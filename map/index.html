@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>台灣生活地圖 · Mapa de la vida en Taiwán</title>
+<style>
+  :root { --ink:#24202e; --bg:#2b3a2e; --card:#fffdf6; --line:#d9d2bd; --accent:#cf3a24; --muted:#6b6478; --gold:#f2b632; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--ink); font-family: 'Noto Sans TC','Segoe UI',sans-serif; display: flex; flex-direction: column; align-items: center; overscroll-behavior: none; }
+  button { font: inherit; cursor: pointer; }
+
+  /* ── 名字畫面 ── */
+  #intro { position: fixed; inset: 0; background: #e9f1e2; display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10; overflow: auto; }
+  #intro .box { background: var(--card); border: 3px solid var(--ink); border-radius: 16px; box-shadow: 6px 6px 0 var(--ink); padding: 22px 22px 20px; max-width: 420px; width: 100%; text-align: center; }
+  #intro h1 { margin: 0; font-size: 28px; letter-spacing: 2px; }
+  #intro .sub { margin: 4px 0 16px; color: var(--muted); }
+  #intro label { display: block; text-align: left; font-weight: 700; margin-bottom: 4px; }
+  #intro input { width: 100%; padding: 10px 12px; font-size: 18px; border: 2px solid var(--line); border-radius: 10px; }
+  .seg-row { display: flex; gap: 10px; justify-content: center; margin: 14px 0; flex-wrap: wrap; }
+  .seg { display: inline-flex; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; }
+  .seg button { border: 0; background: #fff; padding: 6px 14px; font-size: 15px; }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .go { width: 100%; background: var(--accent); color: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 12px; font-size: 20px; font-weight: 700; box-shadow: 3px 3px 0 var(--ink); }
+  .err { color: var(--accent); min-height: 1.3em; font-size: 14px; text-align: left; }
+  .note { font-size: 13px; color: var(--muted); margin: 12px 0 0; }
+
+  /* ── 地圖畫面 ── */
+  #hud { width: 100%; max-width: 960px; display: flex; align-items: center; gap: 8px; padding: 8px 10px; flex-wrap: wrap; color: #fff; }
+  #hud .title { font-weight: 700; font-size: 18px; margin-right: auto; }
+  #hud .chip { background: rgba(255,255,255,.15); border-radius: 999px; padding: 3px 12px; font-size: 14px; white-space: nowrap; }
+  #hud button { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; padding: 3px 12px; font-size: 14px; }
+  #stage { width: 100%; max-width: 960px; padding: 0 10px; }
+  canvas { width: 100%; height: auto; display: block; image-rendering: pixelated; border: 4px solid #1b1a22; border-radius: 10px; background: #6bb05a; touch-action: manipulation; }
+  #help { color: #cfe3c8; font-size: 13px; padding: 6px 12px; text-align: center; }
+  #toast { position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%) translateY(20px); background: #1b1a22; color: #fff; padding: 10px 18px; border-radius: 12px; opacity: 0; transition: .25s; pointer-events: none; z-index: 30; max-width: 90vw; text-align: center; }
+  #toast.show { opacity: 1; transform: translateX(-50%); }
+
+  /* 手機方向鍵 */
+  #pad { display: none; position: fixed; right: 14px; bottom: 14px; width: 150px; height: 150px; z-index: 5; }
+  #pad button { position: absolute; width: 50px; height: 50px; border-radius: 12px; border: 2px solid #1b1a22; background: rgba(255,253,246,.9); font-size: 22px; touch-action: none; }
+  #pad .u { left: 50px; top: 0; } #pad .d { left: 50px; top: 100px; } #pad .l { left: 0; top: 50px; } #pad .r { left: 100px; top: 50px; }
+  @media (pointer: coarse) { #pad { display: block; } }
+
+  /* ── 遊戲視窗 ── */
+  #overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: none; flex-direction: column; align-items: center; z-index: 20; }
+  #overlay.on { display: flex; }
+  #ov-bar { width: 100%; max-width: 980px; display: flex; align-items: center; gap: 10px; padding: 8px 12px; color: #fff; }
+  #ov-bar b { margin-right: auto; }
+  #ov-bar button { background: #fff; border: 2px solid #1b1a22; border-radius: 999px; padding: 4px 14px; font-size: 15px; }
+  #frame { flex: 1; width: 100%; max-width: 980px; border: 0; background: #fff; border-radius: 10px 10px 0 0; }
+</style>
+</head>
+<body>
+
+<!-- ── 名字 ── -->
+<div id="intro">
+  <div class="box">
+    <h1>台灣生活地圖</h1>
+    <p class="sub" data-es="Mapa de la vida en Taiwán" data-en="Life in Taiwan map">Mapa de la vida en Taiwán</p>
+    <label for="name">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input id="name" maxlength="20" autocomplete="off" placeholder="例：María、小明">
+    <div class="err" id="name-err"></div>
+    <div class="seg-row">
+      <div class="seg" role="group" aria-label="中文字體">
+        <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+        <button type="button" data-script="simp" aria-pressed="false">简体</button>
+      </div>
+      <div class="seg" role="group" aria-label="Idioma / Language">
+        <button type="button" data-lang="es" aria-pressed="true">Español</button>
+        <button type="button" data-lang="en" aria-pressed="false">English</button>
+      </div>
+    </div>
+    <button class="go" id="start">開始探索</button>
+    <p class="note" data-es="Camina hasta la puerta de un lugar para empezar su misión. Teclas de flecha / WASD, o toca el mapa." data-en="Walk to a building's door to start its mission. Arrow keys / WASD, or tap the map.">Camina hasta la puerta de un lugar para empezar su misión. Teclas de flecha / WASD, o toca el mapa.</p>
+  </div>
+</div>
+
+<!-- ── 地圖 ── -->
+<div id="hud">
+  <span class="title">🗺️ 台灣生活地圖</span>
+  <span class="chip" id="who"></span>
+  <span class="chip" id="prog"></span>
+  <button id="btn-reset"></button>
+  <button id="btn-back" onclick="location.href='../'"></button>
+</div>
+<div id="stage"><canvas id="cv" width="640" height="448" aria-label="地圖 / Mapa"></canvas></div>
+<div id="help"></div>
+<div id="toast" role="status"></div>
+<div id="pad" aria-hidden="true"><button class="u" data-d="up">▲</button><button class="l" data-d="left">◀</button><button class="r" data-d="right">▶</button><button class="d" data-d="down">▼</button></div>
+
+<!-- ── 遊戲 ── -->
+<div id="overlay">
+  <div id="ov-bar"><b id="ov-title"></b><button id="ov-close"></button></div>
+  <iframe id="frame" title="game" allow="autoplay"></iframe>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   場景（folder = scene = postMessage 的 scene）
+   新增遊戲：在 SCENES 加一筆，並放在 BUILD_SLOTS 的空位
+══════════════════════════════════════ */
+const SCENES = [
+  { id: 'drinks',      zh: '飲料店',   es: 'Tienda de bebidas',  en: 'Drink shop',       emoji: '🧋', roof: '#e0689a', wall: '#f7d6e4', slot: 0 },
+  { id: 'breakfast',   zh: '早餐店',   es: 'Desayunería',        en: 'Breakfast shop',   emoji: '🍳', roof: '#e8a53a', wall: '#fbe9c4', slot: 1 },
+  { id: 'bakery',      zh: '麵包店',   es: 'Panadería',          en: 'Bakery',           emoji: '🥐', roof: '#b9763f', wall: '#f1dcc2', slot: 2 },
+  { id: 'clinic',      zh: '診所',     es: 'Clínica',            en: 'Clinic',           emoji: '🏥', roof: '#2a8d9f', wall: '#dff1f2', slot: 3 },
+  { id: 'parcel',      zh: '便利商店', es: 'Tienda 24 h',        en: 'Convenience store',emoji: '📦', roof: '#3f9a5b', wall: '#dff0e2', slot: 4 },
+  { id: 'nightmarket', zh: '夜市',     es: 'Mercado nocturno',   en: 'Night market',     emoji: '🏮', roof: '#c4382f', wall: '#f4d3cf', slot: 5 },
+  { id: 'reserva',     zh: '我家',     es: 'Mi casa (teléfono)', en: 'Home (phone call)',emoji: '📞', roof: '#7a62c4', wall: '#e5defa', slot: 6 },
+  { id: 'mrt',         zh: '捷運站',   es: 'Estación de metro',  en: 'MRT station',      emoji: '🚇', roof: '#2f5fa7', wall: '#dbe5f6', slot: 7 }
+];
+/* 8 個建築位置：左上、右上、左下、右下，各兩棟（3 格寬） */
+const BUILD_SLOTS = [
+  { x: 1, top: true }, { x: 5, top: true }, { x: 12, top: true }, { x: 16, top: true },
+  { x: 1, top: false }, { x: 5, top: false }, { x: 12, top: false }, { x: 16, top: false }
+];
+const COLS = 20, ROWS = 14, T = 32;
+const ROAD_ROWS = [5, 6], ROAD_COLS = [9, 10];
+const SIDEWALK_ROWS = [4, 7];
+
+/* ══════════════════════════════════════
+   設定與進度
+══════════════════════════════════════ */
+const KEY = 'taiwan_map_v1';
+const S = { name: '', script: 'trad', lang: 'es', done: {} };
+function load() { try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {} }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+const X = (es, en) => S.lang === 'en' ? en : es;
+load();
+
+/* ══════════════════════════════════════
+   地圖資料
+══════════════════════════════════════ */
+const blocked = Array.from({ length: ROWS }, () => Array(COLS).fill(false));
+const doors = {};     // 'x,y' → scene
+const trees = [];
+const buildings = SCENES.map(sc => {
+  const s = BUILD_SLOTS[sc.slot];
+  const y0 = s.top ? 1 : 8;
+  const b = { sc, x: s.x, y: y0, w: 3, h: 3, top: s.top, door: { x: s.x + 1, y: s.top ? 3 : 8 } };
+  for (let yy = b.y; yy < b.y + 3; yy++) for (let xx = b.x; xx < b.x + 3; xx++) blocked[yy][xx] = true;
+  blocked[b.door.y][b.door.x] = false;
+  doors[b.door.x + ',' + b.door.y] = b;
+  b.out = { x: b.door.x, y: s.top ? 4 : 7 };      // 離開遊戲後站的位置
+  return b;
+});
+/* 樹：放在草地角落，擋路 */
+[[0, 0], [4, 0], [8, 0], [11, 0], [15, 0], [19, 0], [4, 2], [11, 2], [15, 2], [0, 12], [4, 12], [8, 12], [11, 12], [15, 12], [19, 12], [4, 10], [11, 10], [15, 10], [0, 9], [19, 9]]
+  .forEach(([x, y]) => { if (!blocked[y][x] && !ROAD_COLS.includes(x)) { trees.push({ x, y }); blocked[y][x] = true; } });
+
+const isRoad = (x, y) => ROAD_ROWS.includes(y) || ROAD_COLS.includes(x);
+const isWalk = (x, y) => x >= 0 && y >= 0 && x < COLS && y < ROWS && !blocked[y][x];
+
+/* ══════════════════════════════════════
+   玩家與移動
+══════════════════════════════════════ */
+const P = { x: 9, y: 4, dir: 'down', moving: null, path: [], step: 0, held: null, locked: false };
+const STEP_MS = 140;
+const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+
+function bfs(sx, sy, tx, ty) {
+  if (!isWalk(tx, ty)) return null;
+  const q = [[sx, sy]], prev = { [sx + ',' + sy]: null };
+  while (q.length) {
+    const [x, y] = q.shift();
+    if (x === tx && y === ty) {
+      const out = []; let k = x + ',' + y;
+      while (prev[k]) { const [px, py] = prev[k].split(',').map(Number); out.unshift({ x: +k.split(',')[0], y: +k.split(',')[1] }); k = prev[k]; }
+      return out;
+    }
+    for (const d of Object.values(DIRS)) {
+      const nx = x + d[0], ny = y + d[1], nk = nx + ',' + ny;
+      if (isWalk(nx, ny) && !(nk in prev)) { prev[nk] = x + ',' + y; q.push([nx, ny]); }
+    }
+  }
+  return null;
+}
+function goTo(tx, ty) {
+  const b = Object.values(doors).find(d => blocked[ty] && blocked[ty][tx] && tx >= d.x && tx < d.x + 3 && ty >= d.y && ty < d.y + 3);
+  if (b) { tx = b.door.x; ty = b.door.y; }              // 點到建築 → 走到它的門
+  const from = P.moving ? P.moving.to : { x: P.x, y: P.y };
+  const p = bfs(from.x, from.y, tx, ty);
+  if (p) P.path = p;
+}
+
+function tick(now) {
+  if (!P.moving && !P.locked) {
+    let d = null;
+    if (P.held) d = P.held;
+    else if (P.path.length) {
+      const n = P.path[0];
+      d = n.x > P.x ? 'right' : n.x < P.x ? 'left' : n.y > P.y ? 'down' : 'up';
+    }
+    if (d) {
+      P.dir = d;
+      const nx = P.x + DIRS[d][0], ny = P.y + DIRS[d][1];
+      if (isWalk(nx, ny)) { P.moving = { from: { x: P.x, y: P.y }, to: { x: nx, y: ny }, t0: now }; if (P.path.length) P.path.shift(); }
+      else P.path = [];
+    }
+  }
+  if (P.moving) {
+    const k = (now - P.moving.t0) / STEP_MS;
+    if (k >= 1) {
+      P.x = P.moving.to.x; P.y = P.moving.to.y; P.moving = null; P.step++;
+      const b = doors[P.x + ',' + P.y];
+      if (b) { P.path = []; P.held = null; openGame(b); }
+    }
+  }
+  draw(now);
+  requestAnimationFrame(tick);
+}
+
+/* ══════════════════════════════════════
+   繪圖（全部用程式畫成像素風格，不需要圖片）
+══════════════════════════════════════ */
+const cv = document.getElementById('cv'), g = cv.getContext('2d');
+g.imageSmoothingEnabled = false;
+const rnd = (x, y, k = 0) => { const v = Math.sin(x * 127.1 + y * 311.7 + k * 74.7) * 43758.5453; return v - Math.floor(v); };
+
+function drawGround() {
+  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+    const px = x * T, py = y * T;
+    if (isRoad(x, y)) {
+      g.fillStyle = '#4a4d55'; g.fillRect(px, py, T, T);
+      g.fillStyle = '#555963'; for (let i = 0; i < 4; i++) g.fillRect(px + rnd(x, y, i) * 28, py + rnd(y, x, i) * 28, 3, 2);
+      // 中線
+      g.fillStyle = '#f2d24b';
+      if (y === 5 && !ROAD_COLS.includes(x)) g.fillRect(px + 4, py + T - 2, 12, 4);
+      if (x === 9 && !ROAD_ROWS.includes(y)) g.fillRect(px + T - 2, py + 4, 4, 12);
+    } else if (SIDEWALK_ROWS.includes(y)) {
+      g.fillStyle = '#cfcab8'; g.fillRect(px, py, T, T);
+      g.fillStyle = '#bdb8a5'; g.fillRect(px, py + T - 2, T, 2); g.fillRect(px + T - 2, py, 2, T);
+    } else {
+      g.fillStyle = (x + y) % 2 ? '#6bb05a' : '#68ac57'; g.fillRect(px, py, T, T);
+      g.fillStyle = '#58994a';
+      for (let i = 0; i < 3; i++) { const r = rnd(x, y, i); g.fillRect(px + r * 26, py + rnd(y, x, i + 5) * 26, 2, 4); }
+      if (rnd(x, y, 9) > .93) { g.fillStyle = '#f7e36a'; g.fillRect(px + 10, py + 12, 4, 4); g.fillStyle = '#fff'; g.fillRect(px + 12, py + 10, 2, 2); }
+    }
+  }
+}
+
+function drawTree(t) {
+  const px = t.x * T, py = t.y * T;
+  g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(px + 6, py + 26, 20, 4);
+  g.fillStyle = '#7a4e2b'; g.fillRect(px + 13, py + 18, 6, 11);
+  g.fillStyle = '#2f7d3a'; g.fillRect(px + 5, py + 6, 22, 16);
+  g.fillStyle = '#3f9a4b'; g.fillRect(px + 8, py + 2, 16, 14);
+  g.fillStyle = '#58b862'; g.fillRect(px + 11, py + 5, 6, 4);
+}
+
+function pill(text, cx, cy, bg, fg) {
+  g.font = 'bold 12px "Noto Sans TC", sans-serif';
+  const w = g.measureText(text).width + 12;
+  g.fillStyle = bg; g.fillRect(cx - w / 2, cy - 9, w, 18);
+  g.strokeStyle = '#1b1a22'; g.lineWidth = 2; g.strokeRect(cx - w / 2, cy - 9, w, 18);
+  g.fillStyle = fg; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, cx, cy + 1);
+}
+
+function drawBuilding(b) {
+  const sc = b.sc, x = b.x * T, y = b.y * T, w = b.w * T, h = b.h * T;
+  const roofY = b.top ? y : y + T, roofH = 2 * T, wallY = b.top ? y + 2 * T : y;
+  // 陰影
+  g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(x + 4, y + h - 2, w, 6);
+  // 牆
+  g.fillStyle = sc.wall; g.fillRect(x, wallY, w, T);
+  g.fillStyle = 'rgba(0,0,0,.12)'; g.fillRect(x, wallY + (b.top ? T - 3 : 0), w, 3);
+  // 屋頂
+  g.fillStyle = sc.roof; g.fillRect(x, roofY, w, roofH);
+  g.fillStyle = 'rgba(255,255,255,.18)'; for (let i = 0; i < 6; i++) g.fillRect(x + 6 + i * 16, roofY + 6, 8, roofH - 12);
+  g.fillStyle = 'rgba(0,0,0,.22)'; g.fillRect(x, roofY + (b.top ? roofH - 4 : 0), w, 4);
+  // 窗
+  g.fillStyle = '#9fd2ee'; g.fillRect(x + 8, wallY + 8, 14, 14); g.fillRect(x + w - 22, wallY + 8, 14, 14);
+  g.fillStyle = '#fff'; g.fillRect(x + 10, wallY + 10, 4, 4); g.fillRect(x + w - 20, wallY + 10, 4, 4);
+  // 門
+  const dx = b.door.x * T, dy = b.door.y * T;
+  g.fillStyle = '#6b4226'; g.fillRect(dx + 4, dy + 2, 24, 30);
+  g.fillStyle = '#8a5a34'; g.fillRect(dx + 7, dy + 5, 8, 12); g.fillRect(dx + 17, dy + 5, 8, 12);
+  g.fillStyle = '#f2b632'; g.fillRect(dx + 22, dy + 18, 3, 3);
+  // 招牌：emoji + 名稱
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '28px "Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.fillStyle = '#000';
+  g.fillText(sc.emoji, x + w / 2, roofY + (b.top ? 22 : 24));
+  g.font = 'bold 14px "Noto Sans TC", sans-serif';
+  const label = sc.zh, lw = g.measureText(label).width + 14;
+  g.fillStyle = '#fffdf6'; g.fillRect(x + w / 2 - lw / 2, roofY + (b.top ? 40 : 42), lw, 17);
+  g.strokeStyle = '#1b1a22'; g.lineWidth = 2; g.strokeRect(x + w / 2 - lw / 2, roofY + (b.top ? 40 : 42), lw, 17);
+  g.fillStyle = '#1b1a22'; g.fillText(label, x + w / 2, roofY + (b.top ? 49 : 51));
+  // 完成標記
+  const r = S.done[sc.id];
+  if (r) pill('✓' + r.score, x + w - 24, roofY + 10, '#7de3a2', '#10381f');
+}
+
+function drawPlayer(now) {
+  let px = P.x * T, py = P.y * T, k = 0;
+  if (P.moving) { k = Math.min(1, (now - P.moving.t0) / STEP_MS); px = (P.moving.from.x + (P.moving.to.x - P.moving.from.x) * k) * T; py = (P.moving.from.y + (P.moving.to.y - P.moving.from.y) * k) * T; }
+  const leg = P.moving ? (Math.floor(k * 2) % 2) : 0, bob = P.moving ? Math.abs(Math.sin(k * Math.PI)) * 2 : 0;
+  py -= bob;
+  g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(px + 8, py + 28 + bob, 16, 4);
+  // 腿
+  g.fillStyle = '#2d3a63'; g.fillRect(px + 10, py + 22, 5, 7 - (leg ? 2 : 0)); g.fillRect(px + 17, py + 22, 5, 7 - (leg ? 0 : 2));
+  // 身體（紅色外套）
+  g.fillStyle = '#d8402c'; g.fillRect(px + 8, py + 13, 16, 10);
+  g.fillStyle = '#f2b632'; g.fillRect(px + 15, py + 13, 2, 10);
+  // 手
+  g.fillStyle = '#f1c9a0'; g.fillRect(px + 6, py + 15, 3, 6); g.fillRect(px + 23, py + 15, 3, 6);
+  // 頭
+  g.fillStyle = '#f1c9a0'; g.fillRect(px + 9, py + 3, 14, 11);
+  g.fillStyle = '#2b2118'; g.fillRect(px + 8, py + 1, 16, 5); g.fillRect(px + 8, py + 4, 2, 6); g.fillRect(px + 22, py + 4, 2, 6);
+  if (P.dir === 'up') { g.fillRect(px + 9, py + 4, 14, 8); }
+  else {
+    g.fillStyle = '#1b1a22';
+    const ox = P.dir === 'left' ? -2 : P.dir === 'right' ? 2 : 0;
+    g.fillRect(px + 12 + ox, py + 8, 2, 3); g.fillRect(px + 18 + ox, py + 8, 2, 3);
+  }
+}
+
+function draw(now) {
+  drawGround();
+  trees.forEach(drawTree);
+  buildings.forEach(drawBuilding);
+  // 目的地提示
+  if (P.path.length) { const t = P.path[P.path.length - 1]; g.strokeStyle = '#f2b632'; g.lineWidth = 3; g.strokeRect(t.x * T + 3, t.y * T + 3, T - 6, T - 6); }
+  drawPlayer(now);
+}
+
+/* ══════════════════════════════════════
+   遊戲視窗：iframe 嵌入，結束後用 postMessage 回報成績
+══════════════════════════════════════ */
+const ov = document.getElementById('overlay'), frame = document.getElementById('frame');
+let current = null;
+function openGame(b) {
+  if (current) return;
+  current = b; P.locked = true;
+  const q = new URLSearchParams({ embed: '1', name: S.name, s: S.script, l: S.lang });
+  document.getElementById('ov-title').textContent = b.sc.emoji + ' ' + b.sc.zh + ' · ' + X(b.sc.es, b.sc.en);
+  frame.src = '../games/' + b.sc.id + '/index.html?' + q;
+  ov.classList.add('on');
+  try { gtag('event', 'map_enter', { scene: b.sc.id }); } catch (e) {}
+}
+function closeGame() {
+  if (!current) return;
+  const b = current; current = null;
+  ov.classList.remove('on'); frame.src = 'about:blank';
+  P.x = b.out.x; P.y = b.out.y; P.dir = b.top ? 'down' : 'up'; P.moving = null; P.path = []; P.locked = false;
+  updateHud();
+}
+window.addEventListener('message', e => {
+  const d = e.data;
+  if (!d || d.type !== 'scene-complete' || !current || e.source !== frame.contentWindow) return;
+  const prev = S.done[d.scene];
+  if (!prev || d.score >= prev.score) S.done[d.scene] = { score: d.score, mistakes: d.mistakes };
+  save();
+  const sc = SCENES.find(s => s.id === d.scene);
+  closeGame();
+  toast('✓ ' + (sc ? sc.zh : d.scene) + '：' + d.score + ' ' + X('puntos', 'points') + (d.mistakes ? ' · ' + d.mistakes + ' ' + X('errores', 'mistakes') : ' · ' + X('¡sin errores!', 'no mistakes!')));
+  try { gtag('event', 'map_complete', { scene: d.scene, score: d.score }); } catch (e) {}
+});
+document.getElementById('ov-close').onclick = closeGame;
+
+/* ══════════════════════════════════════
+   介面
+══════════════════════════════════════ */
+function toast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 3600);
+}
+function updateHud() {
+  const n = SCENES.filter(s => S.done[s.id]).length;
+  document.getElementById('who').textContent = '👤 ' + S.name;
+  document.getElementById('prog').textContent = '⭐ ' + n + ' / ' + SCENES.length;
+  document.getElementById('btn-reset').textContent = X('↻ Borrar progreso', '↻ Reset progress');
+  document.getElementById('btn-back').textContent = X('☰ Lista', '☰ List');
+  document.getElementById('ov-close').textContent = '✕ ' + X('Salir', 'Exit');
+  document.getElementById('help').textContent = X('Flechas / WASD para caminar · toca un edificio para ir a su puerta · entra por la puerta para empezar la misión', 'Arrow keys / WASD to walk · tap a building to go to its door · step through the door to start the mission');
+}
+function applyLang() {
+  document.querySelectorAll('[data-es]').forEach(el => { el.textContent = X(el.dataset.es, el.dataset.en); });
+  document.querySelectorAll('[data-script]').forEach(b => b.setAttribute('aria-pressed', b.dataset.script === S.script));
+  document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === S.lang));
+  updateHud();
+}
+document.querySelectorAll('[data-script]').forEach(b => b.onclick = () => { S.script = b.dataset.script; save(); applyLang(); });
+document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { S.lang = b.dataset.lang; save(); applyLang(); });
+document.getElementById('name').value = S.name || '';
+function begin() {
+  const v = document.getElementById('name').value.trim();
+  if (!v) { document.getElementById('name-err').textContent = '請輸入名字 ' + X('Escribe tu nombre', 'Enter your name'); return; }
+  S.name = v; save();
+  document.getElementById('intro').style.display = 'none';
+  updateHud();
+}
+document.getElementById('start').onclick = begin;
+document.getElementById('name').addEventListener('keydown', e => { if (e.key === 'Enter') begin(); });
+document.getElementById('btn-reset').onclick = () => {
+  if (confirm('清除所有進度？ ' + X('¿Borrar todo el progreso?', 'Clear all progress?'))) { S.done = {}; save(); updateHud(); }
+};
+
+/* 鍵盤、方向鍵、點地圖 */
+const KEYMAP = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right', W: 'up', S: 'down', A: 'left', D: 'right' };
+addEventListener('keydown', e => {
+  if (current || document.getElementById('intro').style.display !== 'none' || e.target.tagName === 'INPUT') return;
+  const d = KEYMAP[e.key]; if (d) { P.held = d; P.path = []; e.preventDefault(); }
+});
+addEventListener('keyup', e => { const d = KEYMAP[e.key]; if (d && P.held === d) P.held = null; });
+document.querySelectorAll('#pad button').forEach(b => {
+  b.addEventListener('pointerdown', e => { e.preventDefault(); P.held = b.dataset.d; P.path = []; });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, () => { if (P.held === b.dataset.d) P.held = null; }));
+});
+cv.addEventListener('pointerdown', e => {
+  if (current) return;
+  const r = cv.getBoundingClientRect();
+  goTo(Math.floor((e.clientX - r.left) / r.width * COLS), Math.floor((e.clientY - r.top) / r.height * ROWS));
+});
+
+applyLang();
+if (S.name) { /* 有名字也先顯示確認畫面，方便改名／改設定 */ }
+window.WorldMap = { P, S, SCENES, buildings, goTo, openGame, closeGame };
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

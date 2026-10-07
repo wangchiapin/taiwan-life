@@ -3,7 +3,7 @@
 ## 結構
 ```
 index.html          遊戲選單（之後換成「台灣一週」地圖）
-map/                地圖專用檔案（之後新增）
+map/index.html      地圖模式（測試版）：走到建築門口 → iframe 載入 games/<scene>/?embed=1 → 收 scene-complete
 games/<scene>/      每個遊戲：index.html + images/（檔名小寫 .jpg）
 ```
 
