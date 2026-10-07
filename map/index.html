@@ -109,7 +109,9 @@ const SCENES = [
   { id: 'parcel',      zh: '便利商店', es: 'Tienda 24 h',        en: 'Convenience store',emoji: '📦', roof: '#3f9a5b', wall: '#dff0e2', slot: 4 },
   { id: 'nightmarket', zh: '夜市',     es: 'Mercado nocturno',   en: 'Night market',     emoji: '🏮', roof: '#c4382f', wall: '#f4d3cf', slot: 5 },
   { id: 'reserva',     zh: '我家',     es: 'Mi casa (teléfono)', en: 'Home (phone call)',emoji: '📞', roof: '#7a62c4', wall: '#e5defa', slot: 6 },
-  { id: 'mrt',         zh: '捷運站',   es: 'Estación de metro',  en: 'MRT station',      emoji: '🚇', roof: '#2f5fa7', wall: '#dbe5f6', slot: 7 }
+  { id: 'mrt',         zh: '捷運站',   es: 'Estación de metro',  en: 'MRT station',      emoji: '🚇', roof: '#2f5fa7', wall: '#dbe5f6', slot: 7 },
+  /* 沒有建築的場景：路上會隨機冒出「❗」，走過去就觸發 */
+  { id: 'street',      zh: '路上突發事件', es: 'Imprevistos en la calle', en: 'Street surprises', emoji: '❗', virtual: true }
 ];
 /* 8 個建築位置：左上、右上、左下、右下，各兩棟（3 格寬） */
 const BUILD_SLOTS = [
@@ -118,7 +120,7 @@ const BUILD_SLOTS = [
 ];
 const COLS = 20, ROWS = 14, T = 32;
 const ROAD_ROWS = [5, 6], ROAD_COLS = [9, 10];
-const SIDEWALK_ROWS = [4, 7];
+const SIDEWALK_ROWS = [4, 7, 11];
 
 /* ══════════════════════════════════════
    設定與進度
@@ -136,14 +138,14 @@ load();
 const blocked = Array.from({ length: ROWS }, () => Array(COLS).fill(false));
 const doors = {};     // 'x,y' → scene
 const trees = [];
-const buildings = SCENES.map(sc => {
+const buildings = SCENES.filter(sc => !sc.virtual).map(sc => {
   const s = BUILD_SLOTS[sc.slot];
   const y0 = s.top ? 1 : 8;
-  const b = { sc, x: s.x, y: y0, w: 3, h: 3, top: s.top, door: { x: s.x + 1, y: s.top ? 3 : 8 } };
+  const b = { sc, x: s.x, y: y0, w: 3, h: 3, top: s.top, door: { x: s.x + 1, y: y0 + 2 } };
   for (let yy = b.y; yy < b.y + 3; yy++) for (let xx = b.x; xx < b.x + 3; xx++) blocked[yy][xx] = true;
   blocked[b.door.y][b.door.x] = false;
   doors[b.door.x + ',' + b.door.y] = b;
-  b.out = { x: b.door.x, y: s.top ? 4 : 7 };      // 離開遊戲後站的位置
+  b.out = { x: b.door.x, y: y0 + 3 };      // 離開遊戲後站的位置
   return b;
 });
 /* 樹：放在草地角落，擋路 */
@@ -152,6 +154,19 @@ const buildings = SCENES.map(sc => {
 
 const isRoad = (x, y) => ROAD_ROWS.includes(y) || ROAD_COLS.includes(x);
 const isWalk = (x, y) => x >= 0 && y >= 0 && x < COLS && y < ROWS && !blocked[y][x];
+
+/* ══════════════════════════════════════
+   路上突發事件：街道和人行道上隨機冒出一個 ❗，走到那格就開始「走在路上」
+══════════════════════════════════════ */
+const STREET = SCENES.find(sc => sc.virtual);
+const EVT = { x: 0, y: 0 };
+function respawnEvent(ax, ay) {
+  const cand = [];
+  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++)
+    if (isWalk(x, y) && (isRoad(x, y) || SIDEWALK_ROWS.includes(y)) && !doors[x + ',' + y] && Math.abs(x - ax) + Math.abs(y - ay) >= 5) cand.push([x, y]);
+  const c = cand[Math.floor(Math.random() * cand.length)];
+  EVT.x = c[0]; EVT.y = c[1];
+}
 
 /* ══════════════════════════════════════
    玩家與移動
@@ -206,6 +221,7 @@ function tick(now) {
       P.x = P.moving.to.x; P.y = P.moving.to.y; P.moving = null; P.step++;
       const b = doors[P.x + ',' + P.y];
       if (b) { P.path = []; P.held = null; openGame(b); }
+      else if (P.x === EVT.x && P.y === EVT.y) { P.path = []; P.held = null; openGame({ sc: STREET, out: { x: EVT.x, y: EVT.y } }); }
     }
   }
   draw(now);
@@ -260,16 +276,16 @@ function pill(text, cx, cy, bg, fg) {
 
 function drawBuilding(b) {
   const sc = b.sc, x = b.x * T, y = b.y * T, w = b.w * T, h = b.h * T;
-  const roofY = b.top ? y : y + T, roofH = 2 * T, wallY = b.top ? y + 2 * T : y;
+  const roofY = y, roofH = 2 * T, wallY = y + 2 * T;
   // 陰影
   g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(x + 4, y + h - 2, w, 6);
   // 牆
   g.fillStyle = sc.wall; g.fillRect(x, wallY, w, T);
-  g.fillStyle = 'rgba(0,0,0,.12)'; g.fillRect(x, wallY + (b.top ? T - 3 : 0), w, 3);
+  g.fillStyle = 'rgba(0,0,0,.12)'; g.fillRect(x, wallY + T - 3, w, 3);
   // 屋頂
   g.fillStyle = sc.roof; g.fillRect(x, roofY, w, roofH);
   g.fillStyle = 'rgba(255,255,255,.18)'; for (let i = 0; i < 6; i++) g.fillRect(x + 6 + i * 16, roofY + 6, 8, roofH - 12);
-  g.fillStyle = 'rgba(0,0,0,.22)'; g.fillRect(x, roofY + (b.top ? roofH - 4 : 0), w, 4);
+  g.fillStyle = 'rgba(0,0,0,.22)'; g.fillRect(x, roofY + roofH - 4, w, 4);
   // 窗
   g.fillStyle = '#9fd2ee'; g.fillRect(x + 8, wallY + 8, 14, 14); g.fillRect(x + w - 22, wallY + 8, 14, 14);
   g.fillStyle = '#fff'; g.fillRect(x + 10, wallY + 10, 4, 4); g.fillRect(x + w - 20, wallY + 10, 4, 4);
@@ -281,12 +297,12 @@ function drawBuilding(b) {
   // 招牌：emoji + 名稱
   g.textAlign = 'center'; g.textBaseline = 'middle';
   g.font = '28px "Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.fillStyle = '#000';
-  g.fillText(sc.emoji, x + w / 2, roofY + (b.top ? 22 : 24));
+  g.fillText(sc.emoji, x + w / 2, roofY + 22);
   g.font = 'bold 14px "Noto Sans TC", sans-serif';
   const label = sc.zh, lw = g.measureText(label).width + 14;
-  g.fillStyle = '#fffdf6'; g.fillRect(x + w / 2 - lw / 2, roofY + (b.top ? 40 : 42), lw, 17);
-  g.strokeStyle = '#1b1a22'; g.lineWidth = 2; g.strokeRect(x + w / 2 - lw / 2, roofY + (b.top ? 40 : 42), lw, 17);
-  g.fillStyle = '#1b1a22'; g.fillText(label, x + w / 2, roofY + (b.top ? 49 : 51));
+  g.fillStyle = '#fffdf6'; g.fillRect(x + w / 2 - lw / 2, roofY + 40, lw, 17);
+  g.strokeStyle = '#1b1a22'; g.lineWidth = 2; g.strokeRect(x + w / 2 - lw / 2, roofY + 40, lw, 17);
+  g.fillStyle = '#1b1a22'; g.fillText(label, x + w / 2, roofY + 49);
   // 完成標記
   const r = S.done[sc.id];
   if (r) pill('✓' + r.score, x + w - 24, roofY + 10, '#7de3a2', '#10381f');
@@ -322,7 +338,15 @@ function draw(now) {
   buildings.forEach(drawBuilding);
   // 目的地提示
   if (P.path.length) { const t = P.path[P.path.length - 1]; g.strokeStyle = '#f2b632'; g.lineWidth = 3; g.strokeRect(t.x * T + 3, t.y * T + 3, T - 6, T - 6); }
+  drawEvent(now);
   drawPlayer(now);
+}
+function drawEvent(now) {
+  const px = EVT.x * T + 16, py = EVT.y * T + 14 - Math.abs(Math.sin(now / 220)) * 5;
+  g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(px, EVT.y * T + 28, 9, 3, 0, 0, 7); g.fill();
+  g.fillStyle = '#f2b632'; g.beginPath(); g.arc(px, py, 12, 0, 7); g.fill();
+  g.strokeStyle = '#1b1a22'; g.lineWidth = 2.5; g.stroke();
+  g.fillStyle = '#1b1a22'; g.font = 'bold 18px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('!', px, py + 1);
 }
 
 /* ══════════════════════════════════════
@@ -334,7 +358,7 @@ function openGame(b) {
   if (current) return;
   current = b; P.locked = true;
   const q = new URLSearchParams({ embed: '1', name: S.name, s: S.script, l: S.lang });
-  document.getElementById('ov-title').textContent = b.sc.emoji + ' ' + b.sc.zh + ' · ' + X(b.sc.es, b.sc.en);
+  document.getElementById('ov-title').textContent = (b.sc.virtual ? '⚠️' : b.sc.emoji) + ' ' + b.sc.zh + ' · ' + X(b.sc.es, b.sc.en);
   frame.src = '../games/' + b.sc.id + '/index.html?' + q;
   ov.classList.add('on');
   try { gtag('event', 'map_enter', { scene: b.sc.id }); } catch (e) {}
@@ -343,7 +367,8 @@ function closeGame() {
   if (!current) return;
   const b = current; current = null;
   ov.classList.remove('on'); frame.src = 'about:blank';
-  P.x = b.out.x; P.y = b.out.y; P.dir = b.top ? 'down' : 'up'; P.moving = null; P.path = []; P.locked = false;
+  P.x = b.out.x; P.y = b.out.y; P.dir = 'down'; P.moving = null; P.path = []; P.locked = false;
+  if (b.sc.virtual) respawnEvent(P.x, P.y);
   updateHud();
 }
 window.addEventListener('message', e => {
@@ -373,7 +398,7 @@ function updateHud() {
   document.getElementById('btn-reset').textContent = X('↻ Borrar progreso', '↻ Reset progress');
   document.getElementById('btn-back').textContent = X('☰ Lista', '☰ List');
   document.getElementById('ov-close').textContent = '✕ ' + X('Salir', 'Exit');
-  document.getElementById('help').textContent = X('Flechas / WASD para caminar · toca un edificio para ir a su puerta · entra por la puerta para empezar la misión', 'Arrow keys / WASD to walk · tap a building to go to its door · step through the door to start the mission');
+  document.getElementById('help').textContent = X('Flechas / WASD para caminar · toca un edificio para ir a su puerta · si ves un ❗ en la calle, ¡pasa por encima!', 'Arrow keys / WASD to walk · tap a building to go to its door · if you see a ❗ on the street, step on it!');
 }
 function applyLang() {
   document.querySelectorAll('[data-es]').forEach(el => { el.textContent = X(el.dataset.es, el.dataset.en); });
@@ -414,9 +439,10 @@ cv.addEventListener('pointerdown', e => {
   goTo(Math.floor((e.clientX - r.left) / r.width * COLS), Math.floor((e.clientY - r.top) / r.height * ROWS));
 });
 
+respawnEvent(P.x, P.y);
 applyLang();
 if (S.name) { /* 有名字也先顯示確認畫面，方便改名／改設定 */ }
-window.WorldMap = { P, S, SCENES, buildings, goTo, openGame, closeGame };
+window.WorldMap = { EVT, P, S, SCENES, buildings, goTo, openGame, closeGame };
 requestAnimationFrame(tick);
 </script>
 </body>
