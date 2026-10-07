@@ -8,7 +8,7 @@ games/<scene>/      每個遊戲：index.html + images/（檔名小寫 .jpg）
 ```
 
 ## 場景 ID（資料夾名 = scene = collection 前綴 = GA4 game 參數）
-drinks · reserva · breakfast · thsr · gas · nightmarket · parcel · bakery
+drinks · reserva · breakfast · thsr · gas · nightmarket · parcel · bakery · clinic
 
 Firestore collection：`<scene>game_scores` 或 `<scene>_scores`（沿用各遊戲現有名稱，不要改，否則舊排行榜會消失）。
 排行榜需要複合索引：score 降冪 + elapsed 升冪。

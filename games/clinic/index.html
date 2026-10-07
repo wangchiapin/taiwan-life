@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>感冒看醫生 · Ir al médico por un resfriado</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：與飲料店同一個專案，collection 換成 clinicgame_scores -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyD2lxec6JTbERwFPGjDzriYzIH7o9IRWnw",
+    authDomain:        "tiendadebebidas-d75ac.firebaseapp.com",
+    projectId:         "tiendadebebidas-d75ac",
+    storageBucket:     "tiendadebebidas-d75ac.firebasestorage.app",
+    messagingSenderId: "1:947444542062:web:62e209f33cfc3ae12c547f",
+    appId:             "G-PGQZPYNBLX"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+  const COL = "clinicgame_scores";
+
+  window._FB = {
+    async saveScore(name, score, elapsed) {
+      try { await addDoc(collection(db, COL), { name, score, elapsed, createdAt: Date.now() }); return true; }
+      catch (e) { console.error("Firebase 寫入失敗", e); return false; }
+    },
+    async getLeaderboard() {
+      try {
+        // 需要在 Firestore 建立複合索引：score 降冪 + elapsed 升冪
+        const q = query(collection(db, COL), orderBy("score", "desc"), orderBy("elapsed", "asc"), limit(15));
+        const snap = await getDocs(q);
+        return snap.docs.map(d => d.data());
+      } catch (e) { console.error("Firebase 讀取失敗", e); return []; }
+    }
+  };
+</script>
+
+
+<style>
+  :root {
+    --ink: #1d2b2f;        /* 主文字 */
+    --red: #1f7a8c;        /* 主色（診所青綠）；沿用範本的變數名稱 */
+    --red-dark: #135868;
+    --yolk: #8fd3c0;       /* 薄荷 */
+    --night: #16414d;      /* 深青 */
+    --kraft: #cfe4e0;
+    --wall: #eaf4f3;
+    --paper: #ffffff;
+    --line: #d3e3e1;
+    --muted: #566b6f;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--ink);
+    background: #e1eeed;
+    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
+    display: flex; justify-content: center; align-items: flex-start;
+    padding: 24px 16px 40px;
+  }
+  body.embed-boot #login-screen.active { display: none; }   /* 嵌入模式：不要閃一下開始畫面 */
+  .screen {
+    width: 100%; max-width: 760px;
+    background: var(--paper); border-radius: 18px; border: 1px solid var(--line);
+    padding: 32px 28px;
+    display: none; flex-direction: column; align-items: center; gap: 16px;
+  }
+  .screen.active { display: flex; }
+
+  /* ── 登入：麵包店招牌 ── */
+  .storefront { width: 100%; max-width: 360px; border-radius: 10px; overflow: hidden; }
+  .storefront .awning { height: 20px; background: repeating-linear-gradient(90deg, var(--red) 0 28px, #ffffff 28px 56px); }
+  .storefront .name { background: var(--night); color: #ffffff; text-align: center; font-size: 30px; font-weight: 700; letter-spacing: 6px; padding: 12px 0; }
+  #login-screen .subtitle { margin: 0; color: var(--muted); font-size: 15px; }
+  .input-group { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 8px; }
+  .input-group label { font-size: 14px; font-weight: 500; }
+  .input-group input {
+    width: 100%; padding: 12px 14px; font-size: 16px; font-family: inherit; color: var(--ink);
+    border: 2px solid var(--line); border-radius: 10px; outline: none;
+  }
+  .input-group input:focus { border-color: var(--red); }
+  .error-msg { color: var(--bad); font-size: 13px; min-height: 18px; }
+  .btn-primary {
+    padding: 14px 44px; font-size: 18px; font-weight: 700; font-family: inherit;
+    background: var(--red); color: #fff; border: none; border-radius: 999px; cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--red-dark); }
+  .flavor-text { color: var(--muted); font-size: 14px; line-height: 1.8; text-align: center; max-width: 420px; margin: 0; }
+
+  /* ── 遊戲 ── */
+  #game-window {
+    width: 100%; max-width: 760px; background: var(--paper);
+    border-radius: 18px; border: 1px solid var(--line);
+    overflow: hidden; display: none; flex-direction: column;
+  }
+  #game-window.active { display: flex; }
+  .top-bar {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-bottom: 1px solid var(--line);
+  }
+  .chip { font-size: 13px; padding: 5px 10px; border-radius: 999px; background: var(--wall); white-space: nowrap; }
+  .chip.score { font-weight: 700; }
+  .btn-pinyin {
+    font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--paper); color: var(--red); border: 1.5px solid var(--red);
+  }
+  .btn-pinyin[aria-pressed="true"] { background: var(--red); color: #fff; }
+
+  #place-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px; background: var(--night); color: #fff;
+    border-bottom: 4px solid var(--yolk);
+  }
+  #place-bar.phone { background: var(--ami); }
+  #place-bar .icon { font-size: 22px; line-height: 1; }
+  #place-bar .who { font-weight: 700; font-size: 16px; }
+  #place-bar .status { font-size: 13px; opacity: .85; }
+  #place-bar .clock { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; }
+
+  #scene { display: flex; justify-content: center; padding: 16px 16px 0; }
+  #npc-avatar { width: 100%; max-width: 360px; aspect-ratio: 1; object-fit: contain; border-radius: 12px; }
+  #scene-placeholder {
+    width: 100%; max-width: 360px; aspect-ratio: 16 / 7;
+    border-radius: 12px; background: var(--wall);
+    display: none; place-items: center; font-size: 64px;
+  }
+
+  #npc-dialogue { padding: 14px 22px 4px; font-size: 21px; line-height: 2.1; }
+  #npc-dialogue .speaker { font-weight: 700; color: var(--red-dark); }
+  #npc-dialogue .speaker.ami { color: var(--ami); }
+  #npc-dialogue .speaker.me { color: var(--muted); }
+  #npc-dialogue .thought { color: var(--muted); font-size: 18px; }
+  ruby { ruby-position: over; }
+  ruby rt { color: var(--red); font-size: .5em; font-weight: 400; }
+
+  /* 購物清單 */
+  .list {
+    margin: 8px 0 10px; padding: 12px 16px; border-radius: 6px;
+    background: #fffdf3; border: 1px dashed #c9bfa4; font-size: 18px; line-height: 1.95;
+  }
+  .list .t { font-weight: 700; color: var(--red-dark); font-size: 15px; display: flex; align-items: center; gap: 2px; }
+  .list .t .grow { flex: 1; }
+  .list .done { text-decoration: line-through; color: var(--muted); }
+  .list .rule { color: var(--muted); font-size: 15px; }
+
+  /* 叫號螢幕 + 藥袋：這個遊戲的招牌元素 */
+  .board { margin: 8px 0 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .board .cell { background: #14181a; color: #ffb347; border-radius: 10px; padding: 10px 12px; text-align: center; box-shadow: inset 0 0 0 3px #2c3438; }
+  .board .cell small { display: block; color: #c9d4d6; font-size: 13px; }
+  .board .cell .n { font-size: 52px; line-height: 1.1; font-variant-numeric: tabular-nums; letter-spacing: 3px; font-family: 'Courier New', monospace; }
+  .board .cell.me { color: #7df0b5; }
+  .board .cell.me.blink .n { animation: blink 1s steps(2, start) infinite; }
+  @keyframes blink { 50% { opacity: .25; } }
+  @media (prefers-reduced-motion: reduce) { .board .cell.me.blink .n { animation: none; } }
+  .bag { margin: 8px 0 12px; background: #fffdf7; border: 2px solid #c9bda0; border-radius: 6px; padding: 10px 14px; box-shadow: 3px 3px 0 #d9cfb6; }
+  .bag .bt { font-weight: 700; color: var(--red-dark); }
+  .bag table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 16px; }
+  .bag th, .bag td { border: 1px solid #d8ceb4; padding: 4px 6px; text-align: center; line-height: 1.8; }
+  .bag th { background: #f1e9d4; font-weight: 500; }
+  .bag td:first-child { text-align: left; font-weight: 700; }
+  .bag td { color: #1b7a43; font-weight: 700; }
+  .bag .bn { color: var(--muted); font-size: 14px; }
+
+  #options-area { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 18px 22px 24px; }
+  #options-area.single { grid-template-columns: 1fr; }
+  .opt {
+    font: inherit; font-size: 17px; font-weight: 500; line-height: 1.9;
+    padding: 10px 14px; cursor: pointer; text-align: center;
+    background: var(--paper); color: var(--ink);
+    border: 2px solid var(--ink); border-radius: 12px;
+    transition: background .15s, color .15s;
+  }
+  .opt:hover { background: var(--ink); color: #fff; }
+  .opt:hover rt { color: #ffd9cf; }
+  .opt.deal { border-color: var(--red); background: var(--red); color: #fff; }
+  .opt.deal rt { color: #ffe1d8; }
+  .opt.deal:hover { background: var(--red-dark); }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--yolk); outline-offset: 2px; }
+
+  #toast {
+    position: fixed; left: 50%; top: 16px; transform: translateX(-50%);
+    max-width: min(92vw, 560px); padding: 12px 18px; border-radius: 12px;
+    background: var(--bad); color: #fff; font-size: 15px; line-height: 1.6;
+    display: none; z-index: 10; pointer-events: none;
+  }
+  #toast.show { display: block; }
+
+  /* ── 排行榜 ── */
+  #leaderboard-screen h2 { margin: 0; font-size: 22px; }
+  .lb-subtitle { margin: 0; color: var(--muted); font-size: 14px; }
+  .congrats-banner, .no-rank-banner { width: 100%; border-radius: 12px; padding: 14px 20px; text-align: center; font-weight: 700; line-height: 1.7; }
+  .congrats-banner { background: var(--yolk); color: var(--ink); }
+  .no-rank-banner { background: var(--wall); color: var(--muted); }
+  #lb-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  #lb-table th { background: var(--ink); color: #fff; font-weight: 500; }
+  #lb-table th, #lb-table td { padding: 9px 8px; text-align: center; border-bottom: 1px solid var(--line); }
+  #lb-table tr.highlight-row { background: #fdeccb; font-weight: 700; }
+  .btn-restart {
+    padding: 12px 36px; font: inherit; font-weight: 700; font-size: 16px; cursor: pointer;
+    background: var(--ink); color: #fff; border: none; border-radius: 999px;
+  }
+
+  @media (max-width: 600px) {
+    .screen { padding: 26px 18px; }
+    .top-bar { gap: 6px; padding: 10px 12px; }
+    .chip { font-size: 12px; padding: 4px 8px; }
+    .btn-pinyin { font-size: 12px; padding: 5px 10px; }
+    #npc-dialogue { font-size: 19px; padding: 12px 16px 2px; }
+    #options-area { grid-template-columns: 1fr; padding: 14px 14px 20px; }
+    #npc-avatar { max-width: 240px; }
+    .board .cell .n { font-size: 40px; }
+    .bag table { font-size: 14px; }
+  }
+  /* ── 句子翻譯 ── */
+  #npc-dialogue .line { margin: 0; }
+  .tr-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; margin-left: 6px; padding: 0; vertical-align: middle;
+    border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper); color: var(--red); cursor: pointer;
+  }
+  .tr-btn:hover { background: #fdeccb; border-color: var(--red); }
+  .tr-btn { position: relative; }
+  .tr-btn::after { content: ''; position: absolute; inset: -5px; }   /* 加大可點範圍 */
+  @media (max-width: 560px) {
+    .tr-btn { width: 34px; height: 34px; margin-left: 8px; }
+    .tr-btn svg { width: 17px; height: 17px; }
+  }
+  .tr-btn.spk.speaking { background: var(--red); color: #fff; border-color: var(--red); }
+  .v-word { display: flex; align-items: center; gap: 4px; }
+  .v-word .tr-btn { margin-left: 4px; }
+  .tr-pop {
+    position: fixed; width: min(340px, calc(100vw - 16px));
+    background: var(--paper); color: var(--ink); border: 1.5px solid var(--red); border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(60, 40, 30, .18); font-size: 15px; line-height: 1.6;
+  }
+  .tr-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 6px 6px 12px; background: var(--red); color: #fff; border-radius: 10px 10px 0 0;
+    font-size: 13px; cursor: move; touch-action: none; user-select: none;
+  }
+  .tr-close { background: none; border: none; color: #fff; font-size: 16px; cursor: pointer; padding: 2px 8px; }
+  .tr-body { padding: 10px 12px 12px; display: grid; gap: 8px; }
+  .tr-row { display: flex; gap: 8px; align-items: baseline; }
+  .tr-lang {
+    flex: none; font-size: 11px; font-weight: 700; color: var(--red);
+    border: 1px solid var(--red); border-radius: 4px; padding: 0 4px; line-height: 1.5;
+  }
+
+  /* ── 本關單字（右側抽屜） ── */
+  #side-tabs {
+    position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 20;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .side-tab {
+    width: 36px; padding: 12px 8px; line-height: 1.25; text-align: center; word-break: break-all; border: none; border-radius: 12px 0 0 12px; cursor: pointer;
+    background: var(--yolk); color: var(--ink); font: inherit; font-weight: 700; font-size: 15px;
+    box-shadow: -2px 2px 10px rgba(60, 40, 30, .15);
+  }
+  .side-tab.hint { background: var(--ink); color: #fff; }
+  .side-tab[hidden] { display: none; }
+  #side-tabs[hidden] { display: none; }
+  .side-tab .v-count { padding: 0 3px !important; min-width: 20px; font-size: 12px !important; white-space: nowrap; letter-spacing: -0.5px; }
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  @media (max-width: 831px) { body:has(#side-tabs:not([hidden])) { padding-right: 44px; } }
+  #vocab-tab .v-count {
+    display: inline-block; margin-top: 6px;
+    background: var(--paper); border-radius: 999px; padding: 0 7px; font-size: 13px;
+  }
+  .drawer {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(320px, 88vw); z-index: 25;
+    background: var(--paper); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(60, 40, 30, .12);
+    transform: translateX(105%); transition: transform .25s ease; display: flex; flex-direction: column;
+  }
+  .drawer.open { transform: none; }
+  @media (prefers-reduced-motion: reduce) { .drawer { transition: none; } }
+  #hint-body { overflow-y: auto; padding: 4px 0 16px; }
+  .h-sec { padding: 12px 16px 4px; font-size: 13px; font-weight: 700; color: var(--red); }
+  .h-item { padding: 8px 16px; border-bottom: 1px solid var(--line); }
+  .h-item .h-zh { font-size: 17px; line-height: 1.7; }
+  .h-item .h-es { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+  .side-tab.log { background: #b5483d; color: #fff; }
+  #log-tab .v-count { display: inline-block; margin-top: 6px; background: var(--paper); color: #b5483d; border-radius: 999px; padding: 0 7px; font-size: 13px; }
+  .fb { margin: 10px 0 6px; padding: 10px 14px; border-radius: 12px; border-left: 6px solid; font-size: 15px; line-height: 1.55; }
+  .fb.bad { background: #fdecea; border-color: var(--bad); }
+  .fb.good { background: #e6f4ea; border-color: #2e7d4f; }
+  .fb-head { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+  .fb.bad .fb-head { color: var(--bad); }
+  .fb.good .fb-head { color: #2e7d4f; }
+  .fb-es { font-weight: 700; font-size: 16px; color: var(--ink); }
+  .fb-zh { font-size: 16px; color: var(--ink); }
+  .fb-en { font-size: 13px; color: var(--muted); }
+  #log-body { overflow-y: auto; padding: 4px 0 16px; }
+  .l-item { padding: 10px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+  .l-item.now { background: #fdecea; border-left: 4px solid var(--bad); }
+  .l-stage { font-size: 12px; color: var(--muted); }
+  .l-es { font-weight: 700; font-size: 15px; line-height: 1.5; }
+  .l-zh { font-size: 16px; line-height: 1.6; }
+  .l-en { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .l-empty { padding: 16px; color: var(--muted); font-size: 14px; line-height: 1.6; }
+  .v-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 16px; border-bottom: 3px solid var(--yolk); }
+  .v-head b { font-size: 18px; }
+  .v-head small { color: var(--muted); }
+  .v-head button { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink); padding: 2px 6px; }
+  #vocab-list { list-style: none; margin: 0; padding: 0; overflow-y: auto; }
+  #vocab-list li { padding: 12px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+  .v-zh { font-size: 24px; font-weight: 700; line-height: 1.3; }
+  .v-py { color: var(--red); font-size: 15px; }
+  .v-tr { display: flex; gap: 8px; align-items: baseline; font-size: 14px; line-height: 1.6; }
+
+  .seg-group { width: 100%; max-width: 320px; display: grid; gap: 10px; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; border: 2px solid var(--red); border-radius: 999px; overflow: hidden; }
+  .seg button {
+    font: inherit; font-size: 15px; font-weight: 500; padding: 9px 0; cursor: pointer;
+    background: var(--paper); color: var(--red); border: none;
+  }
+  .seg button + button { border-left: 2px solid var(--red); }
+  .seg button[aria-pressed="true"] { background: var(--red); color: #fff; font-weight: 700; }
+  .tb-btns { display: flex; gap: 8px; }
+  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
+  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
+  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
+  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">診所</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">感冒看醫生</h1>
+  <p class="subtitle" data-es="Ir al médico por un resfriado" data-en="Seeing a doctor for a cold">Ir al médico por un resfriado</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    你已經不舒服好幾天了，同事 Ami 要你去看醫生。你一個人去診所：掛號、等叫號、跟醫生說明症狀、付錢、領藥，最後還要告訴 Ami 醫生怎麼說。<br>
+    <span data-es="Llevas varios días sintiéndote mal y tu compañera Ami te pide que vayas al médico. Vas solo a la clínica: te registras, esperas tu turno, le explicas tus síntomas al doctor, pagas, recoges la medicina y por último le cuentas a Ami qué dijo el doctor." data-en="You've felt unwell for several days, and your coworker Ami tells you to see a doctor. You go to the clinic alone: register, wait for your number, describe your symptoms to the doctor, pay, pick up your medicine, and finally tell Ami what the doctor said.">Llevas varios días sintiéndote mal y tu compañera Ami te pide que vayas al médico. Vas solo a la clínica: te registras, esperas tu turno, le explicas tus síntomas al doctor, pagas, recoges la medicina y por último le cuentas a Ami qué dijo el doctor.</span>
+  </p>
+  <p class="flavor-text" style="font-size:12px">
+    這個遊戲是中文練習，不是醫療建議。<br>
+    <span data-es="Este juego es práctica de chino, no un consejo médico." data-en="This game is Chinese practice, not medical advice.">Este juego es práctica de chino, no un consejo médico.</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-list" aria-pressed="false" onclick="Game.toggleList()" data-es="📝 Mi estado" data-en="📝 My health card">📝 Mi estado</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">🏥</span>
+    <div>
+      <div class="who" id="place-who">診所</div>
+      <div class="status" id="place-status">Clínica</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 15 名 · Top 15</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+══════════════════════════════════════ */
+/* 讀音以教育部《重編國語辭典修訂本》為準；一、不的變調交給 pinyin-pro（toneSandhi）。
+   新增遊戲文字時，把套件讀錯的詞加在這裡。 */
+pinyinPro.customPinyin({
+  '星期': 'xīng qí', '期': 'qí', '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '還要': 'hái yào',
+  '還好': 'hái hǎo', '還多': 'hái duō', '還少': 'hái shǎo', '還你': 'huán nǐ',
+  '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '覺得': 'jué de',
+  '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan', '時間': 'shí jiān', '時候': 'shí hou',
+  '袋子': 'dài zi', '太太': 'tài tai', '先生': 'xiān sheng', '老闆': 'lǎo bǎn', '老闆娘': 'lǎo bǎn niáng',
+  '單子': 'dān zi', '東西': 'dōng xi', '告訴': 'gào su', '媽媽': 'mā ma', '爸爸': 'bà ba', '奶奶': 'nǎi nai', '弟弟': 'dì di', '妹妹': 'mèi mei',
+  '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '做得': 'zuò de',
+  '著': 'zhe', '只': 'zhǐ', '囉': 'luo', '啦': 'la', '了啦': 'le la', '耶': 'ye',
+  '意思': 'yì si', '關係': 'guān xi', '這個': 'zhè ge', '那個': 'nà ge',
+  '一個': 'yí ge', '兩個': 'liǎng ge', '一共': 'yí gòng',
+  '髮夾': 'fǎ jiá', '要切': 'yào qiē', '切開': 'qiē kāi', '來喔': 'lái ō', '看看': 'kàn kan', '再看看': 'zài kàn kan',
+  '便宜': 'pián yi', '划算': 'huá suàn', '洗手間': 'xǐ shǒu jiān', '廁所': 'cè suǒ', '殺價': 'shā jià', '雞排': 'jī pái',
+  '價錢': 'jià qián', '衣服': 'yī fu', '尺寸': 'chǐ cùn', '喜歡': 'xǐ huān', '漂亮': 'piào liang', '可愛': 'kě ài',
+  '三個': 'sān ge', '每個': 'měi ge', '現炸': 'xiàn zhá', '還剩': 'hái shèng', '欸': 'éi', '訊息': 'xùn xí',
+  '衣服和': 'yī fu hàn', '你和': 'nǐ hàn', '同事': 'tóng shì', '朋友': 'péng yǒu', '清單': 'qīng dān', '會合': 'huì hé', '晚餐': 'wǎn cān', '辛苦': 'xīn kǔ'
+});
+pinyinPro.customPinyin({
+  '健保卡': 'jiàn bǎo kǎ', '掛號': 'guà hào', '掛號費': 'guà hào fèi', '初診': 'chū zhěn', '初診單': 'chū zhěn dān', '家醫科': 'jiā yī kē', '小兒科': 'xiǎo ér kē', '皮膚科': 'pí fū kē',
+  '診間': 'zhěn jiān', '診所': 'zhěn suǒ', '號碼牌': 'hào mǎ pái', '候診': 'hòu zhěn', '看診': 'kàn zhěn', '回診': 'huí zhěn', '叫號': 'jiào hào', '發燒': 'fā shāo',
+  '喉嚨痛': 'hóu lóng tòng', '喉嚨': 'hóu lóng', '咳嗽': 'ké sou', '流鼻水': 'liú bí shuǐ', '鼻塞': 'bí sè', '頭痛': 'tóu tòng', '過敏': 'guò mǐn',
+  '盤尼西林': 'pán ní xī lín', '批價': 'pī jià', '部分負擔': 'bù fèn fù dān', '藥袋': 'yào dài', '領藥': 'lǐng yào', '藥師': 'yào shī', '藥物': 'yào wù',
+  '感冒藥': 'gǎn mào yào', '感冒': 'gǎn mào', '止咳藥': 'zhǐ ké yào', '睡前': 'shuì qián', '飯後': 'fàn hòu', '休息': 'xiū xi', '多喝水': 'duō hē shuǐ',
+  '醫生': 'yī shēng', '護理師': 'hù lǐ shī', '不舒服': 'bù shū fu', '麻煩': 'má fan', '吃藥': 'chī yào', '一包': 'yì bāo', '哪一包': 'nǎ yì bāo',
+  '午餐': 'wǔ cān', '洗澡': 'xǐ zǎo', '搞定': 'gǎo dìng', '趕快': 'gǎn kuài', '好起來': 'hǎo qǐ lái', '還沒': 'hái méi', '怎麼': 'zěn me', '嗯': 'ēn',
+  '幾個': 'jǐ ge', '一點': 'yì diǎn', '一共': 'yí gòng', '一次': 'yí cì', '切': 'qiē', '他們': 'tā men', '填': 'tián', '體溫': 'tǐ wēn', '櫃台': 'guì tái', '前面': 'qián mian', '舒服': 'shū fu', '位子': 'wèi zi', '還在': 'hái zài', '睡覺': 'shuì jiào'
+});
+const PY_OPT = { toneType: 'symbol', toneSandhi: true };
+const isDigits = seg => /^[零一二三四五六七八九]+$/.test(seg);   // 念號碼：一不變調
+function toPinyin(seg, asArray) {
+  return pinyinPro.pinyin(seg, { ...PY_OPT, toneSandhi: !isDigits(seg), type: asArray ? 'array' : 'string' });
+}
+
+/* ══════════════════════════════════════
+   小工具
+══════════════════════════════════════ */
+const CN = ['零','一','二','三','四','五','六','七','八','九','十'];
+const L = (zh, es, en) => ({ zh, es, en });                 // 一行台詞＋翻譯
+const M = (zh, es, en) => ({ zh, es, en });                 // 扣分原因
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const shuffle = arr => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function track(name, params) { try { gtag('event', name, params || {}); } catch (e) {} }
+const money = n => n + '元';
+const esM = n => `${n} dólares`;
+const enM = n => `NT$${n}`;
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '櫃台': ['La enfermera', 'The nurse'], '醫生': ['El doctor', 'The doctor'], '藥師': ['La farmacéutica', 'The pharmacist'] };
+const SPEAKER_RE = /^(Ami|櫃台|醫生|藥師|我)：/;
+
+/* ══════════════════════════════════════
+   網址參數：嵌入模式（給「台灣一週」地圖用）
+   ?embed=1&name=玩家名字（&s=simp&l=en）
+══════════════════════════════════════ */
+const QS = new URLSearchParams(location.search);
+const EMBED = QS.get('embed') === '1';
+if (EMBED && QS.get('name')) document.body.classList.add('embed-boot');
+
+/* ══════════════════════════════════════
+   設定：中文字體（繁／簡）、說明語言（西／英）
+   遊戲內部一律用繁體判斷答案，只在顯示時轉成簡體；拼音一律用台灣讀音（由繁體算出）
+══════════════════════════════════════ */
+const Settings = { script: 'trad', lang: 'es' };
+try {
+  const saved = JSON.parse(localStorage.getItem('clinic_settings') || '{}');
+  if (saved.script === 'simp') Settings.script = 'simp';
+  if (saved.lang === 'en') Settings.lang = 'en';
+} catch (e) {}
+(() => {   // 從「重新開始」回來時，沿用這一局的設定
+  const q = new URLSearchParams(location.search);
+  if (q.get('s') === 'simp' || q.get('s') === 'trad') Settings.script = q.get('s');
+  if (q.get('l') === 'es' || q.get('l') === 'en') Settings.lang = q.get('l');
+})();
+const X = (es, en) => Settings.lang === 'en' ? en : es;     // 依語言選西文或英文
+let _t2s = null;                                            // 繁→簡轉換器（選簡體時才載入）
+const Z = s => (Settings.script === 'simp' && _t2s) ? _t2s(String(s)) : String(s);
+function loadT2S() {
+  if (_t2s) return Promise.resolve();
+  return new Promise(res => {
+    const sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/opencc-js@1.4.2/dist/umd/t2cn.js';
+    sc.onload = () => { try { _t2s = OpenCC.Converter({ from: 'tw', to: 'cn' }); } catch (e) {} res(); };
+    sc.onerror = () => res();
+    document.head.appendChild(sc);
+  });
+}
+/* 登入畫面以外的文字，一出現就轉成簡體（逐行轉換，保留詞的上下文） */
+function convertNode(root) {
+  if (Settings.script !== 'simp' || !_t2s) return;
+  const walk = n => {
+    if (n.nodeType === 3) {
+      if (!/[一-鿿]/.test(n.nodeValue)) return;
+      const el = n.parentElement;
+      if (!el || el.closest('#login-screen, script, style, rt')) return;
+      const v = _t2s(n.nodeValue);
+      if (v !== n.nodeValue) n.nodeValue = v;
+    } else if (n.nodeType === 1) n.childNodes.forEach(walk);
+  };
+  walk(root);
+}
+const simpObserver = new MutationObserver(muts => {
+  muts.forEach(m => {
+    if (m.type === 'characterData') convertNode(m.target);
+    else m.addedNodes.forEach(convertNode);
+  });
+});
+function applyLang() {
+  document.querySelectorAll('[data-es]').forEach(el => {
+    el.textContent = (el.dataset.zh ? el.dataset.zh + ' ' : '') + el.dataset[Settings.lang];
+  });
+  document.documentElement.lang = Settings.script === 'simp' ? 'zh-Hans' : 'zh-Hant';
+  document.querySelectorAll('[data-script]').forEach(b => b.setAttribute('aria-pressed', b.dataset.script === Settings.script));
+  document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === Settings.lang));
+  convertLogin();
+}
+/* 開始畫面：選了简体就馬上轉換，按回繁體就換回原文（「繁體｜简体」按鈕本身不轉） */
+const _loginOrig = new WeakMap();
+function convertLogin() {
+  const walk = n => {
+    if (n.nodeType === 3) {
+      if (!_loginOrig.has(n)) { if (!/[一-鿿]/.test(n.nodeValue)) return; _loginOrig.set(n, n.nodeValue); }
+      const o = _loginOrig.get(n);
+      const v = (Settings.script === 'simp' && _t2s) ? _t2s(o) : o;
+      if (v !== n.nodeValue) n.nodeValue = v;
+    } else if (n.nodeType === 1 && !n.hasAttribute('data-script')) n.childNodes.forEach(walk);
+  };
+  walk(document.getElementById('login-screen'));
+  const inp = document.getElementById('player-name-input');
+  if (!inp.dataset.ph) inp.dataset.ph = inp.placeholder;
+  inp.placeholder = (Settings.script === 'simp' && _t2s) ? _t2s(inp.dataset.ph) : inp.dataset.ph;
+}
+function saveSettings() { try { localStorage.setItem('clinic_settings', JSON.stringify(Settings)); } catch (e) {} }
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['看醫生', 'ir al médico', 'see a doctor'], ['診所', 'clínica', 'clinic'], ['不舒服', 'sentirse mal', 'feel unwell'], ['健保卡', 'tarjeta del seguro nacional de salud', 'NHI card'],
+          ['初診單', 'formulario de primera consulta', 'new-patient form'], ['過敏', 'alergia', 'allergy'], ['家醫科', 'medicina familiar', 'family medicine'], ['感冒', 'resfriado', 'a cold']],
+  R_CARD: [['健保卡', 'tarjeta del seguro nacional de salud', 'NHI card'], ['掛號', 'registrarse (para la consulta)', 'register (for an appointment)'], ['櫃台', 'mostrador, recepción', 'front desk'], ['護理師', 'enfermera', 'nurse']],
+  R_FIRST: [['第一次', 'la primera vez', 'the first time'], ['以前', 'antes', 'before'], ['初診單', 'formulario de primera consulta', 'new-patient form'], ['填', 'llenar (un formulario)', 'fill in']],
+  R_DEPT: [['科', 'especialidad, departamento', 'department'], ['家醫科', 'medicina familiar', 'family medicine'], ['小兒科', 'pediatría', 'pediatrics'], ['皮膚科', 'dermatología', 'dermatology']],
+  R_TICKET: [['號碼牌', 'ficha con número', 'number ticket'], ['前面', 'delante', 'ahead'], ['位', 'clasificador de personas (cortés)', 'measure word for people (polite)'], ['坐著等', 'esperar sentado', 'wait seated']],
+  W_WAIT: [['候診', 'esperar la consulta', 'wait to be seen'], ['叫號', 'llamar por número', 'call numbers'], ['輪到', 'llegar el turno', "be one's turn"], ['進診間', 'entrar al consultorio', 'go into the exam room'], ['繼續', 'continuar', 'continue']],
+  D_SYMPTOM: [['哪裡不舒服', '¿qué le molesta?', "what's wrong?"], ['咳嗽', 'tos', 'cough'], ['流鼻水', 'secreción nasal', 'runny nose'], ['喉嚨痛', 'dolor de garganta', 'sore throat'], ['頭痛', 'dolor de cabeza', 'headache'], ['鼻塞', 'congestión nasal', 'stuffy nose'], ['已經', 'ya, desde hace', 'already']],
+  D_FEVER: [['發燒', 'tener fiebre', 'have a fever'], ['有沒有', '¿tiene o no?', 'do you have or not?'], ['一點', 'un poco', 'a little']],
+  D_ALLERGY: [['藥物', 'medicamento', 'medication'], ['過敏', 'alergia', 'allergy'], ['盤尼西林', 'penicilina', 'penicillin'], ['有沒有', '¿tiene o no?', 'do you have or not?']],
+  D_ADVICE: [['喉嚨', 'garganta', 'throat'], ['感冒', 'resfriado', 'a cold'], ['多喝水', 'beber mucha agua', 'drink lots of water'], ['多休息', 'descansar más', 'rest more'], ['回來看', 'volver a consulta', 'come back to be seen']],
+  P_PAY: [['批價', 'pagar la consulta', 'pay the bill'], ['掛號費', 'cuota de registro', 'registration fee'], ['部分負擔', 'copago', 'copayment'], ['一共', 'en total', 'in total'], ['不夠', 'no alcanza', 'not enough']],
+  M_MED: [['領藥', 'recoger la medicina', 'pick up medicine'], ['感冒藥', 'medicina para el resfriado', 'cold medicine'], ['止咳藥', 'medicina para la tos', 'cough medicine'], ['飯後', 'después de comer', 'after meals'], ['睡前', 'antes de dormir', 'before bed'], ['藥袋', 'bolsa de medicinas', 'medicine bag']],
+  M_NOW: [['午餐', 'almuerzo', 'lunch'], ['洗澡', 'bañarse', 'take a shower'], ['準備', 'prepararse para', 'get ready to'], ['哪一包', '¿cuál sobre?', 'which packet?'], ['都', 'todos', 'both, all']],
+  E_ASK: [['怎麼樣', '¿cómo te fue?', 'how did it go?'], ['醫生說', 'el doctor dijo', 'the doctor said'], ['幾天', '¿cuántos días?', 'how many days?'], ['回診', 'volver a consulta', 'follow-up visit']],
+  END: [['搞定', 'resolver, lograr', 'get it done'], ['厲害', 'genial, impresionante', 'impressive'], ['趕快', 'pronto, rápido', 'quickly'], ['好起來', 'mejorar', 'get better'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your hard work']],
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* ══════════════════════════════════════
+   翻譯小視窗：可拖曳、可關閉，選了選項就全部關掉
+══════════════════════════════════════ */
+const Tr = {
+  z: 30,
+  open(item, btn) {
+    const pop = document.createElement('div');
+    pop.className = 'tr-pop';
+    pop.setAttribute('role', 'dialog');
+    const m = item.zh.match(SPEAKER_RE);
+    const who = m ? (m[1] === '我' ? [Game.N, Game.N] : WHO[m[1]]) : null;
+    const li = Settings.lang === 'en' ? 1 : 0;
+    pop.innerHTML = `<div class="tr-head"><span>翻譯 · ${X('Traducción', 'Translation')}</span><button class="tr-close" aria-label="關閉 Cerrar">✕</button></div>
+      <div class="tr-body">
+        <div class="tr-row"><span class="tr-lang">${li ? 'EN' : 'ES'}</span><span>${who ? `<b>${esc(who[li])}:</b> ` : ''}${esc(li ? item.en : item.es)}</span></div>
+      </div>`;
+    document.body.appendChild(pop);
+    const r = btn.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+    let x = Math.min(Math.max(8, r.right - w), innerWidth - w - 8);
+    let y = r.bottom + 8 + h > innerHeight ? r.top - h - 8 : r.bottom + 8;
+    pop.style.left = x + 'px'; pop.style.top = Math.max(8, y) + 'px';
+    pop.style.zIndex = ++Tr.z;
+    pop.querySelector('.tr-close').onclick = () => pop.remove();
+    pop.addEventListener('pointerdown', () => { pop.style.zIndex = ++Tr.z; });
+    // 拖曳：抓標題列移動
+    const head = pop.querySelector('.tr-head');
+    head.addEventListener('pointerdown', e => {
+      if (e.target.closest('.tr-close')) return;
+      const sx = e.clientX - pop.offsetLeft, sy = e.clientY - pop.offsetTop;
+      head.setPointerCapture(e.pointerId);
+      const move = ev => {
+        pop.style.left = Math.min(Math.max(0, ev.clientX - sx), innerWidth - 60) + 'px';
+        pop.style.top = Math.min(Math.max(0, ev.clientY - sy), innerHeight - 40) + 'px';
+      };
+      const up = () => { head.removeEventListener('pointermove', move); head.removeEventListener('pointerup', up); };
+      head.addEventListener('pointermove', move); head.addEventListener('pointerup', up);
+    });
+  },
+  closeAll() { document.querySelectorAll('.tr-pop').forEach(p => p.remove()); }
+};
+const SPK_ICON = '<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M3 7.5h3l4-3.5v12l-4-3.5H3z" fill="currentColor"/><path d="M13 7a4 4 0 0 1 0 6M15.5 4.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+const TR_ICON = '<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2 10h16M10 2c-2.6 2.4-2.6 13.6 0 16M10 2c2.6 2.4 2.6 13.6 0 16" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>';
+
+/* ══════════════════════════════════════
+   朗讀：用裝置內建的中文語音（優先台灣國語 zh-TW），不用網路、不用錄音
+══════════════════════════════════════ */
+const Speech = {
+  ok: 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window,
+  voice: null,
+  pickVoice() {
+    const vs = speechSynthesis.getVoices();
+    const zh = vs.filter(v => /^(zh|cmn)/i.test(v.lang));
+    const mando = zh.filter(v => !/HK|yue/i.test(v.lang));
+    const tw = mando.filter(v => /TW|Hant/i.test(v.lang));
+    const pool = tw.length ? tw : mando;
+    const isMale = v => /Zhiwei|Kangkang|Yunyang|Yunxi|Yunjian|Yunxia|Li-?mu|male|男/i.test(v.name) && !/female|女/i.test(v.name);
+    this.voice = pool.find(v => !isMale(v)) || pool[0] || null;    // 主要聲音（女聲優先）
+    this.male = pool.find(isMale) || null;                        // 裝置上有男聲才用
+    this.hasList = vs.length > 0;
+  },
+  /* 角色：女性角色用女聲調音高；男性角色有男聲就用男聲，沒有就壓低音高 */
+  ROLE: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '櫃台': { pitch: 1.05 }, '藥師': { pitch: 1 },
+    '醫生': { pitch: 0.8, male: true, malePitch: 1 }
+  },
+  speak(text, btn, who) {
+    if (!this.ok) return;
+    this.stop();
+    if (!this.voice) this.pickVoice();
+    if (this.hasList && !this.voice) {
+      Game.toast(Z('這台裝置沒有中文語音。') + ' ' + X('Este dispositivo no tiene voz en chino.', 'This device has no Chinese voice.'));
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(text.replace(/[（）()]/g, ''));
+    const role = this.ROLE[who] || {};
+    const useMale = role.male && this.male;
+    const v = useMale ? this.male : this.voice;
+    u.lang = v ? v.lang : 'zh-TW';
+    if (v) u.voice = v;
+    u.pitch = useMale ? role.malePitch : (role.pitch || 1);
+    u.rate = 0.9;
+    if (btn) { btn.classList.add('speaking'); this._btn = btn; }
+    u.onend = u.onerror = () => { if (btn) btn.classList.remove('speaking'); };
+    speechSynthesis.speak(u);
+    track('tts', { game: 'clinic', state: Game.state });
+  },
+  stop() {
+    if (!this.ok) return;
+    speechSynthesis.cancel();
+    if (this._btn) this._btn.classList.remove('speaking');
+  }
+};
+if (Speech.ok) { Speech.pickVoice(); speechSynthesis.onvoiceschanged = () => Speech.pickVoice(); }
+const spkBtn = (i, label) => Speech.ok ? `<button class="tr-btn spk" data-spk="${i}" aria-label="${label}">${SPK_ICON}</button>` : '';
+
+/* ══════════════════════════════════════
+   本關單字
+══════════════════════════════════════ */
+const Vocab = {
+  open: false,
+  toggle(force) {
+    this.open = force ?? !this.open;
+    if (this.open) { Hints.toggle(false); Log.toggle(false); }
+    document.getElementById('vocab').classList.toggle('open', this.open);
+    document.getElementById('vocab-tab').setAttribute('aria-expanded', this.open);
+  },
+  render(state) {
+    const list = VOCAB[state] || [];
+    document.getElementById('vocab-count').textContent = list.length;
+    document.getElementById('vocab-tab').hidden = !list.length;
+    document.getElementById('side-tabs').hidden = false;
+    document.getElementById('vocab-list').innerHTML = list.map(([zh, es, en]) => {
+      const py = toPinyin(zh, false);
+      return `<li><div class="v-word"><span class="v-zh">${esc(Z(zh))}</span>${spkBtn(zh, '朗讀')}</div><div class="v-py">${esc(py)}</div>
+        <div class="v-tr">${esc(X(es, en))}</div></li>`;
+    }).join('');
+    document.querySelectorAll('#vocab-list [data-spk]').forEach(btn => { btn.onclick = () => Speech.speak(btn.dataset.spk, btn); });
+  }
+};
+document.getElementById('vocab-tab').onclick = () => Vocab.toggle();
+document.getElementById('vocab-close').onclick = () => Vocab.toggle(false);
+
+/* ══════════════════════════════════════
+   任務提示：只列出 NPC 交代過的原話，聽到了才出現；不扣分，結果頁顯示看了幾次
+══════════════════════════════════════ */
+const Hints = {
+  open: false,
+  toggle(force) {
+    this.open = force ?? !this.open;
+    if (this.open) { Vocab.toggle(false); Log.toggle(false); Game.hintViews += 1; this.render(); }
+    document.getElementById('hints').classList.toggle('open', this.open);
+    document.getElementById('hint-tab').setAttribute('aria-expanded', this.open);
+  },
+  render() {
+    if (!Game.task) return;
+    const r = s => Game.ruby(s);
+    const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
+    let html = `<div class="h-sec">${r('Ami 的 LINE 訊息')}</div>` + Game.amiLines().slice(1).map(item).join('');
+    const st = Game.state, past = (...a) => a.includes(st);
+    if (past('D_ADVICE', 'P_PAY', 'M_MED', 'M_NOW', 'E_ASK', 'END', 'RESULT')) html += `<div class="h-sec">${r('醫生說的話')}</div>` + Game.docLines().map(item).join('');
+    if (past('M_MED', 'M_NOW', 'E_ASK', 'END', 'RESULT')) html += `<div class="h-sec">${r('藥師說的話')}</div>` + Game.pharmLines().map(item).join('');
+    document.getElementById('hint-body').innerHTML = html;
+  }
+};
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+/* ══════════════════════════════════════
+   錯誤紀錄：整局累積、即時更新、最新的在上面、標出關卡
+══════════════════════════════════════ */
+const STAGE = (() => {
+  const reg = ['掛號', 'registro', 'registration'], wait = ['候診', 'sala de espera', 'waiting'], d = ['診間', 'consultorio', 'exam room'], pay = ['批價領藥', 'pago y farmacia', 'payment & pharmacy'], ami = ['回報 Ami', 'informar a Ami', 'telling Ami'];
+  const o = {};
+  ['R_CARD', 'R_FIRST', 'R_DEPT', 'R_TICKET'].forEach(x => o[x] = reg);
+  o.W_WAIT = wait;
+  ['D_SYMPTOM', 'D_FEVER', 'D_ALLERGY', 'D_ADVICE'].forEach(x => o[x] = d);
+  ['P_PAY', 'M_MED', 'M_NOW'].forEach(x => o[x] = pay);
+  o.E_ASK = ami;
+  return o;
+})();
+function stageOf() { const s = STAGE[Game.state]; return s ? [s[0], s[1], s[2]] : [Game.state, Game.state, Game.state]; }
+
+const Log = {
+  open: false,
+  toggle(force) {
+    this.open = force ?? !this.open;
+    if (this.open) { Vocab.toggle(false); Hints.toggle(false); this.render(); }
+    document.getElementById('log').classList.toggle('open', this.open);
+    document.getElementById('log-tab').setAttribute('aria-expanded', this.open);
+  },
+  render() {
+    const list = Game.log;
+    document.getElementById('log-count').textContent = list.length;
+    const body = document.getElementById('log-body');
+    if (!list.length) { body.innerHTML = `<div class="l-empty">目前沒有錯誤，加油！<br>${X('¡Sin errores por ahora!', 'No mistakes so far!')}</div>`; return; }
+    body.innerHTML = list.slice().reverse().map(m => {
+      const st = m.stage || ['', '', ''];
+      return `<div class="l-item${m.visit === Game.visit ? ' now' : ''}">
+        <div class="l-stage">−10 · ${esc(st[0])}｜${esc(X(st[1], st[2]))}</div>
+        <div class="l-es">${esc(X(m.es, m.en))}</div><div class="l-zh">${Game.ruby(m.zh)}</div></div>`;
+    }).join('');
+  }
+};
+document.getElementById('log-tab').onclick = () => Log.toggle();
+document.getElementById('log-close').onclick = () => Log.toggle(false);
+
+/* ══════════════════════════════════════
+   登入
+══════════════════════════════════════ */
+function startGame() {
+  const input = document.getElementById('player-name-input');
+  const name = input.value.trim();
+  if (!name) {
+    document.getElementById('name-error').textContent = '請輸入你的名字 ' + X('Escribe tu nombre', 'Enter your name');
+    input.focus(); return;
+  }
+  if (Settings.script === 'simp' && !_t2s) { loadT2S().then(() => { if (!_t2s) Settings.script = 'trad'; startGame(); }); return; }
+  saveSettings(); applyLang();
+  if (Settings.script === 'simp') { simpObserver.observe(document.body, { childList: true, subtree: true, characterData: true }); convertNode(document.body); }
+  Game.playerName = name;
+  Game.setup();
+  document.getElementById('player-badge').textContent = '玩家：' + name;
+  Game.updateCash();
+  document.getElementById('login-screen').classList.remove('active');
+  document.getElementById('game-window').classList.add('active');
+  track('game_start', { game: 'clinic', script: Settings.script, lang: Settings.lang, embed: EMBED ? 1 : 0 });
+  Game.render();
+}
+document.getElementById('player-name-input').addEventListener('keydown', e => { if (e.key === 'Enter') startGame(); });
+document.querySelectorAll('[data-script]').forEach(b => b.onclick = () => {
+  Settings.script = b.dataset.script; applyLang();
+  if (Settings.script === 'simp' && !_t2s) loadT2S().then(applyLang);
+});
+document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { Settings.lang = b.dataset.lang; applyLang(); });
+applyLang();
+if (Settings.script === 'simp' && !_t2s) loadT2S().then(applyLang);   // 上次選了简体：開始畫面也先轉好
+
+/* 重新開始：保留名字和語言設定，整局重來（重新出題、分數與時間歸零）；中途放棄的不寫入排行榜 */
+function restartGame(skipConfirm) {
+  if (!skipConfirm && !confirm(Z('確定要重新開始嗎？這一局的分數不會保留。') + '\n' + X('¿Seguro que quieres empezar de nuevo? Perderás el puntaje de esta partida.', 'Start over? Your score for this round will be lost.'))) return;
+  track('game_restart', { game: 'clinic', state: Game.state });
+  const p = new URLSearchParams();
+  if (EMBED) { p.set('embed', '1'); p.set('name', Game.playerName); }
+  else p.set('again', Game.playerName);
+  p.set('s', Settings.script); p.set('l', Settings.lang);
+  location.replace(location.pathname + '?' + p.toString());
+}
+
+/* 嵌入模式：玩完把成績交給地圖，由地圖關掉這一關 */
+function finishEmbed() {
+  Tr.closeAll(); Speech.stop();
+  try { parent.postMessage({ type: 'scene-complete', scene: 'clinic', score: Game.score, mistakes: Game.mistakes }, '*'); } catch (e) {}
+}
+
+/* ══════════════════════════════════════
+   排行榜
+══════════════════════════════════════ */
+async function showLeaderboard() {
+  Tr.closeAll(); Speech.stop(); Vocab.toggle(false); Hints.toggle(false); Log.toggle(false);
+  document.getElementById('side-tabs').hidden = true;
+  document.getElementById('game-window').classList.remove('active');
+  document.getElementById('leaderboard-screen').classList.add('active');
+  const myName = Game.playerName, myScore = Game.score, myElapsed = Game.elapsedTime;
+
+  if (window._FB) await window._FB.saveScore(myName, myScore, myElapsed);
+  const rows = window._FB ? await window._FB.getLeaderboard() : [];
+
+  document.getElementById('lb-loading').style.display = 'none';
+  document.getElementById('lb-table').style.display = 'table';
+  const medals = ['🥇','🥈','🥉'];
+  const myRank = rows.findIndex(r => r.name === myName && r.score === myScore && r.elapsed === myElapsed) + 1;
+
+  document.getElementById('rank-banner').innerHTML = myRank
+    ? `<div class="congrats-banner">${medals[myRank - 1] || '🎉'} 恭喜 ${esc(myName)}！你是第 ${myRank} 名！<br><small>${X(`¡Felicidades! Quedaste en el puesto #${myRank}`, `Congratulations! You're #${myRank}`)}</small></div>`
+    : `<div class="no-rank-banner">可惜，${esc(myName)}，這次沒進前 15 名，再試一次吧！<br><small>${X('No entraste al top 15. ¡Inténtalo otra vez!', "You didn't make the top 15. Try again!")}</small></div>`;
+
+  const body = document.getElementById('lb-body');
+  body.innerHTML = rows.length ? '' : `<tr><td colspan="4">還沒有紀錄 ${X('Sin registros', 'No records yet')}</td></tr>`;
+  rows.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    if (i + 1 === myRank) tr.classList.add('highlight-row');
+    tr.innerHTML = `<td>${medals[i] || '#' + (i + 1)}</td><td>${esc(String(r.name))}</td><td>${r.score} 分</td><td>${r.elapsed} 秒</td>`;
+    body.appendChild(tr);
+  });
+}
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+/* 症狀：id → 中文、西文、英文（「我有…」用） */
+const SYM = {
+  cough:  { zh: '咳嗽',   es: 'tos',                 en: 'a cough' },
+  nose:   { zh: '流鼻水', es: 'secreción nasal',     en: 'a runny nose' },
+  throat: { zh: '喉嚨痛', es: 'dolor de garganta',   en: 'a sore throat' },
+  head:   { zh: '頭痛',   es: 'dolor de cabeza',     en: 'a headache' },
+  stuffy: { zh: '鼻塞',   es: 'congestión nasal',    en: 'a stuffy nose' }
+};
+const SYM_IDS = Object.keys(SYM);
+/* 數字念法：叫號用（十二號、十四號…） */
+const NUMZH = n => n <= 10 ? CN[n] : n < 20 ? '十' + CN[n - 10] : CN[Math.floor(n / 10)] + '十' + (n % 10 ? CN[n % 10] : '');
+const DAYZH = n => ({ 2: '兩', 3: '三', 5: '五', 7: '七' })[n];
+const pad2 = n => String(n).padStart(2, '0');
+
+const Game = {
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,   // 過場的話或選錯時的提示（台詞陣列）
+  hintViews: 0,                  // 打開任務提示的次數
+  log: [],                       // 錯誤紀錄（整局）
+  feedback: [],                  // 這一步的回饋卡
+  visit: 0,                      // 第幾次進入關卡（標出「現在這關」的錯誤）
+  att: {},                       // 每一關選了幾次（第一次就對才給綠卡）
+  cur: 0,                        // 叫號螢幕上的號碼
+  ticket: false,                 // 拿到號碼牌了嗎
+
+  /* 圖片：檔案放在 images/，沒有檔案時會顯示 emoji 佔位 */
+  IMAGES: {
+    START: ['images/line.jpg', '📱'],
+    R_CARD: ['images/reception.jpg', '🏥'], R_FIRST: ['images/reception.jpg', '📋'], R_DEPT: ['images/reception.jpg', '🩺'], R_TICKET: ['images/reception.jpg', '🎫'],
+    W_WAIT: ['images/waiting.jpg', '🪑'],
+    D_SYMPTOM: ['images/doctor.jpg', '🩺'], D_FEVER: ['images/doctor.jpg', '🌡️'], D_ALLERGY: ['images/doctor.jpg', '💊'], D_ADVICE: ['images/doctor.jpg', '👨‍⚕️'],
+    P_PAY: ['images/reception.jpg', '💵'],
+    M_MED: ['images/pharmacy.jpg', '💊'], M_NOW: ['images/pharmacy.jpg', '⏰'],
+    E_ASK: ['images/line.jpg', '📱'],
+    END: ['images/end_good.jpg', '🎉'],
+    RESULT: ['images/result.jpg', '📊']
+  },
+
+  get N() { return this.playerName; },
+
+  /* ── 每局隨機任務 ── */
+  setup() {
+    const sym = shuffle(SYM_IDS).slice(0, 2);
+    this.task = {
+      sym,
+      days: pick([2, 3, 5]),
+      fever: pick([true, false]),
+      allergy: pick([true, false]),
+      myNo: pick([12, 14, 16, 18]),
+      fee: pick([150, 200]),
+      rx: pick([3, 5]),
+      now: pick(['lunch', 'bed']),
+      rot: Math.floor(Math.random() * 4)
+    };
+    this.cur = this.task.myNo - 3;
+    this.ticket = false;
+  },
+
+  /* ── 計時 ── */
+  startTimer() {
+    this.startTime = Date.now();
+    this.timerInterval = setInterval(() => {
+      this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000);
+      const m = Math.floor(this.elapsedTime / 60), s = String(this.elapsedTime % 60).padStart(2, '0');
+      document.getElementById('timer-display').textContent = `⏱ ${m}:${s}`;
+    }, 1000);
+  },
+  stopTimer() { clearInterval(this.timerInterval); },
+  updateCash() { document.getElementById('cash-badge').textContent = (this.ticket && !['D_SYMPTOM', 'D_FEVER', 'D_ALLERGY', 'D_ADVICE', 'P_PAY', 'M_MED', 'M_NOW', 'E_ASK', 'END', 'RESULT'].includes(this.state)) ? '🎫 ' + this.task.myNo + X('號', '') : ''; },
+
+  /* ── 扣分與回饋 ── */
+  addMistake(r, thought) {
+    this.score -= 10; this.mistakes += 1; this.mistakeLog.push(r.zh + ' ' + r.es);
+    this.log.push({ ...r, stage: stageOf(), visit: this.visit });
+    if (this.state !== 'END') this.feedback.push({ type: 'bad', ...r });
+    document.getElementById('score-badge').textContent = this.score + ' 分';
+    track('mistake', { game: 'clinic', state: this.state });
+    if (thought) this.thought = thought;
+    Log.render();
+    if (this.mistakes >= 10 && this.state !== 'END') {
+      setTimeout(() => { alert(Z('錯太多次了，從頭再來一次！') + ' ' + X('Demasiados errores. ¡Empieza otra vez!', 'Too many mistakes. Start over!')); restartGame(true); }, 300);
+    }
+  },
+  good(zh, es, en) { this.feedback.push({ type: 'good', zh, es, en }); },
+  feedbackHTML() {
+    return this.feedback.map(f => `<div class="fb ${f.type}">
+      <div class="fb-head">${f.type === 'bad' ? '✗ −10 分' : '✓ ' + X('¡Bien!', 'Nice!') + ' 做得好'}</div>
+      <div class="fb-es">${esc(X(f.es, f.en))}</div><div class="fb-zh">${this.ruby(f.zh)}</div></div>`).join('');
+  },
+  toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => t.classList.remove('show'), 3600);
+  },
+
+  /* ── 拼音／清單 ── */
+  togglePinyin() {
+    this.showPinyin = !this.showPinyin;
+    document.getElementById('btn-pinyin').setAttribute('aria-pressed', this.showPinyin);
+    this.render();
+    if (Hints.open) Hints.render();
+  },
+  toggleList() {
+    this.showList = !this.showList;
+    document.getElementById('btn-list').setAttribute('aria-pressed', this.showList);
+    this.render();
+  },
+  ruby(str) {
+    if (!this.showPinyin) return esc(Z(str));
+    return String(str).split(/([一-鿿]+)/).map(seg => {
+      if (!/^[一-鿿]+$/.test(seg)) return esc(seg);
+      const py = toPinyin(seg, true);                 // 台灣讀音由繁體算
+      const shown = [...Z(seg)], orig = [...seg];
+      const chars = shown.length === orig.length ? shown : orig;
+      return chars.map((c, i) => `<ruby>${c}<rt>${py[i] || ''}</rt></ruby>`).join('');
+    }).join('');
+  },
+
+  /* ── 台詞：每一行一個 div，有翻譯的在句尾加朗讀和翻譯小圖示 ── */
+  formatText(content) {
+    const items = Array.isArray(content) ? content : [content];
+    return items.map(item => {
+      const m = item.zh.match(SPEAKER_RE);
+      let head = '', rest = item.zh;
+      if (m) {
+        const who = m[1] === '我' ? this.N : m[1];
+        const cls = m[1] === 'Ami' ? 'speaker ami' : m[1] === '我' ? 'speaker me' : 'speaker';
+        head = `<span class="${cls}">${this.ruby(who)}：</span>`;
+        rest = item.zh.slice(m[0].length);
+      }
+      let btn = '';
+      if (item.es) {
+        this._spk.push({ text: rest, who: m ? m[1] : null });
+        btn += spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+        this._tr.push(item);
+        btn += `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+      }
+      return `<div class="line">${head}${this.ruby(rest)}${btn}</div>`;
+    }).join('');
+  },
+
+  /* ── 位置列 ── */
+  setPlace(mode) {
+    const map = {
+      reception: ['🏥', '診所櫃台', X('Recepción de la clínica', 'Clinic reception'), ''],
+      wait: ['🪑', '候診區', X('Sala de espera', 'Waiting room'), ''],
+      doctor: ['🩺', '診間', X('Consultorio', 'Doctor\'s office'), ''],
+      pharmacy: ['💊', '領藥', X('Farmacia', 'Pharmacy'), ''],
+      phone: ['📱', 'Ami', 'LINE · ' + X('Mensaje', 'Message'), 'phone']
+    };
+    const [icon, who, st, cls] = map[mode] || map.reception;
+    document.getElementById('place-bar').className = cls;
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = st;
+  },
+
+  /* ── 圖片 ── */
+  missing: new Set(),
+  imageMissing() {
+    const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
+    const cur = img.getAttribute('src');
+    if (cur) this.missing.add(cur);
+    // 輪流圖的第二張不存在：回到第一張，不要跳成 emoji
+    if (this._anim && cur === this._anim.alt) { this.stopAnim(); if (this._anim0 && !this.missing.has(this._anim0)) { img.setAttribute('src', this._anim0); return; } }
+    img.style.display = 'none'; ph.style.display = 'grid';
+  },
+  stopAnim() { clearInterval(this._animTimer); this._anim = null; },
+  /* alt：第二張圖，和第一張輪流出現（像動畫）；開了「減少動態效果」就不動 */
+  setImage(src, emoji, alt) {
+    const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
+    this.stopAnim(); this._anim0 = src;
+    ph.textContent = emoji;
+    if (!src || this.missing.has(src)) { img.style.display = 'none'; ph.style.display = 'grid'; return; }
+    img.style.display = 'block'; ph.style.display = 'none';
+    if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+    const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (alt && !calm && !this.missing.has(alt)) {
+      const pre = new Image(); pre.onerror = () => this.missing.add(alt); pre.src = alt;   // 先載入，避免閃一下
+      this._anim = { alt }; let on = false;
+      this._animTimer = setInterval(() => {
+        if (this.missing.has(alt)) { this.stopAnim(); img.setAttribute('src', src); return; }
+        on = !on; img.setAttribute('src', on ? alt : src);
+      }, 600);
+    }
+  },
+
+  /* ── 說明文字（任務提示也會用到：只放 NPC 說過的原話） ── */
+  symList() { return this.task.sym.map(id => SYM[id]); },
+  sentence(ids, days) {          // 玩家描述症狀的句子 [中文, 西文, 英文]
+    const a = SYM[ids[0]], b = SYM[ids[1]];
+    return [`我${a.zh}、${b.zh}，已經${DAYZH(days)}天了。`, `Tengo ${a.es} y ${b.es} desde hace ${days} días.`, `I have ${a.en} and ${b.en}, and it's been ${days} days.`];
+  },
+  amiLines() {
+    const N = this.N;
+    return [
+      L(`Ami：${N}，你看起來不太舒服，去看醫生吧！我今天要開會，不能陪你去。`,
+        `${N}, no te ves bien: ¡ve al médico! Hoy tengo una reunión y no puedo acompañarte.`,
+        `${N}, you don't look well — go see a doctor! I have a meeting today, so I can't go with you.`),
+      L('Ami：公司旁邊有一家診所，感冒掛家醫科就可以了。',
+        'Hay una clínica al lado de la oficina; para un resfriado basta con registrarte en medicina familiar.',
+        "There's a clinic next to the office. For a cold, just register with family medicine."),
+      L('Ami：記得帶健保卡，第一次去要填初診單。',
+        'Acuérdate de llevar tu tarjeta del seguro de salud; la primera vez tienes que llenar un formulario de primera consulta.',
+        "Remember to bring your NHI card. If it's your first time, you need to fill out a new-patient form."),
+      L('Ami：看醫生的時候，要說清楚哪裡不舒服、幾天了。有對藥物過敏，也要跟醫生說喔。',
+        'Con el médico, explica bien qué te duele y desde hace cuántos días. Si eres alérgico a algún medicamento, también díselo.',
+        "When you see the doctor, explain clearly what's wrong and for how many days. If you're allergic to any medicine, tell the doctor too.")
+    ];
+  },
+  docLines() {
+    const t = this.task, rx = DAYZH(t.rx);
+    const out = [L('醫生：我看一下喉嚨……有一點紅，是感冒喔。', 'Déjame ver la garganta… está un poco roja. Es un resfriado.', "Let me look at your throat… it's a little red. It's a cold.")];
+    if (t.fever) out.push(L('醫生：你有一點發燒，要多休息。', 'Tienes un poco de fiebre; hay que descansar más.', "You have a slight fever, so you need more rest."));
+    if (t.allergy) out.push(L('醫生：你對盤尼西林過敏，我會開別的藥給你。', 'Eres alérgico a la penicilina; te recetaré otros medicamentos.', "You're allergic to penicillin, so I'll prescribe something else."));
+    out.push(L(`醫生：藥吃${rx}天，要多喝水、多休息。如果${rx}天後還沒好，再回來看。`,
+      `Toma el medicamento ${t.rx} días, bebe mucha agua y descansa. Si después de ${t.rx} días no mejoras, vuelve.`,
+      `Take the medicine for ${t.rx} days, drink lots of water and rest. If you're not better after ${t.rx} days, come back.`));
+    return out;
+  },
+  pharmLines() {
+    const rx = DAYZH(this.task.rx);
+    return [
+      L('藥師：這是你的藥。感冒藥一天三次，三餐飯後吃；止咳藥睡前吃。', 'Aquí está su medicina. El de resfriado, tres veces al día después de las comidas; el de la tos, antes de dormir.', 'Here is your medicine. Take the cold medicine three times a day after meals, and the cough medicine before bed.'),
+      L(`藥師：藥一共${rx}天，吃完再看看。`, `El tratamiento es de ${this.task.rx} días en total.`, `The course is ${this.task.rx} days in total.`)
+    ];
+  },
+
+  /* ── 畫面元件 ── */
+  listHTML() {
+    const t = this.task, r = s => this.ruby(s), sy = this.symList();
+    const rows = [
+      { zh: `症狀：${sy[0].zh}、${sy[1].zh}`, es: `Síntomas: ${sy[0].es}, ${sy[1].es}`, en: `Symptoms: ${sy[0].en}, ${sy[1].en}` },
+      { zh: `已經${DAYZH(t.days)}天了`, es: `Desde hace ${t.days} días`, en: `For ${t.days} days` },
+      { zh: t.fever ? '有一點發燒（三十七度八）' : '沒有發燒（三十六度五）', es: t.fever ? 'Un poco de fiebre (37,8 °C)' : 'Sin fiebre (36,5 °C)', en: t.fever ? 'A slight fever (37.8 °C)' : 'No fever (36.5 °C)' },
+      { zh: t.allergy ? '對盤尼西林過敏' : '沒有藥物過敏', es: t.allergy ? 'Alergia a la penicilina' : 'Sin alergia a medicamentos', en: t.allergy ? 'Allergic to penicillin' : 'No drug allergies' },
+      { zh: '有健保卡，是第一次來這家診所', es: 'Tienes tu tarjeta NHI y es tu primera vez en esta clínica', en: "You have your NHI card, and it's your first time at this clinic" }
+    ];
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的身體狀況')}<span class="grow"></span>${sp1}${tr1}</div>` +
+      rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 招牌元素 1：叫號螢幕 */
+  boardHTML() {
+    const t = this.task, r = s => this.ruby(s), mine = this.cur === t.myNo;
+    return `<div class="board"><div class="cell"><small>${r('目前看診')}</small><b class="n">${pad2(this.cur)}</b></div>
+      <div class="cell me${mine ? ' blink' : ''}"><small>${r('你的號碼')}</small><b class="n">${pad2(t.myNo)}</b></div></div>`;
+  },
+  /* 招牌元素 2：藥袋 */
+  bagHTML() {
+    const r = s => this.ruby(s), ok = on => on ? '✔' : '';
+    return `<div class="bag"><div class="bt">${r('藥袋')}</div><table>
+      <tr><th></th><th>${r('早')}</th><th>${r('中')}</th><th>${r('晚')}</th><th>${r('睡前')}</th></tr>
+      <tr><td>${r('感冒藥')}</td><td>${ok(1)}</td><td>${ok(1)}</td><td>${ok(1)}</td><td>${ok(0)}</td></tr>
+      <tr><td>${r('止咳藥')}</td><td>${ok(0)}</td><td>${ok(0)}</td><td>${ok(0)}</td><td>${ok(1)}</td></tr></table>
+      <div class="bn">${r('飯後')} · ${r('吃' + DAYZH(this.task.rx) + '天')}</div></div>`;
+  },
+
+  /* ── 狀態設定 ── */
+  getConfig() {
+    const N = this.N, t = this.task;
+    const desk = (zh, es, en) => L(`櫃台：${zh}`, es, en);
+    const doc = (zh, es, en) => L(`醫生：${zh}`, es, en);
+    const rotate = o => o.map((_, i) => o[(i + t.rot) % o.length]);
+    const sentence = Game.sentence(t.sym, t.days);
+    const otherDays = d => [2, 3, 5, 7].filter(x => x !== d);
+
+    return {
+      /* ═══ Ami 的 LINE ═══ */
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你已經不舒服好幾天了。這時候，手機響了，是Ami傳來的LINE。）',
+            '(Llevas varios días sintiéndote mal. Entonces suena tu celular: es un LINE de Ami.)',
+            '(You\'ve felt unwell for several days. Just then your phone buzzes — a LINE message from Ami.)'),
+          ...Game.amiLines(),
+          L('我：好，我現在就去。', 'Bien, voy ahora mismo.', "OK, I'll go right now.")
+        ],
+        options: ['出發去診所'],
+        next: () => { Game.startTimer(); Game.state = 'R_CARD'; }
+      },
+
+      /* ═══ 掛號 ═══ */
+      R_CARD: {
+        place: 'reception',
+        dialogue: () => [
+          L('（你走進診所，櫃台有一位護理師。）', '(Entras a la clínica; en el mostrador hay una enfermera.)', '(You walk into the clinic. A nurse is at the front desk.)'),
+          desk('你好，請問有健保卡嗎？', 'Hola, ¿tiene su tarjeta del seguro de salud?', 'Hello, do you have your NHI card?')
+        ],
+        options: ['有，這是我的健保卡。', '我沒有健保卡。'],
+        next: c => {
+          if (c.startsWith('我沒有')) {
+            Game.addMistake(M('你有健保卡，掛號要拿出來給櫃台。', 'Tienes tu tarjeta NHI: hay que entregarla en recepción para registrarte.', 'You have your NHI card — hand it over at the desk to register.'),
+              [L('（等一下，健保卡不是在皮夾裡嗎？）', '(Espera, ¿no está la tarjeta en tu cartera?)', '(Wait, isn\'t your NHI card in your wallet?)')]); return;
+          }
+          if (Game.att.R_CARD === 1) Game.good('掛號要先給櫃台看健保卡。', 'Para registrarte, primero muestras la tarjeta NHI.', 'To register, you first show your NHI card.');
+          Game.state = 'R_FIRST';
+        }
+      },
+      R_FIRST: {
+        place: 'reception',
+        dialogue: () => [desk('好。請問是第一次來嗎？', 'Bien. ¿Es su primera vez aquí?', 'OK. Is this your first visit?')],
+        options: ['對，我第一次來。', '不是，我以前來過。'],
+        next: c => {
+          if (c.startsWith('不是')) {
+            Game.addMistake(M('Ami說這是你第一次來這家診所。', 'Es tu primera vez en esta clínica.', "It's your first time at this clinic."),
+              [desk('咦？電腦裡沒有你的資料耶……', '¿Eh? No encuentro sus datos en el sistema…', "Huh? I can't find your records in the system…")]); return;
+          }
+          Game.thought = [desk('第一次來的話，要麻煩你填一下初診單。', 'Si es su primera vez, por favor llene el formulario de primera consulta.', 'Since it\'s your first visit, please fill out the new-patient form.'),
+            L('（你在初診單上寫了名字、生日和電話。）', '(Escribes tu nombre, fecha de nacimiento y teléfono en el formulario.)', '(You write your name, birth date and phone number on the form.)')];
+          Game.state = 'R_DEPT';
+        }
+      },
+      R_DEPT: {
+        place: 'reception',
+        dialogue: () => [desk('要掛哪一科？我們有家醫科、小兒科和皮膚科。', '¿A qué especialidad quiere registrarse? Tenemos medicina familiar, pediatría y dermatología.', 'Which department? We have family medicine, pediatrics and dermatology.')],
+        options: ['家醫科', '小兒科', '皮膚科'],
+        next: c => {
+          if (c !== '家醫科') {
+            Game.addMistake(M('Ami說感冒掛家醫科。', 'Ami dijo que para un resfriado hay que registrarse en medicina familiar.', 'Ami said to register with family medicine for a cold.'),
+              [L('（Ami說感冒要掛哪一科？）', '(¿Qué dijo Ami sobre la especialidad para un resfriado?)', '(What did Ami say about the department for a cold?)')]); return;
+          }
+          if (Game.att.R_DEPT === 1) Game.good('你記得感冒要掛家醫科。', 'Recordaste que el resfriado va a medicina familiar.', 'You remembered that a cold goes to family medicine.');
+          Game.state = 'R_TICKET';
+        }
+      },
+      R_TICKET: {
+        place: 'reception',
+        html: () => Game.boardHTML(),
+        dialogue: () => [desk(`好，這是你的號碼牌，${NUMZH(t.myNo)}號。前面還有三位，請先坐著等一下。`,
+          `Bien, este es su número: el ${t.myNo}. Hay tres personas antes que usted; espere sentado, por favor.`,
+          `OK, here's your number: ${t.myNo}. There are three people ahead of you; please have a seat.`)],
+        options: ['好，謝謝。'],
+        next: () => { Game.ticket = true; Game.updateCash(); Game.state = 'W_WAIT'; }
+      },
+
+      /* ═══ 候診：聽叫號 ═══ */
+      W_WAIT: {
+        place: 'wait',
+        html: () => Game.boardHTML(),
+        dialogue: () => [L('（你坐在候診區，看著牆上的叫號螢幕。護理師會一個一個叫號碼。）',
+          '(Te sientas en la sala de espera y miras la pantalla de turnos. La enfermera irá llamando los números uno por uno.)',
+          '(You sit in the waiting area and watch the number screen. The nurse will call the numbers one by one.)')],
+        options: ['繼續等候', '進診間'],
+        next: c => {
+          const mine = Game.cur === t.myNo;
+          if (c === '進診間') {
+            if (!mine) {
+              Game.addMistake(M(`還沒輪到你。現在是${NUMZH(Game.cur)}號，你是${NUMZH(t.myNo)}號。`, `Todavía no es tu turno: van por el ${Game.cur} y tú tienes el ${t.myNo}.`, `It's not your turn yet: they're at ${Game.cur} and you're ${t.myNo}.`),
+                [desk(`${NUMZH(Game.cur)}號還在看診，請再等一下。`, `El ${Game.cur} todavía está en consulta; espere un poco más, por favor.`, `Number ${Game.cur} is still being seen. Please wait a bit longer.`)]); return;
+            }
+            if (Game.att.W_WAIT <= 4) Game.good('你聽到叫號，輪到自己才進去。', 'Escuchaste el llamado y entraste cuando fue tu turno.', 'You listened for the call and went in when it was your turn.');
+            Game.state = 'D_SYMPTOM'; return;
+          }
+          if (mine) {
+            Game.addMistake(M('輪到你了，要馬上進診間，不要錯過。', 'Ya es tu turno: hay que entrar enseguida para no perderlo.', "It's your turn — go in right away so you don't miss it."),
+              [desk(`${NUMZH(t.myNo)}號，${NUMZH(t.myNo)}號，請進診間！`, `¡Número ${t.myNo}, número ${t.myNo}, pase al consultorio!`, `Number ${t.myNo}, number ${t.myNo}, please come in!`)]); return;
+          }
+          Game.cur += 1;
+          Game.thought = [desk(`${NUMZH(Game.cur)}號的病人，請進診間。`, `Paciente número ${Game.cur}, pase al consultorio.`, `Patient number ${Game.cur}, please come in.`)];
+          if (Game.cur === t.myNo) Game.thought.push(L('（啊，是你的號碼！）', '(¡Es tu número!)', "(That's your number!)"));
+        }
+      },
+
+      /* ═══ 診間 ═══ */
+      D_SYMPTOM: {
+        place: 'doctor',
+        dialogue: () => [L('（你走進診間，醫生坐在桌子後面。）', '(Entras al consultorio; el doctor está sentado detrás del escritorio.)', '(You enter the exam room. The doctor sits behind the desk.)'),
+          doc('請坐。你哪裡不舒服？', 'Siéntese. ¿Qué le pasa?', "Please sit down. What's wrong?")],
+        options: () => {
+          const [a, b] = t.sym;
+          const wrongSym = SYM_IDS.find(id => !t.sym.includes(id));
+          const o = [sentence,
+            Game.sentence(t.sym, otherDays(t.days)[0]),
+            Game.sentence([a, wrongSym], t.days),
+            [`我${SYM[a].zh}，已經${DAYZH(t.days)}天了。`]];
+          return rotate(o.map(x => x[0]));
+        },
+        next: c => {
+          if (c === sentence[0]) {
+            if (Game.att.D_SYMPTOM === 1) Game.good('你把症狀和天數都說清楚了。', 'Explicaste claramente los síntomas y los días.', 'You described your symptoms and the number of days clearly.');
+            Game.state = 'D_FEVER'; return;
+          }
+          const sy = Game.symList();
+          Game.addMistake(M(`你的狀況是：${sy[0].zh}、${sy[1].zh}，已經${DAYZH(t.days)}天了。`, `Tu situación: ${sy[0].es}, ${sy[1].es}, desde hace ${t.days} días.`, `Your situation: ${sy[0].en}, ${sy[1].en}, for ${t.days} days.`),
+            [L('（看一下我的身體狀況卡。）', '(Mira tu tarjeta de estado de salud.)', '(Check your health card.)')]);
+        }
+      },
+      D_FEVER: {
+        place: 'doctor',
+        dialogue: () => [doc('嗯。有沒有發燒？', 'Mm. ¿Tiene fiebre?', 'Mm. Do you have a fever?')],
+        options: ['有，我有一點發燒。', '沒有，我沒有發燒。'],
+        next: c => {
+          const yes = c.startsWith('有');
+          if (yes !== t.fever) {
+            Game.addMistake(M(t.fever ? '你有一點發燒（三十七度八）。' : '你沒有發燒（三十六度五）。', t.fever ? 'Tienes un poco de fiebre (37,8 °C).' : 'No tienes fiebre (36,5 °C).', t.fever ? 'You have a slight fever (37.8 °C).' : 'You have no fever (36.5 °C).'),
+              [L('（看一下我的身體狀況卡。）', '(Mira tu tarjeta de estado de salud.)', '(Check your health card.)')]); return;
+          }
+          Game.state = 'D_ALLERGY';
+        }
+      },
+      D_ALLERGY: {
+        place: 'doctor',
+        dialogue: () => [doc('有沒有對什麼藥物過敏？', '¿Es alérgico a algún medicamento?', 'Are you allergic to any medicine?')],
+        options: ['沒有，沒有過敏。', '有，我對盤尼西林過敏。'],
+        next: c => {
+          const yes = c.startsWith('有');
+          if (yes !== t.allergy) {
+            Game.addMistake(M(t.allergy ? '你對盤尼西林過敏，一定要告訴醫生。' : '你沒有藥物過敏。', t.allergy ? 'Eres alérgico a la penicilina: es imprescindible decírselo al doctor.' : 'No tienes alergia a medicamentos.', t.allergy ? "You're allergic to penicillin — you must tell the doctor." : 'You have no drug allergies.'),
+              [L('（看一下我的身體狀況卡。）', '(Mira tu tarjeta de estado de salud.)', '(Check your health card.)')]); return;
+          }
+          if (t.allergy && Game.att.D_ALLERGY === 1) Game.good('有藥物過敏，一定要跟醫生說。', 'Si tienes alergia a un medicamento, siempre díselo al doctor.', 'If you have a drug allergy, always tell the doctor.');
+          Game.state = 'D_ADVICE';
+        }
+      },
+      D_ADVICE: {
+        place: 'doctor',
+        dialogue: () => Game.docLines(),
+        options: ['好，謝謝醫生。'],
+        next: () => { Game.thought = [L('（你拿著單子，回到櫃台。）', '(Tomas tu receta y vuelves al mostrador.)', '(You take your slip and go back to the front desk.)')]; Game.state = 'P_PAY'; }
+      },
+
+      /* ═══ 批價、領藥 ═══ */
+      P_PAY: {
+        place: 'reception',
+        dialogue: () => [desk(`好，掛號費和部分負擔，一共${t.fee}元。`, `Bien, el costo de registro más el copago son ${esM(t.fee)} en total.`, `OK, the registration fee plus your copay comes to ${enM(t.fee)}.`)],
+        options: ['給100元', '給200元', '給500元'],
+        next: c => {
+          const given = +c.match(/(\d+)/)[1];
+          if (given < t.fee) {
+            Game.addMistake(M(`一共${t.fee}元，${given}元不夠。`, `El total es ${esM(t.fee)}; ${esM(given)} no alcanza.`, `The total is ${enM(t.fee)}; ${enM(given)} isn't enough.`),
+              [desk(`不好意思，${given}元不夠喔。`, `Disculpe, ${esM(given)} no alcanza.`, `Sorry, ${enM(given)} isn't enough.`)]); return;
+          }
+          Game.thought = [desk(given === t.fee ? '剛剛好，謝謝！請到旁邊領藥。' : `收您${given}元，找您${given - t.fee}元。請到旁邊領藥。`,
+            given === t.fee ? 'Justo, ¡gracias! Pase a recoger su medicina al lado.' : `Recibo ${esM(given)}; su cambio son ${esM(given - t.fee)}. Pase a recoger su medicina al lado.`,
+            given === t.fee ? 'Exact change, thanks! Please pick up your medicine next door.' : `Out of ${enM(given)}, here's ${enM(given - t.fee)} in change. Please pick up your medicine next door.`)];
+          Game.state = 'M_MED';
+        }
+      },
+      M_MED: {
+        place: 'pharmacy',
+        html: () => Game.bagHTML(),
+        dialogue: () => Game.pharmLines(),
+        options: ['好，我知道了，謝謝。'],
+        next: () => { Game.state = 'M_NOW'; }
+      },
+      M_NOW: {
+        place: 'pharmacy',
+        dialogue: () => [
+          t.now === 'lunch'
+            ? L('（你回到公司，剛吃完午餐。）', '(Vuelves a la oficina y acabas de almorzar.)', '(You\'re back at the office and have just finished lunch.)')
+            : L('（晚上，你洗好澡，準備睡覺了。）', '(Por la noche te bañas y te preparas para dormir.)', "(In the evening, you've showered and are getting ready for bed.)"),
+          L('我：現在要吃哪一包藥？', '¿Qué medicina me toca tomar ahora?', 'Which medicine should I take now?')
+        ],
+        options: ['感冒藥', '止咳藥', '兩包都吃', '都不用吃'],
+        next: c => {
+          const right = t.now === 'lunch' ? '感冒藥' : '止咳藥';
+          if (c !== right) {
+            Game.addMistake(M(t.now === 'lunch' ? '感冒藥一天三次，三餐飯後吃；剛吃完午餐，要吃感冒藥。' : '止咳藥睡前吃；現在要睡覺了，要吃止咳藥。',
+              t.now === 'lunch' ? 'El de resfriado se toma tres veces al día tras las comidas: ahora toca ese.' : 'El de la tos se toma antes de dormir: ahora toca ese.',
+              t.now === 'lunch' ? 'The cold medicine is taken after each meal, so take it now.' : 'The cough medicine is taken before bed, so take it now.'),
+              [L('（藥師剛剛怎麼說？看一下藥袋。）', '(¿Qué dijo la farmacéutica? Mira la bolsa de medicinas.)', '(What did the pharmacist say? Check the medicine bag.)')]); return;
+          }
+          if (Game.att.M_NOW === 1) Game.good('你記得藥什麼時候吃。', 'Recordaste cuándo tomar cada medicina.', 'You remembered when to take each medicine.');
+          Game.thought = [L('（吃完藥，你坐在位子上休息。過一會兒，Ami傳來訊息。）', '(Tomas la medicina y descansas en tu asiento. Poco después, Ami te escribe.)', '(You take the medicine and rest at your desk. A little later, Ami texts you.)')];
+          Game.state = 'E_ASK';
+        }
+      },
+
+      /* ═══ 回報 Ami ═══ */
+      E_ASK: {
+        place: 'phone',
+        dialogue: () => [L('Ami：怎麼樣？醫生怎麼說？藥要吃幾天？', '¿Cómo te fue? ¿Qué dijo el doctor? ¿Cuántos días tienes que tomar la medicina?', 'How did it go? What did the doctor say? How many days do you take the medicine?')],
+        options: () => rotate([
+          `醫生說是感冒，藥吃${DAYZH(t.rx)}天，要多喝水、多休息。`,
+          `醫生說是感冒，藥吃${DAYZH(t.rx === 3 ? 5 : 3)}天，要多喝水、多休息。`,
+          '醫生說不用吃藥，多喝水就好。',
+          `醫生說是感冒，藥吃${DAYZH(t.rx)}天，吃完一定要再回去看。`
+        ]),
+        next: c => {
+          if (c !== `醫生說是感冒，藥吃${DAYZH(t.rx)}天，要多喝水、多休息。`) {
+            Game.addMistake(M(`醫生說藥吃${DAYZH(t.rx)}天，要多喝水、多休息；${DAYZH(t.rx)}天後還沒好才再回診。`, `El doctor dijo ${t.rx} días de medicina, beber agua y descansar; solo volver si en ${t.rx} días no mejoras.`, `The doctor said ${t.rx} days of medicine, drink water and rest; only come back if you're not better after ${t.rx} days.`),
+              [L('（再想一下，醫生剛剛怎麼說？看一下任務提示。）', '(Piensa otra vez: ¿qué dijo el doctor? Mira las pistas.)', '(Think again: what did the doctor say? Check the hints.)')]); return;
+          }
+          if (Game.att.E_ASK === 1) Game.good('你聽懂醫生說的話，也能告訴朋友。', 'Entendiste al doctor y pudiste contárselo a tu amiga.', 'You understood the doctor and could tell your friend.');
+          Game.stopTimer();
+          Game.state = 'END';
+        }
+      },
+
+      /* ═══ 結局 ═══ */
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2;
+          track('game_complete', { game: 'clinic', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            Game._endGood
+              ? L(`Ami：太好了！${N}，你今天真的很厲害，掛號、看醫生、領藥都自己搞定了！多喝水、早點睡，趕快好起來喔！`, `¡Qué bien! ${N}, hoy lo hiciste todo tú solo: registro, consulta y farmacia. ¡Bebe agua, duerme temprano y mejórate pronto!`, `Great! ${N}, you handled everything yourself today — registration, the doctor, the pharmacy! Drink water, sleep early and get well soon!`)
+              : L('Ami：辛苦了！看醫生的時候要說清楚，有些地方下次再注意就好。你先好好休息，趕快好起來喔！', '¡Gracias por el esfuerzo! Con el médico hay que explicar bien las cosas; cuida unos detalles la próxima vez. ¡Descansa y mejórate pronto!', 'Thanks for your hard work! Be clear with the doctor, and watch a few details next time. Rest up and get well soon!'),
+            L('（提醒：這個遊戲是中文練習，不是醫療建議。身體不舒服，請去看真正的醫生。）', '(Aviso: este juego es práctica de chino, no un consejo médico. Si te sientes mal, acude a un médico de verdad.)', '(Note: this game is Chinese practice, not medical advice. If you feel unwell, please see a real doctor.)')
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; }
+      },
+      RESULT: {
+        place: 'phone',
+        dialogue: () => {
+          const w = (zh, es, en) => zh + ' ' + X(es, en);
+          let msg = `【${w('任務成果', 'Resultados', 'Results')}】\n${w('玩家', 'Jugador', 'Player')}：${N}\n${w('最後分數', 'Puntos', 'Score')}：${Game.score} 分\n` +
+            `${w('錯誤次數', 'Errores', 'Mistakes')}：${Game.mistakes} 次\n${w('時間', 'Tiempo', 'Time')}：${Game.elapsedTime} 秒\n` +
+            `${w('看任務提示', 'Pistas consultadas', 'Hints viewed')}：${Game.hintViews} 次\n\n${w('扣分原因', 'Penalizaciones', 'Penalties')}：`;
+          if (!Game.log.length) msg += '\n沒有扣分！' + X('¡Sin errores!', 'No mistakes!') + ' 🎉';
+          else Game.log.forEach((m, i) => { msg += `\n${i + 1}. ${m.zh} ${X(m.es, m.en)}（−10）`; });
+          return msg.split('\n').map(zh => ({ zh }));
+        },
+        options: () => EMBED ? ['回到地圖 ' + X('Volver al mapa', 'Back to the map')] : ['查看排行榜 ' + X('Ver clasificación', 'See leaderboard')],
+        next: () => { if (EMBED) finishEmbed(); else showLeaderboard(); }
+      }
+    };
+  },
+
+  handleChoice(choice) {
+    const cfg = this.getConfig()[this.state];
+    Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
+    Speech.stop();
+    this.thought = null;
+    this.feedback = [];
+    const before = this.state;
+    this.att[before] = (this.att[before] || 0) + 1;
+    cfg.next(choice);
+    this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
+    if (this.thoughtFirst) this.visit += 1;
+    this.updateCash();
+    if (document.getElementById('game-window').classList.contains('active')) this.render();
+  },
+
+  render() {
+    const cfg = this.getConfig()[this.state];
+    if (!cfg) { console.error('狀態錯誤：' + this.state); return; }
+    const val = v => typeof v === 'function' ? v() : v;
+    this.setPlace(val(cfg.place) || 'reception');
+
+    // END 的 dialogue 會決定結局，所以只算一次
+    const raw = this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
+    let [src, emoji, alt] = this.IMAGES[this.state] || ['', '🏥'];
+    if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
+    this.setImage(src, emoji, alt);
+    Vocab.render(this.state);
+    if (Hints.open) Hints.render();
+    Log.render();
+
+    this._tr = []; this._spk = [];
+    let html = (this.showList && this.state !== 'START' && !['END', 'RESULT'].includes(this.state)) ? this.listHTML() : '';
+    html += cfg.html ? cfg.html() : '';
+    const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
+    const main = this.formatText(raw);
+    html += this.thoughtFirst ? th + main : main + th;
+    html += this.feedbackHTML();
+    const box = document.getElementById('npc-dialogue');
+    box.innerHTML = html;
+    box.querySelectorAll('[data-tr]').forEach(btn => {
+      btn.onclick = () => Tr.open(this._tr[+btn.dataset.tr], btn);
+    });
+    box.querySelectorAll('[data-spk]').forEach(btn => {
+      btn.onclick = () => { const x = this._spk[+btn.dataset.spk]; Speech.speak(x.text, btn, x.who); };
+    });
+
+    const area = document.getElementById('options-area');
+    area.className = '';
+    area.innerHTML = '';
+    const opts = val(cfg.options);
+    area.classList.toggle('single', opts.length === 1 || opts.some(o => o.length > 12));
+    opts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt' + (false ? ' deal' : '');
+      btn.innerHTML = this.ruby(opt);
+      btn.onclick = () => this.handleChoice(opt);
+      area.appendChild(btn);
+    });
+  }
+};
+
+/* 從「重新開始」回來，或嵌入模式：直接用帶進來的名字開始，跳過開始畫面 */
+(() => {
+  const name = EMBED ? QS.get('name') : QS.get('again');
+  if (!name) return;
+  if (!EMBED) history.replaceState(null, '', location.pathname);
+  document.getElementById('player-name-input').value = name;
+  startGame();
+})();
+</script>
+</body>
+</html>
