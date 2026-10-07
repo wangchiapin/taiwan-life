@@ -903,7 +903,7 @@ const Game = {
   /* 圖片：檔案放在 images/，沒有檔案時會顯示 emoji 佔位 */
   IMAGES: {
     START: ['images/start.jpg', '🥐'],
-    TONGS: ['images/tray.jpg', '🧺'], PICK: ['images/tray.jpg', '🧺'],
+    TONGS: ['images/tray.jpg', '🧺', 'images/tray_click.jpg'], PICK: ['images/tray.jpg', '🧺', 'images/tray_click.jpg'],   // 第三個是輪流出現的第二張圖（夾子「喀喀」）
     C_SLICE: ['images/toast.jpg', '🍞'],
     C_HEAT: ['images/counter.jpg', '🧾'], C_SEP: ['images/counter.jpg', '🛍️'], C_MEMBER: ['images/counter.jpg', '💳'], C_PAY: ['images/counter.jpg', '💵'],
     K_GREET: ['images/line.jpg', '📱'],
@@ -1043,15 +1043,30 @@ const Game = {
   missing: new Set(),
   imageMissing() {
     const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
-    if (img.getAttribute('src')) this.missing.add(img.getAttribute('src'));
+    const cur = img.getAttribute('src');
+    if (cur) this.missing.add(cur);
+    // 輪流圖的第二張不存在：回到第一張，不要跳成 emoji
+    if (this._anim && cur === this._anim.alt) { this.stopAnim(); if (this._anim0 && !this.missing.has(this._anim0)) { img.setAttribute('src', this._anim0); return; } }
     img.style.display = 'none'; ph.style.display = 'grid';
   },
-  setImage(src, emoji) {
+  stopAnim() { clearInterval(this._animTimer); this._anim = null; },
+  /* alt：第二張圖，和第一張輪流出現（像動畫）；開了「減少動態效果」就不動 */
+  setImage(src, emoji, alt) {
     const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
+    this.stopAnim(); this._anim0 = src;
     ph.textContent = emoji;
     if (!src || this.missing.has(src)) { img.style.display = 'none'; ph.style.display = 'grid'; return; }
     img.style.display = 'block'; ph.style.display = 'none';
     if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+    const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (alt && !calm && !this.missing.has(alt)) {
+      const pre = new Image(); pre.onerror = () => this.missing.add(alt); pre.src = alt;   // 先載入，避免閃一下
+      this._anim = { alt }; let on = false;
+      this._animTimer = setInterval(() => {
+        if (this.missing.has(alt)) { this.stopAnim(); img.setAttribute('src', src); return; }
+        on = !on; img.setAttribute('src', on ? alt : src);
+      }, 600);
+    }
   },
 
   /* ── Ami 交代的話（任務提示也會用到） ── */
@@ -1518,9 +1533,9 @@ const Game = {
 
     // END 的 dialogue 會決定結局，所以只算一次
     const raw = this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
-    let [src, emoji] = this.IMAGES[this.state] || ['', '🥐'];
-    if (this.state === 'END' && !this._endGood) [src, emoji] = ['images/end_bad.jpg', '😅'];
-    this.setImage(src, emoji);
+    let [src, emoji, alt] = this.IMAGES[this.state] || ['', '🥐'];
+    if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
+    this.setImage(src, emoji, alt);
     Vocab.render(this.state);
     if (Hints.open) Hints.render();
     Log.render();
