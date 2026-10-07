@@ -29,6 +29,11 @@ parent.postMessage({ type: 'scene-complete', scene: '<scene>', score, mistakes }
 ```
 地圖收到後關掉 iframe 並記錄成績。
 
+## 從清單頁進遊戲（不用再輸入名字）
+清單頁（index.html）和地圖共用玩家資料：localStorage `taiwan_player` = { name, script, lang }。
+清單頁有填名字時，點遊戲會開 `games/<scene>/index.html?again=名字&s=…&l=…`，遊戲跳過名字頁直接開始（單機版，有排行榜），網址參數會自動清掉。
+沒填名字，或直接用網址進遊戲，遊戲照常先問名字。
+
 ## 不帶 embed=1
 就是單機版：有登入頁、排行榜，連結可以直接發給學生。
 

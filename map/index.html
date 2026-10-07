@@ -73,6 +73,7 @@
       </div>
     </div>
     <button class="go" id="start">開始探索</button>
+    <p class="note"><a href="../">☰ <span data-es="Ver la lista de juegos" data-en="See the game list">Ver la lista de juegos</span></a></p>
     <p class="note" data-es="Camina hasta la puerta de un lugar para empezar su misión. Teclas de flecha / WASD, o toca el mapa." data-en="Walk to a building's door to start its mission. Arrow keys / WASD, or tap the map.">Camina hasta la puerta de un lugar para empezar su misión. Teclas de flecha / WASD, o toca el mapa.</p>
   </div>
 </div>
@@ -80,7 +81,7 @@
 <!-- ── 地圖 ── -->
 <div id="hud">
   <span class="title">🗺️ 台灣生活地圖</span>
-  <span class="chip" id="who"></span>
+  <button id="who" title="改名字／語言 · Cambiar nombre o idioma"></button>
   <span class="chip" id="prog"></span>
   <button id="btn-reset"></button>
   <button id="btn-back" onclick="location.href='../'"></button>
@@ -125,10 +126,16 @@ const SIDEWALK_ROWS = [4, 7, 11];
 /* ══════════════════════════════════════
    設定與進度
 ══════════════════════════════════════ */
-const KEY = 'taiwan_map_v1';
+const KEY = 'taiwan_map_v1';             // 地圖進度
+const PKEY = 'taiwan_player';            // 玩家資料（名字、字體、語言），和遊戲清單頁共用
 const S = { name: '', script: 'trad', lang: 'es', done: {} };
-function load() { try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {} }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function load() {
+  try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+  try { const p = JSON.parse(localStorage.getItem(PKEY) || '{}'); if (p.name) S.name = p.name; if (p.script) S.script = p.script; if (p.lang) S.lang = p.lang; } catch (e) {}
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(PKEY, JSON.stringify({ name: S.name, script: S.script, lang: S.lang })); } catch (e) {}
+}
 const X = (es, en) => S.lang === 'en' ? en : es;
 load();
 
@@ -393,7 +400,7 @@ function toast(msg) {
 }
 function updateHud() {
   const n = SCENES.filter(s => S.done[s.id]).length;
-  document.getElementById('who').textContent = '👤 ' + S.name;
+  document.getElementById('who').textContent = '👤 ' + S.name + ' ✎';
   document.getElementById('prog').textContent = '⭐ ' + n + ' / ' + SCENES.length;
   document.getElementById('btn-reset').textContent = X('↻ Borrar progreso', '↻ Reset progress');
   document.getElementById('btn-back').textContent = X('☰ Lista', '☰ List');
@@ -441,7 +448,9 @@ cv.addEventListener('pointerdown', e => {
 
 respawnEvent(P.x, P.y);
 applyLang();
-if (S.name) { /* 有名字也先顯示確認畫面，方便改名／改設定 */ }
+// 已經有名字（在清單頁或上次輸入過）：直接進地圖；點 👤 可以改
+if (S.name) document.getElementById('intro').style.display = 'none';
+document.getElementById('who').onclick = () => { document.getElementById('name').value = S.name; document.getElementById('intro').style.display = 'flex'; };
 window.WorldMap = { EVT, P, S, SCENES, buildings, goTo, openGame, closeGame };
 requestAnimationFrame(tick);
 </script>

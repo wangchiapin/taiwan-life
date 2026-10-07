@@ -17,12 +17,29 @@
   a.g:hover { border-color:var(--accent); }
   .g b { font-size:19px; } .g small { display:block; color:var(--muted); margin-top:2px; }
   .soon { opacity:.55; }
+  .player { border:2px solid var(--line); border-radius:14px; background:var(--card); padding:14px 16px; margin:0 0 18px; }
+  .player .t { font-weight:700; margin:0 0 8px; }
+  .player .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .player input { flex:1 1 180px; min-width:0; padding:9px 12px; font-size:17px; border:2px solid var(--line); border-radius:10px; background:var(--bg); color:var(--ink); }
+  .seg { display:inline-flex; border:2px solid var(--ink); border-radius:999px; overflow:hidden; }
+  .seg button { border:0; background:transparent; color:var(--ink); padding:5px 12px; font:inherit; font-size:14px; cursor:pointer; }
+  .seg button[aria-pressed="true"] { background:var(--ink); color:var(--bg); }
+  .player .hint { margin:8px 0 0; font-size:13px; color:var(--muted); }
 </style>
 </head>
 <body>
 <main>
   <h1>情境對話遊戲</h1>
   <p class="sub">Juegos de conversación · A2–B1</p>
+  <section class="player" aria-label="玩家 / Jugador">
+    <p class="t">👤 玩家 · <span data-es="Jugador" data-en="Player">Jugador</span></p>
+    <div class="row">
+      <input id="pname" maxlength="20" autocomplete="off" placeholder="你的名字 · Tu nombre">
+      <div class="seg" role="group" aria-label="中文字體"><button type="button" data-script="trad" aria-pressed="true">繁體</button><button type="button" data-script="simp" aria-pressed="false">简体</button></div>
+      <div class="seg" role="group" aria-label="Idioma / Language"><button type="button" data-lang="es" aria-pressed="true">Español</button><button type="button" data-lang="en" aria-pressed="false">English</button></div>
+    </div>
+    <p class="hint" id="phint"></p>
+  </section>
   <ul>
     <li><a class="g" href="map/"><b>🗺️ 台灣生活地圖（測試）</b><small>Modo mapa: camina hasta cada lugar · 地圖模式</small></a></li>
     <li><a class="g" href="games/drinks/"><b>🧋 飲料店冒險</b><small>Aventura en la tienda de bebidas</small></a></li>
@@ -37,5 +54,34 @@
     <li class="g soon"><b>🚄 高鐵 · ⛽ 加油站</b><small>Próximamente · 即將推出</small></li>
   </ul>
 </main>
+<script>
+/* 玩家資料：和地圖共用。填了名字，點遊戲就直接開始（不用在遊戲裡再輸入名字）；
+   直接用網址進遊戲的人，遊戲還是會先問名字。 */
+const PKEY = 'taiwan_player';
+const P = { name: '', script: 'trad', lang: 'es' };
+try { Object.assign(P, JSON.parse(localStorage.getItem(PKEY) || '{}')); } catch (e) {}
+const save = () => { try { localStorage.setItem(PKEY, JSON.stringify(P)); } catch (e) {} };
+const X = (es, en) => P.lang === 'en' ? en : es;
+const inp = document.getElementById('pname');
+inp.value = P.name || '';
+function paint() {
+  document.querySelectorAll('[data-script]').forEach(b => b.setAttribute('aria-pressed', b.dataset.script === P.script));
+  document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === P.lang));
+  document.querySelectorAll('[data-es]').forEach(el => { el.textContent = X(el.dataset.es, el.dataset.en); });
+  document.getElementById('phint').textContent = P.name
+    ? '✓ 點遊戲就直接開始。 ' + X('Toca un juego y empieza directamente.', 'Tap a game to start right away.')
+    : '先輸入名字，進遊戲就不用再輸入。 ' + X('Escribe tu nombre aquí y no tendrás que escribirlo en cada juego.', "Enter your name here and you won't need to type it in each game.");
+}
+inp.addEventListener('input', () => { P.name = inp.value.trim(); save(); paint(); });
+document.querySelectorAll('[data-script]').forEach(b => b.onclick = () => { P.script = b.dataset.script; save(); paint(); });
+document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { P.lang = b.dataset.lang; save(); paint(); });
+/* 點遊戲：有名字就帶 again=名字（遊戲會跳過名字頁，並把網址清乾淨） */
+document.querySelectorAll('a.g[href^="games/"]').forEach(a => a.addEventListener('click', e => {
+  if (!P.name) return;
+  e.preventDefault();
+  location.href = a.getAttribute('href') + 'index.html?' + new URLSearchParams({ again: P.name, s: P.script, l: P.lang });
+}));
+paint();
+</script>
 </body>
 </html>
