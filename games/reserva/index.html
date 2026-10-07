@@ -89,6 +89,7 @@
     display: grid; place-items: center; font-size: 36px;
   }
   #login-screen h1 { margin: 0; font-size: 30px; font-weight: 700; letter-spacing: 2px; }
+  body.embed-boot #login-screen.active { display: none; }   /* 嵌入模式：不要閃一下開始畫面 */
   #login-screen .subtitle { margin: 0; color: var(--muted); font-size: 15px; }
   .input-group { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 8px; }
   .input-group label { font-size: 14px; font-weight: 500; }
@@ -486,6 +487,10 @@ try {
   if (q.get('s') === 'simp' || q.get('s') === 'trad') Settings.script = q.get('s');
   if (q.get('l') === 'es' || q.get('l') === 'en') Settings.lang = q.get('l');
 })();
+/* 嵌入模式（給「台灣一週」地圖用）：?embed=1&name=玩家名字（&s=simp&l=en） */
+const QS = new URLSearchParams(location.search);
+const EMBED = QS.get('embed') === '1';
+if (EMBED && QS.get('name')) document.body.classList.add('embed-boot');
 const X = (es, en) => Settings.lang === 'en' ? en : es;     // 依語言選西文或英文
 let _t2s = null;                                            // 繁→簡轉換器（選簡體時才載入）
 const Z = s => (Settings.script === 'simp' && _t2s) ? _t2s(String(s)) : String(s);
@@ -884,7 +889,7 @@ function startGame() {
   document.getElementById('phone-badge').textContent = '📱 我的手機 ' + Game.myPhone;
   document.getElementById('login-screen').classList.remove('active');
   document.getElementById('game-window').classList.add('active');
-  track('game_start', { game: 'reserva', script: Settings.script, lang: Settings.lang });
+  track('game_start', { game: 'reserva', script: Settings.script, lang: Settings.lang, embed: EMBED ? 1 : 0 });
   Game.render();
 }
 document.getElementById('player-name-input').addEventListener('keydown', e => { if (e.key === 'Enter') startGame(); });
@@ -900,7 +905,17 @@ if (Settings.script === 'simp' && !_t2s) loadT2S().then(applyLang);   // 上次�
 function restartGame(skipConfirm) {
   if (!skipConfirm && !confirm(Z('確定要重新開始嗎？這一局的分數不會保留。') + '\n' + X('¿Seguro que quieres empezar de nuevo? Perderás el puntaje de esta partida.', 'Start over? Your score for this round will be lost.'))) return;
   track('game_restart', { game: 'reserva', state: Game.state });
-  location.replace(location.pathname + '?again=' + encodeURIComponent(Game.playerName) + '&s=' + Settings.script + '&l=' + Settings.lang);
+  const p = new URLSearchParams();
+  if (EMBED) { p.set('embed', '1'); p.set('name', Game.playerName); }
+  else p.set('again', Game.playerName);
+  p.set('s', Settings.script); p.set('l', Settings.lang);
+  location.replace(location.pathname + '?' + p.toString());
+}
+
+/* 嵌入模式：玩完把成績交給地圖，由地圖關掉這一關 */
+function finishEmbed() {
+  try { Tr.closeAll(); Speech.stop(); } catch (e) {}
+  try { parent.postMessage({ type: 'scene-complete', scene: 'reserva', score: Game.score, mistakes: Game.mistakes }, '*'); } catch (e) {}
 }
 
 /* ══════════════════════════════════════
@@ -1725,8 +1740,8 @@ const Game = {
           else Game.log.forEach((m, i) => { msg += `\n${i + 1}. ${m.zh} ${X(m.es, m.en)}（−10）`; });
           return msg;
         },
-        options: () => ['查看排行榜 ' + X('Ver clasificación', 'See leaderboard')],
-        next: () => { showLeaderboard(); }
+        options: () => EMBED ? ['回到地圖 ' + X('Volver al mapa', 'Back to the map')] : ['查看排行榜 ' + X('Ver clasificación', 'See leaderboard')],
+        next: () => { if (EMBED) finishEmbed(); else showLeaderboard(); }
       }
     };
   },
@@ -1794,9 +1809,9 @@ const Game = {
 
 /* 從「重新開始」回來：直接用原本的名字開新的一局 */
 (() => {
-  const again = new URLSearchParams(location.search).get('again');
+  const again = EMBED ? QS.get('name') : QS.get('again');
   if (!again) return;
-  history.replaceState(null, '', location.pathname);
+  if (!EMBED) history.replaceState(null, '', location.pathname);
   document.getElementById('player-name-input').value = again;
   startGame();
 })();
