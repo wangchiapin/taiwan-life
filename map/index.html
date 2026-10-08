@@ -337,9 +337,10 @@ function updateLife(dt) {
     if (v.pos < -40) v.pos = len + 40;
   }
 }
-/* 走到突發事件旁邊（相鄰一格以內）就開始 */
+/* 走到突發事件旁邊（相鄰一格以內）停下來就開始 */
 function checkEvent() {
-  if (current || P.moving || P.locked) return;
+  // 只有停在旁邊（或點它走過去）才開始；路過不會被打斷
+  if (current || P.moving || P.locked || P.path.length || P.held) return;
   const e = evTile(), d = Math.abs(e.x - P.x) + Math.abs(e.y - P.y);
   if (d <= 1) { P.path = []; P.held = null; openGame({ sc: STREET, out: { x: P.x, y: P.y }, first: EV.type }); }
 }
