@@ -1,3 +1,15 @@
+# 台灣情境對話遊戲系列（Taiwan Week）
+
+> 飲料店、訂位、早餐店、診所、捷運、夜市、包裹、麵包店、街頭等情境對話遊戲
+
+- **網址：** https://wangchiapin.github.io/taiwan-life/
+- **Firebase 專案：** tiendadebebidas-d75ac
+- **登入方式：** —（玩家輸入名字）
+- **狀態：** 使用中
+- **備註：** 排行榜集合為 `<場景>game_scores` 或 `<場景>_scores`，不要改名，否則舊排行榜會消失。
+
+---
+
 # 情境對話遊戲系列（Taiwan Week）
 
 ## 結構
