@@ -31,7 +31,26 @@
   #hud .title { font-weight: 700; font-size: 18px; margin-right: auto; }
   #hud .chip { background: rgba(255,255,255,.15); border-radius: 999px; padding: 3px 12px; font-size: 14px; white-space: nowrap; }
   #hud button { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; padding: 3px 12px; font-size: 14px; }
-  #stage { width: 100%; max-width: 960px; padding: 0 10px; }
+  #stage { width: 100%; max-width: 960px; padding: 0 10px; position: relative; }
+  /* 本週進度條 */
+  #week { width: 100%; max-width: 960px; display: flex; align-items: center; gap: 10px; padding: 0 12px 8px; color: #fff; font-size: 14px; }
+  #week .bar { flex: 1; height: 14px; background: rgba(255,255,255,.15); border: 2px solid #1b1a22; border-radius: 999px; overflow: hidden; }
+  #week .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #f2b632, #ffd66b); transition: width .6s; }
+  #week b { white-space: nowrap; }
+  /* 對話泡泡 */
+  #bubble { position: absolute; z-index: 4; max-width: 240px; background: #fffdf6; color: #1b1a22; border: 2px solid #1b1a22; border-radius: 12px; padding: 5px 10px 6px; font-size: 16px; line-height: 1.35; text-align: left; box-shadow: 2px 2px 0 #1b1a22; cursor: pointer; font-family: inherit; }
+  #bubble small { display: block; font-size: 11px; color: #6b6478; font-weight: 700; }
+  #bubble i { font-style: normal; font-size: 11px; margin-left: 6px; opacity: .7; }
+  #bubble::after { content: ''; position: absolute; left: calc(var(--tail, 50%) - 6px); bottom: -8px; border: 6px solid transparent; border-top-color: #1b1a22; border-bottom: 0; }
+  /* 拼音翻譯小卡 */
+  #card { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); width: min(420px, calc(100vw - 32px)); background: #fffdf6; border: 3px solid #1b1a22; border-radius: 16px; box-shadow: 4px 4px 0 #1b1a22; padding: 14px 16px; z-index: 15; }
+  #card .c-who { font-size: 13px; color: #6b6478; font-weight: 700; }
+  #card .c-zh { font-size: 24px; font-weight: 700; margin: 4px 0 2px; }
+  #card .c-py { font-size: 16px; color: #2f5fa7; }
+  #card .c-tr { font-size: 15px; margin-top: 6px; }
+  #card .c-hint { font-size: 13px; color: #cf3a24; margin-top: 6px; }
+  #card .c-btns { display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end; }
+  #card button { border: 2px solid #1b1a22; border-radius: 999px; background: #fff; padding: 4px 14px; font-size: 15px; }
   canvas { width: 100%; height: auto; display: block; image-rendering: pixelated; border: 4px solid #1b1a22; border-radius: 10px; background: #6bb05a; touch-action: manipulation; }
   #help { color: #cfe3c8; font-size: 13px; padding: 6px 12px; text-align: center; }
   #toast { position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%) translateY(20px); background: #1b1a22; color: #fff; padding: 10px 18px; border-radius: 12px; opacity: 0; transition: .25s; pointer-events: none; z-index: 30; max-width: 90vw; text-align: center; }
@@ -41,7 +60,7 @@
   #pad { display: none; position: fixed; right: 14px; bottom: 14px; width: 150px; height: 150px; z-index: 5; }
   #pad button { position: absolute; width: 50px; height: 50px; border-radius: 12px; border: 2px solid #1b1a22; background: rgba(255,253,246,.9); font-size: 22px; touch-action: none; }
   #pad .u { left: 50px; top: 0; } #pad .d { left: 50px; top: 100px; } #pad .l { left: 0; top: 50px; } #pad .r { left: 100px; top: 50px; }
-  @media (pointer: coarse) { #pad { display: block; } }
+  @media (pointer: coarse) { #pad { display: block; } #card { bottom: 176px; } }
 
   /* ── 遊戲視窗 ── */
   #overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: none; flex-direction: column; align-items: center; z-index: 20; }
@@ -82,11 +101,13 @@
 <div id="hud">
   <span class="title">🗺️ 台灣生活地圖</span>
   <button id="who" title="改名字／語言 · Cambiar nombre o idioma"></button>
-  <span class="chip" id="prog"></span>
   <button id="btn-reset"></button>
   <button id="btn-back" onclick="location.href='../'"></button>
 </div>
-<div id="stage"><canvas id="cv" width="640" height="448" aria-label="地圖 / Mapa"></canvas></div>
+<div id="week"><span id="wk-label"></span><div class="bar"><i id="wk-fill"></i></div><b id="wk-num"></b></div>
+<div id="stage"><canvas id="cv" width="640" height="448" aria-label="地圖 / Mapa"></canvas><button id="bubble" type="button" hidden></button></div>
+<div id="card" hidden role="dialog"><div class="c-who"></div><div class="c-zh"></div><div class="c-py"></div><div class="c-tr"></div><div class="c-hint"></div>
+  <div class="c-btns"><button class="c-say" type="button">🔊</button><button class="c-close" type="button">✕</button></div></div>
 <div id="help"></div>
 <div id="toast" role="status"></div>
 <div id="pad" aria-hidden="true"><button class="u" data-d="up">▲</button><button class="l" data-d="left">◀</button><button class="r" data-d="right">▶</button><button class="d" data-d="down">▼</button></div>
@@ -114,6 +135,7 @@ const SCENES = [
   /* 沒有建築的場景：路上會隨機冒出「❗」，走過去就觸發 */
   { id: 'street',      zh: '路上突發事件', es: 'Imprevistos en la calle', en: 'Street surprises', emoji: '❗', virtual: true }
 ];
+const ZHS = { drinks: '饮料店', bakery: '面包店', clinic: '诊所', mrt: '捷运站' };
 /* 8 個建築位置：左上、右上、左下、右下，各兩棟（3 格寬） */
 const BUILD_SLOTS = [
   { x: 1, top: true }, { x: 5, top: true }, { x: 12, top: true }, { x: 16, top: true },
@@ -163,22 +185,309 @@ const isRoad = (x, y) => ROAD_ROWS.includes(y) || ROAD_COLS.includes(x);
 const isWalk = (x, y) => x >= 0 && y >= 0 && x < COLS && y < ROWS && !blocked[y][x];
 
 /* ══════════════════════════════════════
-   路上突發事件：街道和人行道上隨機冒出一個 ❗，走到那格就開始「走在路上」
+   街上的生活：行人、機車、Ami、看得到的突發事件、對話泡泡
+   台詞格式：[繁體, 簡體, 拼音（台灣讀音）, 西文, 英文]
 ══════════════════════════════════════ */
-const STREET = SCENES.find(sc => sc.virtual);
-const EVT = { x: 0, y: 0 };
-function respawnEvent(ax, ay) {
-  const cand = [];
-  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++)
-    if (isWalk(x, y) && (isRoad(x, y) || SIDEWALK_ROWS.includes(y)) && !doors[x + ',' + y] && Math.abs(x - ax) + Math.abs(y - ay) >= 5) cand.push([x, y]);
-  const c = cand[Math.floor(Math.random() * cand.length)];
-  EVT.x = c[0]; EVT.y = c[1];
+const LINES = {
+  hi:    ['你好！今天天氣真好。', '你好！今天天气真好。', 'nǐ hǎo! jīn tiān tiān qì zhēn hǎo.', '¡Hola! Hoy hace muy buen tiempo.', 'Hi! The weather is really nice today.'],
+  pass:  ['不好意思，借過一下。', '不好意思，借过一下。', 'bù hǎo yì si, jiè guò yí xià.', 'Disculpa, déjame pasar.', 'Excuse me, coming through.'],
+  mrt:   ['我要去捷運站。', '我要去捷运站。', 'wǒ yào qù jié yùn zhàn.', 'Voy a la estación de metro.', "I'm going to the MRT station."],
+  drink: ['那家飲料店很好喝喔！', '那家饮料店很好喝喔！', 'nà jiā yǐn liào diàn hěn hǎo hē ō!', '¡Las bebidas de esa tienda están muy ricas!', 'That drink shop is really good!'],
+  night: ['晚上要不要去逛夜市？', '晚上要不要去逛夜市？', 'wǎn shàng yào bú yào qù guàng yè shì?', '¿Vamos al mercado nocturno esta noche?', 'Want to go to the night market tonight?'],
+  hot:   ['今天好熱喔！', '今天好热喔！', 'jīn tiān hǎo rè ō!', '¡Hoy hace mucho calor!', "It's so hot today!"],
+  honk:  ['嗶嗶！借過一下！', '哔哔！借过一下！', 'bì bì! jiè guò yí xià!', '¡Bip, bip! ¡Déjame pasar!', 'Beep beep! Coming through!']
+};
+/* 說話的人：[繁, 簡, 西, 英] */
+const WHO = {
+  ami: ['Ami', 'Ami', 'Ami', 'Ami'], walker: ['路人', '路人', 'Transeúnte', 'Passer-by'], rider: ['騎士', '骑士', 'Motociclista', 'Scooter rider'],
+  ama: ['阿嬤', '阿嬷', 'Abuelita', 'Grandma'], agong: ['阿公', '阿公', 'Abuelito', 'Grandpa'], flyer: ['發傳單的人', '发传单的人', 'Repartidor de volantes', 'Flyer person'], me: ['（你）', '（你）', '(Tú)', '(You)']
+};
+/* Ami 建議下一個地方 [繁, 簡, 拼音, 西（「¿qué tal si …?」的後半）, 英（"Why don't you …?" 的後半）] */
+const SUGGEST = {
+  drinks:      ['去飲料店買杯飲料', '去饮料店买杯饮料', 'qù yǐn liào diàn mǎi bēi yǐn liào', 'vas a la tienda de bebidas a comprar algo', 'go buy a drink at the drink shop'],
+  breakfast:   ['去早餐店幫忙', '去早餐店帮忙', 'qù zǎo cān diàn bāng máng', 'vas a ayudar a la desayunería', 'go help out at the breakfast shop'],
+  bakery:      ['去麵包店買麵包', '去面包店买面包', 'qù miàn bāo diàn mǎi miàn bāo', 'vas a la panadería a comprar pan', 'go buy bread at the bakery'],
+  clinic:      ['去診所看醫生', '去诊所看医生', 'qù zhěn suǒ kàn yī shēng', 'vas a la clínica a ver al médico', 'go see the doctor at the clinic'],
+  parcel:      ['去便利商店領包裹', '去便利商店领包裹', 'qù biàn lì shāng diàn lǐng bāo guǒ', 'vas a la tienda de conveniencia a recoger tu paquete', 'go pick up your parcel at the convenience store'],
+  nightmarket: ['去夜市逛逛', '去夜市逛逛', 'qù yè shì guàng guang', 'vas a dar una vuelta por el mercado nocturno', 'go walk around the night market'],
+  reserva:     ['回家打電話訂位', '回家打电话订位', 'huí jiā dǎ diàn huà dìng wèi', 'vuelves a casa y llamas para reservar mesa', 'go home and call to book a table'],
+  mrt:         ['去搭捷運', '去搭捷运', 'qù dā jié yùn', 'vas a tomar el metro', 'go take the MRT'],
+  street:      ['在路上走走，看看有沒有人需要幫忙', '在路上走走，看看有没有人需要帮忙', 'zài lù shàng zǒu zou, kàn kan yǒu méi yǒu rén xū yào bāng máng', 'das una vuelta por la calle y ves si alguien necesita ayuda', 'walk around and see if anyone needs help']
+};
+function amiLine() {
+  const N = S.name || '你';
+  const next = SCENES.find(sc => !S.done[sc.id]);
+  if (!next) return [`${N}，這週的任務你都完成了，太厲害了！`, `${N}，这周的任务你都完成了，太厉害了！`, `${N}, zhè zhōu de rèn wù nǐ dōu wán chéng le, tài lì hài le!`,
+    `${N}, ¡terminaste todas las misiones de la semana! ¡Qué crack!`, `${N}, you finished every mission this week. Amazing!`];
+  const s = SUGGEST[next.id];
+  return [`嗨，${N}！要不要${s[0]}？`, `嗨，${N}！要不要${s[1]}？`, `hāi, ${N}! yào bú yào ${s[2]}?`, `¡Hola, ${N}! ¿Qué tal si ${s[3]}?`, `Hi, ${N}! Why don't you ${s[4]}?`];
 }
+
+/* ── 人物外觀 ── */
+const LOOKS = [
+  { hair: '#3a2a1e', shirt: '#3f7fd1', pants: '#2f3542' },
+  { hair: '#141414', shirt: '#f2a541', pants: '#4b3b2a', long: true },
+  { hair: '#6b4a2f', shirt: '#59b36b', pants: '#2c3e50' },
+  { hair: '#1f1a17', shirt: '#e86a8f', pants: '#3a3a5a', long: true }
+];
+const AMI_LOOK = { hair: '#111', shirt: '#1d1d22', inner: '#9cc8ec', pants: '#555b66', long: true, bag: true };
+const OLD_LOOK = { hair: '#e7e7e7', shirt: '#8a6fb0', pants: '#5a5146' };
+
+/* ── 行人：在人行道上走來走去，不擋路 ── */
+const WALKERS = [
+  { row: 4, x0: 0, x1: 8, x: 1.5, dir: 1, speed: 0.9, look: LOOKS[0], line: 'hi' },
+  { row: 7, x0: 11, x1: 19, x: 15, dir: -1, speed: 1.1, look: LOOKS[1], line: 'mrt' },
+  { row: 11, x0: 0, x1: 8, x: 6, dir: -1, speed: 0.8, look: LOOKS[2], line: 'drink' },
+  { row: 11, x0: 11, x1: 19, x: 13, dir: 1, speed: 1, look: LOOKS[3], line: 'night' },
+  { row: 7, x0: 0, x1: 8, x: 3, dir: 1, speed: 0.7, look: LOOKS[2], line: 'hot' }
+].map(w => ({ ...w, pause: 0, phase: Math.random() * 10 }));
+
+/* ── Ami：站在路口 ── */
+const AMI = { x: 11, y: 4 };
+blocked[AMI.y][AMI.x] = true;
+
+/* ── 車：機車和汽車，靠右行駛；遇到人會停下來按喇叭 ── */
+const VEHICLES = [
+  { axis: 'h', lane: 5, dir: -1, pos: 500, speed: 72, kind: 'scooter', color: '#e94f37' },
+  { axis: 'h', lane: 5, dir: -1, pos: 180, speed: 60, kind: 'car', color: '#f2f2f2' },
+  { axis: 'h', lane: 6, dir: 1, pos: 80, speed: 78, kind: 'scooter', color: '#3fa7d6' },
+  { axis: 'h', lane: 6, dir: 1, pos: 420, speed: 56, kind: 'car', color: '#f2c14e' },
+  { axis: 'v', lane: 9, dir: 1, pos: 40, speed: 70, kind: 'scooter', color: '#59cd90' },
+  { axis: 'v', lane: 10, dir: -1, pos: 400, speed: 64, kind: 'scooter', color: '#a06cd5' }
+].map(v => ({ ...v, half: v.kind === 'car' ? 22 : 13, wait: 0 }));
+const W = COLS * T, H = ROWS * T;
+
+/* ── 看得到的突發事件：走到旁邊就開始「走在路上」，第一件就是你看到的那件 ── */
+const EVENT_TYPES = ['elder', 'fall', 'ask', 'wallet', 'flyer'];
+const EVENT_LINES = {
+  elder:  ['ama', ['哎喲，這個綠燈好短喔……', '哎哟，这个绿灯好短喔……', 'āi yō, zhè ge lǜ dēng hǎo duǎn ō……', 'Ay, este semáforo en verde dura muy poco…', 'Oh my, this green light is so short…']],
+  fall:   ['agong', ['哎喲……好痛……', '哎哟……好痛……', 'āi yō…… hǎo tòng……', 'Ay… me duele…', 'Ouch… it hurts…']],
+  ask:    ['walker', ['請問，捷運站怎麼走？', '请问，捷运站怎么走？', 'qǐng wèn, jié yùn zhàn zěn me zǒu?', 'Disculpe, ¿cómo llego a la estación de metro?', 'Excuse me, how do I get to the MRT station?']],
+  wallet: ['me', ['前面那個人的錢包掉了！', '前面那个人的钱包掉了！', 'qián mian nà ge rén de qián bāo diào le!', '¡A la persona de adelante se le cayó la billetera!', 'The person ahead dropped their wallet!']],
+  flyer:  ['flyer', ['您好，新開的餐廳，請看一下！', '您好，新开的餐厅，请看一下！', 'nín hǎo, xīn kāi de cān tīng, qǐng kàn yí xià!', 'Hola, es un restaurante nuevo, ¡échele un vistazo!', "Hello, it's a new restaurant — take a look!"]]
+};
+const STREET = SCENES.find(sc => sc.virtual);
+const EV = { type: 'fall', x: 0, y: 0, dir: 1, pause: 0 };
+const sidewalkOk = (x, y) => isWalk(x, y) && SIDEWALK_ROWS.includes(y) && !isRoad(x, y) && !doors[x + ',' + (y - 1)] && !doors[x + ',' + y];
+function respawnEvent(ax, ay) {
+  EV.type = EVENT_TYPES[Math.floor(Math.random() * EVENT_TYPES.length)];
+  const cand = [];
+  if (EV.type === 'elder') {
+    // 阿嬤在斑馬線上，慢慢從上面的人行道走到下面
+    for (const x of [2, 3, 6, 7, 13, 14, 16, 17]) if (Math.abs(x - ax) + Math.abs(5 - ay) >= 5) cand.push([x, 4]);
+  } else {
+    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++)
+      if (sidewalkOk(x, y) && Math.abs(x - ax) + Math.abs(y - ay) >= 5 && Math.abs(x - AMI.x) + Math.abs(y - AMI.y) > 2 &&
+          (EV.type !== 'wallet' || sidewalkOk(x + 2, y))) cand.push([x, y]);
+  }
+  const c = cand[Math.floor(Math.random() * cand.length)] || [3, 7];
+  EV.x = c[0]; EV.y = c[1]; EV.dir = 1; EV.pause = 1.2;
+}
+const evTile = () => ({ x: Math.round(EV.x), y: Math.round(EV.y) });
+
+/* ── 更新：行人、車、阿嬤 ── */
+function playerTile() { return P.moving ? P.moving.to : { x: P.x, y: P.y }; }
+function updateLife(dt) {
+  const pt = playerTile();
+  for (const w of WALKERS) {
+    w.phase += dt;
+    if (w.pause > 0) { w.pause -= dt; continue; }
+    const ahead = pt.y === w.row && (pt.x + 0.5 - (w.x + 0.5)) * w.dir > 0 && Math.abs(pt.x - w.x) < 1.1;
+    if (ahead) { w.pause = 0.6; continue; }
+    w.x += w.dir * w.speed * dt;
+    if (w.x <= w.x0) { w.x = w.x0; w.dir = 1; w.pause = 1 + Math.random() * 2; }
+    if (w.x >= w.x1) { w.x = w.x1; w.dir = -1; w.pause = 1 + Math.random() * 2; }
+    if (Math.random() < dt * 0.08) w.pause = 1.5 + Math.random() * 2;
+  }
+  if (EV.type === 'elder') {
+    if (EV.pause > 0) EV.pause -= dt;
+    else {
+      EV.y += EV.dir * 0.45 * dt;
+      if (EV.y >= 7) { EV.y = 7; EV.dir = -1; EV.pause = 2.5; }
+      if (EV.y <= 4) { EV.y = 4; EV.dir = 1; EV.pause = 2.5; }
+    }
+  }
+  // 路上會擋車的人（玩家、過馬路的阿嬤）：格子座標
+  const people = [pt];
+  if (EV.type === 'elder') people.push({ x: EV.x, y: EV.y, elder: true });
+  const inBox = v => v.axis === 'h' ? (v.pos + v.half > 9 * T && v.pos - v.half < 11 * T) : (v.pos + v.half > 5 * T && v.pos - v.half < 7 * T);
+  for (const v of VEHICLES) {
+    const front = v.pos + v.dir * v.half;
+    let stop = false, byPlayer = false;
+    for (const o of VEHICLES) if (o !== v && o.axis === v.axis && o.lane === v.lane) {
+      const d = (o.pos - v.pos) * v.dir;
+      if (d > 0 && d < v.half + o.half + 10) stop = true;
+    }
+    for (const p of people) {
+      const onLane = v.axis === 'h' ? Math.abs(p.y - v.lane) < 0.6 : Math.abs(p.x - v.lane) < 0.6;
+      if (!onLane) continue;
+      const c = (v.axis === 'h' ? p.x : p.y) * T + T / 2;
+      const d = (c - front) * v.dir;
+      if (d > -8 && d < 26) { stop = true; if (!p.elder) byPlayer = true; }
+    }
+    // 路口：橫向和直向的車不能同時在路口裡
+    const box = v.axis === 'h' ? [9 * T, 11 * T] : [5 * T, 7 * T];
+    const next = front + v.dir * v.speed * dt;
+    const entering = !inBox(v) && (v.dir > 0 ? (front <= box[0] && next > box[0] - 4) : (front >= box[1] && next < box[1] + 4));
+    if (entering && VEHICLES.some(o => o.axis !== v.axis && inBox(o))) stop = true;
+    if (!stop) v.pos += v.dir * v.speed * dt;
+    v.wait = byPlayer ? v.wait + dt : 0;
+    const len = v.axis === 'h' ? W : H;
+    if (v.pos > len + 40) v.pos = -40;
+    if (v.pos < -40) v.pos = len + 40;
+  }
+}
+/* 走到突發事件旁邊（相鄰一格以內）就開始 */
+function checkEvent() {
+  if (current || P.moving || P.locked) return;
+  const e = evTile(), d = Math.abs(e.x - P.x) + Math.abs(e.y - P.y);
+  if (d <= 1) { P.path = []; P.held = null; openGame({ sc: STREET, out: { x: P.x, y: P.y }, first: EV.type }); }
+}
+
+/* ── 繪圖：人物、車、事件 ── */
+function drawPerson(px, py, o) {
+  // px, py：格子左上角
+  const leg = o.leg || 0;
+  g.fillStyle = 'rgba(0,0,0,.22)'; g.fillRect(px + 9, py + 28, 14, 3);
+  if (o.lying) {   // 跌倒：躺在地上
+    g.fillStyle = o.pants; g.fillRect(px + 2, py + 20, 12, 6);
+    g.fillStyle = o.shirt; g.fillRect(px + 12, py + 18, 12, 9);
+    g.fillStyle = '#f1c9a0'; g.fillRect(px + 23, py + 17, 8, 9);
+    g.fillStyle = o.hair; g.fillRect(px + 27, py + 16, 4, 10);
+    g.fillStyle = '#7a4e2b'; g.fillRect(px + 4, py + 28, 18, 2);   // 拐杖
+    return;
+  }
+  g.fillStyle = o.pants; g.fillRect(px + 11, py + 22, 4, 7 - (leg ? 2 : 0)); g.fillRect(px + 17, py + 22, 4, 7 - (leg ? 0 : 2));
+  g.fillStyle = o.shirt; g.fillRect(px + 9, py + 13, 14, 10);
+  if (o.inner) { g.fillStyle = o.inner; g.fillRect(px + 14, py + 13, 4, 6); }
+  if (o.vest) { g.fillStyle = o.vest; g.fillRect(px + 9, py + 13, 4, 10); g.fillRect(px + 19, py + 13, 4, 10); }
+  g.fillStyle = '#f1c9a0'; g.fillRect(px + 7, py + 15, 3, 6); g.fillRect(px + 22, py + 15, 3, 6);
+  g.fillRect(px + 10, py + 4, 12, 10);
+  g.fillStyle = o.hair; g.fillRect(px + 9, py + 2, 14, 4);
+  if (o.long) { g.fillRect(px + 8, py + 4, 3, 13); g.fillRect(px + 21, py + 4, 3, 13); }
+  else { g.fillRect(px + 9, py + 4, 2, 5); g.fillRect(px + 21, py + 4, 2, 5); }
+  g.fillStyle = '#1b1a22';
+  const ox = o.dir < 0 ? -2 : o.dir > 0 ? 2 : 0;
+  g.fillRect(px + 13 + ox, py + 8, 2, 2); g.fillRect(px + 17 + ox, py + 8, 2, 2);
+  if (o.bag) { g.fillStyle = '#8b5a2b'; g.fillRect(px + 21, py + 18, 5, 5); }
+  if (o.basket) { g.fillStyle = '#c8a165'; g.fillRect(px + 22, py + 18, 8, 6); g.fillStyle = '#4caf50'; g.fillRect(px + 23, py + 16, 6, 3); }
+  if (o.cane) { g.fillStyle = '#7a4e2b'; g.fillRect(px + 5, py + 17, 2, 12); }
+  if (o.phone) { g.fillStyle = '#222'; g.fillRect(px + 23, py + 13, 4, 6); }
+  if (o.paper) { g.fillStyle = '#fff'; g.fillRect(px + 22, py + 12, 8, 7); g.fillStyle = '#e94f37'; g.fillRect(px + 23, py + 13, 6, 2); }
+}
+function drawVehicle(v) {
+  g.save();
+  const cx = v.axis === 'h' ? v.pos : v.lane * T + T / 2, cy = v.axis === 'h' ? v.lane * T + T / 2 : v.pos;
+  g.translate(cx, cy);
+  if (v.axis === 'v') g.rotate(Math.PI / 2);
+  if (v.dir < 0) g.scale(-1, 1);
+  g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(-v.half, 6, v.half * 2, 4);
+  if (v.kind === 'car') {
+    g.fillStyle = v.color; g.fillRect(-22, -9, 44, 18);
+    g.fillStyle = '#9fd2ee'; g.fillRect(2, -7, 9, 14); g.fillRect(-16, -7, 6, 14);
+    g.fillStyle = '#1b1a22'; g.fillRect(-16, -11, 8, 3); g.fillRect(8, -11, 8, 3); g.fillRect(-16, 8, 8, 3); g.fillRect(8, 8, 8, 3);
+    g.fillStyle = '#fff6a0'; g.fillRect(20, -7, 2, 4); g.fillRect(20, 3, 2, 4);
+  } else {
+    g.fillStyle = '#1b1a22'; g.fillRect(-12, 3, 6, 5); g.fillRect(6, 3, 6, 5);
+    g.fillStyle = v.color; g.fillRect(-10, -2, 22, 6);
+    g.fillStyle = '#ccc'; g.fillRect(8, -8, 3, 7);
+    g.fillStyle = '#3a3a3a'; g.fillRect(-6, -10, 9, 9);          // 騎士
+    g.fillStyle = v.color; g.fillRect(-5, -16, 8, 7);              // 安全帽
+  }
+  g.restore();
+  if (v.wait > 0.5) {   // 按喇叭
+    const k = Math.floor(v.wait * 4) % 2;
+    g.fillStyle = '#f2d24b'; g.font = 'bold 12px sans-serif'; g.textAlign = 'center';
+    g.fillText(k ? '))' : ')))', cx + (v.axis === 'h' ? v.dir * 18 : 12), cy - 14);
+  }
+}
+function drawEventScene(now) {
+  const t = EV.type, px = EV.x * T, py = EV.y * T;
+  if (t === 'elder') drawPerson(px, py - Math.abs(Math.sin(now / 300)) * 1, { ...OLD_LOOK, basket: true, dir: 0, leg: EV.pause > 0 ? 0 : Math.floor(now / 400) % 2 });
+  if (t === 'fall') {
+    drawPerson(px, py, { ...OLD_LOOK, lying: true });
+    g.fillStyle = '#f2d24b'; const a = now / 300;
+    for (let i = 0; i < 3; i++) g.fillRect(px + 26 + Math.cos(a + i * 2.1) * 8, py + 12 + Math.sin(a + i * 2.1) * 3, 3, 3);
+  }
+  if (t === 'ask') drawPerson(px, py, { ...LOOKS[0], shirt: '#ff8c42', phone: true, dir: 0 });
+  if (t === 'flyer') drawPerson(px, py, { ...LOOKS[2], shirt: '#ffffff', vest: '#ff5d8f', paper: true, dir: 0, leg: Math.floor(now / 500) % 2 });
+  if (t === 'wallet') {
+    g.fillStyle = '#7b4a26'; g.fillRect(px + 10, py + 22, 12, 8); g.fillStyle = '#a8703f'; g.fillRect(px + 10, py + 22, 12, 3);
+    drawPerson(px + 2 * T, py, { ...LOOKS[1], long: false, dir: 1, leg: Math.floor(now / 300) % 2 });
+  }
+  // ❗ 提示
+  const bx = px + T / 2, by = py - 6 - Math.abs(Math.sin(now / 220)) * 4;
+  g.fillStyle = '#f2b632'; g.beginPath(); g.arc(bx, by, 8, 0, 7); g.fill();
+  g.strokeStyle = '#1b1a22'; g.lineWidth = 2; g.stroke();
+  g.fillStyle = '#1b1a22'; g.font = 'bold 12px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('!', bx, by + 1);
+}
+function drawLife(now) {
+  VEHICLES.forEach(drawVehicle);
+  const items = WALKERS.map(w => ({ y: w.row, f: () => drawPerson(w.x * T, w.row * T, { ...w.look, dir: w.dir, leg: w.pause > 0 ? 0 : Math.floor(w.phase * 4) % 2 }) }));
+  items.push({ y: AMI.y, f: () => drawPerson(AMI.x * T, AMI.y * T, { ...AMI_LOOK, dir: 0 }) });
+  items.push({ y: EV.y, f: () => drawEventScene(now) });
+  items.sort((a, b) => a.y - b.y).forEach(i => i.f());
+}
+
+/* ══════════════════════════════════════
+   對話泡泡：靠近的人頭上冒出中文；點一下看拼音和翻譯
+══════════════════════════════════════ */
+const bub = document.getElementById('bubble'), card = document.getElementById('card');
+let bubNow = null;
+const zhOf = line => S.script === 'simp' ? line[1] : line[0];
+function speakers() {
+  const pt = { x: P.x, y: P.y }, out = [];
+  const dist = (x, y) => Math.hypot(x - pt.x, y - pt.y);
+  out.push({ key: 'ami', who: 'ami', line: amiLine(), x: AMI.x, y: AMI.y, d: dist(AMI.x, AMI.y), r: 1.6 });
+  WALKERS.forEach((w, i) => out.push({ key: 'w' + i, who: 'walker', line: LINES[w.line], x: w.x, y: w.row, d: dist(w.x, w.row), r: 1.6 }));
+  const [ew, el] = EVENT_LINES[EV.type];
+  out.push({ key: 'ev', who: ew, line: el, x: EV.x, y: EV.y, d: dist(EV.x, EV.y), r: 3, ev: true });
+  VEHICLES.forEach((v, i) => { if (v.wait > 0.5) out.push({ key: 'v' + i, who: 'rider', line: LINES.honk, x: (v.axis === 'h' ? v.pos / T - 0.5 : v.lane), y: (v.axis === 'h' ? v.lane : v.pos / T - 0.5), d: 0, r: 9 }); });
+  return out.filter(s => s.d <= s.r).sort((a, b) => a.d - b.d);
+}
+function updateBubble() {
+  const s = current ? null : speakers()[0];
+  if (!s) { bub.hidden = true; bubNow = null; return; }
+  bubNow = s;
+  const w = WHO[s.who], who = S.script === 'simp' ? w[1] : w[0];
+  const html = `<small>${who}</small>${zhOf(s.line)}<i>${s.ev ? '❗ ' : ''}🔤</i>`;
+  if (bub.dataset.k !== s.key + S.script + zhOf(s.line)) { bub.innerHTML = html; bub.dataset.k = s.key + S.script + zhOf(s.line); }
+  bub.hidden = false;
+  const r = cv.getBoundingClientRect(), st = document.getElementById('stage').getBoundingClientRect();
+  const sx = r.width / W, cx = r.left - st.left + (s.x * T + T / 2) * sx, top = r.top - st.top + s.y * T * sx;
+  const bw = bub.offsetWidth;
+  bub.style.left = Math.max(4, Math.min(st.width - bw - 4, cx - bw / 2)) + 'px';
+  bub.style.top = (top - bub.offsetHeight - 4) + 'px';
+  bub.style.setProperty('--tail', (cx - parseFloat(bub.style.left)) + 'px');
+}
+function openCard(s) {
+  if (!s) return;
+  const w = WHO[s.who];
+  card.querySelector('.c-who').textContent = (S.script === 'simp' ? w[1] : w[0]) + ' · ' + X(w[2], w[3]);
+  card.querySelector('.c-zh').textContent = zhOf(s.line);
+  card.querySelector('.c-py').textContent = s.line[2];
+  card.querySelector('.c-tr').textContent = X(s.line[3], s.line[4]);
+  card.querySelector('.c-hint').textContent = s.ev ? X('Acércate (a una casilla) para ayudar.', 'Walk next to them to help.') : '';
+  card.dataset.say = s.line[0];
+  card.hidden = false;
+}
+bub.addEventListener('pointerdown', e => { e.stopPropagation(); });
+bub.addEventListener('click', e => { e.stopPropagation(); openCard(bubNow); });
+card.querySelector('.c-close').onclick = () => { card.hidden = true; try { speechSynthesis.cancel(); } catch (e) {} };
+card.querySelector('.c-say').onclick = () => {
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(card.dataset.say.replace(/[（）()]/g, ''));
+    const v = speechSynthesis.getVoices().find(v => /zh[-_]TW/i.test(v.lang)) || speechSynthesis.getVoices().find(v => /^zh/i.test(v.lang));
+    u.lang = v ? v.lang : 'zh-TW'; if (v) u.voice = v; u.rate = 0.9;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+};
 
 /* ══════════════════════════════════════
    玩家與移動
 ══════════════════════════════════════ */
-const P = { x: 9, y: 4, dir: 'down', moving: null, path: [], step: 0, held: null, locked: false };
+const P = { x: 8, y: 4, dir: 'down', moving: null, path: [], step: 0, held: null, locked: false };
 const STEP_MS = 140;
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
@@ -207,7 +516,10 @@ function goTo(tx, ty) {
   if (p) P.path = p;
 }
 
+let _last = 0;
 function tick(now) {
+  const dt = Math.min(0.05, ((now - (_last || now)) / 1000)); _last = now;
+  if (!current) updateLife(dt);
   if (!P.moving && !P.locked) {
     let d = null;
     if (P.held) d = P.held;
@@ -228,10 +540,11 @@ function tick(now) {
       P.x = P.moving.to.x; P.y = P.moving.to.y; P.moving = null; P.step++;
       const b = doors[P.x + ',' + P.y];
       if (b) { P.path = []; P.held = null; openGame(b); }
-      else if (P.x === EVT.x && P.y === EVT.y) { P.path = []; P.held = null; openGame({ sc: STREET, out: { x: EVT.x, y: EVT.y } }); }
     }
   }
+  checkEvent();
   draw(now);
+  updateBubble();
   requestAnimationFrame(tick);
 }
 
@@ -306,7 +619,7 @@ function drawBuilding(b) {
   g.font = '28px "Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.fillStyle = '#000';
   g.fillText(sc.emoji, x + w / 2, roofY + 22);
   g.font = 'bold 14px "Noto Sans TC", sans-serif';
-  const label = sc.zh, lw = g.measureText(label).width + 14;
+  const label = S.script === 'simp' ? (ZHS[sc.id] || sc.zh) : sc.zh, lw = g.measureText(label).width + 14;
   g.fillStyle = '#fffdf6'; g.fillRect(x + w / 2 - lw / 2, roofY + 40, lw, 17);
   g.strokeStyle = '#1b1a22'; g.lineWidth = 2; g.strokeRect(x + w / 2 - lw / 2, roofY + 40, lw, 17);
   g.fillStyle = '#1b1a22'; g.fillText(label, x + w / 2, roofY + 49);
@@ -345,15 +658,8 @@ function draw(now) {
   buildings.forEach(drawBuilding);
   // 目的地提示
   if (P.path.length) { const t = P.path[P.path.length - 1]; g.strokeStyle = '#f2b632'; g.lineWidth = 3; g.strokeRect(t.x * T + 3, t.y * T + 3, T - 6, T - 6); }
-  drawEvent(now);
+  drawLife(now);
   drawPlayer(now);
-}
-function drawEvent(now) {
-  const px = EVT.x * T + 16, py = EVT.y * T + 14 - Math.abs(Math.sin(now / 220)) * 5;
-  g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(px, EVT.y * T + 28, 9, 3, 0, 0, 7); g.fill();
-  g.fillStyle = '#f2b632'; g.beginPath(); g.arc(px, py, 12, 0, 7); g.fill();
-  g.strokeStyle = '#1b1a22'; g.lineWidth = 2.5; g.stroke();
-  g.fillStyle = '#1b1a22'; g.font = 'bold 18px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('!', px, py + 1);
 }
 
 /* ══════════════════════════════════════
@@ -363,8 +669,9 @@ const ov = document.getElementById('overlay'), frame = document.getElementById('
 let current = null;
 function openGame(b) {
   if (current) return;
-  current = b; P.locked = true;
+  current = b; P.locked = true; card.hidden = true;
   const q = new URLSearchParams({ embed: '1', name: S.name, s: S.script, l: S.lang });
+  if (b.first) q.set('first', b.first);          // 路上突發事件：先玩看到的那件
   document.getElementById('ov-title').textContent = (b.sc.virtual ? '⚠️' : b.sc.emoji) + ' ' + b.sc.zh + ' · ' + X(b.sc.es, b.sc.en);
   frame.src = '../games/' + b.sc.id + '/index.html?' + q;
   ov.classList.add('on');
@@ -401,11 +708,13 @@ function toast(msg) {
 function updateHud() {
   const n = SCENES.filter(s => S.done[s.id]).length;
   document.getElementById('who').textContent = '👤 ' + S.name + ' ✎';
-  document.getElementById('prog').textContent = '⭐ ' + n + ' / ' + SCENES.length;
+  document.getElementById('wk-label').textContent = (S.script === 'simp' ? '这周完成' : '這週完成') + ' · ' + X('Esta semana', 'This week');
+  document.getElementById('wk-num').textContent = '⭐ ' + n + ' / ' + SCENES.length;
+  document.getElementById('wk-fill').style.width = (n / SCENES.length * 100) + '%';
   document.getElementById('btn-reset').textContent = X('↻ Borrar progreso', '↻ Reset progress');
   document.getElementById('btn-back').textContent = X('☰ Lista', '☰ List');
   document.getElementById('ov-close').textContent = '✕ ' + X('Salir', 'Exit');
-  document.getElementById('help').textContent = X('Flechas / WASD para caminar · toca un edificio para ir a su puerta · si ves un ❗ en la calle, ¡pasa por encima!', 'Arrow keys / WASD to walk · tap a building to go to its door · if you see a ❗ on the street, step on it!');
+  document.getElementById('help').textContent = X('Flechas / WASD para caminar · toca un edificio para ir a su puerta · toca a una persona para ver pinyin y traducción · si ves un ❗, acércate para ayudar', 'Arrow keys / WASD to walk · tap a building to go to its door · tap a speech bubble for pinyin and translation · if you see a ❗, walk next to it to help');
 }
 function applyLang() {
   document.querySelectorAll('[data-es]').forEach(el => { el.textContent = X(el.dataset.es, el.dataset.en); });
@@ -434,6 +743,8 @@ const KEYMAP = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight
 addEventListener('keydown', e => {
   if (current || document.getElementById('intro').style.display !== 'none' || e.target.tagName === 'INPUT') return;
   const d = KEYMAP[e.key]; if (d) { P.held = d; P.path = []; e.preventDefault(); }
+  if ((e.key === ' ' || e.key === 'Enter') && bubNow) { e.preventDefault(); openCard(bubNow); }
+  if (e.key === 'Escape') card.hidden = true;
 });
 addEventListener('keyup', e => { const d = KEYMAP[e.key]; if (d && P.held === d) P.held = null; });
 document.querySelectorAll('#pad button').forEach(b => {
@@ -451,7 +762,7 @@ applyLang();
 // 已經有名字（在清單頁或上次輸入過）：直接進地圖；點 👤 可以改
 if (S.name) document.getElementById('intro').style.display = 'none';
 document.getElementById('who').onclick = () => { document.getElementById('name').value = S.name; document.getElementById('intro').style.display = 'flex'; };
-window.WorldMap = { EVT, P, S, SCENES, buildings, goTo, openGame, closeGame };
+window.WorldMap = { EV, VEHICLES, WALKERS, AMI, respawnEvent, P, S, SCENES, buildings, goTo, openGame, closeGame };
 requestAnimationFrame(tick);
 </script>
 </body>

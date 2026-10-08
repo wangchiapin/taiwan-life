@@ -882,7 +882,8 @@ const Game = {
   setup() {
     const flip = pick([true, false]);
     this.task = {
-      evs: shuffle(EV_IDS).slice(0, PER_ROUND),
+      // 從地圖進來（?first=elder）：第一件就是在地圖上看到的那件
+      evs: EV_IDS.includes(QS.get('first')) ? [QS.get('first'), ...shuffle(EV_IDS.filter(x => x !== QS.get('first'))).slice(0, PER_ROUND - 1)] : shuffle(EV_IDS).slice(0, PER_ROUND),
       fallWho: pick(WHOS), elderWho: pick(WHOS),
       walletWho: pick([['先生', 'el señor', 'the man'], ['小姐', 'la señorita', 'the young woman']]),
       rainWho: pick([['先生', 'un señor', 'a man'], ['小姐', 'una señorita', 'a young woman']]),
