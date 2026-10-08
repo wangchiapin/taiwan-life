@@ -235,11 +235,9 @@ const OLD_LOOK = { hair: '#e7e7e7', shirt: '#8a6fb0', pants: '#5a5146' };
 
 /* ── 行人：在人行道上走來走去，不擋路 ── */
 const WALKERS = [
-  { row: 4, x0: 0, x1: 8, x: 1.5, dir: 1, speed: 0.9, look: LOOKS[0], line: 'hi' },
-  { row: 7, x0: 11, x1: 19, x: 15, dir: -1, speed: 1.1, look: LOOKS[1], line: 'mrt' },
-  { row: 11, x0: 0, x1: 8, x: 6, dir: -1, speed: 0.8, look: LOOKS[2], line: 'drink' },
-  { row: 11, x0: 11, x1: 19, x: 13, dir: 1, speed: 1, look: LOOKS[3], line: 'night' },
-  { row: 7, x0: 0, x1: 8, x: 3, dir: 1, speed: 0.7, look: LOOKS[2], line: 'hot' }
+  { row: 4, x0: 0, x1: 8, x: 1.5, dir: 1, speed: 0.8, look: LOOKS[0], line: 'hi' },
+  { row: 7, x0: 11, x1: 19, x: 15, dir: -1, speed: 0.9, look: LOOKS[1], line: 'mrt' },
+  { row: 11, x0: 0, x1: 8, x: 6, dir: -1, speed: 0.7, look: LOOKS[2], line: 'drink' }
 ].map(w => ({ ...w, pause: 0, phase: Math.random() * 10 }));
 
 /* ── Ami：站在路口 ── */
@@ -248,13 +246,10 @@ blocked[AMI.y][AMI.x] = true;
 
 /* ── 車：機車和汽車，靠右行駛；遇到人會停下來按喇叭 ── */
 const VEHICLES = [
-  { axis: 'h', lane: 5, dir: -1, pos: 500, speed: 72, kind: 'scooter', color: '#e94f37' },
-  { axis: 'h', lane: 5, dir: -1, pos: 180, speed: 60, kind: 'car', color: '#f2f2f2' },
-  { axis: 'h', lane: 6, dir: 1, pos: 80, speed: 78, kind: 'scooter', color: '#3fa7d6' },
-  { axis: 'h', lane: 6, dir: 1, pos: 420, speed: 56, kind: 'car', color: '#f2c14e' },
-  { axis: 'v', lane: 9, dir: 1, pos: 40, speed: 70, kind: 'scooter', color: '#59cd90' },
-  { axis: 'v', lane: 10, dir: -1, pos: 400, speed: 64, kind: 'scooter', color: '#a06cd5' }
-].map(v => ({ ...v, half: v.kind === 'car' ? 22 : 13, wait: 0 }));
+  { axis: 'h', lane: 5, dir: -1, pos: 500, speed: 64, kind: 'scooter', color: '#e94f37' },
+  { axis: 'h', lane: 6, dir: 1, pos: 120, speed: 52, kind: 'car', color: '#f2c14e' },
+  { axis: 'v', lane: 9, dir: 1, pos: -40, speed: 62, kind: 'scooter', color: '#59cd90', idle: 6 }
+].map(v => ({ idle: 0, ...v, half: v.kind === 'car' ? 22 : 13, wait: 0 }));
 const W = COLS * T, H = ROWS * T;
 
 /* ── 看得到的突發事件：走到旁邊就開始「走在路上」，第一件就是你看到的那件 ── */
@@ -310,8 +305,9 @@ function updateLife(dt) {
   // 路上會擋車的人（玩家、過馬路的阿嬤）：格子座標
   const people = [pt];
   if (EV.type === 'elder') people.push({ x: EV.x, y: EV.y, elder: true });
-  const inBox = v => v.axis === 'h' ? (v.pos + v.half > 9 * T && v.pos - v.half < 11 * T) : (v.pos + v.half > 5 * T && v.pos - v.half < 7 * T);
+  const inBox = v => v.idle <= 0 && v.axis === 'h' ? (v.pos + v.half > 9 * T && v.pos - v.half < 11 * T) : (v.pos + v.half > 5 * T && v.pos - v.half < 7 * T);
   for (const v of VEHICLES) {
+    if (v.idle > 0) { v.idle -= dt; continue; }      // 在畫面外等一下才開進來
     const front = v.pos + v.dir * v.half;
     let stop = false, byPlayer = false;
     for (const o of VEHICLES) if (o !== v && o.axis === v.axis && o.lane === v.lane) {
@@ -333,8 +329,7 @@ function updateLife(dt) {
     if (!stop) v.pos += v.dir * v.speed * dt;
     v.wait = byPlayer ? v.wait + dt : 0;
     const len = v.axis === 'h' ? W : H;
-    if (v.pos > len + 40) v.pos = -40;
-    if (v.pos < -40) v.pos = len + 40;
+    if (v.pos > len + 40 || v.pos < -40) { v.pos = v.dir > 0 ? -40 : len + 40; v.idle = 5 + Math.random() * 10; }
   }
 }
 /* 走到突發事件旁邊（相鄰一格以內）停下來就開始 */
@@ -517,10 +512,13 @@ function goTo(tx, ty) {
   if (p) P.path = p;
 }
 
+/* 省電：每秒最多畫 30 次；玩遊戲（地圖被蓋住）時完全不畫；
+   切到別的分頁時，瀏覽器本來就會暫停 requestAnimationFrame */
 let _last = 0;
 function tick(now) {
+  if (current || now - _last < 32) { if (current) _last = now; requestAnimationFrame(tick); return; }
   const dt = Math.min(0.05, ((now - (_last || now)) / 1000)); _last = now;
-  if (!current) updateLife(dt);
+  updateLife(dt);
   if (!P.moving && !P.locked) {
     let d = null;
     if (P.held) d = P.held;
@@ -552,7 +550,7 @@ function tick(now) {
 /* ══════════════════════════════════════
    繪圖（全部用程式畫成像素風格，不需要圖片）
 ══════════════════════════════════════ */
-const cv = document.getElementById('cv'), g = cv.getContext('2d');
+const cv = document.getElementById('cv'); let g = cv.getContext('2d');
 g.imageSmoothingEnabled = false;
 const rnd = (x, y, k = 0) => { const v = Math.sin(x * 127.1 + y * 311.7 + k * 74.7) * 43758.5453; return v - Math.floor(v); };
 
@@ -653,10 +651,15 @@ function drawPlayer(now) {
   }
 }
 
+/* 不會動的部分（地面、樹、建築）先畫在一張背景圖上，每一格只要貼上去 */
+const bg = document.createElement('canvas'); bg.width = cv.width; bg.height = cv.height;
+function bakeStatic() {
+  const keep = g; g = bg.getContext('2d'); g.imageSmoothingEnabled = false;
+  drawGround(); trees.forEach(drawTree); buildings.forEach(drawBuilding);
+  g = keep;
+}
 function draw(now) {
-  drawGround();
-  trees.forEach(drawTree);
-  buildings.forEach(drawBuilding);
+  g.drawImage(bg, 0, 0);
   // 目的地提示
   if (P.path.length) { const t = P.path[P.path.length - 1]; g.strokeStyle = '#f2b632'; g.lineWidth = 3; g.strokeRect(t.x * T + 3, t.y * T + 3, T - 6, T - 6); }
   drawLife(now);
@@ -707,6 +710,7 @@ function toast(msg) {
   clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 3600);
 }
 function updateHud() {
+  bakeStatic();
   const n = SCENES.filter(s => S.done[s.id]).length;
   document.getElementById('who').textContent = '👤 ' + S.name + ' ✎';
   document.getElementById('wk-label').textContent = (S.script === 'simp' ? '这周完成' : '這週完成') + ' · ' + X('Esta semana', 'This week');
@@ -760,6 +764,7 @@ cv.addEventListener('pointerdown', e => {
 
 respawnEvent(P.x, P.y);
 applyLang();
+try { document.fonts.ready.then(bakeStatic); } catch (e) {}
 // 已經有名字（在清單頁或上次輸入過）：直接進地圖；點 👤 可以改
 if (S.name) document.getElementById('intro').style.display = 'none';
 document.getElementById('who').onclick = () => { document.getElementById('name').value = S.name; document.getElementById('intro').style.display = 'flex'; };
