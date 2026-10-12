@@ -187,8 +187,10 @@
     border: 2px solid var(--ink); border-radius: 12px;
     transition: background .15s, color .15s;
   }
-  .opt:hover { background: var(--ink); color: #fff; }
-  .opt:hover rt { color: #ffd9cf; }
+  @media (hover: hover) {
+    .opt:hover { background: var(--ink); color: #fff; }
+    .opt:hover rt { color: #ffd9cf; }
+  }
   .opt.deal { border-color: var(--red); background: var(--red); color: #fff; }
   .opt.deal rt { color: #ffe1d8; }
   .opt.deal:hover { background: var(--red-dark); }
@@ -735,7 +737,7 @@ const Hints = {
     const r = s => Game.ruby(s);
     const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
     let html = `<div class="h-sec">${r('Ami 在店門口說的話')}</div>` + Game.amiLines().map(item).join('');
-    if (Game.state.startsWith('K_') || ['END', 'RESULT'].includes(Game.state)) {
+    if (Game.st0.startsWith('K_') || ['END', 'RESULT'].includes(Game.st0)) {
       html += `<div class="h-sec">${r('Ami 的 LINE 訊息')}</div>` + Game.cakeLines().slice(1).map(item).join('');
     }
     document.getElementById('hint-body').innerHTML = html;
@@ -883,6 +885,12 @@ const NZ = n => ({ 2: '兩', 3: '三', 4: '四', 5: '五', 6: '六', 7: '七', 8
 const PICKUP_ES = { '明天上午十點': 'mañana a las 10 de la mañana', '明天下午三點': 'mañana a las 3 de la tarde', '後天下午三點': 'pasado mañana a las 3 de la tarde' };
 const PICKUP_EN = { '明天上午十點': 'tomorrow at 10 a.m.', '明天下午三點': 'tomorrow at 3 p.m.', '後天下午三點': 'the day after tomorrow at 3 p.m.' };
 const FLAVORS = [['草莓鮮奶油', '草莓', 'fresa con crema', 'strawberry cream'], ['巧克力', '巧克力', 'chocolate', 'chocolate'], ['核桃咖啡', '核桃', 'café con nuez', 'walnut coffee']];
+
+/* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
+const NEXT_LABEL = {
+  TONGS: '走進麵包店', PICK: '拿托盤去夾麵包', C_SLICE: '拿托盤去結帳', C_PAY: '準備付錢', K_GREET: '走到蛋糕櫃台',
+  K_CONFIRM: '聽店員確認', K_FIX: '告訴店員哪裡不對', END: '等Ami過來'
+};
 
 const Game = {
   state: 'START',
@@ -1511,7 +1519,35 @@ const Game = {
     };
   },
 
+  /* ── 換關卡：收起清單和右側分頁 ── */
+  closePanels() {
+    for (const k of ['showList', 'showPhone']) if (this[k]) { this[k] = false; const b = document.getElementById(k === 'showList' ? 'btn-list' : 'btn-phone'); if (b) b.setAttribute('aria-pressed', 'false'); }
+    Hints.toggle(false); Vocab.toggle(false); Log.toggle(false);
+  },
+  /* ── 過場：上一關的結果自己一頁，按一句情境句再進下一關 ── */
+  get st0() { return this.state === '_TRANS' && this._trans ? this._trans.to : this.state; },
+  transLabel() {
+    const t = this._trans, f = NEXT_LABEL[t.to];
+    return (typeof f === 'function' ? f(t.from, this.task) : f) || NEXT_LABEL._default || '繼續';
+  },
+  maybeTrans(before, extra) {
+    if (this.state === before && !extra) return;
+    this.closePanels();
+    if ((this.thought || this.feedback.length) && this.state !== 'RESULT') {
+      this._trans = { from: before, to: this.state };
+      this.state = '_TRANS';
+    }
+  },
+
   handleChoice(choice) {
+    if (this.state === '_TRANS') {          // 離開過場，進下一關
+      const t = this._trans; this._trans = null;
+      Tr.closeAll(); Speech.stop();
+      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
+      if (this.updateCash) this.updateCash();
+      if (document.getElementById('game-window').classList.contains('active')) this.render();
+      return;
+    }
     const cfg = this.getConfig()[this.state];
     Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
     Speech.stop();
@@ -1522,17 +1558,25 @@ const Game = {
     cfg.next(choice);
     this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
     if (this.thoughtFirst) this.visit += 1;
+    this.maybeTrans(before);
     if (document.getElementById('game-window').classList.contains('active')) this.render();
   },
 
   render() {
+    if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果
+      const t = this._trans;
+      this.state = t.from;
+      this._transMode = true;
+      try { this.render(); } finally { this._transMode = false; this.state = '_TRANS'; }
+      return;
+    }
     const cfg = this.getConfig()[this.state];
     if (!cfg) { console.error('狀態錯誤：' + this.state); return; }
     const val = v => typeof v === 'function' ? v() : v;
     this.setPlace(val(cfg.place) || 'shop');
 
     // END 的 dialogue 會決定結局，所以只算一次
-    const raw = this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
+    const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
     let [src, emoji, alt] = this.IMAGES[this.state] || ['', '🥐'];
     if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
     this.setImage(src, emoji, alt);
@@ -1543,6 +1587,7 @@ const Game = {
     this._tr = []; this._spk = [];
     let html = (this.showList && this.state !== 'START' && !['END', 'RESULT'].includes(this.state)) ? this.listHTML() : '';
     html += cfg.html ? cfg.html() : '';
+    if (this._transMode) html = '';
     const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
     const main = this.formatText(raw);
     html += this.thoughtFirst ? th + main : main + th;
@@ -1559,7 +1604,7 @@ const Game = {
     const area = document.getElementById('options-area');
     area.className = '';
     area.innerHTML = '';
-    const opts = val(cfg.options);
+    const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
     area.classList.toggle('single', opts.length === 1 || opts.some(o => o.length > 12));
     opts.forEach(opt => {
       const btn = document.createElement('button');

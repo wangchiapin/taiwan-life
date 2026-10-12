@@ -206,8 +206,10 @@
     border: 2px solid var(--ink); border-radius: 12px;
     transition: background .15s, color .15s;
   }
-  .opt:hover { background: var(--ink); color: #fff; }
-  .opt:hover rt { color: #ffd9cf; }
+  @media (hover: hover) {
+    .opt:hover { background: var(--ink); color: #fff; }
+    .opt:hover rt { color: #ffd9cf; }
+  }
   .opt.deal { border-color: var(--red); background: var(--red); color: #fff; }
   .opt.deal rt { color: #ffe1d8; }
   .opt.deal:hover { background: var(--red-dark); }
@@ -751,7 +753,7 @@ const Hints = {
     const r = s => Game.ruby(s);
     const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
     let html = `<div class="h-sec">${r('Ami 在夜市說的話')}</div>` + Game.amiLines().map(item).join('');
-    if (['CALL', 'X_GREET', 'X_PRICE', 'END', 'RESULT'].includes(Game.state)) {
+    if (['CALL', 'X_GREET', 'X_PRICE', 'END', 'RESULT'].includes(Game.st0)) {
       html += `<div class="h-sec">${r('Ami 來電')}</div>` + Game.callLines().slice(1).map(item).join('');
     }
     if (Game.seenT) html += `<div class="h-sec">${r('衣服攤老闆說的話')}</div>` + item(Game.tShirtLine());
@@ -882,6 +884,12 @@ async function showLeaderboard() {
 /* ══════════════════════════════════════
    遊戲主體
 ══════════════════════════════════════ */
+/* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
+const NEXT_LABEL = {
+  MAP: from => ['PAY', 'F_PAY', 'X_PRICE'].includes(from) ? '去下一攤' : '開始逛夜市', T_GREET: '走到衣服攤', A_GREET: '走到飾品攤',
+  HAGGLE: '開始殺價', PAY: '準備付錢', F_GREET: '走到雞排攤', CALL: '接電話', X_GREET: '回到衣服攤', END: '去找Ami和奶奶'
+};
+
 const Game = {
   state: 'START',
   playerName: '你',
@@ -1149,6 +1157,13 @@ const Game = {
     }
     if (c.startsWith('我再看看')) {
       st.walked = true;
+      // 「再看看」不一定有用：大約三分之一的老闆不留人，價錢不變，你只好再走回來
+      if (st.ask > st.floor && Math.random() < 0.35) {
+        this.thought = [L('（你轉身要走……）', '(Te das la vuelta para irte…)', '(You turn to leave…)'),
+          say('好啊，慢慢看，喜歡再回來喔！', '¡Claro, mira con calma! Si te gusta, vuelve.', 'Sure, take your time! Come back if you like it!'),
+          L('（老闆沒有叫住你。你走了幾步，又走回來。）', '(El vendedor no te detiene. Das unos pasos y vuelves.)', "(The vendor doesn't stop you. You take a few steps and come back.)")];
+        return;
+      }
       if (st.ask > st.floor) {
         const p = Math.max(st.floor, r10(st.ask - (st.ask - st.floor) * 0.6));
         this.setAsk(st, p);
@@ -1457,7 +1472,35 @@ const Game = {
     };
   },
 
+  /* ── 換關卡：收起清單和右側分頁 ── */
+  closePanels() {
+    for (const k of ['showList', 'showPhone']) if (this[k]) { this[k] = false; const b = document.getElementById(k === 'showList' ? 'btn-list' : 'btn-phone'); if (b) b.setAttribute('aria-pressed', 'false'); }
+    Hints.toggle(false); Vocab.toggle(false); Log.toggle(false);
+  },
+  /* ── 過場：上一關的結果自己一頁，按一句情境句再進下一關 ── */
+  get st0() { return this.state === '_TRANS' && this._trans ? this._trans.to : this.state; },
+  transLabel() {
+    const t = this._trans, f = NEXT_LABEL[t.to];
+    return (typeof f === 'function' ? f(t.from, this.task) : f) || NEXT_LABEL._default || '繼續';
+  },
+  maybeTrans(before, extra) {
+    if (this.state === before && !extra) return;
+    this.closePanels();
+    if ((this.thought || this.feedback.length) && this.state !== 'RESULT') {
+      this._trans = { from: before, to: this.state };
+      this.state = '_TRANS';
+    }
+  },
+
   handleChoice(choice) {
+    if (this.state === '_TRANS') {          // 離開過場，進下一關
+      const t = this._trans; this._trans = null;
+      Tr.closeAll(); Speech.stop();
+      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
+      if (this.updateCash) this.updateCash();
+      if (document.getElementById('game-window').classList.contains('active')) this.render();
+      return;
+    }
     const cfg = this.getConfig()[this.state];
     Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
     Speech.stop();
@@ -1468,17 +1511,25 @@ const Game = {
     cfg.next(choice);
     this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
     if (this.thoughtFirst) this.visit += 1;
+    this.maybeTrans(before);
     if (document.getElementById('game-window').classList.contains('active')) this.render();
   },
 
   render() {
+    if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果
+      const t = this._trans;
+      this.state = t.from;
+      this._transMode = true;
+      try { this.render(); } finally { this._transMode = false; this.state = '_TRANS'; }
+      return;
+    }
     const cfg = this.getConfig()[this.state];
     if (!cfg) { console.error('狀態錯誤：' + this.state); return; }
     const val = v => typeof v === 'function' ? v() : v;
     this.setPlace(val(cfg.place) || 'market');
 
     // END 的 dialogue 會決定結局，所以只算一次
-    const raw = this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
+    const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
     let [src, emoji] = this.IMAGES[this.state] || (this.state === 'HAGGLE'
       ? (this._stall === 'A' ? this.IMAGES.A_GREET : this.IMAGES.T_GREET) : ['', '🏮']);
     if (this.state === 'END' && !this._endGood) [src, emoji] = ['images/end_bad.jpg', '😅'];
@@ -1490,6 +1541,7 @@ const Game = {
     this._tr = []; this._spk = [];
     let html = (this.showList && this.state !== 'START') ? this.listHTML() : '';
     html += cfg.html ? cfg.html() : '';
+    if (this._transMode) html = '';
     const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
     const main = this.formatText(raw);
     html += this.thoughtFirst ? th + main : main + th;
@@ -1506,7 +1558,7 @@ const Game = {
     const area = document.getElementById('options-area');
     area.className = '';
     area.innerHTML = '';
-    const opts = val(cfg.options);
+    const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
     area.classList.toggle('single', opts.length === 1 || opts.some(o => o.length > 12));
     opts.forEach(opt => {
       const btn = document.createElement('button');

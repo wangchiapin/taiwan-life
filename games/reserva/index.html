@@ -193,8 +193,10 @@
     border: 2px solid var(--ink); border-radius: 12px;
     transition: background .15s, color .15s;
   }
-  .opt:hover { background: var(--ink); color: #fff; }
-  .opt:hover rt { color: #bfe3df; }
+  @media (hover: hover) {
+    .opt:hover { background: var(--ink); color: #fff; }
+    .opt:hover rt { color: #bfe3df; }
+  }
   .opt.call { border-color: #7a5ea8; color: #7a5ea8; }
   .opt.call:hover { background: #7a5ea8; color: #fff; }
   button:focus-visible, input:focus-visible { outline: 3px solid var(--mustard); outline-offset: 2px; }
@@ -431,6 +433,8 @@
 /* 讀音以教育部《重編國語辭典修訂本》為準；一、不的變調交給 pinyin-pro（toneSandhi），
    純數字（電話號碼）不變調。新增遊戲文字時，把套件讀錯的詞加在這裡。 */
 pinyinPro.customPinyin({
+  '告訴': 'gào su', '後面': 'hòu mian',
+  '稱呼': 'chēng hū', '怎麼稱呼': 'zěn me chēng hū',
   '星期': 'xīng qí', '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '還要': 'hái yào',
   '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '覺得': 'jué de',
   '名字': 'míng zì', '位子': 'wèi zi', '桌子': 'zhuō zi', '分鐘': 'fēn zhōng',
@@ -607,7 +611,7 @@ const VOCAB = {
              ['靠窗', 'junto a la ventana', 'by the window'], ['備註', 'anotar', 'add a note']],
   C1_CHAIRS: [['張', 'clasificador para sillas y mesas', 'measure word for chairs, tables'], ['兒童椅', 'silla para niños', 'high chair'],
               ['沒問題', 'no hay problema', 'no problem']],
-  C1_NAME: [['貴姓', '¿su apellido? (formal)', 'your surname? (polite)'], ['叫', 'llamarse', 'to be called'], ['名字', 'nombre', 'name']],
+  C1_NAME: [['怎麼稱呼', '¿cómo le llamo?, ¿a nombre de quién?', 'how should I address you?'], ['叫', 'llamarse', 'to be called'], ['貴姓', '¿su apellido? (formal, para preguntar a otros)', 'your surname? (polite, to ask others)'], ['我姓…', 'mi apellido es…', 'my surname is…']],
   C1_PHONE: [['手機', 'celular', 'cell phone'], ['號碼', 'número', 'number'], ['零', 'cero', 'zero']],
   CONFIRM: [['確認', 'confirmar', 'confirm'], ['訂位人', 'persona que reserva', 'person booking'], ['沒錯', 'exacto', "that's right"]],
   FIX: [['哪裡', '¿dónde?, ¿qué parte?', 'where?, which part?'], ['日期', 'fecha', 'date'], ['時間', 'hora', 'time'],
@@ -953,6 +957,15 @@ async function showLeaderboard() {
 /* ══════════════════════════════════════
    遊戲主體
 ══════════════════════════════════════ */
+/* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
+const NEXT_LABEL = {
+  _default: '繼續講電話',
+  DIAL: '再看一次傳單', WRONG_NUMBER: '聽電話', DELIVERY_LINE: '聽電話',
+  C1_GREET: from => from === 'DELIVERY_LINE' || from === 'WRONG_NUMBER' ? '掛掉，改打訂位專線' : '聽電話',
+  CONFIRM: '聽店員確認', FIX: '告訴店員哪裡不對', C1_HOLD: '聽店員說明', MID_AMI: '掛掉電話',
+  C2_GREET: '再打給餐廳', CALL_AMI: '打電話問Ami', C2_BYE: '聽店員說完', END: '掛掉電話'
+};
+
 const Game = {
   state: 'START',
   playerName: '你',
@@ -1415,9 +1428,9 @@ const Game = {
       },
       C1_NAME: {
         call: 'shop',
-        dialogue: () => [L('店員：請問您貴姓？', '¿Me dice su apellido, por favor?', 'May I have your name, please?')],
+        dialogue: () => [L('店員：請問怎麼稱呼？', '¿A nombre de quién, por favor?', 'What name should I put it under?')],
         options: () => {
-          if (!Game._nameOpts) Game._nameOpts = shuffle([`我叫${N}。`, `我貴姓${N}。`, '你貴姓？']);
+          if (!Game._nameOpts) Game._nameOpts = shuffle([`我叫${N}。`, `我貴姓${N}。`, '你怎麼稱呼？']);
           return Game._nameOpts;
         },
         next: c => {
@@ -1425,7 +1438,7 @@ const Game = {
           if (c.startsWith('我貴姓')) Game.addMistake('「貴姓」是問別人的，不能用在自己身上。"Guìxìng" es para preguntar a otros, no para ti.',
             [L('（「貴姓」好像不能說自己……）', '(«Guìxìng» no se usa para hablar de uno mismo…)', '("Guìxìng" isn\'t used about yourself…)')]);
           else Game.addMistake('店員問的是你的名字。El empleado te preguntó tu nombre.',
-            [L('店員：呃……我是問您的名字喔。', 'Eh… le estoy preguntando su nombre.', "Um… I'm asking for your name.")]);
+            [L('店員：呃……我是問您的名字喔。', 'Eh… le estoy preguntando a usted su nombre.', "Um… I'm asking for your name.")]);
         }
       },
       C1_PHONE: {
@@ -1746,7 +1759,35 @@ const Game = {
     };
   },
 
+  /* ── 換關卡：收起清單和右側分頁 ── */
+  closePanels() {
+    for (const k of ['showList', 'showPhone']) if (this[k]) { this[k] = false; const b = document.getElementById(k === 'showList' ? 'btn-list' : 'btn-phone'); if (b) b.setAttribute('aria-pressed', 'false'); }
+    Hints.toggle(false); Vocab.toggle(false); Log.toggle(false);
+  },
+  /* ── 過場：上一關的結果自己一頁，按一句情境句再進下一關 ── */
+  get st0() { return this.state === '_TRANS' && this._trans ? this._trans.to : this.state; },
+  transLabel() {
+    const t = this._trans, f = NEXT_LABEL[t.to];
+    return (typeof f === 'function' ? f(t.from, this.task) : f) || NEXT_LABEL._default || '繼續';
+  },
+  maybeTrans(before, extra) {
+    if (this.state === before && !extra) return;
+    this.closePanels();
+    if ((this.thought || this.feedback.length) && this.state !== 'RESULT') {
+      this._trans = { from: before, to: this.state };
+      this.state = '_TRANS';
+    }
+  },
+
   handleChoice(choice) {
+    if (this.state === '_TRANS') {          // 離開過場，進下一關
+      const t = this._trans; this._trans = null;
+      Tr.closeAll(); Speech.stop();
+      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
+      if (this.updateCash) this.updateCash();
+      if (document.getElementById('game-window').classList.contains('active')) this.render();
+      return;
+    }
     const cfg = this.getConfig()[this.state];
     Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
     Speech.stop();
@@ -1756,10 +1797,18 @@ const Game = {
     cfg.next(choice);
     this.thoughtFirst = this.state !== before;
     if (this.state !== before) this.visit += 1;   // 換關卡時，過場的話放在對話前面；留在原關卡時，提示放在後面
+    this.maybeTrans(before);
     if (document.getElementById('game-window').classList.contains('active')) this.render();
   },
 
   render() {
+    if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果
+      const t = this._trans;
+      this.state = t.from;
+      this._transMode = true;
+      try { this.render(); } finally { this._transMode = false; this.state = '_TRANS'; }
+      return;
+    }
     const cfg = this.getConfig()[this.state];
     if (!cfg) { console.error('狀態錯誤：' + this.state); return; }
 
@@ -1777,9 +1826,10 @@ const Game = {
     Log.render();
 
     this._tr = []; this._spk = [];
-    const raw = this.state === 'END' ? this._endText : (typeof cfg.dialogue === 'function' ? cfg.dialogue() : cfg.dialogue);
+    const raw = this._transMode ? [] : this.state === 'END' ? this._endText : (typeof cfg.dialogue === 'function' ? cfg.dialogue() : cfg.dialogue);
     let html = '';
     if (cfg.html) html += cfg.html();
+    if (this._transMode) html = '';
     const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
     const main = this.formatText(raw);
     html += this.thoughtFirst ? th + main : main + th;
@@ -1795,7 +1845,7 @@ const Game = {
 
     const area = document.getElementById('options-area');
     area.innerHTML = '';
-    const opts = typeof cfg.options === 'function' ? cfg.options() : cfg.options;
+    const opts = this._transMode ? [this.transLabel()] : typeof cfg.options === 'function' ? cfg.options() : cfg.options;
     area.classList.toggle('single', opts.length === 1 || opts.some(o => o.length > 14));
     opts.forEach(opt => {
       const btn = document.createElement('button');

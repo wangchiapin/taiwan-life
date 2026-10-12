@@ -172,8 +172,10 @@
     border: 2px solid var(--ink); border-radius: 12px;
     transition: background .15s, color .15s;
   }
-  .opt:hover { background: var(--ink); color: #fff; }
-  .opt:hover rt { color: #ffd9b8; }
+  @media (hover: hover) {
+    .opt:hover { background: var(--ink); color: #fff; }
+    .opt:hover rt { color: #ffd9b8; }
+  }
   .opt.call { border-color: #7a5ea8; color: #7a5ea8; }
   .opt.call:hover { background: #7a5ea8; color: #fff; }
   button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
@@ -420,6 +422,7 @@
 /* 讀音以教育部《重編國語辭典修訂本》為準；一、不的變調交給 pinyin-pro（toneSandhi）。
    新增遊戲文字時，把套件讀錯的詞加在這裡。 */
 pinyinPro.customPinyin({
+  '告訴': 'gào su', '後面': 'hòu mian',
   '還是': 'hái shì', '還有': 'hái yǒu', '還要': 'hái yào', '還沒': 'hái méi', '還差': 'hái chà',
   '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '耶': 'ye', '啦': 'la', '囉': 'luo',
   '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan', '我們': 'wǒ men', '你們': 'nǐ men',
@@ -565,6 +568,7 @@ function saveSettings() { try { localStorage.setItem('drink_settings', JSON.stri
    每一關的單字（中文、西文、英文；拼音自動產生）
 ══════════════════════════════════════ */
 const VOCAB = {
+  WHO: [['先', 'primero', 'first'], ['點', 'pedir (en un local)', 'order'], ['誰的', '¿de quién?', 'whose'], ['杯', 'clasificador para bebidas', 'measure word for drinks']],
   START: [['同事', 'compañero de trabajo', 'coworker'], ['渴', 'tener sed', 'thirsty'], ['樓下', 'abajo (en el edificio)', 'downstairs'],
           ['飲料', 'bebida', 'drink'], ['加', 'agregar', 'add'], ['請', 'invitar (pagar por otro)', 'treat (pay for someone)']],
   TYPE: [['歡迎光臨', 'bienvenido', 'welcome'], ['想喝', 'querer tomar', 'want to drink'], ['奶茶', 'té con leche', 'milk tea'],
@@ -741,11 +745,11 @@ document.getElementById('hint-close').onclick = () => Hints.toggle(false);
    錯誤紀錄：整局累積、即時更新、最新的在上面、標出關卡
 ══════════════════════════════════════ */
 const STAGE = {
-  TYPE_1: ['你的飲料：品項', 'tu bebida: tipo', 'your drink: type'], SIZE_1: ['你的飲料：大小', 'tu bebida: tamaño', 'your drink: size'],
-  SUGAR_1: ['你的飲料：甜度', 'tu bebida: azúcar', 'your drink: sugar'], ICE_1: ['你的飲料：冰塊', 'tu bebida: hielo', 'your drink: ice'],
+  WHO: ['先點誰的', 'qué pedir primero', 'which first'], TYPE_1: ['第一杯：品項', 'primera bebida: tipo', 'first drink: type'], SIZE_1: ['第一杯：大小', 'primera bebida: tamaño', 'first drink: size'],
+  SUGAR_1: ['第一杯：甜度', 'primera bebida: azúcar', 'first drink: sugar'], ICE_1: ['第一杯：冰塊', 'primera bebida: hielo', 'first drink: ice'],
   CHECK_1: ['店員確認', 'confirmación', 'read-back'], CORRECT_1: ['更正點單', 'corrección', 'correction'],
-  TYPE_2: ['Ami 的飲料：品項', 'bebida de Ami: tipo', "Ami's drink: type"], SIZE_2: ['Ami 的飲料：大小', 'bebida de Ami: tamaño', "Ami's drink: size"],
-  SUGAR_2: ['Ami 的飲料：甜度', 'bebida de Ami: azúcar', "Ami's drink: sugar"], ICE_2: ['Ami 的飲料：冰塊', 'bebida de Ami: hielo', "Ami's drink: ice"],
+  TYPE_2: ['第二杯：品項', 'segunda bebida: tipo', 'second drink: type'], SIZE_2: ['第二杯：大小', 'segunda bebida: tamaño', 'second drink: size'],
+  SUGAR_2: ['第二杯：甜度', 'segunda bebida: azúcar', 'second drink: sugar'], ICE_2: ['第二杯：冰塊', 'segunda bebida: hielo', 'second drink: ice'],
   TOPPING_2: ['Ami 的飲料：加料', 'bebida de Ami: topping', "Ami's drink: topping"], NO_COCONUT: ['椰果賣完了', 'sin gelatina de coco', 'no coconut jelly'],
   TOPPING_3: ['Ami 的飲料：改加料', 'bebida de Ami: cambio de topping', "Ami's drink: new topping"],
   PAYMENT: ['付錢', 'pagar', 'paying'], CHANGE: ['找錢', 'cambio', 'change'], APOLOGIZE: ['店員道歉', 'disculpa del empleado', 'staff apology'],
@@ -859,6 +863,13 @@ async function showLeaderboard() {
 /* ══════════════════════════════════════
    遊戲主體
 ══════════════════════════════════════ */
+/* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
+const NEXT_LABEL = {
+  WHO: '走到櫃台', TYPE_1: '好，重新點一次。', CHECK_1: '聽店員確認', CORRECT_1: '告訴店員哪裡不對',
+  TYPE_2: '接著點第二杯', TOPPING_2: '接著選加料', CALL_AMI: '打電話給Ami', TOPPING_3: '跟店員說Ami要什麼',
+  PAYMENT: '準備付錢', CHANGE: '拿找的錢', APOLOGIZE: '等店員補錢', FINISH: '等飲料做好', END: '拿飲料回辦公室'
+};
+
 const Game = {
   state: 'START',
   playerName: '你',
@@ -876,7 +887,7 @@ const Game = {
   /* 圖片：檔案放在 images/，沒有檔案時會顯示 emoji 佔位 */
   IMAGES: {
     START: ['images/start.jpg', '🙋‍♀️'],
-    TYPE_1: ['images/ordering.jpg', '🧋'], TYPE_2: ['images/ordering.jpg', '🧋'],
+    WHO: ['images/ordering.jpg', '🧋'], TYPE_1: ['images/ordering.jpg', '🧋'], TYPE_2: ['images/ordering.jpg', '🧋'],
     SIZE_1: ['images/custom.jpg', '🥤'], SIZE_2: ['images/custom.jpg', '🥤'],
     SUGAR_1: ['images/custom.jpg', '🍬'], SUGAR_2: ['images/custom.jpg', '🍬'],
     ICE_1: ['images/custom.jpg', '🧊'], ICE_2: ['images/custom.jpg', '🧊'],
@@ -1020,6 +1031,10 @@ const Game = {
   /* ── 狀態設定 ── */
   getConfig() {
     const N = this.N, t = this.target, me = this.mine, o1 = this.order[1], o2 = this.order[2];
+    // 玩家自己決定先點誰的：第一杯 = order[1]，第二杯 = order[2]
+    const amiFirst = this.first === 'ami', oMe = amiFirst ? o2 : o1, oAmi = amiFirst ? o1 : o2;
+    const afterCup1 = () => amiFirst ? 'TOPPING_2' : 'TYPE_2';     // Ami 的那杯確認完才問加料
+    const afterTopping = () => amiFirst ? 'TYPE_2' : 'PAYMENT';
     const ask = (zh, es, en) => [L(`Benjamin：${zh}`, es, en)];
     return {
       START: {
@@ -1032,7 +1047,14 @@ const Game = {
           L(`我：那……我要一杯${zhOrder(me)}。`, `Mmm… entonces yo quiero ${esOrder(me)}.`, `Hmm… then I'll have ${enOrder(me)}.`)
         ],
         options: ['去樓下的飲料店'],
-        next: () => { Game.startTimer(); Game.state = 'TYPE_1'; }
+        next: () => { Game.startTimer(); Game.state = 'WHO'; }
+      },
+
+      /* ── 先點誰的？兩種順序都可以 ── */
+      WHO: {
+        dialogue: () => [L('（你走到樓下的飲料店，店員在櫃台後面。你要先點誰的飲料？）', '(Llegas a la tienda de bebidas de abajo; el empleado está detrás del mostrador. ¿De quién pides primero?)', "(You reach the drink shop downstairs; the staff member is behind the counter. Whose drink will you order first?)")],
+        options: ['先點我的', '先點Ami的'],
+        next: c => { Game.first = c === '先點Ami的' ? 'ami' : 'me'; Game.state = 'TYPE_1'; }
       },
 
       /* ── 第一杯：你自己的 ── */
@@ -1068,7 +1090,7 @@ const Game = {
         next: c => {
           const wrong = !sameOrder(Game.checkShown, o1);
           if (c === '對。') {
-            if (!wrong) { Game.state = 'TYPE_2'; return; }
+            if (!wrong) { Game.state = afterCup1(); return; }
             Game.addMistake(M('店員念錯了，你卻說對。', 'El empleado repitió mal tu pedido y dijiste que sí.', 'The staff read your order back wrong and you said yes.'),
               [L('Benjamin：咦？等一下，這好像不是您剛剛點的……我們重新點一次吧！', 'Eh, espera, creo que eso no es lo que pediste… Vamos a pedirlo otra vez.', "Huh? Wait, that's not what you ordered… Let's start over.")]);
             Game.order[1] = {};
@@ -1090,7 +1112,7 @@ const Game = {
           Game._fixOpts = null;
           if (c === zhOrder(o1)) {
             Game.thought = [L(`Benjamin：好的，一杯${zhOrder(o1)}，沒問題！`, `Muy bien: ${esOrder(o1)}. ¡Sin problema!`, `OK: ${enOrder(o1)}. No problem!`)];
-            Game.state = 'TYPE_2'; return;
+            Game.state = afterCup1(); return;
           }
           Game.addMistake(M('更正的時候又選錯了。', 'Al corregir, elegiste mal otra vez.', 'You picked the wrong order again when correcting it.'),
             [L('Benjamin：嗯……我們從頭再點一次好了。', 'Mmm… mejor lo pedimos otra vez desde el principio.', "Hmm… let's just order again from the start.")]);
@@ -1119,7 +1141,7 @@ const Game = {
       ICE_2: {
         dialogue: () => ask('冰塊呢？', '¿Y el hielo?', 'And the ice?'),
         options: ICES,
-        next: c => { o2.ice = c; Game.state = 'TOPPING_2'; }
+        next: c => { o2.ice = c; Game.state = amiFirst ? 'PAYMENT' : 'TOPPING_2'; }
       },
       TOPPING_2: {
         html: () => Game.menuHTML(),
@@ -1127,7 +1149,7 @@ const Game = {
         options: [...TOPPINGS, '不加料'],
         next: c => {
           if (c === '椰果') { Game.state = 'NO_COCONUT'; return; }
-          o2.topping = c; Game.state = 'PAYMENT';
+          oAmi.topping = c; Game.state = afterTopping();
         }
       },
       NO_COCONUT: {
@@ -1135,8 +1157,8 @@ const Game = {
         options: () => (Game._ncOpts ||= ['請稍等，我問一下朋友。', ...shuffle(['那就不加料。', `那改加${pick(['珍珠', '布丁'])}。`])]),
         next: c => {
           if (c.startsWith('請稍等')) { Game.state = 'CALL_AMI'; return; }
-          o2.topping = c.includes('珍珠') ? '珍珠' : c.includes('布丁') ? '布丁' : '不加料';
-          Game.state = 'PAYMENT';
+          oAmi.topping = c.includes('珍珠') ? '珍珠' : c.includes('布丁') ? '布丁' : '不加料';
+          Game.state = afterTopping();
         }
       },
       CALL_AMI: {
@@ -1155,7 +1177,7 @@ const Game = {
       TOPPING_3: {
         dialogue: () => ask('請問要改加什麼呢？', '¿Qué topping quieres en su lugar?', 'What topping would you like instead?'),
         options: ['珍珠', '布丁', '不加料'],
-        next: c => { o2.topping = c; Game.state = 'PAYMENT'; }
+        next: c => { oAmi.topping = c; Game.state = afterTopping(); }
       },
 
       /* ── 付錢、找錢 ── */
@@ -1208,10 +1230,10 @@ const Game = {
         place: 'office',
         dialogue: () => {
           const want = { ...t, topping: Game.heard.call ? Game.alt : t.topping };
-          const amiOK = sameOrder(o2, want, true);
-          const meOK = sameOrder(o1, me);
+          const amiOK = sameOrder(oAmi, want, true);
+          const meOK = sameOrder(oMe, me);
           // 椰果賣完了：沒問 Ami 就自己決定，只要剛好是她會選的也算對
-          const amiOK2 = amiOK || (!Game.heard.call && sameOrder(o2, t) && o2.topping === Game.alt);
+          const amiOK2 = amiOK || (!Game.heard.call && sameOrder(oAmi, t) && oAmi.topping === Game.alt);
           Game._endGood = amiOK2 && meOK;
           if (!amiOK2) Game.addMistake(M(`Ami 的飲料買錯了，她要的是${zhOrder(t)}加${Game.alt}。`, 'La bebida de Ami no era la que pidió.', "Ami's drink wasn't what she asked for."));
           if (!meOK) Game.addMistake(M(`你自己的飲料也買錯了，你要的是${zhOrder(me)}。`, 'Tu propia bebida tampoco era la que querías.', "Your own drink wasn't what you wanted either."));
@@ -1220,7 +1242,7 @@ const Game = {
           if (amiOK2) lines.push(L(`Ami：哇！就是這杯！謝謝你，${N}！`, `¡Guau! ¡Es justo esta! ¡Gracias, ${N}!`, `Wow! This is the one! Thanks, ${N}!`));
           else lines.push(
             L(`Ami：咦？${N}，這杯不對吧！我要的是${zhOrder(t)}加${Game.alt}耶。`, `¿Eh? ${N}, esta no es. Yo quería ${esOrder({ ...t, topping: Game.alt })}.`, `Huh? ${N}, this isn't right. I wanted ${enOrder({ ...t, topping: Game.alt })}.`),
-            L(`Ami：你買成${zhOrder(o2)}${o2.topping && o2.topping !== '不加料' ? '加' + o2.topping : '，沒加料'}了啦！`, `¡Compraste ${esOrder(o2)}!`, `You got ${enOrder(o2)}!`));
+            L(`Ami：你買成${zhOrder(oAmi)}${oAmi.topping && oAmi.topping !== '不加料' ? '加' + oAmi.topping : '，沒加料'}了啦！`, `¡Compraste ${esOrder(oAmi)}!`, `You got ${enOrder(oAmi)}!`));
           if (!meOK) lines.push(L(`（你自己不是要${zhOrder(me)}嗎？好像也買錯了……）`, `(¿Tú no querías ${esOrder(me)}? Parece que la tuya también está mal…)`, `(Didn't you want ${enOrder(me)}? Looks like yours is wrong too…)`));
           return lines;
         },
@@ -1250,7 +1272,35 @@ const Game = {
   get shortBy() { return Math.min(this.short, this.bill - this.total - 5); },       // 少找的錢，至少還會找 5 元
   get given() { const right = this.bill - this.total; return this.honest ? right : right - this.shortBy; },
 
+  /* ── 換關卡：收起清單和右側分頁 ── */
+  closePanels() {
+    for (const k of ['showList', 'showPhone']) if (this[k]) { this[k] = false; const b = document.getElementById(k === 'showList' ? 'btn-list' : 'btn-phone'); if (b) b.setAttribute('aria-pressed', 'false'); }
+    Hints.toggle(false); Vocab.toggle(false); Log.toggle(false);
+  },
+  /* ── 過場：上一關的結果自己一頁，按一句情境句再進下一關 ── */
+  get st0() { return this.state === '_TRANS' && this._trans ? this._trans.to : this.state; },
+  transLabel() {
+    const t = this._trans, f = NEXT_LABEL[t.to];
+    return (typeof f === 'function' ? f(t.from, this.task) : f) || NEXT_LABEL._default || '繼續';
+  },
+  maybeTrans(before, extra) {
+    if (this.state === before && !extra) return;
+    this.closePanels();
+    if ((this.thought || this.feedback.length) && this.state !== 'RESULT') {
+      this._trans = { from: before, to: this.state };
+      this.state = '_TRANS';
+    }
+  },
+
   handleChoice(choice) {
+    if (this.state === '_TRANS') {          // 離開過場，進下一關
+      const t = this._trans; this._trans = null;
+      Tr.closeAll(); Speech.stop();
+      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
+      if (this.updateCash) this.updateCash();
+      if (document.getElementById('game-window').classList.contains('active')) this.render();
+      return;
+    }
     const cfg = this.getConfig()[this.state];
     Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
     Speech.stop();
@@ -1261,17 +1311,25 @@ const Game = {
     this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
     if (this.thoughtFirst) { this.visit += 1; this._payOpts = this.state === 'PAYMENT' ? null : this._payOpts; }
     if (this.state === 'CALL_AMI') this.heard.call = true;
+    this.maybeTrans(before);
     if (document.getElementById('game-window').classList.contains('active')) this.render();
   },
 
   render() {
+    if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果
+      const t = this._trans;
+      this.state = t.from;
+      this._transMode = true;
+      try { this.render(); } finally { this._transMode = false; this.state = '_TRANS'; }
+      return;
+    }
     const cfg = this.getConfig()[this.state];
     if (!cfg) { console.error('狀態錯誤：' + this.state); return; }
     const val = v => typeof v === 'function' ? v() : v;
 
     this.setPlace(cfg.place || 'shop');
     // END 的 dialogue 會計分，所以只算一次，再依結果決定圖片
-    const raw = this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
+    const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
     let [src, emoji] = this.IMAGES[this.state] || ['', '🧋'];
     if (this.state === 'END' && !this._endGood) [src, emoji] = ['images/end_bad.jpg', '😤'];
     this.setImage(src, emoji);
@@ -1281,6 +1339,7 @@ const Game = {
 
     this._tr = []; this._spk = [];
     let html = cfg.html ? cfg.html() : '';
+    if (this._transMode) html = '';
     const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
     const main = this.formatText(raw);
     html += this.thoughtFirst ? th + main : main + th;
@@ -1296,7 +1355,7 @@ const Game = {
 
     const area = document.getElementById('options-area');
     area.innerHTML = '';
-    const opts = val(cfg.options);
+    const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
     area.classList.toggle('single', opts.length === 1 || opts.some(o => o.length > 12));
     opts.forEach(opt => {
       const btn = document.createElement('button');

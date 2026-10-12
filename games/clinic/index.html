@@ -190,8 +190,10 @@
     border: 2px solid var(--ink); border-radius: 12px;
     transition: background .15s, color .15s;
   }
-  .opt:hover { background: var(--ink); color: #fff; }
-  .opt:hover rt { color: #ffd9cf; }
+  @media (hover: hover) {
+    .opt:hover { background: var(--ink); color: #fff; }
+    .opt:hover rt { color: #ffd9cf; }
+  }
   .opt.deal { border-color: var(--red); background: var(--red); color: #fff; }
   .opt.deal rt { color: #ffe1d8; }
   .opt.deal:hover { background: var(--red-dark); }
@@ -467,7 +469,7 @@ pinyinPro.customPinyin({
   '健保卡': 'jiàn bǎo kǎ', '掛號': 'guà hào', '掛號費': 'guà hào fèi', '初診': 'chū zhěn', '初診單': 'chū zhěn dān', '家醫科': 'jiā yī kē', '小兒科': 'xiǎo ér kē', '皮膚科': 'pí fū kē',
   '診間': 'zhěn jiān', '診所': 'zhěn suǒ', '號碼牌': 'hào mǎ pái', '候診': 'hòu zhěn', '看診': 'kàn zhěn', '回診': 'huí zhěn', '叫號': 'jiào hào', '發燒': 'fā shāo',
   '喉嚨痛': 'hóu lóng tòng', '喉嚨': 'hóu lóng', '咳嗽': 'ké sou', '流鼻水': 'liú bí shuǐ', '鼻塞': 'bí sè', '頭痛': 'tóu tòng', '過敏': 'guò mǐn',
-  '盤尼西林': 'pán ní xī lín', '批價': 'pī jià', '部分負擔': 'bù fèn fù dān', '藥袋': 'yào dài', '領藥': 'lǐng yào', '藥師': 'yào shī', '藥物': 'yào wù',
+  '止痛藥': 'zhǐ tòng yào', '悠遊卡': 'yōu yóu kǎ', '信用卡': 'xìn yòng kǎ', '會員卡': 'huì yuán kǎ', '金融卡': 'jīn róng kǎ', '批價': 'pī jià', '部分負擔': 'bù fèn fù dān', '藥袋': 'yào dài', '領藥': 'lǐng yào', '藥師': 'yào shī', '藥物': 'yào wù',
   '感冒藥': 'gǎn mào yào', '感冒': 'gǎn mào', '止咳藥': 'zhǐ ké yào', '睡前': 'shuì qián', '飯後': 'fàn hòu', '休息': 'xiū xi', '多喝水': 'duō hē shuǐ',
   '醫生': 'yī shēng', '護理師': 'hù lǐ shī', '不舒服': 'bù shū fu', '麻煩': 'má fan', '吃藥': 'chī yào', '一包': 'yì bāo', '哪一包': 'nǎ yì bāo',
   '午餐': 'wǔ cān', '洗澡': 'xǐ zǎo', '搞定': 'gǎo dìng', '趕快': 'gǎn kuài', '好起來': 'hǎo qǐ lái', '還沒': 'hái méi', '怎麼': 'zěn me', '嗯': 'ēn',
@@ -586,14 +588,14 @@ function saveSettings() { try { localStorage.setItem('clinic_settings', JSON.str
 const VOCAB = {
   START: [['看醫生', 'ir al médico', 'see a doctor'], ['診所', 'clínica', 'clinic'], ['不舒服', 'sentirse mal', 'feel unwell'], ['健保卡', 'tarjeta del seguro nacional de salud', 'NHI card'],
           ['初診單', 'formulario de primera consulta', 'new-patient form'], ['過敏', 'alergia', 'allergy'], ['家醫科', 'medicina familiar', 'family medicine'], ['感冒', 'resfriado', 'a cold']],
-  R_CARD: [['健保卡', 'tarjeta del seguro nacional de salud', 'NHI card'], ['掛號', 'registrarse (para la consulta)', 'register (for an appointment)'], ['櫃台', 'mostrador, recepción', 'front desk'], ['護理師', 'enfermera', 'nurse']],
+  R_CARD: [['健保卡', 'tarjeta del seguro nacional de salud', 'NHI card'], ['掛號', 'registrarse (para la consulta)', 'register (for an appointment)'], ['悠遊卡', 'EasyCard (tarjeta de transporte)', 'EasyCard'], ['信用卡', 'tarjeta de crédito', 'credit card'], ['會員卡', 'tarjeta de socio', 'membership card'], ['金融卡', 'tarjeta de débito', 'debit card']],
   R_FIRST: [['第一次', 'la primera vez', 'the first time'], ['以前', 'antes', 'before'], ['初診單', 'formulario de primera consulta', 'new-patient form'], ['填', 'llenar (un formulario)', 'fill in']],
   R_DEPT: [['科', 'especialidad, departamento', 'department'], ['家醫科', 'medicina familiar', 'family medicine'], ['小兒科', 'pediatría', 'pediatrics'], ['皮膚科', 'dermatología', 'dermatology']],
   R_TICKET: [['號碼牌', 'ficha con número', 'number ticket'], ['前面', 'delante', 'ahead'], ['位', 'clasificador de personas (cortés)', 'measure word for people (polite)'], ['坐著等', 'esperar sentado', 'wait seated']],
   W_WAIT: [['候診', 'esperar la consulta', 'wait to be seen'], ['叫號', 'llamar por número', 'call numbers'], ['輪到', 'llegar el turno', "be one's turn"], ['進診間', 'entrar al consultorio', 'go into the exam room'], ['繼續', 'continuar', 'continue']],
   D_SYMPTOM: [['哪裡不舒服', '¿qué le molesta?', "what's wrong?"], ['咳嗽', 'tos', 'cough'], ['流鼻水', 'secreción nasal', 'runny nose'], ['喉嚨痛', 'dolor de garganta', 'sore throat'], ['頭痛', 'dolor de cabeza', 'headache'], ['鼻塞', 'congestión nasal', 'stuffy nose'], ['已經', 'ya, desde hace', 'already']],
   D_FEVER: [['發燒', 'tener fiebre', 'have a fever'], ['有沒有', '¿tiene o no?', 'do you have or not?'], ['一點', 'un poco', 'a little']],
-  D_ALLERGY: [['藥物', 'medicamento', 'medication'], ['過敏', 'alergia', 'allergy'], ['盤尼西林', 'penicilina', 'penicillin'], ['有沒有', '¿tiene o no?', 'do you have or not?']],
+  D_ALLERGY: [['藥物', 'medicamento', 'medication'], ['過敏', 'alergia', 'allergy'], ['止痛藥', 'analgésico', 'painkiller'], ['有沒有', '¿tiene o no?', 'do you have or not?']],
   D_ADVICE: [['喉嚨', 'garganta', 'throat'], ['感冒', 'resfriado', 'a cold'], ['多喝水', 'beber mucha agua', 'drink lots of water'], ['多休息', 'descansar más', 'rest more'], ['回來看', 'volver a consulta', 'come back to be seen']],
   P_PAY: [['批價', 'pagar la consulta', 'pay the bill'], ['掛號費', 'cuota de registro', 'registration fee'], ['部分負擔', 'copago', 'copayment'], ['一共', 'en total', 'in total'], ['不夠', 'no alcanza', 'not enough']],
   M_MED: [['領藥', 'recoger la medicina', 'pick up medicine'], ['感冒藥', 'medicina para el resfriado', 'cold medicine'], ['止咳藥', 'medicina para la tos', 'cough medicine'], ['飯後', 'después de comer', 'after meals'], ['睡前', 'antes de dormir', 'before bed'], ['藥袋', 'bolsa de medicinas', 'medicine bag']],
@@ -740,8 +742,9 @@ const Hints = {
     if (!Game.task) return;
     const r = s => Game.ruby(s);
     const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
-    let html = `<div class="h-sec">${r('Ami 的 LINE 訊息')}</div>` + Game.amiLines().slice(1).map(item).join('');
-    const st = Game.state, past = (...a) => a.includes(st);
+    let html = `<div class="h-sec">${r('我的身體狀況')}</div>` + Game.statusRows().map(item).join('') +
+      `<div class="h-sec">${r('Ami 的 LINE 訊息')}</div>` + Game.amiLines().slice(1).map(item).join('');
+    const st = Game.st0, past = (...a) => a.includes(st);
     if (past('D_ADVICE', 'P_PAY', 'M_MED', 'M_NOW', 'E_ASK', 'END', 'RESULT')) html += `<div class="h-sec">${r('醫生說的話')}</div>` + Game.docLines().map(item).join('');
     if (past('M_MED', 'M_NOW', 'E_ASK', 'END', 'RESULT')) html += `<div class="h-sec">${r('藥師說的話')}</div>` + Game.pharmLines().map(item).join('');
     document.getElementById('hint-body').innerHTML = html;
@@ -882,9 +885,17 @@ const SYM = {
 };
 const SYM_IDS = Object.keys(SYM);
 /* 數字念法：叫號用（十二號、十四號…） */
+/* 掛號時拿錯的卡：[西文, 英文] */
+const OTHER_CARDS = { '悠遊卡': ['la EasyCard (tarjeta de transporte)', 'your EasyCard'], '信用卡': ['la tarjeta de crédito', 'your credit card'], '會員卡': ['una tarjeta de socio', 'a membership card'], '金融卡': ['la tarjeta de débito', 'your debit card'] };
 const NUMZH = n => n <= 10 ? CN[n] : n < 20 ? '十' + CN[n - 10] : CN[Math.floor(n / 10)] + '十' + (n % 10 ? CN[n % 10] : '');
 const DAYZH = n => ({ 2: '兩', 3: '三', 5: '五', 7: '七' })[n];
 const pad2 = n => String(n).padStart(2, '0');
+
+/* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
+const NEXT_LABEL = {
+  R_CARD: '走進診所', R_DEPT: '填好初診單', R_TICKET: '拿號碼牌', W_WAIT: '坐下來等', D_SYMPTOM: '走進診間',
+  D_ADVICE: '聽醫生說', P_PAY: '去櫃台付錢', M_MED: '去領藥', M_NOW: '回公司', E_ASK: '看手機', END: '回覆Ami'
+};
 
 const Game = {
   state: 'START',
@@ -1091,7 +1102,7 @@ const Game = {
     const t = this.task, rx = DAYZH(t.rx);
     const out = [L('醫生：我看一下喉嚨……有一點紅，是感冒喔。', 'Déjame ver la garganta… está un poco roja. Es un resfriado.', "Let me look at your throat… it's a little red. It's a cold.")];
     if (t.fever) out.push(L('醫生：你有一點發燒，要多休息。', 'Tienes un poco de fiebre; hay que descansar más.', "You have a slight fever, so you need more rest."));
-    if (t.allergy) out.push(L('醫生：你對盤尼西林過敏，我會開別的藥給你。', 'Eres alérgico a la penicilina; te recetaré otros medicamentos.', "You're allergic to penicillin, so I'll prescribe something else."));
+    if (t.allergy) out.push(L('醫生：你對止痛藥過敏，我會開別的藥給你。', 'Eres alérgico a los analgésicos; te recetaré otros medicamentos.', "You're allergic to painkillers, so I'll prescribe something else."));
     out.push(L(`醫生：藥吃${rx}天，要多喝水、多休息。如果${rx}天後還沒好，再回來看。`,
       `Toma el medicamento ${t.rx} días, bebe mucha agua y descansa. Si después de ${t.rx} días no mejoras, vuelve.`,
       `Take the medicine for ${t.rx} days, drink lots of water and rest. If you're not better after ${t.rx} days, come back.`));
@@ -1106,15 +1117,17 @@ const Game = {
   },
 
   /* ── 畫面元件 ── */
-  listHTML() {
+  statusRows() { return this.listHTML(true); },
+  listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s), sy = this.symList();
     const rows = [
       { zh: `症狀：${sy[0].zh}、${sy[1].zh}`, es: `Síntomas: ${sy[0].es}, ${sy[1].es}`, en: `Symptoms: ${sy[0].en}, ${sy[1].en}` },
       { zh: `已經${DAYZH(t.days)}天了`, es: `Desde hace ${t.days} días`, en: `For ${t.days} days` },
       { zh: t.fever ? '有一點發燒（三十七度八）' : '沒有發燒（三十六度五）', es: t.fever ? 'Un poco de fiebre (37,8 °C)' : 'Sin fiebre (36,5 °C)', en: t.fever ? 'A slight fever (37.8 °C)' : 'No fever (36.5 °C)' },
-      { zh: t.allergy ? '對盤尼西林過敏' : '沒有藥物過敏', es: t.allergy ? 'Alergia a la penicilina' : 'Sin alergia a medicamentos', en: t.allergy ? 'Allergic to penicillin' : 'No drug allergies' },
+      { zh: t.allergy ? '對止痛藥過敏' : '沒有藥物過敏', es: t.allergy ? 'Alergia a los analgésicos' : 'Sin alergia a medicamentos', en: t.allergy ? 'Allergic to painkillers' : 'No drug allergies' },
       { zh: '有健保卡，是第一次來這家診所', es: 'Tienes tu tarjeta NHI y es tu primera vez en esta clínica', en: "You have your NHI card, and it's your first time at this clinic" }
     ];
+    if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
     const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
     this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
@@ -1170,11 +1183,13 @@ const Game = {
           L('（你走進診所，櫃台有一位護理師。）', '(Entras a la clínica; en el mostrador hay una enfermera.)', '(You walk into the clinic. A nurse is at the front desk.)'),
           desk('你好，請問有健保卡嗎？', 'Hola, ¿tiene su tarjeta del seguro de salud?', 'Hello, do you have your NHI card?')
         ],
-        options: ['有，這是我的健保卡。', '我沒有健保卡。'],
+        options: () => (Game._cardOpts ||= shuffle(['有，這是我的健保卡。', ...shuffle(Object.keys(OTHER_CARDS)).slice(0, 2).map(k => `有，這是我的${k}。`)])),
         next: c => {
-          if (c.startsWith('我沒有')) {
-            Game.addMistake(M('你有健保卡，掛號要拿出來給櫃台。', 'Tienes tu tarjeta NHI: hay que entregarla en recepción para registrarte.', 'You have your NHI card — hand it over at the desk to register.'),
-              [L('（等一下，健保卡不是在皮夾裡嗎？）', '(Espera, ¿no está la tarjeta en tu cartera?)', '(Wait, isn\'t your NHI card in your wallet?)')]); return;
+          const k = Object.keys(OTHER_CARDS).find(x => c.includes(x));
+          if (k) {
+            const [es, en] = OTHER_CARDS[k];
+            Game.addMistake(M(`掛號要給健保卡，不是${k}。`, `Para registrarte hay que dar la tarjeta del seguro de salud, no ${es}.`, `To register you hand over your NHI card, not ${en}.`),
+              [desk(`這是${k}喔，我們要的是健保卡。`, `Esto es ${es}; necesitamos la tarjeta del seguro de salud.`, `That's ${en}; we need your NHI card.`)]); return;
           }
           if (Game.att.R_CARD === 1) Game.good('掛號要先給櫃台看健保卡。', 'Para registrarte, primero muestras la tarjeta NHI.', 'To register, you first show your NHI card.');
           Game.state = 'R_FIRST';
@@ -1285,11 +1300,11 @@ const Game = {
       D_ALLERGY: {
         place: 'doctor',
         dialogue: () => [doc('有沒有對什麼藥物過敏？', '¿Es alérgico a algún medicamento?', 'Are you allergic to any medicine?')],
-        options: ['沒有，沒有過敏。', '有，我對盤尼西林過敏。'],
+        options: ['沒有，沒有過敏。', '有，我對止痛藥過敏。'],
         next: c => {
           const yes = c.startsWith('有');
           if (yes !== t.allergy) {
-            Game.addMistake(M(t.allergy ? '你對盤尼西林過敏，一定要告訴醫生。' : '你沒有藥物過敏。', t.allergy ? 'Eres alérgico a la penicilina: es imprescindible decírselo al doctor.' : 'No tienes alergia a medicamentos.', t.allergy ? "You're allergic to penicillin — you must tell the doctor." : 'You have no drug allergies.'),
+            Game.addMistake(M(t.allergy ? '你對止痛藥過敏，一定要告訴醫生。' : '你沒有藥物過敏。', t.allergy ? 'Eres alérgico a los analgésicos: es imprescindible decírselo al doctor.' : 'No tienes alergia a medicamentos.', t.allergy ? "You're allergic to painkillers — you must tell the doctor." : 'You have no drug allergies.'),
               [L('（看一下我的身體狀況卡。）', '(Mira tu tarjeta de estado de salud.)', '(Check your health card.)')]); return;
           }
           if (t.allergy && Game.att.D_ALLERGY === 1) Game.good('有藥物過敏，一定要跟醫生說。', 'Si tienes alergia a un medicamento, siempre díselo al doctor.', 'If you have a drug allergy, always tell the doctor.');
@@ -1404,7 +1419,35 @@ const Game = {
     };
   },
 
+  /* ── 換關卡：收起清單和右側分頁 ── */
+  closePanels() {
+    for (const k of ['showList', 'showPhone']) if (this[k]) { this[k] = false; const b = document.getElementById(k === 'showList' ? 'btn-list' : 'btn-phone'); if (b) b.setAttribute('aria-pressed', 'false'); }
+    Hints.toggle(false); Vocab.toggle(false); Log.toggle(false);
+  },
+  /* ── 過場：上一關的結果自己一頁，按一句情境句再進下一關 ── */
+  get st0() { return this.state === '_TRANS' && this._trans ? this._trans.to : this.state; },
+  transLabel() {
+    const t = this._trans, f = NEXT_LABEL[t.to];
+    return (typeof f === 'function' ? f(t.from, this.task) : f) || NEXT_LABEL._default || '繼續';
+  },
+  maybeTrans(before, extra) {
+    if (this.state === before && !extra) return;
+    this.closePanels();
+    if ((this.thought || this.feedback.length) && this.state !== 'RESULT') {
+      this._trans = { from: before, to: this.state };
+      this.state = '_TRANS';
+    }
+  },
+
   handleChoice(choice) {
+    if (this.state === '_TRANS') {          // 離開過場，進下一關
+      const t = this._trans; this._trans = null;
+      Tr.closeAll(); Speech.stop();
+      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
+      if (this.updateCash) this.updateCash();
+      if (document.getElementById('game-window').classList.contains('active')) this.render();
+      return;
+    }
     const cfg = this.getConfig()[this.state];
     Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
     Speech.stop();
@@ -1416,17 +1459,25 @@ const Game = {
     this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
     if (this.thoughtFirst) this.visit += 1;
     this.updateCash();
+    this.maybeTrans(before);
     if (document.getElementById('game-window').classList.contains('active')) this.render();
   },
 
   render() {
+    if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果
+      const t = this._trans;
+      this.state = t.from;
+      this._transMode = true;
+      try { this.render(); } finally { this._transMode = false; this.state = '_TRANS'; }
+      return;
+    }
     const cfg = this.getConfig()[this.state];
     if (!cfg) { console.error('狀態錯誤：' + this.state); return; }
     const val = v => typeof v === 'function' ? v() : v;
     this.setPlace(val(cfg.place) || 'reception');
 
     // END 的 dialogue 會決定結局，所以只算一次
-    const raw = this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
+    const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
     let [src, emoji, alt] = this.IMAGES[this.state] || ['', '🏥'];
     if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
     this.setImage(src, emoji, alt);
@@ -1437,6 +1488,7 @@ const Game = {
     this._tr = []; this._spk = [];
     let html = (this.showList && this.state !== 'START' && !['END', 'RESULT'].includes(this.state)) ? this.listHTML() : '';
     html += cfg.html ? cfg.html() : '';
+    if (this._transMode) html = '';
     const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
     const main = this.formatText(raw);
     html += this.thoughtFirst ? th + main : main + th;
@@ -1453,7 +1505,7 @@ const Game = {
     const area = document.getElementById('options-area');
     area.className = '';
     area.innerHTML = '';
-    const opts = val(cfg.options);
+    const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
     area.classList.toggle('single', opts.length === 1 || opts.some(o => o.length > 12));
     opts.forEach(opt => {
       const btn = document.createElement('button');

@@ -171,8 +171,10 @@
     border: 2px solid var(--ink); border-radius: 12px;
     transition: background .15s, color .15s;
   }
-  .opt:hover { background: var(--ink); color: #fff; }
-  .opt:hover rt { color: #ffd9d6; }
+  @media (hover: hover) {
+    .opt:hover { background: var(--ink); color: #fff; }
+    .opt:hover rt { color: #ffd9d6; }
+  }
   button:focus-visible, input:focus-visible { outline: 3px solid var(--yolk); outline-offset: 2px; }
 
   /* ── 點餐面板：這個遊戲的招牌元素 ── */
@@ -958,6 +960,12 @@ async function showLeaderboard() {
 /* ══════════════════════════════════════
    遊戲主體
 ══════════════════════════════════════ */
+/* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
+const NEXT_LABEL = {
+  GREET: from => from === 'PHONE' ? '掛掉電話，繼續招呼客人' : '招呼下一位客人', HEAR: '聽客人說', PICKUP: '聽客人說',
+  ORDER: '寫點單', DINE: '接著問客人', PRICE: '跟客人算錢', CHANGE: '收錢', BYE: '把早餐交給客人', PHONE: '接電話', END: '繼續顧店'
+};
+
 const Game = {
   state: 'START',
   playerName: '你',
@@ -1213,8 +1221,10 @@ const Game = {
       if (c.tries === 1) this.good('點單一次就全對！', '¡La comanda salió perfecta a la primera!', 'The order was perfect on the first try!');
       this.thoughtFirst = true;
       this.thought = [L(`我：好的，${tk.join('、')}，馬上來！`, `Muy bien: ${esList(tk)}. ¡Enseguida!`, `OK: ${enList(tk)}. Coming right up!`)];
+      const before = this.state;
       this.state = c.pickup ? 'PRICE' : 'DINE';
       this.visit += 1;
+      this.maybeTrans(before);
       this.render(); return;
     }
     const rest = [...c.target];
@@ -1504,7 +1514,35 @@ const Game = {
     };
   },
 
+  /* ── 換關卡：收起清單和右側分頁 ── */
+  closePanels() {
+    for (const k of ['showList', 'showPhone']) if (this[k]) { this[k] = false; const b = document.getElementById(k === 'showList' ? 'btn-list' : 'btn-phone'); if (b) b.setAttribute('aria-pressed', 'false'); }
+    Hints.toggle(false); Vocab.toggle(false); Log.toggle(false);
+  },
+  /* ── 過場：上一關的結果自己一頁，按一句情境句再進下一關 ── */
+  get st0() { return this.state === '_TRANS' && this._trans ? this._trans.to : this.state; },
+  transLabel() {
+    const t = this._trans, f = NEXT_LABEL[t.to];
+    return (typeof f === 'function' ? f(t.from, this.task) : f) || NEXT_LABEL._default || '繼續';
+  },
+  maybeTrans(before, extra) {
+    if (this.state === before && !extra) return;
+    this.closePanels();
+    if ((this.thought || this.feedback.length) && this.state !== 'RESULT') {
+      this._trans = { from: before, to: this.state, ci: extra && extra.ci, toCi: this.ci };
+      this.state = '_TRANS';
+    }
+  },
+
   handleChoice(choice) {
+    if (this.state === '_TRANS') {          // 離開過場，進下一關
+      const t = this._trans; this._trans = null;
+      Tr.closeAll(); Speech.stop();
+      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
+      if (this.updateCash) this.updateCash();
+      if (document.getElementById('game-window').classList.contains('active')) this.render();
+      return;
+    }
     const cfg = this.getConfig()[this.state];
     Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
     Speech.stop();
@@ -1514,10 +1552,18 @@ const Game = {
     cfg.next(choice);
     this.thoughtFirst = this.state !== before || this.ci !== beforeCi;   // 換關卡時，過場的話放在對話前面
     if (this.thoughtFirst) this.visit += 1;
+    this.maybeTrans(before, this.ci !== beforeCi ? { ci: beforeCi } : null);
     if (document.getElementById('game-window').classList.contains('active')) this.render();
   },
 
   render() {
+    if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果
+      const t = this._trans;
+      this.state = t.from; if (t.ci != null) this.ci = t.ci;
+      this._transMode = true;
+      try { this.render(); } finally { this._transMode = false; this.state = '_TRANS'; this.ci = t.toCi; }
+      return;
+    }
     const cfg = this.getConfig()[this.state];
     if (!cfg) { console.error('狀態錯誤：' + this.state); return; }
     const val = v => typeof v === 'function' ? v() : v;
@@ -1525,7 +1571,7 @@ const Game = {
     this.setPlace(cfg.place || 'shop', val(cfg.clock));
 
     // END 的 dialogue 會決定結局，所以只算一次
-    const raw = this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
+    const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
     if (this.IMAGES[this.state]) {
       let [src, emoji] = this.IMAGES[this.state];
       if (this.state === 'END' && !this._endGood) [src, emoji] = ['images/end_bad.jpg', '😅'];
@@ -1539,6 +1585,7 @@ const Game = {
 
     this._tr = []; this._spk = [];
     let html = cfg.html ? cfg.html() : '';
+    if (this._transMode) html = '';
     const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
     const main = this.formatText(raw);
     html += this.thoughtFirst ? th + main : main + th;
@@ -1554,9 +1601,9 @@ const Game = {
 
     const area = document.getElementById('options-area');
     area.className = '';
-    if (cfg.pad) { area.classList.add('pad'); area.innerHTML = this.padHTML(); return; }
+    if (cfg.pad && !this._transMode) { area.classList.add('pad'); area.innerHTML = this.padHTML(); return; }
     area.innerHTML = '';
-    const opts = val(cfg.options);
+    const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
     area.classList.toggle('single', opts.length === 1 || opts.some(o => o.length > 12));
     opts.forEach(opt => {
       const btn = document.createElement('button');
