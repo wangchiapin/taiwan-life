@@ -101,6 +101,7 @@
 <div id="hud">
   <span class="title">🗺️ 台灣生活地圖</span>
   <button id="who" title="改名字／語言 · Cambiar nombre o idioma"></button>
+  <button id="btn-music" onclick="Music.toggle()">🎵</button>
   <button id="btn-reset"></button>
   <button id="btn-back" onclick="location.href='../'"></button>
 </div>
@@ -119,6 +120,90 @@
 </div>
 
 <script>
+/* ══════════════════════════════════════
+   背景音樂：程式即時合成的 8-bit 小曲，不需要音檔
+   🎵 按鈕開關（所有遊戲和地圖共用設定）；中文朗讀時自動變小聲；切到別的分頁就暫停
+══════════════════════════════════════ */
+const Music = {
+  KEY: 'taiwan_music', VOL: 0.12,
+  on: true, ctx: null, master: null, timer: null, step: 0, nextT: 0, song: null, ducked: false, events: null,
+  init(song) {
+    this.song = song;
+    try { if (localStorage.getItem(this.KEY) === 'off') this.on = false; } catch (e) {}
+    this.events = song.tracks.map(tr => this.parse(tr.notes));
+    this.paint();
+    const go = () => { if (this.on) this.start(); };
+    addEventListener('pointerdown', go, { once: true }); addEventListener('keydown', go, { once: true });
+    document.addEventListener('visibilitychange', () => { if (this.ctx) document.hidden ? this.ctx.suspend() : (this.on && this.timer && this.ctx.resume()); });
+  },
+  /* 一個字代表一個八分音符：C5、F#4、Bb3＝音；-＝延長；.＝休止；k s h＝大鼓、小鼓、鈸 */
+  parse(str) {
+    const tk = str.split(/\s+/).filter(x => x && x !== '|'), ev = [];
+    const SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+    tk.forEach((x, i) => {
+      if (x === '-' || x === '.') return;
+      let len = 1; while (tk[i + len] === '-') len++;
+      const m = x.match(/^([A-G])([#b]?)(\d)$/);
+      ev[i] = m ? { midi: 12 * (+m[3] + 1) + SEMI[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0), len } : { drum: x, len };
+    });
+    ev.n = tk.length; return ev;
+  },
+  start() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      this.ctx = new AC(); this.master = this.ctx.createGain(); this.master.gain.value = 0; this.master.connect(this.ctx.destination);
+      const len = this.ctx.sampleRate * 0.3, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      this.noise = buf;
+    }
+    this.ctx.resume();
+    this.fade(this.ducked ? 0.15 : 1);
+    if (!this.timer) { this.step = 0; this.nextT = this.ctx.currentTime + 0.1; this.timer = setInterval(() => this.tick(), 60); }
+  },
+  stop() { if (!this.ctx) return; this.fade(0); clearInterval(this.timer); this.timer = null; },
+  toggle() {
+    this.on = !this.on;
+    try { localStorage.setItem(this.KEY, this.on ? 'on' : 'off'); } catch (e) {}
+    this.on ? this.start() : this.stop(); this.paint();
+  },
+  duck(d) { this.ducked = d; if (this.ctx && this.on && this.timer) this.fade(d ? 0.15 : 1); },
+  fade(x) { const g = this.master.gain, t = this.ctx.currentTime; g.cancelScheduledValues(t); g.setTargetAtTime(x * this.VOL, t, 0.12); },
+  paint() {
+    const b = document.getElementById('btn-music'); if (!b) return;
+    b.textContent = this.on ? '🎵' : '🔇';
+    b.title = this.on ? '關掉音樂 · Silenciar música' : '打開音樂 · Activar música'; b.setAttribute('aria-label', b.title);
+  },
+  tick() {
+    const s = this.song, d = 60 / s.bpm / 2;
+    while (this.nextT < this.ctx.currentTime + 0.3) {
+      s.tracks.forEach((tr, k) => { const ev = this.events[k], e = ev[this.step % ev.n]; if (e) this.play(tr, e, this.nextT, d); });
+      this.nextT += d; this.step++;
+    }
+  },
+  play(tr, e, t, d) {
+    const c = this.ctx, g = c.createGain(); g.connect(this.master);
+    const v = tr.vol ?? 0.5;
+    if (e.drum) {
+      if (e.drum === 'k') {
+        const o = c.createOscillator(); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(40, t + 0.12);
+        g.gain.setValueAtTime(v * 1.4, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.15); o.connect(g); o.start(t); o.stop(t + 0.16);
+      } else {
+        const n = c.createBufferSource(), f = c.createBiquadFilter(); n.buffer = this.noise;
+        f.type = 'highpass'; f.frequency.value = e.drum === 'h' ? 7000 : 1800;
+        const dur = e.drum === 'h' ? 0.04 : 0.1;
+        g.gain.setValueAtTime(v * (e.drum === 'h' ? 0.35 : 0.7), t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+        n.connect(f); f.connect(g); n.start(t); n.stop(t + dur + 0.01);
+      }
+      return;
+    }
+    const o = c.createOscillator(), len = e.len * d * 0.92;
+    o.type = tr.wave || 'square'; o.frequency.value = 440 * Math.pow(2, (e.midi - 69) / 12);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + 0.01);
+    g.gain.setValueAtTime(v * 0.7, t + Math.min(0.08, len * 0.5)); g.gain.exponentialRampToValueAtTime(0.001, t + len);
+    o.connect(g); o.start(t); o.stop(t + len + 0.02);
+  }
+};
+
 /* ══════════════════════════════════════
    場景（folder = scene = postMessage 的 scene）
    新增遊戲：在 SCENES 加一筆，並放在 BUILD_SLOTS 的空位
@@ -476,6 +561,7 @@ card.querySelector('.c-say').onclick = () => {
     const u = new SpeechSynthesisUtterance(card.dataset.say.replace(/[（）()]/g, ''));
     const v = speechSynthesis.getVoices().find(v => /zh[-_]TW/i.test(v.lang)) || speechSynthesis.getVoices().find(v => /^zh/i.test(v.lang));
     u.lang = v ? v.lang : 'zh-TW'; if (v) u.voice = v; u.rate = 0.9;
+    Music.duck(true); u.onend = u.onerror = () => Music.duck(false);
     speechSynthesis.speak(u);
   } catch (e) {}
 };
@@ -679,12 +765,14 @@ function openGame(b) {
   document.getElementById('ov-title').textContent = (b.sc.virtual ? '⚠️' : b.sc.emoji) + ' ' + b.sc.zh + ' · ' + X(b.sc.es, b.sc.en);
   frame.src = '../games/' + b.sc.id + '/index.html?' + q;
   ov.classList.add('on');
+  Music.stop();                                   // 遊戲有自己的音樂
   try { gtag('event', 'map_enter', { scene: b.sc.id }); } catch (e) {}
 }
 function closeGame() {
   if (!current) return;
   const b = current; current = null;
   ov.classList.remove('on'); frame.src = 'about:blank';
+  if (Music.on) Music.start();
   P.x = b.out.x; P.y = b.out.y; P.dir = 'down'; P.moving = null; P.path = []; P.locked = false;
   if (b.sc.virtual) respawnEvent(P.x, P.y);
   updateHud();
@@ -770,6 +858,10 @@ if (S.name) document.getElementById('intro').style.display = 'none';
 document.getElementById('who').onclick = () => { document.getElementById('name').value = S.name; document.getElementById('intro').style.display = 'flex'; };
 window.WorldMap = { EV, VEHICLES, WALKERS, AMI, respawnEvent, P, S, SCENES, buildings, goTo, openGame, closeGame };
 requestAnimationFrame(tick);
+Music.init({ bpm: 112, tracks: [
+  { wave: 'square', vol: 0.32, notes: 'E5 - G5 - A5 G5 E5 - | D5 - E5 - G5 - - . | E5 - G5 - A5 C6 A5 G5 | E5 - D5 - C5 - - .' },
+  { wave: 'triangle', vol: 0.7, notes: 'C3 . G3 . C3 . G3 . | A2 . E3 . A2 . E3 . | F2 . C3 . F2 . C3 . | G2 . D3 . G2 . B2 .' },
+  { vol: 0.45, notes: 'k . h . s . h . k k h . s . h .' }] });
 </script>
 </body>
 </html>

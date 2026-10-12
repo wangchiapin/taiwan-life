@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>背景音樂試聽 · Música de fondo</title>
+<style>
+  :root { --ink:#24202e; --bg:#f4f1ea; --card:#fff; --line:#ddd8e6; --accent:#cf3a24; --muted:#645e72; }
+  @media (prefers-color-scheme: dark) { :root { --ink:#f1eee8; --bg:#1c1a24; --card:#2a2735; --line:#403c4f; --muted:#b4aec4; } }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:'Noto Sans TC','Segoe UI',sans-serif; padding:32px 16px; }
+  main { max-width:560px; margin:0 auto; }
+  h1 { margin:0 0 4px; font-size:26px; } p { color:var(--muted); margin:0 0 20px; }
+  ul { list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+  button { width:100%; text-align:left; padding:14px 16px; border:2px solid var(--line); border-radius:14px; background:var(--card); color:inherit; font:inherit; cursor:pointer; }
+  button[aria-pressed="true"] { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent) inset; }
+  button b { font-size:18px; } button small { display:block; color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>🎵 背景音樂試聽</h1>
+  <p>點一下播放，再點一下停止 · Toca para escuchar, otra vez para parar.</p>
+  <ul>
+    <li><button data-k="map"><b>🗺️ 地圖</b><small>Mapa</small></button></li>
+    <li><button data-k="drinks"><b>🧋 飲料店</b><small>Tienda de bebidas</small></button></li>
+    <li><button data-k="reserva"><b>📞 打電話訂位</b><small>Reserva por teléfono</small></button></li>
+    <li><button data-k="breakfast"><b>🍳 早餐店</b><small>Desayunería</small></button></li>
+    <li><button data-k="parcel"><b>📦 超商領包裹</b><small>Tienda de conveniencia</small></button></li>
+    <li><button data-k="nightmarket"><b>🏮 逛夜市</b><small>Mercado nocturno</small></button></li>
+    <li><button data-k="bakery"><b>🥐 麵包店</b><small>Panadería</small></button></li>
+    <li><button data-k="clinic"><b>🏥 看醫生</b><small>Clínica</small></button></li>
+    <li><button data-k="mrt"><b>🚇 搭捷運</b><small>Metro</small></button></li>
+    <li><button data-k="street"><b>🚶 走在路上</b><small>En la calle</small></button></li>
+  </ul>
+</main>
+<script>
+/* ══════════════════════════════════════
+   背景音樂：程式即時合成的 8-bit 小曲，不需要音檔
+   🎵 按鈕開關（所有遊戲和地圖共用設定）；中文朗讀時自動變小聲；切到別的分頁就暫停
+══════════════════════════════════════ */
+const Music = {
+  KEY: 'taiwan_music', VOL: 0.12,
+  on: true, ctx: null, master: null, timer: null, step: 0, nextT: 0, song: null, ducked: false, events: null,
+  init(song) {
+    this.song = song;
+    try { if (localStorage.getItem(this.KEY) === 'off') this.on = false; } catch (e) {}
+    this.events = song.tracks.map(tr => this.parse(tr.notes));
+    this.paint();
+    const go = () => { if (this.on) this.start(); };
+    addEventListener('pointerdown', go, { once: true }); addEventListener('keydown', go, { once: true });
+    document.addEventListener('visibilitychange', () => { if (this.ctx) document.hidden ? this.ctx.suspend() : (this.on && this.timer && this.ctx.resume()); });
+  },
+  /* 一個字代表一個八分音符：C5、F#4、Bb3＝音；-＝延長；.＝休止；k s h＝大鼓、小鼓、鈸 */
+  parse(str) {
+    const tk = str.split(/\s+/).filter(x => x && x !== '|'), ev = [];
+    const SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+    tk.forEach((x, i) => {
+      if (x === '-' || x === '.') return;
+      let len = 1; while (tk[i + len] === '-') len++;
+      const m = x.match(/^([A-G])([#b]?)(\d)$/);
+      ev[i] = m ? { midi: 12 * (+m[3] + 1) + SEMI[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0), len } : { drum: x, len };
+    });
+    ev.n = tk.length; return ev;
+  },
+  start() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      this.ctx = new AC(); this.master = this.ctx.createGain(); this.master.gain.value = 0; this.master.connect(this.ctx.destination);
+      const len = this.ctx.sampleRate * 0.3, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      this.noise = buf;
+    }
+    this.ctx.resume();
+    this.fade(this.ducked ? 0.15 : 1);
+    if (!this.timer) { this.step = 0; this.nextT = this.ctx.currentTime + 0.1; this.timer = setInterval(() => this.tick(), 60); }
+  },
+  stop() { if (!this.ctx) return; this.fade(0); clearInterval(this.timer); this.timer = null; },
+  toggle() {
+    this.on = !this.on;
+    try { localStorage.setItem(this.KEY, this.on ? 'on' : 'off'); } catch (e) {}
+    this.on ? this.start() : this.stop(); this.paint();
+  },
+  duck(d) { this.ducked = d; if (this.ctx && this.on && this.timer) this.fade(d ? 0.15 : 1); },
+  fade(x) { const g = this.master.gain, t = this.ctx.currentTime; g.cancelScheduledValues(t); g.setTargetAtTime(x * this.VOL, t, 0.12); },
+  paint() {
+    const b = document.getElementById('btn-music'); if (!b) return;
+    b.textContent = this.on ? '🎵' : '🔇';
+    b.title = this.on ? '關掉音樂 · Silenciar música' : '打開音樂 · Activar música'; b.setAttribute('aria-label', b.title);
+  },
+  tick() {
+    const s = this.song, d = 60 / s.bpm / 2;
+    while (this.nextT < this.ctx.currentTime + 0.3) {
+      s.tracks.forEach((tr, k) => { const ev = this.events[k], e = ev[this.step % ev.n]; if (e) this.play(tr, e, this.nextT, d); });
+      this.nextT += d; this.step++;
+    }
+  },
+  play(tr, e, t, d) {
+    const c = this.ctx, g = c.createGain(); g.connect(this.master);
+    const v = tr.vol ?? 0.5;
+    if (e.drum) {
+      if (e.drum === 'k') {
+        const o = c.createOscillator(); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(40, t + 0.12);
+        g.gain.setValueAtTime(v * 1.4, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.15); o.connect(g); o.start(t); o.stop(t + 0.16);
+      } else {
+        const n = c.createBufferSource(), f = c.createBiquadFilter(); n.buffer = this.noise;
+        f.type = 'highpass'; f.frequency.value = e.drum === 'h' ? 7000 : 1800;
+        const dur = e.drum === 'h' ? 0.04 : 0.1;
+        g.gain.setValueAtTime(v * (e.drum === 'h' ? 0.35 : 0.7), t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+        n.connect(f); f.connect(g); n.start(t); n.stop(t + dur + 0.01);
+      }
+      return;
+    }
+    const o = c.createOscillator(), len = e.len * d * 0.92;
+    o.type = tr.wave || 'square'; o.frequency.value = 440 * Math.pow(2, (e.midi - 69) / 12);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + 0.01);
+    g.gain.setValueAtTime(v * 0.7, t + Math.min(0.08, len * 0.5)); g.gain.exponentialRampToValueAtTime(0.001, t + len);
+    o.connect(g); o.start(t); o.stop(t + len + 0.02);
+  }
+};
+
+const SONGS = {
+  map: { bpm: 112, tracks: [
+  { wave: 'square', vol: 0.32, notes: 'E5 - G5 - A5 G5 E5 - | D5 - E5 - G5 - - . | E5 - G5 - A5 C6 A5 G5 | E5 - D5 - C5 - - .' },
+  { wave: 'triangle', vol: 0.7, notes: 'C3 . G3 . C3 . G3 . | A2 . E3 . A2 . E3 . | F2 . C3 . F2 . C3 . | G2 . D3 . G2 . B2 .' },
+  { vol: 0.45, notes: 'k . h . s . h . k k h . s . h .' }] },
+  drinks: { bpm: 124, tracks: [
+  { wave: 'square', vol: 0.3, notes: 'B4 D5 E5 D5 B4 - G4 - | E5 - D5 B4 D5 - - . | C5 E5 G5 E5 D5 - B4 - | A4 B4 D5 - - - . .' },
+  { wave: 'triangle', vol: 0.7, notes: 'G2 . G2 D3 G2 . D3 . | E2 . E2 B2 E2 . B2 . | C3 . C3 G2 C3 . G2 . | D3 . D3 A2 D3 . F#3 .' },
+  { vol: 0.45, notes: 'k . h k s . h . k . h k s h h .' }] },
+  reserva: { bpm: 96, tracks: [
+  { wave: 'sine', vol: 0.5, notes: 'E5 - G5 - B5 - A5 - | G5 - E5 - C5 - - . | F5 - A5 - C6 - B5 - | A5 - G5 - - - . .' },
+  { wave: 'triangle', vol: 0.6, notes: 'C3 . . E3 . . G3 . | A2 . . C3 . . E3 . | D3 . . F3 . . A3 . | G2 . . B2 . . D3 .' },
+  { vol: 0.25, notes: 'h . h h h . h h' }] },
+  breakfast: { bpm: 116, tracks: [
+  { wave: 'square', vol: 0.28, notes: 'F#5 - A5 - D6 - A5 - | E5 - A5 - C#6 - A5 - | F#5 - D5 - B4 - D5 - | G5 - F#5 - E5 - - .' },
+  { wave: 'triangle', vol: 0.7, notes: 'D3 . A2 . D3 . A2 . | A2 . E3 . A2 . E3 . | B2 . F#3 . B2 . F#3 . | G2 . D3 . A2 . C#3 .' },
+  { vol: 0.4, notes: 'k . h . s . h h' }] },
+  parcel: { bpm: 118, tracks: [
+  { wave: 'square', vol: 0.28, notes: 'C5 E5 G5 E5 C6 - G5 - | A5 G5 E5 G5 D5 - - . | C5 E5 G5 E5 A5 - G5 - | E5 D5 C5 D5 C5 - - .' },
+  { wave: 'triangle', vol: 0.7, notes: 'C3 . . . G2 . . . | F2 . . . G2 . . . | C3 . . . F2 . . . | G2 . . . C3 . . .' },
+  { vol: 0.4, notes: 'k . h . s . h .' }] },
+  nightmarket: { bpm: 120, tracks: [
+  { wave: 'square', vol: 0.28, notes: 'D5 E5 G5 E5 D5 B4 A4 B4 | D5 - E5 D5 B4 - G4 - | A4 B4 D5 E5 G5 E5 D5 B4 | A4 - G4 - - - . .' },
+  { wave: 'triangle', vol: 0.7, notes: 'G2 . D3 . G2 . D3 . | E2 . B2 . E2 . B2 . | C3 . G2 . C3 . G2 . | D3 . A2 . G2 . . .' },
+  { vol: 0.5, notes: 'k . s k k . s .' }] },
+  bakery: { bpm: 100, tracks: [
+  { wave: 'triangle', vol: 0.55, notes: 'A4 - C5 - F5 - | E5 - - - G5 - | F5 - D5 - A4 - | Bb4 - - - C5 .' },
+  { wave: 'triangle', vol: 0.6, notes: 'F2 . C3 . C3 . | C3 . G3 . G3 . | D3 . A3 . A3 . | Bb2 . F3 . C3 .' },
+  { vol: 0.3, notes: 'k . h . h .' }] },
+  clinic: { bpm: 84, tracks: [
+  { wave: 'sine', vol: 0.55, notes: 'E5 - - - C5 - - - | A4 - - - C5 - D5 - | E5 - - - G5 - - - | D5 - - - - - . .' },
+  { wave: 'triangle', vol: 0.55, notes: 'A2 - - - E3 - - - | F2 - - - C3 - - - | C3 - - - G2 - - - | G2 - - - D3 - - -' },
+  { vol: 0.2, notes: 'h . . . h . . .' }] },
+  mrt: { bpm: 128, tracks: [
+  { wave: 'square', vol: 0.26, notes: 'G5 . E5 . C5 . E5 G5 | D5 . B4 . G4 . B4 D5 | E5 . C5 . A4 . C5 E5 | F5 - E5 - D5 - . .' },
+  { wave: 'triangle', vol: 0.65, notes: 'C3 C3 C3 C3 C3 C3 C3 C3 | G2 G2 G2 G2 G2 G2 G2 G2 | A2 A2 A2 A2 A2 A2 A2 A2 | F2 F2 F2 F2 G2 G2 G2 G2' },
+  { vol: 0.45, notes: 'k . h . s . h . k . h k s . h h' }] },
+  street: { bpm: 132, tracks: [
+  { wave: 'square', vol: 0.26, notes: 'A4 C5 E5 C5 D5 - C5 B4 | A4 - E4 - G4 - A4 - | C5 D5 E5 G5 E5 - D5 C5 | B4 - G4 - A4 - - .' },
+  { wave: 'triangle', vol: 0.65, notes: 'A2 A2 . A2 E3 . A2 . | F2 F2 . F2 C3 . F2 . | C3 C3 . C3 G3 . C3 . | G2 G2 . G2 E3 . E3 .' },
+  { vol: 0.45, notes: 'k . h k s . h .' }] }
+};
+Music.paint = () => {};
+let cur = null;
+document.querySelectorAll('button[data-k]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('button[data-k]').forEach(x => x.setAttribute('aria-pressed', 'false'));
+  Music.stop();
+  if (cur === b.dataset.k) { cur = null; return; }
+  cur = b.dataset.k; b.setAttribute('aria-pressed', 'true');
+  Music.song = SONGS[cur]; Music.events = Music.song.tracks.map(tr => Music.parse(tr.notes));
+  Music.on = true; Music.start();
+});
+</script>
+</body>
+</html>
