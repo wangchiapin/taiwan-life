@@ -3,7 +3,7 @@ import sys
 P=os.path.join(os.path.dirname(os.path.abspath(__file__)),'../../games/parcel/index.html')
 s=open(P,encoding='utf-8').read()
 # 每一筆：(舊字串, 新字串[, 預期出現次數])；找不到就停
-# 旁白提示：086 已刪（Ben 決定，見 apply_parcel_086.py 的做法：addMistake 不帶 thought）；其餘 063 067 094 098 141 待 Ben 決定，先不動
+# 旁白提示：086 已刪（Ben 決定，見 apply_parcel_086.py 的做法：addMistake 不帶 thought）；067、141 也已刪（Ben 決定，同樣把 addMistake 的提示話拿掉）；063 094 098 保留
 R=[
 # 003 開頭介紹（半形「!」改全形）
 ("你租了房東太太家的一個房間，已經住一陣子了。今天早上，房東太太出門上班前，請你去巷口的超商幫忙領包裹。看清楚簡訊再去！",

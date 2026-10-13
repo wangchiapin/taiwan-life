@@ -1286,8 +1286,7 @@ const Game = {
         next: c => {
           if (c !== `${t.momName}。`) {
             Game.addMistake(M('取件人的名字說錯了。', 'El nombre del destinatario no es correcto.', 'That is not the recipient\'s name.'),
-              [L('店員：這個名字跟包裹上的不一樣喔。', 'Este nombre no coincide con el del paquete.', "That name doesn't match the one on the parcel."),
-               L('（房東太太的名字是哪幾個字？）', '(¿Cómo se escribe el nombre de la casera?)', "(Which characters make up the landlady's name?)")]); return;
+              [L('店員：這個名字跟包裹上的不一樣喔。', 'Este nombre no coincide con el del paquete.', "That name doesn't match the one on the parcel.")]); return;
           }
           Game._wrongBox = Math.random() < 0.4;
           Game.state = 'M_CHECK';
@@ -1480,8 +1479,7 @@ const Game = {
         next: c => {
           const n = { '一百元': 100, '三百元': 300, '五百元': 500, '一千元': 1000 }[c];
           if (n !== t.cardTop) {
-            Game.addMistake(M(`房東太太說加值${t.cardTop}元。`, 'La casera dijo otra cantidad.', 'The landlady said a different amount.'),
-              [L('（房東太太說加多少？看一下LINE……）', '(¿Cuánto dijo la casera? Mira el LINE…)', '(How much did the landlady say? Check LINE…)')]); return;
+            Game.addMistake(M(`房東太太說加值${t.cardTop}元。`, 'La casera dijo otra cantidad.', 'The landlady said a different amount.')); return;
           }
           g.card = n; Game.state = 'CARD_TAP';
         }
