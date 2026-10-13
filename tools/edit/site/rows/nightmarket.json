@@ -1,0 +1,1070 @@
+{
+ "game": "nightmarket",
+ "title": "夜市購物",
+ "rows": [
+  {
+   "id": "nightmarket-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "逛夜市殺價"
+  },
+  {
+   "id": "nightmarket-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "晚上，你和同事 Ami、Ami 的奶奶一起逛夜市。Ami 帶奶奶去洗手間，把一千塊交給你，請你幫忙買東西。會殺價，就能省下錢！"
+  },
+  {
+   "id": "nightmarket-003",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "去下一攤"
+  },
+  {
+   "id": "nightmarket-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "開始逛夜市"
+  },
+  {
+   "id": "nightmarket-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到衣服攤"
+  },
+  {
+   "id": "nightmarket-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到飾品攤"
+  },
+  {
+   "id": "nightmarket-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "開始殺價"
+  },
+  {
+   "id": "nightmarket-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "準備付錢"
+  },
+  {
+   "id": "nightmarket-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到雞排攤"
+  },
+  {
+   "id": "nightmarket-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "接電話"
+  },
+  {
+   "id": "nightmarket-011",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "回到衣服攤"
+  },
+  {
+   "id": "nightmarket-012",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "去找Ami和奶奶"
+  },
+  {
+   "id": "nightmarket-013",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "夜市"
+  },
+  {
+   "id": "nightmarket-014",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "衣服攤"
+  },
+  {
+   "id": "nightmarket-015",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "飾品攤"
+  },
+  {
+   "id": "nightmarket-016",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "雞排攤"
+  },
+  {
+   "id": "nightmarket-017",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "通話中 · "
+  },
+  {
+   "id": "nightmarket-018",
+   "kind": "台詞",
+   "stage": "Ami 交代的話",
+   "stageName": "Ami 交代的話",
+   "who": "Ami",
+   "zh": "〔名字〕，我帶奶奶去洗手間，這一千塊先給你，幫我們買東西，好不好？"
+  },
+  {
+   "id": "nightmarket-019",
+   "kind": "台詞",
+   "stage": "Ami 交代的話",
+   "stageName": "Ami 交代的話",
+   "who": "Ami",
+   "zh": "要買的我都寫在清單上了。衣服和飾品可以殺價，但是吃的不要殺價喔，老闆會不高興。"
+  },
+  {
+   "id": "nightmarket-020",
+   "kind": "台詞",
+   "stage": "Ami 交代的話",
+   "stageName": "Ami 交代的話",
+   "who": "Ami",
+   "zh": "還有，殺價的時候，如果你說要「再看看」，老闆常常就會降價了！"
+  },
+  {
+   "id": "nightmarket-021",
+   "kind": "台詞",
+   "stage": "衣服攤老闆開場",
+   "stageName": "衣服攤老闆開場",
+   "who": "老闆",
+   "zh": "來喔來喔！T恤一件〔價錢〕，每個尺寸都一樣價錢！"
+  },
+  {
+   "id": "nightmarket-022",
+   "kind": "旁白",
+   "stage": "Ami 來電",
+   "stageName": "Ami 來電",
+   "who": "",
+   "zh": "（你的手機響了，是Ami。）"
+  },
+  {
+   "id": "nightmarket-023",
+   "kind": "台詞",
+   "stage": "Ami 來電",
+   "stageName": "Ami 來電",
+   "who": "Ami",
+   "zh": "〔名字〕，東西買好了嗎？我弟弟剛剛傳訊息給我，他說他最近長高了，〔尺寸〕號可能太小了！"
+  },
+  {
+   "id": "nightmarket-024",
+   "kind": "台詞",
+   "stage": "Ami 來電",
+   "stageName": "Ami 來電",
+   "who": "Ami",
+   "zh": "可以幫他換〔大一號的尺寸〕號嗎？拜託拜託！"
+  },
+  {
+   "id": "nightmarket-025",
+   "kind": "購物清單",
+   "stage": "購物清單",
+   "stageName": "購物清單",
+   "who": "",
+   "zh": "弟弟：〔T恤顏色〕T恤，〔尺寸〕號"
+  },
+  {
+   "id": "nightmarket-026",
+   "kind": "購物清單",
+   "stage": "購物清單",
+   "stageName": "購物清單",
+   "who": "",
+   "zh": "妹妹：〔髮夾顏色〕的髮夾，一個"
+  },
+  {
+   "id": "nightmarket-027",
+   "kind": "購物清單",
+   "stage": "購物清單",
+   "stageName": "購物清單",
+   "who": "",
+   "zh": "晚餐：雞排〔份數〕份，一份不要辣（奶奶的），要切"
+  },
+  {
+   "id": "nightmarket-028",
+   "kind": "購物清單",
+   "stage": "購物清單",
+   "stageName": "購物清單",
+   "who": "",
+   "zh": "衣服、飾品可以殺價，吃的不要殺價。"
+  },
+  {
+   "id": "nightmarket-029",
+   "kind": "選項",
+   "stage": "殺價選項",
+   "stageName": "殺價選項",
+   "who": "我",
+   "zh": "老闆，算便宜一點啦！"
+  },
+  {
+   "id": "nightmarket-030",
+   "kind": "選項",
+   "stage": "殺價選項",
+   "stageName": "殺價選項",
+   "who": "我",
+   "zh": "〔價錢〕元可以嗎？"
+  },
+  {
+   "id": "nightmarket-031",
+   "kind": "選項",
+   "stage": "殺價選項",
+   "stageName": "殺價選項",
+   "who": "我",
+   "zh": "我再看看好了。"
+  },
+  {
+   "id": "nightmarket-032",
+   "kind": "選項",
+   "stage": "殺價選項",
+   "stageName": "殺價選項",
+   "who": "我",
+   "zh": "好，〔價錢〕元，我買了。"
+  },
+  {
+   "id": "nightmarket-033",
+   "kind": "台詞",
+   "stage": "殺價：老闆回應",
+   "stageName": "殺價：老闆回應",
+   "who": "老闆／老闆娘",
+   "zh": "好啦好啦，看你很有誠意，〔價錢〕元！"
+  },
+  {
+   "id": "nightmarket-034",
+   "kind": "台詞",
+   "stage": "殺價：老闆回應",
+   "stageName": "殺價：老闆回應",
+   "who": "老闆／老闆娘",
+   "zh": "已經是最便宜的了啦！"
+  },
+  {
+   "id": "nightmarket-035",
+   "kind": "旁白",
+   "stage": "殺價：老闆回應",
+   "stageName": "殺價：老闆回應",
+   "who": "",
+   "zh": "（你轉身要走……）"
+  },
+  {
+   "id": "nightmarket-036",
+   "kind": "台詞",
+   "stage": "殺價：老闆回應",
+   "stageName": "殺價：老闆回應",
+   "who": "老闆／老闆娘",
+   "zh": "好啊，慢慢看，喜歡再回來喔！"
+  },
+  {
+   "id": "nightmarket-037",
+   "kind": "旁白",
+   "stage": "殺價：老闆回應",
+   "stageName": "殺價：老闆回應",
+   "who": "",
+   "zh": "（老闆沒有叫住你。你走了幾步，又走回來。）"
+  },
+  {
+   "id": "nightmarket-038",
+   "kind": "台詞",
+   "stage": "殺價：老闆回應",
+   "stageName": "殺價：老闆回應",
+   "who": "老闆／老闆娘",
+   "zh": "欸欸欸，等一下！〔價錢〕元賣你啦！"
+  },
+  {
+   "id": "nightmarket-039",
+   "kind": "綠卡說明",
+   "stage": "殺價：老闆回應",
+   "stageName": "殺價：老闆回應",
+   "who": "",
+   "zh": "你說了「再看看」，老闆就降價了！"
+  },
+  {
+   "id": "nightmarket-040",
+   "kind": "台詞",
+   "stage": "殺價：老闆回應",
+   "stageName": "殺價：老闆回應",
+   "who": "老闆／老闆娘",
+   "zh": "這已經是最低價了，不買就算了。"
+  },
+  {
+   "id": "nightmarket-041",
+   "kind": "台詞",
+   "stage": "殺價：老闆回應",
+   "stageName": "殺價：老闆回應",
+   "who": "老闆／老闆娘",
+   "zh": "唉，好啦好啦，算你〔價錢〕元！"
+  },
+  {
+   "id": "nightmarket-042",
+   "kind": "台詞",
+   "stage": "殺價：老闆回應",
+   "stageName": "殺價：老闆回應",
+   "who": "老闆／老闆娘",
+   "zh": "〔價錢〕元太少了啦！〔價錢〕元，不能再少了。"
+  },
+  {
+   "id": "nightmarket-043",
+   "kind": "錯誤說明",
+   "stage": "殺價：老闆回應",
+   "stageName": "殺價：老闆回應",
+   "who": "",
+   "zh": "殺價殺太兇，老闆生氣了。"
+  },
+  {
+   "id": "nightmarket-044",
+   "kind": "台詞",
+   "stage": "殺價：老闆回應",
+   "stageName": "殺價：老闆回應",
+   "who": "老闆／老闆娘",
+   "zh": "〔價錢〕元？你在開玩笑嗎？不二價，〔價錢〕元，要買不買隨便你！"
+  },
+  {
+   "id": "nightmarket-045",
+   "kind": "台詞",
+   "stage": "殺價：老闆回應",
+   "stageName": "殺價：老闆回應",
+   "who": "老闆／老闆娘",
+   "zh": "〔價錢〕元？這樣我會虧本耶！"
+  },
+  {
+   "id": "nightmarket-046",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "Ami 在夜市說的話"
+  },
+  {
+   "id": "nightmarket-047",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "Ami 來電"
+  },
+  {
+   "id": "nightmarket-048",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "衣服攤老闆說的話"
+  },
+  {
+   "id": "nightmarket-049",
+   "kind": "旁白",
+   "stage": "START",
+   "stageName": "開場：Ami 請你買東西",
+   "who": "",
+   "zh": "（週末晚上，你和Ami、Ami的奶奶一起逛夜市，人好多，好熱鬧！）"
+  },
+  {
+   "id": "nightmarket-050",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：Ami 請你買東西",
+   "who": "我",
+   "zh": "好，交給我！"
+  },
+  {
+   "id": "nightmarket-051",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "開場：Ami 請你買東西",
+   "who": "我",
+   "zh": "開始逛夜市"
+  },
+  {
+   "id": "nightmarket-052",
+   "kind": "旁白",
+   "stage": "MAP",
+   "stageName": "選攤位",
+   "who": "",
+   "zh": "（夜市好熱鬧！要先去哪一攤？）"
+  },
+  {
+   "id": "nightmarket-053",
+   "kind": "選項",
+   "stage": "MAP",
+   "stageName": "選攤位",
+   "who": "我",
+   "zh": "去衣服攤"
+  },
+  {
+   "id": "nightmarket-054",
+   "kind": "選項",
+   "stage": "MAP",
+   "stageName": "選攤位",
+   "who": "我",
+   "zh": "去飾品攤"
+  },
+  {
+   "id": "nightmarket-055",
+   "kind": "選項",
+   "stage": "MAP",
+   "stageName": "選攤位",
+   "who": "我",
+   "zh": "去雞排攤"
+  },
+  {
+   "id": "nightmarket-056",
+   "kind": "台詞",
+   "stage": "T_GREET",
+   "stageName": "衣服攤",
+   "who": "老闆",
+   "zh": "喜歡哪一件？"
+  },
+  {
+   "id": "nightmarket-057",
+   "kind": "選項",
+   "stage": "T_GREET",
+   "stageName": "衣服攤",
+   "who": "我",
+   "zh": "黑色的"
+  },
+  {
+   "id": "nightmarket-058",
+   "kind": "選項",
+   "stage": "T_GREET",
+   "stageName": "衣服攤",
+   "who": "我",
+   "zh": "白色的"
+  },
+  {
+   "id": "nightmarket-059",
+   "kind": "選項",
+   "stage": "T_GREET",
+   "stageName": "衣服攤",
+   "who": "我",
+   "zh": "藍色的"
+  },
+  {
+   "id": "nightmarket-060",
+   "kind": "錯誤說明",
+   "stage": "T_GREET",
+   "stageName": "衣服攤",
+   "who": "",
+   "zh": "弟弟要的是〔T恤顏色〕。"
+  },
+  {
+   "id": "nightmarket-061",
+   "kind": "旁白",
+   "stage": "T_GREET",
+   "stageName": "衣服攤",
+   "who": "",
+   "zh": "（等等，清單上寫的是什麼顏色？）"
+  },
+  {
+   "id": "nightmarket-062",
+   "kind": "台詞",
+   "stage": "T_SIZE",
+   "stageName": "衣服攤",
+   "who": "老闆",
+   "zh": "要什麼尺寸？"
+  },
+  {
+   "id": "nightmarket-063",
+   "kind": "錯誤說明",
+   "stage": "T_SIZE",
+   "stageName": "衣服攤",
+   "who": "",
+   "zh": "弟弟穿〔尺寸〕號。"
+  },
+  {
+   "id": "nightmarket-064",
+   "kind": "旁白",
+   "stage": "T_SIZE",
+   "stageName": "衣服攤",
+   "who": "",
+   "zh": "（弟弟穿幾號？看一下清單……）"
+  },
+  {
+   "id": "nightmarket-065",
+   "kind": "台詞",
+   "stage": "A_GREET",
+   "stageName": "飾品攤",
+   "who": "老闆娘",
+   "zh": "髮夾嗎？很可愛喔！一個〔髮夾開價〕元，三個〔髮夾三個的價錢〕元，三個比較划算喔！"
+  },
+  {
+   "id": "nightmarket-066",
+   "kind": "選項",
+   "stage": "A_GREET",
+   "stageName": "飾品攤",
+   "who": "我",
+   "zh": "粉紅色的"
+  },
+  {
+   "id": "nightmarket-067",
+   "kind": "選項",
+   "stage": "A_GREET",
+   "stageName": "飾品攤",
+   "who": "我",
+   "zh": "紫色的"
+  },
+  {
+   "id": "nightmarket-068",
+   "kind": "選項",
+   "stage": "A_GREET",
+   "stageName": "飾品攤",
+   "who": "我",
+   "zh": "黃色的"
+  },
+  {
+   "id": "nightmarket-069",
+   "kind": "錯誤說明",
+   "stage": "A_GREET",
+   "stageName": "飾品攤",
+   "who": "",
+   "zh": "妹妹要的是〔髮夾顏色〕的。"
+  },
+  {
+   "id": "nightmarket-070",
+   "kind": "旁白",
+   "stage": "A_GREET",
+   "stageName": "飾品攤",
+   "who": "",
+   "zh": "（妹妹喜歡什麼顏色？）"
+  },
+  {
+   "id": "nightmarket-071",
+   "kind": "台詞",
+   "stage": "A_QTY",
+   "stageName": "飾品攤",
+   "who": "老闆娘",
+   "zh": "要一個還是三個？三個〔髮夾三個的價錢〕元，很便宜喔！"
+  },
+  {
+   "id": "nightmarket-072",
+   "kind": "選項",
+   "stage": "A_QTY",
+   "stageName": "飾品攤",
+   "who": "我",
+   "zh": "一個就好。"
+  },
+  {
+   "id": "nightmarket-073",
+   "kind": "選項",
+   "stage": "A_QTY",
+   "stageName": "飾品攤",
+   "who": "我",
+   "zh": "那買三個好了。"
+  },
+  {
+   "id": "nightmarket-074",
+   "kind": "錯誤說明",
+   "stage": "A_QTY",
+   "stageName": "飾品攤",
+   "who": "",
+   "zh": "妹妹只要一個，買三個反而花更多錢。"
+  },
+  {
+   "id": "nightmarket-075",
+   "kind": "旁白",
+   "stage": "A_QTY",
+   "stageName": "飾品攤",
+   "who": "",
+   "zh": "（等等，清單上寫一個就好……）"
+  },
+  {
+   "id": "nightmarket-076",
+   "kind": "綠卡說明",
+   "stage": "A_QTY",
+   "stageName": "飾品攤",
+   "who": "",
+   "zh": "你看清單，只買一個。"
+  },
+  {
+   "id": "nightmarket-077",
+   "kind": "台詞",
+   "stage": "HAGGLE",
+   "stageName": "殺價",
+   "who": "老闆／老闆娘",
+   "zh": "〔商品〕〔價錢〕元。"
+  },
+  {
+   "id": "nightmarket-078",
+   "kind": "台詞",
+   "stage": "PAY",
+   "stageName": "付錢",
+   "who": "老闆／老闆娘",
+   "zh": "〔價錢〕元，謝謝！"
+  },
+  {
+   "id": "nightmarket-079",
+   "kind": "台詞",
+   "stage": "PAY",
+   "stageName": "付錢",
+   "who": "老闆／老闆娘",
+   "zh": "收您〔給的錢〕元，找您〔找的錢〕元。"
+  },
+  {
+   "id": "nightmarket-080",
+   "kind": "旁白",
+   "stage": "PAY",
+   "stageName": "付錢",
+   "who": "",
+   "zh": "（好像一塊錢都沒殺到……）"
+  },
+  {
+   "id": "nightmarket-081",
+   "kind": "旁白",
+   "stage": "PAY",
+   "stageName": "付錢",
+   "who": "",
+   "zh": "（比原價便宜了〔省下的錢〕元！）"
+  },
+  {
+   "id": "nightmarket-082",
+   "kind": "台詞",
+   "stage": "F_GREET",
+   "stageName": "雞排攤",
+   "who": "老闆",
+   "zh": "雞排一份〔雞排單價〕元，現炸的喔！要幾份？"
+  },
+  {
+   "id": "nightmarket-083",
+   "kind": "選項",
+   "stage": "F_GREET",
+   "stageName": "雞排攤",
+   "who": "我",
+   "zh": "三份"
+  },
+  {
+   "id": "nightmarket-084",
+   "kind": "選項",
+   "stage": "F_GREET",
+   "stageName": "雞排攤",
+   "who": "我",
+   "zh": "四份"
+  },
+  {
+   "id": "nightmarket-085",
+   "kind": "選項",
+   "stage": "F_GREET",
+   "stageName": "雞排攤",
+   "who": "我",
+   "zh": "五份"
+  },
+  {
+   "id": "nightmarket-086",
+   "kind": "錯誤說明",
+   "stage": "F_GREET",
+   "stageName": "雞排攤",
+   "who": "",
+   "zh": "清單上寫〔份數（中文）〕份。"
+  },
+  {
+   "id": "nightmarket-087",
+   "kind": "旁白",
+   "stage": "F_GREET",
+   "stageName": "雞排攤",
+   "who": "",
+   "zh": "（看一下清單，要幾份？）"
+  },
+  {
+   "id": "nightmarket-088",
+   "kind": "台詞",
+   "stage": "F_SPICY",
+   "stageName": "雞排攤",
+   "who": "老闆",
+   "zh": "要不要辣？"
+  },
+  {
+   "id": "nightmarket-089",
+   "kind": "選項",
+   "stage": "F_SPICY",
+   "stageName": "雞排攤",
+   "who": "我",
+   "zh": "都要辣。"
+  },
+  {
+   "id": "nightmarket-090",
+   "kind": "選項",
+   "stage": "F_SPICY",
+   "stageName": "雞排攤",
+   "who": "我",
+   "zh": "〔要辣的份數〕份要辣，一份不要辣。"
+  },
+  {
+   "id": "nightmarket-091",
+   "kind": "選項",
+   "stage": "F_SPICY",
+   "stageName": "雞排攤",
+   "who": "我",
+   "zh": "都不要辣。"
+  },
+  {
+   "id": "nightmarket-092",
+   "kind": "錯誤說明",
+   "stage": "F_SPICY",
+   "stageName": "雞排攤",
+   "who": "",
+   "zh": "奶奶不吃辣，要一份不要辣。"
+  },
+  {
+   "id": "nightmarket-093",
+   "kind": "旁白",
+   "stage": "F_SPICY",
+   "stageName": "雞排攤",
+   "who": "",
+   "zh": "（清單上寫奶奶的那份……）"
+  },
+  {
+   "id": "nightmarket-094",
+   "kind": "綠卡說明",
+   "stage": "F_SPICY",
+   "stageName": "雞排攤",
+   "who": "",
+   "zh": "你記得奶奶不吃辣。"
+  },
+  {
+   "id": "nightmarket-095",
+   "kind": "台詞",
+   "stage": "F_CUT",
+   "stageName": "雞排攤",
+   "who": "老闆",
+   "zh": "要切嗎？"
+  },
+  {
+   "id": "nightmarket-096",
+   "kind": "選項",
+   "stage": "F_CUT",
+   "stageName": "雞排攤",
+   "who": "我",
+   "zh": "要切，謝謝。"
+  },
+  {
+   "id": "nightmarket-097",
+   "kind": "選項",
+   "stage": "F_CUT",
+   "stageName": "雞排攤",
+   "who": "我",
+   "zh": "不用切。"
+  },
+  {
+   "id": "nightmarket-098",
+   "kind": "錯誤說明",
+   "stage": "F_CUT",
+   "stageName": "雞排攤",
+   "who": "",
+   "zh": "清單上寫要切。"
+  },
+  {
+   "id": "nightmarket-099",
+   "kind": "旁白",
+   "stage": "F_CUT",
+   "stageName": "雞排攤",
+   "who": "",
+   "zh": "（再看一下清單……）"
+  },
+  {
+   "id": "nightmarket-100",
+   "kind": "台詞",
+   "stage": "F_PAY",
+   "stageName": "雞排攤",
+   "who": "老闆",
+   "zh": "好，〔份數〕份，一共〔雞排總價〕元。"
+  },
+  {
+   "id": "nightmarket-101",
+   "kind": "選項",
+   "stage": "F_PAY",
+   "stageName": "雞排攤",
+   "who": "我",
+   "zh": "好，給你〔雞排總價〕元。"
+  },
+  {
+   "id": "nightmarket-102",
+   "kind": "選項",
+   "stage": "F_PAY",
+   "stageName": "雞排攤",
+   "who": "我",
+   "zh": "老闆，算〔殺價後的雞排價錢〕元啦！"
+  },
+  {
+   "id": "nightmarket-103",
+   "kind": "選項",
+   "stage": "F_PAY",
+   "stageName": "雞排攤",
+   "who": "我",
+   "zh": "我再看看好了。"
+  },
+  {
+   "id": "nightmarket-104",
+   "kind": "錯誤說明",
+   "stage": "F_PAY",
+   "stageName": "雞排攤",
+   "who": "",
+   "zh": "吃的東西通常不殺價。"
+  },
+  {
+   "id": "nightmarket-105",
+   "kind": "台詞",
+   "stage": "F_PAY",
+   "stageName": "雞排攤",
+   "who": "老闆",
+   "zh": "吃的不能殺價啦，我們賺很少耶！"
+  },
+  {
+   "id": "nightmarket-106",
+   "kind": "台詞",
+   "stage": "F_PAY",
+   "stageName": "雞排攤",
+   "who": "老闆",
+   "zh": "好啊，慢慢看，後面還有很多人在排喔。"
+  },
+  {
+   "id": "nightmarket-107",
+   "kind": "旁白",
+   "stage": "F_PAY",
+   "stageName": "雞排攤",
+   "who": "",
+   "zh": "（Ami說吃的不要殺價……）"
+  },
+  {
+   "id": "nightmarket-108",
+   "kind": "綠卡說明",
+   "stage": "F_PAY",
+   "stageName": "雞排攤",
+   "who": "",
+   "zh": "吃的東西不殺價，你直接付錢了。"
+  },
+  {
+   "id": "nightmarket-109",
+   "kind": "台詞",
+   "stage": "F_PAY",
+   "stageName": "雞排攤",
+   "who": "老闆",
+   "zh": "好，稍等一下，馬上好！"
+  },
+  {
+   "id": "nightmarket-110",
+   "kind": "旁白",
+   "stage": "F_PAY",
+   "stageName": "雞排攤",
+   "who": "",
+   "zh": "（香噴噴的雞排拿到了！）"
+  },
+  {
+   "id": "nightmarket-111",
+   "kind": "選項",
+   "stage": "CALL",
+   "stageName": "Ami 來電",
+   "who": "我",
+   "zh": "好，我回去問問看。"
+  },
+  {
+   "id": "nightmarket-112",
+   "kind": "旁白",
+   "stage": "X_GREET",
+   "stageName": "換尺寸",
+   "who": "",
+   "zh": "（你回到衣服攤。）"
+  },
+  {
+   "id": "nightmarket-113",
+   "kind": "台詞",
+   "stage": "X_GREET",
+   "stageName": "換尺寸",
+   "who": "老闆",
+   "zh": "咦？又是你！怎麼了？"
+  },
+  {
+   "id": "nightmarket-114",
+   "kind": "選項",
+   "stage": "X_GREET",
+   "stageName": "換尺寸",
+   "who": "我",
+   "zh": "不好意思，這件可以換〔大一號的尺寸〕號嗎？"
+  },
+  {
+   "id": "nightmarket-115",
+   "kind": "選項",
+   "stage": "X_GREET",
+   "stageName": "換尺寸",
+   "who": "我",
+   "zh": "這件太小了，我要退錢。"
+  },
+  {
+   "id": "nightmarket-116",
+   "kind": "選項",
+   "stage": "X_GREET",
+   "stageName": "換尺寸",
+   "who": "我",
+   "zh": "你賣的衣服太小了啦！"
+  },
+  {
+   "id": "nightmarket-117",
+   "kind": "錯誤說明",
+   "stage": "X_GREET",
+   "stageName": "換尺寸",
+   "who": "",
+   "zh": "Ami的弟弟要的是換尺寸，不是退錢。"
+  },
+  {
+   "id": "nightmarket-118",
+   "kind": "台詞",
+   "stage": "X_GREET",
+   "stageName": "換尺寸",
+   "who": "老闆",
+   "zh": "退錢喔？不行耶……你要不要換一件？"
+  },
+  {
+   "id": "nightmarket-119",
+   "kind": "錯誤說明",
+   "stage": "X_GREET",
+   "stageName": "換尺寸",
+   "who": "",
+   "zh": "對老闆不禮貌。"
+  },
+  {
+   "id": "nightmarket-120",
+   "kind": "台詞",
+   "stage": "X_GREET",
+   "stageName": "換尺寸",
+   "who": "老闆",
+   "zh": "欸，是你自己選的耶！"
+  },
+  {
+   "id": "nightmarket-121",
+   "kind": "台詞",
+   "stage": "X_PRICE",
+   "stageName": "換尺寸",
+   "who": "老闆",
+   "zh": "可以啊，可是〔大一號的尺寸〕號要多加五十塊喔。"
+  },
+  {
+   "id": "nightmarket-122",
+   "kind": "選項",
+   "stage": "X_PRICE",
+   "stageName": "換尺寸",
+   "who": "我",
+   "zh": "好，加五十塊。"
+  },
+  {
+   "id": "nightmarket-123",
+   "kind": "選項",
+   "stage": "X_PRICE",
+   "stageName": "換尺寸",
+   "who": "我",
+   "zh": "老闆，你剛剛不是說每個尺寸都一樣價錢嗎？"
+  },
+  {
+   "id": "nightmarket-124",
+   "kind": "錯誤說明",
+   "stage": "X_PRICE",
+   "stageName": "換尺寸",
+   "who": "",
+   "zh": "老闆一開始說每個尺寸都一樣價錢。"
+  },
+  {
+   "id": "nightmarket-125",
+   "kind": "台詞",
+   "stage": "X_PRICE",
+   "stageName": "換尺寸",
+   "who": "老闆",
+   "zh": "謝啦！"
+  },
+  {
+   "id": "nightmarket-126",
+   "kind": "綠卡說明",
+   "stage": "X_PRICE",
+   "stageName": "換尺寸",
+   "who": "",
+   "zh": "你記得老闆說每個尺寸都一樣價錢。"
+  },
+  {
+   "id": "nightmarket-127",
+   "kind": "台詞",
+   "stage": "X_PRICE",
+   "stageName": "換尺寸",
+   "who": "老闆",
+   "zh": "哈哈，被你發現了！好啦好啦，直接換給你，不用加錢。"
+  },
+  {
+   "id": "nightmarket-128",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "結局：和 Ami 會合",
+   "who": "",
+   "zh": "（你跟Ami、奶奶會合了。）"
+  },
+  {
+   "id": "nightmarket-129",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局：和 Ami 會合",
+   "who": "我",
+   "zh": "Ami，東西都買好了！一共花了〔花的錢〕元，還剩〔剩下的錢〕元。"
+  },
+  {
+   "id": "nightmarket-130",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局：和 Ami 會合",
+   "who": "我",
+   "zh": "衣服和髮夾，我殺價省了〔殺價省下的錢〕元！"
+  },
+  {
+   "id": "nightmarket-131",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局：和 Ami 會合",
+   "who": "Ami",
+   "zh": "哇，〔名字〕，你比我還會殺價耶！下次逛夜市都帶你來！"
+  },
+  {
+   "id": "nightmarket-132",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局：和 Ami 會合",
+   "who": "Ami",
+   "zh": "辛苦了！有些地方下次再注意就好。"
+  },
+  {
+   "id": "nightmarket-133",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "結局：和 Ami 會合",
+   "who": "",
+   "zh": "（殺價獎勵：每省10元加1分，這次加〔獎勵分數〕分）"
+  }
+ ]
+}

@@ -73,9 +73,9 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-s
 </div>
 
 <script>
-const GAMES = [{ id: 'parcel', name: '超商領包裹' }, { id: 'breakfast', name: '早餐店打工（已改完）' }, { id: 'reserva', name: '打電話訂位（已完成）' }, { id: 'drinks', name: '飲料店冒險（已完成）' }];
-const KIND_ORDER = ['開頭介紹', '旁白', '台詞', '老樣子說法', 'LINE訊息', '簡訊', '手機標題', '結尾包裹說法', '選項', '過場按鈕', '錯誤說明', '綠卡說明', '任務提示（標題）', '任務提示', '位置名稱'];
-const S = { game: 'parcel', rows: [], edits: {}, kind: '全部', q: '' };
+const GAMES = [{ id: 'nightmarket', name: '逛夜市殺價' }, { id: 'parcel', name: '超商領包裹（已完成）' }, { id: 'breakfast', name: '早餐店打工（已改完）' }, { id: 'reserva', name: '打電話訂位（已完成）' }, { id: 'drinks', name: '飲料店冒險（已完成）' }];
+const KIND_ORDER = ['開頭介紹', '旁白', '台詞', '老樣子說法', 'LINE訊息', '簡訊', '手機標題', '結尾包裹說法', '購物清單', '選項', '過場按鈕', '錯誤說明', '綠卡說明', '任務提示（標題）', '任務提示', '位置名稱'];
+const S = { game: 'nightmarket', rows: [], edits: {}, kind: '全部', q: '' };
 let db = null, canWrite = true, unsub = null;
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

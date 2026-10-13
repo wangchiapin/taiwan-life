@@ -17,6 +17,16 @@ CONF={
     ('  getConfig() {','  /* ── 換關卡','cfg')],
     speakers='店員|我|房東太太', extra={'START':'開場：看手機','END':'回家'},
     guess=[('zhItems','拿回來的包裹'),('otherStore','另一家門市'),('store','門市'),('momName','房東太太的名字'),('momFake','相似的名字'),('dadName','房東先生的名字'),('dadFake','相似的名字'),('Tail','末三碼'),('No','包裹編號'),('cod','金額'),('cardTop','金額'),('money(','金額'),('_change','金額'),('md(','日期'),('Sender','寄件人'),('=d','日期'),('=x','末三碼')]),
+'nightmarket': dict(title='夜市購物', regions=[('const NEXT_LABEL','const Game = {','過場按鈕'),
+    ('  setPlace(mode) {','  /* ── 圖片','位置名稱'),
+    ('  /* ── Ami 交代的話','  /* ── 狀態設定','nm'),
+    ('const Hints = {','\n};\n','任務提示'),
+    ('  getConfig() {','  /* ── 換關卡','cfg')],
+    speakers='Ami|老闆|老闆娘|我', extra={'START':'開場：Ami 請你買東西','END':'結局：和 Ami 會合'},
+    guess=[('vend','攤販（老闆／老闆娘）'),('st.start - st.ask','省下的錢'),('given - st.ask','找的錢'),('Game.saved','殺價省下的錢'),('spent','花的錢'),('Game.cash','剩下的錢'),('bonus','獎勵分數'),
+    ('r10(t.chicken','殺價後的雞排價錢'),('t.chicken * t.chickenPrice','雞排總價'),('chickenPrice','雞排單價'),('chicken - 1','要辣的份數'),('CN[','份數（中文）'),('chicken','份數'),
+    ('tColor','T恤顏色'),('aColor','髮夾顏色'),('tSize','尺寸'),('bigSize','大一號的尺寸'),('r10(S.A.start','髮夾三個的價錢'),('S.A.start','髮夾開價'),
+    ('=p','價錢'),('=o','價錢'),('=n','價錢'),('given','給的錢'),('item','商品'),('.ask','價錢'),('.start','價錢'),('x','給的錢'),('cur','攤位')]),
 }
 def guess(e):
     e=e.strip()
@@ -40,6 +50,7 @@ def add(kind,state,who,zh,raw,pos):
 lg0=s.index('<!-- ── 登入 ── -->'); lg=s[lg0:s.index('<!-- ── 遊戲 ── -->')]
 for m in re.finditer(r'>([^<>]*[一-鿿][^<>]*)<', lg):
     t=m.group(1).strip()
+    if g=='nightmarket' and t in ('夜','市'): continue   # 招牌燈籠的裝飾字
     if not t or t in ('開始遊戲','繁體','简体') or '你的名字' in t or t.startswith('例：'): continue
     add('開頭介紹','開始畫面','',html.unescape(t),m.group(1),lg0+m.start(1))
 SPK=re.compile(r'^('+C['speakers']+')：')
@@ -54,6 +65,9 @@ for a_,b_,dk in C['regions']:
             wm=re.findall(r"who: '(.+?)'", s[a:stt]); state='客人：'+wm[-1] if wm else '王伯伯的老樣子'
         elif dk=='phone':
             fm=re.findall(r'\n  (\w+)\(.*?\) \{', '\n'+s[a:stt]); state={'lineMsgs':'房東太太的LINE','momSmsLines':'簡訊（房東太太轉傳）','yourSmsLines':'簡訊（你的手機）','phoneHTML':'手機畫面','bubble':'手機畫面','boxHTML':'包裹標籤','callLines':'房東太太來電'}.get(fm[-1] if fm else '', '手機')
+        elif dk=='nm':
+            fm=re.findall(r'\n  (\w+)\(.*?\) \{', '\n'+s[a:stt]); fn=fm[-1] if fm else ''
+            state={'amiLines':'Ami 交代的話','tShirtLine':'衣服攤老闆開場','callLines':'Ami 來電','listHTML':'購物清單','mapHTML':'選攤位畫面','haggleHTML':'殺價畫面','haggleOptions':'殺價選項','haggleChoose':'殺價：老闆回應'}.get(fn,fn)
         else: state={'過場按鈕':'過場按鈕','位置名稱':'位置列','任務提示':'提示','台詞':'CONFIRM'}[dk]
         kind=classify(s,stt); line_=s[s.rfind('\n',0,stt)+1:s.find('\n',stt)]
         if re.search(r'addMistake\(\s*$',before): kind='錯誤說明'
@@ -64,6 +78,11 @@ for a_,b_,dk in C['regions']:
             elif 'tailOpts' in line_ and kind=='其他': kind='選項'
             elif 'zhItems' in line_ and 'const zhItems' in line_ and kind=='其他': kind='結尾包裹說法'
             elif 'zhItems.push' in line_ and kind=='其他': kind='結尾包裹說法'
+        if g=='nightmarket' and dk=='nm':
+            if state=='購物清單' and kind in ('line','其他'): kind='購物清單'
+            elif state=='選攤位畫面' and kind=='其他': kind='位置名稱'
+            elif state=='殺價選項' and kind=='其他': kind='選項'
+            elif state=='殺價：老闆回應' and re.search(r'\bsay\(\s*$',before): kind='line'
         if dk=='過場按鈕': kind='過場按鈕'
         if dk=='位置名稱': kind='位置名稱'
         if dk=='任務提示':
@@ -80,10 +99,13 @@ for a_,b_,dk in C['regions']:
             m=SPK.match(zh)
             if m: who=m.group(1).strip('（）'); zh=zh[len(m.group(0)):]; kind='台詞'
             elif zh.startswith('〔客人〕：'): who='客人'; zh=zh[5:]; kind='台詞'
+            elif zh.startswith('〔攤販（老闆／老闆娘）〕：'): who='老闆／老闆娘'; zh=zh[len('〔攤販（老闆／老闆娘）〕：'):]; kind='台詞'
+            elif state=='殺價：老闆回應' and re.search(r'\bsay\(\s*$',before): who='老闆／老闆娘'; kind='台詞'
             else: kind='旁白' if zh.startswith('（') else '台詞'
         line=s[s.rfind('\n',0,stt)+1:s.find('\n',stt)]
         if dk=='setup' and kind=='其他' and re.search(r'say: *$',before): kind='台詞'
         if kind=='其他' or zh.startswith(('查看結果','回到地圖','查看排行榜')): continue
+        if g=='nightmarket' and (re.search(r'<(button|div|span)',zh) or zh.strip()=='朗讀'): continue   # 程式拼出來的 HTML 片段
         if re.search(r'(===|!==|==) *$', before): continue
         if kind=='選項' and zh=='晚上': zh='晚上〔時間〕'
         if 'probs.push' in line: who='Ami'
