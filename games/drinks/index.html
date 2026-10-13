@@ -349,8 +349,8 @@
   </div>
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
-    同事 Ami 請你去樓下的飲料店幫她買一杯飲料，也別忘了你自己要喝什麼！<br>
-    <span data-es="Tu compañera Ami te pide que le compres una bebida en la tienda de abajo. ¡Y no olvides la tuya!" data-en="Your coworker Ami asks you to buy her a drink at the shop downstairs. And don't forget your own!">Tu compañera Ami te pide que le compres una bebida en la tienda de abajo. ¡Y no olvides la tuya!</span>
+    同事 Ami 要你去飲料店幫她買一杯飲料，別忘了買一杯你自己的！<br>
+    <span data-es="Tu compañera Ami te pide que vayas a la tienda de bebidas a comprarle una. ¡No olvides comprar una para ti!" data-en="Your coworker Ami asks you to go to the drink shop and buy her a drink. Don't forget to buy one for yourself!">Tu compañera Ami te pide que vayas a la tienda de bebidas a comprarle una. ¡No olvides comprar una para ti!</span>
   </p>
 </div>
 
@@ -423,6 +423,7 @@
 /* 讀音以教育部《重編國語辭典修訂本》為準；一、不的變調交給 pinyin-pro（toneSandhi）。
    新增遊戲文字時，把套件讀錯的詞加在這裡。 */
 pinyinPro.customPinyin({
+  '重點': 'chóng diǎn', '重點一次': 'chóng diǎn yí cì', '欸': 'éi', '嗯': 'ēn',
   '告訴': 'gào su', '後面': 'hòu mian',
   '還是': 'hái shì', '還有': 'hái yǒu', '還要': 'hái yào', '還沒': 'hái méi', '還差': 'hái chà',
   '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '耶': 'ye', '啦': 'la', '囉': 'luo',
@@ -570,7 +571,7 @@ function saveSettings() { try { localStorage.setItem('drink_settings', JSON.stri
 ══════════════════════════════════════ */
 const VOCAB = {
   WHO: [['先', 'primero', 'first'], ['點', 'pedir (en un local)', 'order'], ['誰的', '¿de quién?', 'whose'], ['杯', 'clasificador para bebidas', 'measure word for drinks']],
-  START: [['同事', 'compañero de trabajo', 'coworker'], ['渴', 'tener sed', 'thirsty'], ['樓下', 'abajo (en el edificio)', 'downstairs'],
+  START: [['同事', 'compañero de trabajo', 'coworker'], ['渴', 'tener sed', 'thirsty'], ['飲料店', 'tienda de bebidas', 'drink shop'],
           ['飲料', 'bebida', 'drink'], ['加', 'agregar', 'add'], ['請', 'invitar (pagar por otro)', 'treat (pay for someone)']],
   TYPE: [['歡迎光臨', 'bienvenido', 'welcome'], ['想喝', 'querer tomar', 'want to drink'], ['奶茶', 'té con leche', 'milk tea'],
          ['紅茶', 'té negro', 'black tea'], ['綠茶', 'té verde', 'green tea'], ['烏龍茶', 'té oolong', 'oolong tea'], ['還要', 'además querer', 'also want']],
@@ -951,8 +952,8 @@ async function showLeaderboard() {
 ══════════════════════════════════════ */
 /* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
 const NEXT_LABEL = {
-  WHO: '走到櫃台', TYPE_1: '好，重新點一次。', CHECK_1: '聽店員確認', CORRECT_1: '告訴店員哪裡不對',
-  TYPE_2: '接著點第二杯', TOPPING_2: '接著選加料', CALL_AMI: '打電話給Ami', TOPPING_3: '跟店員說Ami要什麼',
+  WHO: '走到櫃台', TYPE_1: '好，重點一次。', CHECK_1: '聽店員確認', CORRECT_1: '告訴店員哪裡不對',
+  TYPE_2: '繼續點第二杯', TOPPING_2: '選擇加什麼料', CALL_AMI: '打電話給Ami', TOPPING_3: '跟店員說Ami要什麼',
   PAYMENT: '準備付錢', CHANGE: '拿找的錢', APOLOGIZE: '等店員補錢', FINISH: '等飲料做好', END: '拿飲料回辦公室'
 };
 
@@ -1126,19 +1127,19 @@ const Game = {
       START: {
         place: 'office',
         dialogue: () => [
-          L(`Ami：${N}，我好渴喔！可以幫我去樓下買一杯${zhOrder(t)}嗎？我要加椰果。`,
+          L(`Ami：${N}，我好渴喔！可以幫我去買一杯${zhOrder(t)}嗎？我要加椰果。`,
             `${N}, ¡tengo mucha sed! ¿Me compras abajo ${esOrder({ ...t, topping: null })}? Lo quiero con gelatina de coco.`,
             `${N}, I'm so thirsty! Could you get me ${enOrder({ ...t, topping: null })} downstairs? I want coconut jelly in it.`),
           L('Ami：你想喝什麼？我請你！', '¿Y tú qué quieres tomar? ¡Yo invito!', "What do you want to drink? It's on me!"),
           L(`我：那……我要一杯${zhOrder(me)}。`, `Mmm… entonces yo quiero ${esOrder(me)}.`, `Hmm… then I'll have ${enOrder(me)}.`)
         ],
-        options: ['去樓下的飲料店'],
+        options: ['去飲料店'],
         next: () => { Game.startTimer(); Game.state = 'WHO'; }
       },
 
       /* ── 先點誰的？兩種順序都可以 ── */
       WHO: {
-        dialogue: () => [L('（你走到樓下的飲料店，店員在櫃台後面。你要先點誰的飲料？）', '(Llegas a la tienda de bebidas de abajo; el empleado está detrás del mostrador. ¿De quién pides primero?)', "(You reach the drink shop downstairs; the staff member is behind the counter. Whose drink will you order first?)")],
+        dialogue: () => [L('（你到飲料店了，你要先點誰的飲料？）', '(Ya llegaste a la tienda de bebidas. ¿De quién pides primero?)', "(You've arrived at the drink shop. Whose drink will you order first?)")],
         options: ['先點我的', '先點Ami的'],
         next: c => { Game.first = c === '先點Ami的' ? 'ami' : 'me'; Game.state = 'TYPE_1'; }
       },
@@ -1177,17 +1178,17 @@ const Game = {
           const wrong = !sameOrder(Game.checkShown, o1);
           if (c === '對。') {
             if (!wrong) { Game.state = afterCup1(); return; }
-            Game.addMistake(M('店員念錯了，你卻說對。', 'El empleado repitió mal tu pedido y dijiste que sí.', 'The staff read your order back wrong and you said yes.'),
-              [L('Benjamin：咦？等一下，這好像不是您剛剛點的……我們重新點一次吧！', 'Eh, espera, creo que eso no es lo que pediste… Vamos a pedirlo otra vez.', "Huh? Wait, that's not what you ordered… Let's start over.")]);
+            Game.addMistake(M('店員說錯了，你卻說是對的。', 'El empleado dijo mal tu pedido y tú dijiste que estaba bien.', 'The staff read your order back wrong and you said yes.'),
+              [L('Benjamin：咦？等一下，這好像不是您剛剛點的……我們再點一次吧！', 'Eh, espera, creo que eso no es lo que pediste… Vamos a pedirlo otra vez.', "Huh? Wait, that's not what you ordered… Let's order it again.")]);
             Game.order[1] = {};
             Game.state = 'TYPE_1';
           } else {
             if (wrong) {
-              Game.good('你發現店員念錯了！', '¡Notaste que el empleado repitió mal tu pedido!', 'You caught the mistake in the read-back!');
+              Game.good('讚喔！你發現店員說錯了！', '¡Genial! Notaste que el empleado dijo mal tu pedido.', 'Nice! You noticed the staff got your order wrong!');
               Game.state = 'CORRECT_1'; return;
             }
-            Game.addMistake(M('店員念的是對的，你卻說不對。', 'El empleado repitió bien tu pedido y dijiste que no.', 'The staff read your order back correctly and you said no.'),
-              [L('Benjamin：嗯？我念的就是您剛剛點的耶……', '¿Mmm? Eso es justo lo que pediste…', "Hmm? That's exactly what you ordered…")]);
+            Game.addMistake(M('店員說的是對的，你卻說不對。', 'El empleado dijo bien tu pedido y tú dijiste que no.', 'The staff read your order back correctly and you said no.'),
+              [L('Benjamin：嗯？我說的就是您剛剛點的耶……', '¿Mmm? Eso es justo lo que pediste…', "Hmm? That's exactly what you ordered…")]);
           }
         }
       },
@@ -1201,7 +1202,7 @@ const Game = {
             Game.state = afterCup1(); return;
           }
           Game.addMistake(M('更正的時候又選錯了。', 'Al corregir, elegiste mal otra vez.', 'You picked the wrong order again when correcting it.'),
-            [L('Benjamin：嗯……我們從頭再點一次好了。', 'Mmm… mejor lo pedimos otra vez desde el principio.', "Hmm… let's just order again from the start.")]);
+            [L('Benjamin：嗯……我們再點一次好了。', 'Mmm… mejor lo pedimos otra vez.', "Hmm… let's just order it again.")]);
           Game.order[1] = {};
           Game.state = 'TYPE_1';
         }
@@ -1240,9 +1241,9 @@ const Game = {
       },
       NO_COCONUT: {
         dialogue: () => ask('不好意思，椰果今天賣完了耶！', 'Lo siento, ¡hoy se nos acabó la gelatina de coco!', "Sorry, we're out of coconut jelly today!"),
-        options: () => (Game._ncOpts ||= ['請稍等，我問一下朋友。', ...shuffle(['那就不加料。', `那改加${pick(['珍珠', '布丁'])}。`])]),
+        options: () => (Game._ncOpts ||= ['等一下，我問一下我朋友。', ...shuffle(['那就不加料。', `那改加${pick(['珍珠', '布丁'])}。`])]),
         next: c => {
-          if (c.startsWith('請稍等')) { Game.state = 'CALL_AMI'; return; }
+          if (c.startsWith('等一下，我問')) { Game.state = 'CALL_AMI'; return; }
           oAmi.topping = c.includes('珍珠') ? '珍珠' : c.includes('布丁') ? '布丁' : '不加料';
           Game.state = afterTopping();
         }
@@ -1255,7 +1256,7 @@ const Game = {
         ],
         options: ['好，我跟店員說。'],
         next: () => {
-          Game.good('先打電話問 Ami 是好主意。', 'Llamar a Ami primero fue una buena idea.', 'Calling Ami first was a good idea.');
+          Game.good('你有先打電話問 Ami ，很棒喔！', 'Llamaste primero a Ami, ¡muy bien!', 'You called Ami first — great job!');
           Game.thought = [L('我：不好意思，讓你久等了。', 'Perdón por la espera.', 'Sorry to keep you waiting.')];
           Game.state = 'TOPPING_3';
         }
@@ -1290,7 +1291,7 @@ const Game = {
             Game.state = 'FINISH'; return;
           }
           if (wrong) {
-            Game.good('你發現店員找錯錢了！', '¡Notaste que el cambio estaba mal!', 'You noticed the change was wrong!');
+            Game.good('讚欸！你發現店員找錯錢了！', '¡Genial! Notaste que el cambio estaba mal.', 'Nice! You noticed the change was wrong!');
             Game.state = 'APOLOGIZE'; return;
           }
           Game.addMistake(M('店員找的錢是對的。', 'El cambio que te dio el empleado era correcto.', 'The change the staff gave you was correct.'),
@@ -1299,7 +1300,7 @@ const Game = {
       },
       APOLOGIZE: {
         dialogue: () => ask(`啊！抱歉抱歉，少找您${Game.shortBy}元，這是${Game.shortBy}元。`, `¡Ay! Perdón, te di ${Game.shortBy} de menos. Aquí tienes ${Game.shortBy}.`, `Oh! Sorry, I gave you NT$${Game.shortBy} too little. Here's NT$${Game.shortBy}.`),
-        options: ['沒關係，謝謝。', '你到底會不會算啊？'],
+        options: ['沒關係，謝謝。', '幹！你到底會不會算啊？'],
         next: c => {
           if (c !== '沒關係，謝謝。') Game.addMistake(M('對店員不禮貌。', 'Fuiste descortés con el empleado.', 'You were rude to the staff.'));
           Game.state = 'FINISH';
@@ -1327,9 +1328,9 @@ const Game = {
           const lines = [L('（回到辦公室，把飲料拿給 Ami……）', '(Vuelves a la oficina y le das la bebida a Ami…)', '(You go back to the office and give Ami her drink…)')];
           if (amiOK2) lines.push(L(`Ami：哇！就是這杯！謝謝你，${N}！`, `¡Guau! ¡Es justo esta! ¡Gracias, ${N}!`, `Wow! This is the one! Thanks, ${N}!`));
           else lines.push(
-            L(`Ami：咦？${N}，這杯不對吧！我要的是${zhOrder(t)}加${Game.alt}耶。`, `¿Eh? ${N}, esta no es. Yo quería ${esOrder({ ...t, topping: Game.alt })}.`, `Huh? ${N}, this isn't right. I wanted ${enOrder({ ...t, topping: Game.alt })}.`),
+            L(`Ami：咦？${N}，不對吧！我要的是${zhOrder(t)}加${Game.alt}耶。`, `¿Eh? ${N}, esta no es. Yo quería ${esOrder({ ...t, topping: Game.alt })}.`, `Huh? ${N}, this isn't right. I wanted ${enOrder({ ...t, topping: Game.alt })}.`),
             L(`Ami：你買成${zhOrder(oAmi)}${oAmi.topping && oAmi.topping !== '不加料' ? '加' + oAmi.topping : '，沒加料'}了啦！`, `¡Compraste ${esOrder(oAmi)}!`, `You got ${enOrder(oAmi)}!`));
-          if (!meOK) lines.push(L(`（你自己不是要${zhOrder(me)}嗎？好像也買錯了……）`, `(¿Tú no querías ${esOrder(me)}? Parece que la tuya también está mal…)`, `(Didn't you want ${enOrder(me)}? Looks like yours is wrong too…)`));
+          if (!meOK) lines.push(L(`（你不是要喝${zhOrder(me)}嗎？買錯了吧……）`, `(¿No querías tomar ${esOrder(me)}? Creo que te equivocaste…)`, `(Didn't you want ${enOrder(me)}? Looks like you got it wrong…)`));
           return lines;
         },
         options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
@@ -1445,7 +1446,7 @@ const Game = {
     area.classList.toggle('single', opts.length === 1 || opts.some(o => o.length > 12));
     opts.forEach(opt => {
       const btn = document.createElement('button');
-      btn.className = 'opt' + (opt.startsWith('請稍等') ? ' call' : '');
+      btn.className = 'opt' + (opt.startsWith('等一下，我問') ? ' call' : '');
       btn.innerHTML = this.ruby(opt);
       btn.onclick = () => this.handleChoice(opt);
       area.appendChild(btn);
