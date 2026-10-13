@@ -51,6 +51,7 @@
   #card .c-hint { font-size: 13px; color: #cf3a24; margin-top: 6px; }
   #card .c-btns { display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end; }
   #card button { border: 2px solid #1b1a22; border-radius: 999px; background: #fff; padding: 4px 14px; font-size: 15px; }
+  canvas:focus { outline: none; }
   canvas { width: 100%; height: auto; display: block; image-rendering: pixelated; border: 4px solid #1b1a22; border-radius: 10px; background: #6bb05a; touch-action: manipulation; }
   #help { color: #cfe3c8; font-size: 13px; padding: 6px 12px; text-align: center; }
   #toast { position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%) translateY(20px); background: #1b1a22; color: #fff; padding: 10px 18px; border-radius: 12px; opacity: 0; transition: .25s; pointer-events: none; z-index: 30; max-width: 90vw; text-align: center; }
@@ -58,7 +59,7 @@
 
   /* 手機方向鍵 */
   #pad { display: none; position: fixed; right: 14px; bottom: 14px; width: 150px; height: 150px; z-index: 5; }
-  #pad button { position: absolute; width: 50px; height: 50px; border-radius: 12px; border: 2px solid #1b1a22; background: rgba(255,253,246,.9); font-size: 22px; touch-action: none; }
+  #pad button { display: grid; place-items: center; color: #1b1a22; padding: 0; position: absolute; width: 50px; height: 50px; border-radius: 12px; border: 2px solid #1b1a22; background: rgba(255,253,246,.9); font-size: 22px; touch-action: none; }
   #pad .u { left: 50px; top: 0; } #pad .d { left: 50px; top: 100px; } #pad .l { left: 0; top: 50px; } #pad .r { left: 100px; top: 50px; }
   @media (pointer: coarse) { #pad { display: block; } #card { bottom: 176px; } }
 
@@ -106,12 +107,12 @@
   <button id="btn-back" onclick="location.href='../'"></button>
 </div>
 <div id="week"><span id="wk-label"></span><div class="bar"><i id="wk-fill"></i></div><b id="wk-num"></b></div>
-<div id="stage"><canvas id="cv" width="640" height="448" aria-label="地圖 / Mapa"></canvas><button id="bubble" type="button" hidden></button></div>
+<div id="stage"><canvas id="cv" width="640" height="448" tabindex="0" aria-label="地圖 / Mapa"></canvas><button id="bubble" type="button" hidden></button></div>
 <div id="card" hidden role="dialog"><div class="c-who"></div><div class="c-zh"></div><div class="c-py"></div><div class="c-tr"></div><div class="c-hint"></div>
   <div class="c-btns"><button class="c-say" type="button">🔊</button><button class="c-close" type="button">✕</button></div></div>
 <div id="help"></div>
 <div id="toast" role="status"></div>
-<div id="pad" aria-hidden="true"><button class="u" data-d="up">▲</button><button class="l" data-d="left">◀</button><button class="r" data-d="right">▶</button><button class="d" data-d="down">▼</button></div>
+<div id="pad" aria-hidden="true"><button class="u" data-d="up"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" style="transform:rotate(0deg)"><path d="M12 5 L20 16 H4 Z" fill="currentColor"/></svg></button><button class="l" data-d="left"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" style="transform:rotate(-90deg)"><path d="M12 5 L20 16 H4 Z" fill="currentColor"/></svg></button><button class="r" data-d="right"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" style="transform:rotate(90deg)"><path d="M12 5 L20 16 H4 Z" fill="currentColor"/></svg></button><button class="d" data-d="down"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M12 5 L20 16 H4 Z" fill="currentColor"/></svg></button></div>
 
 <!-- ── 遊戲 ── -->
 <div id="overlay">
@@ -771,7 +772,8 @@ function openGame(b) {
 function closeGame() {
   if (!current) return;
   const b = current; current = null;
-  ov.classList.remove('on'); frame.src = 'about:blank';
+  ov.classList.remove('on'); frame.blur(); frame.src = 'about:blank';
+  cv.focus({ preventScroll: true }); window.focus();     // 鍵盤焦點交回地圖，方向鍵馬上能用
   if (Music.on) Music.start();
   P.x = b.out.x; P.y = b.out.y; P.dir = 'down'; P.moving = null; P.path = []; P.locked = false;
   if (b.sc.virtual) respawnEvent(P.x, P.y);

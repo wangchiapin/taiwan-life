@@ -167,6 +167,10 @@
   .shelf { margin: 8px 0 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .bun { background: #fffaf0; border: 1px solid var(--line); border-bottom: 5px solid var(--kraft); border-radius: 10px; padding: 8px 4px; text-align: center; font-size: 14px; line-height: 1.5; }
   .bun .e { font-size: 28px; display: block; }
+  .bimg { display: inline-grid; place-items: center; width: 56px; height: 56px; vertical-align: middle; }
+  .bimg img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; image-rendering: auto; }
+  .bimg.sm { width: 26px; height: 26px; font-size: 18px; }
+  .bimg.sm img { border-radius: 4px; }
   .bun .nm { font-weight: 700; }
   .bun .pr { color: var(--red-dark); font-weight: 700; }
   .bun .lab { margin-top: 2px; display: inline-block; background: var(--bad); color: #fff; border-radius: 4px; padding: 0 6px; font-size: 12px; }
@@ -963,6 +967,8 @@ const SHELF = [
   { id: 'toast',  zh: '吐司',       es: 'pan de molde (una barra)',           en: 'sandwich loaf',          price: 60, e: '🍞', toast: true }
 ];
 const BYID = Object.fromEntries(SHELF.map(i => [i.id, i]));
+/* 麵包小圖：images/bread_<id>.jpg（例：bread_pine.jpg）；檔案還沒放時自動顯示 emoji */
+const breadImg = (id, cls) => `<span class="bimg ${cls || ''}"><img src="images/bread_${id}.jpg" alt="" onerror="this.parentNode.textContent='${BYID[id].e}'"></span>`;
 const BYZH = Object.fromEntries(SHELF.map(i => [i.zh, i]));
 const BREAD_ES = { pine: 'pan piña', floss: 'pan de carne con hebras de cerdo', bean: 'pan de frijol rojo' };
 const BREAD_EN = { pine: 'pineapple buns', floss: 'pork floss buns', bean: 'red bean buns' };
@@ -1243,9 +1249,9 @@ const Game = {
   /* 招牌元素：麵包架 + 托盤（累計金額） */
   trayHTML(withShelf) {
     const r = s => this.ruby(s), c = this.counts();
-    const shelf = withShelf ? `<div class="shelf">${SHELF.map(i => `<div class="bun${i.nut ? ' nut' : ''}"><span class="e">${i.e}</span>
+    const shelf = withShelf ? `<div class="shelf">${SHELF.map(i => `<div class="bun${i.nut ? ' nut' : ''}"><span class="e">${breadImg(i.id)}</span>
       <div class="nm">${r(i.zh)}</div><div class="pr">${i.price}${r('元')}</div>${i.nut ? `<div class="lab">${r('含' + i.nut)}</div>` : ''}</div>`).join('')}</div>` : '';
-    const rows = Object.keys(c).map(id => `<div class="row"><span>${BYID[id].e} ${r(BYID[id].zh)} × ${c[id]}</span><b>${BYID[id].price * c[id]}${r('元')}</b></div>`).join('')
+    const rows = Object.keys(c).map(id => `<div class="row"><span>${breadImg(id, 'sm')} ${r(BYID[id].zh)} × ${c[id]}</span><b>${BYID[id].price * c[id]}${r('元')}</b></div>`).join('')
       || `<div class="empty">${r('托盤是空的')}</div>`;
     return shelf + `<div class="tray"><div class="th">${r('托盤')}</div>${rows}<div class="total"><span>${r('合計')}</span><b>${this.trayTotal()}${r('元')}</b></div></div>`;
   },

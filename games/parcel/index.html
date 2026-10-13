@@ -474,6 +474,8 @@ const rev = s => s.split('').reverse().join('');
 const rot = s => s.slice(1) + s[0];
 const digitsCN = s => String(s).replace(/\d/g, d => CN[+d]);
 const sp = s => String(s).split('').join(' ');
+/* 日期用真實的今天：md(0) 是今天，md(2) 是兩天後，顯示成「月/日」 */
+const md = off => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + off); return `${d.getMonth() + 1}/${d.getDate()}`; };
 const money = n => n + '元';
 const esM = n => `${n} dólares`;
 const enM = n => `NT$${n}`;
@@ -1018,7 +1020,6 @@ const Game = {
       cod: pick([590, 680, 745]),                         // 房東太太的包裹要取貨付款
       dadSender: pick(['網路書店', '電器行']),
       yourArrived: Math.random() < 0.5,                    // 你的包裹到了沒？
-      today: 5,
       cardTop: pick([300, 500])
     };
     this.cash = 1000 + this.task.cardTop;
@@ -1155,7 +1156,7 @@ const Game = {
     ];
   },
   momSmsLines() {
-    const t = this.task, d = `10/${t.today + 7}`;
+    const t = this.task, d = md(7);
     return [
       { zh: '您的包裹已到店', es: 'Su paquete ya llegó a la tienda', en: 'Your parcel has arrived at the store' },
       { zh: `取件門市：${t.store}`, es: `Tienda de recogida: ${stES(t.store)}`, en: `Pickup store: ${stEN(t.store)}`, b: true },
@@ -1170,12 +1171,12 @@ const Game = {
       { zh: '您的包裹已到店', es: 'Su paquete ya llegó a la tienda', en: 'Your parcel has arrived at the store' },
       { zh: `取件門市：${t.store}`, es: `Tienda de recogida: ${stES(t.store)}`, en: `Pickup store: ${stEN(t.store)}`, b: true },
       { zh: '取貨不付款（已付款）', es: 'Sin pago al recoger (ya pagado)', en: 'No payment on pickup (already paid)' },
-      { zh: `取件期限：10/${t.today + 7}`, es: `Plazo de recogida: 10/${t.today + 7}`, en: `Pickup deadline: 10/${t.today + 7}` }
+      { zh: `取件期限：${md(7)}`, es: `Plazo de recogida: ${md(7)}`, en: `Pickup deadline: ${md(7)}` }
     ];
     return [
       { zh: '您的包裹已寄出', es: 'Su paquete fue enviado', en: 'Your parcel has been shipped' },
       { zh: `取件門市：${t.store}`, es: `Tienda de recogida: ${stES(t.store)}`, en: `Pickup store: ${stEN(t.store)}`, b: true },
-      { zh: `預計到店：10/${t.today + 2}`, es: `Llegada estimada a la tienda: 10/${t.today + 2}`, en: `Expected arrival at the store: 10/${t.today + 2}`, warn: true },
+      { zh: `預計到店：${md(2)}`, es: `Llegada estimada a la tienda: ${md(2)}`, en: `Expected arrival at the store: ${md(2)}`, warn: true },
       { zh: '到店後會再通知您', es: 'Le avisaremos cuando llegue a la tienda', en: "We'll notify you when it arrives at the store" }
     ];
   },
@@ -1193,7 +1194,7 @@ const Game = {
   },
   phoneHTML() {
     const t = this.task, r = s => this.ruby(s);
-    const mine = this.bubble('sms', `簡訊（你的手機）　今天是10/${t.today}`, this.yourSmsLines());
+    const mine = this.bubble('sms', `簡訊（你的手機）　今天是${md(0)}`, this.yourSmsLines());
     return `<div class="sms-wrap">${this.bubble('line-msg', '房東太太', this.lineMsgs(), '房東太太')}` +
       `${this.bubble('sms', '簡訊（房東太太轉傳）', this.momSmsLines())}${mine}</div>`;
   },
@@ -1535,7 +1536,7 @@ const Game = {
               `Casera, ya traje ${joinEs(esItems)}, y también recargué la EasyCard con ${esM(t.cardTop)}.`,
               `Landlady, I brought back ${joinEn(enItems)}, and I topped up the EasyCard with ${enM(t.cardTop)}.`)
           ];
-          if (!t.yourArrived) lines.push(L(`我：我的包裹還沒到，簡訊說10/${t.today + 2}才會到。`, `Mi paquete aún no llega; el mensaje dice que llegará el 10/${t.today + 2}.`, `My parcel hasn't arrived yet; the text says it will arrive on 10/${t.today + 2}.`));
+          if (!t.yourArrived) lines.push(L(`我：我的包裹還沒到，簡訊說${md(2)}才會到。`, `Mi paquete aún no llega; el mensaje dice que llegará el ${md(2)}.`, `My parcel hasn't arrived yet; the text says it will arrive on ${md(2)}.`));
           lines.push(L(`我：這是剩下的${money(Game.cash)}。`, `Aquí está el dinero que sobró: ${esM(Game.cash)}.`, `Here's the money that's left: ${enM(Game.cash)}.`));
           lines.push(good
             ? L(`房東太太：哇，${N}，你真厲害！以後包裹都靠你了！`, `¡Vaya, ${N}, eres genial! ¡De ahora en adelante los paquetes quedan en tus manos!`, `Wow, ${N}, you're amazing! From now on, I'll leave the parcels to you!`)

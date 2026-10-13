@@ -463,7 +463,12 @@ function cn(n) {                       // 1–31 → 中文數字
 }
 function cnCount(n) { return n === 2 ? '兩' : cn(n); }   // 量詞前：兩張、兩位
 function timeStr(t) { return cn(Math.floor(t)) + '點' + (t % 1 ? '半' : ''); }
-function dateStr(d) { return `十月${cn(d)}號`; }
+/* 日期：用「離今天幾天」來記（0 = 今天），顯示時換成真實的月、日 */
+const TODAY0 = (() => { const d = new Date(); d.setHours(12, 0, 0, 0); return d; })();
+const dayAt = off => { const d = new Date(TODAY0); d.setDate(d.getDate() + off); return d; };
+function dateStr(off) { const d = dayAt(off); return `${cn(d.getMonth() + 1)}月${cn(d.getDate())}號`; }
+const MES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const phoneCN = s => s.replace(/\d/g, d => CN[+d]);       // 02-4967-2308 → 零二-四九六七-二三零八
 
 // 西文、英文翻譯用
@@ -472,8 +477,8 @@ const DAY_EN = { '今天': 'today', '星期五': 'Friday', '星期六': 'Saturda
 const hm = t => `${Math.floor(t)}:${t % 1 ? '30' : '00'}`;
 const esTime = t => `las ${hm(t)}`;                         // a las 7:30
 const enTime = t => `${hm(t)} p.m.`;
-const esDate = d => `${d} de octubre`;
-const enDate = d => `October ${d}`;
+const esDate = off => { const d = dayAt(off); return `${d.getDate()} de ${MES[d.getMonth()]}`; };
+const enDate = off => { const d = dayAt(off); return `${MON[d.getMonth()]} ${d.getDate()}`; };
 const esN = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 const L = (zh, es, en) => ({ zh, es, en });                 // 一行台詞＋翻譯
 
@@ -598,7 +603,7 @@ const VOCAB = {
              ['便當', 'caja de comida', 'lunch box'], ['開門', 'abrir', 'open']],
   C1_DAY: [['哪一天', '¿qué día?', 'which day?'], ['今天', 'hoy', 'today'], ['星期五', 'viernes', 'Friday'],
            ['星期六', 'sábado', 'Saturday'], ['星期日', 'domingo', 'Sunday']],
-  C1_DATE_CHECK: [['這個星期六', 'este sábado', 'this Saturday'], ['號', 'día (del mes)', 'day of the month'],
+  C1_DATE_CHECK: [['這個星期六', 'este sábado', 'this Saturday'], ['下個星期六', 'el próximo sábado', 'next Saturday'], ['號', 'día (del mes)', 'day of the month'],
                   ['對', 'correcto', 'right'], ['不對', 'incorrecto', 'not right']],
   C1_TIME: [['幾點', '¿a qué hora?', 'what time?'], ['晚上', 'noche', 'evening'], ['點', 'en punto (hora)', "o'clock"],
             ['半', 'y media', 'half past']],
@@ -1107,16 +1112,18 @@ const Game = {
 
   /* ── 每局隨機任務 ── */
   setup() {
-    const monday = pick([5, 12, 19]);                     // 2026 年十月的星期一
+    // 聚餐是下一個週末（五、六、日），一定在今天之後；週一到週四是「這個」週末，週五到週日是「下個」週末
+    const wd = TODAY0.getDay();                           // 0 = 星期日
+    const fri = wd >= 1 && wd <= 4 ? 5 - wd : wd === 5 ? 7 : wd === 6 ? 6 : 5;   // 離下一個（不是今天的）星期五幾天
     const dayIdx = pick([0, 1, 2]);                       // 五、六、日
     const days = ['星期五', '星期六', '星期日'];
     const adults = pick([3, 4, 5]);
     const kids = pick([1, 2]);
     const T = pick([6.5, 7]);                             // Ami 說的時間
     this.task = {
-      days, monday,
+      days, fri, weekWord: wd >= 1 && wd <= 4 ? '這個' : '下個',
       day: days[dayIdx],
-      date: monday + 4 + dayIdx,
+      date: fri + dayIdx,
       adults, kids,
       people: adults + kids,
       T,
@@ -1377,7 +1384,7 @@ const Game = {
             Game.addMistake('Ami 說的不是今天。Ami no dijo que era hoy.', [L('（不對，Ami 說的不是今天……）', '(No, Ami no dijo hoy…)', "(No, Ami didn't say today…)")]);
             b.day = null; return;
           }
-          const realDate = t.monday + 4 + t.days.indexOf(c);
+          const realDate = t.fri + t.days.indexOf(c);
           Game._dateShown = Math.random() < 0.35 ? realDate + pick([7, -1, 1]) : realDate;
           b.date = realDate;
           Game.state = 'C1_DATE_CHECK';
@@ -1385,9 +1392,9 @@ const Game = {
       },
       C1_DATE_CHECK: {
         call: 'shop',
-        dialogue: () => [L(`店員：這個${b.day}是${dateStr(Game._dateShown)}，對嗎？`,
-          `Este ${DAY_ES[b.day]} es ${esDate(Game._dateShown)}, ¿verdad?`,
-          `This ${DAY_EN[b.day]} is ${enDate(Game._dateShown)}, right?`)],
+        dialogue: () => [L(`店員：${t.weekWord}${b.day}是${dateStr(Game._dateShown)}，對嗎？`,
+          `${t.weekWord === '這個' ? 'Este' : 'El próximo'} ${DAY_ES[b.day]} es ${esDate(Game._dateShown)}, ¿verdad?`,
+          `${t.weekWord === '這個' ? 'This' : 'Next'} ${DAY_EN[b.day]} is ${enDate(Game._dateShown)}, right?`)],
         options: ['對。', '不對。'],
         next: c => {
           const storeRight = Game._dateShown === b.date;

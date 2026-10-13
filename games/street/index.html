@@ -958,6 +958,7 @@ const Game = {
   IMAGES: {
     START: ['images/start.jpg', '📱'],
     E_light: ['images/light.jpg', '🚦'],
+    _T_E_light: ['images/light_green.jpg', '🟢'],   // 過場（選對以後）：小綠人亮了
     E_honk: ['images/honk.jpg', '🛵'],
     E_fall: ['images/fall.jpg', '🚑'], E_fall2: ['images/fall.jpg', '📞'],
     E_elder: ['images/elder.jpg', '👵'],
@@ -1402,7 +1403,7 @@ const Game = {
 
     // END 的 dialogue 會決定結局，所以只算一次
     const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
-    let [src, emoji, alt] = this.IMAGES[this.state] || ['', '🚶'];
+    let [src, emoji, alt] = (this._transMode && this.IMAGES['_T_' + this.state]) || this.IMAGES[this.state] || ['', '🚶'];
     if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
     this.setImage(src, emoji, alt);
     Vocab.render(this.state);

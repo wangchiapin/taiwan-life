@@ -1005,7 +1005,7 @@ const Game = {
     W_WAIT: ['images/waiting.jpg', '🪑'],
     D_SYMPTOM: ['images/doctor.jpg', '🩺'], D_FEVER: ['images/doctor.jpg', '🌡️'], D_ALLERGY: ['images/doctor.jpg', '💊'], D_ADVICE: ['images/doctor.jpg', '👨‍⚕️'],
     P_PAY: ['images/reception.jpg', '💵'],
-    M_MED: ['images/pharmacy.jpg', '💊'], M_NOW: ['images/pharmacy.jpg', '⏰'],
+    M_MED: ['images/pharmacy.jpg', '💊'], M_NOW: ['images/med_lunch.jpg', '🍱'],   // M_NOW 依時間換圖：中午 med_lunch、晚上 med_night
     E_ASK: ['images/line.jpg', '📱'],
     END: ['images/end_good.jpg', '🎉'],
     RESULT: ['images/result.jpg', '📊']
@@ -1027,6 +1027,7 @@ const Game = {
       now: pick(['lunch', 'bed']),
       rot: Math.floor(Math.random() * 4)
     };
+    this.IMAGES.M_NOW = this.task.now === 'lunch' ? ['images/med_lunch.jpg', '🍱'] : ['images/med_night.jpg', '🌙'];
     this.cur = this.task.myNo - 3;
     this.ticket = false;
   },
