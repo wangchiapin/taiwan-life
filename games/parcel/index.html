@@ -1342,8 +1342,7 @@ const Game = {
             Game.cash += Game._changeGiven;
           } else {
             if (right) {
-              Game.addMistake(M('找的錢是對的。', 'El cambio era correcto.', 'The change was correct.'),
-                [L(`（一千減${t.cod}……）`, `(Mil menos ${t.cod}…)`, `(1,000 minus ${t.cod}…)`)]); return;
+              Game.addMistake(M('找的錢是對的。', 'El cambio era correcto.', 'The change was correct.')); return;
             }
             Game.cash += Game._change;
             Game.good('很棒喔！你發現店員少找錢！', '¡Muy bien! ¡Notaste que el cambio estaba mal!', 'Great job! You noticed the clerk gave you too little change!');
