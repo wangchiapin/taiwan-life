@@ -1,0 +1,160 @@
+<title>台詞修改表</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;800&display=swap">
+<style>
+/* 版面：左右留白的單欄稿紙，依關卡分段；每一句左邊是原文、右邊是改稿 */
+:root {
+  --bg: #f3f1ea; --paper: #fffdf8; --ink: #22252b; --muted: #6a6e76; --line: #dcd8cc;
+  --accent: #b23a2a; --accent-soft: #f6e3de; --ok: #2e7d4f; --ph: #e9edf6; --ph-ink: #34508a;
+  --serif: "Noto Serif TC", "Songti TC", serif; --sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #17181b; --paper: #202226; --ink: #ecebe6; --muted: #a2a5ab; --line: #383b42;
+  --accent: #ef7d6a; --accent-soft: #3a2723; --ok: #6fcf97; --ph: #263048; --ph-ink: #a9c1f2; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #17181b; --paper: #202226; --ink: #ecebe6; --muted: #a2a5ab; --line: #383b42;
+  --accent: #ef7d6a; --accent-soft: #3a2723; --ok: #6fcf97; --ph: #263048; --ph-ink: #a9c1f2; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 980px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 80px; }
+header h1 { font-family: var(--serif); font-size: 28px; margin: 0; letter-spacing: .04em; text-wrap: balance; }
+header .sub { color: var(--muted); margin: 4px 0 0; }
+.howto { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin: 16px 0; }
+.howto ul { margin: 6px 0 0; padding-left: 20px; }
+.howto b { color: var(--accent); }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-bottom: 1px solid var(--line); }
+.bar select, .bar input { font: inherit; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); }
+.bar input { flex: 1 1 180px; min-width: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+.chip { font: inherit; font-size: 13px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.count { margin-left: auto; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.count b { color: var(--accent); }
+.status { font-size: 13px; color: var(--muted); }
+section { margin-top: 22px; }
+section h2 { font-family: var(--serif); font-size: 17px; margin: 0 0 8px; color: var(--muted); font-weight: 600; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+.row.edited { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
+.meta { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+.kind { background: var(--accent-soft); color: var(--accent); border-radius: 4px; padding: 0 6px; font-weight: 700; }
+.who { font-weight: 700; color: var(--ink); }
+.orig { min-width: 0; font-size: 16px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ph { background: var(--ph); color: var(--ph-ink); border-radius: 4px; padding: 0 3px; font-size: .9em; white-space: nowrap; }
+textarea { width: 100%; min-width: 0; box-sizing: border-box; font: inherit; font-size: 16px; line-height: 1.5; border: 1px dashed var(--line); border-radius: 8px; padding: 6px 8px; background: transparent; color: var(--ink); resize: vertical; min-height: 40px; }
+textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-style: solid; }
+.saved { grid-column: 1 / -1; font-size: 12px; color: var(--ok); min-height: 1em; margin-top: -6px; text-align: right; }
+.empty { color: var(--muted); padding: 30px 0; text-align: center; }
+.ro { color: var(--accent); font-size: 13px; }
+@media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>台詞修改表</h1>
+    <p class="sub">情境對話遊戲 · 每個遊戲的中文文字。右邊打字就會自動存檔。</p>
+  </header>
+  <div class="howto">
+    <b>怎麼用</b>
+    <ul>
+      <li>右邊的框框打上新的句子；<b>空白＝不改</b>。打完就自動儲存，關掉頁面也不會不見。</li>
+      <li>藍色的 <span class="ph">〔名字〕</span> 這種是遊戲會自動換掉的部分（玩家名字、飲料、金額），請照樣保留在句子裡。</li>
+      <li>「選項」可以放心改，對錯判斷我會跟著修。西文、英文翻譯和拼音也由我處理。</li>
+      <li>改完跟我說一聲，我會把修改放進遊戲。</li>
+    </ul>
+  </div>
+  <div class="bar">
+    <select id="game" aria-label="遊戲"></select>
+    <input id="q" type="search" placeholder="搜尋句子…" aria-label="搜尋">
+    <span class="count" id="count"></span>
+    <div class="chips" id="chips" role="group" aria-label="種類"></div>
+    <span class="status" id="status"></span>
+  </div>
+  <main id="list"><p class="empty">載入中…</p></main>
+</div>
+
+<script>
+const GAMES = [{ id: 'breakfast', name: '早餐店打工' }, { id: 'reserva', name: '打電話訂位（已完成）' }, { id: 'drinks', name: '飲料店冒險（已完成）' }];
+const KIND_ORDER = ['開頭介紹', '旁白', '台詞', '老樣子說法', '選項', '過場按鈕', '錯誤說明', '綠卡說明', '任務提示（標題）', '任務提示', '位置名稱'];
+const S = { game: 'breakfast', rows: [], edits: {}, kind: '全部', q: '' };
+let db = null, canWrite = true, unsub = null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const withPh = s => esc(s).replace(/〔(.*?)〕/g, '<span class="ph">〔$1〕</span>');
+
+$('game').innerHTML = GAMES.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+$('game').onchange = () => { S.game = $('game').value; load(); };
+$('q').oninput = () => { S.q = $('q').value.trim(); render(); };
+
+async function load() {
+  $('list').innerHTML = '<p class="empty">載入中…</p>';
+  try {
+    const r = await fetch('rows/' + S.game + '.json'); S.rows = (await r.json()).rows;
+  } catch (e) { $('list').innerHTML = '<p class="empty">讀不到句子資料，請重新整理頁面。</p>'; return; }
+  renderChips(); render(); listen();
+}
+function renderChips() {
+  const kinds = ['全部', ...KIND_ORDER.filter(k => S.rows.some(r => r.kind === k)), '已修改'];
+  $('chips').innerHTML = kinds.map(k => `<button class="chip" data-k="${k}" aria-pressed="${k === S.kind}">${k}</button>`).join('');
+  $('chips').querySelectorAll('.chip').forEach(b => b.onclick = () => { S.kind = b.dataset.k; renderChips(); render(); });
+}
+function visible(r) {
+  if (S.kind === '已修改') { if (!S.edits[r.id]) return false; }
+  else if (S.kind !== '全部' && r.kind !== S.kind) return false;
+  if (S.q && !(r.zh.includes(S.q) || (S.edits[r.id] || '').includes(S.q) || r.id.includes(S.q))) return false;
+  return true;
+}
+function render() {
+  const n = Object.values(S.edits).filter(Boolean).length;
+  $('count').innerHTML = `已修改 <b>${n}</b> / ${S.rows.length}`;
+  const rows = S.rows.filter(visible);
+  if (!rows.length) { $('list').innerHTML = '<p class="empty">沒有符合的句子。</p>'; return; }
+  const groups = [];
+  rows.forEach(r => { let g = groups.find(x => x.name === r.stageName); if (!g) groups.push(g = { name: r.stageName, rows: [] }); g.rows.push(r); });
+  $('list').innerHTML = groups.map(g => `<section><h2>${esc(g.name)}</h2>` + g.rows.map(r => `
+    <div class="row${S.edits[r.id] ? ' edited' : ''}" data-id="${r.id}">
+      <div class="meta"><span>${r.id}</span><span class="kind">${esc(r.kind)}</span>${r.who ? `<span class="who">${esc(r.who)}</span>` : ''}</div>
+      <div class="orig">${withPh(r.zh)}</div>
+      <textarea id="t-${r.id}" rows="1" placeholder="改成…（空白＝不改）" ${canWrite ? '' : 'readonly'}>${esc(S.edits[r.id] || '')}</textarea>
+      <div class="saved" id="s-${r.id}"></div>
+    </div>`).join('') + '</section>').join('');
+  $('list').querySelectorAll('textarea').forEach(t => { fit(t); t.oninput = () => { fit(t); queue(t.id.slice(2), t.value); }; });
+}
+const fit = t => { t.style.height = 'auto'; t.style.height = t.scrollHeight + 2 + 'px'; };
+
+/* 儲存：每一句一份文件 edits/<id>；打字停 0.8 秒才存 */
+const timers = {};
+function queue(id, text) {
+  clearTimeout(timers[id]); $('s-' + id).textContent = '…';
+  timers[id] = setTimeout(() => save(id, text), 800);
+}
+async function save(id, text) {
+  if (!db) { $('s-' + id).textContent = '無法儲存（請登入 claude.ai 後重新整理）'; return; }
+  const doc = db.doc('edits/' + id), v = text.trim();
+  try {
+    if (v) await doc.set({ game: S.game, id, text: v, updatedAt: Date.now() }); else await doc.delete();
+    S.edits[id] = v; $('s-' + id).textContent = v ? '✓ 已儲存' : '✓ 已清空（不改）';
+    document.querySelector(`.row[data-id="${id}"]`)?.classList.toggle('edited', !!v);
+    const n = Object.values(S.edits).filter(Boolean).length; $('count').innerHTML = `已修改 <b>${n}</b> / ${S.rows.length}`;
+  } catch (e) { $('s-' + id).textContent = '沒存到：' + (e && e.code === 'not_granted' ? '你沒有編輯權限' : '請再試一次'); }
+}
+function listen() {
+  if (!db) return;
+  if (unsub) unsub();
+  unsub = db.collection('edits').where('game', '==', S.game).onSnapshot(snap => {
+    const next = {};
+    snap.docs.forEach(d => { const x = d.data(); next[x.id] = x.text; });
+    const focused = document.activeElement && document.activeElement.tagName === 'TEXTAREA' ? document.activeElement.id.slice(2) : null;
+    const changed = Object.keys({ ...next, ...S.edits }).some(k => k !== focused && (next[k] || '') !== (S.edits[k] || ''));
+    S.edits = { ...next, ...(focused ? { [focused]: S.edits[focused] } : {}) };
+    if (changed) render(); else { const n = Object.values(S.edits).filter(Boolean).length; $('count').innerHTML = `已修改 <b>${n}</b> / ${S.rows.length}`; }
+  }, () => { $('status').textContent = '讀取修改時出了問題，請重新整理。'; });
+}
+
+load();
+(async () => {
+  db = await claude.use('db');
+  if (!db) { $('status').innerHTML = '<span class="ro">目前無法存檔：請用 claude.ai 登入後打開這個頁面。</span>'; return; }
+  try { const u = await claude.use('user'); if (u && (await u.can('data.write')) === false) { canWrite = false; $('status').innerHTML = '<span class="ro">你只能檢視，不能修改。</span>'; } } catch (e) {}
+  listen();
+})();
+</script>

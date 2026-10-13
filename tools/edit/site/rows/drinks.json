@@ -1,0 +1,742 @@
+{
+ "game": "drinks",
+ "title": "飲料店冒險",
+ "rows": [
+  {
+   "id": "drinks-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "who": "",
+   "zh": "飲料店冒險",
+   "stageName": "開始畫面"
+  },
+  {
+   "id": "drinks-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "who": "",
+   "zh": "同事 Ami 請你去樓下的飲料店幫她買一杯飲料，也別忘了你自己要喝什麼！",
+   "stageName": "開始畫面"
+  },
+  {
+   "id": "drinks-003",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "who": "",
+   "zh": "走到櫃台",
+   "stageName": "過場按鈕"
+  },
+  {
+   "id": "drinks-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "who": "",
+   "zh": "好，重新點一次。",
+   "stageName": "過場按鈕"
+  },
+  {
+   "id": "drinks-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "who": "",
+   "zh": "聽店員確認",
+   "stageName": "過場按鈕"
+  },
+  {
+   "id": "drinks-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "who": "",
+   "zh": "告訴店員哪裡不對",
+   "stageName": "過場按鈕"
+  },
+  {
+   "id": "drinks-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "who": "",
+   "zh": "接著點第二杯",
+   "stageName": "過場按鈕"
+  },
+  {
+   "id": "drinks-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "who": "",
+   "zh": "接著選加料",
+   "stageName": "過場按鈕"
+  },
+  {
+   "id": "drinks-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "who": "",
+   "zh": "打電話給Ami",
+   "stageName": "過場按鈕"
+  },
+  {
+   "id": "drinks-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "who": "",
+   "zh": "跟店員說Ami要什麼",
+   "stageName": "過場按鈕"
+  },
+  {
+   "id": "drinks-011",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "who": "",
+   "zh": "準備付錢",
+   "stageName": "過場按鈕"
+  },
+  {
+   "id": "drinks-012",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "who": "",
+   "zh": "拿找的錢",
+   "stageName": "過場按鈕"
+  },
+  {
+   "id": "drinks-013",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "who": "",
+   "zh": "等店員補錢",
+   "stageName": "過場按鈕"
+  },
+  {
+   "id": "drinks-014",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "who": "",
+   "zh": "等飲料做好",
+   "stageName": "過場按鈕"
+  },
+  {
+   "id": "drinks-015",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "who": "",
+   "zh": "拿飲料回辦公室",
+   "stageName": "過場按鈕"
+  },
+  {
+   "id": "drinks-016",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "who": "",
+   "zh": "辦公室",
+   "stageName": "畫面上方的地點"
+  },
+  {
+   "id": "drinks-017",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "who": "",
+   "zh": "飲料店",
+   "stageName": "畫面上方的地點"
+  },
+  {
+   "id": "drinks-018",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "who": "",
+   "zh": "通話中 · ",
+   "stageName": "畫面上方的地點"
+  },
+  {
+   "id": "drinks-019",
+   "kind": "台詞",
+   "stage": "START",
+   "who": "Ami",
+   "zh": "〔名字〕，我好渴喔！可以幫我去樓下買一杯〔Ami的飲料〕嗎？我要加椰果。",
+   "stageName": "開場：Ami 請你買飲料"
+  },
+  {
+   "id": "drinks-020",
+   "kind": "台詞",
+   "stage": "START",
+   "who": "Ami",
+   "zh": "你想喝什麼？我請你！",
+   "stageName": "開場：Ami 請你買飲料"
+  },
+  {
+   "id": "drinks-021",
+   "kind": "台詞",
+   "stage": "START",
+   "who": "我",
+   "zh": "那……我要一杯〔你的飲料〕。",
+   "stageName": "開場：Ami 請你買飲料"
+  },
+  {
+   "id": "drinks-022",
+   "kind": "選項",
+   "stage": "START",
+   "who": "我",
+   "zh": "去樓下的飲料店",
+   "stageName": "開場：Ami 請你買飲料"
+  },
+  {
+   "id": "drinks-023",
+   "kind": "旁白",
+   "stage": "WHO",
+   "who": "",
+   "zh": "（你走到樓下的飲料店，店員在櫃台後面。你要先點誰的飲料？）",
+   "stageName": "先點誰的"
+  },
+  {
+   "id": "drinks-024",
+   "kind": "選項",
+   "stage": "WHO",
+   "who": "我",
+   "zh": "先點我的",
+   "stageName": "先點誰的"
+  },
+  {
+   "id": "drinks-025",
+   "kind": "選項",
+   "stage": "WHO",
+   "who": "我",
+   "zh": "先點Ami的",
+   "stageName": "先點誰的"
+  },
+  {
+   "id": "drinks-026",
+   "kind": "台詞",
+   "stage": "TYPE_1",
+   "who": "Benjamin（店員）",
+   "zh": "您好，歡迎光臨！今天想喝什麼？",
+   "stageName": "第一杯：品項"
+  },
+  {
+   "id": "drinks-027",
+   "kind": "台詞",
+   "stage": "SIZE_1",
+   "who": "Benjamin（店員）",
+   "zh": "大杯、中杯還是小杯？",
+   "stageName": "第一杯：大小"
+  },
+  {
+   "id": "drinks-028",
+   "kind": "台詞",
+   "stage": "SUGAR_1",
+   "who": "Benjamin（店員）",
+   "zh": "甜度呢？",
+   "stageName": "第一杯：甜度"
+  },
+  {
+   "id": "drinks-029",
+   "kind": "台詞",
+   "stage": "ICE_1",
+   "who": "Benjamin（店員）",
+   "zh": "冰塊呢？",
+   "stageName": "第一杯：冰塊"
+  },
+  {
+   "id": "drinks-030",
+   "kind": "台詞",
+   "stage": "CHECK_1",
+   "who": "Benjamin（店員）",
+   "zh": "跟您確認一下，是一杯〔店員念的飲料〕嗎？",
+   "stageName": "店員確認"
+  },
+  {
+   "id": "drinks-031",
+   "kind": "選項",
+   "stage": "CHECK_1",
+   "who": "我",
+   "zh": "對。",
+   "stageName": "店員確認"
+  },
+  {
+   "id": "drinks-032",
+   "kind": "選項",
+   "stage": "CHECK_1",
+   "who": "我",
+   "zh": "不對。",
+   "stageName": "店員確認"
+  },
+  {
+   "id": "drinks-033",
+   "kind": "錯誤說明",
+   "stage": "CHECK_1",
+   "who": "",
+   "zh": "店員念錯了，你卻說對。",
+   "stageName": "店員確認"
+  },
+  {
+   "id": "drinks-034",
+   "kind": "台詞",
+   "stage": "CHECK_1",
+   "who": "Benjamin（店員）",
+   "zh": "咦？等一下，這好像不是您剛剛點的……我們重新點一次吧！",
+   "stageName": "店員確認"
+  },
+  {
+   "id": "drinks-035",
+   "kind": "綠卡說明",
+   "stage": "CHECK_1",
+   "who": "",
+   "zh": "你發現店員念錯了！",
+   "stageName": "店員確認"
+  },
+  {
+   "id": "drinks-036",
+   "kind": "錯誤說明",
+   "stage": "CHECK_1",
+   "who": "",
+   "zh": "店員念的是對的，你卻說不對。",
+   "stageName": "店員確認"
+  },
+  {
+   "id": "drinks-037",
+   "kind": "台詞",
+   "stage": "CHECK_1",
+   "who": "Benjamin（店員）",
+   "zh": "嗯？我念的就是您剛剛點的耶……",
+   "stageName": "店員確認"
+  },
+  {
+   "id": "drinks-038",
+   "kind": "台詞",
+   "stage": "CORRECT_1",
+   "who": "Benjamin（店員）",
+   "zh": "啊，抱歉抱歉！那您點的是……？",
+   "stageName": "更正點單"
+  },
+  {
+   "id": "drinks-039",
+   "kind": "台詞",
+   "stage": "CORRECT_1",
+   "who": "Benjamin（店員）",
+   "zh": "好的，一杯〔第一杯飲料〕，沒問題！",
+   "stageName": "更正點單"
+  },
+  {
+   "id": "drinks-040",
+   "kind": "錯誤說明",
+   "stage": "CORRECT_1",
+   "who": "",
+   "zh": "更正的時候又選錯了。",
+   "stageName": "更正點單"
+  },
+  {
+   "id": "drinks-041",
+   "kind": "台詞",
+   "stage": "CORRECT_1",
+   "who": "Benjamin（店員）",
+   "zh": "嗯……我們從頭再點一次好了。",
+   "stageName": "更正點單"
+  },
+  {
+   "id": "drinks-042",
+   "kind": "台詞",
+   "stage": "TYPE_2",
+   "who": "Benjamin（店員）",
+   "zh": "好的，一杯〔第一杯飲料〕。請問還要點什麼嗎？",
+   "stageName": "第二杯：品項"
+  },
+  {
+   "id": "drinks-043",
+   "kind": "台詞",
+   "stage": "SIZE_2",
+   "who": "Benjamin（店員）",
+   "zh": "這杯要大杯、中杯還是小杯？",
+   "stageName": "第二杯：大小"
+  },
+  {
+   "id": "drinks-044",
+   "kind": "台詞",
+   "stage": "SUGAR_2",
+   "who": "Benjamin（店員）",
+   "zh": "甜度呢？",
+   "stageName": "第二杯：甜度"
+  },
+  {
+   "id": "drinks-045",
+   "kind": "台詞",
+   "stage": "ICE_2",
+   "who": "Benjamin（店員）",
+   "zh": "冰塊呢？",
+   "stageName": "第二杯：冰塊"
+  },
+  {
+   "id": "drinks-046",
+   "kind": "台詞",
+   "stage": "TOPPING_2",
+   "who": "Benjamin（店員）",
+   "zh": "要加料嗎？",
+   "stageName": "Ami 的飲料：加料"
+  },
+  {
+   "id": "drinks-047",
+   "kind": "選項",
+   "stage": "TOPPING_2",
+   "who": "我",
+   "zh": "不加料",
+   "stageName": "Ami 的飲料：加料"
+  },
+  {
+   "id": "drinks-048",
+   "kind": "台詞",
+   "stage": "NO_COCONUT",
+   "who": "Benjamin（店員）",
+   "zh": "不好意思，椰果今天賣完了耶！",
+   "stageName": "椰果賣完了"
+  },
+  {
+   "id": "drinks-049",
+   "kind": "選項",
+   "stage": "NO_COCONUT",
+   "who": "我",
+   "zh": "請稍等，我問一下朋友。",
+   "stageName": "椰果賣完了"
+  },
+  {
+   "id": "drinks-050",
+   "kind": "選項",
+   "stage": "NO_COCONUT",
+   "who": "我",
+   "zh": "那就不加料。",
+   "stageName": "椰果賣完了"
+  },
+  {
+   "id": "drinks-051",
+   "kind": "選項",
+   "stage": "NO_COCONUT",
+   "who": "我",
+   "zh": "那改加〔珍珠或布丁〕。",
+   "stageName": "椰果賣完了"
+  },
+  {
+   "id": "drinks-052",
+   "kind": "台詞",
+   "stage": "CALL_AMI",
+   "who": "我",
+   "zh": "Ami，椰果賣完了，要換別的嗎？",
+   "stageName": "打電話問 Ami"
+  },
+  {
+   "id": "drinks-053",
+   "kind": "台詞",
+   "stage": "CALL_AMI",
+   "who": "Ami",
+   "zh": "是喔，那我要加〔Ami改要的配料〕！",
+   "stageName": "打電話問 Ami"
+  },
+  {
+   "id": "drinks-054",
+   "kind": "選項",
+   "stage": "CALL_AMI",
+   "who": "我",
+   "zh": "好，我跟店員說。",
+   "stageName": "打電話問 Ami"
+  },
+  {
+   "id": "drinks-055",
+   "kind": "綠卡說明",
+   "stage": "CALL_AMI",
+   "who": "",
+   "zh": "先打電話問 Ami 是好主意。",
+   "stageName": "打電話問 Ami"
+  },
+  {
+   "id": "drinks-056",
+   "kind": "台詞",
+   "stage": "CALL_AMI",
+   "who": "我",
+   "zh": "不好意思，讓你久等了。",
+   "stageName": "打電話問 Ami"
+  },
+  {
+   "id": "drinks-057",
+   "kind": "台詞",
+   "stage": "TOPPING_3",
+   "who": "Benjamin（店員）",
+   "zh": "請問要改加什麼呢？",
+   "stageName": "Ami 的飲料：改加料"
+  },
+  {
+   "id": "drinks-058",
+   "kind": "選項",
+   "stage": "TOPPING_3",
+   "who": "我",
+   "zh": "珍珠",
+   "stageName": "Ami 的飲料：改加料"
+  },
+  {
+   "id": "drinks-059",
+   "kind": "選項",
+   "stage": "TOPPING_3",
+   "who": "我",
+   "zh": "布丁",
+   "stageName": "Ami 的飲料：改加料"
+  },
+  {
+   "id": "drinks-060",
+   "kind": "選項",
+   "stage": "TOPPING_3",
+   "who": "我",
+   "zh": "不加料",
+   "stageName": "Ami 的飲料：改加料"
+  },
+  {
+   "id": "drinks-061",
+   "kind": "台詞",
+   "stage": "PAYMENT",
+   "who": "Benjamin（店員）",
+   "zh": "兩杯一共〔總價〕元。",
+   "stageName": "付錢"
+  },
+  {
+   "id": "drinks-062",
+   "kind": "選項",
+   "stage": "PAYMENT",
+   "who": "我",
+   "zh": "拿出〔付的錢〕元",
+   "stageName": "付錢"
+  },
+  {
+   "id": "drinks-063",
+   "kind": "選項",
+   "stage": "PAYMENT",
+   "who": "我",
+   "zh": "拿出50元",
+   "stageName": "付錢"
+  },
+  {
+   "id": "drinks-064",
+   "kind": "錯誤說明",
+   "stage": "PAYMENT",
+   "who": "",
+   "zh": "錢不夠，一共要付〔總價〕元。",
+   "stageName": "付錢"
+  },
+  {
+   "id": "drinks-065",
+   "kind": "台詞",
+   "stage": "PAYMENT",
+   "who": "Benjamin（店員）",
+   "zh": "不好意思，錢不夠喔，還差〔還差的錢〕元。",
+   "stageName": "付錢"
+  },
+  {
+   "id": "drinks-066",
+   "kind": "台詞",
+   "stage": "CHANGE",
+   "who": "Benjamin（店員）",
+   "zh": "好的，收您〔付的錢〕元，找您〔找的錢〕元。",
+   "stageName": "找錢"
+  },
+  {
+   "id": "drinks-067",
+   "kind": "選項",
+   "stage": "CHANGE",
+   "who": "我",
+   "zh": "好，謝謝。",
+   "stageName": "找錢"
+  },
+  {
+   "id": "drinks-068",
+   "kind": "選項",
+   "stage": "CHANGE",
+   "who": "我",
+   "zh": "不好意思，你找錯了。",
+   "stageName": "找錢"
+  },
+  {
+   "id": "drinks-069",
+   "kind": "錯誤說明",
+   "stage": "CHANGE",
+   "who": "",
+   "zh": "店員找錯錢，你沒發現。",
+   "stageName": "找錢"
+  },
+  {
+   "id": "drinks-070",
+   "kind": "旁白",
+   "stage": "CHANGE",
+   "who": "",
+   "zh": "（等等，〔付的錢〕減〔總價〕應該是〔應該找的錢〕……）",
+   "stageName": "找錢"
+  },
+  {
+   "id": "drinks-071",
+   "kind": "綠卡說明",
+   "stage": "CHANGE",
+   "who": "",
+   "zh": "你發現店員找錯錢了！",
+   "stageName": "找錢"
+  },
+  {
+   "id": "drinks-072",
+   "kind": "錯誤說明",
+   "stage": "CHANGE",
+   "who": "",
+   "zh": "店員找的錢是對的。",
+   "stageName": "找錢"
+  },
+  {
+   "id": "drinks-073",
+   "kind": "台詞",
+   "stage": "CHANGE",
+   "who": "Benjamin（店員）",
+   "zh": "〔付的錢〕減〔總價〕，是〔應該找的錢〕元沒錯喔。",
+   "stageName": "找錢"
+  },
+  {
+   "id": "drinks-074",
+   "kind": "台詞",
+   "stage": "APOLOGIZE",
+   "who": "Benjamin（店員）",
+   "zh": "啊！抱歉抱歉，少找您〔少找的錢〕元，這是〔少找的錢〕元。",
+   "stageName": "店員道歉"
+  },
+  {
+   "id": "drinks-075",
+   "kind": "選項",
+   "stage": "APOLOGIZE",
+   "who": "我",
+   "zh": "沒關係，謝謝。",
+   "stageName": "店員道歉"
+  },
+  {
+   "id": "drinks-076",
+   "kind": "選項",
+   "stage": "APOLOGIZE",
+   "who": "我",
+   "zh": "你到底會不會算啊？",
+   "stageName": "店員道歉"
+  },
+  {
+   "id": "drinks-077",
+   "kind": "錯誤說明",
+   "stage": "APOLOGIZE",
+   "who": "",
+   "zh": "對店員不禮貌。",
+   "stageName": "店員道歉"
+  },
+  {
+   "id": "drinks-078",
+   "kind": "台詞",
+   "stage": "FINISH",
+   "who": "Benjamin（店員）",
+   "zh": "飲料好了喔！謝謝光臨！",
+   "stageName": "拿飲料"
+  },
+  {
+   "id": "drinks-079",
+   "kind": "選項",
+   "stage": "FINISH",
+   "who": "我",
+   "zh": "謝謝！",
+   "stageName": "拿飲料"
+  },
+  {
+   "id": "drinks-080",
+   "kind": "錯誤說明",
+   "stage": "END",
+   "who": "",
+   "zh": "Ami 的飲料買錯了，她要的是〔Ami的飲料〕加〔Ami改要的配料〕。",
+   "stageName": "結局"
+  },
+  {
+   "id": "drinks-081",
+   "kind": "錯誤說明",
+   "stage": "END",
+   "who": "",
+   "zh": "你自己的飲料也買錯了，你要的是〔你的飲料〕。",
+   "stageName": "結局"
+  },
+  {
+   "id": "drinks-082",
+   "kind": "旁白",
+   "stage": "END",
+   "who": "",
+   "zh": "（回到辦公室，把飲料拿給 Ami……）",
+   "stageName": "結局"
+  },
+  {
+   "id": "drinks-083",
+   "kind": "台詞",
+   "stage": "END",
+   "who": "Ami",
+   "zh": "哇！就是這杯！謝謝你，〔名字〕！",
+   "stageName": "結局"
+  },
+  {
+   "id": "drinks-084",
+   "kind": "台詞",
+   "stage": "END",
+   "who": "Ami",
+   "zh": "咦？〔名字〕，這杯不對吧！我要的是〔Ami的飲料〕加〔Ami改要的配料〕耶。",
+   "stageName": "結局"
+  },
+  {
+   "id": "drinks-085",
+   "kind": "台詞",
+   "stage": "END",
+   "who": "Ami",
+   "zh": "你買成〔你幫Ami買的飲料〕〔加的配料〕了啦！",
+   "stageName": "結局"
+  },
+  {
+   "id": "drinks-086",
+   "kind": "旁白",
+   "stage": "END",
+   "who": "",
+   "zh": "（你自己不是要〔你的飲料〕嗎？好像也買錯了……）",
+   "stageName": "結局"
+  },
+  {
+   "id": "drinks-087",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "who": "",
+   "zh": "Ami 一開始說的",
+   "stageName": "任務提示"
+  },
+  {
+   "id": "drinks-088",
+   "kind": "任務提示",
+   "stage": "提示",
+   "who": "",
+   "zh": "Ami 要一杯〔Ami的飲料〕，加椰果。",
+   "stageName": "任務提示"
+  },
+  {
+   "id": "drinks-089",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "who": "",
+   "zh": "你自己要喝的",
+   "stageName": "任務提示"
+  },
+  {
+   "id": "drinks-090",
+   "kind": "任務提示",
+   "stage": "提示",
+   "who": "",
+   "zh": "一杯〔你的飲料〕。",
+   "stageName": "任務提示"
+  },
+  {
+   "id": "drinks-091",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "who": "",
+   "zh": "打電話問 Ami",
+   "stageName": "任務提示"
+  },
+  {
+   "id": "drinks-092",
+   "kind": "任務提示",
+   "stage": "提示",
+   "who": "",
+   "zh": "椰果賣完了，改加〔Ami改要的配料〕。",
+   "stageName": "任務提示"
+  }
+ ]
+}

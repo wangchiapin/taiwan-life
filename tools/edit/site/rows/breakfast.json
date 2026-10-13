@@ -1,0 +1,822 @@
+{
+ "game": "breakfast",
+ "title": "早餐店打工",
+ "rows": [
+  {
+   "id": "breakfast-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "早餐店"
+  },
+  {
+   "id": "breakfast-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "你在陳姐的早餐店打工一陣子了。今天陳姐去市場，陳大哥在後面做早餐，櫃台交給你。聽懂客人要什麼！"
+  },
+  {
+   "id": "breakfast-003",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "掛掉電話，繼續招呼客人"
+  },
+  {
+   "id": "breakfast-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "招呼下一位客人"
+  },
+  {
+   "id": "breakfast-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "聽客人說"
+  },
+  {
+   "id": "breakfast-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "寫點單"
+  },
+  {
+   "id": "breakfast-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "接著問客人"
+  },
+  {
+   "id": "breakfast-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "跟客人算錢"
+  },
+  {
+   "id": "breakfast-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "收錢"
+  },
+  {
+   "id": "breakfast-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "把早餐交給客人"
+  },
+  {
+   "id": "breakfast-011",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "接電話"
+  },
+  {
+   "id": "breakfast-012",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "繼續顧店"
+  },
+  {
+   "id": "breakfast-013",
+   "kind": "老樣子說法",
+   "stage": "王伯伯的老樣子",
+   "stageName": "王伯伯的老樣子",
+   "who": "",
+   "zh": "蘿蔔糕加蛋，還有一杯中杯熱豆漿，無糖"
+  },
+  {
+   "id": "breakfast-014",
+   "kind": "老樣子說法",
+   "stage": "王伯伯的老樣子",
+   "stageName": "王伯伯的老樣子",
+   "who": "",
+   "zh": "火腿蛋吐司，還有一杯大杯熱豆漿，有糖"
+  },
+  {
+   "id": "breakfast-015",
+   "kind": "老樣子說法",
+   "stage": "王伯伯的老樣子",
+   "stageName": "王伯伯的老樣子",
+   "who": "",
+   "zh": "蘿蔔糕不加蛋，還有一杯中杯熱奶茶"
+  },
+  {
+   "id": "breakfast-016",
+   "kind": "台詞",
+   "stage": "客人：張太太",
+   "stageName": "客人：張太太",
+   "who": "張太太",
+   "zh": "我要一個〔餐點〕和一杯〔飲料〕。"
+  },
+  {
+   "id": "breakfast-017",
+   "kind": "台詞",
+   "stage": "客人：張太太",
+   "stageName": "客人：張太太",
+   "who": "張太太",
+   "zh": "我們內用。"
+  },
+  {
+   "id": "breakfast-018",
+   "kind": "旁白",
+   "stage": "客人：李先生",
+   "stageName": "客人：李先生",
+   "who": "",
+   "zh": "（一位穿西裝的先生急急忙忙走進來。）"
+  },
+  {
+   "id": "breakfast-019",
+   "kind": "台詞",
+   "stage": "客人：李先生",
+   "stageName": "客人：李先生",
+   "who": "李先生",
+   "zh": "老闆，一個〔餐點〕，一杯〔飲料〕，外帶，我趕時間！"
+  },
+  {
+   "id": "breakfast-020",
+   "kind": "旁白",
+   "stage": "客人：王伯伯",
+   "stageName": "客人：王伯伯",
+   "who": "",
+   "zh": "（一位伯伯慢慢走進來，跟你揮揮手。）"
+  },
+  {
+   "id": "breakfast-021",
+   "kind": "台詞",
+   "stage": "客人：王伯伯",
+   "stageName": "客人：王伯伯",
+   "who": "王伯伯",
+   "zh": "早安！今天陳姐不在喔？我要老樣子！今天再多一個薯餅。"
+  },
+  {
+   "id": "breakfast-022",
+   "kind": "台詞",
+   "stage": "客人：王伯伯",
+   "stageName": "客人：王伯伯",
+   "who": "王伯伯",
+   "zh": "內用，我坐在這裡看報紙。"
+  },
+  {
+   "id": "breakfast-023",
+   "kind": "旁白",
+   "stage": "客人：張太太",
+   "stageName": "客人：張太太",
+   "who": "",
+   "zh": "（一位媽媽帶著小朋友走進來。）"
+  },
+  {
+   "id": "breakfast-024",
+   "kind": "台詞",
+   "stage": "客人：張太太",
+   "stageName": "客人：張太太",
+   "who": "小朋友",
+   "zh": "我要鐵板麵加蛋！還有一杯〔飲料〕！"
+  },
+  {
+   "id": "breakfast-025",
+   "kind": "台詞",
+   "stage": "客人：張太太",
+   "stageName": "客人：張太太",
+   "who": "小朋友",
+   "zh": "那我要〔餐點〕，還有一杯〔飲料〕！"
+  },
+  {
+   "id": "breakfast-026",
+   "kind": "旁白",
+   "stage": "客人：林小姐",
+   "stageName": "客人：林小姐",
+   "who": "",
+   "zh": "（一位小姐一邊看手機一邊走進來。）"
+  },
+  {
+   "id": "breakfast-027",
+   "kind": "台詞",
+   "stage": "客人：林小姐",
+   "stageName": "客人：林小姐",
+   "who": "林小姐",
+   "zh": "你好，我是林小姐，我有打電話訂早餐。"
+  },
+  {
+   "id": "breakfast-028",
+   "kind": "台詞",
+   "stage": "客人：林小姐",
+   "stageName": "客人：林小姐",
+   "who": "林小姐",
+   "zh": "飲料是〔飲料〕，對吧？可以再幫我加一杯〔飲料〕嗎？"
+  },
+  {
+   "id": "breakfast-029",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：陳姐交代",
+   "who": "陳姐",
+   "zh": "〔名字〕，早安！我要去市場買菜，大概一個小時回來。"
+  },
+  {
+   "id": "breakfast-030",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：陳姐交代",
+   "who": "陳姐",
+   "zh": "陳大哥在後面煎台做早餐，櫃台就交給你囉！"
+  },
+  {
+   "id": "breakfast-031",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：陳姐交代",
+   "who": "陳姐",
+   "zh": "客人點什麼，你就在點單上點。客人常常說簡稱：「大冰奶」就是大杯冰奶茶，「中冰紅」就是中杯冰紅茶，「中熱奶」就是中杯熱奶茶。"
+  },
+  {
+   "id": "breakfast-032",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：陳姐交代",
+   "who": "陳姐",
+   "zh": "鐵板麵今天賣完了，記得跟客人說。"
+  },
+  {
+   "id": "breakfast-033",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：陳姐交代",
+   "who": "陳姐",
+   "zh": "還有，王伯伯每天都會來，他說「老樣子」就是〔老樣子內容〕。"
+  },
+  {
+   "id": "breakfast-034",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：陳姐交代",
+   "who": "陳姐",
+   "zh": "電話訂餐的單子我貼在收銀機上了。拜託你囉！"
+  },
+  {
+   "id": "breakfast-035",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：陳姐交代",
+   "who": "我",
+   "zh": "好，沒問題！"
+  },
+  {
+   "id": "breakfast-036",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "開場：陳姐交代",
+   "who": "我",
+   "zh": "開始顧店"
+  },
+  {
+   "id": "breakfast-037",
+   "kind": "選項",
+   "stage": "GREET",
+   "stageName": "打招呼",
+   "who": "我",
+   "zh": "歡迎光臨！"
+  },
+  {
+   "id": "breakfast-038",
+   "kind": "選項",
+   "stage": "GREET",
+   "stageName": "打招呼",
+   "who": "我",
+   "zh": "你要什麼？快點說。"
+  },
+  {
+   "id": "breakfast-039",
+   "kind": "選項",
+   "stage": "GREET",
+   "stageName": "打招呼",
+   "who": "我",
+   "zh": "我們還沒開。"
+  },
+  {
+   "id": "breakfast-040",
+   "kind": "錯誤說明",
+   "stage": "GREET",
+   "stageName": "打招呼",
+   "who": "",
+   "zh": "早餐店已經開門了。"
+  },
+  {
+   "id": "breakfast-041",
+   "kind": "旁白",
+   "stage": "GREET",
+   "stageName": "打招呼",
+   "who": "",
+   "zh": "（店已經開了啦……）"
+  },
+  {
+   "id": "breakfast-042",
+   "kind": "錯誤說明",
+   "stage": "GREET",
+   "stageName": "打招呼",
+   "who": "",
+   "zh": "對客人不禮貌。"
+  },
+  {
+   "id": "breakfast-043",
+   "kind": "選項",
+   "stage": "HEAR",
+   "stageName": "聽點餐",
+   "who": "我",
+   "zh": "好的，請稍等。"
+  },
+  {
+   "id": "breakfast-044",
+   "kind": "選項",
+   "stage": "HEAR",
+   "stageName": "聽點餐",
+   "who": "我",
+   "zh": "不好意思，鐵板麵今天賣完了。"
+  },
+  {
+   "id": "breakfast-045",
+   "kind": "選項",
+   "stage": "HEAR",
+   "stageName": "聽點餐",
+   "who": "我",
+   "zh": "不好意思，蛋餅今天賣完了。"
+  },
+  {
+   "id": "breakfast-046",
+   "kind": "綠卡說明",
+   "stage": "HEAR",
+   "stageName": "聽點餐",
+   "who": "",
+   "zh": "你記得告訴客人鐵板麵賣完了。"
+  },
+  {
+   "id": "breakfast-047",
+   "kind": "台詞",
+   "stage": "HEAR",
+   "stageName": "聽點餐",
+   "who": "小朋友",
+   "zh": "喔……那我要〔餐點〕！"
+  },
+  {
+   "id": "breakfast-048",
+   "kind": "錯誤說明",
+   "stage": "HEAR",
+   "stageName": "聽點餐",
+   "who": "",
+   "zh": "蛋餅沒有賣完，是鐵板麵賣完了。"
+  },
+  {
+   "id": "breakfast-049",
+   "kind": "台詞",
+   "stage": "HEAR",
+   "stageName": "聽點餐",
+   "who": "張太太",
+   "zh": "咦？可是菜單上有蛋餅啊？"
+  },
+  {
+   "id": "breakfast-050",
+   "kind": "錯誤說明",
+   "stage": "HEAR",
+   "stageName": "聽點餐",
+   "who": "",
+   "zh": "鐵板麵賣完了，要先跟客人說。"
+  },
+  {
+   "id": "breakfast-051",
+   "kind": "旁白",
+   "stage": "HEAR",
+   "stageName": "聽點餐",
+   "who": "",
+   "zh": "（等等，陳姐說鐵板麵今天……）"
+  },
+  {
+   "id": "breakfast-052",
+   "kind": "台詞",
+   "stage": "PICKUP",
+   "stageName": "取電話訂餐",
+   "who": "林小姐",
+   "zh": "〔電話末三碼〕。"
+  },
+  {
+   "id": "breakfast-053",
+   "kind": "錯誤說明",
+   "stage": "PICKUP",
+   "stageName": "取電話訂餐",
+   "who": "",
+   "zh": "拿錯袋子了，那是另一位林小姐八點半要拿的。"
+  },
+  {
+   "id": "breakfast-054",
+   "kind": "台詞",
+   "stage": "PICKUP",
+   "stageName": "取電話訂餐",
+   "who": "林小姐",
+   "zh": "咦？我沒有點雞腿堡耶。"
+  },
+  {
+   "id": "breakfast-055",
+   "kind": "綠卡說明",
+   "stage": "PICKUP",
+   "stageName": "取電話訂餐",
+   "who": "",
+   "zh": "先問電話後三碼再拿，很仔細！"
+  },
+  {
+   "id": "breakfast-056",
+   "kind": "台詞",
+   "stage": "PICKUP",
+   "stageName": "取電話訂餐",
+   "who": "我",
+   "zh": "是這袋，〔餐點〕。"
+  },
+  {
+   "id": "breakfast-057",
+   "kind": "旁白",
+   "stage": "DINE",
+   "stageName": "內用外帶",
+   "who": "",
+   "zh": "（點單做好了。）"
+  },
+  {
+   "id": "breakfast-058",
+   "kind": "選項",
+   "stage": "DINE",
+   "stageName": "內用外帶",
+   "who": "我",
+   "zh": "請問內用還是外帶？"
+  },
+  {
+   "id": "breakfast-059",
+   "kind": "選項",
+   "stage": "DINE",
+   "stageName": "內用外帶",
+   "who": "我",
+   "zh": "好，我馬上做。"
+  },
+  {
+   "id": "breakfast-060",
+   "kind": "錯誤說明",
+   "stage": "DINE",
+   "stageName": "內用外帶",
+   "who": "",
+   "zh": "客人剛剛說了「〔內用/外帶〕」。"
+  },
+  {
+   "id": "breakfast-061",
+   "kind": "台詞",
+   "stage": "DINE",
+   "stageName": "內用外帶",
+   "who": "客人",
+   "zh": "我剛剛說〔內用/外帶〕了啦！"
+  },
+  {
+   "id": "breakfast-062",
+   "kind": "綠卡說明",
+   "stage": "DINE",
+   "stageName": "內用外帶",
+   "who": "",
+   "zh": "王伯伯沒說內用還是外帶，你記得問了。"
+  },
+  {
+   "id": "breakfast-063",
+   "kind": "錯誤說明",
+   "stage": "DINE",
+   "stageName": "內用外帶",
+   "who": "",
+   "zh": "沒問客人內用還是外帶。"
+  },
+  {
+   "id": "breakfast-064",
+   "kind": "旁白",
+   "stage": "DINE",
+   "stageName": "內用外帶",
+   "who": "",
+   "zh": "（王伯伯拿著報紙坐下了，可是你把早餐裝進了袋子……）"
+  },
+  {
+   "id": "breakfast-065",
+   "kind": "台詞",
+   "stage": "PRICE",
+   "stageName": "算錢",
+   "who": "客人",
+   "zh": "這樣多少錢？"
+  },
+  {
+   "id": "breakfast-066",
+   "kind": "選項",
+   "stage": "PRICE",
+   "stageName": "算錢",
+   "who": "我",
+   "zh": "一共〔金額〕元。"
+  },
+  {
+   "id": "breakfast-067",
+   "kind": "錯誤說明",
+   "stage": "PRICE",
+   "stageName": "算錢",
+   "who": "",
+   "zh": "算錯錢了。"
+  },
+  {
+   "id": "breakfast-068",
+   "kind": "台詞",
+   "stage": "PRICE",
+   "stageName": "算錢",
+   "who": "客人",
+   "zh": "嗯？好像不太對，你再算一次。"
+  },
+  {
+   "id": "breakfast-069",
+   "kind": "台詞",
+   "stage": "CHANGE",
+   "stageName": "找錢",
+   "who": "客人",
+   "zh": "給你〔金額〕元〔有時加：，不好意思，我沒有零錢〕。"
+  },
+  {
+   "id": "breakfast-070",
+   "kind": "錯誤說明",
+   "stage": "CHANGE",
+   "stageName": "找錢",
+   "who": "",
+   "zh": "找錯錢了。"
+  },
+  {
+   "id": "breakfast-071",
+   "kind": "台詞",
+   "stage": "CHANGE",
+   "stageName": "找錢",
+   "who": "客人",
+   "zh": "你好像少找我〔金額〕元喔。"
+  },
+  {
+   "id": "breakfast-072",
+   "kind": "台詞",
+   "stage": "CHANGE",
+   "stageName": "找錢",
+   "who": "客人",
+   "zh": "你多找我〔金額〕元了，還你。"
+  },
+  {
+   "id": "breakfast-073",
+   "kind": "旁白",
+   "stage": "BYE",
+   "stageName": "送客",
+   "who": "",
+   "zh": "（你把早餐裝進袋子，交給〔客人〕。）"
+  },
+  {
+   "id": "breakfast-074",
+   "kind": "旁白",
+   "stage": "BYE",
+   "stageName": "送客",
+   "who": "",
+   "zh": "（你把早餐端到桌上。）"
+  },
+  {
+   "id": "breakfast-075",
+   "kind": "選項",
+   "stage": "BYE",
+   "stageName": "送客",
+   "who": "我",
+   "zh": "謝謝光臨，慢走！"
+  },
+  {
+   "id": "breakfast-076",
+   "kind": "選項",
+   "stage": "BYE",
+   "stageName": "送客",
+   "who": "我",
+   "zh": "請慢用！"
+  },
+  {
+   "id": "breakfast-077",
+   "kind": "選項",
+   "stage": "BYE",
+   "stageName": "送客",
+   "who": "我",
+   "zh": "下一位！"
+  },
+  {
+   "id": "breakfast-078",
+   "kind": "錯誤說明",
+   "stage": "BYE",
+   "stageName": "送客",
+   "who": "",
+   "zh": "對客人太冷淡了。"
+  },
+  {
+   "id": "breakfast-079",
+   "kind": "錯誤說明",
+   "stage": "BYE",
+   "stageName": "送客",
+   "who": "",
+   "zh": "客人要外帶，不是在這裡吃。"
+  },
+  {
+   "id": "breakfast-080",
+   "kind": "錯誤說明",
+   "stage": "BYE",
+   "stageName": "送客",
+   "who": "",
+   "zh": "客人要在這裡吃，應該說「請慢用」。"
+  },
+  {
+   "id": "breakfast-081",
+   "kind": "旁白",
+   "stage": "PHONE",
+   "stageName": "電話訂餐",
+   "who": "",
+   "zh": "（陳姐打電話來了。）"
+  },
+  {
+   "id": "breakfast-082",
+   "kind": "台詞",
+   "stage": "PHONE",
+   "stageName": "電話訂餐",
+   "who": "陳姐",
+   "zh": "〔名字〕，還好嗎？王伯伯來了沒？"
+  },
+  {
+   "id": "breakfast-083",
+   "kind": "台詞",
+   "stage": "PHONE",
+   "stageName": "電話訂餐",
+   "who": "陳姐",
+   "zh": "他今天點什麼？"
+  },
+  {
+   "id": "breakfast-084",
+   "kind": "選項",
+   "stage": "PHONE",
+   "stageName": "電話訂餐",
+   "who": "我",
+   "zh": "老樣子，還多一個薯餅。"
+  },
+  {
+   "id": "breakfast-085",
+   "kind": "選項",
+   "stage": "PHONE",
+   "stageName": "電話訂餐",
+   "who": "我",
+   "zh": "老樣子，還多一個鐵板麵。"
+  },
+  {
+   "id": "breakfast-086",
+   "kind": "錯誤說明",
+   "stage": "PHONE",
+   "stageName": "電話訂餐",
+   "who": "",
+   "zh": "沒記住王伯伯點了什麼。"
+  },
+  {
+   "id": "breakfast-087",
+   "kind": "旁白",
+   "stage": "PHONE",
+   "stageName": "電話訂餐",
+   "who": "",
+   "zh": "（他說老樣子，再多一個……）"
+  },
+  {
+   "id": "breakfast-088",
+   "kind": "綠卡說明",
+   "stage": "PHONE",
+   "stageName": "電話訂餐",
+   "who": "",
+   "zh": "你記得王伯伯點了什麼。"
+  },
+  {
+   "id": "breakfast-089",
+   "kind": "台詞",
+   "stage": "PHONE",
+   "stageName": "電話訂餐",
+   "who": "陳姐",
+   "zh": "好，我九點以前回去，有事再打給我！"
+  },
+  {
+   "id": "breakfast-090",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "陳姐回來",
+   "who": "",
+   "zh": "（八點，陳姐提著菜回來了。）"
+  },
+  {
+   "id": "breakfast-091",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "陳姐回來",
+   "who": "陳姐",
+   "zh": "我回來了！今天賣了〔金額〕元耶。"
+  },
+  {
+   "id": "breakfast-092",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "陳姐回來",
+   "who": "陳姐",
+   "zh": "〔名字〕，你做得太好了！以後我去市場，櫃台都交給你！"
+  },
+  {
+   "id": "breakfast-093",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "陳姐回來",
+   "who": "陳姐",
+   "zh": "辛苦了！有一些小問題，下次再加油喔。"
+  },
+  {
+   "id": "breakfast-094",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "陳姐交代的"
+  },
+  {
+   "id": "breakfast-095",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "陳大哥在後面做早餐，你負責櫃台：點單、收錢、找錢。"
+  },
+  {
+   "id": "breakfast-096",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "鐵板麵今天賣完了，要跟客人說。"
+  },
+  {
+   "id": "breakfast-097",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "王伯伯說「老樣子」，就是〔老樣子內容〕。"
+  },
+  {
+   "id": "breakfast-098",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "電話訂餐的單子貼在收銀機上。"
+  },
+  {
+   "id": "breakfast-099",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "客人常說的簡稱"
+  },
+  {
+   "id": "breakfast-100",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "大冰奶＝大杯冰奶茶"
+  },
+  {
+   "id": "breakfast-101",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "中冰紅＝中杯冰紅茶"
+  },
+  {
+   "id": "breakfast-102",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "中熱奶＝中杯熱奶茶"
+  }
+ ]
+}

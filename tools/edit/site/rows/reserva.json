@@ -1,0 +1,1734 @@
+{
+ "game": "reserva",
+ "title": "打電話訂位",
+ "rows": [
+  {
+   "id": "reserva-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "打電話訂位"
+  },
+  {
+   "id": "reserva-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "Ami 要你幫大家打電話訂位。記住她說的每一個細節！"
+  },
+  {
+   "id": "reserva-003",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "繼續講電話"
+  },
+  {
+   "id": "reserva-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "再看一次傳單"
+  },
+  {
+   "id": "reserva-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "聽電話"
+  },
+  {
+   "id": "reserva-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "掛掉，改打訂位專線"
+  },
+  {
+   "id": "reserva-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "聽店員確認"
+  },
+  {
+   "id": "reserva-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "告訴店員哪裡不對"
+  },
+  {
+   "id": "reserva-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "聽店員說明"
+  },
+  {
+   "id": "reserva-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "掛掉電話"
+  },
+  {
+   "id": "reserva-011",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "再打給餐廳"
+  },
+  {
+   "id": "reserva-012",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "打電話問Ami"
+  },
+  {
+   "id": "reserva-013",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "聽店員說完"
+  },
+  {
+   "id": "reserva-014",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "在家"
+  },
+  {
+   "id": "reserva-015",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "好味道餐廳"
+  },
+  {
+   "id": "reserva-016",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "通話中 · "
+  },
+  {
+   "id": "reserva-017",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "未知號碼"
+  },
+  {
+   "id": "reserva-018",
+   "kind": "台詞",
+   "stage": "CONFIRM",
+   "stageName": "複述確認",
+   "who": "店員",
+   "zh": "跟您確認一下："
+  },
+  {
+   "id": "reserva-019",
+   "kind": "台詞",
+   "stage": "CONFIRM",
+   "stageName": "複述確認",
+   "who": "",
+   "zh": "〔日期〕〔星期幾〕，晚上〔時間〕，〔人數〕位，〔座位〕〔變數〕。"
+  },
+  {
+   "id": "reserva-020",
+   "kind": "台詞",
+   "stage": "CONFIRM",
+   "stageName": "複述確認",
+   "who": "",
+   "zh": "訂位人〔名字〕，電話〔電話〕。"
+  },
+  {
+   "id": "reserva-021",
+   "kind": "台詞",
+   "stage": "CONFIRM",
+   "stageName": "複述確認",
+   "who": "",
+   "zh": "這樣對嗎？"
+  },
+  {
+   "id": "reserva-022",
+   "kind": "台詞",
+   "stage": "",
+   "stageName": "",
+   "who": "店員",
+   "zh": "您好，好味道餐廳，請問有什麼需要？"
+  },
+  {
+   "id": "reserva-023",
+   "kind": "台詞",
+   "stage": "",
+   "stageName": "",
+   "who": "店員",
+   "zh": "沒問題，要幾張兒童椅？"
+  },
+  {
+   "id": "reserva-024",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：Ami 請你訂位",
+   "who": "Ami",
+   "zh": "〔名字〕，〔星期幾〕（〔日期〕）我們要去好味道餐廳聚餐，你可以幫我打電話訂位嗎？"
+  },
+  {
+   "id": "reserva-025",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：Ami 請你訂位",
+   "who": "Ami",
+   "zh": "你幫我打吧，剛好讓你練習中文！"
+  },
+  {
+   "id": "reserva-026",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：Ami 請你訂位",
+   "who": "Ami",
+   "zh": "我們有〔大人人數〕個大人，還有〔小孩人數〕個小朋友，小朋友要坐兒童椅。"
+  },
+  {
+   "id": "reserva-027",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：Ami 請你訂位",
+   "who": "Ami",
+   "zh": "時間是晚上〔時間〕。我〔時間〕才下班，所以不能比〔時間〕早喔！"
+  },
+  {
+   "id": "reserva-028",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：Ami 請你訂位",
+   "who": "Ami",
+   "zh": "對了，我朋友小美吃素。還有，不要太貴的位子！"
+  },
+  {
+   "id": "reserva-029",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：Ami 請你訂位",
+   "who": "我",
+   "zh": "好，交給我！"
+  },
+  {
+   "id": "reserva-030",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "開場：Ami 請你訂位",
+   "who": "我",
+   "zh": "找餐廳的電話"
+  },
+  {
+   "id": "reserva-031",
+   "kind": "旁白",
+   "stage": "DIAL",
+   "stageName": "撥號",
+   "who": "",
+   "zh": "（冰箱上有一張餐廳的傳單。要打哪一個號碼？）"
+  },
+  {
+   "id": "reserva-032",
+   "kind": "錯誤說明",
+   "stage": "DIAL",
+   "stageName": "撥號",
+   "who": "",
+   "zh": "打到外送專線，不是訂位專線。"
+  },
+  {
+   "id": "reserva-033",
+   "kind": "錯誤說明",
+   "stage": "DIAL",
+   "stageName": "撥號",
+   "who": "",
+   "zh": "號碼撥錯了，打到別人家。"
+  },
+  {
+   "id": "reserva-034",
+   "kind": "台詞",
+   "stage": "WRONG_NUMBER",
+   "stageName": "打錯電話",
+   "who": "一個不認識的人",
+   "zh": "喂？你找誰？這裡不是餐廳喔，你打錯了。"
+  },
+  {
+   "id": "reserva-035",
+   "kind": "選項",
+   "stage": "WRONG_NUMBER",
+   "stageName": "打錯電話",
+   "who": "我",
+   "zh": "不好意思，打錯了。"
+  },
+  {
+   "id": "reserva-036",
+   "kind": "台詞",
+   "stage": "DELIVERY_LINE",
+   "stageName": "打到外送專線",
+   "who": "店員",
+   "zh": "好味道外送，請問要點什麼？"
+  },
+  {
+   "id": "reserva-037",
+   "kind": "台詞",
+   "stage": "DELIVERY_LINE",
+   "stageName": "打到外送專線",
+   "who": "我",
+   "zh": "不好意思，我想訂位。"
+  },
+  {
+   "id": "reserva-038",
+   "kind": "台詞",
+   "stage": "DELIVERY_LINE",
+   "stageName": "打到外送專線",
+   "who": "店員",
+   "zh": "這裡是外送專線喔，訂位要打另一支電話。"
+  },
+  {
+   "id": "reserva-039",
+   "kind": "選項",
+   "stage": "DELIVERY_LINE",
+   "stageName": "打到外送專線",
+   "who": "我",
+   "zh": "好，謝謝。"
+  },
+  {
+   "id": "reserva-040",
+   "kind": "選項",
+   "stage": "C1_GREET",
+   "stageName": "第一通：打招呼",
+   "who": "我",
+   "zh": "我想訂位。"
+  },
+  {
+   "id": "reserva-041",
+   "kind": "選項",
+   "stage": "C1_GREET",
+   "stageName": "第一通：打招呼",
+   "who": "我",
+   "zh": "我要外帶。"
+  },
+  {
+   "id": "reserva-042",
+   "kind": "選項",
+   "stage": "C1_GREET",
+   "stageName": "第一通：打招呼",
+   "who": "我",
+   "zh": "我要點一個便當。"
+  },
+  {
+   "id": "reserva-043",
+   "kind": "選項",
+   "stage": "C1_GREET",
+   "stageName": "第一通：打招呼",
+   "who": "我",
+   "zh": "請問你們幾點開門？"
+  },
+  {
+   "id": "reserva-044",
+   "kind": "錯誤說明",
+   "stage": "C1_GREET",
+   "stageName": "第一通：打招呼",
+   "who": "",
+   "zh": "沒有說要訂位。"
+  },
+  {
+   "id": "reserva-045",
+   "kind": "台詞",
+   "stage": "C1_GREET",
+   "stageName": "第一通：打招呼",
+   "who": "店員",
+   "zh": "好的……請問還有別的事嗎？"
+  },
+  {
+   "id": "reserva-046",
+   "kind": "旁白",
+   "stage": "C1_GREET",
+   "stageName": "第一通：打招呼",
+   "who": "",
+   "zh": "（等等，我是要訂位！）"
+  },
+  {
+   "id": "reserva-047",
+   "kind": "台詞",
+   "stage": "C1_DAY",
+   "stageName": "第一通：日期",
+   "who": "店員",
+   "zh": "好的，請問要訂哪一天？"
+  },
+  {
+   "id": "reserva-048",
+   "kind": "選項",
+   "stage": "C1_DAY",
+   "stageName": "第一通：日期",
+   "who": "我",
+   "zh": "今天"
+  },
+  {
+   "id": "reserva-049",
+   "kind": "錯誤說明",
+   "stage": "C1_DAY",
+   "stageName": "第一通：日期",
+   "who": "",
+   "zh": "Ami 說的不是今天。"
+  },
+  {
+   "id": "reserva-050",
+   "kind": "旁白",
+   "stage": "C1_DAY",
+   "stageName": "第一通：日期",
+   "who": "",
+   "zh": "（不對，Ami 說的不是今天……）"
+  },
+  {
+   "id": "reserva-051",
+   "kind": "台詞",
+   "stage": "C1_DATE_CHECK",
+   "stageName": "第一通：確認日期",
+   "who": "店員",
+   "zh": "〔變數〕〔星期幾〕是〔日期〕，對嗎？"
+  },
+  {
+   "id": "reserva-052",
+   "kind": "選項",
+   "stage": "C1_DATE_CHECK",
+   "stageName": "第一通：確認日期",
+   "who": "我",
+   "zh": "對。"
+  },
+  {
+   "id": "reserva-053",
+   "kind": "選項",
+   "stage": "C1_DATE_CHECK",
+   "stageName": "第一通：確認日期",
+   "who": "我",
+   "zh": "不對。"
+  },
+  {
+   "id": "reserva-054",
+   "kind": "錯誤說明",
+   "stage": "C1_DATE_CHECK",
+   "stageName": "第一通：確認日期",
+   "who": "",
+   "zh": "店員說錯日期，你卻說對。"
+  },
+  {
+   "id": "reserva-055",
+   "kind": "綠卡說明",
+   "stage": "C1_DATE_CHECK",
+   "stageName": "第一通：確認日期",
+   "who": "",
+   "zh": "你發現店員說錯日期了！"
+  },
+  {
+   "id": "reserva-056",
+   "kind": "台詞",
+   "stage": "C1_DATE_CHECK",
+   "stageName": "第一通：確認日期",
+   "who": "我",
+   "zh": "不是喔，是〔日期〕。"
+  },
+  {
+   "id": "reserva-057",
+   "kind": "台詞",
+   "stage": "C1_DATE_CHECK",
+   "stageName": "第一通：確認日期",
+   "who": "店員",
+   "zh": "啊，抱歉，是〔日期〕沒錯。"
+  },
+  {
+   "id": "reserva-058",
+   "kind": "台詞",
+   "stage": "C1_DATE_CHECK",
+   "stageName": "第一通：確認日期",
+   "who": "我",
+   "zh": "不好意思，我說錯了，我重新說。"
+  },
+  {
+   "id": "reserva-059",
+   "kind": "錯誤說明",
+   "stage": "C1_DATE_CHECK",
+   "stageName": "第一通：確認日期",
+   "who": "",
+   "zh": "日期明明是對的，你卻說不對。"
+  },
+  {
+   "id": "reserva-060",
+   "kind": "台詞",
+   "stage": "C1_TIME",
+   "stageName": "第一通：時間",
+   "who": "店員",
+   "zh": "請問幾點呢？"
+  },
+  {
+   "id": "reserva-061",
+   "kind": "選項",
+   "stage": "C1_TIME",
+   "stageName": "第一通：時間",
+   "who": "我",
+   "zh": "晚上〔時間〕"
+  },
+  {
+   "id": "reserva-062",
+   "kind": "錯誤說明",
+   "stage": "C1_TIME",
+   "stageName": "第一通：時間",
+   "who": "",
+   "zh": "Ami 〔時間〕才下班，不能比〔時間〕早。"
+  },
+  {
+   "id": "reserva-063",
+   "kind": "旁白",
+   "stage": "C1_TIME",
+   "stageName": "第一通：時間",
+   "who": "",
+   "zh": "（等等，Ami 〔時間〕才下班……）"
+  },
+  {
+   "id": "reserva-064",
+   "kind": "錯誤說明",
+   "stage": "C1_TIME",
+   "stageName": "第一通：時間",
+   "who": "",
+   "zh": "Ami 說的是〔時間〕。"
+  },
+  {
+   "id": "reserva-065",
+   "kind": "台詞",
+   "stage": "C1_FULL",
+   "stageName": "第一通：客滿",
+   "who": "店員",
+   "zh": "不好意思，〔時間〕已經客滿了。〔時間〕或是〔時間〕還有位子，可以嗎？"
+  },
+  {
+   "id": "reserva-066",
+   "kind": "選項",
+   "stage": "C1_FULL",
+   "stageName": "第一通：客滿",
+   "who": "我",
+   "zh": "〔時間〕好了。"
+  },
+  {
+   "id": "reserva-067",
+   "kind": "選項",
+   "stage": "C1_FULL",
+   "stageName": "第一通：客滿",
+   "who": "我",
+   "zh": "那〔時間〕好了。"
+  },
+  {
+   "id": "reserva-068",
+   "kind": "選項",
+   "stage": "C1_FULL",
+   "stageName": "第一通：客滿",
+   "who": "我",
+   "zh": "請稍等，我問一下朋友。"
+  },
+  {
+   "id": "reserva-069",
+   "kind": "錯誤說明",
+   "stage": "C1_FULL",
+   "stageName": "第一通：客滿",
+   "who": "",
+   "zh": "Ami 〔時間〕才下班，來不及。"
+  },
+  {
+   "id": "reserva-070",
+   "kind": "旁白",
+   "stage": "C1_FULL",
+   "stageName": "第一通：客滿",
+   "who": "",
+   "zh": "（不行不行，Ami 〔時間〕才下班！）"
+  },
+  {
+   "id": "reserva-071",
+   "kind": "台詞",
+   "stage": "C1_PEOPLE",
+   "stageName": "第一通：人數",
+   "who": "店員",
+   "zh": "好的。請問幾位呢？"
+  },
+  {
+   "id": "reserva-072",
+   "kind": "綠卡說明",
+   "stage": "C1_PEOPLE",
+   "stageName": "第一通：人數",
+   "who": "",
+   "zh": "人數正確，有把小朋友算進去。"
+  },
+  {
+   "id": "reserva-073",
+   "kind": "錯誤說明",
+   "stage": "C1_PEOPLE",
+   "stageName": "第一通：人數",
+   "who": "",
+   "zh": "忘了把小朋友也算進去。"
+  },
+  {
+   "id": "reserva-074",
+   "kind": "錯誤說明",
+   "stage": "C1_PEOPLE",
+   "stageName": "第一通：人數",
+   "who": "",
+   "zh": "人數不對，應該是〔人數〕位。"
+  },
+  {
+   "id": "reserva-075",
+   "kind": "台詞",
+   "stage": "C1_PEOPLE",
+   "stageName": "第一通：人數",
+   "who": "我",
+   "zh": "啊，不好意思，我說錯了，是〔人數〕位。"
+  },
+  {
+   "id": "reserva-076",
+   "kind": "台詞",
+   "stage": "C1_ROOM",
+   "stageName": "第一通：包廂",
+   "who": "店員",
+   "zh": "〔人數〕位的話，我們有包廂，可是包廂每個人低消五百元。要坐包廂嗎？"
+  },
+  {
+   "id": "reserva-077",
+   "kind": "選項",
+   "stage": "C1_ROOM",
+   "stageName": "第一通：包廂",
+   "who": "我",
+   "zh": "好，坐包廂。"
+  },
+  {
+   "id": "reserva-078",
+   "kind": "選項",
+   "stage": "C1_ROOM",
+   "stageName": "第一通：包廂",
+   "who": "我",
+   "zh": "不用，一般座位就好。"
+  },
+  {
+   "id": "reserva-079",
+   "kind": "選項",
+   "stage": "C1_ROOM",
+   "stageName": "第一通：包廂",
+   "who": "我",
+   "zh": "請稍等，我問一下朋友。"
+  },
+  {
+   "id": "reserva-080",
+   "kind": "台詞",
+   "stage": "C1_OTHER",
+   "stageName": "第一通：其他需要",
+   "who": "店員",
+   "zh": "好的，幫您備註了。還有其他需要嗎？"
+  },
+  {
+   "id": "reserva-081",
+   "kind": "台詞",
+   "stage": "C1_OTHER",
+   "stageName": "第一通：其他需要",
+   "who": "店員",
+   "zh": "好的。還有其他需要嗎？"
+  },
+  {
+   "id": "reserva-082",
+   "kind": "選項",
+   "stage": "C1_OTHER",
+   "stageName": "第一通：其他需要",
+   "who": "我",
+   "zh": "我們需要兒童椅。"
+  },
+  {
+   "id": "reserva-083",
+   "kind": "選項",
+   "stage": "C1_OTHER",
+   "stageName": "第一通：其他需要",
+   "who": "我",
+   "zh": "有素食的餐點嗎？"
+  },
+  {
+   "id": "reserva-084",
+   "kind": "選項",
+   "stage": "C1_OTHER",
+   "stageName": "第一通：其他需要",
+   "who": "我",
+   "zh": "可以坐靠窗的位子嗎？"
+  },
+  {
+   "id": "reserva-085",
+   "kind": "選項",
+   "stage": "C1_OTHER",
+   "stageName": "第一通：其他需要",
+   "who": "我",
+   "zh": "沒有了。"
+  },
+  {
+   "id": "reserva-086",
+   "kind": "台詞",
+   "stage": "C1_OTHER",
+   "stageName": "第一通：其他需要",
+   "who": "店員",
+   "zh": "有，我們有素食套餐。"
+  },
+  {
+   "id": "reserva-087",
+   "kind": "錯誤說明",
+   "stage": "C1_OTHER",
+   "stageName": "第一通：其他需要",
+   "who": "",
+   "zh": "Ami 沒有說要靠窗。"
+  },
+  {
+   "id": "reserva-088",
+   "kind": "台詞",
+   "stage": "C1_OTHER",
+   "stageName": "第一通：其他需要",
+   "who": "店員",
+   "zh": "靠窗的位子要另外收服務費喔。"
+  },
+  {
+   "id": "reserva-089",
+   "kind": "台詞",
+   "stage": "C1_OTHER",
+   "stageName": "第一通：其他需要",
+   "who": "我",
+   "zh": "喔……那不用了。"
+  },
+  {
+   "id": "reserva-090",
+   "kind": "綠卡說明",
+   "stage": "C1_OTHER",
+   "stageName": "第一通：其他需要",
+   "who": "",
+   "zh": "兒童椅和素食都問了！"
+  },
+  {
+   "id": "reserva-091",
+   "kind": "選項",
+   "stage": "C1_CHAIRS",
+   "stageName": "第一通：兒童椅",
+   "who": "我",
+   "zh": "一張"
+  },
+  {
+   "id": "reserva-092",
+   "kind": "選項",
+   "stage": "C1_CHAIRS",
+   "stageName": "第一通：兒童椅",
+   "who": "我",
+   "zh": "兩張"
+  },
+  {
+   "id": "reserva-093",
+   "kind": "選項",
+   "stage": "C1_CHAIRS",
+   "stageName": "第一通：兒童椅",
+   "who": "我",
+   "zh": "三張"
+  },
+  {
+   "id": "reserva-094",
+   "kind": "台詞",
+   "stage": "C1_NAME",
+   "stageName": "第一通：名字",
+   "who": "店員",
+   "zh": "請問怎麼稱呼？"
+  },
+  {
+   "id": "reserva-095",
+   "kind": "選項",
+   "stage": "C1_NAME",
+   "stageName": "第一通：名字",
+   "who": "我",
+   "zh": "我叫〔名字〕。"
+  },
+  {
+   "id": "reserva-096",
+   "kind": "選項",
+   "stage": "C1_NAME",
+   "stageName": "第一通：名字",
+   "who": "我",
+   "zh": "我貴姓〔名字〕。"
+  },
+  {
+   "id": "reserva-097",
+   "kind": "選項",
+   "stage": "C1_NAME",
+   "stageName": "第一通：名字",
+   "who": "我",
+   "zh": "你怎麼稱呼？"
+  },
+  {
+   "id": "reserva-098",
+   "kind": "綠卡說明",
+   "stage": "C1_NAME",
+   "stageName": "第一通：名字",
+   "who": "",
+   "zh": "說自己的名字用「我叫……」。"
+  },
+  {
+   "id": "reserva-099",
+   "kind": "錯誤說明",
+   "stage": "C1_NAME",
+   "stageName": "第一通：名字",
+   "who": "",
+   "zh": "「貴姓」是問別人的，不能用在自己身上。"
+  },
+  {
+   "id": "reserva-100",
+   "kind": "旁白",
+   "stage": "C1_NAME",
+   "stageName": "第一通：名字",
+   "who": "",
+   "zh": "（「貴姓」好像不能說自己……）"
+  },
+  {
+   "id": "reserva-101",
+   "kind": "錯誤說明",
+   "stage": "C1_NAME",
+   "stageName": "第一通：名字",
+   "who": "",
+   "zh": "店員問的是你的名字。"
+  },
+  {
+   "id": "reserva-102",
+   "kind": "台詞",
+   "stage": "C1_NAME",
+   "stageName": "第一通：名字",
+   "who": "店員",
+   "zh": "呃……我是問您的名字喔。"
+  },
+  {
+   "id": "reserva-103",
+   "kind": "台詞",
+   "stage": "C1_PHONE",
+   "stageName": "第一通：電話",
+   "who": "店員",
+   "zh": "請問您的手機號碼是？"
+  },
+  {
+   "id": "reserva-104",
+   "kind": "錯誤說明",
+   "stage": "C1_PHONE",
+   "stageName": "第一通：電話",
+   "who": "",
+   "zh": "電話號碼說錯了。"
+  },
+  {
+   "id": "reserva-105",
+   "kind": "旁白",
+   "stage": "C1_PHONE",
+   "stageName": "第一通：電話",
+   "who": "",
+   "zh": "（等一下，這不是我的號碼……看一下上面！）"
+  },
+  {
+   "id": "reserva-106",
+   "kind": "選項",
+   "stage": "CONFIRM",
+   "stageName": "複述確認",
+   "who": "我",
+   "zh": "對，沒錯。"
+  },
+  {
+   "id": "reserva-107",
+   "kind": "選項",
+   "stage": "CONFIRM",
+   "stageName": "複述確認",
+   "who": "我",
+   "zh": "不對。"
+  },
+  {
+   "id": "reserva-108",
+   "kind": "錯誤說明",
+   "stage": "CONFIRM",
+   "stageName": "複述確認",
+   "who": "",
+   "zh": "店員複述時說錯了，你沒發現。"
+  },
+  {
+   "id": "reserva-109",
+   "kind": "錯誤說明",
+   "stage": "CONFIRM",
+   "stageName": "複述確認",
+   "who": "",
+   "zh": "店員說的都對，你卻說不對。"
+  },
+  {
+   "id": "reserva-110",
+   "kind": "台詞",
+   "stage": "FIX",
+   "stageName": "更正",
+   "who": "店員",
+   "zh": "啊，不好意思！請問是哪裡不對？"
+  },
+  {
+   "id": "reserva-111",
+   "kind": "選項",
+   "stage": "FIX",
+   "stageName": "更正",
+   "who": "我",
+   "zh": "日期"
+  },
+  {
+   "id": "reserva-112",
+   "kind": "選項",
+   "stage": "FIX",
+   "stageName": "更正",
+   "who": "我",
+   "zh": "時間"
+  },
+  {
+   "id": "reserva-113",
+   "kind": "選項",
+   "stage": "FIX",
+   "stageName": "更正",
+   "who": "我",
+   "zh": "人數"
+  },
+  {
+   "id": "reserva-114",
+   "kind": "選項",
+   "stage": "FIX",
+   "stageName": "更正",
+   "who": "我",
+   "zh": "電話"
+  },
+  {
+   "id": "reserva-115",
+   "kind": "錯誤說明",
+   "stage": "FIX",
+   "stageName": "更正",
+   "who": "",
+   "zh": "指出的地方不對。"
+  },
+  {
+   "id": "reserva-116",
+   "kind": "台詞",
+   "stage": "FIX",
+   "stageName": "更正",
+   "who": "店員",
+   "zh": "這個沒有錯喔……請問是哪裡呢？"
+  },
+  {
+   "id": "reserva-117",
+   "kind": "綠卡說明",
+   "stage": "FIX",
+   "stageName": "更正",
+   "who": "",
+   "zh": "你發現店員複述錯了！"
+  },
+  {
+   "id": "reserva-118",
+   "kind": "台詞",
+   "stage": "FIX",
+   "stageName": "更正",
+   "who": "我",
+   "zh": "是〔變數〕才對。"
+  },
+  {
+   "id": "reserva-119",
+   "kind": "台詞",
+   "stage": "FIX",
+   "stageName": "更正",
+   "who": "店員",
+   "zh": "抱歉抱歉，我改好了。"
+  },
+  {
+   "id": "reserva-120",
+   "kind": "台詞",
+   "stage": "C1_HOLD",
+   "stageName": "第一通：結束",
+   "who": "店員",
+   "zh": "好的，訂好了！位子只保留十分鐘，遲到超過十分鐘就會取消喔。"
+  },
+  {
+   "id": "reserva-121",
+   "kind": "選項",
+   "stage": "C1_HOLD",
+   "stageName": "第一通：結束",
+   "who": "我",
+   "zh": "好，謝謝，到時候見！"
+  },
+  {
+   "id": "reserva-122",
+   "kind": "選項",
+   "stage": "C1_HOLD",
+   "stageName": "第一通：結束",
+   "who": "我",
+   "zh": "十分鐘太短了吧！"
+  },
+  {
+   "id": "reserva-123",
+   "kind": "選項",
+   "stage": "C1_HOLD",
+   "stageName": "第一通：結束",
+   "who": "我",
+   "zh": "喔。"
+  },
+  {
+   "id": "reserva-124",
+   "kind": "錯誤說明",
+   "stage": "C1_HOLD",
+   "stageName": "第一通：結束",
+   "who": "",
+   "zh": "對店員沒有禮貌。"
+  },
+  {
+   "id": "reserva-125",
+   "kind": "錯誤說明",
+   "stage": "C1_HOLD",
+   "stageName": "第一通：結束",
+   "who": "",
+   "zh": "回答太冷淡，可以說謝謝。"
+  },
+  {
+   "id": "reserva-126",
+   "kind": "旁白",
+   "stage": "MID_AMI",
+   "stageName": "Ami 回電",
+   "who": "",
+   "zh": "（掛掉電話五分鐘後，Ami 打來了……）"
+  },
+  {
+   "id": "reserva-127",
+   "kind": "台詞",
+   "stage": "MID_AMI",
+   "stageName": "Ami 回電",
+   "who": "Ami",
+   "zh": "〔名字〕！我同事阿哲也要來，多一個人！"
+  },
+  {
+   "id": "reserva-128",
+   "kind": "台詞",
+   "stage": "MID_AMI",
+   "stageName": "Ami 回電",
+   "who": "Ami",
+   "zh": "還有，可以改成〔時間〕嗎？大家都要坐在一起喔！"
+  },
+  {
+   "id": "reserva-129",
+   "kind": "選項",
+   "stage": "MID_AMI",
+   "stageName": "Ami 回電",
+   "who": "我",
+   "zh": "好，我再打給餐廳。"
+  },
+  {
+   "id": "reserva-130",
+   "kind": "選項",
+   "stage": "C2_GREET",
+   "stageName": "第二通：打招呼",
+   "who": "我",
+   "zh": "我想修改訂位。"
+  },
+  {
+   "id": "reserva-131",
+   "kind": "選項",
+   "stage": "C2_GREET",
+   "stageName": "第二通：打招呼",
+   "who": "我",
+   "zh": "我想訂位。"
+  },
+  {
+   "id": "reserva-132",
+   "kind": "選項",
+   "stage": "C2_GREET",
+   "stageName": "第二通：打招呼",
+   "who": "我",
+   "zh": "我想取消訂位。"
+  },
+  {
+   "id": "reserva-133",
+   "kind": "錯誤說明",
+   "stage": "C2_GREET",
+   "stageName": "第二通：打招呼",
+   "who": "",
+   "zh": "已經訂過了，這次要「修改」。"
+  },
+  {
+   "id": "reserva-134",
+   "kind": "台詞",
+   "stage": "C2_GREET",
+   "stageName": "第二通：打招呼",
+   "who": "店員",
+   "zh": "好的，請問哪一天？"
+  },
+  {
+   "id": "reserva-135",
+   "kind": "台詞",
+   "stage": "C2_GREET",
+   "stageName": "第二通：打招呼",
+   "who": "我",
+   "zh": "啊不是，我之前已經訂了……"
+  },
+  {
+   "id": "reserva-136",
+   "kind": "錯誤說明",
+   "stage": "C2_GREET",
+   "stageName": "第二通：打招呼",
+   "who": "",
+   "zh": "不是要取消，是要修改。"
+  },
+  {
+   "id": "reserva-137",
+   "kind": "台詞",
+   "stage": "C2_GREET",
+   "stageName": "第二通：打招呼",
+   "who": "店員",
+   "zh": "確定要取消嗎？"
+  },
+  {
+   "id": "reserva-138",
+   "kind": "台詞",
+   "stage": "C2_GREET",
+   "stageName": "第二通：打招呼",
+   "who": "我",
+   "zh": "不不不，等一下！"
+  },
+  {
+   "id": "reserva-139",
+   "kind": "台詞",
+   "stage": "C2_LOOKUP",
+   "stageName": "第二通：查訂位",
+   "who": "店員",
+   "zh": "好的，請問是用什麼名字、哪支電話訂的？"
+  },
+  {
+   "id": "reserva-140",
+   "kind": "錯誤說明",
+   "stage": "C2_LOOKUP",
+   "stageName": "第二通：查訂位",
+   "who": "",
+   "zh": "訂位資料說錯了，店員查不到。"
+  },
+  {
+   "id": "reserva-141",
+   "kind": "台詞",
+   "stage": "C2_LOOKUP",
+   "stageName": "第二通：查訂位",
+   "who": "店員",
+   "zh": "嗯……我查不到這筆訂位耶，可以再說一次嗎？"
+  },
+  {
+   "id": "reserva-142",
+   "kind": "台詞",
+   "stage": "C2_PEOPLE",
+   "stageName": "第二通：人數",
+   "who": "店員",
+   "zh": "找到了，〔日期〕〔星期幾〕晚上〔時間〕，〔人數〕位。請問要改成幾位？"
+  },
+  {
+   "id": "reserva-143",
+   "kind": "錯誤說明",
+   "stage": "C2_PEOPLE",
+   "stageName": "第二通：人數",
+   "who": "",
+   "zh": "人數改錯了，多一個人應該是〔變數〕位。"
+  },
+  {
+   "id": "reserva-144",
+   "kind": "旁白",
+   "stage": "C2_PEOPLE",
+   "stageName": "第二通：人數",
+   "who": "",
+   "zh": "（等等，只多一個人……）"
+  },
+  {
+   "id": "reserva-145",
+   "kind": "台詞",
+   "stage": "C2_TABLE",
+   "stageName": "第二通：座位",
+   "who": "店員",
+   "zh": "〔人數〕位的話，包廂還坐得下，一樣每個人低消五百元。或是改成大廳兩張桌子併在一起，也可以分開坐兩桌。"
+  },
+  {
+   "id": "reserva-146",
+   "kind": "台詞",
+   "stage": "C2_TABLE",
+   "stageName": "第二通：座位",
+   "who": "店員",
+   "zh": "〔人數〕位的話，一張桌子坐不下。可以幫您把兩張桌子併在一起，或是分開坐兩桌，您覺得呢？"
+  },
+  {
+   "id": "reserva-147",
+   "kind": "選項",
+   "stage": "C2_TABLE",
+   "stageName": "第二通：座位",
+   "who": "我",
+   "zh": "那繼續坐包廂。"
+  },
+  {
+   "id": "reserva-148",
+   "kind": "選項",
+   "stage": "C2_TABLE",
+   "stageName": "第二通：座位",
+   "who": "我",
+   "zh": "改成併桌好了。"
+  },
+  {
+   "id": "reserva-149",
+   "kind": "選項",
+   "stage": "C2_TABLE",
+   "stageName": "第二通：座位",
+   "who": "我",
+   "zh": "分開坐兩桌。"
+  },
+  {
+   "id": "reserva-150",
+   "kind": "選項",
+   "stage": "C2_TABLE",
+   "stageName": "第二通：座位",
+   "who": "我",
+   "zh": "麻煩幫我們併桌。"
+  },
+  {
+   "id": "reserva-151",
+   "kind": "選項",
+   "stage": "C2_TABLE",
+   "stageName": "第二通：座位",
+   "who": "我",
+   "zh": "那算了，取消好了。"
+  },
+  {
+   "id": "reserva-152",
+   "kind": "錯誤說明",
+   "stage": "C2_TABLE",
+   "stageName": "第二通：座位",
+   "who": "",
+   "zh": "不需要取消訂位。"
+  },
+  {
+   "id": "reserva-153",
+   "kind": "旁白",
+   "stage": "C2_TABLE",
+   "stageName": "第二通：座位",
+   "who": "",
+   "zh": "（不行，取消的話 Ami 會生氣……）"
+  },
+  {
+   "id": "reserva-154",
+   "kind": "綠卡說明",
+   "stage": "C2_TABLE",
+   "stageName": "第二通：座位",
+   "who": "",
+   "zh": "併桌，大家可以坐在一起。"
+  },
+  {
+   "id": "reserva-155",
+   "kind": "台詞",
+   "stage": "C2_TIME",
+   "stageName": "第二通：時間",
+   "who": "店員",
+   "zh": "好的。時間有要改嗎？"
+  },
+  {
+   "id": "reserva-156",
+   "kind": "選項",
+   "stage": "C2_TIME",
+   "stageName": "第二通：時間",
+   "who": "我",
+   "zh": "不用改。"
+  },
+  {
+   "id": "reserva-157",
+   "kind": "選項",
+   "stage": "C2_TIME",
+   "stageName": "第二通：時間",
+   "who": "我",
+   "zh": "可以改成〔時間〕嗎？"
+  },
+  {
+   "id": "reserva-158",
+   "kind": "錯誤說明",
+   "stage": "C2_TIME",
+   "stageName": "第二通：時間",
+   "who": "",
+   "zh": "Ami 說想改成〔時間〕，至少要問問看。"
+  },
+  {
+   "id": "reserva-159",
+   "kind": "錯誤說明",
+   "stage": "C2_TIME",
+   "stageName": "第二通：時間",
+   "who": "",
+   "zh": "Ami 說的是〔時間〕。"
+  },
+  {
+   "id": "reserva-160",
+   "kind": "台詞",
+   "stage": "C2_TIME",
+   "stageName": "第二通：時間",
+   "who": "店員",
+   "zh": "〔時間〕已經客滿了喔。"
+  },
+  {
+   "id": "reserva-161",
+   "kind": "旁白",
+   "stage": "C2_TIME",
+   "stageName": "第二通：時間",
+   "who": "",
+   "zh": "（對了，Ami 說的是〔時間〕……）"
+  },
+  {
+   "id": "reserva-162",
+   "kind": "台詞",
+   "stage": "C2_FULL",
+   "stageName": "第二通：客滿",
+   "who": "店員",
+   "zh": "〔時間〕〔人數〕位的位子沒有了。可以維持原本的〔時間〕，或是改到〔時間〕。"
+  },
+  {
+   "id": "reserva-163",
+   "kind": "選項",
+   "stage": "C2_FULL",
+   "stageName": "第二通：客滿",
+   "who": "我",
+   "zh": "維持〔時間〕。"
+  },
+  {
+   "id": "reserva-164",
+   "kind": "選項",
+   "stage": "C2_FULL",
+   "stageName": "第二通：客滿",
+   "who": "我",
+   "zh": "改到〔時間〕。"
+  },
+  {
+   "id": "reserva-165",
+   "kind": "選項",
+   "stage": "C2_FULL",
+   "stageName": "第二通：客滿",
+   "who": "我",
+   "zh": "請稍等，我問一下朋友。"
+  },
+  {
+   "id": "reserva-166",
+   "kind": "台詞",
+   "stage": "C2_CHAIRS",
+   "stageName": "第二通：兒童椅",
+   "who": "店員",
+   "zh": "兒童椅一樣是〔兒童椅張數〕張嗎？"
+  },
+  {
+   "id": "reserva-167",
+   "kind": "台詞",
+   "stage": "C2_CHAIRS",
+   "stageName": "第二通：兒童椅",
+   "who": "店員",
+   "zh": "好的。其他的都一樣嗎？"
+  },
+  {
+   "id": "reserva-168",
+   "kind": "選項",
+   "stage": "C2_CHAIRS",
+   "stageName": "第二通：兒童椅",
+   "who": "我",
+   "zh": "對，一樣。"
+  },
+  {
+   "id": "reserva-169",
+   "kind": "選項",
+   "stage": "C2_CHAIRS",
+   "stageName": "第二通：兒童椅",
+   "who": "我",
+   "zh": "要多一張。"
+  },
+  {
+   "id": "reserva-170",
+   "kind": "選項",
+   "stage": "C2_CHAIRS",
+   "stageName": "第二通：兒童椅",
+   "who": "我",
+   "zh": "對，都一樣。"
+  },
+  {
+   "id": "reserva-171",
+   "kind": "選項",
+   "stage": "C2_CHAIRS",
+   "stageName": "第二通：兒童椅",
+   "who": "我",
+   "zh": "啊，我們還需要兒童椅！"
+  },
+  {
+   "id": "reserva-172",
+   "kind": "錯誤說明",
+   "stage": "C2_CHAIRS",
+   "stageName": "第二通：兒童椅",
+   "who": "",
+   "zh": "阿哲是大人，不需要兒童椅。"
+  },
+  {
+   "id": "reserva-173",
+   "kind": "旁白",
+   "stage": "C2_CHAIRS",
+   "stageName": "第二通：兒童椅",
+   "who": "",
+   "zh": "（阿哲是 Ami 的同事，是大人啦……）"
+  },
+  {
+   "id": "reserva-174",
+   "kind": "選項",
+   "stage": "C2_ADD_CHAIRS",
+   "stageName": "第二通：兒童椅",
+   "who": "我",
+   "zh": "一張"
+  },
+  {
+   "id": "reserva-175",
+   "kind": "選項",
+   "stage": "C2_ADD_CHAIRS",
+   "stageName": "第二通：兒童椅",
+   "who": "我",
+   "zh": "兩張"
+  },
+  {
+   "id": "reserva-176",
+   "kind": "選項",
+   "stage": "C2_ADD_CHAIRS",
+   "stageName": "第二通：兒童椅",
+   "who": "我",
+   "zh": "三張"
+  },
+  {
+   "id": "reserva-177",
+   "kind": "台詞",
+   "stage": "C2_BYE",
+   "stageName": "第二通：結束",
+   "who": "店員",
+   "zh": "好的，幫您改好了。謝謝您的來電！"
+  },
+  {
+   "id": "reserva-178",
+   "kind": "選項",
+   "stage": "C2_BYE",
+   "stageName": "第二通：結束",
+   "who": "我",
+   "zh": "謝謝，再見！"
+  },
+  {
+   "id": "reserva-179",
+   "kind": "選項",
+   "stage": "C2_BYE",
+   "stageName": "第二通：結束",
+   "who": "我",
+   "zh": "不客氣。"
+  },
+  {
+   "id": "reserva-180",
+   "kind": "錯誤說明",
+   "stage": "C2_BYE",
+   "stageName": "第二通：結束",
+   "who": "",
+   "zh": "店員說謝謝，你應該也說謝謝，不是「不客氣」。"
+  },
+  {
+   "id": "reserva-181",
+   "kind": "台詞",
+   "stage": "CALL_AMI",
+   "stageName": "打電話問 Ami",
+   "who": "我",
+   "zh": "Ami，〔時間〕客滿了，〔時間〕或〔時間〕可以嗎？"
+  },
+  {
+   "id": "reserva-182",
+   "kind": "台詞",
+   "stage": "CALL_AMI",
+   "stageName": "打電話問 Ami",
+   "who": "Ami",
+   "zh": "〔時間〕我還沒下班啦！〔時間〕好了。"
+  },
+  {
+   "id": "reserva-183",
+   "kind": "台詞",
+   "stage": "CALL_AMI",
+   "stageName": "打電話問 Ami",
+   "who": "我",
+   "zh": "Ami，餐廳問要不要坐包廂，每個人低消五百元。"
+  },
+  {
+   "id": "reserva-184",
+   "kind": "台詞",
+   "stage": "CALL_AMI",
+   "stageName": "打電話問 Ami",
+   "who": "Ami",
+   "zh": "太貴了啦！坐一般的位子就好。"
+  },
+  {
+   "id": "reserva-185",
+   "kind": "台詞",
+   "stage": "CALL_AMI",
+   "stageName": "打電話問 Ami",
+   "who": "我",
+   "zh": "Ami，〔時間〕沒位子了，要維持〔時間〕，還是改到〔時間〕？"
+  },
+  {
+   "id": "reserva-186",
+   "kind": "台詞",
+   "stage": "CALL_AMI",
+   "stageName": "打電話問 Ami",
+   "who": "Ami",
+   "zh": "〔時間〕太晚了，小朋友會想睡覺。維持〔時間〕吧！"
+  },
+  {
+   "id": "reserva-187",
+   "kind": "台詞",
+   "stage": "CALL_AMI",
+   "stageName": "打電話問 Ami",
+   "who": "Ami",
+   "zh": "〔時間〕阿哲趕不到，改〔時間〕好了。"
+  },
+  {
+   "id": "reserva-188",
+   "kind": "選項",
+   "stage": "CALL_AMI",
+   "stageName": "打電話問 Ami",
+   "who": "我",
+   "zh": "好，我跟餐廳說。"
+  },
+  {
+   "id": "reserva-189",
+   "kind": "綠卡說明",
+   "stage": "CALL_AMI",
+   "stageName": "打電話問 Ami",
+   "who": "",
+   "zh": "先問 Ami 是好主意。"
+  },
+  {
+   "id": "reserva-190",
+   "kind": "台詞",
+   "stage": "CALL_AMI",
+   "stageName": "打電話問 Ami",
+   "who": "我",
+   "zh": "不好意思，讓您久等了。"
+  },
+  {
+   "id": "reserva-191",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局",
+   "who": "Ami",
+   "zh": "日期訂成〔日期〕，可是是〔日期〕才對！"
+  },
+  {
+   "id": "reserva-192",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局",
+   "who": "Ami",
+   "zh": "時間是〔時間〕？我們說好〔時間〕的！"
+  },
+  {
+   "id": "reserva-193",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局",
+   "who": "Ami",
+   "zh": "位子只有〔人數〕個人的，我們有〔變數〕個人耶！"
+  },
+  {
+   "id": "reserva-194",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局",
+   "who": "Ami",
+   "zh": "包廂每個人低消五百元，太貴了啦！"
+  },
+  {
+   "id": "reserva-195",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局",
+   "who": "Ami",
+   "zh": "分兩桌？我說大家要坐在一起耶！"
+  },
+  {
+   "id": "reserva-196",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局",
+   "who": "Ami",
+   "zh": "兒童椅要〔小孩人數〕張，你訂了〔兒童椅張數〕。"
+  },
+  {
+   "id": "reserva-197",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局",
+   "who": "Ami",
+   "zh": "你沒問素食，小美要吃什麼？"
+  },
+  {
+   "id": "reserva-198",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局",
+   "who": "Ami",
+   "zh": "餐廳記的電話是錯的，有事都聯絡不到你！"
+  },
+  {
+   "id": "reserva-199",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局",
+   "who": "我",
+   "zh": "Ami，訂好了！〔變數〕，兒童椅和素食都說了。"
+  },
+  {
+   "id": "reserva-200",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局",
+   "who": "Ami",
+   "zh": "太棒了，〔名字〕！謝謝你，那天我請你吃飯！"
+  },
+  {
+   "id": "reserva-201",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局",
+   "who": "我",
+   "zh": "Ami，訂好了！〔變數〕。"
+  },
+  {
+   "id": "reserva-202",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局",
+   "who": "Ami",
+   "zh": "嗯……等一下……"
+  },
+  {
+   "id": "reserva-203",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "Ami 一開始說的"
+  },
+  {
+   "id": "reserva-204",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "〔星期幾〕（〔日期〕），去好味道餐廳聚餐。"
+  },
+  {
+   "id": "reserva-205",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "〔大人人數〕個大人，還有〔小孩人數〕個小朋友，小朋友要坐兒童椅。"
+  },
+  {
+   "id": "reserva-206",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "時間是晚上〔時間〕。Ami 〔時間〕才下班，不能比〔時間〕早。"
+  },
+  {
+   "id": "reserva-207",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "朋友小美吃素。"
+  },
+  {
+   "id": "reserva-208",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "不要太貴的位子。"
+  },
+  {
+   "id": "reserva-209",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "問 Ami：〔時間〕還沒下班，〔時間〕好了。"
+  },
+  {
+   "id": "reserva-210",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "問 Ami：包廂太貴了，坐一般的位子就好。"
+  },
+  {
+   "id": "reserva-211",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "Ami 回電說的"
+  },
+  {
+   "id": "reserva-212",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "同事阿哲也要來，多一個人。"
+  },
+  {
+   "id": "reserva-213",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "想改成〔時間〕。"
+  },
+  {
+   "id": "reserva-214",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "大家都要坐在一起。"
+  },
+  {
+   "id": "reserva-215",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "問 Ami：〔時間〕太晚了，維持〔時間〕。"
+  },
+  {
+   "id": "reserva-216",
+   "kind": "任務提示",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "問 Ami：阿哲〔時間〕趕不到，改〔時間〕。"
+  }
+ ]
+}
