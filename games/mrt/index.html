@@ -164,7 +164,7 @@
   .list .rule { color: var(--muted); font-size: 15px; }
 
   /* 路線圖 + 加值機：這個遊戲的招牌元素 */
-  .map { margin: 8px 0 12px; background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 10px; }
+  .map { overflow-x: auto; margin: 8px 0 12px; background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 10px; }
   .mline { display: flex; align-items: center; gap: 8px; }
   .mname { flex: 0 0 auto; color: #fff; font-weight: 700; border-radius: 999px; padding: 2px 12px; font-size: 15px; }
   .mline.red .mname { background: #d6322f; }
@@ -172,13 +172,14 @@
   .mst { flex: 1; display: flex; align-items: flex-start; border-top: 6px solid; padding-top: 0; min-width: 0; }
   .mline.red .mst { border-color: #d6322f; }
   .mline.blue .mst { border-color: #1f6fc4; }
-  .st { flex: 1 1 0; min-width: 0; text-align: center; font-size: 13px; line-height: 1.35; margin-top: -9px; }
+  .st { flex: 1 0 auto; padding: 0 4px; white-space: nowrap; text-align: center; font-size: 12px; line-height: 1.35; margin-top: -9px; }
+  .mline { min-width: 700px; }
   .st i { display: block; font-style: normal; color: var(--ink); }
   .st::before { content: ''; display: block; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 3px solid currentColor; margin: 0 auto 2px; box-sizing: border-box; }
   .mline.red .st { color: #d6322f; } .mline.blue .st { color: #1f6fc4; }
   .st.xfer { font-weight: 700; }
   .st.here::before, .st.goal::before { background: var(--yolk); }
-  .st.here, .st.goal { font-size: 15px; }
+  .st.here, .st.goal { font-size: 13px; font-weight: 700; }
   .st.here { filter: drop-shadow(0 0 3px rgba(242,182,50,.9)); }
   .dots { flex: 0 0 22px; text-align: center; color: var(--muted); margin-top: -12px; }
   .machine { margin: 8px 0 12px; background: #2b3a55; border-radius: 10px; padding: 10px 14px; color: #fff; box-shadow: inset 0 0 0 3px #3c4d6e; }
@@ -235,7 +236,7 @@
     #options-area { grid-template-columns: 1fr; padding: 14px 14px 20px; }
     #npc-avatar { max-width: 240px; }
     .map { overflow-x: auto; }
-    .mline { flex-direction: column; align-items: stretch; gap: 4px; min-width: 520px; }
+    .mline { flex-direction: column; align-items: stretch; gap: 4px; min-width: 720px; }
     .mname { align-self: flex-start; font-size: 13px; padding: 1px 10px; }
     .st { font-size: 12px; white-space: nowrap; } .st.here, .st.goal { font-size: 13px; }
   }
@@ -376,8 +377,8 @@
   </div>
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
-    週六下午，同事 Ami 在西門或忠孝復興站等你。你要從中山站出發：先把飲料喝完、看悠遊卡有沒有錢、問路、搭紅線、在台北車站轉藍線、聽廣播，最後在對的站下車。<br>
-    <span data-es="Es sábado por la tarde y tu compañera Ami te espera en la estación Ximen o Zhongxiao Fuxing. Sales de Zhongshan: termina tu bebida, revisa el saldo de tu EasyCard, pregunta cómo llegar, toma la línea roja, haz transbordo a la azul en Taipei Main Station, escucha los anuncios y bájate en la estación correcta." data-en="It's Saturday afternoon and your coworker Ami is waiting at Ximen or Zhongxiao Fuxing Station. You start at Zhongshan: finish your drink, check your EasyCard balance, ask for directions, take the Red Line, transfer to the Blue Line at Taipei Main Station, listen to the announcements, and get off at the right stop.">Es sábado por la tarde y tu compañera Ami te espera en la estación Ximen o Zhongxiao Fuxing. Sales de Zhongshan: termina tu bebida, revisa el saldo de tu EasyCard, pregunta cómo llegar, toma la línea roja, haz transbordo a la azul en Taipei Main Station, escucha los anuncios y bájate en la estación correcta.</span>
+    週六下午，同事 Ami 在藍線的某一站等你。你要從紅線的某一站出發：先把飲料喝完、看悠遊卡有沒有錢、問路、搭紅線、在台北車站轉藍線、聽廣播，最後在對的站下車。<br>
+    <span data-es="Es sábado por la tarde y tu compañera Ami te espera en una estación de la línea azul. Sales de una estación de la línea roja: termina tu bebida, revisa el saldo de tu EasyCard, pregunta cómo llegar, toma la línea roja, haz transbordo a la azul en Taipei Main Station, escucha los anuncios y bájate en la estación correcta." data-en="It's Saturday afternoon and your coworker Ami is waiting at a Blue Line station. You start from a Red Line station: finish your drink, check your EasyCard balance, ask for directions, take the Red Line, transfer to the Blue Line at Taipei Main Station, listen to the announcements, and get off at the right stop.">Es sábado por la tarde y tu compañera Ami te espera en una estación de la línea azul. Sales de una estación de la línea roja: termina tu bebida, revisa el saldo de tu EasyCard, pregunta cómo llegar, toma la línea roja, haz transbordo a la azul en Taipei Main Station, escucha los anuncios y bájate en la estación correcta.</span>
   </p>
 </div>
 
@@ -469,6 +470,7 @@ pinyinPro.customPinyin({
   '衣服和': 'yī fu hàn', '你和': 'nǐ hàn', '同事': 'tóng shì', '朋友': 'péng yǒu', '清單': 'qīng dān', '會合': 'huì hé', '晚餐': 'wǎn cān', '辛苦': 'xīn kǔ'
 });
 pinyinPro.customPinyin({
+  '民權西路': 'mín quán xī lù', '中正紀念堂': 'zhōng zhèng jì niàn táng', '東門': 'dōng mén', '忠孝敦化': 'zhōng xiào dūn huà', '國父紀念館': 'guó fù jì niàn guǎn', '市政府': 'shì zhèng fǔ', '兩站': 'liǎng zhàn',
   '淡水': 'dàn shuǐ', '象山': 'xiàng shān', '頂埔': 'dǐng pǔ', '南港展覽館': 'nán gǎng zhǎn lǎn guǎn', '善導寺': 'shàn dǎo sì', '忠孝新生': 'zhōng xiào xīn shēng', '忠孝復興': 'zhōng xiào fù xīng',
   '西門': 'xī mén', '中山': 'zhōng shān', '雙連': 'shuāng lián', '台北車站': 'tái běi chē zhàn', '台大醫院': 'tái dà yī yuàn', '龍山寺': 'lóng shān sì',
   '板南線': 'bǎn nán xiàn', '淡水信義線': 'dàn shuǐ xìn yì xiàn', '博愛座': 'bó ài zuò', '悠遊卡': 'yōu yóu kǎ', '閘門': 'zhá mén', '月台': 'yuè tái', '轉乘': 'zhuǎn chéng', '轉車': 'zhuǎn chē',
@@ -593,7 +595,7 @@ const VOCAB = {
   G_TAP: [['閘門', 'torniquete', 'fare gate'], ['感應區', 'zona de lectura', 'card reader'], ['餘額不足', 'saldo insuficiente', 'insufficient balance'], ['票價', 'tarifa, precio del pasaje', 'fare'], ['加值', 'recargar', 'top up']],
   G_TOP: [['加值機', 'máquina de recarga', 'top-up machine'], ['加', 'agregar, sumar', 'add'], ['餘額', 'saldo', 'balance'], ['成功', 'con éxito', 'successful'], ['夠', 'ser suficiente', 'be enough']],
   S_ASK: [['服務台', 'mostrador de atención', 'service counter'], ['站務員', 'personal de la estación', 'station staff'], ['怎麼搭', '¿cómo se toma?', 'how do I take it?'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['需要', 'necesitar', 'need']],
-  P_RED: [['月台', 'andén', 'platform'], ['方向', 'dirección', 'direction'], ['往…方向', 'en dirección a…', 'toward…'], ['終點站', 'estación terminal', 'end station'], ['象山', 'Xiangshan (terminal de la línea roja)', 'Xiangshan (Red Line terminus)']],
+  P_RED: [['月台', 'andén', 'platform'], ['方向', 'dirección', 'direction'], ['往…方向', 'en dirección a…', 'toward…'], ['終點站', 'estación terminal', 'end station'], ['淡水', 'Tamsui (terminal norte de la línea roja)', 'Tamsui (north end of the Red Line)'], ['象山', 'Xiangshan (terminal sur de la línea roja)', 'Xiangshan (south end of the Red Line)']],
   T_RED: [['廣播', 'anuncio por altavoz', 'announcement'], ['下一站', 'la próxima estación', 'the next stop'], ['下車', 'bajarse', 'get off'], ['轉乘', 'hacer transbordo', 'transfer'], ['台北車站', 'Estación Principal de Taipei', 'Taipei Main Station']],
   X_XFER: [['轉乘', 'hacer transbordo', 'transfer'], ['指標', 'letrero, señal', 'sign'], ['板南線', 'línea Bannan (azul)', 'Bannan Line (Blue)'], ['藍線', 'línea azul', 'Blue Line'], ['出口', 'salida', 'exit']],
   P_BLUE: [['月台', 'andén', 'platform'], ['方向', 'dirección', 'direction'], ['頂埔', 'Dingpu (terminal oeste de la línea azul)', 'Dingpu (west end of the Blue Line)'], ['南港展覽館', 'Nangang Exhibition Center (terminal este)', 'Nangang Exhibition Center (east end)'], ['路線圖', 'mapa de líneas', 'route map']],
@@ -955,15 +957,36 @@ async function showLeaderboard() {
 /* ══════════════════════════════════════
    遊戲主體
 ══════════════════════════════════════ */
-/* 路線（只用台北捷運最常用、確定的站序；… 表示中間省略的站） */
-const RED  = ['淡水', '…', '雙連', '中山', '台北車站', '台大醫院', '…', '象山'];
-const BLUE = ['頂埔', '…', '龍山寺', '西門', '台北車站', '善導寺', '忠孝新生', '忠孝復興', '…', '南港展覽館'];
-/* 目的地：藍線的方向、中間會經過的站 */
-const DEST = {
-  '西門':     { dir: '頂埔',       stops: ['西門'],                             es: 'Ximen',          en: 'Ximen' },
-  '忠孝復興': { dir: '南港展覽館', stops: ['善導寺', '忠孝新生', '忠孝復興'], es: 'Zhongxiao Fuxing', en: 'Zhongxiao Fuxing' }
+/* 路線（台北捷運官方站序；… 表示中間省略的站） */
+const RED  = ['淡水', '…', '民權西路', '雙連', '中山', '台北車站', '台大醫院', '中正紀念堂', '東門', '…', '象山'];
+const BLUE = ['頂埔', '…', '龍山寺', '西門', '台北車站', '善導寺', '忠孝新生', '忠孝復興', '忠孝敦化', '國父紀念館', '市政府', '…', '南港展覽館'];
+/* 站名的西文／英文寫法 */
+const ROM = {
+  '淡水': 'Tamsui', '象山': 'Xiangshan', '頂埔': 'Dingpu', '南港展覽館': 'Nangang Exhibition Center', '台北車站': 'Taipei Main Station',
+  '雙連': 'Shuanglian', '中山': 'Zhongshan', '台大醫院': 'NTU Hospital', '中正紀念堂': 'Chiang Kai-shek Memorial Hall',
+  '龍山寺': 'Longshan Temple', '西門': 'Ximen', '善導寺': 'Shandao Temple', '忠孝新生': 'Zhongxiao Xinsheng', '忠孝復興': 'Zhongxiao Fuxing',
+  '忠孝敦化': 'Zhongxiao Dunhua', '國父紀念館': 'Sun Yat-sen Memorial Hall', '市政府': 'Taipei City Hall'
 };
-const NZ = n => CN[n];
+/* 出發站（紅線）：往台北車站的方向、中間會停的站（最後一站是台北車站） */
+const ORIGIN = {
+  '雙連':       { dir: '象山', stops: ['中山', '台北車站'] },
+  '中山':       { dir: '象山', stops: ['台北車站'] },
+  '台大醫院':   { dir: '淡水', stops: ['台北車站'] },
+  '中正紀念堂': { dir: '淡水', stops: ['台大醫院', '台北車站'] }
+};
+/* 目的地（藍線）：從台北車站出發的方向、中間會停的站（最後一站是目的地） */
+const DEST = {
+  '西門':       { dir: '頂埔',       stops: ['西門'] },
+  '龍山寺':     { dir: '頂埔',       stops: ['西門', '龍山寺'] },
+  '善導寺':     { dir: '南港展覽館', stops: ['善導寺'] },
+  '忠孝新生':   { dir: '南港展覽館', stops: ['善導寺', '忠孝新生'] },
+  '忠孝復興':   { dir: '南港展覽館', stops: ['善導寺', '忠孝新生', '忠孝復興'] },
+  '忠孝敦化':   { dir: '南港展覽館', stops: ['善導寺', '忠孝新生', '忠孝復興', '忠孝敦化'] },
+  '國父紀念館': { dir: '南港展覽館', stops: ['善導寺', '忠孝新生', '忠孝復興', '忠孝敦化', '國父紀念館'] },
+  '市政府':     { dir: '南港展覽館', stops: ['善導寺', '忠孝新生', '忠孝復興', '忠孝敦化', '國父紀念館', '市政府'] }
+};
+Object.entries(DEST).forEach(([k, v]) => { v.es = v.en = ROM[k]; });
+const NZ = n => n === 2 ? '兩' : CN[n];
 const DRINKS = [['珍珠奶茶', 'té con leche y perlas de tapioca', 'a bubble tea'], ['冰紅茶', 'un té negro helado', 'an iced black tea']];
 
 /* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
@@ -985,6 +1008,7 @@ const Game = {
   visit: 0,                      // 第幾次進入關卡（標出「現在這關」的錯誤）
   att: {},                       // 每一關選了幾次（第一次就對才給綠卡）
   at: '中山',                    // 現在在哪一站
+  rstep: 0,                      // 紅線上坐到第幾站
   line: 'red',                   // 現在在哪一條線上
   step: 0,                       // 藍線上坐到第幾站
   balance: 0,                    // 悠遊卡餘額
@@ -1005,16 +1029,17 @@ const Game = {
 
   /* ── 每局隨機任務 ── */
   setup() {
-    const dest = pick(['西門', '忠孝復興']);
+    const dest = pick(Object.keys(DEST)), origin = pick(Object.keys(ORIGIN));
     this.task = {
       dest, dir: DEST[dest].dir, stops: DEST[dest].stops,
+      origin, rdir: ORIGIN[origin].dir, rstops: ORIGIN[origin].stops,
       drink: pick(DRINKS),
       bal: pick([5, 8]),
       elder: pick([['阿嬤', 'la abuelita', 'an elderly lady'], ['阿公', 'el abuelito', 'an elderly gentleman']]),
       rot: Math.floor(Math.random() * 3)
     };
     this.balance = this.task.bal;
-    this.at = '中山'; this.line = 'red'; this.step = 0;
+    this.at = origin; this.line = 'red'; this.step = 0; this.rstep = 0;
   },
 
   /* ── 計時 ── */
@@ -1156,9 +1181,9 @@ const Game = {
       L(`Ami：${N}，我已經在${t.dest}站了！你搭捷運過來，到了再打給我。`,
         `${N}, ¡ya estoy en la estación ${this.destEs()}! Ven en metro y llámame cuando llegues.`,
         `${N}, I'm already at ${t.dest} Station! Take the MRT over and call me when you get here.`),
-      L('Ami：你在中山站對吧？先搭紅線，到台北車站轉車。',
-        '¿Estás en la estación Zhongshan, verdad? Primero toma la línea roja y haz transbordo en Taipei Main Station.',
-        "You're at Zhongshan Station, right? Take the Red Line first and transfer at Taipei Main Station."),
+      L(`Ami：你在${t.origin}站對吧？先搭紅線，到台北車站轉車。`,
+        `¿Estás en la estación ${ROM[t.origin]}, verdad? Primero toma la línea roja y haz transbordo en Taipei Main Station.`,
+        `You're at ${ROM[t.origin]} Station, right? Take the Red Line first and transfer at Taipei Main Station.`),
       L('Ami：悠遊卡記得先看一下有沒有錢，不夠要先加值喔。',
         'Acuérdate de revisar el saldo de tu EasyCard; si no alcanza, recarga primero.',
         "Remember to check your EasyCard balance. If it's not enough, top it up first."),
@@ -1168,14 +1193,14 @@ const Game = {
     ];
   },
   routeLines() {
-    const t = this.task, n = t.stops.length;
+    const t = this.task, n = t.stops.length, rn = t.rstops.length;
     return [
-      L(`站務員：到${t.dest}站的話，先搭紅線，往象山方向，坐一站，在台北車站下車。`,
-        `Para ir a ${this.destEs()}: primero la línea roja, dirección Xiangshan, una parada, y bájese en Taipei Main Station.`,
-        `To get to ${t.dest}: take the Red Line toward Xiangshan for one stop and get off at Taipei Main Station.`),
+      L(`站務員：到${t.dest}站的話，先搭紅線，往${t.rdir}方向，坐${NZ(rn)}站，在台北車站下車。`,
+        `Para ir a ${this.destEs()}: primero la línea roja, dirección ${ROM[t.rdir]}, ${rn} ${rn === 1 ? 'parada' : 'paradas'}, y bájese en Taipei Main Station.`,
+        `To get to ${t.dest}: take the Red Line toward ${ROM[t.rdir]} for ${rn} ${rn === 1 ? 'stop' : 'stops'} and get off at Taipei Main Station.`),
       L(`站務員：然後轉搭藍線，往${t.dir}方向，坐${NZ(n)}站就到了。`,
-        `Luego haga transbordo a la línea azul, dirección ${t.dir === '頂埔' ? 'Dingpu' : 'Nangang Exhibition Center'}; son ${n} ${n === 1 ? 'parada' : 'paradas'}.`,
-        `Then transfer to the Blue Line toward ${t.dir === '頂埔' ? 'Dingpu' : 'Nangang Exhibition Center'}; it's ${n} ${n === 1 ? 'stop' : 'stops'}.`)
+        `Luego haga transbordo a la línea azul, dirección ${ROM[t.dir]}; son ${n} ${n === 1 ? 'parada' : 'paradas'}.`,
+        `Then transfer to the Blue Line toward ${ROM[t.dir]}; it's ${n} ${n === 1 ? 'stop' : 'stops'}.`)
     ];
   },
 
@@ -1184,7 +1209,7 @@ const Game = {
     const t = this.task, r = s => this.ruby(s);
     const rows = [
       { zh: `目的地：${t.dest}站`, es: `Destino: estación ${this.destEs()}`, en: `Destination: ${t.dest} Station` },
-      { zh: '現在在：中山站（紅線）', es: 'Ahora estás en: Zhongshan (línea roja)', en: "You're at: Zhongshan (Red Line)" },
+      { zh: `現在在：${t.origin}站（紅線）`, es: `Ahora estás en: ${ROM[t.origin]} (línea roja)`, en: `You're at: ${ROM[t.origin]} (Red Line)` },
       { zh: `悠遊卡餘額：${t.bal}元`, es: `Saldo de tu EasyCard: ${esM(t.bal)}`, en: `EasyCard balance: ${enM(t.bal)}` },
       { zh: `手上有：${t.drink[0]}`, es: `En la mano: ${t.drink[1]}`, en: `In your hand: ${t.drink[2]}` }
     ];
@@ -1223,9 +1248,9 @@ const Game = {
         place: 'phone',
         html: () => Game.listHTML(),
         dialogue: () => [
-          L(`（週六下午，你在中山站附近。手機響了一聲，是Ami傳來的LINE。你手上還拿著一杯${t.drink[0]}。）`,
-            `(Es sábado por la tarde y estás cerca de la estación Zhongshan. Tu celular suena: es un LINE de Ami. En la mano llevas ${t.drink[1]}.)`,
-            `(It's Saturday afternoon and you're near Zhongshan Station. Your phone buzzes — a LINE from Ami. You're holding ${t.drink[2]}.)`),
+          L(`（週六下午，你在${t.origin}站附近。手機響了一聲，是Ami傳來的LINE。你手上還拿著一杯${t.drink[0]}。）`,
+            `(Es sábado por la tarde y estás cerca de la estación ${ROM[t.origin]}. Tu celular suena: es un LINE de Ami. En la mano llevas ${t.drink[1]}.)`,
+            `(It's Saturday afternoon and you're near ${ROM[t.origin]} Station. Your phone buzzes — a LINE from Ami. You're holding ${t.drink[2]}.)`),
           ...Game.amiLines(),
           L('我：好，我現在過去！', '¡Bien, voy para allá ahora mismo!', "OK, I'm on my way!")
         ],
@@ -1310,27 +1335,39 @@ const Game = {
         dialogue: () => [L('（你刷卡進站，走到紅線的月台。月台上有兩個方向的指示牌。）', '(Pasas la tarjeta y vas al andén de la línea roja. Hay carteles para dos direcciones.)', '(You tap in and walk to the Red Line platform. There are signs for two directions.)')],
         options: ['往淡水方向', '往象山方向'],
         next: c => {
-          if (c !== '往象山方向') {
-            Game.addMistake(M('站務員說要搭往象山方向。', 'La persona del mostrador dijo que había que tomar la dirección Xiangshan.', 'The staff member said to take the train toward Xiangshan.'),
+          if (c !== `往${t.rdir}方向`) {
+            Game.addMistake(M(`站務員說要搭往${t.rdir}方向。`, `La persona del mostrador dijo que había que tomar la dirección ${ROM[t.rdir]}.`, `The staff member said to take the train toward ${ROM[t.rdir]}.`),
               [L('（站務員剛剛說往哪個方向？）', '(¿Qué dirección dijo la persona del mostrador?)', '(Which direction did the staff member say?)')]); return;
           }
           goodFirst('P_RED', '搭捷運要看「往…方向」，也就是終點站的名字。', 'En el metro se mira «dirección…», es decir, el nombre de la terminal.', 'On the MRT, look for the "toward…" sign — it\'s the name of the end station.');
-          Game.line = 'red';
+          Game.line = 'red'; Game.rstep = 0;
           Game.state = 'T_RED';
         }
       },
       T_RED: {
         place: 'train',
         html: () => Game.mapHTML(),
-        dialogue: () => [L('（列車進站了。你上了車，車廂裡有一點擠。）', '(Llega el tren. Subes; el vagón va un poco lleno.)', '(The train arrives. You get on; the car is a bit crowded.)'),
-          L('（車廂廣播：「各位旅客，下一站，台北車站，可轉乘板南線。」）', '(Anuncio del tren: «Estimados pasajeros, la próxima estación es Taipei Main Station, con transbordo a la línea Bannan».)', '(Announcement: "Dear passengers, the next stop is Taipei Main Station, with a transfer to the Bannan Line.")')],
-        options: ['下一站，我要下車。', '我要坐到象山。', '我要在台大醫院下車。'],
+        dialogue: () => {
+          const nx = t.rstops[Game.rstep], tpe = nx === '台北車站';
+          const ann = L(`（車廂廣播：「各位旅客，下一站，${nx}${tpe ? '，可轉乘板南線' : ''}。」）`,
+            `(Anuncio del tren: «Estimados pasajeros, la próxima estación es ${ROM[nx]}${tpe ? ', con transbordo a la línea Bannan' : ''}».)`,
+            `(Announcement: "Dear passengers, the next stop is ${ROM[nx]}${tpe ? ', with a transfer to the Bannan Line' : ''}.")`);
+          return Game.rstep === 0 ? [L('（列車進站了。你上了車，車廂裡有一點擠。）', '(Llega el tren. Subes; el vagón va un poco lleno.)', '(The train arrives. You get on; the car is a bit crowded.)'), ann] : [ann];
+        },
+        options: ['下一站下車', '不下車，繼續坐'],
         next: c => {
-          if (!c.startsWith('下一站')) {
-            Game.addMistake(M('廣播說下一站是台北車站，要在那裡轉車。', 'El anuncio dijo que la próxima es Taipei Main Station: allí se hace el transbordo.', 'The announcement said the next stop is Taipei Main Station — that\'s where you transfer.'),
-              [L('（廣播剛剛說下一站是哪裡？）', '(¿Qué estación dijo el anuncio?)', '(Which stop did the announcement say?)')]); return;
+          const nx = t.rstops[Game.rstep], tpe = nx === '台北車站', off = c === '下一站下車';
+          if (off !== tpe) {
+            Game.addMistake(tpe ? M('下一站就是台北車站，要在那裡轉車！', 'La próxima es Taipei Main Station: ¡ahí se hace el transbordo!', 'The next stop is Taipei Main Station — that\'s where you transfer!')
+                                : M(`還沒到台北車站，下一站是${nx}。`, `Todavía no es Taipei Main Station; la próxima es ${ROM[nx]}.`, `Not Taipei Main Station yet; the next stop is ${ROM[nx]}.`),
+              [L(tpe ? '（車門快要關了！）' : '（你看一下路線圖……還沒到。）', tpe ? '(¡Las puertas están a punto de cerrarse!)' : '(Miras el mapa… todavía no es.)', tpe ? '(The doors are about to close!)' : "(You check the map… not there yet.)")]); return;
           }
-          goodFirst('T_RED', '你聽懂廣播，知道要在台北車站下車。', 'Entendiste el anuncio y sabes dónde bajar.', 'You understood the announcement and know where to get off.');
+          if (!tpe) {
+            Game.at = nx; Game.rstep += 1;
+            Game.thought = [L(`（列車到${nx}站了。）`, `(El tren llega a ${ROM[nx]}.)`, `(The train arrives at ${ROM[nx]}.)`)];
+            return;
+          }
+          if (Game.att.T_RED === t.rstops.length) Game.good('你聽懂廣播，知道要在台北車站下車。', 'Entendiste el anuncio y sabes dónde bajar.', 'You understood the announcement and know where to get off.');
           Game.at = '台北車站'; Game.line = 'both';
           Game.thought = [L('（你在台北車站下了車。）', '(Bajas en Taipei Main Station.)', '(You get off at Taipei Main Station.)')];
           Game.state = 'X_XFER';
@@ -1394,12 +1431,12 @@ const Game = {
       T_BLUE: {
         place: 'train',
         html: () => Game.mapHTML(),
-        dialogue: () => [L(`（車廂廣播：「各位旅客，下一站，${t.stops[Game.step]}。」）`, `(Anuncio del tren: «Estimados pasajeros, la próxima estación es ${t.stops[Game.step] === '西門' ? 'Ximen' : t.stops[Game.step] === '善導寺' ? 'Shandaosi' : t.stops[Game.step] === '忠孝新生' ? 'Zhongxiao Xinsheng' : 'Zhongxiao Fuxing'}».)`, `(Announcement: "Dear passengers, the next stop is ${t.stops[Game.step] === '西門' ? 'Ximen' : t.stops[Game.step] === '善導寺' ? 'Shandaosi' : t.stops[Game.step] === '忠孝新生' ? 'Zhongxiao Xinsheng' : 'Zhongxiao Fuxing'}.")`)],
+        dialogue: () => [L(`（車廂廣播：「各位旅客，下一站，${t.stops[Game.step]}。」）`, `(Anuncio del tren: «Estimados pasajeros, la próxima estación es ${ROM[t.stops[Game.step]]}».)`, `(Announcement: "Dear passengers, the next stop is ${ROM[t.stops[Game.step]]}.")`)],
         options: ['下一站下車', '不下車，繼續坐'],
         next: c => {
           const next = t.stops[Game.step], isDest = next === t.dest, off = c === '下一站下車';
           if (off !== isDest) {
-            Game.addMistake(isDest ? M(`下一站就是${t.dest}站，要下車！`, `¡La próxima es ${Game.destEs()}: hay que bajar!`, `The next stop is ${t.dest} — get off!`) : M(`還沒到。你要去${t.dest}站，下一站是${next}。`, `Todavía no: vas a ${Game.destEs()} y la próxima es ${next}.`, `Not yet: you're going to ${t.dest}, and the next stop is ${next}.`),
+            Game.addMistake(isDest ? M(`下一站就是${t.dest}站，要下車！`, `¡La próxima es ${Game.destEs()}: hay que bajar!`, `The next stop is ${t.dest} — get off!`) : M(`還沒到。你要去${t.dest}站，下一站是${next}。`, `Todavía no: vas a ${Game.destEs()} y la próxima es ${ROM[next]}.`, `Not yet: you're going to ${t.dest}, and the next stop is ${ROM[next]}.`),
               [L(isDest ? '（車門快要關了！）' : '（你看一下路線圖……還沒到。）', isDest ? '(¡Las puertas están a punto de cerrarse!)' : '(Miras el mapa… todavía no es.)', isDest ? '(The doors are about to close!)' : "(You check the map… not there yet.)")]); return;
           }
           if (isDest) {
@@ -1407,7 +1444,7 @@ const Game = {
             Game.state = 'END'; return;
           }
           Game.at = next; Game.step += 1;
-          Game.thought = [L(`（列車到${next}站了。）`, `(El tren llega a ${next}.)`, `(The train arrives at ${next}.)`)];
+          Game.thought = [L(`（列車到${next}站了。）`, `(El tren llega a ${ROM[next]}.)`, `(The train arrives at ${ROM[next]}.)`)];
         }
       },
 
