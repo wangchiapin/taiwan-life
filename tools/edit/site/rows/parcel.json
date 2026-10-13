@@ -1,0 +1,1310 @@
+{
+ "game": "parcel",
+ "title": "超商領包裹",
+ "rows": [
+  {
+   "id": "parcel-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "便利商店"
+  },
+  {
+   "id": "parcel-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "超商領包裹"
+  },
+  {
+   "id": "parcel-003",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "你租了房東太太家的一個房間，已經住一陣子了。今天早上，房東太太出門上班前，請你去巷口的超商幫忙領包裹。看清楚簡訊再去！"
+  },
+  {
+   "id": "parcel-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "出門去超商"
+  },
+  {
+   "id": "parcel-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走進超商"
+  },
+  {
+   "id": "parcel-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "看店員拿來的包裹"
+  },
+  {
+   "id": "parcel-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "準備付錢"
+  },
+  {
+   "id": "parcel-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "拿找的錢"
+  },
+  {
+   "id": "parcel-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "接電話"
+  },
+  {
+   "id": "parcel-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "跟店員說還有一個包裹"
+  },
+  {
+   "id": "parcel-011",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "看螢幕"
+  },
+  {
+   "id": "parcel-012",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "拿出悠遊卡"
+  },
+  {
+   "id": "parcel-013",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "等店員結帳"
+  },
+  {
+   "id": "parcel-014",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "回家"
+  },
+  {
+   "id": "parcel-015",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "房東太太的LINE"
+  },
+  {
+   "id": "parcel-016",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "房東太太來電"
+  },
+  {
+   "id": "parcel-017",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "住處"
+  },
+  {
+   "id": "parcel-018",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "巷口"
+  },
+  {
+   "id": "parcel-019",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "便利商店 "
+  },
+  {
+   "id": "parcel-020",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "房東太太"
+  },
+  {
+   "id": "parcel-021",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "通話中 · "
+  },
+  {
+   "id": "parcel-022",
+   "kind": "LINE訊息",
+   "stage": "房東太太的LINE",
+   "stageName": "房東太太的LINE",
+   "who": "房東太太",
+   "zh": "我的包裹到了，幫我去〔門市〕拿，是取貨付款，錢在桌上。"
+  },
+  {
+   "id": "parcel-023",
+   "kind": "LINE訊息",
+   "stage": "房東太太的LINE",
+   "stageName": "房東太太的LINE",
+   "who": "房東太太",
+   "zh": "取件人是我，〔房東太太的名字〕，手機末三碼〔末三碼〕。"
+  },
+  {
+   "id": "parcel-024",
+   "kind": "LINE訊息",
+   "stage": "房東太太的LINE",
+   "stageName": "房東太太的LINE",
+   "who": "房東太太",
+   "zh": "順便幫我的悠遊卡加值〔金額〕元。家裡塑膠袋太多了，不要再買袋子喔！"
+  },
+  {
+   "id": "parcel-025",
+   "kind": "簡訊",
+   "stage": "簡訊（房東太太轉傳）",
+   "stageName": "簡訊（房東太太轉傳）",
+   "who": "",
+   "zh": "您的包裹已到店"
+  },
+  {
+   "id": "parcel-026",
+   "kind": "簡訊",
+   "stage": "簡訊（房東太太轉傳）",
+   "stageName": "簡訊（房東太太轉傳）",
+   "who": "",
+   "zh": "取件門市：〔門市〕"
+  },
+  {
+   "id": "parcel-027",
+   "kind": "簡訊",
+   "stage": "簡訊（房東太太轉傳）",
+   "stageName": "簡訊（房東太太轉傳）",
+   "who": "",
+   "zh": "包裹編號：〔包裹編號〕"
+  },
+  {
+   "id": "parcel-028",
+   "kind": "簡訊",
+   "stage": "簡訊（房東太太轉傳）",
+   "stageName": "簡訊（房東太太轉傳）",
+   "who": "",
+   "zh": "取貨付款：〔金額〕元"
+  },
+  {
+   "id": "parcel-029",
+   "kind": "簡訊",
+   "stage": "簡訊（房東太太轉傳）",
+   "stageName": "簡訊（房東太太轉傳）",
+   "who": "",
+   "zh": "取件期限：〔日期〕"
+  },
+  {
+   "id": "parcel-030",
+   "kind": "簡訊",
+   "stage": "簡訊（你的手機）",
+   "stageName": "簡訊（你的手機）",
+   "who": "",
+   "zh": "您的包裹已到店"
+  },
+  {
+   "id": "parcel-031",
+   "kind": "簡訊",
+   "stage": "簡訊（你的手機）",
+   "stageName": "簡訊（你的手機）",
+   "who": "",
+   "zh": "取件門市：〔門市〕"
+  },
+  {
+   "id": "parcel-032",
+   "kind": "簡訊",
+   "stage": "簡訊（你的手機）",
+   "stageName": "簡訊（你的手機）",
+   "who": "",
+   "zh": "取貨不付款（已付款）"
+  },
+  {
+   "id": "parcel-033",
+   "kind": "簡訊",
+   "stage": "簡訊（你的手機）",
+   "stageName": "簡訊（你的手機）",
+   "who": "",
+   "zh": "取件期限：〔日期〕"
+  },
+  {
+   "id": "parcel-034",
+   "kind": "簡訊",
+   "stage": "簡訊（你的手機）",
+   "stageName": "簡訊（你的手機）",
+   "who": "",
+   "zh": "您的包裹已寄出"
+  },
+  {
+   "id": "parcel-035",
+   "kind": "簡訊",
+   "stage": "簡訊（你的手機）",
+   "stageName": "簡訊（你的手機）",
+   "who": "",
+   "zh": "預計到店：〔日期〕"
+  },
+  {
+   "id": "parcel-036",
+   "kind": "簡訊",
+   "stage": "簡訊（你的手機）",
+   "stageName": "簡訊（你的手機）",
+   "who": "",
+   "zh": "到店後會再通知您"
+  },
+  {
+   "id": "parcel-037",
+   "kind": "手機標題",
+   "stage": "手機畫面",
+   "stageName": "手機畫面",
+   "who": "",
+   "zh": "簡訊（你的手機）　今天是〔日期〕"
+  },
+  {
+   "id": "parcel-038",
+   "kind": "旁白",
+   "stage": "房東太太來電",
+   "stageName": "房東太太來電",
+   "who": "",
+   "zh": "（你的手機響了，是房東太太。）"
+  },
+  {
+   "id": "parcel-039",
+   "kind": "台詞",
+   "stage": "房東太太來電",
+   "stageName": "房東太太來電",
+   "who": "房東太太",
+   "zh": "〔名字〕，拿到了嗎？啊，我忘了說，房東先生也有一個包裹在同一家！"
+  },
+  {
+   "id": "parcel-040",
+   "kind": "台詞",
+   "stage": "房東太太來電",
+   "stageName": "房東太太來電",
+   "who": "房東太太",
+   "zh": "取件人寫房東先生的名字，〔房東先生的名字〕，末三碼是〔末三碼〕。那個已經付過錢了。拜託你囉！"
+  },
+  {
+   "id": "parcel-041",
+   "kind": "選項",
+   "stage": "",
+   "stageName": "",
+   "who": "我",
+   "zh": "末三碼是〔末三碼〕。"
+  },
+  {
+   "id": "parcel-042",
+   "kind": "旁白",
+   "stage": "START",
+   "stageName": "開場：看手機",
+   "who": "",
+   "zh": "（今天早上，房東太太出門上班前傳了LINE給你，你的手機也收到了一則簡訊。）"
+  },
+  {
+   "id": "parcel-043",
+   "kind": "旁白",
+   "stage": "START",
+   "stageName": "開場：看手機",
+   "who": "",
+   "zh": "（上面的「看手機」按鈕，隨時可以再打開來看。）"
+  },
+  {
+   "id": "parcel-044",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "開場：看手機",
+   "who": "我",
+   "zh": "好，出門去超商！"
+  },
+  {
+   "id": "parcel-045",
+   "kind": "旁白",
+   "stage": "STORE",
+   "stageName": "選門市",
+   "who": "",
+   "zh": "（巷口有兩家超商，一家是「〔門市〕」，另一家是「〔另一家門市〕」。要去哪一家？）"
+  },
+  {
+   "id": "parcel-046",
+   "kind": "選項",
+   "stage": "STORE",
+   "stageName": "選門市",
+   "who": "我",
+   "zh": "去〔門市〕"
+  },
+  {
+   "id": "parcel-047",
+   "kind": "選項",
+   "stage": "STORE",
+   "stageName": "選門市",
+   "who": "我",
+   "zh": "去〔另一家門市〕"
+  },
+  {
+   "id": "parcel-048",
+   "kind": "錯誤說明",
+   "stage": "STORE",
+   "stageName": "選門市",
+   "who": "",
+   "zh": "去錯門市了，簡訊上寫的是另一家。"
+  },
+  {
+   "id": "parcel-049",
+   "kind": "台詞",
+   "stage": "STORE",
+   "stageName": "選門市",
+   "who": "店員",
+   "zh": "這裡是〔另一家門市〕，沒有您的包裹喔。"
+  },
+  {
+   "id": "parcel-050",
+   "kind": "旁白",
+   "stage": "STORE",
+   "stageName": "選門市",
+   "who": "",
+   "zh": "（看一下簡訊上的取件門市……）"
+  },
+  {
+   "id": "parcel-051",
+   "kind": "綠卡說明",
+   "stage": "STORE",
+   "stageName": "選門市",
+   "who": "",
+   "zh": "你先看了簡訊，去對了門市。"
+  },
+  {
+   "id": "parcel-052",
+   "kind": "旁白",
+   "stage": "GREET",
+   "stageName": "打招呼",
+   "who": "",
+   "zh": "（叮咚——）"
+  },
+  {
+   "id": "parcel-053",
+   "kind": "台詞",
+   "stage": "GREET",
+   "stageName": "打招呼",
+   "who": "店員",
+   "zh": "歡迎光臨！請問需要什麼？"
+  },
+  {
+   "id": "parcel-054",
+   "kind": "選項",
+   "stage": "GREET",
+   "stageName": "打招呼",
+   "who": "我",
+   "zh": "我要取貨。"
+  },
+  {
+   "id": "parcel-055",
+   "kind": "選項",
+   "stage": "GREET",
+   "stageName": "打招呼",
+   "who": "我",
+   "zh": "我要寄貨。"
+  },
+  {
+   "id": "parcel-056",
+   "kind": "選項",
+   "stage": "GREET",
+   "stageName": "打招呼",
+   "who": "我",
+   "zh": "我要退貨。"
+  },
+  {
+   "id": "parcel-057",
+   "kind": "錯誤說明",
+   "stage": "GREET",
+   "stageName": "打招呼",
+   "who": "",
+   "zh": "你是來「取貨」的。"
+  },
+  {
+   "id": "parcel-058",
+   "kind": "台詞",
+   "stage": "GREET",
+   "stageName": "打招呼",
+   "who": "店員",
+   "zh": "好的，請給我您的包裹……"
+  },
+  {
+   "id": "parcel-059",
+   "kind": "台詞",
+   "stage": "GREET",
+   "stageName": "打招呼",
+   "who": "我",
+   "zh": "啊，不是，說錯了！"
+  },
+  {
+   "id": "parcel-060",
+   "kind": "台詞",
+   "stage": "M_TAIL",
+   "stageName": "末三碼",
+   "who": "店員",
+   "zh": "請問手機末三碼？"
+  },
+  {
+   "id": "parcel-061",
+   "kind": "錯誤說明",
+   "stage": "M_TAIL",
+   "stageName": "末三碼",
+   "who": "",
+   "zh": "末三碼說錯了。"
+  },
+  {
+   "id": "parcel-062",
+   "kind": "台詞",
+   "stage": "M_TAIL",
+   "stageName": "末三碼",
+   "who": "店員",
+   "zh": "嗯……這個號碼查不到耶。"
+  },
+  {
+   "id": "parcel-063",
+   "kind": "旁白",
+   "stage": "M_TAIL",
+   "stageName": "末三碼",
+   "who": "",
+   "zh": "（是誰的包裹？要說誰的號碼？）"
+  },
+  {
+   "id": "parcel-064",
+   "kind": "台詞",
+   "stage": "M_NAME",
+   "stageName": "取件人",
+   "who": "店員",
+   "zh": "請問大名？"
+  },
+  {
+   "id": "parcel-065",
+   "kind": "錯誤說明",
+   "stage": "M_NAME",
+   "stageName": "取件人",
+   "who": "",
+   "zh": "取件人的名字說錯了。"
+  },
+  {
+   "id": "parcel-066",
+   "kind": "台詞",
+   "stage": "M_NAME",
+   "stageName": "取件人",
+   "who": "店員",
+   "zh": "這個名字跟包裹上的不一樣喔。"
+  },
+  {
+   "id": "parcel-067",
+   "kind": "旁白",
+   "stage": "M_NAME",
+   "stageName": "取件人",
+   "who": "",
+   "zh": "（房東太太的名字是哪幾個字？）"
+  },
+  {
+   "id": "parcel-068",
+   "kind": "台詞",
+   "stage": "M_CHECK",
+   "stageName": "核對包裹",
+   "who": "店員",
+   "zh": "找到了，是這個嗎？"
+  },
+  {
+   "id": "parcel-069",
+   "kind": "選項",
+   "stage": "M_CHECK",
+   "stageName": "核對包裹",
+   "who": "我",
+   "zh": "對，是這個。"
+  },
+  {
+   "id": "parcel-070",
+   "kind": "選項",
+   "stage": "M_CHECK",
+   "stageName": "核對包裹",
+   "who": "我",
+   "zh": "不對，名字不一樣。"
+  },
+  {
+   "id": "parcel-071",
+   "kind": "錯誤說明",
+   "stage": "M_CHECK",
+   "stageName": "核對包裹",
+   "who": "",
+   "zh": "包裹拿錯了，收件人不是房東太太。"
+  },
+  {
+   "id": "parcel-072",
+   "kind": "台詞",
+   "stage": "M_CHECK",
+   "stageName": "核對包裹",
+   "who": "店員",
+   "zh": "等一下，不好意思，好像拿錯了，這個是別人的！"
+  },
+  {
+   "id": "parcel-073",
+   "kind": "錯誤說明",
+   "stage": "M_CHECK",
+   "stageName": "核對包裹",
+   "who": "",
+   "zh": "名字是對的。"
+  },
+  {
+   "id": "parcel-074",
+   "kind": "綠卡說明",
+   "stage": "M_CHECK",
+   "stageName": "核對包裹",
+   "who": "",
+   "zh": "你發現包裹上的名字不對。"
+  },
+  {
+   "id": "parcel-075",
+   "kind": "台詞",
+   "stage": "M_CHECK",
+   "stageName": "核對包裹",
+   "who": "店員",
+   "zh": "啊，抱歉，拿到〔相似的名字〕小姐的了。這個才對。"
+  },
+  {
+   "id": "parcel-076",
+   "kind": "台詞",
+   "stage": "M_PAY",
+   "stageName": "取貨付款",
+   "who": "店員",
+   "zh": "這個是取貨付款，一共〔金額〕元。"
+  },
+  {
+   "id": "parcel-077",
+   "kind": "選項",
+   "stage": "M_PAY",
+   "stageName": "取貨付款",
+   "who": "我",
+   "zh": "好，給你一千元。"
+  },
+  {
+   "id": "parcel-078",
+   "kind": "選項",
+   "stage": "M_PAY",
+   "stageName": "取貨付款",
+   "who": "我",
+   "zh": "房東太太已經付過了。"
+  },
+  {
+   "id": "parcel-079",
+   "kind": "錯誤說明",
+   "stage": "M_PAY",
+   "stageName": "取貨付款",
+   "who": "",
+   "zh": "簡訊上寫「取貨付款」，要現在付。"
+  },
+  {
+   "id": "parcel-080",
+   "kind": "台詞",
+   "stage": "M_PAY",
+   "stageName": "取貨付款",
+   "who": "店員",
+   "zh": "不好意思，這個寫的是取貨付款喔，要在這邊付。"
+  },
+  {
+   "id": "parcel-081",
+   "kind": "台詞",
+   "stage": "M_CHANGE",
+   "stageName": "找錢",
+   "who": "店員",
+   "zh": "收您一千元，找您〔金額〕。"
+  },
+  {
+   "id": "parcel-082",
+   "kind": "選項",
+   "stage": "M_CHANGE",
+   "stageName": "找錢",
+   "who": "我",
+   "zh": "好，謝謝。"
+  },
+  {
+   "id": "parcel-083",
+   "kind": "選項",
+   "stage": "M_CHANGE",
+   "stageName": "找錢",
+   "who": "我",
+   "zh": "不好意思，好像少找了。"
+  },
+  {
+   "id": "parcel-084",
+   "kind": "錯誤說明",
+   "stage": "M_CHANGE",
+   "stageName": "找錢",
+   "who": "",
+   "zh": "少找了錢，應該找〔金額〕。"
+  },
+  {
+   "id": "parcel-085",
+   "kind": "錯誤說明",
+   "stage": "M_CHANGE",
+   "stageName": "找錢",
+   "who": "",
+   "zh": "找的錢是對的。"
+  },
+  {
+   "id": "parcel-086",
+   "kind": "旁白",
+   "stage": "M_CHANGE",
+   "stageName": "找錢",
+   "who": "",
+   "zh": "（一千減〔金額〕……）"
+  },
+  {
+   "id": "parcel-087",
+   "kind": "綠卡說明",
+   "stage": "M_CHANGE",
+   "stageName": "找錢",
+   "who": "",
+   "zh": "你發現店員少找錢，還說出來了！"
+  },
+  {
+   "id": "parcel-088",
+   "kind": "台詞",
+   "stage": "M_CHANGE",
+   "stageName": "找錢",
+   "who": "店員",
+   "zh": "啊，抱歉抱歉！"
+  },
+  {
+   "id": "parcel-089",
+   "kind": "選項",
+   "stage": "CALL",
+   "stageName": "房東太太來電",
+   "who": "我",
+   "zh": "好，我再問問看。"
+  },
+  {
+   "id": "parcel-090",
+   "kind": "台詞",
+   "stage": "D_TAIL",
+   "stageName": "末三碼",
+   "who": "我",
+   "zh": "不好意思，還有一個包裹要拿。"
+  },
+  {
+   "id": "parcel-091",
+   "kind": "台詞",
+   "stage": "D_TAIL",
+   "stageName": "末三碼",
+   "who": "店員",
+   "zh": "好的，末三碼是？"
+  },
+  {
+   "id": "parcel-092",
+   "kind": "錯誤說明",
+   "stage": "D_TAIL",
+   "stageName": "末三碼",
+   "who": "",
+   "zh": "末三碼說錯了。"
+  },
+  {
+   "id": "parcel-093",
+   "kind": "台詞",
+   "stage": "D_TAIL",
+   "stageName": "末三碼",
+   "who": "店員",
+   "zh": "這個號碼沒有包裹耶。"
+  },
+  {
+   "id": "parcel-094",
+   "kind": "旁白",
+   "stage": "D_TAIL",
+   "stageName": "末三碼",
+   "who": "",
+   "zh": "（房東太太剛剛電話裡說房東先生的末三碼是……）"
+  },
+  {
+   "id": "parcel-095",
+   "kind": "台詞",
+   "stage": "D_NAME",
+   "stageName": "取件人",
+   "who": "店員",
+   "zh": "請問取件人的大名？"
+  },
+  {
+   "id": "parcel-096",
+   "kind": "錯誤說明",
+   "stage": "D_NAME",
+   "stageName": "取件人",
+   "who": "",
+   "zh": "房東先生的名字說錯了。"
+  },
+  {
+   "id": "parcel-097",
+   "kind": "台詞",
+   "stage": "D_NAME",
+   "stageName": "取件人",
+   "who": "店員",
+   "zh": "這個名字不對喔。"
+  },
+  {
+   "id": "parcel-098",
+   "kind": "旁白",
+   "stage": "D_NAME",
+   "stageName": "取件人",
+   "who": "",
+   "zh": "（房東太太在電話裡說的名字是……）"
+  },
+  {
+   "id": "parcel-099",
+   "kind": "台詞",
+   "stage": "D_CONFIRM",
+   "stageName": "確認取貨",
+   "who": "店員",
+   "zh": "這個已經付過款了，麻煩在螢幕上按「確認取貨」。"
+  },
+  {
+   "id": "parcel-100",
+   "kind": "選項",
+   "stage": "D_CONFIRM",
+   "stageName": "確認取貨",
+   "who": "我",
+   "zh": "按「確認取貨」"
+  },
+  {
+   "id": "parcel-101",
+   "kind": "選項",
+   "stage": "D_CONFIRM",
+   "stageName": "確認取貨",
+   "who": "我",
+   "zh": "按「取消」"
+  },
+  {
+   "id": "parcel-102",
+   "kind": "錯誤說明",
+   "stage": "D_CONFIRM",
+   "stageName": "確認取貨",
+   "who": "",
+   "zh": "按錯了，要按確認取貨。"
+  },
+  {
+   "id": "parcel-103",
+   "kind": "台詞",
+   "stage": "D_CONFIRM",
+   "stageName": "確認取貨",
+   "who": "店員",
+   "zh": "喔，按到取消了，再按一次確認喔。"
+  },
+  {
+   "id": "parcel-104",
+   "kind": "台詞",
+   "stage": "Y_ASK",
+   "stageName": "我的包裹",
+   "who": "店員",
+   "zh": "好了。還有其他需要嗎？"
+  },
+  {
+   "id": "parcel-105",
+   "kind": "選項",
+   "stage": "Y_ASK",
+   "stageName": "我的包裹",
+   "who": "我",
+   "zh": "還有我的包裹，末三碼是〔末三碼〕。"
+  },
+  {
+   "id": "parcel-106",
+   "kind": "選項",
+   "stage": "Y_ASK",
+   "stageName": "我的包裹",
+   "who": "我",
+   "zh": "我的包裹還沒到店，不用了。"
+  },
+  {
+   "id": "parcel-107",
+   "kind": "選項",
+   "stage": "Y_ASK",
+   "stageName": "我的包裹",
+   "who": "我",
+   "zh": "沒有了。"
+  },
+  {
+   "id": "parcel-108",
+   "kind": "錯誤說明",
+   "stage": "Y_ASK",
+   "stageName": "我的包裹",
+   "who": "",
+   "zh": "你的包裹已經到店了，簡訊上有寫。"
+  },
+  {
+   "id": "parcel-109",
+   "kind": "旁白",
+   "stage": "Y_ASK",
+   "stageName": "我的包裹",
+   "who": "",
+   "zh": "（等等，我的簡訊寫的是「已到店」……）"
+  },
+  {
+   "id": "parcel-110",
+   "kind": "綠卡說明",
+   "stage": "Y_ASK",
+   "stageName": "我的包裹",
+   "who": "",
+   "zh": "你看了簡訊，知道包裹還沒到。"
+  },
+  {
+   "id": "parcel-111",
+   "kind": "台詞",
+   "stage": "Y_NOTFOUND",
+   "stageName": "我的包裹",
+   "who": "店員",
+   "zh": "不好意思，這個號碼查不到包裹耶。"
+  },
+  {
+   "id": "parcel-112",
+   "kind": "選項",
+   "stage": "Y_NOTFOUND",
+   "stageName": "我的包裹",
+   "who": "我",
+   "zh": "可以再找一次嗎？"
+  },
+  {
+   "id": "parcel-113",
+   "kind": "選項",
+   "stage": "Y_NOTFOUND",
+   "stageName": "我的包裹",
+   "who": "我",
+   "zh": "喔，我看一下簡訊……還沒到店，不好意思！"
+  },
+  {
+   "id": "parcel-114",
+   "kind": "錯誤說明",
+   "stage": "Y_NOTFOUND",
+   "stageName": "我的包裹",
+   "who": "",
+   "zh": "簡訊寫「預計到店」，包裹還沒到。"
+  },
+  {
+   "id": "parcel-115",
+   "kind": "台詞",
+   "stage": "Y_NOTFOUND",
+   "stageName": "我的包裹",
+   "who": "店員",
+   "zh": "我又找了一次，真的沒有喔……"
+  },
+  {
+   "id": "parcel-116",
+   "kind": "旁白",
+   "stage": "Y_NOTFOUND",
+   "stageName": "我的包裹",
+   "who": "",
+   "zh": "（看一下簡訊上的日期？）"
+  },
+  {
+   "id": "parcel-117",
+   "kind": "綠卡說明",
+   "stage": "Y_NOTFOUND",
+   "stageName": "我的包裹",
+   "who": "",
+   "zh": "你看了簡訊，知道包裹還沒到。"
+  },
+  {
+   "id": "parcel-118",
+   "kind": "台詞",
+   "stage": "Y_NOTFOUND",
+   "stageName": "我的包裹",
+   "who": "店員",
+   "zh": "沒關係，到了會再傳簡訊給您。"
+  },
+  {
+   "id": "parcel-119",
+   "kind": "台詞",
+   "stage": "Y_NAME",
+   "stageName": "我的包裹",
+   "who": "店員",
+   "zh": "請問大名？"
+  },
+  {
+   "id": "parcel-120",
+   "kind": "錯誤說明",
+   "stage": "Y_NAME",
+   "stageName": "我的包裹",
+   "who": "",
+   "zh": "這是你自己的包裹，要說你的名字。"
+  },
+  {
+   "id": "parcel-121",
+   "kind": "台詞",
+   "stage": "Y_CONFIRM",
+   "stageName": "我的包裹",
+   "who": "店員",
+   "zh": "這個已經付過款了，麻煩在螢幕上按「確認取貨」。"
+  },
+  {
+   "id": "parcel-122",
+   "kind": "選項",
+   "stage": "Y_CONFIRM",
+   "stageName": "我的包裹",
+   "who": "我",
+   "zh": "按「確認取貨」"
+  },
+  {
+   "id": "parcel-123",
+   "kind": "選項",
+   "stage": "Y_CONFIRM",
+   "stageName": "我的包裹",
+   "who": "我",
+   "zh": "給他一百元"
+  },
+  {
+   "id": "parcel-124",
+   "kind": "錯誤說明",
+   "stage": "Y_CONFIRM",
+   "stageName": "我的包裹",
+   "who": "",
+   "zh": "已經付過款了，不用再付。"
+  },
+  {
+   "id": "parcel-125",
+   "kind": "台詞",
+   "stage": "Y_CONFIRM",
+   "stageName": "我的包裹",
+   "who": "店員",
+   "zh": "不用不用，已經付過了！"
+  },
+  {
+   "id": "parcel-126",
+   "kind": "台詞",
+   "stage": "CARD",
+   "stageName": "悠遊卡",
+   "who": "店員",
+   "zh": "還有其他需要嗎？"
+  },
+  {
+   "id": "parcel-127",
+   "kind": "選項",
+   "stage": "CARD",
+   "stageName": "悠遊卡",
+   "who": "我",
+   "zh": "我要幫悠遊卡加值。"
+  },
+  {
+   "id": "parcel-128",
+   "kind": "選項",
+   "stage": "CARD",
+   "stageName": "悠遊卡",
+   "who": "我",
+   "zh": "我要買一張新的悠遊卡。"
+  },
+  {
+   "id": "parcel-129",
+   "kind": "選項",
+   "stage": "CARD",
+   "stageName": "悠遊卡",
+   "who": "我",
+   "zh": "沒有了，謝謝。"
+  },
+  {
+   "id": "parcel-130",
+   "kind": "錯誤說明",
+   "stage": "CARD",
+   "stageName": "悠遊卡",
+   "who": "",
+   "zh": "房東太太還請你幫悠遊卡加值。"
+  },
+  {
+   "id": "parcel-131",
+   "kind": "旁白",
+   "stage": "CARD",
+   "stageName": "悠遊卡",
+   "who": "",
+   "zh": "（等等，房東太太還交代了一件事……）"
+  },
+  {
+   "id": "parcel-132",
+   "kind": "錯誤說明",
+   "stage": "CARD",
+   "stageName": "悠遊卡",
+   "who": "",
+   "zh": "不用買新的，是幫房東太太的卡加值。"
+  },
+  {
+   "id": "parcel-133",
+   "kind": "台詞",
+   "stage": "CARD",
+   "stageName": "悠遊卡",
+   "who": "店員",
+   "zh": "新卡一張一百元喔。"
+  },
+  {
+   "id": "parcel-134",
+   "kind": "台詞",
+   "stage": "CARD",
+   "stageName": "悠遊卡",
+   "who": "我",
+   "zh": "啊不是，我是要加值！"
+  },
+  {
+   "id": "parcel-135",
+   "kind": "台詞",
+   "stage": "CARD_AMT",
+   "stageName": "悠遊卡加值",
+   "who": "店員",
+   "zh": "要加多少？"
+  },
+  {
+   "id": "parcel-136",
+   "kind": "選項",
+   "stage": "CARD_AMT",
+   "stageName": "悠遊卡加值",
+   "who": "我",
+   "zh": "一百元"
+  },
+  {
+   "id": "parcel-137",
+   "kind": "選項",
+   "stage": "CARD_AMT",
+   "stageName": "悠遊卡加值",
+   "who": "我",
+   "zh": "三百元"
+  },
+  {
+   "id": "parcel-138",
+   "kind": "選項",
+   "stage": "CARD_AMT",
+   "stageName": "悠遊卡加值",
+   "who": "我",
+   "zh": "五百元"
+  },
+  {
+   "id": "parcel-139",
+   "kind": "選項",
+   "stage": "CARD_AMT",
+   "stageName": "悠遊卡加值",
+   "who": "我",
+   "zh": "一千元"
+  },
+  {
+   "id": "parcel-140",
+   "kind": "錯誤說明",
+   "stage": "CARD_AMT",
+   "stageName": "悠遊卡加值",
+   "who": "",
+   "zh": "房東太太說加值〔金額〕元。"
+  },
+  {
+   "id": "parcel-141",
+   "kind": "旁白",
+   "stage": "CARD_AMT",
+   "stageName": "悠遊卡加值",
+   "who": "",
+   "zh": "（房東太太說加多少？看一下LINE……）"
+  },
+  {
+   "id": "parcel-142",
+   "kind": "台詞",
+   "stage": "CARD_TAP",
+   "stageName": "悠遊卡加值",
+   "who": "店員",
+   "zh": "好，〔金額〕元，麻煩把卡放在感應區上面。"
+  },
+  {
+   "id": "parcel-143",
+   "kind": "選項",
+   "stage": "CARD_TAP",
+   "stageName": "悠遊卡加值",
+   "who": "我",
+   "zh": "把卡放在感應區上"
+  },
+  {
+   "id": "parcel-144",
+   "kind": "選項",
+   "stage": "CARD_TAP",
+   "stageName": "悠遊卡加值",
+   "who": "我",
+   "zh": "把卡交給店員"
+  },
+  {
+   "id": "parcel-145",
+   "kind": "選項",
+   "stage": "CARD_TAP",
+   "stageName": "悠遊卡加值",
+   "who": "我",
+   "zh": "把卡插進收銀機"
+  },
+  {
+   "id": "parcel-146",
+   "kind": "錯誤說明",
+   "stage": "CARD_TAP",
+   "stageName": "悠遊卡加值",
+   "who": "",
+   "zh": "要把卡放在感應區上。"
+  },
+  {
+   "id": "parcel-147",
+   "kind": "台詞",
+   "stage": "CARD_TAP",
+   "stageName": "悠遊卡加值",
+   "who": "店員",
+   "zh": "放在這邊的感應區上面就好喔。"
+  },
+  {
+   "id": "parcel-148",
+   "kind": "旁白",
+   "stage": "CARD_TAP",
+   "stageName": "悠遊卡加值",
+   "who": "",
+   "zh": "（嗶！）"
+  },
+  {
+   "id": "parcel-149",
+   "kind": "台詞",
+   "stage": "CARD_TAP",
+   "stageName": "悠遊卡加值",
+   "who": "店員",
+   "zh": "加值好了。"
+  },
+  {
+   "id": "parcel-150",
+   "kind": "台詞",
+   "stage": "BAG",
+   "stageName": "袋子",
+   "who": "店員",
+   "zh": "東西有點多，需要袋子嗎？一個兩塊。"
+  },
+  {
+   "id": "parcel-151",
+   "kind": "選項",
+   "stage": "BAG",
+   "stageName": "袋子",
+   "who": "我",
+   "zh": "要，買一個袋子。"
+  },
+  {
+   "id": "parcel-152",
+   "kind": "選項",
+   "stage": "BAG",
+   "stageName": "袋子",
+   "who": "我",
+   "zh": "不用，我自己拿就好，謝謝。"
+  },
+  {
+   "id": "parcel-153",
+   "kind": "錯誤說明",
+   "stage": "BAG",
+   "stageName": "袋子",
+   "who": "",
+   "zh": "房東太太說不要再買袋子。"
+  },
+  {
+   "id": "parcel-154",
+   "kind": "綠卡說明",
+   "stage": "BAG",
+   "stageName": "袋子",
+   "who": "",
+   "zh": "你記得房東太太說不要再買袋子。"
+  },
+  {
+   "id": "parcel-155",
+   "kind": "結尾包裹說法",
+   "stage": "END",
+   "stageName": "回家",
+   "who": "",
+   "zh": "您的包裹"
+  },
+  {
+   "id": "parcel-156",
+   "kind": "結尾包裹說法",
+   "stage": "END",
+   "stageName": "回家",
+   "who": "",
+   "zh": "房東先生的包裹"
+  },
+  {
+   "id": "parcel-157",
+   "kind": "結尾包裹說法",
+   "stage": "END",
+   "stageName": "回家",
+   "who": "",
+   "zh": "我自己的包裹"
+  },
+  {
+   "id": "parcel-158",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "回家",
+   "who": "",
+   "zh": "（晚上，房東太太下班回來了。）"
+  },
+  {
+   "id": "parcel-159",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "回家",
+   "who": "我",
+   "zh": "房東太太，〔拿回來的包裹〕都拿回來了，悠遊卡也加值了〔金額〕元。"
+  },
+  {
+   "id": "parcel-160",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "回家",
+   "who": "我",
+   "zh": "我的包裹還沒到，簡訊說〔日期〕才會到。"
+  },
+  {
+   "id": "parcel-161",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "回家",
+   "who": "我",
+   "zh": "這是剩下的〔金額〕。"
+  },
+  {
+   "id": "parcel-162",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "回家",
+   "who": "房東太太",
+   "zh": "哇，〔名字〕，你真厲害！以後包裹都靠你了！"
+  },
+  {
+   "id": "parcel-163",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "回家",
+   "who": "房東太太",
+   "zh": "謝謝你！有些小地方要再注意，慢慢就習慣了。"
+  }
+ ]
+}

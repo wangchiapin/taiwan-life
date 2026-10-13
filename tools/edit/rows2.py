@@ -10,6 +10,13 @@ CONF={
     ('  /* ── 每局隨機任務','  /* ── 計時','setup'),('  getConfig() {','  /* ── 換關卡','cfg'),('const Hints = {','\n};\n','任務提示')],
     speakers='陳姐|我|李先生|王伯伯|張太太|小朋友|林小姐', extra={'START':'開場：陳姐交代','END':'陳姐回來','PHONE':'電話訂餐'},
     guess=[('=n','金額'),('=d','金額'),('sales','金額'),('dine','內用/外帶'),('u.say','老樣子內容'),('usual.say','老樣子內容'),('usual','老樣子內容'),('m1','餐點'),('momMain','餐點'),('kidNew','餐點'),('d1','飲料'),('momDrink','飲料'),('kidDrink','飲料'),('add4','飲料'),('drink','飲料'),('tail','電話末三碼'),('total','金額'),('bill','金額'),('change','金額'),('who','客人'),('w[','客人'),('food','餐點')]),
+'parcel': dict(title='超商領包裹', regions=[('const NEXT_LABEL','const Game = {','過場按鈕'),
+    ('const Hints = {','\n};\n','任務提示'),
+    ('  setPlace(mode) {','  /* ── 圖片','位置名稱'),
+    ('  lineMsgs() {','  /* ── 狀態設定','phone'),
+    ('  getConfig() {','  /* ── 換關卡','cfg')],
+    speakers='店員|我|房東太太', extra={'START':'開場：看手機','END':'回家'},
+    guess=[('zhItems','拿回來的包裹'),('otherStore','另一家門市'),('store','門市'),('momName','房東太太的名字'),('momFake','相似的名字'),('dadName','房東先生的名字'),('dadFake','相似的名字'),('Tail','末三碼'),('No','包裹編號'),('cod','金額'),('cardTop','金額'),('money(','金額'),('_change','金額'),('md(','日期'),('Sender','寄件人'),('=d','日期'),('=x','末三碼')]),
 }
 def guess(e):
     e=e.strip()
@@ -45,9 +52,18 @@ for a_,b_,dk in C['regions']:
             sm=re.findall(r'\n      ([A-Z][A-Z_0-9]*): \{', s[gi:stt]); state=sm[-1] if sm else ''
         elif dk=='setup':
             wm=re.findall(r"who: '(.+?)'", s[a:stt]); state='客人：'+wm[-1] if wm else '王伯伯的老樣子'
+        elif dk=='phone':
+            fm=re.findall(r'\n  (\w+)\(.*?\) \{', '\n'+s[a:stt]); state={'lineMsgs':'房東太太的LINE','momSmsLines':'簡訊（房東太太轉傳）','yourSmsLines':'簡訊（你的手機）','phoneHTML':'手機畫面','bubble':'手機畫面','boxHTML':'包裹標籤','callLines':'房東太太來電'}.get(fm[-1] if fm else '', '手機')
         else: state={'過場按鈕':'過場按鈕','位置名稱':'位置列','任務提示':'提示','台詞':'CONFIRM'}[dk]
-        kind=classify(s,stt)
+        kind=classify(s,stt); line_=s[s.rfind('\n',0,stt)+1:s.find('\n',stt)]
         if re.search(r'addMistake\(\s*$',before): kind='錯誤說明'
+        if g=='parcel':
+            if re.search(r'zh: *$',before): kind='簡訊'
+            elif re.search(r"bubble\(\s*'[a-z-]+',\s*$",before): kind='手機標題'
+            elif dk=='phone' and state=='房東太太的LINE' and kind=='line': kind='LINE訊息'
+            elif 'tailOpts' in line_ and kind=='其他': kind='選項'
+            elif 'zhItems' in line_ and 'const zhItems' in line_ and kind=='其他': kind='結尾包裹說法'
+            elif 'zhItems.push' in line_ and kind=='其他': kind='結尾包裹說法'
         if dk=='過場按鈕': kind='過場按鈕'
         if dk=='位置名稱': kind='位置名稱'
         if dk=='任務提示':
@@ -59,6 +75,7 @@ for a_,b_,dk in C['regions']:
         zh=readable2(body); who=''
         if kind=='錯誤說明' and re.search(r'[A-Za-z]{3}',zh):
             zh=re.split(r'(?<=[。！？」])\s*[«"A-Z¡¿]',zh)[0]
+        if kind=='LINE訊息': who='房東太太'
         if kind in ('line','台詞'):
             m=SPK.match(zh)
             if m: who=m.group(1).strip('（）'); zh=zh[len(m.group(0)):]; kind='台詞'
