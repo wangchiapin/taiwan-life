@@ -30,7 +30,7 @@ ORACLE = """() => {
     M_CHANGE: Game._changeGiven === Game._change ? '好，謝謝。' : '不好意思，好像少找了。',
     CALL: '好，我再問問看。', D_TAIL: '末三碼是' + t.dadTail + '。', D_NAME: t.dadName + '。', D_CONFIRM: '按「確認取貨」',
     Y_ASK: t.yourArrived ? '還有我的包裹，末三碼是' + t.yourTail + '。' : '我的包裹還沒到店，不用了。',
-    Y_NAME: N + '。', Y_CONFIRM: '按「確認取貨」', CARD: '我要幫悠遊卡加值。', CARD_AMT: amt[t.cardTop],
+    Y_NAME: N + '。', Y_CONFIRM: '按「確認取貨」', CARD: '我要加值悠遊卡。', CARD_AMT: amt[t.cardTop],
     CARD_TAP: '把卡放在感應區上', BAG: '不用，我自己拿就好，謝謝。'
   };
   return m[s] ?? null;
