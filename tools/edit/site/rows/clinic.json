@@ -1,0 +1,1046 @@
+{
+ "game": "clinic",
+ "title": "診所看醫生",
+ "rows": [
+  {
+   "id": "clinic-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "診所"
+  },
+  {
+   "id": "clinic-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "感冒看醫生"
+  },
+  {
+   "id": "clinic-003",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "你已經不舒服好幾天了，同事 Ami 要你去看醫生。你一個人去診所：掛號、等叫號、跟醫生說明症狀、付錢、領藥，最後還要告訴 Ami 醫生怎麼說。"
+  },
+  {
+   "id": "clinic-004",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "這個遊戲是中文練習，不是醫療建議。"
+  },
+  {
+   "id": "clinic-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走進診所"
+  },
+  {
+   "id": "clinic-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "填好初診單"
+  },
+  {
+   "id": "clinic-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "拿號碼牌"
+  },
+  {
+   "id": "clinic-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "坐下來等"
+  },
+  {
+   "id": "clinic-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走進診間"
+  },
+  {
+   "id": "clinic-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "聽醫生說"
+  },
+  {
+   "id": "clinic-011",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "去櫃台付錢"
+  },
+  {
+   "id": "clinic-012",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "去領藥"
+  },
+  {
+   "id": "clinic-013",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "回公司"
+  },
+  {
+   "id": "clinic-014",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "看手機"
+  },
+  {
+   "id": "clinic-015",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "回覆Ami"
+  },
+  {
+   "id": "clinic-016",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "診所櫃台"
+  },
+  {
+   "id": "clinic-017",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "候診區"
+  },
+  {
+   "id": "clinic-018",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "診間"
+  },
+  {
+   "id": "clinic-019",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "領藥"
+  },
+  {
+   "id": "clinic-020",
+   "kind": "選項",
+   "stage": "說症狀的句子",
+   "stageName": "說症狀的句子",
+   "who": "我",
+   "zh": "我〔症狀1〕、〔症狀2〕，已經〔天數〕天了。"
+  },
+  {
+   "id": "clinic-021",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "〔名字〕，你看起來不太舒服，去看醫生吧！我今天要開會，不能陪你去。"
+  },
+  {
+   "id": "clinic-022",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "公司旁邊有一家診所，感冒掛家醫科就可以了。"
+  },
+  {
+   "id": "clinic-023",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "記得帶健保卡，第一次去要填初診單。"
+  },
+  {
+   "id": "clinic-024",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "看醫生的時候，要說清楚哪裡不舒服、幾天了。有對藥物過敏，也要跟醫生說喔。"
+  },
+  {
+   "id": "clinic-025",
+   "kind": "台詞",
+   "stage": "醫生交代的話",
+   "stageName": "醫生交代的話",
+   "who": "醫生",
+   "zh": "我看一下喉嚨……有一點紅，是感冒喔。"
+  },
+  {
+   "id": "clinic-026",
+   "kind": "台詞",
+   "stage": "醫生交代的話",
+   "stageName": "醫生交代的話",
+   "who": "醫生",
+   "zh": "你有一點發燒，要多休息。"
+  },
+  {
+   "id": "clinic-027",
+   "kind": "台詞",
+   "stage": "醫生交代的話",
+   "stageName": "醫生交代的話",
+   "who": "醫生",
+   "zh": "你對止痛藥過敏，我會開別的藥給你。"
+  },
+  {
+   "id": "clinic-028",
+   "kind": "台詞",
+   "stage": "醫生交代的話",
+   "stageName": "醫生交代的話",
+   "who": "醫生",
+   "zh": "藥吃〔吃藥天數〕天，要多喝水、多休息。如果〔吃藥天數〕天後還沒好，再回來看。"
+  },
+  {
+   "id": "clinic-029",
+   "kind": "台詞",
+   "stage": "藥師交代的話",
+   "stageName": "藥師交代的話",
+   "who": "藥師",
+   "zh": "這是你的藥。感冒藥一天三次，三餐飯後吃；止咳藥睡前吃。"
+  },
+  {
+   "id": "clinic-030",
+   "kind": "台詞",
+   "stage": "藥師交代的話",
+   "stageName": "藥師交代的話",
+   "who": "藥師",
+   "zh": "藥一共〔吃藥天數〕天，吃完再看看。"
+  },
+  {
+   "id": "clinic-031",
+   "kind": "清單文字",
+   "stage": "我的身體狀況卡",
+   "stageName": "我的身體狀況卡",
+   "who": "",
+   "zh": "症狀：〔症狀1〕、〔症狀2〕"
+  },
+  {
+   "id": "clinic-032",
+   "kind": "清單文字",
+   "stage": "我的身體狀況卡",
+   "stageName": "我的身體狀況卡",
+   "who": "",
+   "zh": "已經〔不舒服的天數〕天了"
+  },
+  {
+   "id": "clinic-033",
+   "kind": "清單文字",
+   "stage": "我的身體狀況卡",
+   "stageName": "我的身體狀況卡",
+   "who": "",
+   "zh": "有一點發燒（三十七度八）"
+  },
+  {
+   "id": "clinic-034",
+   "kind": "清單文字",
+   "stage": "我的身體狀況卡",
+   "stageName": "我的身體狀況卡",
+   "who": "",
+   "zh": "沒有發燒（三十六度五）"
+  },
+  {
+   "id": "clinic-035",
+   "kind": "清單文字",
+   "stage": "我的身體狀況卡",
+   "stageName": "我的身體狀況卡",
+   "who": "",
+   "zh": "對止痛藥過敏"
+  },
+  {
+   "id": "clinic-036",
+   "kind": "清單文字",
+   "stage": "我的身體狀況卡",
+   "stageName": "我的身體狀況卡",
+   "who": "",
+   "zh": "沒有藥物過敏"
+  },
+  {
+   "id": "clinic-037",
+   "kind": "清單文字",
+   "stage": "我的身體狀況卡",
+   "stageName": "我的身體狀況卡",
+   "who": "",
+   "zh": "有健保卡，是第一次來這家診所"
+  },
+  {
+   "id": "clinic-038",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "我的身體狀況"
+  },
+  {
+   "id": "clinic-039",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "Ami 的 LINE 訊息"
+  },
+  {
+   "id": "clinic-040",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "醫生說的話"
+  },
+  {
+   "id": "clinic-041",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "藥師說的話"
+  },
+  {
+   "id": "clinic-042",
+   "kind": "旁白",
+   "stage": "START",
+   "stageName": "開場：Ami 的 LINE",
+   "who": "",
+   "zh": "（你已經不舒服好幾天了。這時候，手機響了，是Ami傳來的LINE。）"
+  },
+  {
+   "id": "clinic-043",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：Ami 的 LINE",
+   "who": "我",
+   "zh": "好，我現在就去。"
+  },
+  {
+   "id": "clinic-044",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "開場：Ami 的 LINE",
+   "who": "我",
+   "zh": "出發去診所"
+  },
+  {
+   "id": "clinic-045",
+   "kind": "旁白",
+   "stage": "R_CARD",
+   "stageName": "掛號：健保卡",
+   "who": "",
+   "zh": "（你走進診所，櫃台有一位護理師。）"
+  },
+  {
+   "id": "clinic-046",
+   "kind": "台詞",
+   "stage": "R_CARD",
+   "stageName": "掛號：健保卡",
+   "who": "櫃台",
+   "zh": "你好，請問有健保卡嗎？"
+  },
+  {
+   "id": "clinic-047",
+   "kind": "選項",
+   "stage": "R_CARD",
+   "stageName": "掛號：健保卡",
+   "who": "我",
+   "zh": "有，這是我的健保卡。"
+  },
+  {
+   "id": "clinic-048",
+   "kind": "選項",
+   "stage": "R_CARD",
+   "stageName": "掛號：健保卡",
+   "who": "我",
+   "zh": "有，這是我的〔拿錯的卡〕。"
+  },
+  {
+   "id": "clinic-049",
+   "kind": "錯誤說明",
+   "stage": "R_CARD",
+   "stageName": "掛號：健保卡",
+   "who": "",
+   "zh": "掛號要給健保卡，不是〔拿錯的卡〕。"
+  },
+  {
+   "id": "clinic-050",
+   "kind": "台詞",
+   "stage": "R_CARD",
+   "stageName": "掛號：健保卡",
+   "who": "櫃台",
+   "zh": "這是〔拿錯的卡〕喔，我們要的是健保卡。"
+  },
+  {
+   "id": "clinic-051",
+   "kind": "綠卡說明",
+   "stage": "R_CARD",
+   "stageName": "掛號：健保卡",
+   "who": "",
+   "zh": "掛號要先給櫃台看健保卡。"
+  },
+  {
+   "id": "clinic-052",
+   "kind": "台詞",
+   "stage": "R_FIRST",
+   "stageName": "掛號：第一次來",
+   "who": "櫃台",
+   "zh": "好。請問是第一次來嗎？"
+  },
+  {
+   "id": "clinic-053",
+   "kind": "選項",
+   "stage": "R_FIRST",
+   "stageName": "掛號：第一次來",
+   "who": "我",
+   "zh": "對，我第一次來。"
+  },
+  {
+   "id": "clinic-054",
+   "kind": "選項",
+   "stage": "R_FIRST",
+   "stageName": "掛號：第一次來",
+   "who": "我",
+   "zh": "不是，我以前來過。"
+  },
+  {
+   "id": "clinic-055",
+   "kind": "錯誤說明",
+   "stage": "R_FIRST",
+   "stageName": "掛號：第一次來",
+   "who": "",
+   "zh": "Ami說這是你第一次來這家診所。"
+  },
+  {
+   "id": "clinic-056",
+   "kind": "台詞",
+   "stage": "R_FIRST",
+   "stageName": "掛號：第一次來",
+   "who": "櫃台",
+   "zh": "咦？電腦裡沒有你的資料耶……"
+  },
+  {
+   "id": "clinic-057",
+   "kind": "台詞",
+   "stage": "R_FIRST",
+   "stageName": "掛號：第一次來",
+   "who": "櫃台",
+   "zh": "第一次來的話，要麻煩你填一下初診單。"
+  },
+  {
+   "id": "clinic-058",
+   "kind": "旁白",
+   "stage": "R_FIRST",
+   "stageName": "掛號：第一次來",
+   "who": "",
+   "zh": "（你在初診單上寫了名字、生日和電話。）"
+  },
+  {
+   "id": "clinic-059",
+   "kind": "台詞",
+   "stage": "R_DEPT",
+   "stageName": "掛號：掛哪一科",
+   "who": "櫃台",
+   "zh": "要掛哪一科？我們有家醫科、小兒科和皮膚科。"
+  },
+  {
+   "id": "clinic-060",
+   "kind": "選項",
+   "stage": "R_DEPT",
+   "stageName": "掛號：掛哪一科",
+   "who": "我",
+   "zh": "家醫科"
+  },
+  {
+   "id": "clinic-061",
+   "kind": "選項",
+   "stage": "R_DEPT",
+   "stageName": "掛號：掛哪一科",
+   "who": "我",
+   "zh": "小兒科"
+  },
+  {
+   "id": "clinic-062",
+   "kind": "選項",
+   "stage": "R_DEPT",
+   "stageName": "掛號：掛哪一科",
+   "who": "我",
+   "zh": "皮膚科"
+  },
+  {
+   "id": "clinic-063",
+   "kind": "錯誤說明",
+   "stage": "R_DEPT",
+   "stageName": "掛號：掛哪一科",
+   "who": "",
+   "zh": "Ami說感冒掛家醫科。"
+  },
+  {
+   "id": "clinic-064",
+   "kind": "旁白",
+   "stage": "R_DEPT",
+   "stageName": "掛號：掛哪一科",
+   "who": "",
+   "zh": "（Ami說感冒要掛哪一科？）"
+  },
+  {
+   "id": "clinic-065",
+   "kind": "綠卡說明",
+   "stage": "R_DEPT",
+   "stageName": "掛號：掛哪一科",
+   "who": "",
+   "zh": "你記得感冒要掛家醫科。"
+  },
+  {
+   "id": "clinic-066",
+   "kind": "台詞",
+   "stage": "R_TICKET",
+   "stageName": "掛號：號碼牌",
+   "who": "櫃台",
+   "zh": "好，這是你的號碼牌，〔你的號碼〕號。前面還有三位，請先坐著等一下。"
+  },
+  {
+   "id": "clinic-067",
+   "kind": "選項",
+   "stage": "R_TICKET",
+   "stageName": "掛號：號碼牌",
+   "who": "我",
+   "zh": "好，謝謝。"
+  },
+  {
+   "id": "clinic-068",
+   "kind": "旁白",
+   "stage": "W_WAIT",
+   "stageName": "候診：等叫號",
+   "who": "",
+   "zh": "（你坐在候診區，看著牆上的叫號螢幕。護理師會一個一個叫號碼。）"
+  },
+  {
+   "id": "clinic-069",
+   "kind": "選項",
+   "stage": "W_WAIT",
+   "stageName": "候診：等叫號",
+   "who": "我",
+   "zh": "繼續等候"
+  },
+  {
+   "id": "clinic-070",
+   "kind": "選項",
+   "stage": "W_WAIT",
+   "stageName": "候診：等叫號",
+   "who": "我",
+   "zh": "進診間"
+  },
+  {
+   "id": "clinic-071",
+   "kind": "錯誤說明",
+   "stage": "W_WAIT",
+   "stageName": "候診：等叫號",
+   "who": "",
+   "zh": "還沒輪到你。現在是〔目前看診號碼〕號，你是〔你的號碼〕號。"
+  },
+  {
+   "id": "clinic-072",
+   "kind": "台詞",
+   "stage": "W_WAIT",
+   "stageName": "候診：等叫號",
+   "who": "櫃台",
+   "zh": "〔目前看診號碼〕號還在看診，請再等一下。"
+  },
+  {
+   "id": "clinic-073",
+   "kind": "綠卡說明",
+   "stage": "W_WAIT",
+   "stageName": "候診：等叫號",
+   "who": "",
+   "zh": "你聽到叫號，輪到自己才進去。"
+  },
+  {
+   "id": "clinic-074",
+   "kind": "錯誤說明",
+   "stage": "W_WAIT",
+   "stageName": "候診：等叫號",
+   "who": "",
+   "zh": "輪到你了，要馬上進診間，不要錯過。"
+  },
+  {
+   "id": "clinic-075",
+   "kind": "台詞",
+   "stage": "W_WAIT",
+   "stageName": "候診：等叫號",
+   "who": "櫃台",
+   "zh": "〔你的號碼〕號，〔你的號碼〕號，請進診間！"
+  },
+  {
+   "id": "clinic-076",
+   "kind": "台詞",
+   "stage": "W_WAIT",
+   "stageName": "候診：等叫號",
+   "who": "櫃台",
+   "zh": "〔目前看診號碼〕號的病人，請進診間。"
+  },
+  {
+   "id": "clinic-077",
+   "kind": "旁白",
+   "stage": "W_WAIT",
+   "stageName": "候診：等叫號",
+   "who": "",
+   "zh": "（啊，是你的號碼！）"
+  },
+  {
+   "id": "clinic-078",
+   "kind": "旁白",
+   "stage": "D_SYMPTOM",
+   "stageName": "診間：說症狀",
+   "who": "",
+   "zh": "（你走進診間，醫生坐在桌子後面。）"
+  },
+  {
+   "id": "clinic-079",
+   "kind": "台詞",
+   "stage": "D_SYMPTOM",
+   "stageName": "診間：說症狀",
+   "who": "醫生",
+   "zh": "請坐。你哪裡不舒服？"
+  },
+  {
+   "id": "clinic-080",
+   "kind": "選項",
+   "stage": "D_SYMPTOM",
+   "stageName": "診間：說症狀",
+   "who": "我",
+   "zh": "我〔症狀1〕，已經〔不舒服的天數〕天了。"
+  },
+  {
+   "id": "clinic-081",
+   "kind": "綠卡說明",
+   "stage": "D_SYMPTOM",
+   "stageName": "診間：說症狀",
+   "who": "",
+   "zh": "你把症狀和天數都說清楚了。"
+  },
+  {
+   "id": "clinic-082",
+   "kind": "錯誤說明",
+   "stage": "D_SYMPTOM",
+   "stageName": "診間：說症狀",
+   "who": "",
+   "zh": "你的狀況是：〔症狀1〕、〔症狀2〕，已經〔不舒服的天數〕天了。"
+  },
+  {
+   "id": "clinic-083",
+   "kind": "旁白",
+   "stage": "D_SYMPTOM",
+   "stageName": "診間：說症狀",
+   "who": "",
+   "zh": "（看一下我的身體狀況卡。）"
+  },
+  {
+   "id": "clinic-084",
+   "kind": "台詞",
+   "stage": "D_FEVER",
+   "stageName": "診間：發燒",
+   "who": "醫生",
+   "zh": "嗯。有沒有發燒？"
+  },
+  {
+   "id": "clinic-085",
+   "kind": "選項",
+   "stage": "D_FEVER",
+   "stageName": "診間：發燒",
+   "who": "我",
+   "zh": "有，我有一點發燒。"
+  },
+  {
+   "id": "clinic-086",
+   "kind": "選項",
+   "stage": "D_FEVER",
+   "stageName": "診間：發燒",
+   "who": "我",
+   "zh": "沒有，我沒有發燒。"
+  },
+  {
+   "id": "clinic-087",
+   "kind": "錯誤說明",
+   "stage": "D_FEVER",
+   "stageName": "診間：發燒",
+   "who": "",
+   "zh": "你有一點發燒（三十七度八）。"
+  },
+  {
+   "id": "clinic-088",
+   "kind": "錯誤說明",
+   "stage": "D_FEVER",
+   "stageName": "診間：發燒",
+   "who": "",
+   "zh": "你沒有發燒（三十六度五）。"
+  },
+  {
+   "id": "clinic-089",
+   "kind": "旁白",
+   "stage": "D_FEVER",
+   "stageName": "診間：發燒",
+   "who": "",
+   "zh": "（看一下我的身體狀況卡。）"
+  },
+  {
+   "id": "clinic-090",
+   "kind": "台詞",
+   "stage": "D_ALLERGY",
+   "stageName": "診間：過敏",
+   "who": "醫生",
+   "zh": "有沒有對什麼藥物過敏？"
+  },
+  {
+   "id": "clinic-091",
+   "kind": "選項",
+   "stage": "D_ALLERGY",
+   "stageName": "診間：過敏",
+   "who": "我",
+   "zh": "沒有，沒有過敏。"
+  },
+  {
+   "id": "clinic-092",
+   "kind": "選項",
+   "stage": "D_ALLERGY",
+   "stageName": "診間：過敏",
+   "who": "我",
+   "zh": "有，我對止痛藥過敏。"
+  },
+  {
+   "id": "clinic-093",
+   "kind": "錯誤說明",
+   "stage": "D_ALLERGY",
+   "stageName": "診間：過敏",
+   "who": "",
+   "zh": "你對止痛藥過敏，一定要告訴醫生。"
+  },
+  {
+   "id": "clinic-094",
+   "kind": "錯誤說明",
+   "stage": "D_ALLERGY",
+   "stageName": "診間：過敏",
+   "who": "",
+   "zh": "你沒有藥物過敏。"
+  },
+  {
+   "id": "clinic-095",
+   "kind": "旁白",
+   "stage": "D_ALLERGY",
+   "stageName": "診間：過敏",
+   "who": "",
+   "zh": "（看一下我的身體狀況卡。）"
+  },
+  {
+   "id": "clinic-096",
+   "kind": "綠卡說明",
+   "stage": "D_ALLERGY",
+   "stageName": "診間：過敏",
+   "who": "",
+   "zh": "有藥物過敏，一定要跟醫生說。"
+  },
+  {
+   "id": "clinic-097",
+   "kind": "選項",
+   "stage": "D_ADVICE",
+   "stageName": "診間：醫生交代",
+   "who": "我",
+   "zh": "好，謝謝醫生。"
+  },
+  {
+   "id": "clinic-098",
+   "kind": "旁白",
+   "stage": "D_ADVICE",
+   "stageName": "診間：醫生交代",
+   "who": "",
+   "zh": "（你拿著單子，回到櫃台。）"
+  },
+  {
+   "id": "clinic-099",
+   "kind": "台詞",
+   "stage": "P_PAY",
+   "stageName": "批價：付錢",
+   "who": "櫃台",
+   "zh": "好，掛號費和部分負擔，一共〔金額〕元。"
+  },
+  {
+   "id": "clinic-100",
+   "kind": "選項",
+   "stage": "P_PAY",
+   "stageName": "批價：付錢",
+   "who": "我",
+   "zh": "給100元"
+  },
+  {
+   "id": "clinic-101",
+   "kind": "選項",
+   "stage": "P_PAY",
+   "stageName": "批價：付錢",
+   "who": "我",
+   "zh": "給200元"
+  },
+  {
+   "id": "clinic-102",
+   "kind": "選項",
+   "stage": "P_PAY",
+   "stageName": "批價：付錢",
+   "who": "我",
+   "zh": "給500元"
+  },
+  {
+   "id": "clinic-103",
+   "kind": "錯誤說明",
+   "stage": "P_PAY",
+   "stageName": "批價：付錢",
+   "who": "",
+   "zh": "一共〔金額〕元，〔給的錢〕元不夠。"
+  },
+  {
+   "id": "clinic-104",
+   "kind": "台詞",
+   "stage": "P_PAY",
+   "stageName": "批價：付錢",
+   "who": "櫃台",
+   "zh": "不好意思，〔給的錢〕元不夠喔。"
+  },
+  {
+   "id": "clinic-105",
+   "kind": "台詞",
+   "stage": "P_PAY",
+   "stageName": "批價：付錢",
+   "who": "櫃台",
+   "zh": "剛剛好，謝謝！請到旁邊領藥。"
+  },
+  {
+   "id": "clinic-106",
+   "kind": "台詞",
+   "stage": "P_PAY",
+   "stageName": "批價：付錢",
+   "who": "櫃台",
+   "zh": "收您〔給的錢〕元，找您〔找的錢〕元。請到旁邊領藥。"
+  },
+  {
+   "id": "clinic-107",
+   "kind": "選項",
+   "stage": "M_MED",
+   "stageName": "領藥",
+   "who": "我",
+   "zh": "好，我知道了，謝謝。"
+  },
+  {
+   "id": "clinic-108",
+   "kind": "旁白",
+   "stage": "M_NOW",
+   "stageName": "吃藥",
+   "who": "",
+   "zh": "（你回到公司，剛吃完午餐。）"
+  },
+  {
+   "id": "clinic-109",
+   "kind": "旁白",
+   "stage": "M_NOW",
+   "stageName": "吃藥",
+   "who": "",
+   "zh": "（晚上，你洗好澡，準備睡覺了。）"
+  },
+  {
+   "id": "clinic-110",
+   "kind": "台詞",
+   "stage": "M_NOW",
+   "stageName": "吃藥",
+   "who": "我",
+   "zh": "現在要吃哪一包藥？"
+  },
+  {
+   "id": "clinic-111",
+   "kind": "選項",
+   "stage": "M_NOW",
+   "stageName": "吃藥",
+   "who": "我",
+   "zh": "感冒藥"
+  },
+  {
+   "id": "clinic-112",
+   "kind": "選項",
+   "stage": "M_NOW",
+   "stageName": "吃藥",
+   "who": "我",
+   "zh": "止咳藥"
+  },
+  {
+   "id": "clinic-113",
+   "kind": "選項",
+   "stage": "M_NOW",
+   "stageName": "吃藥",
+   "who": "我",
+   "zh": "兩包都吃"
+  },
+  {
+   "id": "clinic-114",
+   "kind": "選項",
+   "stage": "M_NOW",
+   "stageName": "吃藥",
+   "who": "我",
+   "zh": "都不用吃"
+  },
+  {
+   "id": "clinic-115",
+   "kind": "錯誤說明",
+   "stage": "M_NOW",
+   "stageName": "吃藥",
+   "who": "",
+   "zh": "感冒藥一天三次，三餐飯後吃；剛吃完午餐，要吃感冒藥。"
+  },
+  {
+   "id": "clinic-116",
+   "kind": "錯誤說明",
+   "stage": "M_NOW",
+   "stageName": "吃藥",
+   "who": "",
+   "zh": "止咳藥睡前吃；現在要睡覺了，要吃止咳藥。"
+  },
+  {
+   "id": "clinic-117",
+   "kind": "旁白",
+   "stage": "M_NOW",
+   "stageName": "吃藥",
+   "who": "",
+   "zh": "（藥師剛剛怎麼說？看一下藥袋。）"
+  },
+  {
+   "id": "clinic-118",
+   "kind": "綠卡說明",
+   "stage": "M_NOW",
+   "stageName": "吃藥",
+   "who": "",
+   "zh": "你記得藥什麼時候吃。"
+  },
+  {
+   "id": "clinic-119",
+   "kind": "旁白",
+   "stage": "M_NOW",
+   "stageName": "吃藥",
+   "who": "",
+   "zh": "（吃完藥，你坐在位子上休息。過一會兒，Ami傳來訊息。）"
+  },
+  {
+   "id": "clinic-120",
+   "kind": "台詞",
+   "stage": "E_ASK",
+   "stageName": "回報 Ami",
+   "who": "Ami",
+   "zh": "怎麼樣？醫生怎麼說？藥要吃幾天？"
+  },
+  {
+   "id": "clinic-121",
+   "kind": "選項",
+   "stage": "E_ASK",
+   "stageName": "回報 Ami",
+   "who": "我",
+   "zh": "醫生說是感冒，藥吃〔吃藥天數〕天，要多喝水、多休息。"
+  },
+  {
+   "id": "clinic-122",
+   "kind": "選項",
+   "stage": "E_ASK",
+   "stageName": "回報 Ami",
+   "who": "我",
+   "zh": "醫生說是感冒，藥吃〔錯的天數〕天，要多喝水、多休息。"
+  },
+  {
+   "id": "clinic-123",
+   "kind": "選項",
+   "stage": "E_ASK",
+   "stageName": "回報 Ami",
+   "who": "我",
+   "zh": "醫生說不用吃藥，多喝水就好。"
+  },
+  {
+   "id": "clinic-124",
+   "kind": "選項",
+   "stage": "E_ASK",
+   "stageName": "回報 Ami",
+   "who": "我",
+   "zh": "醫生說是感冒，藥吃〔吃藥天數〕天，吃完一定要再回去看。"
+  },
+  {
+   "id": "clinic-125",
+   "kind": "錯誤說明",
+   "stage": "E_ASK",
+   "stageName": "回報 Ami",
+   "who": "",
+   "zh": "醫生說藥吃〔吃藥天數〕天，要多喝水、多休息；〔吃藥天數〕天後還沒好才再回診。"
+  },
+  {
+   "id": "clinic-126",
+   "kind": "旁白",
+   "stage": "E_ASK",
+   "stageName": "回報 Ami",
+   "who": "",
+   "zh": "（再想一下，醫生剛剛怎麼說？看一下任務提示。）"
+  },
+  {
+   "id": "clinic-127",
+   "kind": "綠卡說明",
+   "stage": "E_ASK",
+   "stageName": "回報 Ami",
+   "who": "",
+   "zh": "你聽懂醫生說的話，也能告訴朋友。"
+  },
+  {
+   "id": "clinic-128",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局",
+   "who": "Ami",
+   "zh": "太好了！〔名字〕，你今天真的很厲害，掛號、看醫生、領藥都自己搞定了！多喝水、早點睡，趕快好起來喔！"
+  },
+  {
+   "id": "clinic-129",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局",
+   "who": "Ami",
+   "zh": "辛苦了！看醫生的時候要說清楚，有些地方下次再注意就好。你先好好休息，趕快好起來喔！"
+  },
+  {
+   "id": "clinic-130",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "結局",
+   "who": "",
+   "zh": "（提醒：這個遊戲是中文練習，不是醫療建議。身體不舒服，請去看真正的醫生。）"
+  }
+ ]
+}

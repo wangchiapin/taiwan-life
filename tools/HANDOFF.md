@@ -33,7 +33,8 @@
 
 進度：
 - drinks ✅、reserva ✅（43 處）、breakfast ✅（34 處）、parcel ✅（30 句＋旁白刪 3 句，已上線）、nightmarket ✅（Ben 改 26 句，已套用：019/020/024/049/130 刪除並併入前一句，087/093 的提示話拿掉）、bakery ✅（Ben 改 48 句，已套用並推上去；`apply_bakery.py`）
-- 線上修改表現在預設是 bakery（之後準備新遊戲時改預設，並把 bakery 標「已完成」）；`GAMES` 清單裡已改完的遊戲都標「已完成」
+- clinic：已在 `rows2.py` 加 `CONF`（130 句），已發布到線上修改表（預設 clinic），等 Ben 改完再套用。`helpers={'desk':'櫃台','doc':'醫生'}` 處理 `desk(...)`／`doc(...)` 包起來的台詞。叫號螢幕、藥袋、狀況卡標題等 HTML 片段的字（目前看診、你的號碼、藥袋、早中晚睡前…）和 SYM 症狀名、OTHER_CARDS 卡名沒抽出來。
+- 線上修改表的 `GAMES` 清單裡已改完的遊戲都標「已完成」
 - 接下來：clinic、mrt、street（每個遊戲：先在 `rows2.py` 的 `CONF` 加設定（parcel、breakfast 是範例） → 抽出 → 發布表格 → 等 Ben 改完 → 套用）
 
 ### parcel 的旁白（錯誤後的提示話）：Ben 已決定

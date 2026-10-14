@@ -36,6 +36,15 @@ CONF={
     fnmap={'amiLines':'Ami 在店門口說的話','cakeLines':'Ami 的 LINE 訊息','listHTML':'清單','trayHTML':'托盤畫面','breadName':'麵包名稱'},
     first=[('c.slice','選的片數')],
     guess=[('errName[t.err]','店員講錯的項目'),('errName[k]','選的項目'),('NZ(recapSize)','吋數（店員說的）'),('NZ(recapCandle)','蠟燭根數（店員說的）'),('recapTime','取貨時間（店員說的）'),('recapSize','吋數（店員說的）'),('recapCandle','蠟燭根數（店員說的）'),('flName','口味'),('NZ(t.people)','人數'),('NZ(t.candles)','蠟燭根數'),('NZ(t.size)','吋數'),('NZ(t.slice)','片數'),('NZ(t.n)','個數'),('=sz','片數'),('=nz','個數'),('=bz','麵包名稱'),('breadName','麵包名稱'),('t.pickup','取貨時間'),('t.friend','朋友名字'),('t.flavor','口味'),('given - total','找的錢'),('given','給的錢'),('total','總價'),('have','夾的個數'),('it.zh','麵包名稱'),('it.nut','堅果'),('BYID[','麵包名稱'),('other','別的名字')]),
+'clinic': dict(title='診所看醫生', stagevar='const STAGE = (() => {', ternary=True, regions=[('const NEXT_LABEL','const Game = {','過場按鈕'),
+    ('  setPlace(mode) {','  /* ── 圖片','位置名稱'),
+    ('  /* ── 說明文字','  /* ── 狀態設定','nm'),
+    ('const Hints = {','\n};\n','任務提示'),
+    ('  getConfig() {','  /* ── 換關卡','cfg')],
+    speakers='Ami|櫃台|醫生|藥師|我', extra={'START':'開場：Ami 的 LINE','R_CARD':'掛號：健保卡','R_FIRST':'掛號：第一次來','R_DEPT':'掛號：掛哪一科','R_TICKET':'掛號：號碼牌','W_WAIT':'候診：等叫號','D_SYMPTOM':'診間：說症狀','D_FEVER':'診間：發燒','D_ALLERGY':'診間：過敏','D_ADVICE':'診間：醫生交代','P_PAY':'批價：付錢','M_MED':'領藥','M_NOW':'吃藥','E_ASK':'回報 Ami','END':'結局'},
+    fnmap={'amiLines':'Ami 的 LINE 訊息','docLines':'醫生交代的話','pharmLines':'藥師交代的話','sentence':'說症狀的句子','listHTML':'我的身體狀況卡'},
+    helpers={'desk':'櫃台','doc':'醫生'},
+    guess=[('given - t.fee','找的錢'),('given','給的錢'),('t.fee','金額'),('NUMZH(t.myNo)','你的號碼'),('NUMZH(Game.cur)','目前看診號碼'),('DAYZH(t.rx === 3','錯的天數'),('DAYZH(t.rx)','吃藥天數'),('=rx','吃藥天數'),('DAYZH(t.days)','不舒服的天數'),('DAYZH(days)','天數'),('SYM[a].zh','症狀1'),('sy[0].zh','症狀1'),('sy[1].zh','症狀2'),('a.zh','症狀1'),('b.zh','症狀2'),('=k','拿錯的卡')]),
 }
 def guess(e):
     e=e.strip()
@@ -104,6 +113,17 @@ for a_,b_,dk in C['regions']:
             elif state=='選攤位畫面' and kind=='其他': kind='位置名稱'
             elif state=='殺價選項' and kind=='其他': kind='選項'
             elif state=='殺價：老闆回應' and re.search(r'\bsay\(\s*$',before): kind='line'
+        if g=='clinic':
+            hm=re.search(r'\b('+'|'.join(C['helpers'])+r')\(\s*([^()]*[?:] *)?$',before)
+            if hm and kind=='其他': kind='line'; isSay=C['helpers'][hm.group(1)]
+            elif kind=='其他' and re.search(r'[?:] *$',before):
+                if re.search(r'\bM\(',line_): kind='錯誤說明'
+                elif re.search(r'\bL\(',line_): kind='line'
+            if dk=='cfg' and kind=='其他':
+                pv=s[gi:stt]
+                if pv.rfind('options:')>max(pv.rfind('next:'),pv.rfind('dialogue:')): kind='選項'
+            if dk=='nm' and state=='說症狀的句子' and kind=='其他': kind='選項'
+            if dk=='nm' and state=='我的身體狀況卡' and kind in ('line','其他'): kind='清單文字'
         if dk=='過場按鈕': kind='過場按鈕'
         if dk=='位置名稱': kind='位置名稱'
         if dk=='任務提示':
@@ -122,6 +142,7 @@ for a_,b_,dk in C['regions']:
             elif zh.startswith('〔客人〕：'): who='客人'; zh=zh[5:]; kind='台詞'
             elif zh.startswith('〔攤販（老闆／老闆娘）〕：'): who='老闆／老闆娘'; zh=zh[len('〔攤販（老闆／老闆娘）〕：'):]; kind='台詞'
             elif g=='bakery' and isSay and not zh.startswith('（'): who='店員'; kind='台詞'
+            elif g=='clinic' and isSay: who=isSay; kind='台詞'
             elif state=='殺價：老闆回應' and re.search(r'\bsay\(\s*$',before): who='老闆／老闆娘'; kind='台詞'
             else: kind='旁白' if zh.startswith('（') else '台詞'
         line=s[s.rfind('\n',0,stt)+1:s.find('\n',stt)]
@@ -129,6 +150,7 @@ for a_,b_,dk in C['regions']:
         if kind=='其他' or zh.startswith(('查看結果','回到地圖','查看排行榜')): continue
         if g=='bakery' and (zh in ('〔變數〕',) or re.fullmatch(r'店員：〔[^〕]*〕',zh) or re.search(r'<(button|div|span)',zh) or zh.strip()=='朗讀'): continue
         if g=='bakery' and zh=='你記得Ami說的：': zh+='〔要加熱。／不用加熱。〕'
+        if g=='clinic' and (re.search(r'<(button|div|span|tr|td|th|table|small|b )',zh) or zh.strip() in ('朗讀','〔變數〕','我')): continue
         if g=='nightmarket' and (re.search(r'<(button|div|span)',zh) or zh.strip()=='朗讀'): continue   # 程式拼出來的 HTML 片段
         if re.search(r'(===|!==|==) *$', before): continue
         if kind=='選項' and zh=='晚上': zh='晚上〔時間〕'
