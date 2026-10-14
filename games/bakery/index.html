@@ -371,8 +371,8 @@
   </div>
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
-    週六早上，你跟同事 Ami 約好，一起去她家附近的麵包店買早餐。Ami 在外面講電話，你先進去：自己拿托盤和夾子，夾麵包、結帳，還要幫 Ami 訂一個生日蛋糕。小心，Ami 對堅果過敏！<br>
-    <span data-es="Es sábado por la mañana y quedaste con tu compañera Ami para desayunar en una panadería cerca de su casa. Ami está afuera hablando por teléfono, así que entras tú primero: tomas la bandeja y las pinzas, eliges el pan, pagas y además encargas un pastel de cumpleaños para Ami. ¡Ojo: Ami es alérgica a los frutos secos!" data-en="It's Saturday morning, and you and your coworker Ami are going to a bakery near her place for breakfast. Ami is outside on a phone call, so you go in first: take a tray and tongs, pick the bread, pay, and also order a birthday cake for Ami. Careful — Ami is allergic to nuts!">Es sábado por la mañana y quedaste con tu compañera Ami para desayunar en una panadería cerca de su casa. Ami está afuera hablando por teléfono, así que entras tú primero: tomas la bandeja y las pinzas, eliges el pan, pagas y además encargas un pastel de cumpleaños para Ami. ¡Ojo: Ami es alérgica a los frutos secos!</span>
+    你跟Ami一起去麵包店買麵包，Ami臨時接到電話，要你先進去買。除了買麵包，還要幫Ami訂一個生日蛋糕喔！小心，Ami 對堅果過敏！<br>
+    <span data-es="Vas con Ami a la panadería a comprar pan, pero a Ami le entra una llamada de última hora y te pide que entres tú primero. ¡Además del pan, tienes que encargar un pastel de cumpleaños para Ami! ¡Ojo: Ami es alérgica a los frutos secos!" data-en="You and Ami go to a bakery to buy bread, but Ami suddenly gets a phone call and asks you to go in first. Besides the bread, you also need to order a birthday cake for Ami! Careful — Ami is allergic to nuts!">Vas con Ami a la panadería a comprar pan, pero a Ami le entra una llamada de última hora y te pide que entres tú primero. ¡Además del pan, tienes que encargar un pastel de cumpleaños para Ami! ¡Ojo: Ami es alérgica a los frutos secos!</span>
   </p>
 </div>
 
@@ -468,7 +468,7 @@ pinyinPro.customPinyin({
   '杏仁': 'xìng rén', '堅果': 'jiān guǒ', '核桃': 'hé tao', '全麥': 'quán mài', '加熱': 'jiā rè', '會員': 'huì yuán', '蠟燭': 'là zhú',
   '蛋糕': 'dàn gāo', '吋': 'cùn', '過敏': 'guò mǐn', '生日快樂': 'shēng rì kuài lè', '喀喀': 'kā kā', '分開裝': 'fēn kāi zhuāng',
   '公園': 'gōng yuán', '一條': 'yì tiáo', '切片': 'qiē piàn', '點數': 'diǎn shù', '店員': 'diàn yuán', '結帳': 'jié zhàng', '標籤': 'biāo qiān',
-  '稱呼': 'chēng hu', '取貨': 'qǔ huò', '複誦': 'fù sòng', '切': 'qiē', '還寫': 'hái xiě', '他們': 'tā men', '怎麼': 'zěn me', '嗯': 'ēn', '幾個': 'jǐ ge', '外面': 'wài mian', '電話': 'diàn huà', '一起': 'yì qǐ', '麵包': 'miàn bāo'
+  '對嗎': 'duì ma', '這樣對嗎': 'zhè yàng duì ma', '厲害': 'lì hai', '臨時': 'lín shí', '稱呼': 'chēng hu', '取貨': 'qǔ huò', '複誦': 'fù sòng', '切': 'qiē', '還寫': 'hái xiě', '他們': 'tā men', '怎麼': 'zěn me', '嗯': 'ēn', '幾個': 'jǐ ge', '外面': 'wài mian', '電話': 'diàn huà', '一起': 'yì qǐ', '麵包': 'miàn bāo'
 });
 const PY_OPT = { toneType: 'symbol', toneSandhi: true };
 const isDigits = seg => /^[零一二三四五六七八九]+$/.test(seg);   // 念號碼：一不變調
@@ -592,15 +592,15 @@ const VOCAB = {
   C_SEP: [['分開裝', 'poner por separado en bolsas', 'bag separately'], ['裝在一起', 'poner todo junto', 'put together'], ['袋子', 'bolsa', 'bag']],
   C_MEMBER: [['會員卡', 'tarjeta de miembro', 'membership card'], ['辦', 'tramitar, hacerse', 'sign up for'], ['累積', 'acumular', 'accumulate'], ['點數', 'puntos', 'points']],
   C_PAY: [['一共', 'en total', 'in total'], ['不夠', 'no alcanza', 'not enough'], ['收', 'recibir', 'receive'], ['找', 'dar el cambio', 'give change']],
-  K_GREET: [['順便', 'de paso', 'while you are at it'], ['生日', 'cumpleaños', 'birthday'], ['訂', 'encargar, reservar', 'order, reserve'], ['蛋糕', 'pastel', 'cake'], ['傳', 'enviar (mensaje)', 'send (a message)']],
+  K_GREET: [['朋友', 'amigo/a', 'friend'], ['生日', 'cumpleaños', 'birthday'], ['訂', 'encargar, reservar', 'order, reserve'], ['蛋糕', 'pastel', 'cake'], ['傳', 'enviar (mensaje)', 'send (a message)']],
   K_SIZE: [['吋', 'pulgada', 'inch'], ['幾吋', '¿de cuántas pulgadas?', 'how many inches?'], ['大概', 'más o menos', 'approximately'], ['個人', 'personas', 'people']],
   K_FLAVOR: [['口味', 'sabor', 'flavor'], ['草莓', 'fresa', 'strawberry'], ['鮮奶油', 'crema', 'fresh cream'], ['巧克力', 'chocolate', 'chocolate'], ['咖啡', 'café', 'coffee']],
   K_CANDLE: [['蠟燭', 'vela', 'candle'], ['根', 'clasificador de velas, palitos', 'measure word for sticks/candles'], ['幾根', '¿cuántas?', 'how many?']],
   K_PLATE: [['巧克力片', 'plaquita de chocolate', 'chocolate plaque'], ['寫', 'escribir', 'write'], ['生日快樂', 'feliz cumpleaños', 'happy birthday'], ['名字', 'nombre', 'name']],
   K_TIME: [['取貨', 'recoger el pedido', 'pick up the order'], ['明天', 'mañana', 'tomorrow'], ['後天', 'pasado mañana', 'the day after tomorrow'], ['上午', 'por la mañana', 'morning (a.m.)'], ['下午', 'por la tarde', 'afternoon (p.m.)']],
-  K_CONFIRM: [['確認', 'confirmar', 'confirm'], ['複誦', 'repetir lo dicho', 'repeat back'], ['不對', 'no es correcto', 'not right'], ['地方', 'lugar, punto', 'place, point']],
+  K_CONFIRM: [['確認', 'confirmar', 'confirm'], ['這樣對嗎', '¿es correcto?', 'is that right?'], ['不對', 'no es correcto', 'not right'], ['地方', 'lugar, punto', 'place, point']],
   K_FIX: [['哪裡', '¿dónde?', 'where?'], ['尺寸', 'tamaño', 'size'], ['蠟燭', 'vela', 'candle'], ['取貨時間', 'hora de recogida', 'pickup time'], ['改', 'corregir, cambiar', 'fix, change']],
-  K_NAME: [['怎麼稱呼', '¿cómo se llama? (cortés)', 'what should I call you? (polite)'], ['取貨人', 'quien recoge el pedido', 'person picking up'], ['留', 'dejar', 'leave'], ['名字', 'nombre', 'name']],
+  K_NAME: [['怎麼稱呼', '¿cómo se llama? (cortés)', 'what should I call you? (polite)'], ['朋友', 'amigo/a', 'friend'], ['留', 'dejar', 'leave'], ['名字', 'nombre', 'name']],
   END: [['講完', 'terminar de hablar', 'finish talking'], ['公園', 'parque', 'park'], ['厲害', 'genial, impresionante', 'impressive'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your hard work'], ['夾子', 'pinzas', 'tongs']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
@@ -1175,21 +1175,18 @@ const Game = {
     const N = this.N, t = this.task, bz = this.breadName();
     const nz = NZ(t.n), sz = NZ(t.slice);
     return [
-      L(`Ami：${N}，你先進去，我在外面接個電話，馬上進來！`,
-        `${N}, entra tú primero; estoy contestando una llamada afuera y entro enseguida.`,
-        `${N}, go in first. I'm taking a phone call outside and I'll be right in!`),
-      L(`Ami：我要${nz}個${bz}。你自己也選一個別種的，但是不要有堅果的，我對堅果過敏，我們可能會分著吃。`,
-        `Quiero ${t.n} ${BREAD_ES[t.bread]}. Tú elige también uno de otro tipo, pero sin frutos secos: soy alérgica y quizás lo compartamos.`,
-        `I want ${t.n} ${BREAD_EN[t.bread]}. Pick one of a different kind for yourself, but nothing with nuts — I'm allergic, and we might share.`),
-      L(`Ami：還要一條吐司，請店員幫忙切成${sz}片。`,
-        `También una barra de pan de molde: pídele a la dependienta que la corte en ${t.slice} rebanadas.`,
-        `Also one loaf of sandwich bread. Ask the clerk to slice it into ${t.slice} slices.`),
+      L(`Ami：${N}，你先進去，我接個電話。`,
+        `${N}, entra tú primero; voy a contestar una llamada.`,
+        `${N}, go in first. I'm going to take a call.`),
+      L(`Ami：我要${nz}個${bz}。你看你另外要吃什麼，但是不要買有堅果的喔！我也想吃你買的。對了！再買一條吐司，請店員切成${sz}片。`,
+        `Quiero ${t.n} ${BREAD_ES[t.bread]}. Mira qué otro pan quieres tú, pero ¡no compres nada con frutos secos! Yo también quiero probar lo que compres. ¡Ah, y también una barra de pan de molde: pídele a la dependienta que la corte en ${t.slice} rebanadas!`,
+        `I want ${t.n} ${BREAD_EN[t.bread]}. Pick whatever else you'd like, but don't buy anything with nuts! I want to eat what you buy too. Oh, and get one loaf of sandwich bread — ask the clerk to slice it into ${t.slice} slices.`),
       L(`Ami：麵包${t.heat ? '要加熱，我想吃熱的' : '不用加熱，我們等一下要去公園吃'}。你的跟我的${t.sep ? '要分開裝' : '裝在一起就好'}。`,
         (t.heat ? 'El pan, calentado: quiero comerlo caliente. ' : 'El pan no hace falta calentarlo: vamos a comerlo en el parque. ') + (t.sep ? 'El tuyo y el mío, en bolsas separadas.' : 'El tuyo y el mío pueden ir juntos.'),
         (t.heat ? 'Please have the bread heated — I want it warm. ' : "No need to heat the bread; we're eating at the park soon. ") + (t.sep ? 'Bag yours and mine separately.' : 'Yours and mine can go in the same bag.')),
-      L('Ami：還有，店員如果問要不要辦會員，不用辦喔。',
-        'Y si la dependienta pregunta si quieres hacerte miembro, no hace falta.',
-        "And if the clerk asks whether you want to sign up for a membership, no need.")
+      L('Ami：還有，不需要辦會員喔。',
+        'Y no hace falta que te hagas miembro.',
+        "Also, no need to sign up for a membership.")
     ];
   },
   cakeLines() {
@@ -1197,16 +1194,12 @@ const Game = {
     const fl = t.flavor === '草莓' ? ['fresa', 'strawberry'] : ['chocolate', 'chocolate'];
     return [
       L('（你的手機響了一聲，是Ami傳來的LINE。）', '(Tu celular suena: es un LINE de Ami.)', '(Your phone buzzes — it\'s a LINE message from Ami.)'),
-      L(`Ami：${N}，麻煩你順便去櫃台幫我訂一個蛋糕，是我朋友${t.friend}的生日蛋糕！`,
-        `${N}, de paso, ¿puedes pedir un pastel en el mostrador? Es el pastel de cumpleaños de mi amiga ${t.friend}.`,
-        `${N}, while you're there, could you order a cake at the counter? It's for my friend ${t.friend}'s birthday!`),
-      L(`Ami：${t.friend}家有${NZ(t.people)}個人要吃，口味要${t.flavor}的，我也要吃，所以不要堅果。`,
-        `En casa de ${t.friend} van a comer ${t.people} personas; el sabor, de ${fl[0]}. Yo también voy a comer, así que sin frutos secos.`,
-        `There are ${t.people} people eating at ${t.friend}'s place, and the flavor should be ${fl[1]}. I'll eat some too, so no nuts.`),
-      L(`Ami：蠟燭要${NZ(t.candles)}根，巧克力片寫「${t.friend}，生日快樂」。`,
-        `Las velas: ${t.candles}. En la plaquita de chocolate, escribe «${t.friend}, feliz cumpleaños».`,
-        `${t.candles} candles, and on the chocolate plaque write "${t.friend}, happy birthday".`),
-      L(`Ami：我們${t.pickup}來拿。`, `Vendremos a recogerlo ${PICKUP_ES[t.pickup]}.`, `We'll come pick it up ${PICKUP_EN[t.pickup]}.`)
+      L(`Ami：${N}，幫我訂一個生日蛋糕，要給我朋友${t.friend}的！`,
+        `${N}, ¿puedes encargar un pastel de cumpleaños por mí? ¡Es para mi amiga ${t.friend}!`,
+        `${N}, could you order a birthday cake for me? It's for my friend ${t.friend}!`),
+      L(`Ami：有${NZ(t.people)}個人要吃，${t.flavor}口味的，因為我也會吃，所以不要有堅果的。跟店員要${NZ(t.candles)}根蠟燭，巧克力片寫「${t.friend}，生日快樂」。我們${t.pickup}來拿。`,
+        `Van a comer ${t.people} personas, de sabor ${fl[0]}; como yo también voy a comer, que no lleve frutos secos. Pídele a la dependienta ${t.candles} velas, y que en la plaquita de chocolate escriba «${t.friend}, feliz cumpleaños». Vendremos a recogerlo ${PICKUP_ES[t.pickup]}.`,
+        `${t.people} people will eat it, ${fl[1]} flavor, and since I'll eat some too, no nuts. Ask the clerk for ${t.candles} candles, and have the chocolate plaque say "${t.friend}, happy birthday". We'll pick it up ${PICKUP_EN[t.pickup]}.`)
     ];
   },
 
@@ -1226,7 +1219,7 @@ const Game = {
         { zh: `巧克力片：「${t.friend}，生日快樂」`, es: `Plaquita: «${t.friend}, feliz cumpleaños»`, en: `Chocolate plaque: "${t.friend}, happy birthday"` },
         { zh: `取貨：${t.pickup}`, es: `Recoger: ${PICKUP_ES[t.pickup]}`, en: `Pickup: ${PICKUP_EN[t.pickup]}` }
       ];
-      rule = L('蛋糕訂好之前，要確認店員寫的對不對。', 'Antes de terminar, comprueba que lo que anotó la dependienta sea correcto.', 'Before you finish, check that what the clerk wrote down is correct.');
+      rule = null;
     } else {
       const own = this.tray.filter(id => id !== t.bread && !BYID[id].toast && !BYID[id].nut).length;
       rows = [
@@ -1235,16 +1228,16 @@ const Game = {
         { ok: (c.toast || 0) === 1, zh: `吐司：一條，切${NZ(t.slice)}片`, es: `Pan de molde: una barra, ${t.slice} rebanadas`, en: `Sandwich loaf: one, ${t.slice} slices` },
         { zh: `${t.heat ? '要加熱' : '不用加熱'}；${t.sep ? '分開裝' : '裝在一起'}；不辦會員`, es: `${t.heat ? 'Calentar' : 'Sin calentar'}; ${t.sep ? 'bolsas separadas' : 'todo junto'}; sin membresía`, en: `${t.heat ? 'Heat it' : 'No heating'}; ${t.sep ? 'separate bags' : 'one bag'}; no membership` }
       ];
-      rule = L('我對堅果過敏，所以不要買有堅果的。', 'Soy alérgica a los frutos secos: no compres nada que los lleve.', "I'm allergic to nuts, so don't buy anything with nuts.");
+      rule = L('Ami對堅果過敏。', 'Ami es alérgica a los frutos secos.', 'Ami is allergic to nuts.');
     }
-    const all = [...rows, rule];
+    const all = rule ? [...rows, rule] : rows;
     this._spk.push({ text: all.map(x => x.zh.replace('：', '，')).join('。'), who: 'Ami' });
     const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
     this._tr.push({ zh: all.map(x => x.zh).join(' '), es: all.map(x => x.es).join(' '), en: all.map(x => x.en).join(' ') });
     const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
     return `<div class="list"><div class="t">${r(inCake ? 'Ami 的蛋糕訊息' : 'Ami 的麵包清單')}<span class="grow"></span>${sp1}${tr1}</div>` +
       rows.map(x => `<div class="${x.ok ? 'done' : ''}">${x.ok ? '✔' : '□'} ${r(x.zh)}</div>`).join('') +
-      `<div class="rule">${r(rule.zh)}</div></div>`;
+      (rule ? `<div class="rule">${r(rule.zh)}</div>` : '') + '</div>';
   },
   /* 招牌元素：麵包架 + 托盤（累計金額） */
   trayHTML(withShelf) {
@@ -1275,9 +1268,6 @@ const Game = {
         place: 'shop',
         html: () => Game.listHTML(),
         dialogue: () => [
-          L('（週六早上，你跟Ami約好，一起去她家附近的麵包店買早餐。）',
-            '(Es sábado por la mañana. Quedaste con Ami para comprar el desayuno en la panadería cerca de su casa.)',
-            '(It\'s Saturday morning. You and Ami are going to a bakery near her place to buy breakfast.)'),
           ...Game.amiLines(),
           L('我：好，交給我！', '¡Bien, déjamelo a mí!', 'OK, leave it to me!')
         ],
@@ -1291,16 +1281,14 @@ const Game = {
         dialogue: () => [
           L('（你走進麵包店，一股烤麵包的香味撲鼻而來。）', '(Entras a la panadería y te envuelve el aroma a pan recién horneado.)', '(You step into the bakery, and the smell of fresh-baked bread hits you.)'),
           L('店員：歡迎光臨！托盤和夾子在那邊，自己拿喔。', '¡Bienvenido! Las bandejas y las pinzas están allí; sírvete tú mismo.', 'Welcome! Trays and tongs are over there — help yourself.'),
-          L('（前面的客人拿起夾子，先「喀喀」空夾了兩下，才去夾麵包。）', '(El cliente de delante toma las pinzas y las cierra dos veces en el aire —clic, clic— antes de ir por el pan.)', '(The customer ahead picks up the tongs and clicks them twice in the air — click, click — before reaching for the bread.)')
+          L('（喀喀喀！是什麼聲音呢？）', '(¡Clic, clic, clic! ¿Qué será ese ruido?)', "(Click, click, click! What's that sound?)")
         ],
         options: ['拿起托盤和夾子，先空夾兩下。', '拿起托盤和夾子，直接去夾麵包。'],
         next: c => {
           Game.clickedTongs = c.includes('空夾');
           if (Game.clickedTongs) {
-            Game.good('在台灣，很多人拿夾子會先「喀喀」空夾兩下，再去夾麵包。', 'En Taiwán muchas personas cierran las pinzas dos veces en el aire (clic, clic) antes de tomar el pan.', 'In Taiwan, many people click the tongs twice in the air before picking up bread.');
-            Game.thought = [L('（喀喀！你空夾了兩下，覺得自己好像在地人了。）', '(¡Clic, clic! Sientes que ya pareces un local.)', '(Click, click! You feel like a local already.)')];
-          } else {
-            Game.thought = [L('（你拿起夾子，走向麵包架。）', '(Tomas las pinzas y vas hacia los estantes de pan.)', '(You pick up the tongs and head to the bread shelves.)')];
+            Game.good('你越來越像台灣人了喔！在台灣，很多人拿夾子會先「喀喀」空夾兩下，再去夾麵包。', '¡Cada vez te pareces más a un taiwanés! En Taiwán muchas personas cierran las pinzas dos veces en el aire (clic, clic) antes de tomar el pan.', "You're becoming more and more like a Taiwanese person! In Taiwan, many people click the tongs twice in the air before picking up bread.");
+            Game.thought = [L('（喀喀！你空夾了兩下，覺得自己好像變成台灣人了。）', '(¡Clic, clic! Sientes que te has vuelto un poco taiwanés.)', '(Click, click! You feel like you\'ve become a bit Taiwanese.)')];
           }
           Game.state = 'PICK';
         }
@@ -1308,7 +1296,7 @@ const Game = {
       PICK: {
         place: 'tray',
         html: () => Game.trayHTML(true),
-        dialogue: () => [L('（架上的麵包都有標籤，寫著名字、價錢，有些還寫了成分。）', '(Cada pan tiene una etiqueta con nombre y precio; algunos indican sus ingredientes.)', '(Each bread has a label with its name and price, and some list ingredients.)')],
+        dialogue: () => [],
         options: () => {
           const o = SHELF.map(i => i.zh);
           if (Game.tray.length) o.push(`把${BYID[Game.tray[Game.tray.length - 1]].zh}放回去`);
@@ -1321,16 +1309,13 @@ const Game = {
             const own = Game.tray.filter(id => id !== t.bread && !BYID[id].toast).length;
             const fail = (m, th) => { Game.checkFails += 1; Game.addMistake(m, th); };
             if (have !== t.n)
-              fail(M(`Ami要${NZ(t.n)}個${bz}，你夾了${have}個。`, `Ami quería ${t.n} ${BREAD_ES[t.bread]} y pusiste ${have}.`, `Ami wanted ${t.n} ${BREAD_EN[t.bread]}, and you took ${have}.`),
-                [L('（看一下清單，Ami要幾個？）', '(Mira la lista: ¿cuántos quería Ami?)', '(Check the list: how many does Ami want?)')]);
+              fail(M(`Ami要${NZ(t.n)}個${bz}，你夾了${have}個。`, `Ami quería ${t.n} ${BREAD_ES[t.bread]} y pusiste ${have}.`, `Ami wanted ${t.n} ${BREAD_EN[t.bread]}, and you took ${have}.`));
             else if (toastN !== 1)
-              fail(M('Ami要一條吐司。', 'Ami quería una barra de pan de molde.', 'Ami wanted one loaf of sandwich bread.'),
-                [L('（吐司呢？Ami說要一條。）', '(¿Y el pan de molde? Ami pidió una barra.)', '(What about the loaf? Ami asked for one.)')]);
+              fail(M('Ami要一條吐司。', 'Ami quería una barra de pan de molde.', 'Ami wanted one loaf of sandwich bread.'));
             else if (own !== 1)
-              fail(M(own === 0 ? '你自己也要選一個別種的麵包。' : '你自己的麵包只要一個。', own === 0 ? 'Tú también debías elegir un pan de otro tipo.' : 'Para ti solo hacía falta un pan.', own === 0 ? 'You were supposed to pick one different bread for yourself.' : 'You only needed one bread for yourself.'),
-                [L('（Ami說，你自己選一個別種的。）', '(Ami dijo: elige tú uno de otro tipo.)', '(Ami said: pick one of a different kind for yourself.)')]);
+              fail(M(own === 0 ? '你自己也要選一個別種的麵包。' : '你自己的麵包只要一個。', own === 0 ? 'Tú también debías elegir un pan de otro tipo.' : 'Para ti solo hacía falta un pan.', own === 0 ? 'You were supposed to pick one different bread for yourself.' : 'You only needed one bread for yourself.'));
             else {
-              if (Game.checkFails === 0) Game.good('你看清楚清單和標籤，沒有買到堅果。', 'Leíste bien la lista y las etiquetas: no compraste frutos secos.', 'You read the list and labels carefully and avoided nuts.');
+              if (Game.checkFails === 0) Game.good('很棒！你記得Ami說過的，沒有買到堅果。', '¡Muy bien! Recordaste lo que dijo Ami: no compraste frutos secos.', 'Great! You remembered what Ami said and avoided nuts.');
               Game.state = 'C_SLICE';
             }
             return;
@@ -1338,7 +1323,7 @@ const Game = {
           if (c.startsWith('把')) { const id = Game.tray.pop(); Game.thought = [L(`（你把${BYID[id].zh}放回架上。）`, `(Devuelves «${BYID[id].zh}» al estante.)`, `(You put the ${BYID[id].zh} back.)`)]; Game.updateCash(); return; }
           const it = BYZH[c];
           if (it.nut) {
-            Game.addMistake(M(`標籤寫「含${it.nut}」，Ami對堅果過敏。`, `La etiqueta dice «contiene ${it.nutEs}»; Ami es alérgica a los frutos secos.`, `The label says it contains ${it.nutEn}; Ami is allergic to nuts.`),
+            Game.addMistake(M(`你買的麵包含${it.nut}，Ami對堅果過敏。`, `El pan que compraste contiene ${it.nutEs}; Ami es alérgica a los frutos secos.`, `The bread you bought contains ${it.nutEn}; Ami is allergic to nuts.`),
               [L(`（標籤寫著「含${it.nut}」……）`, `(La etiqueta dice «contiene ${it.nutEs}»…)`, `(The label says "contains ${it.nutEn}"…)`)]);
             return;
           }
@@ -1353,7 +1338,6 @@ const Game = {
         place: 'counter',
         html: () => Game.trayHTML(false),
         dialogue: () => [
-          L('（你把托盤拿到櫃台。）', '(Llevas la bandeja al mostrador.)', '(You carry the tray to the counter.)'),
           L('店員：吐司要幫你切嗎？可以切八片、十片或十二片喔。', '¿Le corto el pan de molde? Puedo hacer 8, 10 o 12 rebanadas.', 'Shall I slice the loaf for you? I can do 8, 10 or 12 slices.')
         ],
         options: ['不用切，謝謝。', '切八片，謝謝。', '切十片，謝謝。', '切十二片，謝謝。'],
@@ -1362,11 +1346,10 @@ const Game = {
           if (c !== want) {
             Game.addMistake(M(c.startsWith('不用') ? `Ami要把吐司切成${NZ(t.slice)}片。` : `Ami要切成${NZ(t.slice)}片，不是${c.slice(1, c.indexOf('片'))}片。`,
               c.startsWith('不用') ? `Ami quería el pan cortado en ${t.slice} rebanadas.` : `Ami quería ${t.slice} rebanadas.`,
-              c.startsWith('不用') ? `Ami wanted the loaf cut into ${t.slice} slices.` : `Ami wanted ${t.slice} slices.`),
-              [L('（Ami說要切幾片？）', '(¿Cuántas rebanadas dijo Ami?)', '(How many slices did Ami say?)')]);
+              c.startsWith('不用') ? `Ami wanted the loaf cut into ${t.slice} slices.` : `Ami wanted ${t.slice} slices.`));
             return;
           }
-          if (Game.att.C_SLICE === 1) Game.good('你記得吐司要切幾片。', 'Recordaste en cuántas rebanadas cortar el pan.', 'You remembered how many slices to cut.');
+          if (Game.att.C_SLICE === 1) Game.good('不錯喔！你記得吐司要切幾片。', '¡Bien! Recordaste en cuántas rebanadas cortar el pan.', 'Nice! You remembered how many slices to cut.');
           Game.thought = [L('店員：好，等我一下，我幫你切。', 'Bien, espere un momento, se lo corto.', 'OK, give me a moment — I\'ll slice it.')];
           Game.state = 'C_HEAT';
         }
@@ -1379,11 +1362,10 @@ const Game = {
         next: c => {
           const yes = c.startsWith('要');
           if (yes !== t.heat) {
-            Game.addMistake(M(t.heat ? 'Ami想吃熱的，麵包要加熱。' : 'Ami說不用加熱，他們要去公園吃。', t.heat ? 'Ami quería comerlo caliente: había que calentar el pan.' : 'Ami dijo que no hacía falta calentarlo: lo comerán en el parque.', t.heat ? 'Ami wanted it warm, so the bread should be heated.' : 'Ami said no heating — they\'re eating at the park.'),
-              [L('（Ami說麵包要不要加熱？）', '(¿Qué dijo Ami sobre calentar el pan?)', '(What did Ami say about heating the bread?)')]);
+            Game.addMistake(M(t.heat ? 'Ami說麵包要加熱。' : 'Ami說麵包不用加熱。', t.heat ? 'Ami dijo que había que calentar el pan.' : 'Ami dijo que no hacía falta calentar el pan.', t.heat ? 'Ami said the bread should be heated.' : 'Ami said the bread doesn\'t need heating.'));
             return;
           }
-          if (Game.att.C_HEAT === 1) Game.good('你記得Ami說的：' + (t.heat ? '要加熱。' : '不用加熱。'), 'Recordaste lo que dijo Ami sobre calentar el pan.', 'You remembered what Ami said about heating the bread.');
+          if (Game.att.C_HEAT === 1) Game.good('讚喔！你記得Ami說的：' + (t.heat ? '要加熱。' : '不用加熱。'), '¡Genial! Recordaste lo que dijo Ami sobre calentar el pan.', 'Awesome! You remembered what Ami said about heating the bread.');
           Game.state = 'C_SEP';
         }
       },
@@ -1395,8 +1377,7 @@ const Game = {
         next: c => {
           const yes = c.startsWith('要');
           if (yes !== t.sep) {
-            Game.addMistake(M(t.sep ? 'Ami說你的麵包跟她的要分開裝。' : 'Ami說裝在一起就好。', t.sep ? 'Ami dijo que tu pan y el suyo fueran en bolsas separadas.' : 'Ami dijo que todo podía ir junto.', t.sep ? 'Ami said her bread and yours should be bagged separately.' : 'Ami said everything could go together.'),
-              [L('（Ami說要不要分開裝？）', '(¿Qué dijo Ami sobre separar las bolsas?)', '(What did Ami say about separate bags?)')]);
+            Game.addMistake(M(t.sep ? 'Ami說你的麵包跟她的要分開裝。' : 'Ami說裝在一起就好。', t.sep ? 'Ami dijo que tu pan y el suyo fueran en bolsas separadas.' : 'Ami dijo que todo podía ir junto.', t.sep ? 'Ami said her bread and yours should be bagged separately.' : 'Ami said everything could go together.'));
             return;
           }
           Game.state = 'C_MEMBER';
@@ -1409,11 +1390,10 @@ const Game = {
         options: ['沒有，也不用辦，謝謝。', '沒有，我想辦一張。', '有，用手機號碼查。'],
         next: c => {
           if (!c.startsWith('沒有，也不用')) {
-            Game.addMistake(M(c.startsWith('沒有，我想') ? 'Ami說不用辦會員。' : '你沒有這家的會員卡。', c.startsWith('沒有，我想') ? 'Ami dijo que no hacía falta hacerse miembro.' : 'No tienes tarjeta de miembro de esta tienda.', c.startsWith('沒有，我想') ? 'Ami said not to sign up for a membership.' : 'You don\'t have a membership card here.'),
-              [L('（Ami說會員要不要辦？）', '(¿Qué dijo Ami sobre la membresía?)', '(What did Ami say about the membership?)')]);
+            Game.addMistake(M(c.startsWith('沒有，我想') ? 'Ami說不用辦會員。' : '你沒有這家的會員卡。', c.startsWith('沒有，我想') ? 'Ami dijo que no hacía falta hacerse miembro.' : 'No tienes tarjeta de miembro de esta tienda.', c.startsWith('沒有，我想') ? 'Ami said not to sign up for a membership.' : 'You don\'t have a membership card here.'));
             return;
           }
-          if (Game.att.C_MEMBER === 1) Game.good('你禮貌地拒絕了辦會員。', 'Rechazaste con educación hacerte miembro.', 'You politely declined the membership.');
+          if (Game.att.C_MEMBER === 1) Game.good('很好！你禮貌地拒絕了辦會員。', '¡Muy bien! Rechazaste con educación hacerte miembro.', 'Well done! You politely declined the membership.');
           Game.state = 'C_PAY';
         }
       },
@@ -1449,18 +1429,17 @@ const Game = {
       K_SIZE: {
         place: 'cake',
         dialogue: () => [
-          L('（你走到蛋糕櫃台。）', '(Vas al mostrador de pasteles.)', '(You walk to the cake counter.)'),
+          L('（你走到櫃台。）', '(Vas al mostrador.)', '(You walk to the counter.)'),
           sayK('你好，要訂蛋糕嗎？六吋大概四到六個人吃，八吋大概八到十個人吃。你要幾吋的？', 'Hola, ¿quiere encargar un pastel? El de 6 pulgadas alcanza para unas 4–6 personas y el de 8 para unas 8–10. ¿De qué tamaño?', 'Hi, would you like to order a cake? A 6-inch feeds about 4–6 people and an 8-inch about 8–10. Which size?')
         ],
         options: ['我想訂六吋的。', '我想訂八吋的。', '我想訂十吋的。'],
         next: c => {
           const sz = c.includes('六') ? 6 : c.includes('八') ? 8 : 10;
           if (sz !== t.size) {
-            Game.addMistake(M(`${t.friend}家有${NZ(t.people)}個人，要訂${NZ(t.size)}吋的。`, `En casa de ${t.friend} son ${t.people} personas: hay que pedir el de ${t.size} pulgadas.`, `There are ${t.people} people at ${t.friend}'s, so you need the ${t.size}-inch.`),
-              [L('（朋友家有幾個人要吃？）', '(¿Cuántas personas van a comer?)', '(How many people will be eating?)')]);
+            Game.addMistake(M(`${t.friend}家有${NZ(t.people)}個人，要訂${NZ(t.size)}吋的。`, `En casa de ${t.friend} son ${t.people} personas: hay que pedir el de ${t.size} pulgadas.`, `There are ${t.people} people at ${t.friend}'s, so you need the ${t.size}-inch.`));
             return;
           }
-          if (Game.att.K_SIZE === 1) Game.good('你用人數選對了蛋糕的大小。', 'Elegiste bien el tamaño según el número de personas.', 'You chose the right size for the number of people.');
+          if (Game.att.K_SIZE === 1) Game.good('厲害喔！你用人數選對了蛋糕的大小。', '¡Genial! Elegiste bien el tamaño según el número de personas.', 'Impressive! You chose the right size for the number of people.');
           Game.state = 'K_FLAVOR';
         }
       },
@@ -1475,8 +1454,7 @@ const Game = {
               [L('（核桃……Ami不能吃堅果！）', '(Nuez… ¡Ami no puede comer frutos secos!)', '(Walnuts… Ami can\'t eat nuts!)')]); return;
           }
           if (f[1] !== t.flavor) {
-            Game.addMistake(M(`Ami說口味要${t.flavor}的。`, `Ami dijo que el sabor era ${t.flavor === '草莓' ? 'fresa' : 'chocolate'}.`, `Ami said the flavor should be ${t.flavor === '草莓' ? 'strawberry' : 'chocolate'}.`),
-              [L('（Ami傳的訊息，口味是什麼？）', '(En el mensaje de Ami, ¿qué sabor era?)', '(What flavor did Ami\'s message say?)')]); return;
+            Game.addMistake(M(`Ami說要${t.flavor}口味的。`, `Ami dijo que el sabor era ${t.flavor === '草莓' ? 'fresa' : 'chocolate'}.`, `Ami said the flavor should be ${t.flavor === '草莓' ? 'strawberry' : 'chocolate'}.`)); return;
           }
           Game.state = 'K_CANDLE';
         }
@@ -1504,10 +1482,9 @@ const Game = {
         },
         next: c => {
           if (c !== `寫「${t.friend}，生日快樂」。`) {
-            Game.addMistake(M(`Ami要寫「${t.friend}，生日快樂」。`, `Ami quería «${t.friend}, feliz cumpleaños».`, `Ami wanted "${t.friend}, happy birthday".`),
-              [L('（朋友叫什麼名字？）', '(¿Cómo se llama su amiga/o?)', '(What is the friend\'s name?)')]); return;
+            Game.addMistake(M(`Ami要寫「${t.friend}，生日快樂」。`, `Ami quería «${t.friend}, feliz cumpleaños».`, `Ami wanted "${t.friend}, happy birthday".`)); return;
           }
-          if (Game.att.K_PLATE === 1) Game.good('你記得朋友的名字。', 'Recordaste el nombre de la amiga/o.', 'You remembered the friend\'s name.');
+          if (Game.att.K_PLATE === 1) Game.good('很好！你記得Ami朋友的名字。', '¡Muy bien! Recordaste el nombre de la amiga/o de Ami.', 'Well done! You remembered Ami\'s friend\'s name.');
           Game.state = 'K_TIME';
         }
       },
@@ -1517,8 +1494,7 @@ const Game = {
         options: ['明天上午十點', '明天下午三點', '後天下午三點'],
         next: c => {
           if (c !== t.pickup) {
-            Game.addMistake(M(`Ami說${t.pickup}來拿。`, `Ami dijo que lo recogerían ${PICKUP_ES[t.pickup]}.`, `Ami said they'd pick it up ${PICKUP_EN[t.pickup]}.`),
-              [L('（Ami說什麼時候來拿？）', '(¿Cuándo dijo Ami que vendrían?)', '(When did Ami say they\'d come?)')]); return;
+            Game.addMistake(M(`Ami說${t.pickup}來拿。`, `Ami dijo que lo recogerían ${PICKUP_ES[t.pickup]}.`, `Ami said they'd pick it up ${PICKUP_EN[t.pickup]}.`)); return;
           }
           Game.state = 'K_CONFIRM';
         }
@@ -1541,8 +1517,7 @@ const Game = {
               [L('（等一下，剛剛有一個地方跟Ami說的不一樣……）', '(Espera, hay algo distinto de lo que dijo Ami…)', '(Wait, something doesn\'t match what Ami said…)')]); return;
           }
           if (!ok && !t.err) {
-            Game.addMistake(M('店員複誦的都是對的。', 'Todo lo que repitió la dependienta era correcto.', 'Everything the clerk repeated was correct.'),
-              [L('（再核對一次Ami的訊息……都對耶。）', '(Revisas otra vez el mensaje de Ami… todo está bien.)', '(You check Ami\'s message again… it all matches.)')]); return;
+            Game.addMistake(M('店員確認的都是對的。', 'Todo lo que confirmó la dependienta era correcto.', 'Everything the clerk confirmed was correct.')); return;
           }
           if (ok) { Game.state = 'K_NAME'; return; }
           Game.state = 'K_FIX';
@@ -1555,17 +1530,16 @@ const Game = {
         next: c => {
           const k = c.startsWith('尺寸') ? 'size' : c.startsWith('蠟燭') ? 'candle' : 'time';
           if (k !== t.err) {
-            Game.addMistake(M(`不是${errName[k][0]}，是${errName[t.err][0]}講錯了。`, `No era ${errName[k][1]}: la dependienta se equivocó en ${errName[t.err][1]}.`, `It wasn't ${errName[k][2]} — the clerk got ${errName[t.err][2]} wrong.`),
-              [L('（再聽一次店員剛剛說的……）', '(Escucha otra vez lo que dijo la dependienta…)', '(Listen again to what the clerk said…)')]); return;
+            Game.addMistake(M(`不是${errName[k][0]}，是${errName[t.err][0]}講錯了。`, `No era ${errName[k][1]}: la dependienta se equivocó en ${errName[t.err][1]}.`, `It wasn't ${errName[k][2]} — the clerk got ${errName[t.err][2]} wrong.`)); return;
           }
-          Game.good('你聽出來店員講錯了！', '¡Notaste que la dependienta se equivocó!', 'You caught the clerk\'s mistake!');
+          Game.good('厲害喔！你聽出來店員講錯了！', '¡Impresionante! ¡Notaste que la dependienta se equivocó!', 'Impressive! You caught the clerk\'s mistake!');
           Game.thought = [sayK('啊，不好意思！我改一下。', '¡Ay, disculpe! Lo corrijo.', 'Oh, sorry! Let me fix that.')];
           Game.state = 'K_NAME';
         }
       },
       K_NAME: {
         place: 'cake',
-        dialogue: () => [sayK('好，請問怎麼稱呼？我要寫一下取貨人的名字。', 'Bien, ¿cómo se llama? Necesito anotar el nombre de quien recogerá el pedido.', 'OK, what\'s your name? I need to write down who\'s picking it up.')],
+        dialogue: () => [sayK('好，請問怎麼稱呼？', 'Bien, ¿cómo se llama?', 'OK, what\'s your name?')],
         options: () => [`我叫${N}。`, '我是Ami的朋友。', '不用留名字。'],
         next: c => {
           if (c !== `我叫${N}。`) {
@@ -1584,11 +1558,13 @@ const Game = {
           Game._endGood = Game.mistakes <= 2;
           track('game_complete', { game: 'bakery', score: Game.score, elapsed: Game.elapsedTime, tongs: Game.clickedTongs ? 1 : 0 });
           return [
-            L('（蛋糕訂好了。這時候，Ami講完電話，走進麵包店。）', '(El pastel está encargado. En ese momento, Ami termina su llamada y entra a la panadería.)', '(The cake is ordered. Just then, Ami finishes her call and walks into the bakery.)'),
+            L('（蛋糕訂好了，Ami也剛好講完電話，走進麵包店。）', '(El pastel está encargado, y Ami también termina justo su llamada y entra a la panadería.)', '(The cake is ordered, and Ami also happens to finish her call and walks into the bakery.)'),
             L('我：Ami，麵包買好了，蛋糕也訂好了！', '¡Ami, ya compré el pan y también encargué el pastel!', 'Ami, I got the bread, and I ordered the cake too!'),
             Game._endGood
-              ? L(`Ami：哇，${N}，你好厲害！連夾子都夾得像台灣人！我們去公園吃吧！`, `¡Vaya, ${N}, qué bien! ¡Hasta usas las pinzas como un taiwanés! ¡Vamos a comer al parque!`, `Wow, ${N}, you're great! You even handle the tongs like a Taiwanese person! Let's go eat at the park!`)
-              : L('Ami：辛苦了！有些地方下次再注意就好。我們去公園吃吧！', '¡Gracias por el esfuerzo! La próxima vez cuida unos detallitos. ¡Vamos a comer al parque!', "Thanks for your hard work! Just watch a few details next time. Let's go eat at the park!")
+              ? (Game.clickedTongs
+                ? L(`Ami：哇，${N}，你好厲害！連拿夾子的時候都變成台灣人的樣子了！我們去公園吃吧！`, `¡Vaya, ${N}, qué bien! ¡Hasta cuando usas las pinzas pareces un taiwanés! ¡Vamos a comer al parque!`, `Wow, ${N}, you're great! Even the way you handle the tongs makes you look Taiwanese! Let's go eat at the park!`)
+                : L(`Ami：哇，${N}，你好厲害！我們去公園吃吧！`, `¡Vaya, ${N}, qué bien! ¡Vamos a comer al parque!`, `Wow, ${N}, you're great! Let's go eat at the park!`))
+              : L('Ami：感謝你！下次買麵包再給你練習一次吧！我們去公園吃吧！', '¡Gracias! La próxima vez que compremos pan, ¡te dejo practicar otra vez! ¡Vamos a comer al parque!', "Thank you! Next time we buy bread, I'll let you practice again! Let's go eat at the park!")
           ];
         },
         options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
