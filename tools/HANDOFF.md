@@ -32,9 +32,9 @@
 - parcel 的 `CONF` 是最新範例（`phone` 區塊、`簡訊`/`LINE訊息`/`手機標題`/`結尾包裹說法` 類別）；手機畫面上的寄件標籤（「房東太太」「簡訊（房東太太轉傳）」）和包裹標籤（收件人／寄件人）沒抽出來。
 
 進度：
-- drinks ✅、reserva ✅（43 處）、breakfast ✅（34 處）、parcel ✅（30 句＋旁白刪 3 句，已上線）
-- 線上修改表現在預設是 parcel；`GAMES` 清單裡 breakfast 標「已改完」
-- 接下來：nightmarket、bakery、clinic、mrt、street（每個遊戲：先在 `rows2.py` 的 `CONF` 加設定（parcel、breakfast 是範例） → 抽出 → 發布表格 → 等 Ben 改完 → 套用）
+- drinks ✅、reserva ✅（43 處）、breakfast ✅（34 處）、parcel ✅（30 句＋旁白刪 3 句，已上線）、nightmarket ✅（Ben 改 26 句，已套用：019/020/024/049/130 刪除並併入前一句，087/093 的提示話拿掉）
+- 線上修改表現在預設是 nightmarket；`GAMES` 清單裡已改完的遊戲都標「已完成」
+- 接下來：bakery、clinic、mrt、street（每個遊戲：先在 `rows2.py` 的 `CONF` 加設定（parcel、breakfast 是範例） → 抽出 → 發布表格 → 等 Ben 改完 → 套用）
 
 ### parcel 的旁白（錯誤後的提示話）：Ben 已決定
 - 刪除：086（驗算）、067（房東太太的名字）、141（加值金額）；已從遊戲拿掉。
@@ -55,3 +55,8 @@
 - MRT：https://claude.ai/code/artifact/1e13584c-6b11-4dd1-9b34-41f702f93e79
 - 街頭事件：https://claude.ai/code/artifact/5b761cac-74b3-4101-87d2-7f54557e9f99
 - 麵包／吃藥／小綠人：https://claude.ai/code/artifact/e5a7c9c9-f02c-427d-820e-84c923bcf9f9
+
+### nightmarket 套用時的決定（Ben 確認）
+- 020（「再看看」提示）Ben 決定刪除；018 保留「殺價的時候要有技巧喔」，單字表 START 換成 技巧、敢，CALL 換成 變胖（原本 長高）。
+- 結局「衣服和髮夾，我殺價省了…」併進上一句，仍只在 `Game.saved > 0` 時出現。
+- `rows2.py` 的 nightmarket 設定有 `nm` 區塊（amiLines、listHTML、殺價引擎等函式內的字串）可當範例。
