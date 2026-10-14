@@ -27,12 +27,25 @@ CONF={
     ('r10(t.chicken','殺價後的雞排價錢'),('t.chicken * t.chickenPrice','雞排總價'),('chickenPrice','雞排單價'),('chicken - 1','要辣的份數'),('CN[','份數（中文）'),('chicken','份數'),
     ('tColor','T恤顏色'),('aColor','髮夾顏色'),('tSize','尺寸'),('bigSize','大一號的尺寸'),('r10(S.A.start','髮夾三個的價錢'),('S.A.start','髮夾開價'),
     ('=p','價錢'),('=o','價錢'),('=n','價錢'),('given','給的錢'),('item','商品'),('.ask','價錢'),('.start','價錢'),('x','給的錢'),('cur','攤位')]),
+'bakery': dict(title='麵包店買麵包', stagevar='const STAGE = (() => {', ternary=True, regions=[('const NEXT_LABEL','const Game = {','過場按鈕'),
+    ('  setPlace(mode) {','  /* ── 圖片','位置名稱'),
+    ('  /* ── Ami 交代的話','  /* ── 狀態設定','nm'),
+    ('const Hints = {','\n};\n','任務提示'),
+    ('  getConfig() {','  /* ── 換關卡','cfg')],
+    speakers='Ami|店員|我', extra={'START':'開場：Ami 請你買麵包','TONGS':'拿托盤和夾子','PICK':'夾麵包','C_SLICE':'櫃台：切吐司','C_HEAT':'櫃台：加熱','C_SEP':'櫃台：分開裝','C_MEMBER':'櫃台：會員卡','C_PAY':'櫃台：付錢','K_GREET':'Ami 的 LINE 訊息','K_SIZE':'訂蛋糕：尺寸','K_FLAVOR':'訂蛋糕：口味','K_CANDLE':'訂蛋糕：蠟燭','K_PLATE':'訂蛋糕：巧克力片','K_TIME':'訂蛋糕：取貨時間','K_CONFIRM':'訂蛋糕：店員確認','K_FIX':'訂蛋糕：哪裡不對','K_NAME':'訂蛋糕：留名字','END':'結局：Ami 進來'},
+    fnmap={'amiLines':'Ami 在店門口說的話','cakeLines':'Ami 的 LINE 訊息','listHTML':'清單','trayHTML':'托盤畫面','breadName':'麵包名稱'},
+    first=[('c.slice','選的片數')],
+    guess=[('errName[t.err]','店員講錯的項目'),('errName[k]','選的項目'),('NZ(recapSize)','吋數（店員說的）'),('NZ(recapCandle)','蠟燭根數（店員說的）'),('recapTime','取貨時間（店員說的）'),('recapSize','吋數（店員說的）'),('recapCandle','蠟燭根數（店員說的）'),('flName','口味'),('NZ(t.people)','人數'),('NZ(t.candles)','蠟燭根數'),('NZ(t.size)','吋數'),('NZ(t.slice)','片數'),('NZ(t.n)','個數'),('=sz','片數'),('=nz','個數'),('=bz','麵包名稱'),('breadName','麵包名稱'),('t.pickup','取貨時間'),('t.friend','朋友名字'),('t.flavor','口味'),('given - total','找的錢'),('given','給的錢'),('total','總價'),('have','夾的個數'),('it.zh','麵包名稱'),('it.nut','堅果'),('BYID[','麵包名稱'),('other','別的名字')]),
 }
 def guess(e):
     e=e.strip()
     if e=='N': return '名字'
+    for k,v in C.get('first',[]):
+        if k in e: return v
     cj=re.findall(r"'([^']*[一-鿿][^']*)'", e)
-    if cj: return '有時加：'+cj[0]
+    if cj:
+        if C.get('ternary') and len(cj)>=2 and '?' in e: return cj[0]+'／'+cj[1]
+        return '有時加：'+cj[0]
     for k,v in C.get('guess',[]):
         if (k[1:]==e if k.startswith('=') else k in e): return v
     for k,v in [('phone','電話'),('Phone','電話'),('date','日期'),('Date','日期'),('time','時間'),('Time','時間'),('.T','時間'),('people','人數'),('adults','大人人數'),('kids','小孩人數'),('chairs','兒童椅張數'),('day','星期幾'),('Line','電話號碼'),('name','名字'),('seat','座位'),('ask2','時間'),('alt2','時間'),('t1','時間')]:
@@ -67,7 +80,7 @@ for a_,b_,dk in C['regions']:
             fm=re.findall(r'\n  (\w+)\(.*?\) \{', '\n'+s[a:stt]); state={'lineMsgs':'房東太太的LINE','momSmsLines':'簡訊（房東太太轉傳）','yourSmsLines':'簡訊（你的手機）','phoneHTML':'手機畫面','bubble':'手機畫面','boxHTML':'包裹標籤','callLines':'房東太太來電'}.get(fm[-1] if fm else '', '手機')
         elif dk=='nm':
             fm=re.findall(r'\n  (\w+)\(.*?\) \{', '\n'+s[a:stt]); fn=fm[-1] if fm else ''
-            state={'amiLines':'Ami 交代的話','tShirtLine':'衣服攤老闆開場','callLines':'Ami 來電','listHTML':'購物清單','mapHTML':'選攤位畫面','haggleHTML':'殺價畫面','haggleOptions':'殺價選項','haggleChoose':'殺價：老闆回應'}.get(fn,fn)
+            state=C.get('fnmap',{'amiLines':'Ami 交代的話','tShirtLine':'衣服攤老闆開場','callLines':'Ami 來電','listHTML':'購物清單','mapHTML':'選攤位畫面','haggleHTML':'殺價畫面','haggleOptions':'殺價選項','haggleChoose':'殺價：老闆回應'}).get(fn,fn)
         else: state={'過場按鈕':'過場按鈕','位置名稱':'位置列','任務提示':'提示','台詞':'CONFIRM'}[dk]
         kind=classify(s,stt); line_=s[s.rfind('\n',0,stt)+1:s.find('\n',stt)]
         if re.search(r'addMistake\(\s*$',before): kind='錯誤說明'
@@ -78,6 +91,14 @@ for a_,b_,dk in C['regions']:
             elif 'tailOpts' in line_ and kind=='其他': kind='選項'
             elif 'zhItems' in line_ and 'const zhItems' in line_ and kind=='其他': kind='結尾包裹說法'
             elif 'zhItems.push' in line_ and kind=='其他': kind='結尾包裹說法'
+        isSay=False
+        if g=='bakery':
+            if re.search(r'sayK\(\s*$',before) and kind=='其他': kind='line'; isSay=True
+            elif kind=='其他' and re.search(r'[?:] *$',before):
+                if 'sayK(' in line_: kind='line'; isSay=True
+                elif re.search(r'\bM\(|addMistake|fail\(',line_): kind='錯誤說明'
+            if kind=='其他' and re.match(r'\s*const o = \[',line_): kind='選項'
+            if dk=='nm' and state=='清單' and kind in ('line','其他'): kind='清單文字'
         if g=='nightmarket' and dk=='nm':
             if state=='購物清單' and kind in ('line','其他'): kind='購物清單'
             elif state=='選攤位畫面' and kind=='其他': kind='位置名稱'
@@ -100,11 +121,14 @@ for a_,b_,dk in C['regions']:
             if m: who=m.group(1).strip('（）'); zh=zh[len(m.group(0)):]; kind='台詞'
             elif zh.startswith('〔客人〕：'): who='客人'; zh=zh[5:]; kind='台詞'
             elif zh.startswith('〔攤販（老闆／老闆娘）〕：'): who='老闆／老闆娘'; zh=zh[len('〔攤販（老闆／老闆娘）〕：'):]; kind='台詞'
+            elif g=='bakery' and isSay and not zh.startswith('（'): who='店員'; kind='台詞'
             elif state=='殺價：老闆回應' and re.search(r'\bsay\(\s*$',before): who='老闆／老闆娘'; kind='台詞'
             else: kind='旁白' if zh.startswith('（') else '台詞'
         line=s[s.rfind('\n',0,stt)+1:s.find('\n',stt)]
         if dk=='setup' and kind=='其他' and re.search(r'say: *$',before): kind='台詞'
         if kind=='其他' or zh.startswith(('查看結果','回到地圖','查看排行榜')): continue
+        if g=='bakery' and (zh in ('〔變數〕',) or re.fullmatch(r'店員：〔[^〕]*〕',zh) or re.search(r'<(button|div|span)',zh) or zh.strip()=='朗讀'): continue
+        if g=='bakery' and zh=='你記得Ami說的：': zh+='〔要加熱。／不用加熱。〕'
         if g=='nightmarket' and (re.search(r'<(button|div|span)',zh) or zh.strip()=='朗讀'): continue   # 程式拼出來的 HTML 片段
         if re.search(r'(===|!==|==) *$', before): continue
         if kind=='選項' and zh=='晚上': zh='晚上〔時間〕'

@@ -1,0 +1,1342 @@
+{
+ "game": "bakery",
+ "title": "麵包店買麵包",
+ "rows": [
+  {
+   "id": "bakery-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "麵包店"
+  },
+  {
+   "id": "bakery-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "麵包店買麵包"
+  },
+  {
+   "id": "bakery-003",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "週六早上，你跟同事 Ami 約好，一起去她家附近的麵包店買早餐。Ami 在外面講電話，你先進去：自己拿托盤和夾子，夾麵包、結帳，還要幫 Ami 訂一個生日蛋糕。小心，Ami 對堅果過敏！"
+  },
+  {
+   "id": "bakery-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走進麵包店"
+  },
+  {
+   "id": "bakery-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "拿托盤去夾麵包"
+  },
+  {
+   "id": "bakery-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "拿托盤去結帳"
+  },
+  {
+   "id": "bakery-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "準備付錢"
+  },
+  {
+   "id": "bakery-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到蛋糕櫃台"
+  },
+  {
+   "id": "bakery-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "聽店員確認"
+  },
+  {
+   "id": "bakery-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "告訴店員哪裡不對"
+  },
+  {
+   "id": "bakery-011",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "等Ami過來"
+  },
+  {
+   "id": "bakery-012",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "麵包店"
+  },
+  {
+   "id": "bakery-013",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "麵包區"
+  },
+  {
+   "id": "bakery-014",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "櫃台"
+  },
+  {
+   "id": "bakery-015",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "蛋糕櫃台"
+  },
+  {
+   "id": "bakery-016",
+   "kind": "台詞",
+   "stage": "Ami 在店門口說的話",
+   "stageName": "Ami 在店門口說的話",
+   "who": "Ami",
+   "zh": "〔名字〕，你先進去，我在外面接個電話，馬上進來！"
+  },
+  {
+   "id": "bakery-017",
+   "kind": "台詞",
+   "stage": "Ami 在店門口說的話",
+   "stageName": "Ami 在店門口說的話",
+   "who": "Ami",
+   "zh": "我要〔個數〕個〔麵包名稱〕。你自己也選一個別種的，但是不要有堅果的，我對堅果過敏，我們可能會分著吃。"
+  },
+  {
+   "id": "bakery-018",
+   "kind": "台詞",
+   "stage": "Ami 在店門口說的話",
+   "stageName": "Ami 在店門口說的話",
+   "who": "Ami",
+   "zh": "還要一條吐司，請店員幫忙切成〔片數〕片。"
+  },
+  {
+   "id": "bakery-019",
+   "kind": "台詞",
+   "stage": "Ami 在店門口說的話",
+   "stageName": "Ami 在店門口說的話",
+   "who": "Ami",
+   "zh": "麵包〔要加熱，我想吃熱的／不用加熱，我們等一下要去公園吃〕。你的跟我的〔要分開裝／裝在一起就好〕。"
+  },
+  {
+   "id": "bakery-020",
+   "kind": "台詞",
+   "stage": "Ami 在店門口說的話",
+   "stageName": "Ami 在店門口說的話",
+   "who": "Ami",
+   "zh": "還有，店員如果問要不要辦會員，不用辦喔。"
+  },
+  {
+   "id": "bakery-021",
+   "kind": "旁白",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "",
+   "zh": "（你的手機響了一聲，是Ami傳來的LINE。）"
+  },
+  {
+   "id": "bakery-022",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "〔名字〕，麻煩你順便去櫃台幫我訂一個蛋糕，是我朋友〔朋友名字〕的生日蛋糕！"
+  },
+  {
+   "id": "bakery-023",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "〔朋友名字〕家有〔人數〕個人要吃，口味要〔口味〕的，我也要吃，所以不要堅果。"
+  },
+  {
+   "id": "bakery-024",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "蠟燭要〔蠟燭根數〕根，巧克力片寫「〔朋友名字〕，生日快樂」。"
+  },
+  {
+   "id": "bakery-025",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "我們〔取貨時間〕來拿。"
+  },
+  {
+   "id": "bakery-026",
+   "kind": "清單文字",
+   "stage": "清單",
+   "stageName": "清單",
+   "who": "",
+   "zh": "〔朋友名字〕家：〔人數〕個人"
+  },
+  {
+   "id": "bakery-027",
+   "kind": "清單文字",
+   "stage": "清單",
+   "stageName": "清單",
+   "who": "",
+   "zh": "口味：〔口味〕，不要堅果"
+  },
+  {
+   "id": "bakery-028",
+   "kind": "清單文字",
+   "stage": "清單",
+   "stageName": "清單",
+   "who": "",
+   "zh": "蠟燭：〔蠟燭根數〕根"
+  },
+  {
+   "id": "bakery-029",
+   "kind": "清單文字",
+   "stage": "清單",
+   "stageName": "清單",
+   "who": "",
+   "zh": "巧克力片：「〔朋友名字〕，生日快樂」"
+  },
+  {
+   "id": "bakery-030",
+   "kind": "清單文字",
+   "stage": "清單",
+   "stageName": "清單",
+   "who": "",
+   "zh": "取貨：〔取貨時間〕"
+  },
+  {
+   "id": "bakery-031",
+   "kind": "清單文字",
+   "stage": "清單",
+   "stageName": "清單",
+   "who": "",
+   "zh": "蛋糕訂好之前，要確認店員寫的對不對。"
+  },
+  {
+   "id": "bakery-032",
+   "kind": "清單文字",
+   "stage": "清單",
+   "stageName": "清單",
+   "who": "",
+   "zh": "Ami：〔麵包名稱〕，〔個數〕個"
+  },
+  {
+   "id": "bakery-033",
+   "kind": "清單文字",
+   "stage": "清單",
+   "stageName": "清單",
+   "who": "",
+   "zh": "你：別種麵包一個，不要有堅果"
+  },
+  {
+   "id": "bakery-034",
+   "kind": "清單文字",
+   "stage": "清單",
+   "stageName": "清單",
+   "who": "",
+   "zh": "吐司：一條，切〔片數〕片"
+  },
+  {
+   "id": "bakery-035",
+   "kind": "清單文字",
+   "stage": "清單",
+   "stageName": "清單",
+   "who": "",
+   "zh": "〔要加熱／不用加熱〕；〔分開裝／裝在一起〕；不辦會員"
+  },
+  {
+   "id": "bakery-036",
+   "kind": "清單文字",
+   "stage": "清單",
+   "stageName": "清單",
+   "who": "",
+   "zh": "我對堅果過敏，所以不要買有堅果的。"
+  },
+  {
+   "id": "bakery-037",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "Ami 在店門口說的話"
+  },
+  {
+   "id": "bakery-038",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "Ami 的 LINE 訊息"
+  },
+  {
+   "id": "bakery-039",
+   "kind": "旁白",
+   "stage": "START",
+   "stageName": "開場：Ami 請你買麵包",
+   "who": "",
+   "zh": "（週六早上，你跟Ami約好，一起去她家附近的麵包店買早餐。）"
+  },
+  {
+   "id": "bakery-040",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：Ami 請你買麵包",
+   "who": "我",
+   "zh": "好，交給我！"
+  },
+  {
+   "id": "bakery-041",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "開場：Ami 請你買麵包",
+   "who": "我",
+   "zh": "走進麵包店"
+  },
+  {
+   "id": "bakery-042",
+   "kind": "旁白",
+   "stage": "TONGS",
+   "stageName": "拿托盤和夾子",
+   "who": "",
+   "zh": "（你走進麵包店，一股烤麵包的香味撲鼻而來。）"
+  },
+  {
+   "id": "bakery-043",
+   "kind": "台詞",
+   "stage": "TONGS",
+   "stageName": "拿托盤和夾子",
+   "who": "店員",
+   "zh": "歡迎光臨！托盤和夾子在那邊，自己拿喔。"
+  },
+  {
+   "id": "bakery-044",
+   "kind": "旁白",
+   "stage": "TONGS",
+   "stageName": "拿托盤和夾子",
+   "who": "",
+   "zh": "（前面的客人拿起夾子，先「喀喀」空夾了兩下，才去夾麵包。）"
+  },
+  {
+   "id": "bakery-045",
+   "kind": "選項",
+   "stage": "TONGS",
+   "stageName": "拿托盤和夾子",
+   "who": "我",
+   "zh": "拿起托盤和夾子，先空夾兩下。"
+  },
+  {
+   "id": "bakery-046",
+   "kind": "選項",
+   "stage": "TONGS",
+   "stageName": "拿托盤和夾子",
+   "who": "我",
+   "zh": "拿起托盤和夾子，直接去夾麵包。"
+  },
+  {
+   "id": "bakery-047",
+   "kind": "綠卡說明",
+   "stage": "TONGS",
+   "stageName": "拿托盤和夾子",
+   "who": "",
+   "zh": "在台灣，很多人拿夾子會先「喀喀」空夾兩下，再去夾麵包。"
+  },
+  {
+   "id": "bakery-048",
+   "kind": "旁白",
+   "stage": "TONGS",
+   "stageName": "拿托盤和夾子",
+   "who": "",
+   "zh": "（喀喀！你空夾了兩下，覺得自己好像在地人了。）"
+  },
+  {
+   "id": "bakery-049",
+   "kind": "旁白",
+   "stage": "TONGS",
+   "stageName": "拿托盤和夾子",
+   "who": "",
+   "zh": "（你拿起夾子，走向麵包架。）"
+  },
+  {
+   "id": "bakery-050",
+   "kind": "旁白",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "",
+   "zh": "（架上的麵包都有標籤，寫著名字、價錢，有些還寫了成分。）"
+  },
+  {
+   "id": "bakery-051",
+   "kind": "選項",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "我",
+   "zh": "把〔麵包名稱〕放回去"
+  },
+  {
+   "id": "bakery-052",
+   "kind": "選項",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "我",
+   "zh": "夾好了，去結帳"
+  },
+  {
+   "id": "bakery-053",
+   "kind": "錯誤說明",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "",
+   "zh": "Ami要〔個數〕個〔麵包名稱〕，你夾了〔夾的個數〕個。"
+  },
+  {
+   "id": "bakery-054",
+   "kind": "旁白",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "",
+   "zh": "（看一下清單，Ami要幾個？）"
+  },
+  {
+   "id": "bakery-055",
+   "kind": "錯誤說明",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "",
+   "zh": "Ami要一條吐司。"
+  },
+  {
+   "id": "bakery-056",
+   "kind": "旁白",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "",
+   "zh": "（吐司呢？Ami說要一條。）"
+  },
+  {
+   "id": "bakery-057",
+   "kind": "錯誤說明",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "",
+   "zh": "你自己也要選一個別種的麵包。"
+  },
+  {
+   "id": "bakery-058",
+   "kind": "錯誤說明",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "",
+   "zh": "你自己的麵包只要一個。"
+  },
+  {
+   "id": "bakery-059",
+   "kind": "旁白",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "",
+   "zh": "（Ami說，你自己選一個別種的。）"
+  },
+  {
+   "id": "bakery-060",
+   "kind": "綠卡說明",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "",
+   "zh": "你看清楚清單和標籤，沒有買到堅果。"
+  },
+  {
+   "id": "bakery-061",
+   "kind": "旁白",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "",
+   "zh": "（你把〔麵包名稱〕放回架上。）"
+  },
+  {
+   "id": "bakery-062",
+   "kind": "錯誤說明",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "",
+   "zh": "標籤寫「含〔堅果〕」，Ami對堅果過敏。"
+  },
+  {
+   "id": "bakery-063",
+   "kind": "旁白",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "",
+   "zh": "（標籤寫著「含〔堅果〕」……）"
+  },
+  {
+   "id": "bakery-064",
+   "kind": "旁白",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "",
+   "zh": "（吐司已經夾了一條了。）"
+  },
+  {
+   "id": "bakery-065",
+   "kind": "旁白",
+   "stage": "PICK",
+   "stageName": "夾麵包",
+   "who": "",
+   "zh": "（你用夾子把〔麵包名稱〕夾進托盤。）"
+  },
+  {
+   "id": "bakery-066",
+   "kind": "旁白",
+   "stage": "C_SLICE",
+   "stageName": "櫃台：切吐司",
+   "who": "",
+   "zh": "（你把托盤拿到櫃台。）"
+  },
+  {
+   "id": "bakery-067",
+   "kind": "台詞",
+   "stage": "C_SLICE",
+   "stageName": "櫃台：切吐司",
+   "who": "店員",
+   "zh": "吐司要幫你切嗎？可以切八片、十片或十二片喔。"
+  },
+  {
+   "id": "bakery-068",
+   "kind": "選項",
+   "stage": "C_SLICE",
+   "stageName": "櫃台：切吐司",
+   "who": "我",
+   "zh": "不用切，謝謝。"
+  },
+  {
+   "id": "bakery-069",
+   "kind": "選項",
+   "stage": "C_SLICE",
+   "stageName": "櫃台：切吐司",
+   "who": "我",
+   "zh": "切八片，謝謝。"
+  },
+  {
+   "id": "bakery-070",
+   "kind": "選項",
+   "stage": "C_SLICE",
+   "stageName": "櫃台：切吐司",
+   "who": "我",
+   "zh": "切十片，謝謝。"
+  },
+  {
+   "id": "bakery-071",
+   "kind": "選項",
+   "stage": "C_SLICE",
+   "stageName": "櫃台：切吐司",
+   "who": "我",
+   "zh": "切十二片，謝謝。"
+  },
+  {
+   "id": "bakery-072",
+   "kind": "錯誤說明",
+   "stage": "C_SLICE",
+   "stageName": "櫃台：切吐司",
+   "who": "",
+   "zh": "Ami要把吐司切成〔片數〕片。"
+  },
+  {
+   "id": "bakery-073",
+   "kind": "錯誤說明",
+   "stage": "C_SLICE",
+   "stageName": "櫃台：切吐司",
+   "who": "",
+   "zh": "Ami要切成〔片數〕片，不是〔選的片數〕片。"
+  },
+  {
+   "id": "bakery-074",
+   "kind": "旁白",
+   "stage": "C_SLICE",
+   "stageName": "櫃台：切吐司",
+   "who": "",
+   "zh": "（Ami說要切幾片？）"
+  },
+  {
+   "id": "bakery-075",
+   "kind": "綠卡說明",
+   "stage": "C_SLICE",
+   "stageName": "櫃台：切吐司",
+   "who": "",
+   "zh": "你記得吐司要切幾片。"
+  },
+  {
+   "id": "bakery-076",
+   "kind": "台詞",
+   "stage": "C_SLICE",
+   "stageName": "櫃台：切吐司",
+   "who": "店員",
+   "zh": "好，等我一下，我幫你切。"
+  },
+  {
+   "id": "bakery-077",
+   "kind": "台詞",
+   "stage": "C_HEAT",
+   "stageName": "櫃台：加熱",
+   "who": "店員",
+   "zh": "麵包要加熱嗎？"
+  },
+  {
+   "id": "bakery-078",
+   "kind": "選項",
+   "stage": "C_HEAT",
+   "stageName": "櫃台：加熱",
+   "who": "我",
+   "zh": "要加熱，謝謝。"
+  },
+  {
+   "id": "bakery-079",
+   "kind": "選項",
+   "stage": "C_HEAT",
+   "stageName": "櫃台：加熱",
+   "who": "我",
+   "zh": "不用加熱，謝謝。"
+  },
+  {
+   "id": "bakery-080",
+   "kind": "錯誤說明",
+   "stage": "C_HEAT",
+   "stageName": "櫃台：加熱",
+   "who": "",
+   "zh": "Ami想吃熱的，麵包要加熱。"
+  },
+  {
+   "id": "bakery-081",
+   "kind": "錯誤說明",
+   "stage": "C_HEAT",
+   "stageName": "櫃台：加熱",
+   "who": "",
+   "zh": "Ami說不用加熱，他們要去公園吃。"
+  },
+  {
+   "id": "bakery-082",
+   "kind": "旁白",
+   "stage": "C_HEAT",
+   "stageName": "櫃台：加熱",
+   "who": "",
+   "zh": "（Ami說麵包要不要加熱？）"
+  },
+  {
+   "id": "bakery-083",
+   "kind": "綠卡說明",
+   "stage": "C_HEAT",
+   "stageName": "櫃台：加熱",
+   "who": "",
+   "zh": "你記得Ami說的：〔要加熱。／不用加熱。〕"
+  },
+  {
+   "id": "bakery-084",
+   "kind": "台詞",
+   "stage": "C_SEP",
+   "stageName": "櫃台：分開裝",
+   "who": "店員",
+   "zh": "要分開裝嗎？"
+  },
+  {
+   "id": "bakery-085",
+   "kind": "選項",
+   "stage": "C_SEP",
+   "stageName": "櫃台：分開裝",
+   "who": "我",
+   "zh": "要，分開裝。"
+  },
+  {
+   "id": "bakery-086",
+   "kind": "選項",
+   "stage": "C_SEP",
+   "stageName": "櫃台：分開裝",
+   "who": "我",
+   "zh": "不用，裝在一起就好。"
+  },
+  {
+   "id": "bakery-087",
+   "kind": "錯誤說明",
+   "stage": "C_SEP",
+   "stageName": "櫃台：分開裝",
+   "who": "",
+   "zh": "Ami說你的麵包跟她的要分開裝。"
+  },
+  {
+   "id": "bakery-088",
+   "kind": "錯誤說明",
+   "stage": "C_SEP",
+   "stageName": "櫃台：分開裝",
+   "who": "",
+   "zh": "Ami說裝在一起就好。"
+  },
+  {
+   "id": "bakery-089",
+   "kind": "旁白",
+   "stage": "C_SEP",
+   "stageName": "櫃台：分開裝",
+   "who": "",
+   "zh": "（Ami說要不要分開裝？）"
+  },
+  {
+   "id": "bakery-090",
+   "kind": "台詞",
+   "stage": "C_MEMBER",
+   "stageName": "櫃台：會員卡",
+   "who": "店員",
+   "zh": "有會員卡嗎？要不要辦一張？可以累積點數喔。"
+  },
+  {
+   "id": "bakery-091",
+   "kind": "選項",
+   "stage": "C_MEMBER",
+   "stageName": "櫃台：會員卡",
+   "who": "我",
+   "zh": "沒有，也不用辦，謝謝。"
+  },
+  {
+   "id": "bakery-092",
+   "kind": "選項",
+   "stage": "C_MEMBER",
+   "stageName": "櫃台：會員卡",
+   "who": "我",
+   "zh": "沒有，我想辦一張。"
+  },
+  {
+   "id": "bakery-093",
+   "kind": "選項",
+   "stage": "C_MEMBER",
+   "stageName": "櫃台：會員卡",
+   "who": "我",
+   "zh": "有，用手機號碼查。"
+  },
+  {
+   "id": "bakery-094",
+   "kind": "錯誤說明",
+   "stage": "C_MEMBER",
+   "stageName": "櫃台：會員卡",
+   "who": "",
+   "zh": "Ami說不用辦會員。"
+  },
+  {
+   "id": "bakery-095",
+   "kind": "錯誤說明",
+   "stage": "C_MEMBER",
+   "stageName": "櫃台：會員卡",
+   "who": "",
+   "zh": "你沒有這家的會員卡。"
+  },
+  {
+   "id": "bakery-096",
+   "kind": "旁白",
+   "stage": "C_MEMBER",
+   "stageName": "櫃台：會員卡",
+   "who": "",
+   "zh": "（Ami說會員要不要辦？）"
+  },
+  {
+   "id": "bakery-097",
+   "kind": "綠卡說明",
+   "stage": "C_MEMBER",
+   "stageName": "櫃台：會員卡",
+   "who": "",
+   "zh": "你禮貌地拒絕了辦會員。"
+  },
+  {
+   "id": "bakery-098",
+   "kind": "台詞",
+   "stage": "C_PAY",
+   "stageName": "櫃台：付錢",
+   "who": "店員",
+   "zh": "好，一共〔總價〕元。"
+  },
+  {
+   "id": "bakery-099",
+   "kind": "選項",
+   "stage": "C_PAY",
+   "stageName": "櫃台：付錢",
+   "who": "我",
+   "zh": "給100元"
+  },
+  {
+   "id": "bakery-100",
+   "kind": "選項",
+   "stage": "C_PAY",
+   "stageName": "櫃台：付錢",
+   "who": "我",
+   "zh": "給500元"
+  },
+  {
+   "id": "bakery-101",
+   "kind": "選項",
+   "stage": "C_PAY",
+   "stageName": "櫃台：付錢",
+   "who": "我",
+   "zh": "給1000元"
+  },
+  {
+   "id": "bakery-102",
+   "kind": "錯誤說明",
+   "stage": "C_PAY",
+   "stageName": "櫃台：付錢",
+   "who": "",
+   "zh": "一共〔總價〕元，〔給的錢〕元不夠。"
+  },
+  {
+   "id": "bakery-103",
+   "kind": "台詞",
+   "stage": "C_PAY",
+   "stageName": "櫃台：付錢",
+   "who": "店員",
+   "zh": "不好意思，〔給的錢〕元不夠喔。"
+  },
+  {
+   "id": "bakery-104",
+   "kind": "台詞",
+   "stage": "C_PAY",
+   "stageName": "櫃台：付錢",
+   "who": "店員",
+   "zh": "收您〔給的錢〕元，找您〔找的錢〕元。"
+  },
+  {
+   "id": "bakery-105",
+   "kind": "旁白",
+   "stage": "C_PAY",
+   "stageName": "櫃台：付錢",
+   "who": "",
+   "zh": "（麵包和吐司裝好了！）"
+  },
+  {
+   "id": "bakery-106",
+   "kind": "選項",
+   "stage": "K_GREET",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "我",
+   "zh": "好，我去訂蛋糕。"
+  },
+  {
+   "id": "bakery-107",
+   "kind": "旁白",
+   "stage": "K_SIZE",
+   "stageName": "訂蛋糕：尺寸",
+   "who": "",
+   "zh": "（你走到蛋糕櫃台。）"
+  },
+  {
+   "id": "bakery-108",
+   "kind": "台詞",
+   "stage": "K_SIZE",
+   "stageName": "訂蛋糕：尺寸",
+   "who": "店員",
+   "zh": "你好，要訂蛋糕嗎？六吋大概四到六個人吃，八吋大概八到十個人吃。你要幾吋的？"
+  },
+  {
+   "id": "bakery-109",
+   "kind": "選項",
+   "stage": "K_SIZE",
+   "stageName": "訂蛋糕：尺寸",
+   "who": "我",
+   "zh": "我想訂六吋的。"
+  },
+  {
+   "id": "bakery-110",
+   "kind": "選項",
+   "stage": "K_SIZE",
+   "stageName": "訂蛋糕：尺寸",
+   "who": "我",
+   "zh": "我想訂八吋的。"
+  },
+  {
+   "id": "bakery-111",
+   "kind": "選項",
+   "stage": "K_SIZE",
+   "stageName": "訂蛋糕：尺寸",
+   "who": "我",
+   "zh": "我想訂十吋的。"
+  },
+  {
+   "id": "bakery-112",
+   "kind": "錯誤說明",
+   "stage": "K_SIZE",
+   "stageName": "訂蛋糕：尺寸",
+   "who": "",
+   "zh": "〔朋友名字〕家有〔人數〕個人，要訂〔吋數〕吋的。"
+  },
+  {
+   "id": "bakery-113",
+   "kind": "旁白",
+   "stage": "K_SIZE",
+   "stageName": "訂蛋糕：尺寸",
+   "who": "",
+   "zh": "（朋友家有幾個人要吃？）"
+  },
+  {
+   "id": "bakery-114",
+   "kind": "綠卡說明",
+   "stage": "K_SIZE",
+   "stageName": "訂蛋糕：尺寸",
+   "who": "",
+   "zh": "你用人數選對了蛋糕的大小。"
+  },
+  {
+   "id": "bakery-115",
+   "kind": "台詞",
+   "stage": "K_FLAVOR",
+   "stageName": "訂蛋糕：口味",
+   "who": "店員",
+   "zh": "口味有草莓鮮奶油、巧克力，還有核桃咖啡。你要哪一種？"
+  },
+  {
+   "id": "bakery-116",
+   "kind": "錯誤說明",
+   "stage": "K_FLAVOR",
+   "stageName": "訂蛋糕：口味",
+   "who": "",
+   "zh": "核桃咖啡有堅果，Ami對堅果過敏。"
+  },
+  {
+   "id": "bakery-117",
+   "kind": "旁白",
+   "stage": "K_FLAVOR",
+   "stageName": "訂蛋糕：口味",
+   "who": "",
+   "zh": "（核桃……Ami不能吃堅果！）"
+  },
+  {
+   "id": "bakery-118",
+   "kind": "錯誤說明",
+   "stage": "K_FLAVOR",
+   "stageName": "訂蛋糕：口味",
+   "who": "",
+   "zh": "Ami說口味要〔口味〕的。"
+  },
+  {
+   "id": "bakery-119",
+   "kind": "旁白",
+   "stage": "K_FLAVOR",
+   "stageName": "訂蛋糕：口味",
+   "who": "",
+   "zh": "（Ami傳的訊息，口味是什麼？）"
+  },
+  {
+   "id": "bakery-120",
+   "kind": "台詞",
+   "stage": "K_CANDLE",
+   "stageName": "訂蛋糕：蠟燭",
+   "who": "店員",
+   "zh": "蠟燭要幾根？"
+  },
+  {
+   "id": "bakery-121",
+   "kind": "選項",
+   "stage": "K_CANDLE",
+   "stageName": "訂蛋糕：蠟燭",
+   "who": "我",
+   "zh": "三根"
+  },
+  {
+   "id": "bakery-122",
+   "kind": "選項",
+   "stage": "K_CANDLE",
+   "stageName": "訂蛋糕：蠟燭",
+   "who": "我",
+   "zh": "五根"
+  },
+  {
+   "id": "bakery-123",
+   "kind": "選項",
+   "stage": "K_CANDLE",
+   "stageName": "訂蛋糕：蠟燭",
+   "who": "我",
+   "zh": "七根"
+  },
+  {
+   "id": "bakery-124",
+   "kind": "錯誤說明",
+   "stage": "K_CANDLE",
+   "stageName": "訂蛋糕：蠟燭",
+   "who": "",
+   "zh": "Ami說蠟燭要〔蠟燭根數〕根。"
+  },
+  {
+   "id": "bakery-125",
+   "kind": "旁白",
+   "stage": "K_CANDLE",
+   "stageName": "訂蛋糕：蠟燭",
+   "who": "",
+   "zh": "（蠟燭要幾根？看一下Ami的訊息。）"
+  },
+  {
+   "id": "bakery-126",
+   "kind": "台詞",
+   "stage": "K_PLATE",
+   "stageName": "訂蛋糕：巧克力片",
+   "who": "店員",
+   "zh": "巧克力片要寫字嗎？要寫什麼？"
+  },
+  {
+   "id": "bakery-127",
+   "kind": "選項",
+   "stage": "K_PLATE",
+   "stageName": "訂蛋糕：巧克力片",
+   "who": "我",
+   "zh": "寫「〔朋友名字〕，生日快樂」。"
+  },
+  {
+   "id": "bakery-128",
+   "kind": "選項",
+   "stage": "K_PLATE",
+   "stageName": "訂蛋糕：巧克力片",
+   "who": "我",
+   "zh": "寫「〔別的名字〕，生日快樂」。"
+  },
+  {
+   "id": "bakery-129",
+   "kind": "選項",
+   "stage": "K_PLATE",
+   "stageName": "訂蛋糕：巧克力片",
+   "who": "我",
+   "zh": "寫「生日快樂」就好。"
+  },
+  {
+   "id": "bakery-130",
+   "kind": "選項",
+   "stage": "K_PLATE",
+   "stageName": "訂蛋糕：巧克力片",
+   "who": "我",
+   "zh": "不用寫字。"
+  },
+  {
+   "id": "bakery-131",
+   "kind": "錯誤說明",
+   "stage": "K_PLATE",
+   "stageName": "訂蛋糕：巧克力片",
+   "who": "",
+   "zh": "Ami要寫「〔朋友名字〕，生日快樂」。"
+  },
+  {
+   "id": "bakery-132",
+   "kind": "旁白",
+   "stage": "K_PLATE",
+   "stageName": "訂蛋糕：巧克力片",
+   "who": "",
+   "zh": "（朋友叫什麼名字？）"
+  },
+  {
+   "id": "bakery-133",
+   "kind": "綠卡說明",
+   "stage": "K_PLATE",
+   "stageName": "訂蛋糕：巧克力片",
+   "who": "",
+   "zh": "你記得朋友的名字。"
+  },
+  {
+   "id": "bakery-134",
+   "kind": "台詞",
+   "stage": "K_TIME",
+   "stageName": "訂蛋糕：取貨時間",
+   "who": "店員",
+   "zh": "什麼時候來拿？"
+  },
+  {
+   "id": "bakery-135",
+   "kind": "選項",
+   "stage": "K_TIME",
+   "stageName": "訂蛋糕：取貨時間",
+   "who": "我",
+   "zh": "明天上午十點"
+  },
+  {
+   "id": "bakery-136",
+   "kind": "選項",
+   "stage": "K_TIME",
+   "stageName": "訂蛋糕：取貨時間",
+   "who": "我",
+   "zh": "明天下午三點"
+  },
+  {
+   "id": "bakery-137",
+   "kind": "選項",
+   "stage": "K_TIME",
+   "stageName": "訂蛋糕：取貨時間",
+   "who": "我",
+   "zh": "後天下午三點"
+  },
+  {
+   "id": "bakery-138",
+   "kind": "錯誤說明",
+   "stage": "K_TIME",
+   "stageName": "訂蛋糕：取貨時間",
+   "who": "",
+   "zh": "Ami說〔取貨時間〕來拿。"
+  },
+  {
+   "id": "bakery-139",
+   "kind": "旁白",
+   "stage": "K_TIME",
+   "stageName": "訂蛋糕：取貨時間",
+   "who": "",
+   "zh": "（Ami說什麼時候來拿？）"
+  },
+  {
+   "id": "bakery-140",
+   "kind": "台詞",
+   "stage": "K_CONFIRM",
+   "stageName": "訂蛋糕：店員確認",
+   "who": "店員",
+   "zh": "好，我跟你確認一下："
+  },
+  {
+   "id": "bakery-141",
+   "kind": "台詞",
+   "stage": "K_CONFIRM",
+   "stageName": "訂蛋糕：店員確認",
+   "who": "店員",
+   "zh": "〔吋數（店員說的）〕吋，〔口味〕，蠟燭〔蠟燭根數（店員說的）〕根，巧克力片寫「〔朋友名字〕，生日快樂」，〔取貨時間（店員說的）〕來拿。"
+  },
+  {
+   "id": "bakery-142",
+   "kind": "台詞",
+   "stage": "K_CONFIRM",
+   "stageName": "訂蛋糕：店員確認",
+   "who": "店員",
+   "zh": "這樣對嗎？"
+  },
+  {
+   "id": "bakery-143",
+   "kind": "選項",
+   "stage": "K_CONFIRM",
+   "stageName": "訂蛋糕：店員確認",
+   "who": "我",
+   "zh": "對，都沒有錯。"
+  },
+  {
+   "id": "bakery-144",
+   "kind": "選項",
+   "stage": "K_CONFIRM",
+   "stageName": "訂蛋糕：店員確認",
+   "who": "我",
+   "zh": "不好意思，有一個地方不對。"
+  },
+  {
+   "id": "bakery-145",
+   "kind": "錯誤說明",
+   "stage": "K_CONFIRM",
+   "stageName": "訂蛋糕：店員確認",
+   "who": "",
+   "zh": "店員講錯了，你要仔細聽。"
+  },
+  {
+   "id": "bakery-146",
+   "kind": "旁白",
+   "stage": "K_CONFIRM",
+   "stageName": "訂蛋糕：店員確認",
+   "who": "",
+   "zh": "（等一下，剛剛有一個地方跟Ami說的不一樣……）"
+  },
+  {
+   "id": "bakery-147",
+   "kind": "錯誤說明",
+   "stage": "K_CONFIRM",
+   "stageName": "訂蛋糕：店員確認",
+   "who": "",
+   "zh": "店員複誦的都是對的。"
+  },
+  {
+   "id": "bakery-148",
+   "kind": "旁白",
+   "stage": "K_CONFIRM",
+   "stageName": "訂蛋糕：店員確認",
+   "who": "",
+   "zh": "（再核對一次Ami的訊息……都對耶。）"
+  },
+  {
+   "id": "bakery-149",
+   "kind": "台詞",
+   "stage": "K_FIX",
+   "stageName": "訂蛋糕：哪裡不對",
+   "who": "店員",
+   "zh": "欸，哪裡不對？"
+  },
+  {
+   "id": "bakery-150",
+   "kind": "選項",
+   "stage": "K_FIX",
+   "stageName": "訂蛋糕：哪裡不對",
+   "who": "我",
+   "zh": "尺寸不對。"
+  },
+  {
+   "id": "bakery-151",
+   "kind": "選項",
+   "stage": "K_FIX",
+   "stageName": "訂蛋糕：哪裡不對",
+   "who": "我",
+   "zh": "蠟燭不對。"
+  },
+  {
+   "id": "bakery-152",
+   "kind": "選項",
+   "stage": "K_FIX",
+   "stageName": "訂蛋糕：哪裡不對",
+   "who": "我",
+   "zh": "取貨時間不對。"
+  },
+  {
+   "id": "bakery-153",
+   "kind": "錯誤說明",
+   "stage": "K_FIX",
+   "stageName": "訂蛋糕：哪裡不對",
+   "who": "",
+   "zh": "不是〔選的項目〕，是〔店員講錯的項目〕講錯了。"
+  },
+  {
+   "id": "bakery-154",
+   "kind": "旁白",
+   "stage": "K_FIX",
+   "stageName": "訂蛋糕：哪裡不對",
+   "who": "",
+   "zh": "（再聽一次店員剛剛說的……）"
+  },
+  {
+   "id": "bakery-155",
+   "kind": "綠卡說明",
+   "stage": "K_FIX",
+   "stageName": "訂蛋糕：哪裡不對",
+   "who": "",
+   "zh": "你聽出來店員講錯了！"
+  },
+  {
+   "id": "bakery-156",
+   "kind": "台詞",
+   "stage": "K_FIX",
+   "stageName": "訂蛋糕：哪裡不對",
+   "who": "店員",
+   "zh": "啊，不好意思！我改一下。"
+  },
+  {
+   "id": "bakery-157",
+   "kind": "台詞",
+   "stage": "K_NAME",
+   "stageName": "訂蛋糕：留名字",
+   "who": "店員",
+   "zh": "好，請問怎麼稱呼？我要寫一下取貨人的名字。"
+  },
+  {
+   "id": "bakery-158",
+   "kind": "選項",
+   "stage": "K_NAME",
+   "stageName": "訂蛋糕：留名字",
+   "who": "我",
+   "zh": "我叫〔名字〕。"
+  },
+  {
+   "id": "bakery-159",
+   "kind": "選項",
+   "stage": "K_NAME",
+   "stageName": "訂蛋糕：留名字",
+   "who": "我",
+   "zh": "我是Ami的朋友。"
+  },
+  {
+   "id": "bakery-160",
+   "kind": "選項",
+   "stage": "K_NAME",
+   "stageName": "訂蛋糕：留名字",
+   "who": "我",
+   "zh": "不用留名字。"
+  },
+  {
+   "id": "bakery-161",
+   "kind": "錯誤說明",
+   "stage": "K_NAME",
+   "stageName": "訂蛋糕：留名字",
+   "who": "",
+   "zh": "訂蛋糕要留取貨人的名字。"
+  },
+  {
+   "id": "bakery-162",
+   "kind": "台詞",
+   "stage": "K_NAME",
+   "stageName": "訂蛋糕：留名字",
+   "who": "店員",
+   "zh": "嗯……請問你的名字是？"
+  },
+  {
+   "id": "bakery-163",
+   "kind": "台詞",
+   "stage": "K_NAME",
+   "stageName": "訂蛋糕：留名字",
+   "who": "店員",
+   "zh": "要留名字喔，不然取貨的時候找不到。"
+  },
+  {
+   "id": "bakery-164",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "結局：Ami 進來",
+   "who": "",
+   "zh": "（蛋糕訂好了。這時候，Ami講完電話，走進麵包店。）"
+  },
+  {
+   "id": "bakery-165",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局：Ami 進來",
+   "who": "我",
+   "zh": "Ami，麵包買好了，蛋糕也訂好了！"
+  },
+  {
+   "id": "bakery-166",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局：Ami 進來",
+   "who": "Ami",
+   "zh": "哇，〔名字〕，你好厲害！連夾子都夾得像台灣人！我們去公園吃吧！"
+  },
+  {
+   "id": "bakery-167",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局：Ami 進來",
+   "who": "Ami",
+   "zh": "辛苦了！有些地方下次再注意就好。我們去公園吃吧！"
+  }
+ ]
+}
