@@ -908,7 +908,7 @@ const ov = document.getElementById('overlay'), frame = document.getElementById('
 let current = null;
 function openGame(b) {
   if (current) return;
-  current = b; P.locked = true; card.hidden = true;
+  current = b; b.result = null; P.locked = true; card.hidden = true;
   const q = new URLSearchParams({ embed: '1', name: S.name, code: S.code, s: S.script, l: S.lang });
   if (b.first) q.set('first', b.first);          // 路上突發事件：先玩看到的那件
   document.getElementById('ov-title').textContent = (b.sc.virtual ? '⚠️' : b.sc.emoji) + ' ' + b.sc.zh + ' · ' + X(b.sc.es, b.sc.en);
@@ -927,9 +927,8 @@ function closeGame() {
   if (b.sc.virtual) respawnEvent(P.x, P.y);
   updateHud();
 }
-window.addEventListener('message', e => {
-  const d = e.data;
-  if (!d || d.type !== 'scene-complete' || !current || e.source !== frame.contentWindow) return;
+/* 記下這一關的成績，關掉遊戲視窗 */
+function completeScene(d) {
   const prev = S.done[d.scene];
   if (!prev || d.score >= prev.score) S.done[d.scene] = { score: d.score, mistakes: d.mistakes };
   save(); pushProgress();
@@ -937,8 +936,17 @@ window.addEventListener('message', e => {
   closeGame();
   toast('✓ ' + (sc ? sc.zh : d.scene) + '：' + d.score + ' ' + X('puntos', 'points') + (d.mistakes ? ' · ' + d.mistakes + ' ' + X('errores', 'mistakes') : ' · ' + X('¡sin errores!', 'no mistakes!')));
   try { gtag('event', 'map_complete', { scene: d.scene, score: d.score }); } catch (e) {}
+}
+/* 遊戲送來的訊息：
+   scene-result   玩完、排行榜出現了（先記著；這時按右上角「✕ Salir」也算完成）
+   scene-complete 按了「回到地圖」 */
+window.addEventListener('message', e => {
+  const d = e.data;
+  if (!d || !current || e.source !== frame.contentWindow) return;
+  if (d.type === 'scene-result') current.result = d;
+  if (d.type === 'scene-complete') completeScene(d);
 });
-document.getElementById('ov-close').onclick = closeGame;
+document.getElementById('ov-close').onclick = () => { if (current && current.result) completeScene(current.result); else closeGame(); };
 
 /* ══════════════════════════════════════
    介面

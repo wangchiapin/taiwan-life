@@ -50,6 +50,8 @@ games/<scene>/index.html?embed=1&name=玩家名&s=simp&l=en
 - 嵌入時不顯示登入頁，直接開始。
 - 玩完和單機版一樣：結果頁 →「查看排行榜」（成績寫進那個遊戲的排行榜）→ 排行榜的按鈕變成「回到地圖」。
 
+排行榜出現時先送 `{ type: 'scene-result', scene, score, mistakes }`（地圖先記著；這時按地圖的「✕ Salir」也算完成）。
+
 按「回到地圖」時送出：
 ```js
 parent.postMessage({ type: 'scene-complete', scene: '<scene>', score, mistakes }, '*');

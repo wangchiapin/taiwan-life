@@ -414,6 +414,8 @@ async function showLeaderboard() {
   if (EMBED) {
     const back = document.querySelector('#leaderboard-screen .btn-restart');
     if (back) { back.dataset.zh = '回到地圖'; back.dataset.es = 'Volver al mapa'; back.dataset.en = 'Back to the map'; back.textContent = '回到地圖 ' + X('Volver al mapa', 'Back to the map'); back.onclick = finishEmbed; }
+    // 先告訴地圖成績（學生直接按地圖右上角「✕ Salir」離開，也算完成）
+    try { parent.postMessage({ type: 'scene-result', scene: GAME.scene, score: Game.score, mistakes: Game.mistakes }, '*'); } catch (e) {}
   }
   Tr.closeAll(); Speech.stop(); Vocab.toggle(false); Hints.toggle(false); Log.toggle(false);
   document.getElementById('side-tabs').hidden = true;
