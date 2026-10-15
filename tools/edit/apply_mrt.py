@@ -104,6 +104,7 @@ R=[
 # 101
 ("""goodFirst('P_BLUE', '你看路線圖，選對了方向。', 'Miraste el mapa y elegiste bien la dirección.', 'You checked the map and chose the right direction.')""",
  """goodFirst('P_BLUE', '太棒了！你看路線圖，選對了方向。', '¡Genial! Miraste el mapa y elegiste bien la dirección.', 'Awesome! You checked the map and chose the right direction.')""", 1),
+# 103（Ben 後來改成「（你坐在優先席上。）」，單字表 博愛座→慢慢；在 commit 裡直接改）
 # 104
 ("""L(`（這時候，一位${t.elder[0]}慢慢走上車，手裡拿著拐杖，站在你面前。）`, `(Entonces sube lentamente ${t.elder[1]} con un bastón y se queda de pie frente a ti.)`, `(Then ${t.elder[2]} slowly boards with a cane and stands in front of you.)`)""",
  """L(`（一位${t.elder[0]}慢慢走上車，站在你面前。）`, `(Sube lentamente ${t.elder[1]} y se queda de pie frente a ti.)`, `(${t.elder[2][0].toUpperCase() + t.elder[2].slice(1)} slowly boards and stands in front of you.)`)""", 1),

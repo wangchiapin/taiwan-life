@@ -599,7 +599,7 @@ const VOCAB = {
   T_RED: [['廣播', 'anuncio por altavoz', 'announcement'], ['下一站', 'la próxima estación', 'the next stop'], ['下車', 'bajarse', 'get off'], ['轉乘', 'hacer transbordo', 'transfer'], ['台北車站', 'Estación Principal de Taipei', 'Taipei Main Station']],
   X_XFER: [['轉乘', 'hacer transbordo', 'transfer'], ['指標', 'letrero, señal', 'sign'], ['板南線', 'línea Bannan (azul)', 'Bannan Line (Blue)'], ['藍線', 'línea azul', 'Blue Line'], ['出口', 'salida', 'exit']],
   P_BLUE: [['月台', 'andén', 'platform'], ['方向', 'dirección', 'direction'], ['頂埔', 'Dingpu (terminal oeste de la línea azul)', 'Dingpu (west end of the Blue Line)'], ['南港展覽館', 'Nangang Exhibition Center (terminal este)', 'Nangang Exhibition Center (east end)'], ['路線圖', 'mapa de líneas', 'route map']],
-  T_SEAT: [['博愛座', 'asiento preferencial', 'priority seat'], ['讓座', 'ceder el asiento', 'give up your seat'], ['優先席', 'asiento prioritario', 'priority seat'], ['您請坐', 'siéntese, por favor', 'please have a seat'], ['年輕人', 'joven', 'young person']],
+  T_SEAT: [['慢慢', 'despacio', 'slowly'], ['讓座', 'ceder el asiento', 'give up your seat'], ['優先席', 'asiento prioritario', 'priority seat'], ['您請坐', 'siéntese, por favor', 'please have a seat'], ['年輕人', 'joven', 'young person']],
   T_BLUE: [['下一站', 'la próxima estación', 'the next stop'], ['下車', 'bajarse', 'get off'], ['繼續', 'continuar', 'continue'], ['廣播', 'anuncio por altavoz', 'announcement'], ['到站', 'llegar a la estación', 'arrive at a station']],
   END: [['出站', 'salir de la estación', 'exit the station'], ['解鎖', 'desbloquear (un logro)', 'unlock (an achievement)'], ['複雜', 'complicado', 'complicated'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort'], ['吃飯', 'comer', 'eat a meal']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
@@ -1398,7 +1398,7 @@ const Game = {
         place: 'train',
         html: () => Game.mapHTML(),
         dialogue: () => [
-          L('（車廂裡人很多，只剩一個博愛座，你坐了下來。）', '(El vagón va lleno y solo queda un asiento preferencial; te sientas.)', '(The car is packed, and only a priority seat is left, so you sit down.)'),
+          L('（你坐在優先席上。）', '(Estás sentado en un asiento prioritario.)', "(You're sitting in a priority seat.)"),
           L(`（一位${t.elder[0]}慢慢走上車，站在你面前。）`, `(Sube lentamente ${t.elder[1]} y se queda de pie frente a ti.)`, `(${t.elder[2][0].toUpperCase() + t.elder[2].slice(1)} slowly boards and stands in front of you.)`)
         ],
         options: () => rot([`${t.elder[0]}，您請坐。`, '低下頭繼續滑手機。', '閉上眼睛假裝睡覺。']),
