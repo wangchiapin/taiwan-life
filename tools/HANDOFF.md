@@ -12,7 +12,30 @@
 - 共用機制（詳見 README）：單檔 HTML 狀態機（`getConfig()`、`L(zh,es,en)`、`Game.addMistake`、`Game.good`）、過場 `NEXT_LABEL`、換關時自動收起面板、背景音樂（`Music`，共用 key `taiwan_music`）、嵌入模式 `?embed=1&name=` → `postMessage scene-complete`、清單頁帶 `?again=名字&s=&l=` 免再輸入名字、拼音用 pinyin-pro `customPinyin`（台灣讀音）、簡體用 opencc。
 - Firebase（tiendadebebidas-d75ac）排行榜：程式寫好了，但需要 Ben 在 console 建複合索引（score desc、elapsed asc）並檢查 rules；設定裡 messagingSenderId/appId 可能對調了，等 Ben 提供正確設定再修。
 
-## 目前在做：Ben 自己改中文用詞（一個遊戲一個遊戲）
+## 下一階段（2026-10-15 Ben 確認的計畫，照順序做）
+九個遊戲的中文用詞 Ben 已經全部改完（見下面「中文用詞」）。Ben 說之後會自己全部玩一次。接下來照這個順序：
+
+1. **地圖擴充**（`map/index.html`）
+   - 用 A 方案：地圖往下延伸，畫面跟著玩家捲動（現在是 20×14 格、640×448 固定畫布，8 個建築位置已滿）。
+   - 新加 4 個地點，先標「🚧 維修中」：學校、機場（**佔兩格寬**）、電影院、菜市場。
+   - 另外加 5 個左右的空位，標「建造中」（圍欄、工地），代表之後要擴充的地點。
+   - 維修中、建造中都不能進去，走到門口顯示「還在準備中，敬請期待」（中、西、英）。
+2. **Firebase 修正 + 每局上傳完整紀錄 + 管理員成績頁**
+   - **firebaseConfig 確定錯位了**：9 個遊戲裡 `messagingSenderId` 放的是 appId、`appId` 放的是 measurementId。Ben 提供的正確值：
+     apiKey "AIzaSyD2lxec6JTbERwFPGjDzriYzIH7o9IRWnw"、authDomain "tiendadebebidas-d75ac.firebaseapp.com"、projectId "tiendadebebidas-d75ac"、storageBucket "tiendadebebidas-d75ac.firebasestorage.app"、messagingSenderId "947444542062"、appId "1:947444542062:web:62e209f33cfc3ae12c547f"、measurementId "G-PGQZPYNBLX"。
+   - 這個 Firebase 專案只有這系列遊戲在用，可以放心改規則。**Ben 還沒貼目前的 Firestore 規則**，改規則前先跟他要。
+   - 排行榜複合索引（score desc、elapsed asc）要請 Ben 在 console 建（寫步驟給他）。
+   - 新增統一的成績集合（例如 `results`）：每局一筆，含 playerId（玩家代碼）、名字、scene、score、mistakes、錯在哪裡（每個扣分原因 zh/es/en＋關卡）、elapsed、hintViews、script、lang、embed（地圖或單機）、difficulty（先固定 'normal'）、createdAt。地圖模式也要上傳。舊排行榜集合照舊，不要改名。
+   - **玩家代碼（Ben 選 A）**：第一次玩時產生短代碼（例如 `MAR-4821`，名字前三碼＋4 位數），存在 localStorage；換裝置時輸入代碼就能接上。
+   - **地圖進度也上傳**（用玩家代碼當 key），換裝置輸入代碼後讀回來。
+   - **管理員成績頁** `admin/index.html`：Google 登入，只有 **a2224907@gmail.com** 能讀（Firestore 規則：成績任何人可新增，只有這個帳號可讀、可刪）。內容：總覽（玩家數、局數、近 7 天、最熱門遊戲）、玩家×遊戲最高分表、點玩家看每局紀錄（含錯在哪裡）、點遊戲看最常錯的題目、篩選（日期、遊戲、名字）、匯出 CSV、**可以刪除紀錄**（單筆、整個玩家）。
+3. **共用程式抽成共用檔**（例如 `shared/game.js`、`shared/game.css`）：設定、翻譯、朗讀、拼音、單字抽屜、錯誤紀錄、提示、過場、排行榜、成績上傳、音樂、嵌入模式、重新開始。九個遊戲改成載入共用檔，**之後的新遊戲也用它**。抽完每個遊戲都要跑 smoke.py 四種測試。
+4. **九個遊戲全面檢查一次**（共用檔抽完再做，只做一次）：西文、英文翻譯和中文是否一致（這次改過很多句）、拼音台灣讀音（必要時加 `customPinyin`）、單字表（`VOCAB`）的詞是否還出現在對話裡。Ben 會另外找西文母語者看翻譯。
+5. **難度設定**：到時再跟 Ben 詳細討論（成績紀錄已先留 difficulty 欄位）。
+
+其他 Ben 的決定：刪掉旁白後只剩選項的頁面，Ben 自己玩過再決定要不要補；麵包圖的畫風不用改；reserva、breakfast 之後補 oracle（正解測試）。
+
+## 中文用詞（已完成）的流程與紀錄
 流程：
 1. 用 `tools/edit/rows2.py <game>` 從遊戲抽出所有中文（產生 `tools/edit/site/rows/<game>.json` 和 `tools/edit/priv/priv_<game>.json`，priv 存原始程式字串和位置）。新遊戲要先在 rows2.py 的 `CONF` 加設定（參考 reserva、breakfast）。
 2. 把 `tools/edit/site/index.html` 和 rows 發布到線上修改表：https://claude.ai/artifact/WBeNojoGuKyvoHHyjVY8G7（db 集合 `edits`，文件 `edits/<rowId>` = `{game, id, text, updatedAt}`）。在 `GAMES` 加遊戲、預設 `S.game`。
