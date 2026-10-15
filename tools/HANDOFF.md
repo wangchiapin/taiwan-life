@@ -21,6 +21,7 @@
    - 另外加 5 個左右的空位，標「建造中」（圍欄、工地），代表之後要擴充的地點。
    - 維修中、建造中都不能進去，走到門口顯示「還在準備中，敬請期待」（中、西、英）。
 2. **Firebase 修正 + 每局上傳完整紀錄 + 管理員成績頁** ✅ 2026-10-15 程式完成（`shared/`、`admin/`、`tools/firestore.rules`、`tools/apply_firebase_results.py`）。
+   2026-10-15 Ben 已在 console 全部設定好並測試通過：規則、Google 登入、9 個排行榜索引。注意：API 金鑰（Browser key，6/23 建的那把）有限制網站，要允許 `https://tiendadebebidas-d75ac.firebaseapp.com/*`，Google 登入才不會被擋（API_KEY_HTTP_REFERRER_BLOCKED）。
    原本的規則只開放 drinkgame_scores，其他 8 個排行榜一直寫不進去；新規則一起修好。Ben 要在 console：貼規則、開 Google 登入＋授權網域 wangchiapin.github.io、用管理員頁「設定檢查」建 9 個排行榜索引。
    smoke.py 的假 Firebase 改成會記錄寫入，每局檢查「剛好一筆 results、內容和遊戲一致、單機版有寫排行榜」（結果最後一欄 FB✓）。bakery 隨機玩偶爾 timeout 是舊問題（舊版本也會），不是上傳造成的。
    - **firebaseConfig 確定錯位了**：9 個遊戲裡 `messagingSenderId` 放的是 appId、`appId` 放的是 measurementId。Ben 提供的正確值：
@@ -31,7 +32,13 @@
    - **玩家代碼（Ben 選 A）**：第一次玩時產生短代碼（例如 `MAR-4821`，名字前三碼＋4 位數），存在 localStorage；換裝置時輸入代碼就能接上。
    - **地圖進度也上傳**（用玩家代碼當 key），換裝置輸入代碼後讀回來。
    - **管理員成績頁** `admin/index.html`：Google 登入，只有 **a2224907@gmail.com** 能讀（Firestore 規則：成績任何人可新增，只有這個帳號可讀、可刪）。內容：總覽（玩家數、局數、近 7 天、最熱門遊戲）、玩家×遊戲最高分表、點玩家看每局紀錄（含錯在哪裡）、點遊戲看最常錯的題目、篩選（日期、遊戲、名字）、匯出 CSV、**可以刪除紀錄**（單筆、整個玩家）。
-3. **共用程式抽成共用檔**（例如 `shared/game.js`、`shared/game.css`）：設定、翻譯、朗讀、拼音、單字抽屜、錯誤紀錄、提示、過場、排行榜、成績上傳、音樂、嵌入模式、重新開始。九個遊戲改成載入共用檔，**之後的新遊戲也用它**。抽完每個遊戲都要跑 smoke.py 四種測試。
+3. ✅ 2026-10-15 完成：**共用程式抽成共用檔** `shared/game.js`、`shared/game.css`（用法見 README「共用程式」）。
+   - 9 個遊戲都改好；`tools/share_game.py` 逐段比對（忽略註解、空白、遊戲名稱這類參數），完全一樣才刪；不一樣的 function 留在遊戲裡蓋過共用版：breakfast 的 `stageOf`、`Game.maybeTrans`，parcel 的 `restartGame`（多帶 store），reserva 的 `Game.addMistake`、`Game.feedbackHTML`（它的扣分原因可以只有中文）。
+   - reserva 先把兩處舊寫法換成新寫法（翻譯視窗的角色名稱改用 WHO／SPEAKER_RE、朗讀男聲改用 malePitch），效果一樣；順手修了英文版錯誤紀錄沒有關卡名稱時會顯示 undefined。
+   - CSS：只搬 9 個遊戲完全一樣、而且搬過去不會改變先後順序效果的 59 條；第一次多搬了會造成手機版朗讀／翻譯按鈕變小，已改掉。
+   - 驗證：`tools/compare_shots.py` 改之前／改之後逐畫面比對（繁西、簡英＋拼音、手機、嵌入），9 個遊戲約 1,500 張畫面一致（reserva 只有「通話中」閃爍小圓點拍到不同瞬間）；smoke.py 四種測試通過；從地圖進每個遊戲正常。
+   - 新增：地圖裡「重新開始」會帶玩家代碼。
+   原本的計畫：設定、翻譯、朗讀、拼音、單字抽屜、錯誤紀錄、提示、過場、排行榜、成績上傳、音樂、嵌入模式、重新開始。九個遊戲改成載入共用檔，**之後的新遊戲也用它**。抽完每個遊戲都要跑 smoke.py 四種測試。
 4. **九個遊戲全面檢查一次**（共用檔抽完再做，只做一次）：西文、英文翻譯和中文是否一致（這次改過很多句）、拼音台灣讀音（必要時加 `customPinyin`）、單字表（`VOCAB`）的詞是否還出現在對話裡。Ben 會另外找西文母語者看翻譯。
 5. **難度設定**：到時再跟 Ben 詳細討論（成績紀錄已先留 difficulty 欄位）。
 

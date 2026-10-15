@@ -19,42 +19,55 @@ INIT = """(() => { let s = 12345; Math.random = () => { s = (s * 1103515245 + 12
 
 def shot(page):
     page.mouse.move(0, 0); page.wait_for_timeout(60)
+    try: page.wait_for_function("[...document.images].every(i => i.complete)", timeout=3000)   # 等圖片載完
+    except Exception: pass
     return page.screenshot(full_page=True)
 
 def play(page, scenario):
-    shots = []
+    shots = []; bad = set(); rng = __import__('random').Random(42)
     orc = smoke.EXTRA.get(game) or smoke.ORACLES.get(game)
-    for step in range(200):
-        page.wait_for_timeout(120)
-        if page.evaluate("document.getElementById('leaderboard-screen').classList.contains('active')"):
-            page.wait_for_timeout(300); shots.append(('leaderboard', shot(page))); break
-        st = page.evaluate('Game.state')
-        if st == 'RESULT' and page.evaluate('EMBED'): shots.append(('RESULT', shot(page))); break
-        if game == 'breakfast' and page.evaluate("!!(Game.getConfig()[Game.state]||{}).pad"):
-            page.evaluate("Game.pad.ticket=[...Game.C.target]; Game.padSubmit()"); continue
-        opts = smoke.texts(page)
-        if not opts: continue
-        shots.append((f'{step:02d}_{st}', shot(page)))
-        if step == 2 and scenario == 'panels':        # 打開三個側邊分頁各拍一張
-            for tab in ['vocab-tab', 'hint-tab', 'log-tab']:
-                if page.locator('#' + tab).is_visible():
-                    page.click('#' + tab); page.wait_for_timeout(150); shots.append((f'{step:02d}_{tab}', shot(page)))
-                    page.evaluate('Vocab.toggle(false); Hints.toggle(false); Log.toggle(false)'); page.wait_for_timeout(100)
-            if page.locator('.tr-btn[data-tr]').count():
-                page.locator('.tr-btn[data-tr]').first.click(); page.wait_for_timeout(150)
-                shots.append((f'{step:02d}_tr', shot(page))); page.evaluate('Tr.closeAll()')
-        ans = None
-        if orc:
-            try: ans = page.evaluate(orc)
-            except Exception: ans = None
-        idx = 0
-        if ans:
-            for i, o in enumerate(opts):
-                if o.strip() == ans or ans in o: idx = i; break
-        elif step % 3 == 1 and len(opts) > 1: idx = 1          # 沒有正解：偶爾選錯，看到錯誤卡片
-        try: smoke.click_i(page, idx)
-        except Exception as e:
-            page.wait_for_timeout(600); continue          # 畫面剛好在換（例如錯太多次重新開始），下一輪再看
+    for step in range(150):
+      try:
+            page.wait_for_timeout(120)
+            if page.evaluate("document.getElementById('leaderboard-screen').classList.contains('active')"):
+                page.wait_for_timeout(300); shots.append(('leaderboard', shot(page))); break
+            st = page.evaluate('Game.state')
+            if page.evaluate('Game.mistakes') >= 8: page.evaluate('Game.mistakes = 0')   # 不要觸發「錯太多次重來」（和 smoke.py 一樣）
+            if st == 'RESULT' and page.evaluate('EMBED'): shots.append(('RESULT', shot(page))); break
+            if game == 'breakfast' and page.evaluate("!!(Game.getConfig()[Game.state]||{}).pad"):
+                page.evaluate("Game.pad.ticket=[...Game.C.target]; Game.padSubmit()"); continue
+            opts = smoke.texts(page)
+            if not opts: continue
+            shots.append((f'{step:02d}_{st}', shot(page)))
+            if step == 2 and scenario == 'panels':        # 打開三個側邊分頁各拍一張
+                for tab in ['vocab-tab', 'hint-tab', 'log-tab']:
+                    if page.locator('#' + tab).is_visible():
+                        page.click('#' + tab); page.wait_for_timeout(150); shots.append((f'{step:02d}_{tab}', shot(page)))
+                        page.evaluate('Vocab.toggle(false); Hints.toggle(false); Log.toggle(false)'); page.wait_for_timeout(100)
+                if page.locator('.tr-btn[data-tr]').count():
+                    page.locator('.tr-btn[data-tr]').first.click(); page.wait_for_timeout(150)
+                    shots.append((f'{step:02d}_tr', shot(page))); page.evaluate('Tr.closeAll()')
+            ans = None
+            if orc:
+                try: ans = page.evaluate(orc)
+                except Exception: ans = None
+            idx = None
+            if ans:
+                for i, o in enumerate(opts):
+                    if o.strip() == ans or ans in o: idx = i; break
+            if idx is None:      # 沒有正解：照順序試，選錯的記起來，下次換下一個（兩邊完全一樣）
+                cand = [i for i, o in enumerate(opts) if (st, o) not in bad] or list(range(len(opts)))
+                idx = rng.choice(cand)        # 兩邊用同一組隨機數字，所以選的一樣
+            m0 = page.evaluate('Game.mistakes')
+            try:
+                smoke.click_i(page, idx)
+                page.wait_for_timeout(60)
+                if page.evaluate('Game.mistakes') > m0: bad.add((st, opts[idx]))
+            except Exception as e:
+                page.wait_for_timeout(600); continue          # 畫面剛好在換（例如錯太多次重新開始），下一輪再看
+      except Exception as e:       # 畫面剛好在重新整理（錯太多次自動重來）
+        if 'closed' in str(e): raise
+        page.wait_for_timeout(700)
     return shots
 
 SCEN = [('trad_es', {}, '', 'panels'), ('simp_en_py', {}, 'simp_en', 'pinyin'), ('phone', {'width': 390, 'height': 844}, '', ''),
@@ -85,7 +98,7 @@ for name, *_ in SCEN:
     so, eo = res[('old', name)]; sn, en = res[('new', name)]
     if eo or en: print(f'  {name} 錯誤 old={eo[:2]} new={en[:2]}')
     if [k for k, _ in so] != [k for k, _ in sn]:
-        print(f'  {name} 步驟不同：old={[k for k,_ in so]} new={[k for k,_ in sn]}'); diffs += 1; continue
+        print(f'  {name} 步驟不同：old 共 {len(so)} 步、new 共 {len(sn)} 步；第一個不同：', next((a[0]+' / '+b[0] for a, b in zip(so, sn) if a[0] != b[0]), '長度不同')); diffs += 1; continue
     for (k, a), (_, c) in zip(so, sn):
         total += 1
         fa, fc = OUT / f'{name}_{k}_old.png', OUT / f'{name}_{k}_new.png'

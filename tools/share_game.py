@@ -32,6 +32,26 @@ def unit_span(text, start_re, pos=0):
 
 class Fail(Exception): pass
 
+def _fix_reserva(js):
+    """訂位是最早的遊戲：先把兩處舊寫法換成新寫法（效果一樣），再和共用版比對"""
+    def rep(a, b):
+        nonlocal js
+        if js.count(a) != 1: raise Fail('訂位前處理找不到：' + a[:40])
+        js = js.replace(a, b)
+    # 翻譯小視窗的角色名稱 → WHO / SPEAKER_RE（和其他遊戲一樣）
+    rep("  SPEAKER: { '店員': ['Empleado', 'Staff'], 'Ami': ['Ami', 'Ami'], '（一個不認識的人）': ['Desconocido', 'Stranger'] },\n", '')
+    rep("const m = item.zh.match(/^(店員|Ami|我|（一個不認識的人）)：/);", "const m = item.zh.match(SPEAKER_RE);")
+    rep("Tr.SPEAKER[m[1]]", "WHO[m[1]]")
+    rep("const L = (zh, es, en) => ({ zh, es, en });", "/* 角色名稱：翻譯視窗用 [西文, 英文] */\nconst WHO = { '店員': ['Empleado', 'Staff'], 'Ami': ['Ami', 'Ami'], '（一個不認識的人）': ['Desconocido', 'Stranger'] };\nconst SPEAKER_RE = /^(店員|Ami|我|（一個不認識的人）)：/;\nconst L = (zh, es, en) => ({ zh, es, en });")
+    # 朗讀：男聲的寫法 → useMale／malePitch（陌生人有男聲時音高 1，和原本一樣）
+    rep("'（一個不認識的人）': { pitch: 0.75, male: true } }", "'（一個不認識的人）': { pitch: 0.75, male: true, malePitch: 1 } }")
+    rep("    const v = role.male && this.male ? this.male : this.voice;", "    const useMale = role.male && this.male;\n    const v = useMale ? this.male : this.voice;")
+    rep("    u.pitch = role.male && this.male ? 1 : (role.pitch || 1);", "    u.pitch = useMale ? role.malePitch : (role.pitch || 1);")
+    # 錯誤紀錄：沒有關卡名稱時，英文版原本會顯示 undefined（小錯誤，順便修好，和其他遊戲一樣）
+    rep("const st = m.stage || ['', ''];", "const st = m.stage || ['', '', ''];")
+    return js
+PRE_FIX = {'reserva': _fix_reserva}
+
 def back_comments(text, i):
     """往上連同緊貼著的說明註解一起刪（一行的 /* … */，不含段落標題）"""
     while True:
@@ -46,6 +66,7 @@ def run(game, dry=False):
     a = html.index('<script>\n/* ═'); b = html.index('</script>', a)
     js = html[a + len('<script>\n'):b]
     report = []
+    js = PRE_FIX.get(game, lambda t: t)(js)
 
     # ── 參數 ──
     key = re.search(r"localStorage\.getItem\('(\w+_settings)'\)", js).group(1)
@@ -64,7 +85,8 @@ def run(game, dry=False):
         if not sp: raise SystemExit('共用檔沒有：' + start_re)
         return SHARED_JS[sp[0]:sp[1]]
 
-    removed = []
+    removed = []; overridden = []
+    OVERRIDABLE = {'stageOf', 'restartGame', 'finishEmbed', 'showLeaderboard', 'uploadResult', 'applyLang', 'convertLogin', 'convertNode', 'loadT2S', 'toPinyin'}
     def remove_unit(start_re, label, fix_game=lambda t: t, fix_shared=lambda t: t, required=True):
         nonlocal js
         sp = unit_span(js, start_re)
@@ -74,6 +96,8 @@ def run(game, dry=False):
         g = js[sp[0]:sp[1]]
         s = lit(shared_unit(start_re))
         if norm(fix_game(g)) != norm(fix_shared(s)):
+            if re.match(r'^(async )?function ', g) and label in OVERRIDABLE:
+                overridden.append(label); return       # 遊戲自己的版本留著，會蓋過共用版
             d = '\n'.join(difflib.unified_diff(norm(fix_shared(s)).split('; '), norm(fix_game(g)).split('; '), 'shared', game, lineterm='', n=1))
             raise Fail(f'{label} 不一樣：\n' + '\n'.join(d.split('\n')[:40]))
         js = js[:back_comments(js, sp[0])] + js[sp[1]:]
@@ -82,7 +106,7 @@ def run(game, dry=False):
     # 拼音、小工具
     for name in ['PY_OPT', 'isDigits']: remove_unit(rf'^const {name} = ', name)
     remove_unit(r'^function toPinyin\(', 'toPinyin')
-    for name in ['CN', 'L', 'M', 'pick', 'shuffle', 'esc']: remove_unit(rf'^const {name} = ', name)
+    for name in ['CN', 'L', 'M', 'pick', 'shuffle', 'esc']: remove_unit(rf'^const {name} = ', name, required=False)
     remove_unit(r'^function track\(', 'track')
     # 網址參數、設定
     for name in ['QS', 'EMBED']: remove_unit(rf'^const {name} = ', name)
@@ -103,7 +127,7 @@ def run(game, dry=False):
     remove_unit(r"^document\.getElementById\('vocab-tab'\)\.onclick", 'vocab-tab')
     remove_unit(r"^document\.getElementById\('vocab-close'\)\.onclick", 'vocab-close')
     # 錯誤紀錄
-    remove_unit(r'^function stageOf\(', 'stageOf',
+    remove_unit(r'^function stageOf\(', 'stageOf', required=False,
                 fix_game=lambda t: t.replace('{ return STAGE[Game.state] || [Game.state, Game.state, Game.state]; }',
                                              '{ const s = STAGE[Game.state]; return s ? [s[0], s[1], s[2]] : [Game.state, Game.state, Game.state]; }'))
     remove_unit(r'^const Log = ', 'Log')
@@ -152,8 +176,8 @@ def run(game, dry=False):
         else:
             kept.append(n)
     if on_start:
-        body = body.replace('\n  get N()', '\n  /* 按開始後、換到遊戲畫面前（shared/game.js 的 startGame 會呼叫） */\n  onStart() {\n    '
-                            + on_start.replace('Game.', 'this.').replace('\n', '\n  ') + '\n  },\n\n  get N()', 1) if '\n  get N()' in body else body
+        body = body.replace('const Game = {\n', 'const Game = {\n  /* 按開始後、換到遊戲畫面前（shared/game.js 的 startGame 會呼叫） */\n  onStart() {\n    '
+                            + on_start.replace('Game.', 'this.').replace('\n', '\n  ') + '\n  },\n', 1)
         if 'onStart()' not in body: raise Fail('onStart 放不進去')
     body = body.replace('const Game = {', 'const Game = defineGame({', 1)
     body = re.sub(r'\n\};\n$', '\n});\n', body)
@@ -161,10 +185,10 @@ def run(game, dry=False):
     js = js[:gi] + body + js[ge:]
 
     # ── 最後的「重新開始」→ GameBoot() ──
-    boot = re.search(r"/\* 從「重新開始」回來：直接用原本的名字開新的一局 \*/\n\(\(\) => \{\n  const again = .*?\n\}\)\(\);\n", js, re.S)
+    boot = re.search(r"/\* 從「重新開始」回來[^\n]*\*/\n\(\(\) => \{\n  const (?:again|name) = .*?\n\}\)\(\);\n", js, re.S)
     if not boot: raise Fail('找不到最後的重新開始區塊')
     exp = "(() => { const again = EMBED ? QS.get('name') : QS.get('again'); if (!again) return; if (!EMBED) history.replaceState(null, '', location.pathname); document.getElementById('player-name-input').value = again; startGame(); })();"
-    if norm(boot.group(0)) != exp: raise Fail('重新開始區塊不一樣')
+    if norm(re.sub(r"(?<![\w'-])name(?![\w'-])", 'again', boot.group(0))) != exp: raise Fail('重新開始區塊不一樣')
     js = js.replace(boot.group(0), '/* 從「重新開始」或清單頁回來：直接用原本的名字開新的一局 */\nGameBoot();\n')
 
     # ── 清掉只剩標題的段落 ──
@@ -175,7 +199,7 @@ def run(game, dry=False):
            + (f" timerPrefix: '{tm}'," if tm != '⏱ ' else '')
            + f"\n  roles: {roles}\n}};\n</script>\n<script src=\"../../shared/game.js\"></script>\n")
     html = html[:a] + cfg + '<script>\n' + js + html[b:]
-    print(game, '刪掉', len(removed), '段；Game 保留自己的版本：', kept or '無', '；onStart：', on_start or '無')
+    print(game, '刪掉', len(removed), '段；保留自己的版本：', (overridden + ['Game.' + k for k in kept]) or '無', '；onStart：', on_start or '無')
     if not dry: path.write_text(html, encoding='utf-8')
     return removed, kept
 

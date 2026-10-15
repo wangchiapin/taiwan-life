@@ -27,7 +27,7 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['name', 'score', 'elapsed', 'createdAt'])
         && okName(request.resource.data.name)
         && request.resource.data.score is int
-        && request.resource.data.score <= 100 && request.resource.data.score >= -1000
+        && request.resource.data.score <= 200 && request.resource.data.score >= -1000   // 夜市殺價有加分，最高 120
         && request.resource.data.elapsed is number && request.resource.data.elapsed >= 0;
       allow delete: if col in scoreCols() && isAdmin();
     }

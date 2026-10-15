@@ -63,8 +63,18 @@ parent.postMessage({ type: 'scene-complete', scene: '<scene>', score, mistakes }
 ## 不帶 embed=1
 就是單機版：有登入頁、排行榜，連結可以直接發給學生。
 
+## 共用程式（shared/game.js、shared/game.css）
+9 個遊戲共用：設定（繁簡、西英）、翻譯小視窗、背景音樂、朗讀、拼音、單字抽屜、錯誤紀錄、開始畫面、重新開始、地圖嵌入、成績上傳、排行榜，
+以及遊戲物件的共用功能（計時、扣分、回饋卡、拼音、圖片、過場）。改這兩個檔案會影響全部遊戲。
+
+每個遊戲的 index.html 裡留下的：
+1. 載入順序：`shared/player.js` → Firebase（`initFB`）→ `<link shared/game.css>` → 自己的 `<style>`（顏色變數和自己的樣式）→ 畫面 HTML → `const GAME = {…}` → `shared/game.js` → 自己的程式。
+2. `GAME = { scene, track, settingsKey, timerPrefix?, roles }`：場景 ID、GA4 的 game 名稱（沿用舊名）、存設定的 localStorage 名稱、計時器前面的字（預設 ⏱）、朗讀角色的音高。可選 `restartParams(p)`。
+3. 自己的程式：`pinyinPro.customPinyin`、資料、`WHO`／`SPEAKER_RE`、`VOCAB`／`VOCAB_OF`、`Hints`、`STAGE`、`NEXT_LABEL`、`const Game = defineGame({ … })`（`setup`、`getConfig`、`render`、`handleChoice`、`formatText`、`setPlace`、`setImage`…；同名功能會蓋過共用版；開始時要多做的事寫在 `onStart()`）、最後 `GameBoot();` 和 `Music.init({…})`。
+
 ## 新增遊戲
-複製現有遊戲的共用區塊（設定、翻譯、朗讀、單字、錯誤紀錄、排行榜、重新開始），只換遊戲專屬部分；詳見交接包。
+複製一個現有遊戲（建議 mrt 或 street，最新），只改上面第 2、3 點的遊戲專屬部分，共用的不用複製。
+改完跑 `tools/smoke.py` 四種測試。改共用檔時，可以用 `tools/compare_shots.py <遊戲> <舊檔>` 逐畫面比對改之前／改之後。
 
 ## 圖片規格
 情境圖：正方形 .jpg，**720×720**、品質約 84（每張約 100–150 KB）。遊戲最大只顯示 360px 寬，720 已足夠高解析螢幕。
