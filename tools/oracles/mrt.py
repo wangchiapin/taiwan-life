@@ -24,7 +24,7 @@ ORACLE = """() => {
   const t = Game.task, s = Game.state;
   const m = {
     START: '走向捷運站', G_DRINK: '好，我喝完再進去。', G_TAP: '去加值機加值', G_TOP: '加100元',
-    S_ASK: '請問到' + t.dest + '站要怎麼搭？', P_RED: '往' + t.rdir + '方向', T_RED: t.rstops[Game.rstep] === '台北車站' ? '下一站下車' : '不下車，繼續坐',
+    S_ASK: '請問要怎麼搭去' + t.dest + '站？', P_RED: '往' + t.rdir + '方向', T_RED: t.rstops[Game.rstep] === '台北車站' ? '下一站下車' : '不下車，繼續坐',
     X_XFER: '跟著藍色「板南線」的指標走', P_BLUE: '往' + t.dir + '方向', T_SEAT: t.elder[0] + '，您請坐。',
     T_BLUE: t.stops[Game.step] === t.dest ? '下一站下車' : '不下車，繼續坐'
   };
