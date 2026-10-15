@@ -1197,7 +1197,7 @@ const Game = {
       /* ═══ 1 紅綠燈 ═══ */
       E_light: mk('light', {
         html: () => Game.signalHTML('red'),
-        dialogue: () => [sc('（你走到一個大路口，行人號誌是紅燈。路上沒什麼車，旁邊有兩個人已經直接走過去了。）', '(Llegas a un cruce grande y el semáforo peatonal está en rojo. Casi no pasan autos y dos personas ya cruzaron.)', '(You reach a big intersection and the pedestrian signal is red. There are hardly any cars, and two people have already walked across.)')],
+        dialogue: () => [sc('（行人號誌是紅燈。路上沒什麼車，所以旁邊有兩個人直接走過去了。）', '(El semáforo peatonal está en rojo. Casi no pasan autos, así que dos personas a tu lado cruzan sin más.)', '(The pedestrian signal is red. There are hardly any cars, so two people beside you just walk across.)')],
         opts: [
           { t: '等到小綠人亮了再走。', ok: true },
           { t: '沒有車，直接闖過去。', m: M('紅燈的時候不能過馬路，就算沒有車也一樣。', 'Con la luz roja no se cruza, aunque no vengan autos.', "You don't cross on a red light, even if there are no cars."), th: [sc('（一台機車突然從旁邊衝出來，你嚇了一跳！）', '(¡Una moto sale de golpe por un lado y te llevas un susto!)', '(A scooter suddenly shoots out from the side and you jump!)')] },
