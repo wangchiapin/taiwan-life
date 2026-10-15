@@ -24,7 +24,7 @@ ORACLE = """() => {
   const t = Game.task, s = Game.state;
   const fw = t.fallWho[0], ew = t.elderWho[0], ww = t.walletWho[0];
   const m = {
-    START: '走上街', E_light: '等到小綠人亮了再走。', E_honk: '往旁邊靠一下，讓他先過。', E_fall: '「您還好嗎？哪裡痛？」', E_fall2: '您先別動，我幫您打119。',
+    START: '走上街', E_light: '等到小綠人亮了再走。', E_honk: '往旁邊靠一下，讓他先過。', E_fall: '「您還好嗎？哪裡痛？」', E_fall2: '您先別動，我幫您叫救護車。',
     E_elder: ew + '，我陪您慢慢過。', E_ask: '直走，到第' + CN[t.n] + '個路口' + t.dir[0] + '，在' + t.lm[0] + '旁邊。',
     E_wallet: ww + '，不好意思，您的錢包掉了！', E_rain: '好，謝謝你，那就麻煩你了。', E_flyer: '不好意思，我趕時間，不用了，謝謝。'
   };

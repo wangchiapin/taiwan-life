@@ -361,8 +361,8 @@
   </div>
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
-    週六下午，Ami 在前面路口的咖啡店等你。你走在路上，會遇到各種突發的事：紅燈、機車喇叭、有人跌倒、阿嬤過馬路、有人問路、掉錢包、下雨、發傳單……每次遊戲會遇到其中五件。<br>
-    <span data-es="Es sábado por la tarde y Ami te espera en una cafetería de la esquina. Por el camino te pasarán cosas imprevistas: semáforo en rojo, bocinazos de motos, alguien que se cae, una abuelita cruzando, alguien que pregunta una dirección, una billetera caída, lluvia, volantes… En cada partida te tocan cinco." data-en="It's Saturday afternoon and Ami is waiting at a café at the next intersection. On the way you'll run into all kinds of surprises: a red light, scooter horns, someone falling, a grandma crossing, someone asking directions, a dropped wallet, rain, flyers… Each round gives you five of them.">Es sábado por la tarde y Ami te espera en una cafetería de la esquina. Por el camino te pasarán cosas imprevistas: semáforo en rojo, bocinazos de motos, alguien que se cae, una abuelita cruzando, alguien que pregunta una dirección, una billetera caída, lluvia, volantes… En cada partida te tocan cinco.</span>
+    Ami 在咖啡店等你。你走在路上，會遇到各種突發事件，你可以順利到達咖啡店嗎？<br>
+    <span data-es="Ami te espera en una cafetería. Por el camino te pasarán todo tipo de imprevistos. ¿Podrás llegar a la cafetería sin problemas?" data-en="Ami is waiting for you at a café. On the way you'll run into all kinds of surprises. Can you make it to the café?">Ami te espera en una cafetería. Por el camino te pasarán todo tipo de imprevistos. ¿Podrás llegar a la cafetería sin problemas?</span>
   </p>
 </div>
 
@@ -453,6 +453,7 @@ pinyinPro.customPinyin({
   '衣服和': 'yī fu hàn', '你和': 'nǐ hàn', '同事': 'tóng shì', '朋友': 'péng yǒu', '清單': 'qīng dān', '會合': 'huì hé', '晚餐': 'wǎn cān', '辛苦': 'xīn kǔ'
 });
 pinyinPro.customPinyin({
+  '路上': 'lù shàng', '走得': 'zǒu de', '處理得': 'chǔ lǐ de', '慢慢地': 'màn màn de', '客氣地': 'kè qì de', '認識': 'rèn shì',
   '紅綠燈': 'hóng lǜ dēng', '行人號誌': 'xíng rén hào zhì', '小綠人': 'xiǎo lǜ rén', '小紅人': 'xiǎo hóng rén', '闖紅燈': 'chuǎng hóng dēng', '斑馬線': 'bān mǎ xiàn', '紅燈': 'hóng dēng', '綠燈': 'lǜ dēng',
   '機車': 'jī chē', '車': 'chē', '喇叭': 'lǎ ba', '按喇叭': 'àn lǎ ba', '借過': 'jiè guò', '小巷': 'xiǎo xiàng', '巷子': 'xiàng zi', '人行道': 'rén xíng dào', '騎士': 'qí shì',
   '跌倒': 'diē dǎo', '哎喲': 'āi yō', '您還好嗎': 'nín hái hǎo ma', '還好': 'hái hǎo', '哪裡痛': 'nǎ lǐ tòng', '受傷': 'shòu shāng', '站不起來': 'zhàn bù qǐ lái', '別動': 'bié dòng', '救護車': 'jiù hù chē', '打119': 'dǎ yāo yāo jiǔ', '蹲': 'dūn',
@@ -572,17 +573,17 @@ function saveSettings() { try { localStorage.setItem('street_settings', JSON.str
    每一關的單字（中文、西文、英文；拼音自動產生）
 ══════════════════════════════════════ */
 const VOCAB = {
-  START: [['路口', 'esquina, cruce', 'intersection'], ['咖啡店', 'cafetería', 'café'], ['小心', 'tener cuidado', 'be careful'], ['處理', 'ocuparse de, resolver', 'deal with']],
-  E_light: [['紅綠燈', 'semáforo', 'traffic light'], ['行人號誌', 'semáforo peatonal', 'pedestrian signal'], ['小綠人', 'hombrecito verde (luz peatonal)', 'little green man (walk signal)'], ['闖紅燈', 'saltarse el semáforo en rojo', 'run a red light'], ['斑馬線', 'paso de cebra', 'crosswalk']],
-  E_honk: [['小巷', 'callejón', 'alley'], ['人行道', 'acera', 'sidewalk'], ['機車', 'moto, scooter', 'scooter'], ['按喇叭', 'tocar la bocina', 'honk'], ['借過', 'permiso, déjeme pasar', 'excuse me (let me through)']],
+  START: [['咖啡店', 'cafetería', 'café'], ['趕快', 'rápido, date prisa', 'hurry'], ['小心', 'tener cuidado', 'be careful'], ['路上', 'por el camino', 'on the way']],
+  E_light: [['紅綠燈', 'semáforo', 'traffic light'], ['行人號誌', 'semáforo peatonal', 'pedestrian signal'], ['小綠人', 'hombrecito verde (luz peatonal)', 'little green man (walk signal)'], ['闖紅燈', 'saltarse el semáforo en rojo', 'run a red light'], ['交通規則', 'normas de tráfico', 'traffic rules'], ['三寶', '(jerga) conductor o peatón imprudente', '(slang) reckless road user']],
+  E_honk: [['瞪', 'mirar mal, fulminar con la mirada', 'glare at'], ['點頭', 'asentir con la cabeza', 'nod'], ['機車', 'moto, scooter', 'scooter'], ['按喇叭', 'tocar la bocina', 'honk'], ['借過', 'permiso, déjeme pasar', 'excuse me (let me through)']],
   E_fall: [['跌倒', 'caerse', 'fall down'], ['您還好嗎', '¿se encuentra bien?', 'are you OK? (polite)'], ['哪裡痛', '¿dónde le duele?', 'where does it hurt?'], ['受傷', 'lastimarse', 'get hurt']],
   E_fall2: [['站不起來', 'no poder levantarse', "can't stand up"], ['別動', 'no se mueva', "don't move"], ['打119', 'llamar al 119', 'call 119'], ['救護車', 'ambulancia', 'ambulance']],
-  E_elder: [['過馬路', 'cruzar la calle', 'cross the street'], ['菜籃', 'cesta de la compra', 'shopping basket'], ['閃', 'parpadear', 'flash'], ['陪', 'acompañar', 'accompany'], ['好心', 'de buen corazón', 'kind-hearted']],
+  E_elder: [['過馬路', 'cruzar la calle', 'cross the street'], ['催', 'meter prisa, apurar', 'rush (someone)'], ['紅燈', 'luz roja', 'red light'], ['陪', 'acompañar', 'accompany'], ['好心', 'de buen corazón', 'kind-hearted']],
   E_ask: [['問路', 'preguntar por una dirección', 'ask for directions'], ['直走', 'ir todo recto', 'go straight'], ['左轉', 'girar a la izquierda', 'turn left'], ['右轉', 'girar a la derecha', 'turn right'], ['旁邊', 'al lado', 'next to'], ['郵局', 'oficina de correos', 'post office']],
-  E_wallet: [['錢包', 'billetera', 'wallet'], ['掉', 'caerse, perder', 'drop'], ['撿', 'recoger del suelo', 'pick up'], ['叫住', 'llamar a alguien para que se detenga', 'call out to stop someone'], ['不好意思', 'disculpe', 'excuse me']],
+  E_wallet: [['錢包', 'billetera', 'wallet'], ['掉', 'caerse, perder', 'drop'], ['撿', 'recoger del suelo', 'pick up'], ['提醒', 'avisar, recordar', 'remind, let someone know'], ['不好意思', 'disculpe', 'excuse me']],
   E_rain: [['大雨', 'aguacero', 'heavy rain'], ['傘', 'paraguas', 'umbrella'], ['撐傘', 'abrir/sostener un paraguas', 'hold up an umbrella'], ['麻煩', 'molestar, causar molestia', 'trouble'], ['一起', 'juntos', 'together']],
-  E_flyer: [['傳單', 'volante', 'flyer'], ['趕時間', 'tener prisa', 'be in a hurry'], ['不用了', 'no hace falta', 'no need'], ['介紹', 'presentar, explicar', 'introduce, explain']],
-  END: [['順利', 'sin problemas', 'smoothly'], ['處理', 'ocuparse de', 'deal with'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
+  E_flyer: [['傳單', 'volante', 'flyer'], ['趕時間', 'tener prisa', 'be in a hurry'], ['不用了', 'no hace falta', 'no need'], ['介紹', 'presentar, explicar', 'introduce, explain'], ['拒絕', 'rechazar', 'refuse, turn down']],
+  END: [['順利', 'sin problemas', 'smoothly'], ['處理', 'ocuparse de', 'deal with'], ['經驗', 'experiencia', 'experience'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 
@@ -1128,15 +1129,12 @@ const Game = {
   amiLines() {
     const N = this.N;
     return [
-      L(`Ami：${N}，我在前面路口的咖啡店等你，你走過來吧！`,
-        `${N}, te espero en la cafetería de la esquina de enfrente. ¡Ven caminando!`,
-        `${N}, I'm waiting at the café at the next intersection. Come on over!`),
-      L('Ami：路上人多車也多，要小心喔。',
-        'Hay mucha gente y muchos autos en la calle; ten cuidado.',
-        "There are lots of people and cars out there, so be careful."),
-      L('Ami：如果路上有什麼事，先處理一下，我可以等你。',
-        'Si pasa algo en el camino, ocúpate primero; yo puedo esperarte.',
-        "If something happens on the way, deal with it first — I can wait.")
+      L(`Ami：${N}，我在咖啡店等你，你趕快過來吧！`,
+        `${N}, te espero en la cafetería. ¡Ven rápido!`,
+        `${N}, I'm waiting for you at the café. Hurry on over!`),
+      L('Ami：路上小心喔！',
+        '¡Ten cuidado por el camino!',
+        'Be careful on the way!')
     ];
   },
   listHTML() { return ''; },
@@ -1202,112 +1200,110 @@ const Game = {
         dialogue: () => [sc('（你走到一個大路口，行人號誌是紅燈。路上沒什麼車，旁邊有兩個人已經直接走過去了。）', '(Llegas a un cruce grande y el semáforo peatonal está en rojo. Casi no pasan autos y dos personas ya cruzaron.)', '(You reach a big intersection and the pedestrian signal is red. There are hardly any cars, and two people have already walked across.)')],
         opts: [
           { t: '等到小綠人亮了再走。', ok: true },
-          { t: '沒有車，我也直接走過去。', m: M('紅燈的時候不能過馬路，就算沒有車也一樣。', 'Con la luz roja no se cruza, aunque no vengan autos.', "You don't cross on a red light, even if there are no cars."), th: [sc('（一台機車突然從旁邊衝出來，你嚇了一跳！）', '(¡Una moto sale de golpe por un lado y te llevas un susto!)', '(A scooter suddenly shoots out from the side and you jump!)')] },
+          { t: '沒有車，直接闖過去。', m: M('紅燈的時候不能過馬路，就算沒有車也一樣。', 'Con la luz roja no se cruza, aunque no vengan autos.', "You don't cross on a red light, even if there are no cars."), th: [sc('（一台機車突然從旁邊衝出來，你嚇了一跳！）', '(¡Una moto sale de golpe por un lado y te llevas un susto!)', '(A scooter suddenly shoots out from the side and you jump!)')] },
           { t: '跟著前面的人一起走。', m: M('別人闖紅燈，你也不可以跟著做。', 'Que otros se salten el semáforo no significa que tú puedas hacerlo.', "Just because others run the red light doesn't mean you should."), th: [sc('（你停了一下，旁邊的人看了你一眼……）', '(Te detienes y la gente a tu lado te mira…)', '(You stop, and the people beside you glance at you…)')] }
         ],
-        good: ['在台灣，要等小綠人亮了才過馬路。', 'En Taiwán se cruza solo cuando se enciende el hombrecito verde.', 'In Taiwan you cross only when the little green man lights up.'],
-        after: [sc('（小綠人亮了，你慢慢走過斑馬線。）', '(Se enciende el hombrecito verde y cruzas con calma por el paso de cebra.)', '(The little green man lights up and you walk across the crosswalk.)')]
+        good: ['遵守交通規則，不要當馬路三寶。', 'Respeta las normas de tráfico: no seas un peligro en la calle.', "Follow the traffic rules — don't be a road menace."],
+        after: [sc('（小綠人走起來了！很可愛吧！）', '(¡El hombrecito verde echa a andar! ¿A que es lindo?)', "(The little green man starts walking! Cute, isn't it?)")]
       }),
 
       /* ═══ 2 機車按喇叭 ═══ */
       E_honk: mk('honk', {
-        dialogue: () => [sc('（你走進一條小巷，巷子很窄，沒有人行道。後面突然傳來「嗶！嗶！」的喇叭聲，一台機車想要過去。）', '(Entras en un callejón estrecho, sin acera. De pronto suena «¡bip, bip!» detrás de ti: una moto quiere pasar.)', '(You walk into a narrow alley with no sidewalk. Suddenly you hear "beep, beep!" behind you — a scooter wants to get past.)')],
+        dialogue: () => [sc('（叭！叭！）', '(¡Piii, piii!)', '(Honk! Honk!)')],
         opts: [
           { t: '往旁邊靠一下，讓他先過。', ok: true },
-          { t: '站在原地不動，回頭看他。', m: M('機車按喇叭，是請你讓一下。往旁邊靠比較安全。', 'Si la moto toca la bocina, te pide que te apartes. Hazte a un lado: es más seguro.', 'When a scooter honks, it is asking you to move over. Step aside to be safe.'), th: [L('騎士：欸，借過一下！', '¡Disculpa, déjame pasar!', 'Excuse me, let me through!')] },
+          { t: '站在原地不動，回頭瞪他。', m: M('機車按喇叭，你可以先讓一下，保護自己的安全。', 'Si una moto toca la bocina, puedes apartarte primero para protegerte.', 'When a scooter honks, you can step aside first to keep yourself safe.'), th: [L('騎士：欸，借過一下！', '¡Disculpa, déjame pasar!', 'Excuse me, let me through!')] },
           { t: '走到巷子中間，離他遠一點。', m: M('不要走到路中間，那樣更危險。', 'No te pongas en el medio del callejón: es más peligroso.', "Don't walk into the middle of the alley — that's more dangerous."), th: [sc('（機車慢慢跟在你後面，騎士一直按喇叭。）', '(La moto te sigue despacio y el conductor sigue tocando la bocina.)', '(The scooter creeps along behind you, the rider still honking.)')] }
         ],
-        good: ['小巷子裡聽到喇叭聲，要往旁邊靠，讓車先過。', 'Si oyes una bocina en un callejón, apártate y deja pasar al vehículo.', 'If you hear a horn in a narrow alley, step aside and let the vehicle pass.'],
-        after: [L('騎士：謝謝！', '¡Gracias!', 'Thanks!'), sc('（機車慢慢地從你旁邊騎過去。）', '(La moto pasa despacio a tu lado.)', '(The scooter slowly rides past you.)')]
+        good: ['雖然可能不是你的問題，但是你很有禮貌喔！', 'Quizá no era culpa tuya, ¡pero fuiste muy educado!', "It may not have been your fault, but that was very polite of you!"],
+        after: [L('騎士：謝謝！', '¡Gracias!', 'Thanks!'), sc('（機車慢慢地從你旁邊騎過去，跟你點點頭感謝。）', '(La moto pasa despacio a tu lado y el conductor te agradece con la cabeza.)', '(The scooter slowly rides past you, and the rider nods in thanks.)')]
       }),
 
       /* ═══ 3 有人跌倒（兩步） ═══ */
       E_fall: mk('fall', {
-        dialogue: () => [sc(`（前面有一位${fw[0]}在人行道上跌倒了，坐在地上，沒有站起來。）`, `(Delante, ${fw[1]} se ha caído en la acera y sigue sentado en el suelo.)`, `(Ahead, ${fw[2]} has fallen on the sidewalk and is still sitting on the ground.)`),
+        dialogue: () => [sc(`（前面有一位${fw[0]}跌倒了，坐在地上！）`, `(Delante, ¡${fw[1]} se ha caído y está sentado en el suelo!)`, `(Ahead, ${fw[2]} has fallen and is sitting on the ground!)`),
           L(`${fw[0]}：哎喲……`, 'Ay…', 'Ouch…')],
         opts: [
           { t: '「您還好嗎？哪裡痛？」', ok: true },
-          { t: '趕快用力把他拉起來。', m: M('不要馬上拉受傷的人。先問他哪裡痛，必要的時候打119。', 'No levantes de golpe a alguien que pudo lastimarse: pregunta dónde le duele y, si hace falta, llama al 119.', "Don't yank up someone who may be hurt — ask where it hurts first, and call 119 if needed."), th: [L(`${fw[0]}：啊！好痛！不要拉我！`, '¡Ay! ¡Me duele! ¡No me jale!', "Ow! It hurts! Don't pull me!")] },
-          { t: '假裝沒看到，繼續走。', m: M('看到有人跌倒，要先關心他。', 'Si ves a alguien caerse, primero interésate por él.', 'If you see someone fall, check on them first.'), th: [sc('（你走了幾步，覺得這樣不對，又走回來。）', '(Das unos pasos, sientes que no está bien y vuelves.)', "(You take a few steps, feel it isn't right, and go back.)")] }
+          { t: '用力把他拉起來。', m: M('不要馬上拉受傷的人。先問他哪裡痛，必要的時候打119。', 'No levantes de golpe a alguien que pudo lastimarse: pregunta dónde le duele y, si hace falta, llama al 119.', "Don't yank up someone who may be hurt — ask where it hurts first, and call 119 if needed."), th: [L(`${fw[0]}：啊！好痛！不要拉我！`, '¡Ay! ¡Me duele! ¡No me jale!', "Ow! It hurts! Don't pull me!")] },
+          { t: '假裝沒看到，繼續走。', m: M('看到有人跌倒，我們可以關心他一下，世界會更美好。', 'Si ves a alguien caerse, puedes preguntarle cómo está: el mundo será un poco mejor.', 'If you see someone fall, you can check on them — the world will be a little better.'), th: [sc('（你走了幾步，覺得這樣不對，又走回來。）', '(Das unos pasos, sientes que no está bien y vuelves.)', "(You take a few steps, feel it isn't right, and go back.)")] }
         ],
-        good: ['看到有人跌倒，先問「您還好嗎？」。', 'Si ves a alguien caerse, pregunta primero «¿Está bien?».', 'When someone falls, first ask "Are you OK?".'],
-        after: [sc('（你蹲下來，輕輕地問他。）', '(Te agachas y le preguntas con suavidad.)', '(You crouch down and ask gently.)')],
+        good: ['你很善良喔！看到有人跌倒會上前關心。', '¡Qué buena persona! Cuando alguien se cae, te acercas a ver cómo está.', 'How kind! When someone falls, you go over to check on them.'],
         to: 'E_fall2'
       }),
       E_fall2: mk('fall2', {
         dialogue: () => [L(`${fw[0]}：我的腳好痛，站不起來……`, 'Me duele mucho el pie y no puedo levantarme…', "My foot really hurts and I can't get up…")],
         opts: [
-          { t: '您先別動，我幫您打119。', ok: true },
+          { t: '您先別動，我幫您叫救護車。', ok: true },
           { t: '那您自己慢慢站起來吧。', m: M('他站不起來，要打119，請救護車來。', 'No puede levantarse: hay que llamar al 119 para pedir una ambulancia.', "He/she can't get up — call 119 for an ambulance."), th: [sc('（你看著他，覺得這樣不行。）', '(Lo miras y piensas que así no se puede.)', "(You look at him/her and realize that won't do.)")] },
           { t: '我扶您去搭捷運。', m: M('受傷的人不要自己走，也不要搭捷運，先打119。', 'Una persona herida no debe caminar ni tomar el metro: primero llama al 119.', "An injured person shouldn't walk or take the MRT — call 119 first.")
             , th: [L(`${fw[0]}：不行不行，我真的走不了……`, 'No, no, de verdad no puedo caminar…', "No, no, I really can't walk…")] }
         ],
-        good: ['在台灣，需要救護車就打119。', 'En Taiwán, si hace falta una ambulancia, se llama al 119.', 'In Taiwan, call 119 when you need an ambulance.'],
-        after: [sc('（你打了119，十幾分鐘後，救護車來了。）', '(Llamas al 119 y, unos diez minutos después, llega la ambulancia.)', '(You call 119, and about ten minutes later the ambulance arrives.)'), L(`${fw[0]}：謝謝你，年輕人！`, '¡Gracias, jovencito!', 'Thank you, young one!')]
+        good: ['沒錯！在台灣，需要救護車就打119。', '¡Exacto! En Taiwán, si hace falta una ambulancia, se llama al 119.', 'Exactly! In Taiwan, call 119 when you need an ambulance.'],
+        after: [L(`${fw[0]}：謝謝你，年輕人！`, '¡Gracias, jovencito!', 'Thank you, young one!')]
       }),
 
       /* ═══ 4 阿嬤過馬路 ═══ */
       E_elder: mk('elder', {
         html: () => Game.signalHTML('green'),
-        dialogue: () => [sc(`（綠燈亮了。一位${ew[0]}拿著菜籃慢慢過馬路，走到一半，小綠人開始閃了。）`, `(Se pone verde. ${ew[1][0].toUpperCase() + ew[1].slice(1)} cruza despacio con una cesta de verduras y, a mitad de camino, el hombrecito verde empieza a parpadear.)`, `(The light turns green. ${ew[2][0].toUpperCase() + ew[2].slice(1)} slowly crosses with a basket of vegetables, and halfway across, the little green man starts to flash.)`)],
+        dialogue: () => [sc(`（綠燈亮了。一位${ew[0]}慢慢過馬路。）`, `(Se pone verde. ${ew[1][0].toUpperCase() + ew[1].slice(1)} cruza la calle despacio.)`, `(The light turns green. ${ew[2][0].toUpperCase() + ew[2].slice(1)} slowly crosses the street.)`)],
         opts: [
           { t: `${ew[0]}，我陪您慢慢過。`, ok: true },
-          { t: '低頭滑手機，等他自己過。', m: M('長輩走得慢，看到了要幫忙。', 'Los mayores caminan despacio: si lo ves, ayúdalo.', 'Elderly people walk slowly — if you see it, help.'), th: [sc('（車子開始按喇叭了。）', '(Los autos empiezan a tocar la bocina.)', '(The cars start honking.)')] },
-          { t: '「快一點！綠燈要沒有了！」', m: M('這樣催長輩很不禮貌，應該陪他慢慢走。', 'Apurar a un mayor es de mala educación: acompáñalo despacio.', "Rushing an elderly person is rude — walk with them slowly."), th: [L(`${ew[0]}：我……我已經很快了……`, 'Ya… ya estoy yendo rápido…', "I… I'm already going as fast as I can…")] }
+          { t: '低頭滑手機，等他自己過。', m: M('長輩走得慢，可以的話要幫忙一下。', 'Los mayores caminan despacio: si puedes, échales una mano.', 'Elderly people walk slowly — if you can, give them a hand.'), th: [sc('（車子開始按喇叭了。）', '(Los autos empiezan a tocar la bocina.)', '(The cars start honking.)')] },
+          { t: '「走快一點！快要紅燈了！」', m: M('這樣催長輩很不禮貌。', 'Apurar así a un mayor es de mala educación.', 'Rushing an elderly person like that is rude.'), th: [L(`${ew[0]}：我……我已經很快了……`, 'Ya… ya estoy yendo rápido…', "I… I'm already going as fast as I can…")] }
         ],
-        good: ['看到長輩過馬路，主動陪他走。', 'Si ves a un mayor cruzando, acompáñalo por iniciativa propia.', 'When you see an elderly person crossing, offer to walk with them.'],
-        after: [L(`${ew[0]}：謝謝你啊，好心的年輕人！`, '¡Gracias, joven de buen corazón!', 'Thank you, kind young one!'), sc('（你陪他走到對面，小綠人剛好變成紅燈。）', '(Lo acompañas al otro lado justo cuando el semáforo cambia a rojo.)', '(You walk with them to the other side just as the signal turns red.)')]
+        good: ['你真是大好人！看到長輩過馬路，主動陪他走。', '¡Eres un sol! Al ver a un mayor cruzando, lo acompañaste por iniciativa propia.', 'What a good person! You saw an elderly person crossing and offered to walk with them.'],
+        after: [L(`${ew[0]}：謝謝你啊，好心的年輕人！`, '¡Gracias, joven de buen corazón!', 'Thank you, kind young one!')]
       }),
 
       /* ═══ 5 路人問路 ═══ */
       E_ask: mk('ask', {
         html: () => Game.dirCardHTML(),
-        dialogue: () => [sc('（一位路人拿著手機走過來。）', '(Un transeúnte se te acerca con el celular en la mano.)', '(A passer-by walks up holding a phone.)'),
-          L('路人：不好意思，請問捷運站怎麼走？', 'Disculpe, ¿cómo llego a la estación de metro?', 'Excuse me, how do I get to the MRT station?')],
+        dialogue: () => [L('路人：不好意思，請問捷運站怎麼走？', 'Disculpe, ¿cómo llego a la estación de metro?', 'Excuse me, how do I get to the MRT station?')],
         opts: [
           { t: RIGHT_ASK, ok: true },
           { t: dirSentence(t.n, otherDir[0], t.lm[0]), m: M(`你知道的路是：${t.dir[0]}，不是${otherDir[0]}。`, `El camino que conoces es: ${t.dir[1]}, no ${otherDir[1]}.`, `The way you know is to ${t.dir[2]}, not ${otherDir[2]}.`), th: [L('路人：嗯？你確定嗎？', '¿Hm? ¿Seguro?', 'Hm? Are you sure?')] },
           { t: dirSentence(otherN, t.dir[0], t.lm[0]), m: M(`要在第${CN[t.n]}個路口${t.dir[0]}，不是第${CN[otherN]}個。`, `Hay que girar en ${nth[t.n][1]} esquina, no en ${nth[otherN][1]}.`, `You turn at ${nth[t.n][2]} intersection, not ${nth[otherN][2]}.`), th: [L('路人：可是我走到那裡，沒有看到捷運站……', 'Pero llegué allí y no vi ninguna estación…', "But I went there and didn't see any station…")] }
         ],
-        good: ['問路時，說「直走、第幾個路口、左轉或右轉、在哪裡旁邊」。', 'Para dar indicaciones: «todo recto, la … esquina, gira a…, al lado de…».', 'When giving directions: "go straight, the Nth intersection, turn left/right, next to…".'],
+        good: ['你已經不是那個只會問路的人了，可以幫忙指路了唷！', '¡Ya no eres solo quien pregunta el camino: ahora también puedes indicarlo!', "You're no longer the one who can only ask for directions — now you can give them too!"],
         after: [L('路人：喔，我知道了，謝謝你！', '¡Ah, ya entendí, gracias!', 'Oh, I got it. Thank you!')]
       }),
 
       /* ═══ 6 掉錢包 ═══ */
       E_wallet: mk('wallet', {
-        dialogue: () => [sc(`（前面一位${ww[0]}從口袋拿手機的時候，錢包掉在地上了。他沒發現，繼續往前走。）`, `(Delante, ${ww[1]} saca el celular del bolsillo y se le cae la billetera. No se da cuenta y sigue caminando.)`, `(Ahead, ${ww[2]} pulls a phone from a pocket and drops a wallet. They don't notice and keep walking.)`)],
+        dialogue: () => [sc(`（前面一位${ww[0]}從口袋拿手機的時候，錢包掉在地上了。）`, `(Delante, ${ww[1]} saca el celular del bolsillo y se le cae la billetera al suelo.)`, `(Ahead, ${ww[2]} pulls a phone from a pocket and drops a wallet on the ground.)`)],
         opts: [
           { t: `${ww[0]}，不好意思，您的錢包掉了！`, ok: true },
           { t: '撿起來，放進自己的包包。', m: M('不是你的東西，不可以拿走。', 'No es tuyo: no puedes quedártelo.', "It isn't yours — you can't take it."), th: [sc('（你想了想，覺得這樣不對。）', '(Lo piensas un momento y ves que eso no está bien.)', "(You think it over and realize that isn't right.)")] },
-          { t: '不用管，反正不是我的。', m: M('看到別人的東西掉了，要叫住他。', 'Si ves que a alguien se le cae algo, llámalo.', 'If you see someone drop something, call out to them.'), th: [sc('（那個人越走越遠了……）', '(Esa persona se aleja cada vez más…)', '(The person is getting farther and farther away…)')] }
+          { t: '不用管，反正不是我的。', m: M('看到別人的東西掉了，最好提醒他一下。', 'Si ves que a alguien se le cae algo, lo mejor es avisarle.', "If you see someone drop something, it's best to let them know."), th: [sc('（那個人越走越遠了……）', '(Esa persona se aleja cada vez más…)', '(The person is getting farther and farther away…)')] }
         ],
-        good: ['東西掉了的人還沒發現，要出聲叫他。', 'Si alguien no se da cuenta de que perdió algo, avísale en voz alta.', "If someone hasn't noticed they dropped something, call out to them."],
+        good: ['你人真好！提醒別人東西掉了。', '¡Qué amable! Le avisaste de que se le cayó algo.', 'How kind! You let them know they dropped something.'],
         after: [L(`${ww[0]}：啊！真的！謝謝你！`, '¡Ah, es cierto! ¡Gracias!', 'Oh! You\'re right! Thank you!')]
       }),
 
       /* ═══ 7 下雨 ═══ */
       E_rain: mk('rain', {
-        dialogue: () => [sc(`（天空突然下起大雨，你沒有帶傘。旁邊有${rw[0]}撐著傘，對你說話。）`, `(De repente cae un aguacero y no llevas paraguas. A tu lado, ${rw[1]} con paraguas te habla.)`, `(It suddenly starts pouring and you have no umbrella. Beside you, ${rw[2]} holding an umbrella speaks to you.)`),
-          L('路人：你也是往前面走嗎？來，一起撐吧！', '¿Tú también vas hacia allá? ¡Ven, compartamos el paraguas!', "Are you going that way too? Come on, let's share the umbrella!")],
+        dialogue: () => [sc(`（天空突然下起大雨，你沒有帶傘。旁邊有一個${rw[0]}撐著傘，跟你說話。）`, `(De repente cae un aguacero y no llevas paraguas. A tu lado, ${rw[1]} con paraguas te habla.)`, `(It suddenly starts pouring and you have no umbrella. Beside you, ${rw[2]} holding an umbrella speaks to you.)`),
+          L('路人：你也是往前面走嗎？要不要一起撐？', '¿Tú también vas hacia allá? ¿Quieres compartir el paraguas?', 'Are you going that way too? Want to share my umbrella?')],
         opts: [
           { t: '好，謝謝你，那就麻煩你了。', ok: true },
-          { t: '你的傘借我，你自己跑吧。', m: M('這樣很沒有禮貌，人家好心幫你。', 'Eso es muy descortés: la otra persona te está ayudando de buena voluntad.', "That's very rude — they're kindly trying to help you."), th: [L('路人：什麼？', '¿Qué?', 'What?')] },
-          { t: '不要，我不認識你。', m: M('有人好心幫忙，要說謝謝，不要這樣直接拒絕。', 'Si alguien te ayuda con buena intención, da las gracias; no lo rechaces así.', "When someone kindly helps, say thank you — don't just refuse like that."), th: [sc('（你繼續在雨裡走，衣服全濕了。）', '(Sigues bajo la lluvia y acabas empapado.)', '(You keep walking in the rain and get soaked.)')] }
+          { t: '你的傘直接給我吧。', m: M('這樣很沒有禮貌，人家好心幫你。', 'Eso es muy descortés: la otra persona te está ayudando de buena voluntad.', "That's very rude — they're kindly trying to help you."), th: [L('路人：什麼？', '¿Qué?', 'What?')] },
+          { t: '不要，你是誰？我不認識你。', m: M('有人好心幫忙，要說謝謝，不要這樣直接拒絕。', 'Si alguien te ayuda con buena intención, da las gracias; no lo rechaces así.', "When someone kindly helps, say thank you — don't just refuse like that."), th: [sc('（你繼續在雨裡走，衣服全濕了。）', '(Sigues bajo la lluvia y acabas empapado.)', '(You keep walking in the rain and get soaked.)')] }
         ],
-        good: ['別人好心幫忙，可以說「謝謝，麻煩你了」。', 'Si alguien te ayuda de buena fe, puedes decir «gracias, qué molestia».', 'When someone kindly helps, you can say "Thanks, sorry to trouble you."'],
-        after: [L('路人：不會不會，雨很大，慢慢走。', 'No hay problema; llueve fuerte, vamos despacio.', "No problem — it's raining hard, so let's walk slowly."), sc('（你們一起撐著傘，走到前面的路口。）', '(Compartiendo el paraguas, llegan juntos a la esquina de enfrente.)', '(Sharing the umbrella, you walk to the next intersection together.)')]
+        good: ['沒錯！我們要感謝別人的好心！', '¡Exacto! Hay que agradecer la amabilidad de los demás.', "Exactly! We should be grateful for other people's kindness!"],
+        after: [L('路人：不會不會，雨很大，慢慢走。', 'No hay problema; llueve fuerte, vamos despacio.', "No problem — it's raining hard, so let's walk slowly.")]
       }),
 
       /* ═══ 8 發傳單 ═══ */
       E_flyer: mk('flyer', {
-        dialogue: () => [sc('（路口有一個人在發傳單，他把一張傳單遞到你面前。你還要趕去找Ami。）', '(En la esquina alguien reparte volantes y te extiende uno. Aún tienes que llegar a donde está Ami.)', '(Someone at the corner is handing out flyers and holds one out to you. You still need to hurry to Ami.)'),
+        dialogue: () => [sc('（路口有人在發傳單。）', '(En la esquina alguien reparte volantes.)', '(Someone at the corner is handing out flyers.)'),
           L('發傳單的人：您好，這是新開的餐廳，請看一下！', 'Hola, es un restaurante nuevo, ¡échele un vistazo!', "Hello, it's a new restaurant — please take a look!")],
         opts: [
           { t: '不好意思，我趕時間，不用了，謝謝。', ok: true },
           { t: '站下來，聽他介紹每一道菜。', m: M('Ami在等你，你在趕時間，不要停下來。', 'Ami te está esperando y tienes prisa: no te detengas.', 'Ami is waiting and you are in a hurry — keep going.'), th: [sc('（十分鐘過去了，Ami傳了一則訊息：「你到哪裡了？」）', '(Pasan diez minutos y Ami manda un mensaje: «¿Dónde estás?».)', '(Ten minutes go by and Ami texts: "Where are you?")')] },
-          { t: '「不要！走開！」', m: M('太不禮貌了。不想要的話，可以說「不用了，謝謝」。', 'Es demasiado descortés. Si no lo quieres, di «no, gracias».', 'That is far too rude. If you don\'t want one, just say "No, thank you."'), th: [L('發傳單的人：好……好的，對不起。', 'B-bueno… perdón.', 'O-OK… sorry.')] }
+          { t: '滾開啦！', m: M('太不禮貌了。不想要的話，可以說「不用了，謝謝」。', 'Es demasiado descortés. Si no lo quieres, di «no, gracias».', 'That is far too rude. If you don\'t want one, just say "No, thank you."'), th: [L('發傳單的人：好……好的，對不起。', 'B-bueno… perdón.', 'O-OK… sorry.')] }
         ],
-        good: ['不想要傳單，可以客氣地說「不用了，謝謝」。', 'Si no quieres el volante, di cortésmente «no hace falta, gracias».', "If you don't want a flyer, politely say \"No need, thanks.\""],
+        good: ['你做得對！客氣地拒絕就可以了！', '¡Bien hecho! Basta con rechazarlo con amabilidad.', 'Well done! A polite no is all it takes!'],
         after: [L('發傳單的人：好的，沒關係，您慢走！', 'Está bien, no hay problema, ¡que le vaya bien!', "OK, no problem. Take care!")]
       }),
 
@@ -1318,10 +1314,9 @@ const Game = {
           Game._endGood = Game.mistakes <= 2;
           track('game_complete', { game: 'street', score: Game.score, elapsed: Game.elapsedTime });
           return [
-            sc('（你終於走到路口的咖啡店，Ami坐在窗邊，看到你就揮手。）', '(Por fin llegas a la cafetería de la esquina. Ami está junto a la ventana y te saluda con la mano.)', '(You finally reach the café at the intersection. Ami is by the window and waves when she sees you.)'),
             Game._endGood
-              ? L(`Ami：${N}，你來啦！路上都還順利嗎？你一個人處理得真好！`, `¡${N}, ya llegaste! ¿Todo bien por el camino? ¡Lo manejaste muy bien tú solo!`, `${N}, you made it! Was everything OK on the way? You handled it all so well on your own!`)
-              : L('Ami：你來啦！辛苦了，路上遇到不少事情吧？下次我們再慢慢練習。', '¡Llegaste! Debió de pasarte de todo en el camino, ¿no? La próxima vez seguimos practicando.', 'You made it! A lot happened on the way, huh? We can keep practicing next time.')
+              ? L(`Ami：${N}，你來啦！路上都還順利嗎？你已經不需要其他人陪你一起出門了嘛！`, `¡${N}, ya llegaste! ¿Todo bien por el camino? ¡Ya no necesitas que nadie te acompañe para salir!`, `${N}, you made it! Was everything OK on the way? You don't need anyone to go out with you anymore!`)
+              : L('Ami：你來啦！感覺路上遇到很多事情，有這次的經驗下次可以處理得更好！', '¡Llegaste! Parece que te pasaron muchas cosas por el camino; con esta experiencia, ¡la próxima vez lo harás aún mejor!', "You made it! Sounds like a lot happened on the way — with this experience, you'll handle it even better next time!")
           ];
         },
         options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
