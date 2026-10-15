@@ -1390,7 +1390,7 @@ const Game = {
         place: 'doctor',
         dialogue: () => Game.docLines(),
         options: ['好，謝謝醫生。'],
-        next: () => { Game.state = 'P_PAY'; }
+        next: () => { Game.thought = [L('（你拿著單子，回到櫃台。）', '(Tomas tu receta y vuelves al mostrador.)', '(You take your slip and go back to the front desk.)')]; Game.state = 'P_PAY'; }
       },
 
       /* ═══ 批價、領藥 ═══ */

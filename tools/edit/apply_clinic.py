@@ -80,9 +80,7 @@ R=[
 # 096
 ("""Game.good('有藥物過敏，一定要跟醫生說。', 'Si tienes alergia a un medicamento, siempre díselo al doctor.', 'If you have a drug allergy, always tell the doctor.')""",
  """Game.good('沒錯！有藥物過敏，一定要跟醫生說。', '¡Exacto! Si tienes alergia a un medicamento, siempre díselo al doctor.', 'Exactly! If you have a drug allergy, always tell the doctor.')""", 1),
-# 098 刪除
-("""next: () => { Game.thought = [L('（你拿著單子，回到櫃台。）', '(Tomas tu receta y vuelves al mostrador.)', '(You take your slip and go back to the front desk.)')]; Game.state = 'P_PAY'; }""",
- """next: () => { Game.state = 'P_PAY'; }""", 1),
+# 098 Ben 後來決定保留（「拿著單子回到櫃台」恢復），不改
 # 118
 ("""Game.good('你記得藥什麼時候吃。', 'Recordaste cuándo tomar cada medicina.', 'You remembered when to take each medicine.')""",
  """Game.good('不錯喔！你記得藥什麼時候吃。', '¡Bien hecho! Recordaste cuándo tomar cada medicina.', 'Nice! You remembered when to take each medicine.')""", 1),
