@@ -36,6 +36,14 @@ CONF={
     fnmap={'amiLines':'Ami 在店門口說的話','cakeLines':'Ami 的 LINE 訊息','listHTML':'清單','trayHTML':'托盤畫面','breadName':'麵包名稱'},
     first=[('c.slice','選的片數')],
     guess=[('errName[t.err]','店員講錯的項目'),('errName[k]','選的項目'),('NZ(recapSize)','吋數（店員說的）'),('NZ(recapCandle)','蠟燭根數（店員說的）'),('recapTime','取貨時間（店員說的）'),('recapSize','吋數（店員說的）'),('recapCandle','蠟燭根數（店員說的）'),('flName','口味'),('NZ(t.people)','人數'),('NZ(t.candles)','蠟燭根數'),('NZ(t.size)','吋數'),('NZ(t.slice)','片數'),('NZ(t.n)','個數'),('=sz','片數'),('=nz','個數'),('=bz','麵包名稱'),('breadName','麵包名稱'),('t.pickup','取貨時間'),('t.friend','朋友名字'),('t.flavor','口味'),('given - total','找的錢'),('given','給的錢'),('total','總價'),('have','夾的個數'),('it.zh','麵包名稱'),('it.nut','堅果'),('BYID[','麵包名稱'),('other','別的名字')]),
+'street': dict(title='街頭事件', stagevar='const STAGE = (() => {', statere=r'\n      (E_\w+|START|END|RESULT): ', regions=[('const NEXT_LABEL','const Game = {','過場按鈕'),
+    ('  setPlace(mode) {','  /* ── 說明文字','位置名稱'),
+    ('  /* ── 說明文字','  /* ── 狀態設定','nm'),
+    ('const Hints = {','\n};\n','任務提示'),
+    ('  getConfig() {','  /* ── 換關卡','cfg')],
+    speakers='Ami|我|騎士|路人|發傳單的人', extra={'START':'開場：Ami 的 LINE','E_light':'紅綠燈','E_honk':'機車按喇叭','E_fall':'有人跌倒','E_fall2':'有人跌倒：打119','E_elder':'長輩過馬路','E_ask':'路人問路','E_wallet':'掉錢包','E_rain':'下雨','E_flyer':'發傳單','END':'結局：到咖啡店'},
+    fnmap={'amiLines':'Ami 的 LINE 訊息'},
+    guess=[('fw[0]','跌倒的阿公／阿嬤'),('ew[0]','過馬路的阿公／阿嬤'),('ww[0]','掉錢包的先生／小姐'),('rw[0]','撐傘的先生／小姐'),('t.dir[0]','你知道的方向'),('otherDir[0]','另一個方向'),('CN[t.n]','第幾個'),('CN[otherN]','錯的第幾個'),('CN[n]','第幾個'),('=d','左轉／右轉'),('=lm','地標')]),
 'mrt': dict(title='搭捷運', stagevar='const STAGE = (() => {', ternary=True, regions=[('const NEXT_LABEL','const Game = {','過場按鈕'),
     ('  setPlace(mode) {','  /* ── 圖片','位置名稱'),
     ('  /* ── 說明文字','  /* ── 狀態設定','nm'),
@@ -91,7 +99,7 @@ for a_,b_,dk in C['regions']:
     for stt,en,q,body in literals(s[a:b],a):
         before=s[max(0,stt-60):stt]
         if dk=='cfg':
-            sm=re.findall(r'\n      ([A-Z][A-Z_0-9]*): \{', s[gi:stt]); state=sm[-1] if sm else ''
+            sm=re.findall(C.get('statere',r'\n      ([A-Z][A-Z_0-9]*): \{'), s[gi:stt]); state=sm[-1] if sm else ''
         elif dk=='setup':
             wm=re.findall(r"who: '(.+?)'", s[a:stt]); state='客人：'+wm[-1] if wm else '王伯伯的老樣子'
         elif dk=='phone':
@@ -122,6 +130,15 @@ for a_,b_,dk in C['regions']:
             elif state=='選攤位畫面' and kind=='其他': kind='位置名稱'
             elif state=='殺價選項' and kind=='其他': kind='選項'
             elif state=='殺價：老闆回應' and re.search(r'\bsay\(\s*$',before): kind='line'
+        if g=='street':
+            if kind=='其他' and re.search(r'\bsc\(\s*$',before): kind='line'
+            if kind=='其他' and re.search(r'\bt: *$',before): kind='選項'
+            if kind=='其他' and re.search(r'good: *\[\s*$',before): kind='綠卡說明'
+            if kind=='其他' and 'const dirSentence' in line_: kind='選項'; state='路人問路：報路的句子（三個選項都用這句）'
+            if kind=='line' and re.search(r'th: *\[(sc|L)\(\s*$',before): isSay='th'
+            if dk=='cfg' and kind=='其他':
+                pv=s[gi:stt]
+                if pv.rfind('options:')>max(pv.rfind('next:'),pv.rfind('dialogue:')): kind='選項'
         if g=='mrt':
             hs='|'.join(C['helpers'])
             hm=re.search(r'\b('+hs+r')\(\s*$',before)
@@ -167,14 +184,20 @@ for a_,b_,dk in C['regions']:
             elif g=='bakery' and isSay and not zh.startswith('（'): who='店員'; kind='台詞'
             elif g=='clinic' and isSay: who=isSay; kind='台詞'
             elif g=='mrt' and isSay: who=isSay; kind='台詞'
+            elif g=='street':
+                m2=re.match(r'〔([^〕]+)〕：',zh)
+                if m2: who=m2.group(1); zh=zh[len(m2.group(0)):]; kind='台詞'
+                else: kind='旁白' if zh.startswith('（') else '台詞'
             elif g=='mrt' and zh.startswith('〔阿嬤／阿公〕：'): who='阿嬤／阿公'; zh=zh[len('〔阿嬤／阿公〕：'):]; kind='台詞'
             elif state=='殺價：老闆回應' and re.search(r'\bsay\(\s*$',before): who='老闆／老闆娘'; kind='台詞'
             else: kind='旁白' if zh.startswith('（') else '台詞'
         line=s[s.rfind('\n',0,stt)+1:s.find('\n',stt)]
+        if g=='street' and isSay=='th': kind='選錯後的反應'
         if dk=='setup' and kind=='其他' and re.search(r'say: *$',before): kind='台詞'
         if kind=='其他' or zh.startswith(('查看結果','回到地圖','查看排行榜')): continue
         if g=='bakery' and (zh in ('〔變數〕',) or re.fullmatch(r'店員：〔[^〕]*〕',zh) or re.search(r'<(button|div|span)',zh) or zh.strip()=='朗讀'): continue
         if g=='bakery' and zh=='你記得Ami說的：': zh+='〔要加熱。／不用加熱。〕'
+        if g=='street' and (re.search(r'<(button|div|span|i|b)[ >]',zh) or zh.strip() in ('朗讀','〔變數〕','我')): continue
         if g=='mrt' and (re.search(r'<(button|div|span|i|b)[ >]',zh) or zh.strip() in ('朗讀','〔變數〕','我')): continue
         if g=='clinic' and (re.search(r'<(button|div|span|tr|td|th|table|small|b )',zh) or zh.strip() in ('朗讀','〔變數〕','我')): continue
         if g=='nightmarket' and (re.search(r'<(button|div|span)',zh) or zh.strip()=='朗讀'): continue   # 程式拼出來的 HTML 片段

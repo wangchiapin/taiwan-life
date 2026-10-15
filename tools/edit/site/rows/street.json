@@ -1,0 +1,910 @@
+{
+ "game": "street",
+ "title": "街頭事件",
+ "rows": [
+  {
+   "id": "street-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "街頭"
+  },
+  {
+   "id": "street-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "走在路上"
+  },
+  {
+   "id": "street-003",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "週六下午，Ami 在前面路口的咖啡店等你。你走在路上，會遇到各種突發的事：紅燈、機車喇叭、有人跌倒、阿嬤過馬路、有人問路、掉錢包、下雨、發傳單……每次遊戲會遇到其中五件。"
+  },
+  {
+   "id": "street-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "繼續往前走"
+  },
+  {
+   "id": "street-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "聽他說"
+  },
+  {
+   "id": "street-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到咖啡店"
+  },
+  {
+   "id": "street-007",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "路上"
+  },
+  {
+   "id": "street-008",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "〔名字〕，我在前面路口的咖啡店等你，你走過來吧！"
+  },
+  {
+   "id": "street-009",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "路上人多車也多，要小心喔。"
+  },
+  {
+   "id": "street-010",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "如果路上有什麼事，先處理一下，我可以等你。"
+  },
+  {
+   "id": "street-011",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "Ami 的 LINE 訊息"
+  },
+  {
+   "id": "street-012",
+   "kind": "選項",
+   "stage": "路人問路：報路的句子（三個選項都用這句）",
+   "stageName": "路人問路：報路的句子（三個選項都用這句）",
+   "who": "我",
+   "zh": "直走，到第〔第幾個〕個路口〔左轉／右轉〕，在〔地標〕旁邊。"
+  },
+  {
+   "id": "street-013",
+   "kind": "旁白",
+   "stage": "START",
+   "stageName": "開場：Ami 的 LINE",
+   "who": "",
+   "zh": "（週六下午，你走出家門，手機響了一聲，是Ami傳來的LINE。）"
+  },
+  {
+   "id": "street-014",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：Ami 的 LINE",
+   "who": "我",
+   "zh": "好，我現在過去！"
+  },
+  {
+   "id": "street-015",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "開場：Ami 的 LINE",
+   "who": "我",
+   "zh": "走上街"
+  },
+  {
+   "id": "street-016",
+   "kind": "旁白",
+   "stage": "E_light",
+   "stageName": "紅綠燈",
+   "who": "",
+   "zh": "（你走到一個大路口，行人號誌是紅燈。路上沒什麼車，旁邊有兩個人已經直接走過去了。）"
+  },
+  {
+   "id": "street-017",
+   "kind": "選項",
+   "stage": "E_light",
+   "stageName": "紅綠燈",
+   "who": "我",
+   "zh": "等到小綠人亮了再走。"
+  },
+  {
+   "id": "street-018",
+   "kind": "選項",
+   "stage": "E_light",
+   "stageName": "紅綠燈",
+   "who": "我",
+   "zh": "沒有車，我也直接走過去。"
+  },
+  {
+   "id": "street-019",
+   "kind": "錯誤說明",
+   "stage": "E_light",
+   "stageName": "紅綠燈",
+   "who": "",
+   "zh": "紅燈的時候不能過馬路，就算沒有車也一樣。"
+  },
+  {
+   "id": "street-020",
+   "kind": "選錯後的反應",
+   "stage": "E_light",
+   "stageName": "紅綠燈",
+   "who": "",
+   "zh": "（一台機車突然從旁邊衝出來，你嚇了一跳！）"
+  },
+  {
+   "id": "street-021",
+   "kind": "選項",
+   "stage": "E_light",
+   "stageName": "紅綠燈",
+   "who": "我",
+   "zh": "跟著前面的人一起走。"
+  },
+  {
+   "id": "street-022",
+   "kind": "錯誤說明",
+   "stage": "E_light",
+   "stageName": "紅綠燈",
+   "who": "",
+   "zh": "別人闖紅燈，你也不可以跟著做。"
+  },
+  {
+   "id": "street-023",
+   "kind": "選錯後的反應",
+   "stage": "E_light",
+   "stageName": "紅綠燈",
+   "who": "",
+   "zh": "（你停了一下，旁邊的人看了你一眼……）"
+  },
+  {
+   "id": "street-024",
+   "kind": "綠卡說明",
+   "stage": "E_light",
+   "stageName": "紅綠燈",
+   "who": "",
+   "zh": "在台灣，要等小綠人亮了才過馬路。"
+  },
+  {
+   "id": "street-025",
+   "kind": "旁白",
+   "stage": "E_light",
+   "stageName": "紅綠燈",
+   "who": "",
+   "zh": "（小綠人亮了，你慢慢走過斑馬線。）"
+  },
+  {
+   "id": "street-026",
+   "kind": "旁白",
+   "stage": "E_honk",
+   "stageName": "機車按喇叭",
+   "who": "",
+   "zh": "（你走進一條小巷，巷子很窄，沒有人行道。後面突然傳來「嗶！嗶！」的喇叭聲，一台機車想要過去。）"
+  },
+  {
+   "id": "street-027",
+   "kind": "選項",
+   "stage": "E_honk",
+   "stageName": "機車按喇叭",
+   "who": "我",
+   "zh": "往旁邊靠一下，讓他先過。"
+  },
+  {
+   "id": "street-028",
+   "kind": "選項",
+   "stage": "E_honk",
+   "stageName": "機車按喇叭",
+   "who": "我",
+   "zh": "站在原地不動，回頭看他。"
+  },
+  {
+   "id": "street-029",
+   "kind": "錯誤說明",
+   "stage": "E_honk",
+   "stageName": "機車按喇叭",
+   "who": "",
+   "zh": "機車按喇叭，是請你讓一下。往旁邊靠比較安全。"
+  },
+  {
+   "id": "street-030",
+   "kind": "選錯後的反應",
+   "stage": "E_honk",
+   "stageName": "機車按喇叭",
+   "who": "騎士",
+   "zh": "欸，借過一下！"
+  },
+  {
+   "id": "street-031",
+   "kind": "選項",
+   "stage": "E_honk",
+   "stageName": "機車按喇叭",
+   "who": "我",
+   "zh": "走到巷子中間，離他遠一點。"
+  },
+  {
+   "id": "street-032",
+   "kind": "錯誤說明",
+   "stage": "E_honk",
+   "stageName": "機車按喇叭",
+   "who": "",
+   "zh": "不要走到路中間，那樣更危險。"
+  },
+  {
+   "id": "street-033",
+   "kind": "選錯後的反應",
+   "stage": "E_honk",
+   "stageName": "機車按喇叭",
+   "who": "",
+   "zh": "（機車慢慢跟在你後面，騎士一直按喇叭。）"
+  },
+  {
+   "id": "street-034",
+   "kind": "綠卡說明",
+   "stage": "E_honk",
+   "stageName": "機車按喇叭",
+   "who": "",
+   "zh": "小巷子裡聽到喇叭聲，要往旁邊靠，讓車先過。"
+  },
+  {
+   "id": "street-035",
+   "kind": "台詞",
+   "stage": "E_honk",
+   "stageName": "機車按喇叭",
+   "who": "騎士",
+   "zh": "謝謝！"
+  },
+  {
+   "id": "street-036",
+   "kind": "旁白",
+   "stage": "E_honk",
+   "stageName": "機車按喇叭",
+   "who": "",
+   "zh": "（機車慢慢地從你旁邊騎過去。）"
+  },
+  {
+   "id": "street-037",
+   "kind": "旁白",
+   "stage": "E_fall",
+   "stageName": "有人跌倒",
+   "who": "",
+   "zh": "（前面有一位〔跌倒的阿公／阿嬤〕在人行道上跌倒了，坐在地上，沒有站起來。）"
+  },
+  {
+   "id": "street-038",
+   "kind": "台詞",
+   "stage": "E_fall",
+   "stageName": "有人跌倒",
+   "who": "跌倒的阿公／阿嬤",
+   "zh": "哎喲……"
+  },
+  {
+   "id": "street-039",
+   "kind": "選項",
+   "stage": "E_fall",
+   "stageName": "有人跌倒",
+   "who": "我",
+   "zh": "「您還好嗎？哪裡痛？」"
+  },
+  {
+   "id": "street-040",
+   "kind": "選項",
+   "stage": "E_fall",
+   "stageName": "有人跌倒",
+   "who": "我",
+   "zh": "趕快用力把他拉起來。"
+  },
+  {
+   "id": "street-041",
+   "kind": "錯誤說明",
+   "stage": "E_fall",
+   "stageName": "有人跌倒",
+   "who": "",
+   "zh": "不要馬上拉受傷的人。先問他哪裡痛，必要的時候打119。"
+  },
+  {
+   "id": "street-042",
+   "kind": "選錯後的反應",
+   "stage": "E_fall",
+   "stageName": "有人跌倒",
+   "who": "跌倒的阿公／阿嬤",
+   "zh": "啊！好痛！不要拉我！"
+  },
+  {
+   "id": "street-043",
+   "kind": "選項",
+   "stage": "E_fall",
+   "stageName": "有人跌倒",
+   "who": "我",
+   "zh": "假裝沒看到，繼續走。"
+  },
+  {
+   "id": "street-044",
+   "kind": "錯誤說明",
+   "stage": "E_fall",
+   "stageName": "有人跌倒",
+   "who": "",
+   "zh": "看到有人跌倒，要先關心他。"
+  },
+  {
+   "id": "street-045",
+   "kind": "選錯後的反應",
+   "stage": "E_fall",
+   "stageName": "有人跌倒",
+   "who": "",
+   "zh": "（你走了幾步，覺得這樣不對，又走回來。）"
+  },
+  {
+   "id": "street-046",
+   "kind": "綠卡說明",
+   "stage": "E_fall",
+   "stageName": "有人跌倒",
+   "who": "",
+   "zh": "看到有人跌倒，先問「您還好嗎？」。"
+  },
+  {
+   "id": "street-047",
+   "kind": "旁白",
+   "stage": "E_fall",
+   "stageName": "有人跌倒",
+   "who": "",
+   "zh": "（你蹲下來，輕輕地問他。）"
+  },
+  {
+   "id": "street-048",
+   "kind": "台詞",
+   "stage": "E_fall2",
+   "stageName": "有人跌倒：打119",
+   "who": "跌倒的阿公／阿嬤",
+   "zh": "我的腳好痛，站不起來……"
+  },
+  {
+   "id": "street-049",
+   "kind": "選項",
+   "stage": "E_fall2",
+   "stageName": "有人跌倒：打119",
+   "who": "我",
+   "zh": "您先別動，我幫您打119。"
+  },
+  {
+   "id": "street-050",
+   "kind": "選項",
+   "stage": "E_fall2",
+   "stageName": "有人跌倒：打119",
+   "who": "我",
+   "zh": "那您自己慢慢站起來吧。"
+  },
+  {
+   "id": "street-051",
+   "kind": "錯誤說明",
+   "stage": "E_fall2",
+   "stageName": "有人跌倒：打119",
+   "who": "",
+   "zh": "他站不起來，要打119，請救護車來。"
+  },
+  {
+   "id": "street-052",
+   "kind": "選錯後的反應",
+   "stage": "E_fall2",
+   "stageName": "有人跌倒：打119",
+   "who": "",
+   "zh": "（你看著他，覺得這樣不行。）"
+  },
+  {
+   "id": "street-053",
+   "kind": "選項",
+   "stage": "E_fall2",
+   "stageName": "有人跌倒：打119",
+   "who": "我",
+   "zh": "我扶您去搭捷運。"
+  },
+  {
+   "id": "street-054",
+   "kind": "錯誤說明",
+   "stage": "E_fall2",
+   "stageName": "有人跌倒：打119",
+   "who": "",
+   "zh": "受傷的人不要自己走，也不要搭捷運，先打119。"
+  },
+  {
+   "id": "street-055",
+   "kind": "選錯後的反應",
+   "stage": "E_fall2",
+   "stageName": "有人跌倒：打119",
+   "who": "跌倒的阿公／阿嬤",
+   "zh": "不行不行，我真的走不了……"
+  },
+  {
+   "id": "street-056",
+   "kind": "綠卡說明",
+   "stage": "E_fall2",
+   "stageName": "有人跌倒：打119",
+   "who": "",
+   "zh": "在台灣，需要救護車就打119。"
+  },
+  {
+   "id": "street-057",
+   "kind": "旁白",
+   "stage": "E_fall2",
+   "stageName": "有人跌倒：打119",
+   "who": "",
+   "zh": "（你打了119，十幾分鐘後，救護車來了。）"
+  },
+  {
+   "id": "street-058",
+   "kind": "台詞",
+   "stage": "E_fall2",
+   "stageName": "有人跌倒：打119",
+   "who": "跌倒的阿公／阿嬤",
+   "zh": "謝謝你，年輕人！"
+  },
+  {
+   "id": "street-059",
+   "kind": "旁白",
+   "stage": "E_elder",
+   "stageName": "長輩過馬路",
+   "who": "",
+   "zh": "（綠燈亮了。一位〔過馬路的阿公／阿嬤〕拿著菜籃慢慢過馬路，走到一半，小綠人開始閃了。）"
+  },
+  {
+   "id": "street-060",
+   "kind": "選項",
+   "stage": "E_elder",
+   "stageName": "長輩過馬路",
+   "who": "我",
+   "zh": "〔過馬路的阿公／阿嬤〕，我陪您慢慢過。"
+  },
+  {
+   "id": "street-061",
+   "kind": "選項",
+   "stage": "E_elder",
+   "stageName": "長輩過馬路",
+   "who": "我",
+   "zh": "低頭滑手機，等他自己過。"
+  },
+  {
+   "id": "street-062",
+   "kind": "錯誤說明",
+   "stage": "E_elder",
+   "stageName": "長輩過馬路",
+   "who": "",
+   "zh": "長輩走得慢，看到了要幫忙。"
+  },
+  {
+   "id": "street-063",
+   "kind": "選錯後的反應",
+   "stage": "E_elder",
+   "stageName": "長輩過馬路",
+   "who": "",
+   "zh": "（車子開始按喇叭了。）"
+  },
+  {
+   "id": "street-064",
+   "kind": "選項",
+   "stage": "E_elder",
+   "stageName": "長輩過馬路",
+   "who": "我",
+   "zh": "「快一點！綠燈要沒有了！」"
+  },
+  {
+   "id": "street-065",
+   "kind": "錯誤說明",
+   "stage": "E_elder",
+   "stageName": "長輩過馬路",
+   "who": "",
+   "zh": "這樣催長輩很不禮貌，應該陪他慢慢走。"
+  },
+  {
+   "id": "street-066",
+   "kind": "選錯後的反應",
+   "stage": "E_elder",
+   "stageName": "長輩過馬路",
+   "who": "過馬路的阿公／阿嬤",
+   "zh": "我……我已經很快了……"
+  },
+  {
+   "id": "street-067",
+   "kind": "綠卡說明",
+   "stage": "E_elder",
+   "stageName": "長輩過馬路",
+   "who": "",
+   "zh": "看到長輩過馬路，主動陪他走。"
+  },
+  {
+   "id": "street-068",
+   "kind": "台詞",
+   "stage": "E_elder",
+   "stageName": "長輩過馬路",
+   "who": "過馬路的阿公／阿嬤",
+   "zh": "謝謝你啊，好心的年輕人！"
+  },
+  {
+   "id": "street-069",
+   "kind": "旁白",
+   "stage": "E_elder",
+   "stageName": "長輩過馬路",
+   "who": "",
+   "zh": "（你陪他走到對面，小綠人剛好變成紅燈。）"
+  },
+  {
+   "id": "street-070",
+   "kind": "旁白",
+   "stage": "E_ask",
+   "stageName": "路人問路",
+   "who": "",
+   "zh": "（一位路人拿著手機走過來。）"
+  },
+  {
+   "id": "street-071",
+   "kind": "台詞",
+   "stage": "E_ask",
+   "stageName": "路人問路",
+   "who": "路人",
+   "zh": "不好意思，請問捷運站怎麼走？"
+  },
+  {
+   "id": "street-072",
+   "kind": "錯誤說明",
+   "stage": "E_ask",
+   "stageName": "路人問路",
+   "who": "",
+   "zh": "你知道的路是：〔你知道的方向〕，不是〔另一個方向〕。"
+  },
+  {
+   "id": "street-073",
+   "kind": "選錯後的反應",
+   "stage": "E_ask",
+   "stageName": "路人問路",
+   "who": "路人",
+   "zh": "嗯？你確定嗎？"
+  },
+  {
+   "id": "street-074",
+   "kind": "錯誤說明",
+   "stage": "E_ask",
+   "stageName": "路人問路",
+   "who": "",
+   "zh": "要在第〔第幾個〕個路口〔你知道的方向〕，不是第〔錯的第幾個〕個。"
+  },
+  {
+   "id": "street-075",
+   "kind": "選錯後的反應",
+   "stage": "E_ask",
+   "stageName": "路人問路",
+   "who": "路人",
+   "zh": "可是我走到那裡，沒有看到捷運站……"
+  },
+  {
+   "id": "street-076",
+   "kind": "綠卡說明",
+   "stage": "E_ask",
+   "stageName": "路人問路",
+   "who": "",
+   "zh": "問路時，說「直走、第幾個路口、左轉或右轉、在哪裡旁邊」。"
+  },
+  {
+   "id": "street-077",
+   "kind": "台詞",
+   "stage": "E_ask",
+   "stageName": "路人問路",
+   "who": "路人",
+   "zh": "喔，我知道了，謝謝你！"
+  },
+  {
+   "id": "street-078",
+   "kind": "旁白",
+   "stage": "E_wallet",
+   "stageName": "掉錢包",
+   "who": "",
+   "zh": "（前面一位〔掉錢包的先生／小姐〕從口袋拿手機的時候，錢包掉在地上了。他沒發現，繼續往前走。）"
+  },
+  {
+   "id": "street-079",
+   "kind": "選項",
+   "stage": "E_wallet",
+   "stageName": "掉錢包",
+   "who": "我",
+   "zh": "〔掉錢包的先生／小姐〕，不好意思，您的錢包掉了！"
+  },
+  {
+   "id": "street-080",
+   "kind": "選項",
+   "stage": "E_wallet",
+   "stageName": "掉錢包",
+   "who": "我",
+   "zh": "撿起來，放進自己的包包。"
+  },
+  {
+   "id": "street-081",
+   "kind": "錯誤說明",
+   "stage": "E_wallet",
+   "stageName": "掉錢包",
+   "who": "",
+   "zh": "不是你的東西，不可以拿走。"
+  },
+  {
+   "id": "street-082",
+   "kind": "選錯後的反應",
+   "stage": "E_wallet",
+   "stageName": "掉錢包",
+   "who": "",
+   "zh": "（你想了想，覺得這樣不對。）"
+  },
+  {
+   "id": "street-083",
+   "kind": "選項",
+   "stage": "E_wallet",
+   "stageName": "掉錢包",
+   "who": "我",
+   "zh": "不用管，反正不是我的。"
+  },
+  {
+   "id": "street-084",
+   "kind": "錯誤說明",
+   "stage": "E_wallet",
+   "stageName": "掉錢包",
+   "who": "",
+   "zh": "看到別人的東西掉了，要叫住他。"
+  },
+  {
+   "id": "street-085",
+   "kind": "選錯後的反應",
+   "stage": "E_wallet",
+   "stageName": "掉錢包",
+   "who": "",
+   "zh": "（那個人越走越遠了……）"
+  },
+  {
+   "id": "street-086",
+   "kind": "綠卡說明",
+   "stage": "E_wallet",
+   "stageName": "掉錢包",
+   "who": "",
+   "zh": "東西掉了的人還沒發現，要出聲叫他。"
+  },
+  {
+   "id": "street-087",
+   "kind": "台詞",
+   "stage": "E_wallet",
+   "stageName": "掉錢包",
+   "who": "掉錢包的先生／小姐",
+   "zh": "啊！真的！謝謝你！"
+  },
+  {
+   "id": "street-088",
+   "kind": "旁白",
+   "stage": "E_rain",
+   "stageName": "下雨",
+   "who": "",
+   "zh": "（天空突然下起大雨，你沒有帶傘。旁邊有〔撐傘的先生／小姐〕撐著傘，對你說話。）"
+  },
+  {
+   "id": "street-089",
+   "kind": "台詞",
+   "stage": "E_rain",
+   "stageName": "下雨",
+   "who": "路人",
+   "zh": "你也是往前面走嗎？來，一起撐吧！"
+  },
+  {
+   "id": "street-090",
+   "kind": "選項",
+   "stage": "E_rain",
+   "stageName": "下雨",
+   "who": "我",
+   "zh": "好，謝謝你，那就麻煩你了。"
+  },
+  {
+   "id": "street-091",
+   "kind": "選項",
+   "stage": "E_rain",
+   "stageName": "下雨",
+   "who": "我",
+   "zh": "你的傘借我，你自己跑吧。"
+  },
+  {
+   "id": "street-092",
+   "kind": "錯誤說明",
+   "stage": "E_rain",
+   "stageName": "下雨",
+   "who": "",
+   "zh": "這樣很沒有禮貌，人家好心幫你。"
+  },
+  {
+   "id": "street-093",
+   "kind": "選錯後的反應",
+   "stage": "E_rain",
+   "stageName": "下雨",
+   "who": "路人",
+   "zh": "什麼？"
+  },
+  {
+   "id": "street-094",
+   "kind": "選項",
+   "stage": "E_rain",
+   "stageName": "下雨",
+   "who": "我",
+   "zh": "不要，我不認識你。"
+  },
+  {
+   "id": "street-095",
+   "kind": "錯誤說明",
+   "stage": "E_rain",
+   "stageName": "下雨",
+   "who": "",
+   "zh": "有人好心幫忙，要說謝謝，不要這樣直接拒絕。"
+  },
+  {
+   "id": "street-096",
+   "kind": "選錯後的反應",
+   "stage": "E_rain",
+   "stageName": "下雨",
+   "who": "",
+   "zh": "（你繼續在雨裡走，衣服全濕了。）"
+  },
+  {
+   "id": "street-097",
+   "kind": "綠卡說明",
+   "stage": "E_rain",
+   "stageName": "下雨",
+   "who": "",
+   "zh": "別人好心幫忙，可以說「謝謝，麻煩你了」。"
+  },
+  {
+   "id": "street-098",
+   "kind": "台詞",
+   "stage": "E_rain",
+   "stageName": "下雨",
+   "who": "路人",
+   "zh": "不會不會，雨很大，慢慢走。"
+  },
+  {
+   "id": "street-099",
+   "kind": "旁白",
+   "stage": "E_rain",
+   "stageName": "下雨",
+   "who": "",
+   "zh": "（你們一起撐著傘，走到前面的路口。）"
+  },
+  {
+   "id": "street-100",
+   "kind": "旁白",
+   "stage": "E_flyer",
+   "stageName": "發傳單",
+   "who": "",
+   "zh": "（路口有一個人在發傳單，他把一張傳單遞到你面前。你還要趕去找Ami。）"
+  },
+  {
+   "id": "street-101",
+   "kind": "台詞",
+   "stage": "E_flyer",
+   "stageName": "發傳單",
+   "who": "發傳單的人",
+   "zh": "您好，這是新開的餐廳，請看一下！"
+  },
+  {
+   "id": "street-102",
+   "kind": "選項",
+   "stage": "E_flyer",
+   "stageName": "發傳單",
+   "who": "我",
+   "zh": "不好意思，我趕時間，不用了，謝謝。"
+  },
+  {
+   "id": "street-103",
+   "kind": "選項",
+   "stage": "E_flyer",
+   "stageName": "發傳單",
+   "who": "我",
+   "zh": "站下來，聽他介紹每一道菜。"
+  },
+  {
+   "id": "street-104",
+   "kind": "錯誤說明",
+   "stage": "E_flyer",
+   "stageName": "發傳單",
+   "who": "",
+   "zh": "Ami在等你，你在趕時間，不要停下來。"
+  },
+  {
+   "id": "street-105",
+   "kind": "選錯後的反應",
+   "stage": "E_flyer",
+   "stageName": "發傳單",
+   "who": "",
+   "zh": "（十分鐘過去了，Ami傳了一則訊息：「你到哪裡了？」）"
+  },
+  {
+   "id": "street-106",
+   "kind": "選項",
+   "stage": "E_flyer",
+   "stageName": "發傳單",
+   "who": "我",
+   "zh": "「不要！走開！」"
+  },
+  {
+   "id": "street-107",
+   "kind": "錯誤說明",
+   "stage": "E_flyer",
+   "stageName": "發傳單",
+   "who": "",
+   "zh": "太不禮貌了。不想要的話，可以說「不用了，謝謝」。"
+  },
+  {
+   "id": "street-108",
+   "kind": "選錯後的反應",
+   "stage": "E_flyer",
+   "stageName": "發傳單",
+   "who": "發傳單的人",
+   "zh": "好……好的，對不起。"
+  },
+  {
+   "id": "street-109",
+   "kind": "綠卡說明",
+   "stage": "E_flyer",
+   "stageName": "發傳單",
+   "who": "",
+   "zh": "不想要傳單，可以客氣地說「不用了，謝謝」。"
+  },
+  {
+   "id": "street-110",
+   "kind": "台詞",
+   "stage": "E_flyer",
+   "stageName": "發傳單",
+   "who": "發傳單的人",
+   "zh": "好的，沒關係，您慢走！"
+  },
+  {
+   "id": "street-111",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "結局：到咖啡店",
+   "who": "",
+   "zh": "（你終於走到路口的咖啡店，Ami坐在窗邊，看到你就揮手。）"
+  },
+  {
+   "id": "street-112",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局：到咖啡店",
+   "who": "Ami",
+   "zh": "〔名字〕，你來啦！路上都還順利嗎？你一個人處理得真好！"
+  },
+  {
+   "id": "street-113",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局：到咖啡店",
+   "who": "Ami",
+   "zh": "你來啦！辛苦了，路上遇到不少事情吧？下次我們再慢慢練習。"
+  }
+ ]
+}

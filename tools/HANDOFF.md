@@ -36,7 +36,7 @@
 - clinic ✅（Ben 改 31 句，已套用並推上去；`apply_clinic.py`）。`rows2.py` 的 clinic 設定用 `helpers={'desk':'櫃台','doc':'醫生'}` 處理 `desk(...)`／`doc(...)` 包起來的台詞。叫號螢幕、藥袋、狀況卡標題等 HTML 片段和 SYM 症狀名、OTHER_CARDS 卡名沒抽出來。
 - 線上修改表的 `GAMES` 清單裡已改完的遊戲都標「已完成」
 - mrt ✅（Ben 改 46 句，已套用並推上去；`apply_mrt.py`）。103 Ben 改成「（你坐在優先席上。）」。`rows2.py` 的 mrt 設定用 `helpers={'staff':'站務員'}`；站名、DRINKS、阿嬤／阿公、路線圖和加值機畫面的字沒抽出來。
-- 接下來：street（每個遊戲：先在 `rows2.py` 的 `CONF` 加設定（parcel、breakfast 是範例） → 抽出 → 發布表格 → 等 Ben 改完 → 套用）
+- street：已在 `rows2.py` 加 `CONF`（113 句），已發布到線上修改表（預設 street），等 Ben 改完再套用。這個遊戲的事件是資料格式（`mk(id, {opts:[{t, ok, m, th}], good, after})`），所以 CONF 用 `statere` 抓 `E_xxx: mk(` 當關卡；`th`（選錯後的反應）是新類別「選錯後的反應」，已加進修改表的 `KIND_ORDER`。號誌、問路小卡畫面的字和 WHOS／先生小姐／地標資料沒抽出來。（每個遊戲：先在 `rows2.py` 的 `CONF` 加設定（parcel、breakfast 是範例） → 抽出 → 發布表格 → 等 Ben 改完 → 套用）
 
 ### parcel 的旁白（錯誤後的提示話）：Ben 已決定
 - 刪除：086（驗算）、067（房東太太的名字）、141（加值金額）；已從遊戲拿掉。
