@@ -1,0 +1,990 @@
+{
+ "game": "mrt",
+ "title": "搭捷運",
+ "rows": [
+  {
+   "id": "mrt-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "捷運"
+  },
+  {
+   "id": "mrt-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "搭捷運"
+  },
+  {
+   "id": "mrt-003",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "週六下午，同事 Ami 在藍線的某一站等你。你要從紅線的某一站出發：先把飲料喝完、看悠遊卡有沒有錢、問路、搭紅線、在台北車站轉藍線、聽廣播，最後在對的站下車。"
+  },
+  {
+   "id": "mrt-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走向捷運站"
+  },
+  {
+   "id": "mrt-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到閘門"
+  },
+  {
+   "id": "mrt-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到加值機"
+  },
+  {
+   "id": "mrt-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "去服務台問路"
+  },
+  {
+   "id": "mrt-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到紅線月台"
+  },
+  {
+   "id": "mrt-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "上車"
+  },
+  {
+   "id": "mrt-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "下車轉乘"
+  },
+  {
+   "id": "mrt-011",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到藍線月台"
+  },
+  {
+   "id": "mrt-012",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走進車廂"
+  },
+  {
+   "id": "mrt-013",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "坐好，聽廣播"
+  },
+  {
+   "id": "mrt-014",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "出站"
+  },
+  {
+   "id": "mrt-015",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "捷運站 · 閘門"
+  },
+  {
+   "id": "mrt-016",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "加值機"
+  },
+  {
+   "id": "mrt-017",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "服務台"
+  },
+  {
+   "id": "mrt-018",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "月台"
+  },
+  {
+   "id": "mrt-019",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "車廂"
+  },
+  {
+   "id": "mrt-020",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "〔名字〕，我已經在〔目的地〕站了！你搭捷運過來，到了再打給我。"
+  },
+  {
+   "id": "mrt-021",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "你在〔出發站〕站對吧？先搭紅線，到台北車站轉車。"
+  },
+  {
+   "id": "mrt-022",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "悠遊卡記得先看一下有沒有錢，不夠要先加值喔。"
+  },
+  {
+   "id": "mrt-023",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "還有，捷運裡面不能吃東西、不能喝飲料，要在進站前喝完。"
+  },
+  {
+   "id": "mrt-024",
+   "kind": "台詞",
+   "stage": "站務員說的路線",
+   "stageName": "站務員說的路線",
+   "who": "站務員",
+   "zh": "到〔目的地〕站的話，先搭紅線，往〔紅線的方向〕方向，坐〔紅線坐幾站〕站，在台北車站下車。"
+  },
+  {
+   "id": "mrt-025",
+   "kind": "台詞",
+   "stage": "站務員說的路線",
+   "stageName": "站務員說的路線",
+   "who": "站務員",
+   "zh": "然後轉搭藍線，往〔藍線的方向〕方向，坐〔藍線坐幾站〕站就到了。"
+  },
+  {
+   "id": "mrt-026",
+   "kind": "清單文字",
+   "stage": "我的狀況卡",
+   "stageName": "我的狀況卡",
+   "who": "",
+   "zh": "目的地：〔目的地〕站"
+  },
+  {
+   "id": "mrt-027",
+   "kind": "清單文字",
+   "stage": "我的狀況卡",
+   "stageName": "我的狀況卡",
+   "who": "",
+   "zh": "現在在：〔出發站〕站（紅線）"
+  },
+  {
+   "id": "mrt-028",
+   "kind": "清單文字",
+   "stage": "我的狀況卡",
+   "stageName": "我的狀況卡",
+   "who": "",
+   "zh": "悠遊卡餘額：〔餘額〕元"
+  },
+  {
+   "id": "mrt-029",
+   "kind": "清單文字",
+   "stage": "我的狀況卡",
+   "stageName": "我的狀況卡",
+   "who": "",
+   "zh": "手上有：〔飲料〕"
+  },
+  {
+   "id": "mrt-030",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "Ami 的 LINE 訊息"
+  },
+  {
+   "id": "mrt-031",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "站務員說的話"
+  },
+  {
+   "id": "mrt-032",
+   "kind": "旁白",
+   "stage": "START",
+   "stageName": "開場：Ami 的 LINE",
+   "who": "",
+   "zh": "（週六下午，你在〔出發站〕站附近。手機響了一聲，是Ami傳來的LINE。你手上還拿著一杯〔飲料〕。）"
+  },
+  {
+   "id": "mrt-033",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "開場：Ami 的 LINE",
+   "who": "我",
+   "zh": "好，我現在過去！"
+  },
+  {
+   "id": "mrt-034",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "開場：Ami 的 LINE",
+   "who": "我",
+   "zh": "走向捷運站"
+  },
+  {
+   "id": "mrt-035",
+   "kind": "旁白",
+   "stage": "G_DRINK",
+   "stageName": "進站：手上的飲料",
+   "who": "",
+   "zh": "（你走到捷運站的入口，手上還拿著飲料。）"
+  },
+  {
+   "id": "mrt-036",
+   "kind": "台詞",
+   "stage": "G_DRINK",
+   "stageName": "進站：手上的飲料",
+   "who": "站務員",
+   "zh": "不好意思，捷運裡面不能吃東西、喝飲料喔。"
+  },
+  {
+   "id": "mrt-037",
+   "kind": "選項",
+   "stage": "G_DRINK",
+   "stageName": "進站：手上的飲料",
+   "who": "我",
+   "zh": "好，我喝完再進去。"
+  },
+  {
+   "id": "mrt-038",
+   "kind": "選項",
+   "stage": "G_DRINK",
+   "stageName": "進站：手上的飲料",
+   "who": "我",
+   "zh": "沒關係，我在車上再喝。"
+  },
+  {
+   "id": "mrt-039",
+   "kind": "選項",
+   "stage": "G_DRINK",
+   "stageName": "進站：手上的飲料",
+   "who": "我",
+   "zh": "我只喝一口，可以嗎？"
+  },
+  {
+   "id": "mrt-040",
+   "kind": "錯誤說明",
+   "stage": "G_DRINK",
+   "stageName": "進站：手上的飲料",
+   "who": "",
+   "zh": "捷運裡面不能吃東西、喝飲料，要在進站前喝完。"
+  },
+  {
+   "id": "mrt-041",
+   "kind": "台詞",
+   "stage": "G_DRINK",
+   "stageName": "進站：手上的飲料",
+   "who": "站務員",
+   "zh": "不行喔，車上也不能喝。"
+  },
+  {
+   "id": "mrt-042",
+   "kind": "台詞",
+   "stage": "G_DRINK",
+   "stageName": "進站：手上的飲料",
+   "who": "站務員",
+   "zh": "一口也不行喔，進站前請先喝完。"
+  },
+  {
+   "id": "mrt-043",
+   "kind": "綠卡說明",
+   "stage": "G_DRINK",
+   "stageName": "進站：手上的飲料",
+   "who": "",
+   "zh": "在台灣，捷運站內不能吃東西、喝飲料，要在進站前喝完。"
+  },
+  {
+   "id": "mrt-044",
+   "kind": "旁白",
+   "stage": "G_DRINK",
+   "stageName": "進站：手上的飲料",
+   "who": "",
+   "zh": "（你站在入口旁邊，把〔飲料〕喝完了。）"
+  },
+  {
+   "id": "mrt-045",
+   "kind": "旁白",
+   "stage": "G_TAP",
+   "stageName": "進站：刷卡",
+   "who": "",
+   "zh": "（你走到閘門前，把悠遊卡放在感應區。）"
+  },
+  {
+   "id": "mrt-046",
+   "kind": "旁白",
+   "stage": "G_TAP",
+   "stageName": "進站：刷卡",
+   "who": "",
+   "zh": "（閘門「嗶嗶」響了，沒有打開。螢幕上寫著：餘額不足。）"
+  },
+  {
+   "id": "mrt-047",
+   "kind": "旁白",
+   "stage": "G_TAP",
+   "stageName": "進站：刷卡",
+   "who": "",
+   "zh": "（你看了一下餘額：只剩〔餘額〕元。這趟的票價大概二十多元，不夠。）"
+  },
+  {
+   "id": "mrt-048",
+   "kind": "選項",
+   "stage": "G_TAP",
+   "stageName": "進站：刷卡",
+   "who": "我",
+   "zh": "去加值機加值"
+  },
+  {
+   "id": "mrt-049",
+   "kind": "選項",
+   "stage": "G_TAP",
+   "stageName": "進站：刷卡",
+   "who": "我",
+   "zh": "再刷一次"
+  },
+  {
+   "id": "mrt-050",
+   "kind": "選項",
+   "stage": "G_TAP",
+   "stageName": "進站：刷卡",
+   "who": "我",
+   "zh": "從旁邊直接走過去"
+  },
+  {
+   "id": "mrt-051",
+   "kind": "錯誤說明",
+   "stage": "G_TAP",
+   "stageName": "進站：刷卡",
+   "who": "",
+   "zh": "餘額不夠，刷再多次也一樣，要先加值。"
+  },
+  {
+   "id": "mrt-052",
+   "kind": "錯誤說明",
+   "stage": "G_TAP",
+   "stageName": "進站：刷卡",
+   "who": "",
+   "zh": "不可以不付錢就搭捷運，要先加值。"
+  },
+  {
+   "id": "mrt-053",
+   "kind": "旁白",
+   "stage": "G_TAP",
+   "stageName": "進站：刷卡",
+   "who": "",
+   "zh": "（對了，Ami說過，餘額不夠要先加值……）"
+  },
+  {
+   "id": "mrt-054",
+   "kind": "旁白",
+   "stage": "G_TOP",
+   "stageName": "進站：加值",
+   "who": "",
+   "zh": "（你走到加值機前，把悠遊卡放在感應區。）"
+  },
+  {
+   "id": "mrt-055",
+   "kind": "台詞",
+   "stage": "G_TOP",
+   "stageName": "進站：加值",
+   "who": "我",
+   "zh": "要加多少錢呢？"
+  },
+  {
+   "id": "mrt-056",
+   "kind": "選項",
+   "stage": "G_TOP",
+   "stageName": "進站：加值",
+   "who": "我",
+   "zh": "加10元"
+  },
+  {
+   "id": "mrt-057",
+   "kind": "選項",
+   "stage": "G_TOP",
+   "stageName": "進站：加值",
+   "who": "我",
+   "zh": "加100元"
+  },
+  {
+   "id": "mrt-058",
+   "kind": "選項",
+   "stage": "G_TOP",
+   "stageName": "進站：加值",
+   "who": "我",
+   "zh": "加500元"
+  },
+  {
+   "id": "mrt-059",
+   "kind": "錯誤說明",
+   "stage": "G_TOP",
+   "stageName": "進站：加值",
+   "who": "",
+   "zh": "加〔加值金額〕元，餘額只有〔加值後餘額〕元，還是不夠搭車。"
+  },
+  {
+   "id": "mrt-060",
+   "kind": "旁白",
+   "stage": "G_TOP",
+   "stageName": "進站：加值",
+   "who": "",
+   "zh": "（〔餘額〕元加〔加值金額〕元，票價大概二十多元……還是不夠。）"
+  },
+  {
+   "id": "mrt-061",
+   "kind": "綠卡說明",
+   "stage": "G_TOP",
+   "stageName": "進站：加值",
+   "who": "",
+   "zh": "你加的錢夠搭好幾趟了。"
+  },
+  {
+   "id": "mrt-062",
+   "kind": "旁白",
+   "stage": "G_TOP",
+   "stageName": "進站：加值",
+   "who": "",
+   "zh": "（「嗶」！加值成功，餘額：〔餘額〕元。）"
+  },
+  {
+   "id": "mrt-063",
+   "kind": "旁白",
+   "stage": "S_ASK",
+   "stageName": "問路",
+   "who": "",
+   "zh": "（你不太確定怎麼去，所以走到服務台問站務員。）"
+  },
+  {
+   "id": "mrt-064",
+   "kind": "台詞",
+   "stage": "S_ASK",
+   "stageName": "問路",
+   "who": "站務員",
+   "zh": "你好，有什麼需要幫忙的嗎？"
+  },
+  {
+   "id": "mrt-065",
+   "kind": "選項",
+   "stage": "S_ASK",
+   "stageName": "問路",
+   "who": "我",
+   "zh": "請問到〔目的地〕站要怎麼搭？"
+  },
+  {
+   "id": "mrt-066",
+   "kind": "選項",
+   "stage": "S_ASK",
+   "stageName": "問路",
+   "who": "我",
+   "zh": "請問廁所在哪裡？"
+  },
+  {
+   "id": "mrt-067",
+   "kind": "選項",
+   "stage": "S_ASK",
+   "stageName": "問路",
+   "who": "我",
+   "zh": "請問現在幾點？"
+  },
+  {
+   "id": "mrt-068",
+   "kind": "錯誤說明",
+   "stage": "S_ASK",
+   "stageName": "問路",
+   "who": "",
+   "zh": "你要問的是：到〔目的地〕站要怎麼搭。"
+  },
+  {
+   "id": "mrt-069",
+   "kind": "台詞",
+   "stage": "S_ASK",
+   "stageName": "問路",
+   "who": "站務員",
+   "zh": "廁所在那邊。還有別的事嗎？"
+  },
+  {
+   "id": "mrt-070",
+   "kind": "台詞",
+   "stage": "S_ASK",
+   "stageName": "問路",
+   "who": "站務員",
+   "zh": "現在是下午三點多。還有別的事嗎？"
+  },
+  {
+   "id": "mrt-071",
+   "kind": "綠卡說明",
+   "stage": "S_ASK",
+   "stageName": "問路",
+   "who": "",
+   "zh": "不知道怎麼走，就問站務員。"
+  },
+  {
+   "id": "mrt-072",
+   "kind": "旁白",
+   "stage": "P_RED",
+   "stageName": "紅線：選方向",
+   "who": "",
+   "zh": "（你刷卡進站，走到紅線的月台。月台上有兩個方向的指示牌。）"
+  },
+  {
+   "id": "mrt-073",
+   "kind": "選項",
+   "stage": "P_RED",
+   "stageName": "紅線：選方向",
+   "who": "我",
+   "zh": "往淡水方向"
+  },
+  {
+   "id": "mrt-074",
+   "kind": "選項",
+   "stage": "P_RED",
+   "stageName": "紅線：選方向",
+   "who": "我",
+   "zh": "往象山方向"
+  },
+  {
+   "id": "mrt-075",
+   "kind": "錯誤說明",
+   "stage": "P_RED",
+   "stageName": "紅線：選方向",
+   "who": "",
+   "zh": "站務員說要搭往〔紅線的方向〕方向。"
+  },
+  {
+   "id": "mrt-076",
+   "kind": "旁白",
+   "stage": "P_RED",
+   "stageName": "紅線：選方向",
+   "who": "",
+   "zh": "（站務員剛剛說往哪個方向？）"
+  },
+  {
+   "id": "mrt-077",
+   "kind": "綠卡說明",
+   "stage": "P_RED",
+   "stageName": "紅線：選方向",
+   "who": "",
+   "zh": "搭捷運要看「往…方向」，也就是終點站的名字。"
+  },
+  {
+   "id": "mrt-078",
+   "kind": "旁白",
+   "stage": "T_RED",
+   "stageName": "紅線：聽廣播下車",
+   "who": "",
+   "zh": "（車廂廣播：「各位旅客，下一站，〔下一站〕〔有時加：，可轉乘板南線〕。」）"
+  },
+  {
+   "id": "mrt-079",
+   "kind": "旁白",
+   "stage": "T_RED",
+   "stageName": "紅線：聽廣播下車",
+   "who": "",
+   "zh": "（列車進站了。你上了車，車廂裡有一點擠。）"
+  },
+  {
+   "id": "mrt-080",
+   "kind": "選項",
+   "stage": "T_RED",
+   "stageName": "紅線：聽廣播下車",
+   "who": "我",
+   "zh": "下一站下車"
+  },
+  {
+   "id": "mrt-081",
+   "kind": "選項",
+   "stage": "T_RED",
+   "stageName": "紅線：聽廣播下車",
+   "who": "我",
+   "zh": "不下車，繼續坐"
+  },
+  {
+   "id": "mrt-082",
+   "kind": "錯誤說明",
+   "stage": "T_RED",
+   "stageName": "紅線：聽廣播下車",
+   "who": "",
+   "zh": "下一站就是台北車站，要在那裡轉車！"
+  },
+  {
+   "id": "mrt-083",
+   "kind": "錯誤說明",
+   "stage": "T_RED",
+   "stageName": "紅線：聽廣播下車",
+   "who": "",
+   "zh": "還沒到台北車站，下一站是〔下一站〕。"
+  },
+  {
+   "id": "mrt-084",
+   "kind": "旁白",
+   "stage": "T_RED",
+   "stageName": "紅線：聽廣播下車",
+   "who": "",
+   "zh": "（車門快要關了！）"
+  },
+  {
+   "id": "mrt-085",
+   "kind": "旁白",
+   "stage": "T_RED",
+   "stageName": "紅線：聽廣播下車",
+   "who": "",
+   "zh": "（你看一下路線圖……還沒到。）"
+  },
+  {
+   "id": "mrt-086",
+   "kind": "旁白",
+   "stage": "T_RED",
+   "stageName": "紅線：聽廣播下車",
+   "who": "",
+   "zh": "（列車到〔下一站〕站了。）"
+  },
+  {
+   "id": "mrt-087",
+   "kind": "綠卡說明",
+   "stage": "T_RED",
+   "stageName": "紅線：聽廣播下車",
+   "who": "",
+   "zh": "你聽懂廣播，知道要在台北車站下車。"
+  },
+  {
+   "id": "mrt-088",
+   "kind": "旁白",
+   "stage": "T_RED",
+   "stageName": "紅線：聽廣播下車",
+   "who": "",
+   "zh": "（你在台北車站下了車。）"
+  },
+  {
+   "id": "mrt-089",
+   "kind": "旁白",
+   "stage": "X_XFER",
+   "stageName": "台北車站：轉乘",
+   "who": "",
+   "zh": "（台北車站好大，到處都是指標。你要轉搭藍線，也就是板南線。）"
+  },
+  {
+   "id": "mrt-090",
+   "kind": "選項",
+   "stage": "X_XFER",
+   "stageName": "台北車站：轉乘",
+   "who": "我",
+   "zh": "跟著藍色「板南線」的指標走"
+  },
+  {
+   "id": "mrt-091",
+   "kind": "選項",
+   "stage": "X_XFER",
+   "stageName": "台北車站：轉乘",
+   "who": "我",
+   "zh": "跟著紅色「淡水信義線」的指標走"
+  },
+  {
+   "id": "mrt-092",
+   "kind": "選項",
+   "stage": "X_XFER",
+   "stageName": "台北車站：轉乘",
+   "who": "我",
+   "zh": "跟著「出口」的指標走"
+  },
+  {
+   "id": "mrt-093",
+   "kind": "錯誤說明",
+   "stage": "X_XFER",
+   "stageName": "台北車站：轉乘",
+   "who": "",
+   "zh": "要轉搭藍線，所以要跟著藍色「板南線」的指標走。"
+  },
+  {
+   "id": "mrt-094",
+   "kind": "旁白",
+   "stage": "X_XFER",
+   "stageName": "台北車站：轉乘",
+   "who": "",
+   "zh": "（站務員說，要轉搭哪一條線？）"
+  },
+  {
+   "id": "mrt-095",
+   "kind": "綠卡說明",
+   "stage": "X_XFER",
+   "stageName": "台北車站：轉乘",
+   "who": "",
+   "zh": "轉乘時，跟著路線的顏色和名字走。"
+  },
+  {
+   "id": "mrt-096",
+   "kind": "旁白",
+   "stage": "P_BLUE",
+   "stageName": "藍線：選方向",
+   "who": "",
+   "zh": "（你來到藍線的月台，這裡也有兩個方向。）"
+  },
+  {
+   "id": "mrt-097",
+   "kind": "選項",
+   "stage": "P_BLUE",
+   "stageName": "藍線：選方向",
+   "who": "我",
+   "zh": "往頂埔方向"
+  },
+  {
+   "id": "mrt-098",
+   "kind": "選項",
+   "stage": "P_BLUE",
+   "stageName": "藍線：選方向",
+   "who": "我",
+   "zh": "往南港展覽館方向"
+  },
+  {
+   "id": "mrt-099",
+   "kind": "錯誤說明",
+   "stage": "P_BLUE",
+   "stageName": "藍線：選方向",
+   "who": "",
+   "zh": "到〔目的地〕站要搭往〔藍線的方向〕方向。"
+  },
+  {
+   "id": "mrt-100",
+   "kind": "旁白",
+   "stage": "P_BLUE",
+   "stageName": "藍線：選方向",
+   "who": "",
+   "zh": "（站務員剛剛說往哪個方向？看一下任務提示和路線圖。）"
+  },
+  {
+   "id": "mrt-101",
+   "kind": "綠卡說明",
+   "stage": "P_BLUE",
+   "stageName": "藍線：選方向",
+   "who": "",
+   "zh": "你看路線圖，選對了方向。"
+  },
+  {
+   "id": "mrt-102",
+   "kind": "旁白",
+   "stage": "P_BLUE",
+   "stageName": "藍線：選方向",
+   "who": "",
+   "zh": "（列車進站了，你走進車廂。）"
+  },
+  {
+   "id": "mrt-103",
+   "kind": "旁白",
+   "stage": "T_SEAT",
+   "stageName": "藍線：博愛座",
+   "who": "",
+   "zh": "（車廂裡人很多，只剩一個博愛座，你坐了下來。）"
+  },
+  {
+   "id": "mrt-104",
+   "kind": "旁白",
+   "stage": "T_SEAT",
+   "stageName": "藍線：博愛座",
+   "who": "",
+   "zh": "（這時候，一位〔阿嬤／阿公〕慢慢走上車，手裡拿著拐杖，站在你面前。）"
+  },
+  {
+   "id": "mrt-105",
+   "kind": "選項",
+   "stage": "T_SEAT",
+   "stageName": "藍線：博愛座",
+   "who": "我",
+   "zh": "〔阿嬤／阿公〕，您請坐。"
+  },
+  {
+   "id": "mrt-106",
+   "kind": "選項",
+   "stage": "T_SEAT",
+   "stageName": "藍線：博愛座",
+   "who": "我",
+   "zh": "低下頭繼續滑手機。"
+  },
+  {
+   "id": "mrt-107",
+   "kind": "選項",
+   "stage": "T_SEAT",
+   "stageName": "藍線：博愛座",
+   "who": "我",
+   "zh": "閉上眼睛假裝睡覺。"
+  },
+  {
+   "id": "mrt-108",
+   "kind": "錯誤說明",
+   "stage": "T_SEAT",
+   "stageName": "藍線：博愛座",
+   "who": "",
+   "zh": "博愛座要讓給需要的人，像是老人、孕婦、行動不便的人。"
+  },
+  {
+   "id": "mrt-109",
+   "kind": "旁白",
+   "stage": "T_SEAT",
+   "stageName": "藍線：博愛座",
+   "who": "",
+   "zh": "（旁邊的人都看著你……）"
+  },
+  {
+   "id": "mrt-110",
+   "kind": "綠卡說明",
+   "stage": "T_SEAT",
+   "stageName": "藍線：博愛座",
+   "who": "",
+   "zh": "看到需要的人，要主動讓座。"
+  },
+  {
+   "id": "mrt-111",
+   "kind": "台詞",
+   "stage": "T_SEAT",
+   "stageName": "藍線：博愛座",
+   "who": "阿嬤／阿公",
+   "zh": "謝謝你，年輕人！"
+  },
+  {
+   "id": "mrt-112",
+   "kind": "旁白",
+   "stage": "T_BLUE",
+   "stageName": "藍線：聽廣播下車",
+   "who": "",
+   "zh": "（車廂廣播：「各位旅客，下一站，〔下一站〕。」）"
+  },
+  {
+   "id": "mrt-113",
+   "kind": "選項",
+   "stage": "T_BLUE",
+   "stageName": "藍線：聽廣播下車",
+   "who": "我",
+   "zh": "下一站下車"
+  },
+  {
+   "id": "mrt-114",
+   "kind": "選項",
+   "stage": "T_BLUE",
+   "stageName": "藍線：聽廣播下車",
+   "who": "我",
+   "zh": "不下車，繼續坐"
+  },
+  {
+   "id": "mrt-115",
+   "kind": "錯誤說明",
+   "stage": "T_BLUE",
+   "stageName": "藍線：聽廣播下車",
+   "who": "",
+   "zh": "下一站就是〔目的地〕站，要下車！"
+  },
+  {
+   "id": "mrt-116",
+   "kind": "錯誤說明",
+   "stage": "T_BLUE",
+   "stageName": "藍線：聽廣播下車",
+   "who": "",
+   "zh": "還沒到。你要去〔目的地〕站，下一站是〔下一站〕。"
+  },
+  {
+   "id": "mrt-117",
+   "kind": "旁白",
+   "stage": "T_BLUE",
+   "stageName": "藍線：聽廣播下車",
+   "who": "",
+   "zh": "（車門快要關了！）"
+  },
+  {
+   "id": "mrt-118",
+   "kind": "旁白",
+   "stage": "T_BLUE",
+   "stageName": "藍線：聽廣播下車",
+   "who": "",
+   "zh": "（你看一下路線圖……還沒到。）"
+  },
+  {
+   "id": "mrt-119",
+   "kind": "旁白",
+   "stage": "T_BLUE",
+   "stageName": "藍線：聽廣播下車",
+   "who": "",
+   "zh": "（列車到〔下一站〕站了。）"
+  },
+  {
+   "id": "mrt-120",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "結局：出站和 Ami 會合",
+   "who": "",
+   "zh": "（你在〔目的地〕站下了車，刷卡出站，「嗶」一聲，閘門打開了。）"
+  },
+  {
+   "id": "mrt-121",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "結局：出站和 Ami 會合",
+   "who": "",
+   "zh": "（出站以後，你看到Ami在出口等你。）"
+  },
+  {
+   "id": "mrt-122",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局：出站和 Ami 會合",
+   "who": "Ami",
+   "zh": "哇，〔名字〕，你一個人搭捷運搭得好順喔！我們去吃飯吧！"
+  },
+  {
+   "id": "mrt-123",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "結局：出站和 Ami 會合",
+   "who": "Ami",
+   "zh": "辛苦了！搭捷運有些地方下次再注意就好。我們去吃飯吧！"
+  }
+ ]
+}
