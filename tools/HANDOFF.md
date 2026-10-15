@@ -33,9 +33,9 @@
 
 進度：
 - drinks ✅、reserva ✅（43 處）、breakfast ✅（34 處）、parcel ✅（30 句＋旁白刪 3 句，已上線）、nightmarket ✅（Ben 改 26 句，已套用：019/020/024/049/130 刪除並併入前一句，087/093 的提示話拿掉）、bakery ✅（Ben 改 48 句，已套用並推上去；`apply_bakery.py`）
-- clinic：已在 `rows2.py` 加 `CONF`（130 句），已發布到線上修改表（預設 clinic），等 Ben 改完再套用。`helpers={'desk':'櫃台','doc':'醫生'}` 處理 `desk(...)`／`doc(...)` 包起來的台詞。叫號螢幕、藥袋、狀況卡標題等 HTML 片段的字（目前看診、你的號碼、藥袋、早中晚睡前…）和 SYM 症狀名、OTHER_CARDS 卡名沒抽出來。
+- clinic ✅（Ben 改 31 句，已套用並推上去；`apply_clinic.py`）。`rows2.py` 的 clinic 設定用 `helpers={'desk':'櫃台','doc':'醫生'}` 處理 `desk(...)`／`doc(...)` 包起來的台詞。叫號螢幕、藥袋、狀況卡標題等 HTML 片段和 SYM 症狀名、OTHER_CARDS 卡名沒抽出來。
 - 線上修改表的 `GAMES` 清單裡已改完的遊戲都標「已完成」
-- 接下來：clinic、mrt、street（每個遊戲：先在 `rows2.py` 的 `CONF` 加設定（parcel、breakfast 是範例） → 抽出 → 發布表格 → 等 Ben 改完 → 套用）
+- 接下來：mrt、street（每個遊戲：先在 `rows2.py` 的 `CONF` 加設定（parcel、breakfast 是範例） → 抽出 → 發布表格 → 等 Ben 改完 → 套用）
 
 ### parcel 的旁白（錯誤後的提示話）：Ben 已決定
 - 刪除：086（驗算）、067（房東太太的名字）、141（加值金額）；已從遊戲拿掉。
@@ -69,3 +69,10 @@
 - 單字表：K_GREET 順便→朋友，K_CONFIRM 複誦→這樣對嗎，K_NAME 取貨人→朋友。
 - 我順手修的：023 的「要要」、164 缺的「）」。
 - `rows2.py` 的 bakery 設定示範了 `ternary=True`（「A／B」三元運算式）、`fnmap`（函式內字串的類別名）、`first`。資料常數（SHELF 麵包名、FLAVORS、PICKUP 選項、托盤／清單標題）不在表格裡。
+
+### clinic 套用時的決定（Ben 改的）
+- Ami 的 LINE：022、023 併進 021（「我今天要開會，不能陪你去」拿掉，「公司旁邊」→「附近」）。因為重點都在第一句，任務提示改成列出全部 Ami 的話（原本 `slice(1)` 跳過第一句）。
+- 刪除的旁白：045 走進診所、058 填初診單、078 走進診間、098 拿單子回櫃台（D_ADVICE→P_PAY 現在沒有過場頁，直接進批價）；錯誤後的提示旁白（083/089/095 看狀況卡、117 看藥袋、126 看任務提示）全部移除。
+- 綠卡說明前面都加了稱讚語（很好！、不錯唷！、沒錯！…）。
+- 單字表：START 加 生病，W_WAIT 加 過號，D_ALLERGY 的 有沒有 → 吃藥。
+- 我順手修的：090「吃藥會過敏嗎?」半形問號改全形；customPinyin 加 聽得懂 → tīng de dǒng。
