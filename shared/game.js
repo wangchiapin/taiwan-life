@@ -410,6 +410,11 @@ function uploadResult() {
    排行榜
 ══════════════════════════════════════ */
 async function showLeaderboard() {
+  // 地圖模式：看完排名，按鈕改成「回到地圖」（成績交給地圖、地圖關掉這一關）
+  if (EMBED) {
+    const back = document.querySelector('#leaderboard-screen .btn-restart');
+    if (back) { back.dataset.zh = '回到地圖'; back.dataset.es = 'Volver al mapa'; back.dataset.en = 'Back to the map'; back.textContent = '回到地圖 ' + X('Volver al mapa', 'Back to the map'); back.onclick = finishEmbed; }
+  }
   Tr.closeAll(); Speech.stop(); Vocab.toggle(false); Hints.toggle(false); Log.toggle(false);
   document.getElementById('side-tabs').hidden = true;
   document.getElementById('game-window').classList.remove('active');

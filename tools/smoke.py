@@ -53,13 +53,15 @@ def play(page,g,mode,log):
     orc=EXTRA.get(g) or ORACLES.get(g)
     while steps<400:
         steps+=1
-        if page.evaluate("document.getElementById('leaderboard-screen').classList.contains('active')"): return 'leaderboard',trans
+        if page.evaluate("document.getElementById('leaderboard-screen').classList.contains('active')"):
+            if page.evaluate('EMBED'):   # 地圖模式：看完排行榜按「回到地圖」
+                page.wait_for_timeout(300); page.click('#leaderboard-screen .btn-restart'); return 'embed-done',trans
+            return 'leaderboard',trans
         st=page.evaluate('Game.state')
         if page.evaluate('Game.mistakes')>=8: page.evaluate('Game.mistakes=0')
         if st=='_TRANS':
             trans+=1; lab=texts(page); TRANS.add(page.evaluate('Game._trans.from+">"+Game._trans.to'))
             click_i(page,0); continue
-        if st=='RESULT' and page.evaluate('EMBED'): click_i(page,0); return 'embed-done',trans
         if g=='breakfast' and page.evaluate("!!(Game.getConfig()[Game.state]||{}).pad"):
             page.evaluate("Game.pad.ticket=[...Game.C.target]; Game.padSubmit()"); continue
         opts=texts(page)
@@ -89,15 +91,17 @@ def fbcheck(page,g,embed):
     bad=[k for k,ok in [('scene',r['scene']==g),('score',r['score']==gs[0]),('mistakes',r['mistakes']==gs[1]),('errors',len(r['errors'])==gs[2]),
         ('embed',r['embed']==embed),('code',bool(re.match(r'^[A-Z]{3}-[0-9]{4}$',r['playerId']))),('stage',all(e['stage'] for e in r['errors']))] if not ok]
     lb=[c for c,d in w if c.endswith('_scores')]
-    if not embed and len(lb)!=1: bad.append(f'leaderboard={len(lb)}')
-    if embed and lb: bad.append('embed寫了排行榜')
+    if len(lb)!=1: bad.append(f'leaderboard={len(lb)}')   # 單機和地圖模式都寫排行榜
+    if embed:
+        sc=page.evaluate('window.__sc||null')
+        if not sc or sc.get('score')!=gs[0]: bad.append(f'scene-complete={sc}')
     return 'FB✓ '+r['playerId'] if not bad else 'FB✗ '+','.join(bad)
 def run(g,mode='mixed',runs=3,embed=False,vp=None):
     out=[]
     with sync_playwright() as p:
         b=p.chromium.launch()
         for k in range(runs):
-            ctx=b.new_context(viewport=vp or {'width':1000,'height':900}); ctx.route('**/*',route); page=ctx.new_page()
+            ctx=b.new_context(viewport=vp or {'width':1000,'height':900}); ctx.route('**/*',route); ctx.add_init_script("addEventListener('message',e=>{if(e.data&&e.data.type==='scene-complete')window.__sc=e.data})"); page=ctx.new_page()
             errs=[]; page.on('pageerror',lambda e:errs.append(str(e))); page.on('dialog',lambda d:d.accept())
             url=f'http://127.0.0.1:{PORT}/games/{g}/index.html'+('?embed=1&name=Ana' if embed else '')
             page.goto(url); page.wait_for_timeout(400)

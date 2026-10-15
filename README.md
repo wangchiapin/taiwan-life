@@ -14,8 +14,8 @@
 
 ## 結構
 ```
-index.html          遊戲選單（之後換成「台灣一週」地圖）
-map/index.html      地圖模式（測試版）：走到建築門口 → iframe 載入 games/<scene>/?embed=1 → 收 scene-complete
+index.html          首頁＝台灣生活地圖（2026-10-16 起正式用地圖模式，原本的遊戲清單頁已刪除）：走到建築門口 → iframe 載入 games/<scene>/?embed=1 → 收 scene-complete
+map/index.html      舊的地圖網址，自動轉到首頁
                     20×28 格，畫面一次看 20×14 格，跟著玩家上下捲動。
                     還不能玩的地點放在 COMING（🚧 維修中／建造中），走到門口只顯示「還在準備中，敬請期待」；開放時搬到 SCENES，slot 不變
 games/<scene>/      每個遊戲：index.html + images/（檔名小寫 .jpg）
@@ -35,7 +35,7 @@ Firestore collection：`<scene>game_scores` 或 `<scene>_scores`（沿用各遊�
 ## 成績紀錄與玩家代碼
 - 每局結果頁出現時上傳一筆到 `results`（遊戲裡呼叫 `uploadResult()`）：playerId（玩家代碼）、name、scene、score、mistakes、errors（每個扣分原因 zh/es/en＋關卡 stage/stageEs/stageEn）、elapsed、hintViews、script、lang、embed、difficulty（先固定 'normal'）、createdAt。
 - 玩家代碼：例如 `MAR-4821`（名字前三個英文字母＋4 位數；沒有英文字母就隨機）。第一次用某個名字時產生，存在 localStorage `taiwan_player.code` 和 `taiwan_codes`（名字→代碼），並登記到 `progress/<代碼>`。
-- 地圖進度存在 `progress/<代碼>` = { code, name, done }；換裝置在清單頁或地圖輸入代碼就接回來（同一個地方取比較高的分數）。
+- 地圖進度存在 `progress/<代碼>` = { code, name, done }；換裝置在地圖的名字畫面輸入代碼就接回來（同一個地方取比較高的分數）。
 - 規則：排行榜任何人可看、可新增，不能改；results 任何人可新增，只有管理員能讀、能刪；progress 知道代碼就能讀寫，只有管理員能列出全部、能刪。
 
 ## 嵌入模式（給地圖用）
@@ -47,21 +47,18 @@ games/<scene>/index.html?embed=1&name=玩家名&s=simp&l=en
 - `s`：`simp` 簡體，預設繁體
 - `l`：`en` 英文，預設西文
 - `code`：玩家代碼（地圖會帶，成績紀錄用）
-- 嵌入時不顯示登入頁和排行榜，直接開始。
+- 嵌入時不顯示登入頁，直接開始。
+- 玩完和單機版一樣：結果頁 →「查看排行榜」（成績寫進那個遊戲的排行榜）→ 排行榜的按鈕變成「回到地圖」。
 
-遊戲結束時（結果頁按「回到地圖」）送出：
+按「回到地圖」時送出：
 ```js
 parent.postMessage({ type: 'scene-complete', scene: '<scene>', score, mistakes }, '*');
 ```
 地圖收到後關掉 iframe 並記錄成績。
 
-## 從清單頁進遊戲（不用再輸入名字）
-清單頁（index.html）和地圖共用玩家資料：localStorage `taiwan_player` = { name, script, lang }。
-清單頁有填名字時，點遊戲會開 `games/<scene>/index.html?again=名字&s=…&l=…`，遊戲跳過名字頁直接開始（單機版，有排行榜），網址參數會自動清掉。
-沒填名字，或直接用網址進遊戲，遊戲照常先問名字。
-
-## 不帶 embed=1
-就是單機版：有登入頁、排行榜，連結可以直接發給學生。
+## 單一遊戲的網址（不帶 embed=1）
+就是單機版：有登入頁、排行榜。畫面上已經沒有連結，但網址留著（Ben 決定）：上課想直接丟一個遊戲給學生時用，以前發出去的連結也不會壞。
+`?again=名字&s=…&l=…` 會跳過名字頁直接開始（「重新開始」用），網址參數會自動清掉。
 
 ## 共用程式（shared/game.js、shared/game.css）
 9 個遊戲共用：設定（繁簡、西英）、翻譯小視窗、背景音樂、朗讀、拼音、單字抽屜、錯誤紀錄、開始畫面、重新開始、地圖嵌入、成績上傳、排行榜，

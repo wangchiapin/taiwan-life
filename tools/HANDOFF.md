@@ -12,6 +12,12 @@
 - 共用機制（詳見 README）：單檔 HTML 狀態機（`getConfig()`、`L(zh,es,en)`、`Game.addMistake`、`Game.good`）、過場 `NEXT_LABEL`、換關時自動收起面板、背景音樂（`Music`，共用 key `taiwan_music`）、嵌入模式 `?embed=1&name=` → `postMessage scene-complete`、清單頁帶 `?again=名字&s=&l=` 免再輸入名字、拼音用 pinyin-pro `customPinyin`（台灣讀音）、簡體用 opencc。
 - Firebase（tiendadebebidas-d75ac）排行榜：程式寫好了，但需要 Ben 在 console 建複合索引（score desc、elapsed asc）並檢查 rules；設定裡 messagingSenderId/appId 可能對調了，等 Ben 提供正確設定再修。
 
+## 2026-10-16 改成正式地圖模式（Ben 決定）
+- 首頁 `index.html` 就是地圖；原本的遊戲清單頁刪掉；`map/` 舊網址自動轉到首頁；地圖上回清單的按鈕和連結拿掉。
+- 單一遊戲網址 `games/<scene>/` 留著（不放連結），給上課直接丟連結用。
+- 地圖模式玩完也進排行榜：結果頁 →「查看排行榜」→ 按鈕變成「回到地圖」才送 scene-complete（`shared/game.js` 的 `showLeaderboard`）。smoke.py embed 測試會檢查排行榜有寫、scene-complete 有送。
+- 第 4 步的檢查清單（https://claude.ai/artifact/EgrTFKHk5Y41FgR1tZML3X，db 集合 `decisions`，文件 id＝項目 id、內容 {choice: 改/不改/再討論, note}）：Ben 說晚一點再看，看完用 ArtifactData 讀 `decisions` 照著改。檢查工具在 `tools/review/`。
+
 ## 下一階段（2026-10-15 Ben 確認的計畫，照順序做）
 九個遊戲的中文用詞 Ben 已經全部改完（見下面「中文用詞」）。Ben 說之後會自己全部玩一次。接下來照這個順序：
 

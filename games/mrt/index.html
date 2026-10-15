@@ -868,8 +868,8 @@ const Game = defineGame({
           else Game.log.forEach((m, i) => { msg += `\n${i + 1}. ${m.zh} ${X(m.es, m.en)}（−10）`; });
           return msg.split('\n').map(zh => ({ zh }));
         },
-        options: () => EMBED ? ['回到地圖 ' + X('Volver al mapa', 'Back to the map')] : ['查看排行榜 ' + X('Ver clasificación', 'See leaderboard')],
-        next: () => { if (EMBED) finishEmbed(); else showLeaderboard(); }
+        options: () => ['查看排行榜 ' + X('Ver clasificación', 'See leaderboard')],
+        next: () => showLeaderboard()
       }
     };
   },
