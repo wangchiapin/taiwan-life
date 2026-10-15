@@ -19,38 +19,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
 
-<!-- Firebase：與飲料店同一個專案，collection 換成 clinicgame_scores -->
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：clinicgame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs }
-      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey:            "AIzaSyD2lxec6JTbERwFPGjDzriYzIH7o9IRWnw",
-    authDomain:        "tiendadebebidas-d75ac.firebaseapp.com",
-    projectId:         "tiendadebebidas-d75ac",
-    storageBucket:     "tiendadebebidas-d75ac.firebasestorage.app",
-    messagingSenderId: "1:947444542062:web:62e209f33cfc3ae12c547f",
-    appId:             "G-PGQZPYNBLX"
-  };
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
-  const COL = "clinicgame_scores";
-
-  window._FB = {
-    async saveScore(name, score, elapsed) {
-      try { await addDoc(collection(db, COL), { name, score, elapsed, createdAt: Date.now() }); return true; }
-      catch (e) { console.error("Firebase 寫入失敗", e); return false; }
-    },
-    async getLeaderboard() {
-      try {
-        // 需要在 Firestore 建立複合索引：score 降冪 + elapsed 升冪
-        const q = query(collection(db, COL), orderBy("score", "desc"), orderBy("elapsed", "asc"), limit(15));
-        const snap = await getDocs(q);
-        return snap.docs.map(d => d.data());
-      } catch (e) { console.error("Firebase 讀取失敗", e); return []; }
-    }
-  };
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "clinicgame_scores" });
 </script>
 
 
@@ -926,6 +899,15 @@ function finishEmbed() {
   try { parent.postMessage({ type: 'scene-complete', scene: 'clinic', score: Game.score, mistakes: Game.mistakes }, '*'); } catch (e) {}
 }
 
+/* 每局完整紀錄：結果頁出現時上傳到 results（管理員成績頁看得到）；一局只傳一次 */
+function uploadResult() {
+  if (Game._sent) return; Game._sent = true;
+  try {
+    TWResults.send({ scene: 'clinic', name: Game.playerName, code: QS.get('code'), score: Game.score, mistakes: Game.mistakes,
+      log: Game.log, elapsed: Game.elapsedTime, hintViews: Game.hintViews, script: Settings.script, lang: Settings.lang, embed: EMBED });
+  } catch (e) { console.error('成績紀錄上傳失敗', e); }
+}
+
 /* ══════════════════════════════════════
    排行榜
 ══════════════════════════════════════ */
@@ -1473,7 +1455,7 @@ const Game = {
           ];
         },
         options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
-        next: () => { Game.state = 'RESULT'; }
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
       },
       RESULT: {
         place: 'phone',

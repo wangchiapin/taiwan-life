@@ -25,6 +25,14 @@
   .seg button { border:0; background:transparent; color:var(--ink); padding:5px 12px; font:inherit; font-size:14px; cursor:pointer; }
   .seg button[aria-pressed="true"] { background:var(--ink); color:var(--bg); }
   .player .hint { margin:8px 0 0; font-size:13px; color:var(--muted); }
+  .player .code { margin:8px 0 0; font-size:14px; }
+  .player .code b { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:16px; letter-spacing:1px; border:2px solid var(--line); border-radius:8px; padding:0 6px; }
+  .player details { margin:8px 0 0; font-size:14px; }
+  .player summary { cursor:pointer; color:var(--muted); }
+  .player .crow { display:flex; gap:8px; margin-top:6px; }
+  .player .crow input { flex:1 1 auto; text-transform:uppercase; font-family:ui-monospace,Menlo,Consolas,monospace; }
+  .player .crow button { border:2px solid var(--line); border-radius:10px; background:var(--card); color:var(--ink); padding:0 12px; font:inherit; cursor:pointer; }
+  .player .cerr { color:var(--accent); font-size:13px; min-height:1.2em; margin:4px 0 0; }
 </style>
 </head>
 <body>
@@ -39,6 +47,12 @@
       <div class="seg" role="group" aria-label="Idioma / Language"><button type="button" data-lang="es" aria-pressed="true">Español</button><button type="button" data-lang="en" aria-pressed="false">English</button></div>
     </div>
     <p class="hint" id="phint"></p>
+    <p class="code" id="pcode" hidden></p>
+    <details id="have-code">
+      <summary>🔑 我有代碼 · <span data-es="Tengo un código" data-en="I have a code">Tengo un código</span></summary>
+      <div class="crow"><input id="code-in" maxlength="9" autocomplete="off" placeholder="MAR-4821"><button type="button" id="code-go">讀取 · <span data-es="Cargar" data-en="Load">Cargar</span></button></div>
+      <p class="cerr" id="code-err"></p>
+    </details>
   </section>
   <ul>
     <li><a class="g" href="map/"><b>🗺️ 台灣生活地圖（測試）</b><small>Modo mapa: camina hasta cada lugar · 地圖模式</small></a></li>
@@ -54,11 +68,17 @@
     <li class="g soon"><b>🚄 高鐵 · ⛽ 加油站</b><small>Próximamente · 即將推出</small></li>
   </ul>
 </main>
+<!-- 玩家代碼、Firebase：shared/ 共用檔 -->
+<script src="shared/player.js"></script>
+<script type="module">
+  import { initFB } from "./shared/firebase.js";
+  initFB();
+</script>
 <script>
 /* 玩家資料：和地圖共用。填了名字，點遊戲就直接開始（不用在遊戲裡再輸入名字）；
    直接用網址進遊戲的人，遊戲還是會先問名字。 */
 const PKEY = 'taiwan_player';
-const P = { name: '', script: 'trad', lang: 'es' };
+const P = { name: '', script: 'trad', lang: 'es', code: '' };
 try { Object.assign(P, JSON.parse(localStorage.getItem(PKEY) || '{}')); } catch (e) {}
 const save = () => { try { localStorage.setItem(PKEY, JSON.stringify(P)); } catch (e) {} };
 const X = (es, en) => P.lang === 'en' ? en : es;
@@ -71,17 +91,45 @@ function paint() {
   document.getElementById('phint').textContent = P.name
     ? '✓ 點遊戲就直接開始。 ' + X('Toca un juego y empieza directamente.', 'Tap a game to start right away.')
     : '先輸入名字，進遊戲就不用再輸入。 ' + X('Escribe tu nombre aquí y no tendrás que escribirlo en cada juego.', "Enter your name here and you won't need to type it in each game.");
+  const pc = document.getElementById('pcode');
+  pc.hidden = !(P.name && P.code);
+  if (!pc.hidden) pc.innerHTML = `🔑 你的代碼 · ${X('Tu código', 'Your code')}：<b>${P.code}</b> <small>記下來，換裝置時用。 ${X('Anótalo para usarlo en otro dispositivo.', 'Write it down to use on another device.')}</small>`;
 }
-inp.addEventListener('input', () => { P.name = inp.value.trim(); save(); paint(); });
+/* 名字填好（離開輸入框）或要進遊戲時，才產生／找出這個名字的代碼 */
+function ensureCode() {
+  if (!P.name) return;
+  const c = TWPlayer.codeFor(P.name);
+  if (c !== P.code) { P.code = c; save(); }
+  paint();
+}
+inp.addEventListener('input', () => { P.name = inp.value.trim(); P.code = ''; save(); paint(); });
+inp.addEventListener('change', ensureCode);
+/* 換裝置：輸入代碼 → 接回名字（地圖進度在地圖裡讀回） */
+document.getElementById('code-go').onclick = async () => {
+  const err = document.getElementById('code-err'), c = TWPlayer.normCode(document.getElementById('code-in').value);
+  const say = (zh, es, en) => { err.textContent = (zh ? zh + ' ' : '') + X(es, en); };
+  if (!c) return say('代碼是 3 個英文字母＋4 個數字，例如 MAR-4821。', 'El código tiene 3 letras y 4 números, por ejemplo MAR-4821.', 'The code has 3 letters and 4 numbers, e.g. MAR-4821.');
+  if (!window._FB) return say('連不上網路，請稍後再試。', 'Sin conexión. Inténtalo más tarde.', 'No connection. Please try again later.');
+  say('讀取中……', 'Cargando…', 'Loading…');
+  let d = null;
+  try { d = await window._FB.getProgress(c); } catch (e) { return say('連不上網路，請稍後再試。', 'Sin conexión. Inténtalo más tarde.', 'No connection. Please try again later.'); }
+  if (!d || !d.name) return say('找不到這個代碼。', 'No encontramos ese código.', "We couldn't find that code.");
+  P.name = d.name; P.code = c; TWPlayer.remember(d.name, c); save();
+  inp.value = d.name; err.textContent = '';
+  say('✓', `¡Hola de nuevo, ${d.name}!`, `Welcome back, ${d.name}!`);
+  paint();
+};
+document.getElementById('code-in').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('code-go').click(); });
 document.querySelectorAll('[data-script]').forEach(b => b.onclick = () => { P.script = b.dataset.script; save(); paint(); });
 document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { P.lang = b.dataset.lang; save(); paint(); });
 /* 點遊戲：有名字就帶 again=名字（遊戲會跳過名字頁，並把網址清乾淨） */
 document.querySelectorAll('a.g[href^="games/"]').forEach(a => a.addEventListener('click', e => {
   if (!P.name) return;
   e.preventDefault();
+  ensureCode();
   location.href = a.getAttribute('href') + 'index.html?' + new URLSearchParams({ again: P.name, s: P.script, l: P.lang });
 }));
-paint();
+if (P.name && !P.code) ensureCode(); else paint();
 </script>
 </body>
 </html>

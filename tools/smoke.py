@@ -9,11 +9,21 @@ class H(http.server.SimpleHTTPRequestHandler):
 socketserver.TCPServer.allow_reuse_address=True
 PORT=8810+random.randrange(80)
 srv=socketserver.ThreadingTCPServer(('127.0.0.1',PORT),functools.partial(H,directory=ROOT)); srv.handle_error=lambda *a: None; threading.Thread(target=srv.serve_forever,daemon=True).start()
+# 假的 Firebase：不連網路，把寫入記在 window.__fbw = [[集合, 資料], ...]（測試會檢查上傳的成績紀錄）
+FAKE_FB = """const W = (window.__fbw ||= []);
+export const initializeApp=()=>({}); export const getFirestore=()=>({});
+export const collection=(db,n)=>({n}); export const doc=(db,n,id)=>({n,id});
+export const addDoc=async(c,d)=>{W.push([c.n,d]);return {id:'x'+W.length};};
+export const setDoc=async(r,d)=>{W.push([r.n+'/'+r.id,d]);};
+export const getDoc=async()=>({exists:()=>false,data:()=>null});
+export const getDocs=async()=>({docs:[]}); export const deleteDoc=async()=>{};
+export const query=c=>c; export const where=()=>({}); export const orderBy=()=>({}); export const limit=()=>({});
+export const writeBatch=()=>({delete(){},commit:async()=>{}});"""
 def route(r):
     u=r.request.url
     if 'pinyin-pro' in u: return r.fulfill(path=NPM+'/pinyin-pro/dist/index.js',content_type='application/javascript')
     if 'opencc-js' in u: return r.fulfill(path=NPM+'/opencc-js/dist/umd/t2cn.js',content_type='application/javascript')
-    if 'firebase' in u: return r.fulfill(body='export const initializeApp=()=>({});export const getFirestore=()=>({});export const collection=()=>({});export const addDoc=async()=>({});export const query=()=>({});export const orderBy=()=>({});export const limit=()=>({});export const getDocs=async()=>({docs:[]});',content_type='application/javascript')
+    if 'gstatic.com/firebasejs' in u: return r.fulfill(body=FAKE_FB,content_type='application/javascript')
     if u.startswith('http://127.0.0.1'): return r.continue_()
     return r.abort()
 def oracle_from(path):
@@ -71,6 +81,17 @@ def play(page,g,mode,log):
         m0=page.evaluate('Game.mistakes'); click_i(page,idx)
         if page.evaluate('Game.state')==st and page.evaluate('Game.mistakes')>m0: bad.add((st,opts[idx]))
     log.append(seen); return 'timeout',trans
+def fbcheck(page,g,embed):
+    """檢查上傳：每局剛好一筆 results（分數、錯誤數和遊戲一致）；單機版還要寫排行榜"""
+    w=page.evaluate('window.__fbw||[]'); res=[d for c,d in w if c=='results']
+    if len(res)!=1: return f'FB✗ results={len(res)}'
+    r=res[0]; gs=page.evaluate('[Game.score,Game.mistakes,Game.log.length]')
+    bad=[k for k,ok in [('scene',r['scene']==g),('score',r['score']==gs[0]),('mistakes',r['mistakes']==gs[1]),('errors',len(r['errors'])==gs[2]),
+        ('embed',r['embed']==embed),('code',bool(re.match(r'^[A-Z]{3}-[0-9]{4}$',r['playerId']))),('stage',all(e['stage'] for e in r['errors']))] if not ok]
+    lb=[c for c,d in w if c.endswith('_scores')]
+    if not embed and len(lb)!=1: bad.append(f'leaderboard={len(lb)}')
+    if embed and lb: bad.append('embed寫了排行榜')
+    return 'FB✓ '+r['playerId'] if not bad else 'FB✗ '+','.join(bad)
 def run(g,mode='mixed',runs=3,embed=False,vp=None):
     out=[]
     with sync_playwright() as p:
@@ -83,7 +104,8 @@ def run(g,mode='mixed',runs=3,embed=False,vp=None):
             if not embed: page.fill('#player-name-input','María'); page.click('.btn-primary')
             page.wait_for_timeout(300); log=[]
             end,tr=play(page,g,mode,log)
-            out.append((end,tr,page.evaluate('Game.score'),errs[:2], page.evaluate('Game.log.map(m=>m.zh).slice(0,4)') if mode=='perfect' else ''))
+            page.wait_for_timeout(300)
+            out.append((end,tr,page.evaluate('Game.score'),errs[:2], page.evaluate('Game.log.map(m=>m.zh).slice(0,4)') if mode=='perfect' else '', fbcheck(page,g,embed)))
             ctx.close()
         b.close()
     return out

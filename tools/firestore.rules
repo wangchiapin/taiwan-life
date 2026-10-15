@@ -1,0 +1,61 @@
+rules_version = '2';
+// 台灣情境對話遊戲系列（tiendadebebidas-d75ac）的 Firestore 規則
+// 貼到 Firebase console → Firestore Database → 規則 → 發布
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 管理員：只有 Ben 的 Google 帳號
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'a2224907@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    function scoreCols() {
+      return ['drinkgame_scores', 'reservagame_scores', 'breakfastgame_scores', 'parcelgame_scores',
+              'nightmarket_scores', 'bakerygame_scores', 'clinicgame_scores', 'mrtgame_scores', 'streetgame_scores'];
+    }
+    function scenes() {
+      return ['drinks', 'reserva', 'breakfast', 'parcel', 'nightmarket', 'bakery', 'clinic', 'mrt', 'street'];
+    }
+    function okName(n) { return n is string && n.size() > 0 && n.size() <= 30; }
+
+    // ── 9 個舊排行榜：任何人可以看、可以新增；不能修改；只有管理員能刪 ──
+    match /{col}/{id} {
+      allow read: if col in scoreCols();
+      allow create: if col in scoreCols()
+        && request.resource.data.keys().hasOnly(['name', 'score', 'elapsed', 'createdAt'])
+        && okName(request.resource.data.name)
+        && request.resource.data.score is int
+        && request.resource.data.score <= 100 && request.resource.data.score >= -1000
+        && request.resource.data.elapsed is number && request.resource.data.elapsed >= 0;
+      allow delete: if col in scoreCols() && isAdmin();
+    }
+
+    // ── 每局完整紀錄：任何人可以新增；只有管理員能看、能刪 ──
+    match /results/{id} {
+      allow read, delete: if isAdmin();
+      allow create: if request.resource.data.keys().hasOnly(['playerId', 'name', 'scene', 'score', 'mistakes', 'errors',
+            'elapsed', 'hintViews', 'script', 'lang', 'embed', 'difficulty', 'createdAt'])
+        && request.resource.data.playerId is string && request.resource.data.playerId.size() <= 12
+        && okName(request.resource.data.name)
+        && request.resource.data.scene in scenes()
+        && request.resource.data.score is int
+        && request.resource.data.mistakes is int
+        && request.resource.data.errors is list && request.resource.data.errors.size() <= 50
+        && request.resource.data.elapsed is number
+        && request.resource.data.createdAt is number;
+    }
+
+    // ── 玩家代碼＋地圖進度：知道代碼就能讀、能存；只有管理員能列出全部、能刪 ──
+    match /progress/{code} {
+      allow get: if true;
+      allow list, delete: if isAdmin();
+      allow create, update: if code.matches('^[A-Z]{3}-[0-9]{4}$')
+        && request.resource.data.code == code
+        && request.resource.data.keys().hasOnly(['code', 'name', 'done', 'updatedAt'])
+        && okName(request.resource.data.name)
+        && (!('done' in request.resource.data) || request.resource.data.done is map);
+    }
+  }
+}

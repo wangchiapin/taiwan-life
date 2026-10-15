@@ -20,7 +20,9 @@
    - 新加 4 個地點，先標「🚧 維修中」：學校、機場（**佔兩格寬**）、電影院、菜市場。
    - 另外加 5 個左右的空位，標「建造中」（圍欄、工地），代表之後要擴充的地點。
    - 維修中、建造中都不能進去，走到門口顯示「還在準備中，敬請期待」（中、西、英）。
-2. **Firebase 修正 + 每局上傳完整紀錄 + 管理員成績頁**
+2. **Firebase 修正 + 每局上傳完整紀錄 + 管理員成績頁** ✅ 2026-10-15 程式完成（`shared/`、`admin/`、`tools/firestore.rules`、`tools/apply_firebase_results.py`）。
+   原本的規則只開放 drinkgame_scores，其他 8 個排行榜一直寫不進去；新規則一起修好。Ben 要在 console：貼規則、開 Google 登入＋授權網域 wangchiapin.github.io、用管理員頁「設定檢查」建 9 個排行榜索引。
+   smoke.py 的假 Firebase 改成會記錄寫入，每局檢查「剛好一筆 results、內容和遊戲一致、單機版有寫排行榜」（結果最後一欄 FB✓）。bakery 隨機玩偶爾 timeout 是舊問題（舊版本也會），不是上傳造成的。
    - **firebaseConfig 確定錯位了**：9 個遊戲裡 `messagingSenderId` 放的是 appId、`appId` 放的是 measurementId。Ben 提供的正確值：
      apiKey "AIzaSyD2lxec6JTbERwFPGjDzriYzIH7o9IRWnw"、authDomain "tiendadebebidas-d75ac.firebaseapp.com"、projectId "tiendadebebidas-d75ac"、storageBucket "tiendadebebidas-d75ac.firebasestorage.app"、messagingSenderId "947444542062"、appId "1:947444542062:web:62e209f33cfc3ae12c547f"、measurementId "G-PGQZPYNBLX"。
    - 這個 Firebase 專案只有這系列遊戲在用，可以放心改規則。**Ben 還沒貼目前的 Firestore 規則**，改規則前先跟他要。

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>成績管理 · 台灣情境對話遊戲</title>
+<style>
+  :root { --ink:#24202e; --bg:#f4f1ea; --card:#fff; --line:#e2dccf; --muted:#6b6478; --accent:#cf3a24; --good:#2e8b57; --soft:#faf7f0; --hl:#fff3c9; }
+  @media (prefers-color-scheme: dark) { :root { --ink:#f1eee8; --bg:#1c1a24; --card:#262330; --line:#3d394b; --muted:#b4aec4; --soft:#2d2a38; --hl:#4a4330; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Noto Sans TC', 'Segoe UI', sans-serif; font-size: 15px; }
+  button, input, select { font: inherit; color: inherit; }
+  header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 14px 18px; border-bottom: 2px solid var(--line); background: var(--card); position: sticky; top: 0; z-index: 5; }
+  header h1 { font-size: 20px; margin: 0 auto 0 0; }
+  header .who { color: var(--muted); font-size: 13px; }
+  .btn { border: 2px solid var(--ink); background: var(--card); border-radius: 999px; padding: 4px 14px; cursor: pointer; }
+  .btn.primary { background: var(--ink); color: var(--bg); }
+  .btn.danger { border-color: var(--accent); color: var(--accent); }
+  .btn.small { padding: 1px 10px; font-size: 13px; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  main { max-width: 1180px; margin: 0 auto; padding: 16px; }
+  #gate { max-width: 440px; margin: 12vh auto; text-align: center; background: var(--card); border: 2px solid var(--line); border-radius: 16px; padding: 28px 22px; }
+  #gate p { color: var(--muted); }
+  nav { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 12px; }
+  nav button { border: 2px solid var(--line); background: var(--card); border-radius: 10px; padding: 6px 14px; cursor: pointer; }
+  nav button[aria-selected="true"] { border-color: var(--ink); background: var(--ink); color: var(--bg); }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; background: var(--card); border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 0 0 14px; }
+  .filters label { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+  .filters input, .filters select { border: 2px solid var(--line); border-radius: 8px; padding: 4px 8px; background: var(--soft); }
+  .filters .sp { flex: 1; }
+  [hidden] { display: none !important; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 0 0 18px; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+  .card .k { color: var(--muted); font-size: 13px; }
+  .card .v { font-size: 30px; font-weight: 700; margin-top: 2px; }
+  .card .s { color: var(--muted); font-size: 13px; }
+  h2 { font-size: 17px; margin: 18px 0 8px; }
+  .panel { background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 12px; overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; white-space: nowrap; }
+  th { font-size: 13px; color: var(--muted); font-weight: 700; background: var(--soft); position: sticky; top: 0; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.wrap { white-space: normal; min-width: 220px; }
+  tr.click { cursor: pointer; }
+  tr.click:hover td { background: var(--soft); }
+  .code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; color: var(--muted); }
+  .best { font-weight: 700; }
+  .best.full { color: var(--good); }
+  .muted { color: var(--muted); }
+  .bar { height: 10px; background: var(--ink); border-radius: 999px; min-width: 2px; }
+  .errs { margin: 4px 0 2px; padding: 0; list-style: none; }
+  .errs li { padding: 3px 0; border-top: 1px dashed var(--line); white-space: normal; }
+  .errs .st { font-size: 12px; color: var(--muted); }
+  .tag { display: inline-block; font-size: 12px; border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; color: var(--muted); }
+  .back { margin: 0 0 10px; }
+  #status { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 16px; border-radius: 10px; opacity: 0; transition: .2s; pointer-events: none; max-width: 90vw; }
+  #status.on { opacity: 1; }
+  .empty { padding: 18px; text-align: center; color: var(--muted); }
+  .ok { color: var(--good); font-weight: 700; } .bad { color: var(--accent); font-weight: 700; }
+  a { color: inherit; }
+</style>
+</head>
+<body>
+<header>
+  <h1>📊 成績管理</h1>
+  <span class="who" id="who"></span>
+  <button class="btn small" id="btn-reload" hidden>↻ 重新讀取</button>
+  <button class="btn small" id="btn-out" hidden>登出</button>
+</header>
+
+<div id="gate">
+  <h2 style="margin-top:0">台灣情境對話遊戲 · 成績管理</h2>
+  <p id="gate-msg">只有管理員帳號可以看。</p>
+  <button class="btn primary" id="btn-in">用 Google 登入</button>
+</div>
+
+<main id="app" hidden>
+  <nav role="tablist">
+    <button data-tab="overview" aria-selected="true">總覽</button>
+    <button data-tab="players">玩家</button>
+    <button data-tab="games">遊戲</button>
+    <button data-tab="plays">全部紀錄</button>
+    <button data-tab="boards">排行榜</button>
+    <button data-tab="check">設定檢查</button>
+  </nav>
+  <div class="filters" id="filters">
+    <label>從 <input type="date" id="f-from"></label>
+    <label>到 <input type="date" id="f-to"></label>
+    <label>遊戲 <select id="f-scene"></select></label>
+    <label>名字／代碼 <input type="search" id="f-name" placeholder="María、MAR-4821" size="14"></label>
+    <span class="sp"></span>
+    <button class="btn small" id="f-clear">清除篩選</button>
+    <button class="btn small" id="btn-csv">⬇ 匯出 CSV</button>
+  </div>
+  <section id="view"></section>
+</main>
+<div id="status" role="status"></div>
+
+<script type="module">
+import { app, db, SCORE_COLS, collection, doc, getDocs, deleteDoc, query, orderBy, limit, writeBatch } from "../shared/firebase.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const ADMIN = 'a2224907@gmail.com';
+const SCENES = [
+  ['drinks', '🧋', '飲料店'], ['reserva', '📞', '打電話訂位'], ['breakfast', '🍳', '早餐店'], ['parcel', '📦', '超商領包裹'],
+  ['nightmarket', '🏮', '夜市'], ['bakery', '🥐', '麵包店'], ['clinic', '🏥', '看醫生'], ['mrt', '🚇', '搭捷運'], ['street', '🚶', '走在路上']
+];
+const SC = Object.fromEntries(SCENES.map(([id, e, zh]) => [id, { e, zh }]));
+const scName = id => SC[id] ? SC[id].e + ' ' + SC[id].zh : id;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmtDate = t => t ? new Date(t).toLocaleString('zh-TW', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+const fmtDay = t => t ? new Date(t).toLocaleDateString('zh-TW') : '';
+const fmtSec = s => { s = Math.round(s || 0); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+function status(msg, ms = 2600) { const el = $('status'); el.textContent = msg; el.classList.add('on'); clearTimeout(status._t); if (ms) status._t = setTimeout(() => el.classList.remove('on'), ms); }
+
+/* ── 資料 ── */
+const D = { results: [], progress: [], loaded: false };
+const V = { tab: 'overview', player: null, scene: null, open: new Set(), board: 'drinks' };
+
+async function loadAll() {
+  status('讀取中……', 0);
+  try {
+    const [r, p] = await Promise.all([
+      getDocs(query(collection(db, 'results'), orderBy('createdAt', 'desc'), limit(5000))),
+      getDocs(collection(db, 'progress'))
+    ]);
+    D.results = r.docs.map(d => ({ id: d.id, ...d.data() }));
+    D.progress = p.docs.map(d => ({ id: d.id, ...d.data() }));
+    D.loaded = true;
+    status(`讀到 ${D.results.length} 局`);
+  } catch (e) {
+    console.error(e);
+    status('讀取失敗：' + (e.code || e.message), 6000);
+  }
+  render();
+}
+
+/* 篩選 */
+function filtered() {
+  const from = $('f-from').value ? new Date($('f-from').value + 'T00:00:00').getTime() : 0;
+  const to = $('f-to').value ? new Date($('f-to').value + 'T23:59:59').getTime() : Infinity;
+  const sc = $('f-scene').value, nm = $('f-name').value.trim().toLowerCase();
+  return D.results.filter(r => r.createdAt >= from && r.createdAt <= to && (!sc || r.scene === sc) &&
+    (!nm || String(r.name || '').toLowerCase().includes(nm) || String(r.playerId || '').toLowerCase().includes(nm)));
+}
+const pidOf = r => r.playerId || ('?' + r.name);
+
+/* 玩家清單（從紀錄整理；有地圖進度但沒紀錄的也列出來） */
+function playersOf(rows) {
+  const m = new Map();
+  for (const r of rows) {
+    const k = pidOf(r);
+    if (!m.has(k)) m.set(k, { id: k, code: r.playerId || '', name: r.name, plays: [], best: {}, last: 0 });
+    const p = m.get(k);
+    p.plays.push(r);
+    if (r.createdAt > p.last) { p.last = r.createdAt; p.name = r.name; }
+    if (p.best[r.scene] == null || r.score > p.best[r.scene]) p.best[r.scene] = r.score;
+  }
+  return [...m.values()].sort((a, b) => b.last - a.last);
+}
+
+/* ── 畫面 ── */
+function render() {
+  document.querySelectorAll('nav button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === V.tab));
+  $('filters').hidden = V.tab === 'boards' || V.tab === 'check';
+  const v = $('view');
+  if (!D.loaded && V.tab !== 'check' && V.tab !== 'boards') { v.innerHTML = '<div class="empty">讀取中……</div>'; return; }
+  if (V.tab === 'overview') v.innerHTML = overview();
+  if (V.tab === 'players') v.innerHTML = V.player ? playerDetail(V.player) : playersTable();
+  if (V.tab === 'games') v.innerHTML = V.scene ? gameDetail(V.scene) : gamesTable();
+  if (V.tab === 'plays') v.innerHTML = playsTable(filtered(), true);
+  if (V.tab === 'boards') { v.innerHTML = boardsShell(); loadBoard(); }
+  if (V.tab === 'check') { v.innerHTML = checkShell(); runCheck(); }
+}
+
+function overview() {
+  const rows = filtered(), now = Date.now(), wk = rows.filter(r => r.createdAt >= now - 7 * 864e5);
+  const count = {}; rows.forEach(r => count[r.scene] = (count[r.scene] || 0) + 1);
+  const top = Object.entries(count).sort((a, b) => b[1] - a[1]);
+  const max = top.length ? top[0][1] : 1;
+  const avg = rows.length ? Math.round(rows.reduce((s, r) => s + r.score, 0) / rows.length) : 0;
+  const card = (k, v, s = '') => `<div class="card"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
+  return `<div class="cards">
+    ${card('玩家數', new Set(rows.map(pidOf)).size, '有玩完至少一局的人')}
+    ${card('局數', rows.length, '平均 ' + avg + ' 分')}
+    ${card('近 7 天', wk.length + ' 局', new Set(wk.map(pidOf)).size + ' 位玩家')}
+    ${card('最熱門遊戲', top.length ? esc(scName(top[0][0])) : '—', top.length ? top[0][1] + ' 局' : '')}
+  </div>
+  <h2>各遊戲局數</h2>
+  <div class="panel"><table><tbody>${SCENES.map(([id]) => {
+      const n = count[id] || 0;
+      return `<tr class="click" data-go-scene="${id}"><td>${esc(scName(id))}</td><td class="num">${n}</td><td style="width:60%"><div class="bar" style="width:${n / max * 100}%"></div></td></tr>`;
+    }).join('')}</tbody></table></div>
+  <h2>最近 10 局</h2>${playsTable(rows.slice(0, 10), false)}`;
+}
+
+function playersTable() {
+  const ps = playersOf(filtered());
+  if (!ps.length) return '<div class="empty">沒有符合的玩家</div>';
+  return `<p class="muted">點一位玩家看他的每一局。格子裡是這個遊戲的最高分。</p><div class="panel"><table>
+    <thead><tr><th>名字</th><th>代碼</th>${SCENES.map(([id, e]) => `<th class="num" title="${SC[id].zh}">${e}</th>`).join('')}<th class="num">局數</th><th>最近一次</th></tr></thead>
+    <tbody>${ps.map(p => `<tr class="click" data-player="${esc(p.id)}"><td><b>${esc(p.name)}</b></td><td class="code">${esc(p.code || '（沒有）')}</td>
+      ${SCENES.map(([id]) => p.best[id] == null ? '<td class="num muted">·</td>' : `<td class="num best${p.best[id] === 100 ? ' full' : ''}">${p.best[id]}</td>`).join('')}
+      <td class="num">${p.plays.length}</td><td>${fmtDate(p.last)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function playerDetail(id) {
+  const p = playersOf(D.results).find(x => x.id === id);
+  if (!p) { V.player = null; return playersTable(); }
+  const prog = D.progress.find(x => x.id === p.code);
+  const done = prog && prog.done ? Object.entries(prog.done) : [];
+  return `<div class="back"><button class="btn small" data-back>← 所有玩家</button></div>
+    <div class="cards">
+      <div class="card"><div class="k">玩家</div><div class="v" style="font-size:24px">${esc(p.name)}</div><div class="s code">${esc(p.code || '沒有代碼（舊紀錄）')}</div></div>
+      <div class="card"><div class="k">局數</div><div class="v">${p.plays.length}</div><div class="s">最近 ${fmtDate(p.last)}</div></div>
+      <div class="card"><div class="k">地圖進度</div><div class="v">${done.length} / 9</div><div class="s">${done.map(([k, v]) => SC[k] ? SC[k].e + v.score : '').join(' ')}</div></div>
+    </div>
+    <p><button class="btn small danger" data-del-player="${esc(p.id)}">🗑 刪除這位玩家（全部 ${p.plays.length} 局${prog ? '＋地圖進度' : ''}）</button></p>
+    ${playsTable(p.plays, false, true)}`;
+}
+
+function gamesTable() {
+  const rows = filtered();
+  return `<p class="muted">點一個遊戲看最常錯的地方。</p><div class="panel"><table>
+    <thead><tr><th>遊戲</th><th class="num">局數</th><th class="num">玩家</th><th class="num">平均分數</th><th class="num">100 分</th><th class="num">平均時間</th><th class="num">平均看提示</th></tr></thead>
+    <tbody>${SCENES.map(([id]) => {
+      const rs = rows.filter(r => r.scene === id), n = rs.length;
+      const a = f => n ? rs.reduce((s, r) => s + (f(r) || 0), 0) / n : 0;
+      return `<tr class="click" data-scene="${id}"><td>${esc(scName(id))}</td><td class="num">${n}</td><td class="num">${new Set(rs.map(pidOf)).size}</td>
+        <td class="num">${n ? Math.round(a(r => r.score)) : '·'}</td><td class="num">${n ? rs.filter(r => r.score === 100).length : '·'}</td>
+        <td class="num">${n ? fmtSec(a(r => r.elapsed)) : '·'}</td><td class="num">${n ? a(r => r.hintViews).toFixed(1) : '·'}</td></tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+
+function gameDetail(id) {
+  const rs = filtered().filter(r => r.scene === id);
+  const m = new Map();
+  for (const r of rs) for (const e of r.errors || []) {
+    const k = e.stage + '|' + e.zh;
+    if (!m.has(k)) m.set(k, { ...e, n: 0, players: new Set() });
+    const x = m.get(k); x.n++; x.players.add(pidOf(r));
+  }
+  const list = [...m.values()].sort((a, b) => b.n - a.n);
+  return `<div class="back"><button class="btn small" data-back>← 所有遊戲</button></div>
+    <h2 style="margin-top:0">${esc(scName(id))} · 最常錯的地方 <span class="muted" style="font-weight:400">（${rs.length} 局）</span></h2>
+    ${list.length ? `<div class="panel"><table><thead><tr><th class="num">次數</th><th class="num">人數</th><th>關卡</th><th>錯在哪裡</th></tr></thead><tbody>
+      ${list.map(x => `<tr><td class="num"><b>${x.n}</b></td><td class="num">${x.players.size}</td><td>${esc(x.stage)}</td>
+        <td class="wrap">${esc(x.zh)}<br><span class="muted">${esc(x.es)}</span></td></tr>`).join('')}</tbody></table></div>`
+      : '<div class="empty">這個範圍裡沒有人錯，或還沒有人玩。</div>'}`;
+}
+
+function playsTable(rows, showPlayer = true, inPlayer = false) {
+  if (!rows.length) return '<div class="empty">沒有紀錄</div>';
+  return `<div class="panel"><table><thead><tr><th>時間</th>${inPlayer ? '' : '<th>玩家</th>'}<th>遊戲</th><th class="num">分數</th><th class="num">錯</th><th class="num">時間</th><th class="num">提示</th><th>方式</th><th></th></tr></thead><tbody>
+    ${rows.map(r => {
+      const open = V.open.has(r.id), errs = r.errors || [];
+      return `<tr class="click" data-toggle="${r.id}"><td>${fmtDate(r.createdAt)}</td>
+        ${inPlayer ? '' : `<td><b>${esc(r.name)}</b> <span class="code">${esc(r.playerId || '')}</span></td>`}
+        <td>${esc(scName(r.scene))}</td><td class="num best${r.score === 100 ? ' full' : ''}">${r.score}</td><td class="num">${r.mistakes}</td>
+        <td class="num">${fmtSec(r.elapsed)}</td><td class="num">${r.hintViews || 0}</td>
+        <td><span class="tag">${r.embed ? '地圖' : '單機'}</span> <span class="tag">${r.script === 'simp' ? '简' : '繁'}·${r.lang === 'en' ? 'EN' : 'ES'}</span></td>
+        <td>${errs.length ? (open ? '▲' : '▼ ' + errs.length) : ''} <button class="btn small danger" data-del="${r.id}" title="刪除這一局">🗑</button></td></tr>
+        ${open && errs.length ? `<tr><td colspan="${inPlayer ? 8 : 9}"><ul class="errs">${errs.map((e, i) =>
+          `<li><span class="st">${i + 1}. ${esc(e.stage)}｜${esc(e.stageEs)}</span><br>${esc(e.zh)}<br><span class="muted">${esc(e.es)}</span></li>`).join('')}</ul></td></tr>` : ''}`;
+    }).join('')}</tbody></table></div>`;
+}
+
+/* ── 舊排行榜：看、刪 ── */
+function boardsShell() {
+  return `<p class="muted">遊戲結束時顯示給玩家看的排行榜（前 15 名）。有人亂填名字可以在這裡刪。</p>
+    <div class="filters"><label>遊戲 <select id="b-scene">${SCENES.map(([id]) => `<option value="${id}"${id === V.board ? ' selected' : ''}>${esc(scName(id))}</option>`).join('')}</select></label>
+    <span class="code">${SCORE_COLS[V.board]}</span></div><div id="b-body"><div class="empty">讀取中……</div></div>`;
+}
+async function loadBoard() {
+  const col = SCORE_COLS[V.board];
+  try {
+    const snap = await getDocs(query(collection(db, col), orderBy('score', 'desc'), limit(300)));
+    const rows = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => b.score - a.score || a.elapsed - b.elapsed);
+    $('b-body').innerHTML = rows.length ? `<div class="panel"><table><thead><tr><th class="num">#</th><th>名字</th><th class="num">分數</th><th class="num">秒</th><th>時間</th><th></th></tr></thead><tbody>
+      ${rows.map((r, i) => `<tr><td class="num">${i + 1}</td><td><b>${esc(r.name)}</b></td><td class="num">${r.score}</td><td class="num">${r.elapsed}</td><td>${fmtDate(r.createdAt)}</td>
+        <td><button class="btn small danger" data-del-board="${r.id}">🗑</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">還沒有成績</div>';
+  } catch (e) { $('b-body').innerHTML = `<div class="empty bad">讀取失敗：${esc(e.code || e.message)}</div>`; }
+}
+
+/* ── 設定檢查：排行榜索引 ── */
+function checkShell() {
+  return `<h2 style="margin-top:0">排行榜索引</h2>
+    <p class="muted">每個遊戲的排行榜要一個索引（分數由高到低＋時間由短到長）。沒有的話，旁邊會出現「建立索引」，點下去在 Firebase 頁面按「建立」，等幾分鐘就好。</p>
+    <div class="panel"><table><tbody>${SCENES.map(([id]) => `<tr><td>${esc(scName(id))}</td><td class="code">${SCORE_COLS[id]}</td><td id="ck-${id}">檢查中……</td></tr>`).join('')}</tbody></table></div>`;
+}
+async function runCheck() {
+  for (const [id] of SCENES) {
+    const cell = $('ck-' + id); if (!cell) return;
+    try {
+      await getDocs(query(collection(db, SCORE_COLS[id]), orderBy('score', 'desc'), orderBy('elapsed', 'asc'), limit(1)));
+      cell.innerHTML = '<span class="ok">✓ 正常</span>';
+    } catch (e) {
+      const url = (String(e.message).match(/https:\/\/console\.firebase\.google\.com\S+/) || [])[0];
+      cell.innerHTML = url ? `<span class="bad">缺索引</span> <a class="btn small" href="${esc(url)}" target="_blank" rel="noopener">建立索引 ↗</a>`
+        : `<span class="bad">錯誤：${esc(e.code || e.message)}</span>`;
+    }
+  }
+}
+
+/* ── 刪除 ── */
+async function delResult(id) {
+  const r = D.results.find(x => x.id === id); if (!r) return;
+  if (!confirm(`刪除這一局？\n${r.name}・${SC[r.scene] ? SC[r.scene].zh : r.scene}・${r.score} 分・${fmtDate(r.createdAt)}\n刪除後不能復原。`)) return;
+  try { await deleteDoc(doc(db, 'results', id)); D.results = D.results.filter(x => x.id !== id); status('已刪除'); render(); }
+  catch (e) { status('刪除失敗：' + (e.code || e.message), 6000); }
+}
+async function delPlayer(pid) {
+  const p = playersOf(D.results).find(x => x.id === pid); if (!p) return;
+  const prog = p.code && D.progress.find(x => x.id === p.code);
+  if (!confirm(`刪除玩家「${p.name}」${p.code ? '（' + p.code + '）' : ''}？\n會刪掉他全部 ${p.plays.length} 局紀錄${prog ? '和地圖進度' : ''}。\n（排行榜上的成績不會刪，要的話到「排行榜」分頁刪。）\n刪除後不能復原。`)) return;
+  try {
+    const refs = p.plays.map(r => doc(db, 'results', r.id));
+    if (prog) refs.push(doc(db, 'progress', p.code));
+    for (let i = 0; i < refs.length; i += 400) { const b = writeBatch(db); refs.slice(i, i + 400).forEach(r => b.delete(r)); await b.commit(); }
+    const ids = new Set(p.plays.map(r => r.id));
+    D.results = D.results.filter(x => !ids.has(x.id));
+    if (prog) D.progress = D.progress.filter(x => x.id !== p.code);
+    V.player = null; status(`已刪除 ${p.name}`); render();
+  } catch (e) { status('刪除失敗：' + (e.code || e.message), 6000); }
+}
+async function delBoard(id) {
+  if (!confirm('從排行榜刪除這筆成績？刪除後不能復原。')) return;
+  try { await deleteDoc(doc(db, SCORE_COLS[V.board], id)); status('已刪除'); loadBoard(); }
+  catch (e) { status('刪除失敗：' + (e.code || e.message), 6000); }
+}
+
+/* ── CSV（用目前的篩選；Excel 打得開，中文不會亂碼） ── */
+function exportCSV() {
+  const rows = filtered();
+  const head = ['時間', '玩家代碼', '名字', '遊戲', '分數', '錯誤次數', '秒數', '看提示', '方式', '字體', '語言', '難度', '錯在哪裡'];
+  const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const lines = [head.map(q).join(',')].concat(rows.map(r => [
+    new Date(r.createdAt).toLocaleString('zh-TW', { hour12: false }), r.playerId, r.name, SC[r.scene] ? SC[r.scene].zh : r.scene, r.score, r.mistakes, r.elapsed, r.hintViews,
+    r.embed ? '地圖' : '單機', r.script === 'simp' ? '簡體' : '繁體', r.lang === 'en' ? '英文' : '西文', r.difficulty,
+    (r.errors || []).map((e, i) => `${i + 1}. [${e.stage}] ${e.zh}`).join('\n')
+  ].map(q).join(',')));
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `成績_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  status(`已匯出 ${rows.length} 局`);
+}
+
+/* ── 事件 ── */
+$('f-scene').innerHTML = '<option value="">全部</option>' + SCENES.map(([id]) => `<option value="${id}">${esc(scName(id))}</option>`).join('');
+['f-from', 'f-to', 'f-scene', 'f-name'].forEach(id => $(id).addEventListener('input', () => render()));
+$('f-clear').onclick = () => { ['f-from', 'f-to', 'f-scene', 'f-name'].forEach(id => $(id).value = ''); render(); };
+$('btn-csv').onclick = exportCSV;
+$('btn-reload').onclick = loadAll;
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => { V.tab = b.dataset.tab; V.player = null; V.scene = null; render(); window.scrollTo(0, 0); });
+$('view').addEventListener('change', e => { if (e.target.id === 'b-scene') { V.board = e.target.value; render(); } });
+$('view').addEventListener('click', e => {
+  const t = e.target.closest('[data-del],[data-del-player],[data-del-board],[data-back],[data-player],[data-scene],[data-go-scene],[data-toggle]');
+  if (!t || e.target.closest('a')) return;
+  if (t.dataset.del) return delResult(t.dataset.del);
+  if (t.dataset.delPlayer) return delPlayer(t.dataset.delPlayer);
+  if (t.dataset.delBoard) return delBoard(t.dataset.delBoard);
+  if ('back' in t.dataset) { V.player = null; V.scene = null; return render(); }
+  if (t.dataset.player) { V.player = t.dataset.player; V.open.clear(); render(); return window.scrollTo(0, 0); }
+  if (t.dataset.scene) { V.scene = t.dataset.scene; render(); return window.scrollTo(0, 0); }
+  if (t.dataset.goScene) { V.tab = 'games'; V.scene = t.dataset.goScene; return render(); }
+  if (t.dataset.toggle) { V.open.has(t.dataset.toggle) ? V.open.delete(t.dataset.toggle) : V.open.add(t.dataset.toggle); render(); }
+});
+
+/* ── 登入 ── */
+const auth = getAuth(app);
+$('btn-in').onclick = async () => {
+  try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+  catch (e) { $('gate-msg').textContent = '登入失敗：' + (e.code || e.message); }
+};
+$('btn-out').onclick = () => signOut(auth);
+onAuthStateChanged(auth, user => {
+  const ok = user && user.email === ADMIN;
+  $('who').textContent = user ? user.email : '';
+  $('btn-out').hidden = !user; $('btn-reload').hidden = !ok;
+  $('gate').hidden = ok; $('app').hidden = !ok;
+  if (user && !ok) $('gate-msg').textContent = `${user.email} 沒有權限。請登出，換管理員帳號登入。`;
+  if (!user) $('gate-msg').textContent = '只有管理員帳號可以看。';
+  $('btn-in').hidden = !!user;
+  if (ok && !D.loaded) loadAll();
+});
+</script>
+</body>
+</html>

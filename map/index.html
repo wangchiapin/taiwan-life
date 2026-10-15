@@ -25,6 +25,14 @@
   .go { width: 100%; background: var(--accent); color: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 12px; font-size: 20px; font-weight: 700; box-shadow: 3px 3px 0 var(--ink); }
   .err { color: var(--accent); min-height: 1.3em; font-size: 14px; text-align: left; }
   .note { font-size: 13px; color: var(--muted); margin: 12px 0 0; }
+  /* 玩家代碼 */
+  .code-line { margin: 6px 0 0; font-size: 14px; text-align: left; }
+  .code-line b { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 16px; letter-spacing: 1px; background: #fff3c9; border: 2px solid var(--ink); border-radius: 8px; padding: 0 6px; }
+  .have-code { text-align: left; margin: 10px 0 0; font-size: 14px; }
+  .have-code summary { cursor: pointer; color: var(--muted); }
+  .code-row { display: flex; gap: 8px; margin-top: 6px; }
+  .code-row input { flex: 1; min-width: 0; text-transform: uppercase; font-family: ui-monospace, Menlo, Consolas, monospace; }
+  .code-row button { border: 2px solid var(--ink); border-radius: 10px; background: #fff; padding: 0 12px; white-space: nowrap; }
 
   /* ── 地圖畫面 ── */
   #hud { width: 100%; max-width: 960px; display: flex; align-items: center; gap: 8px; padding: 8px 10px; flex-wrap: wrap; color: #fff; }
@@ -82,6 +90,13 @@
     <label for="name">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
     <input id="name" maxlength="20" autocomplete="off" placeholder="例：María、小明">
     <div class="err" id="name-err"></div>
+    <p class="code-line" id="code-line" hidden></p>
+    <details class="have-code" id="have-code">
+      <summary>🔑 我有代碼 · <span data-es="Tengo un código" data-en="I have a code">Tengo un código</span></summary>
+      <div class="code-row"><input id="code-in" maxlength="9" autocomplete="off" placeholder="MAR-4821"><button type="button" id="code-go">讀取 · <span data-es="Cargar" data-en="Load">Cargar</span></button></div>
+      <div class="err" id="code-err"></div>
+      <p class="note" data-es="¿Usas otro dispositivo? Escribe tu código para recuperar tu nombre y tu progreso." data-en="On another device? Enter your code to get back your name and progress.">¿Usas otro dispositivo? Escribe tu código para recuperar tu nombre y tu progreso.</p>
+    </details>
     <div class="seg-row">
       <div class="seg" role="group" aria-label="中文字體">
         <button type="button" data-script="trad" aria-pressed="true">繁體</button>
@@ -120,6 +135,12 @@
   <iframe id="frame" title="game" allow="autoplay"></iframe>
 </div>
 
+<!-- 玩家代碼、Firebase（進度上傳）：shared/ 共用檔 -->
+<script src="../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../shared/firebase.js";
+  initFB();
+</script>
 <script>
 /* ══════════════════════════════════════
    背景音樂：程式即時合成的 8-bit 小曲，不需要音檔
@@ -254,13 +275,38 @@ const CENTER_ROWS = [5, 19];              // 橫向馬路畫黃色中線的那�
 ══════════════════════════════════════ */
 const KEY = 'taiwan_map_v1';             // 地圖進度
 const PKEY = 'taiwan_player';            // 玩家資料（名字、字體、語言），和遊戲清單頁共用
-const S = { name: '', script: 'trad', lang: 'es', done: {} };
+const S = { name: '', script: 'trad', lang: 'es', code: '', done: {} };
 function load() {
   try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
-  try { const p = JSON.parse(localStorage.getItem(PKEY) || '{}'); if (p.name) S.name = p.name; if (p.script) S.script = p.script; if (p.lang) S.lang = p.lang; } catch (e) {}
+  try { const p = JSON.parse(localStorage.getItem(PKEY) || '{}'); if (p.name) S.name = p.name; if (p.script) S.script = p.script; if (p.lang) S.lang = p.lang; if (p.code) S.code = p.code; } catch (e) {}
 }
 function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(PKEY, JSON.stringify({ name: S.name, script: S.script, lang: S.lang })); } catch (e) {}
+  try { localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(PKEY, JSON.stringify({ name: S.name, script: S.script, lang: S.lang, code: S.code })); } catch (e) {}
+}
+/* ── 進度存到 Firebase：progress/<玩家代碼>，換裝置輸入代碼就能讀回 ── */
+function pushProgress() {
+  if (!S.code) return;
+  TWFB.when(fb => fb.saveProgress(S.code, { name: S.name, done: S.done }));
+}
+/* 兩邊的進度合在一起：同一個地方取比較高的分數 */
+function mergeDone(a, b) {
+  const out = { ...a };
+  for (const [k, v] of Object.entries(b || {})) if (v && typeof v.score === 'number' && (!out[k] || v.score > out[k].score)) out[k] = { score: v.score, mistakes: v.mistakes || 0 };
+  return out;
+}
+/* 打開地圖時，把雲端的進度合進來（例如在別的裝置玩過） */
+function pullProgress() {
+  if (!S.code) return;
+  const code = S.code;
+  TWFB.when(async fb => {
+    let d = null; try { d = await fb.getProgress(code); } catch (e) { return; }
+    if (code !== S.code) return;
+    if (!d) { pushProgress(); return; }
+    const merged = mergeDone(S.done, d.done);
+    const changed = JSON.stringify(merged) !== JSON.stringify(S.done);
+    S.done = merged; save(); if (changed) updateHud();
+    if (JSON.stringify(merged) !== JSON.stringify(d.done || {}) || d.name !== S.name) pushProgress();
+  });
 }
 const X = (es, en) => S.lang === 'en' ? en : es;
 load();
@@ -865,7 +911,7 @@ let current = null;
 function openGame(b) {
   if (current) return;
   current = b; P.locked = true; card.hidden = true;
-  const q = new URLSearchParams({ embed: '1', name: S.name, s: S.script, l: S.lang });
+  const q = new URLSearchParams({ embed: '1', name: S.name, code: S.code, s: S.script, l: S.lang });
   if (b.first) q.set('first', b.first);          // 路上突發事件：先玩看到的那件
   document.getElementById('ov-title').textContent = (b.sc.virtual ? '⚠️' : b.sc.emoji) + ' ' + b.sc.zh + ' · ' + X(b.sc.es, b.sc.en);
   frame.src = '../games/' + b.sc.id + '/index.html?' + q;
@@ -888,7 +934,7 @@ window.addEventListener('message', e => {
   if (!d || d.type !== 'scene-complete' || !current || e.source !== frame.contentWindow) return;
   const prev = S.done[d.scene];
   if (!prev || d.score >= prev.score) S.done[d.scene] = { score: d.score, mistakes: d.mistakes };
-  save();
+  save(); pushProgress();
   const sc = SCENES.find(s => s.id === d.scene);
   closeGame();
   toast('✓ ' + (sc ? sc.zh : d.scene) + '：' + d.score + ' ' + X('puntos', 'points') + (d.mistakes ? ' · ' + d.mistakes + ' ' + X('errores', 'mistakes') : ' · ' + X('¡sin errores!', 'no mistakes!')));
@@ -914,7 +960,10 @@ function comingSoon(b) {
 function updateHud() {
   bakeStatic();
   const n = SCENES.filter(s => S.done[s.id]).length;
-  document.getElementById('who').textContent = '👤 ' + S.name + ' ✎';
+  document.getElementById('who').textContent = '👤 ' + S.name + (S.code ? ' · ' + S.code : '') + ' ✎';
+  const cl = document.getElementById('code-line');
+  cl.hidden = !S.code;
+  if (S.code) cl.innerHTML = `你的代碼 · ${X('Tu código', 'Your code')}：<b>${S.code}</b><br><small>${(S.script === 'simp' ? '记下来，换装置时用。 ' : '記下來，換裝置時用。 ') + X('Anótalo para usarlo en otro dispositivo.', 'Write it down to use on another device.')}</small>`;
   document.getElementById('wk-label').textContent = (S.script === 'simp' ? '这周完成' : '這週完成') + ' · ' + X('Esta semana', 'This week');
   document.getElementById('wk-num').textContent = '⭐ ' + n + ' / ' + SCENES.length;
   document.getElementById('wk-fill').style.width = (n / SCENES.length * 100) + '%';
@@ -935,14 +984,36 @@ document.getElementById('name').value = S.name || '';
 function begin() {
   const v = document.getElementById('name').value.trim();
   if (!v) { document.getElementById('name-err').textContent = '請輸入名字 ' + X('Escribe tu nombre', 'Enter your name'); return; }
+  const code = TWPlayer.codeFor(v);
+  if (code !== S.code) { if (S.code) S.done = {}; S.code = code; }   // 換成另一個玩家：進度用他自己的
   S.name = v; save();
   document.getElementById('intro').style.display = 'none';
-  updateHud();
+  updateHud(); pullProgress();
 }
+/* 換裝置：輸入代碼 → 讀回名字和地圖進度 */
+document.getElementById('code-go').onclick = async () => {
+  const err = document.getElementById('code-err'), c = TWPlayer.normCode(document.getElementById('code-in').value);
+  const say = (zh, es, en) => { err.textContent = (zh ? zh + ' ' : '') + X(es, en); };
+  if (!c) return say('代碼是 3 個英文字母＋4 個數字，例如 MAR-4821。', 'El código tiene 3 letras y 4 números, por ejemplo MAR-4821.', 'The code has 3 letters and 4 numbers, e.g. MAR-4821.');
+  if (!window._FB) return say('連不上網路，請稍後再試。', 'Sin conexión. Inténtalo más tarde.', 'No connection. Please try again later.');
+  say('讀取中……', 'Cargando…', 'Loading…');
+  let d = null;
+  try { d = await window._FB.getProgress(c); } catch (e) { return say('連不上網路，請稍後再試。', 'Sin conexión. Inténtalo más tarde.', 'No connection. Please try again later.'); }
+  if (!d || !d.name) return say('找不到這個代碼。', 'No encontramos ese código.', "We couldn't find that code.");
+  if (c !== S.code) S.done = {};
+  S.code = c; S.name = d.name; S.done = mergeDone(S.done, d.done);
+  TWPlayer.remember(d.name, c); save();
+  err.textContent = '';
+  document.getElementById('name').value = d.name;
+  document.getElementById('have-code').open = false;
+  begin();
+  toast('👋 ' + d.name + '　' + X('¡Bienvenido/a de nuevo!', 'Welcome back!'));
+};
+document.getElementById('code-in').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('code-go').click(); });
 document.getElementById('start').onclick = begin;
 document.getElementById('name').addEventListener('keydown', e => { if (e.key === 'Enter') begin(); });
 document.getElementById('btn-reset').onclick = () => {
-  if (confirm('清除所有進度？ ' + X('¿Borrar todo el progreso?', 'Clear all progress?'))) { S.done = {}; save(); updateHud(); }
+  if (confirm('清除所有進度？ ' + X('¿Borrar todo el progreso?', 'Clear all progress?'))) { S.done = {}; save(); pushProgress(); updateHud(); }
 };
 
 /* 鍵盤、方向鍵、點地圖 */
@@ -968,7 +1039,11 @@ respawnEvent(P.x, P.y);
 applyLang();
 try { document.fonts.ready.then(bakeStatic); } catch (e) {}
 // 已經有名字（在清單頁或上次輸入過）：直接進地圖；點 👤 可以改
-if (S.name) document.getElementById('intro').style.display = 'none';
+if (S.name) {
+  document.getElementById('intro').style.display = 'none';
+  if (!S.code) { S.code = TWPlayer.codeFor(S.name); save(); }    // 以前就玩過的人：補一個代碼
+  updateHud(); pullProgress();
+}
 document.getElementById('who').onclick = () => { document.getElementById('name').value = S.name; document.getElementById('intro').style.display = 'flex'; };
 window.WorldMap = { EV, VEHICLES, WALKERS, AMI, respawnEvent, P, S, SCENES, buildings, goTo, openGame, closeGame };
 requestAnimationFrame(tick);
