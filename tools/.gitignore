@@ -1,2 +1,4 @@
 .npm/
 __pycache__/
+review/out/*
+!review/out/findings.jsonl
