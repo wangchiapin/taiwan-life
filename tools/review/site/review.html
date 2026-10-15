@@ -1,0 +1,194 @@
+<title>台灣情境遊戲檢查清單</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* 版面：一欄的審查單，上面是摘要和篩選，下面一張一張問題卡；每張卡左邊的色條代表類型 */
+:root{
+  --bg:#eef2f1; --paper:#ffffff; --ink:#1d2a2b; --muted:#5d6e6f; --line:#d3dddc;
+  --accent:#1f7a6d; --accent-soft:#d9efea;
+  --k-trans:#2f6db5; --k-py:#b5652f; --k-vocab:#7a5ab5; --k-zh:#a83b4b;
+  --yes:#1f7a6d; --no:#7b8788; --talk:#c08a1e;
+  --f-zh:"LXGW WenKai TC","Noto Sans TC","PingFang TC",serif;
+  --f-ui:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141c1d; --paper:#1d2829; --ink:#e3ecea; --muted:#9db0ae; --line:#304143;
+  --accent:#4fbfae; --accent-soft:#1d3a36; --k-trans:#6ea6ee; --k-py:#e39a62; --k-vocab:#b29aee; --k-zh:#e07a8a;
+  --yes:#4fbfae; --no:#8c9a9b; --talk:#e2b04c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141c1d; --paper:#1d2829; --ink:#e3ecea; --muted:#9db0ae; --line:#304143;
+  --accent:#4fbfae; --accent-soft:#1d3a36; --k-trans:#6ea6ee; --k-py:#e39a62; --k-vocab:#b29aee; --k-zh:#e07a8a;
+  --yes:#4fbfae; --no:#8c9a9b; --talk:#e2b04c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:860px;margin:0 auto;display:grid;gap:18px}
+h1{font-family:var(--f-zh);font-size:30px;margin:0;line-height:1.25;text-wrap:balance}
+.lede{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.sum{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:baseline;padding:14px 16px;background:var(--paper);border:1px solid var(--line);border-radius:10px}
+.sum b{font-size:22px;font-variant-numeric:tabular-nums}
+.sum span{color:var(--muted);font-size:13px}
+.bar{flex:1 1 200px;height:8px;border-radius:99px;background:var(--line);overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.filters{display:grid;gap:8px}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.row>label{font-size:12px;color:var(--muted);letter-spacing:.06em;min-width:3.5em}
+.chip{font:inherit;font-size:13px;padding:3px 11px;border-radius:99px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip:focus-visible,.dec button:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.list{display:grid;gap:12px}
+.card{background:var(--paper);border:1px solid var(--line);border-left:5px solid var(--k);border-radius:8px;padding:14px 16px;display:grid;gap:8px;min-width:0}
+.card[data-kind="翻譯"]{--k:var(--k-trans)} .card[data-kind="拼音"]{--k:var(--k-py)} .card[data-kind="單字表"]{--k:var(--k-vocab)} .card[data-kind="中文"]{--k:var(--k-zh)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12px;color:var(--muted)}
+.meta .kind{color:var(--k);font-weight:700;letter-spacing:.04em}
+.meta .id{font-family:var(--f-mono)}
+.tag{border:1px solid var(--line);border-radius:4px;padding:0 6px}
+.tag.es{border-color:var(--talk);color:var(--talk)}
+.zh{font-family:var(--f-zh);font-size:19px;line-height:1.5;overflow-wrap:anywhere}
+dl{margin:0;display:grid;grid-template-columns:3.2em 1fr;gap:4px 10px;font-size:14px}
+dt{color:var(--muted);font-size:12px;padding-top:2px}
+dd{margin:0;min-width:0;overflow-wrap:anywhere}
+dd.sug{color:var(--accent);font-weight:500}
+.act{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;border-top:1px dashed var(--line);padding-top:10px}
+.dec{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.dec button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--ink);padding:5px 12px;cursor:pointer}
+.dec button+button{border-left:1px solid var(--line)}
+.dec button[aria-pressed="true"][data-v="改"]{background:var(--yes);color:var(--paper)}
+.dec button[aria-pressed="true"][data-v="不改"]{background:var(--no);color:var(--paper)}
+.dec button[aria-pressed="true"][data-v="再討論"]{background:var(--talk);color:var(--paper)}
+textarea{flex:1 1 220px;min-width:0;font:inherit;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:5px 8px;resize:vertical;min-height:32px}
+.saved{font-size:12px;color:var(--muted);align-self:center}
+.empty,.status{color:var(--muted);font-size:13px}
+.status.err{color:var(--k-zh)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>台灣情境遊戲檢查清單</h1>
+    <p class="lede">九個遊戲的翻譯、拼音和單字表檢查結果。每一項選「要改」「不改」或「再討論」，需要的話寫備註；選好就會自動存，Claude 會照這裡的決定去改。標「西文」的可以請西文母語者一起看。</p>
+  </header>
+  <section class="sum" aria-label="進度">
+    <div><b id="n-done">0</b> <span>/ <span id="n-all">0</span> 項已決定</span></div>
+    <div><b id="n-yes">0</b> <span>要改</span></div>
+    <div><b id="n-no">0</b> <span>不改</span></div>
+    <div><b id="n-talk">0</b> <span>再討論</span></div>
+    <div class="bar" aria-hidden="true"><i id="b-yes" style="background:var(--yes)"></i><i id="b-no" style="background:var(--no)"></i><i id="b-talk" style="background:var(--talk)"></i></div>
+  </section>
+  <p class="status" id="status">正在連線，連上之前選的決定還不會存。</p>
+  <section class="filters" aria-label="篩選">
+    <div class="row" id="f-kind"><label>類型</label></div>
+    <div class="row" id="f-game"><label>遊戲</label></div>
+    <div class="row" id="f-state"><label>狀態</label></div>
+  </section>
+  <section class="list" id="list" aria-live="polite"></section>
+</div>
+
+<script id="items" type="application/json">[{"id": "T01", "game": "drinks", "kind": "翻譯", "sub": "翻譯：意思不同", "line": 691, "zh": "錢不夠，一共要付〔總價〕元。", "cur": "es: No te alcanzó: el total era más de 50. / en: Not enough money: the total was more than 50.", "sug": "es: No te alcanzó: el total era 〔總價〕 dólares. / en: Not enough money: the total was NT$〔總價〕.", "why": "中文說「一共要付多少」，西英文說「超過 50」，和中文不一樣。", "es": true}, {"id": "T02", "game": "drinks", "kind": "翻譯", "sub": "翻譯：少了內容", "line": 740, "zh": "Ami 的飲料買錯了，她要的是〔她的飲料〕加〔料〕。", "cur": "es: La bebida de Ami no era la que pidió. / en: Ami's drink wasn't what she asked for.", "sug": "es: La bebida de Ami no era la que pidió: ella quería 〔Ami 的飲料〕. / en: Ami's drink was wrong: she wanted 〔Ami 的飲料〕.", "why": "中文有說她要的是什麼，翻譯沒有；扣分原因學生會看翻譯。", "es": true}, {"id": "T03", "game": "drinks", "kind": "翻譯", "sub": "翻譯：少了內容", "line": 741, "zh": "你自己的飲料也買錯了，你要的是〔你的飲料〕。", "cur": "es: Tu propia bebida tampoco era la que querías. / en: Your own drink wasn't what you wanted either.", "sug": "es: Tu bebida tampoco era la correcta: querías 〔你的飲料〕. / en: Your own drink was wrong too: you wanted 〔你的飲料〕.", "why": "同上。", "es": true}, {"id": "T04", "game": "drinks", "kind": "翻譯", "sub": "翻譯：多了內容", "line": 545, "zh": "可以幫我去買一杯……嗎？", "cur": "es: ¿Me compras abajo …? / en: Could you get me … downstairs?", "sug": "es: ¿Me puedes ir a comprar …? / en: Could you go get me …?", "why": "西英文多了「樓下（abajo / downstairs）」，中文沒有說。很小的差別，也可以不改。", "es": true}, {"id": "T05", "game": "drinks", "kind": "單字表", "sub": "單字翻譯", "line": 0, "zh": "還要（單字表 TYPE）", "cur": "es: además querer", "sug": "es: querer también / querer algo más", "why": "「además querer」不是自然的西文說法。", "es": true}, {"id": "T06", "game": "reserva", "kind": "單字表", "sub": "單字翻譯", "line": 404, "zh": "點（單字表：幾點的點）", "cur": "es: en punto (hora) / en: o'clock", "sug": "es: hora (las …) / en: o'clock", "why": "「en punto」是「整點」的意思，可是遊戲裡有「七點半」，用 en punto 會誤會。", "es": true}, {"id": "T07", "game": "reserva", "kind": "單字表", "sub": "單字翻譯", "line": 416, "zh": "怎麼稱呼", "cur": "es: ¿cómo le llamo?, ¿a nombre de quién?", "sug": "es: ¿cómo se llama?, ¿a nombre de quién?", "why": "「¿cómo le llamo?」是西班牙的說法（leísmo），拉美學生比較常說「¿cómo lo llamo?」；建議改成兩邊都自然的說法。請西文母語者確認。", "es": true}, {"id": "T08", "game": "reserva", "kind": "翻譯", "sub": "翻譯：可能不自然", "line": 978, "zh": "店員：呃……我是問您的名字喔。", "cur": "es: Eh… le estoy preguntando a usted su nombre.", "sug": "es: Eh… le pregunto su nombre.", "why": "「a usted」重複了，聽起來有點生硬。請西文母語者確認。", "es": true}, {"id": "T09", "game": "reserva", "kind": "翻譯", "sub": "翻譯：可能不自然", "line": 1125, "zh": "包廂還坐得下", "cur": "es: el salón privado todavía alcanza", "sug": "es: todavía caben en el salón privado", "why": "說空間夠大，西文通常用「caber」，「alcanzar」比較像「錢夠」。請西文母語者確認。", "es": true}, {"id": "T10", "game": "reserva", "kind": "中文", "sub": "中文用字不一致", "line": 1261, "zh": "應該是〔幾〕張兒童座椅吧？", "cur": "這句寫「兒童座椅」，其他地方都寫「兒童椅」", "sug": "改成「兒童椅」", "why": "單字表教的是「兒童椅」，同一個東西用同一個詞比較好。", "es": false}, {"id": "T11", "game": "reserva", "kind": "翻譯", "sub": "翻譯：地區用法", "line": 792, "zh": "（一個不認識的人）：喂？你找誰？", "cur": "es: ¿Aló? …", "sug": "給西文母語者決定", "why": "接電話說「¿Aló?」是南美的說法；墨西哥說「¿Bueno?」，西班牙說「¿Diga?/¿Sí?」。手機「celular」（拉美）／「móvil」（西班牙）也一樣。學生來自不同國家，維持一種也可以。", "es": true}, {"id": "T12", "game": "breakfast", "kind": "翻譯", "sub": "翻譯：少了內容", "line": 882, "zh": "客人剛剛說了「〔內用／外帶〕」。", "cur": "es: El cliente ya lo había dicho. / en: The customer had already said it.", "sug": "es: El cliente ya había dicho «para llevar» (o «para comer aquí»). / en: The customer had already said \"to go\" (or \"for here\").", "why": "中文有說客人說了什麼，翻譯沒有。", "es": true}, {"id": "T13", "game": "parcel", "kind": "翻譯", "sub": "翻譯：少了內容", "line": 920, "zh": "房東太太說加值〔金額〕元。", "cur": "es: La casera dijo otra cantidad. / en: The landlady said a different amount.", "sug": "es: La casera dijo que recargaras 〔金額〕. / en: The landlady said to add 〔金額〕.", "why": "中文有說金額，翻譯只說「別的金額」。", "es": true}, {"id": "T14", "game": "nightmarket", "kind": "翻譯", "sub": "西文：性別", "line": 933, "zh": "Ami：辛苦了！我們下次再一起來夜市試試看。", "cur": "es: …volvamos a venir juntas…", "sug": "es: …volvamos juntos/as… → 建議改成「…la próxima vez vengamos otra vez al mercado nocturno a intentarlo.」（不用 juntas）", "why": "「juntas」假設玩家是女生。", "es": true}, {"id": "T15", "game": "bakery", "kind": "翻譯", "sub": "翻譯：用詞", "line": 821, "zh": "（麵包和吐司裝好了！）", "cur": "en: Your bread and toast are bagged!", "sug": "en: Your bread and the sandwich loaf are bagged!", "why": "這裡的吐司是一整條沒烤過的吐司，英文 toast 是「烤過的吐司片」。遊戲其他地方英文都用 loaf / sandwich bread。", "es": false}, {"id": "T16", "game": "bakery", "kind": "翻譯", "sub": "西文：可能不自然", "line": 894, "zh": "很好！你記得Ami朋友的名字。", "cur": "es: …el nombre de la amiga/o de Ami.", "sug": "es: …el nombre de la persona amiga de Ami. 或依名字分：小美、雅婷 → la amiga；阿哲 → el amigo", "why": "「amiga/o」寫法很生硬。朋友是隨機的（小美、阿哲、雅婷）；另外 604 行 LINE 裡寫死「mi amiga」，抽到阿哲時西文會變成女生。", "es": true}, {"id": "T17", "game": "bakery", "kind": "翻譯", "sub": "翻譯：顯示中文", "line": 730, "zh": "（你把〔麵包名〕放回架上。）、（你用夾子把〔麵包名〕夾進托盤。）", "cur": "西文、英文裡的麵包名稱直接放中文（例如 «菠蘿麵包»）", "sug": "如果是故意的（讓學生看中文名）就不用改；不是的話改成西文／英文名稱", "why": "確認一下是不是故意的。", "es": false}, {"id": "T18", "game": "clinic", "kind": "翻譯", "sub": "翻譯：少了內容", "line": 603, "zh": "藥師：藥一共〔幾〕天，吃完再看看。", "cur": "es: El tratamiento es de 〔天數〕 días en total.", "sug": "es: Son 〔天數〕 días de medicina en total; cuando la termines, vemos cómo sigues. / en: That's 〔天數〕 days of medicine; see how you feel when you finish.", "why": "翻譯少了「吃完再看看」。", "es": true}, {"id": "T19", "game": "clinic", "kind": "翻譯", "sub": "翻譯：用詞不一致", "line": 681, "zh": "掛號要先給櫃台看健保卡。", "cur": "es: …la tarjeta NHI.", "sug": "es: …la tarjeta del seguro de salud.", "why": "其他地方都說 tarjeta del seguro de salud，只有這裡用英文縮寫 NHI。", "es": true}, {"id": "T20", "game": "mrt", "kind": "翻譯", "sub": "英文：顯示中文站名", "line": 589, "zh": "Ami：我已經在〔目的地〕站了！（還有 606、722、796、833、851 行）", "cur": "en: I'm already at 〔中文站名〕 Station! — 英文裡出現中文站名，例如「at 市政府 Station」", "sug": "英文改用和西文一樣的站名（例如 Taipei City Hall）", "why": "西文用了站名的英文寫法，英文卻直接放中文。這是程式的小錯，一定要改。", "es": false}, {"id": "T21", "game": "mrt", "kind": "翻譯", "sub": "翻譯：用詞不一致", "line": 739, "zh": "站務員說要搭往〔方向〕方向。", "cur": "es: La persona del mostrador dijo…", "sug": "es: El personal de la estación dijo…", "why": "其他地方「站務員」都翻成 el personal de la estación。", "es": true}, {"id": "T22", "game": "mrt", "kind": "翻譯", "sub": "翻譯：用詞不一致", "line": 815, "zh": "優先席是要讓給有需要的人…", "cur": "es: Los asientos preferenciales… (809 行用 asiento prioritario)", "sug": "統一用 asiento prioritario（或統一用 preferencial）", "why": "同一個東西兩種說法。", "es": true}, {"id": "T23", "game": "mrt", "kind": "翻譯", "sub": "翻譯：少了內容", "line": 706, "zh": "（〔餘額〕元加〔金額〕元，票價大概二十多元……還是不夠。）", "cur": "es: (Aun así no alcanza para el pasaje…)", "sug": "es: (〔餘額〕 más 〔金額〕… el pasaje cuesta unos veinte y tantos dólares: todavía no alcanza.)", "why": "中文有算給學生看，翻譯沒有。", "es": true}, {"id": "T24", "game": "street", "kind": "翻譯", "sub": "西文：性別錯誤", "line": 631, "zh": "（前面有一位〔阿公／阿嬤〕跌倒了，坐在地上！）", "cur": "es: …¡la abuelita se ha caído y está sentado en el suelo! — 抽到阿嬤時「sentado」應該是「sentada」；645 行「Lo miras」也一樣（應為 La miras）", "sug": "依阿公／阿嬤換成 sentado／sentada、lo／la；英文的 He/she、him/her 也可以照人換成 he／she", "why": "抽到阿嬤時西文文法錯。", "es": true}, {"id": "T25", "game": "all", "kind": "翻譯", "sub": "西文：玩家的性別", "line": 0, "zh": "多個遊戲", "cur": "西文對玩家說話時用了陽性或陰性：¡Qué listo!（便利商店）、¡Muy listo!（訂位）、¡Muy cuidadoso!（早餐店）、tú mismo（麵包店、夜市）、¡Bienvenido!（飲料店、便利商店、麵包店）、enfermo / alérgico / tú solo（診所）、sentado / jovencito（捷運）、educado / empapado / jovencito（街頭）；只有夜市用陰性 ¡Qué lista! 和 juntas", "sug": "改成不分男女的說法，例如 ¡Qué buena idea! / ¡Muy bien pensado! / ¡Muy atento de tu parte! / te sirves tú / ¡Hola, bienvenida/o! → ¡Hola! ¿Qué tal?", "why": "學生有男有女，現在大部分用男生的說法，夜市又用女生的說法，前後不一致。請 Ben 決定要不要統一改成中性說法。", "es": true}, {"id": "T26", "game": "reserva", "kind": "翻譯", "sub": "西文：性別", "line": 0, "zh": "店員（翻譯小視窗的說話人名稱）", "cur": "es: Empleado / en: Staff", "sug": "es: Empleada", "why": "訂位的店員是女生（圖和朗讀聲音都是女生），西文說話人卻寫陽性的 Empleado。", "es": true}, {"id": "P01", "game": "drinks", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "微糖", "cur": "微糖：wēi táng", "sug": "微糖：wéi táng（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P02", "game": "drinks", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "微冰", "cur": "微冰：wēi bīng", "sug": "微冰：wéi bīng（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P03", "game": "reserva", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "日期、確認日期、你發現店員說錯日期了、店員說錯日期、日期明明是對的", "cur": "日期：rì qī", "sug": "日期：rì qí（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。共 5 處。", "es": false}, {"id": "P04", "game": "reserva", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "一個不認識的人", "cur": "認識：rèn shi", "sug": "認識：rèn shì（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P05", "game": "reserva", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "為什麼要分兩桌", "cur": "為什麼：wéi shén me", "sug": "為什麼：wèi shén me（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P06", "game": "reserva", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "要仔細聽喔", "cur": "仔細：zǎi xì", "sug": "仔細：zǐ xì（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P07", "game": "breakfast", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "你還記得大杯冰奶茶我們會說成什麼吧", "cur": "還記得：huán jì de", "sug": "還記得：hái jì de（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P08", "game": "breakfast", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "很仔細", "cur": "仔細：zǎi xì", "sug": "仔細：zǐ xì（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P09", "game": "parcel", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "你還收到了一封簡訊", "cur": "還收到：huán shōu dào", "sug": "還收到：hái shōu dào（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P10", "game": "parcel", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "陳淑芬", "cur": "淑芬：shū fēn", "sug": "淑芬：shú fēn（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P11", "game": "parcel", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "陳淑芳", "cur": "淑芳：shū fāng", "sug": "淑芳：shú fāng（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P12", "game": "parcel", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "陳淑貞", "cur": "淑貞：shū zhēn", "sug": "淑貞：shú zhēn（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P13", "game": "parcel", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "房東太太傳訊息給你、要看清楚訊息內容喔", "cur": "訊息：xùn xī", "sug": "訊息：xùn xí（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。共 2 處。", "es": false}, {"id": "P14", "game": "nightmarket", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "切、不用切", "cur": "切：qiè", "sug": "切：qiē（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。共 2 處。", "es": false}, {"id": "P15", "game": "nightmarket", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "我突然想到我弟最近變胖了", "cur": "突然：tū rán", "sug": "突然：tú rán（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P16", "game": "nightmarket", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "怎麼了", "cur": "怎麼：zěn mó", "sug": "怎麼：zěn me（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P17", "game": "nightmarket", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "你比我還會殺價耶", "cur": "還會：huán huì", "sug": "還會：hái huì（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P18", "game": "bakery", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "累積、可以累積點數喔", "cur": "累積：lèi jī", "sug": "累積：lěi jī（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。共 2 處。", "es": false}, {"id": "P19", "game": "bakery", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "因為我也會吃", "cur": "因為：yīn wéi", "sug": "因為：yīn wèi（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P20", "game": "bakery", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "你禮貌地拒絕了辦會員", "cur": "禮貌地：lǐ mào dì", "sug": "禮貌地：lǐ mào de（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P21", "game": "bakery", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "你要仔細聽", "cur": "仔細：zǎi xì", "sug": "仔細：zǐ xì（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P22", "game": "clinic", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "多休息、要多休息、你正在休息、你先好好休息", "cur": "休息：xiū xi", "sug": "休息：xiū xí（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。共 4 處。", "es": false}, {"id": "P23", "game": "street", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "跌倒、跌倒了、看到有人跌倒、看到有人跌倒會上前關心", "cur": "跌倒：diē dǎo", "sug": "跌倒：dié dǎo（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。共 4 處。", "es": false}, {"id": "P24", "game": "street", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "一台機車突然從旁邊衝出來、天空突然下起大雨", "cur": "突然：tū rán", "sug": "突然：tú rán（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。共 2 處。", "es": false}, {"id": "P25", "game": "street", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "你嚇了一跳", "cur": "嚇了一跳：hè le yí tiào", "sug": "嚇了一跳：xià le yí tiào（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P26", "game": "street", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "那樣更危險", "cur": "危險：wēi xiǎn", "sug": "危險：wéi xiǎn（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P27", "game": "street", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "長輩走得慢、這樣催長輩很不禮貌、看到長輩過馬路", "cur": "長輩：cháng bèi", "sug": "長輩：zhǎng bèi（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。共 3 處。", "es": false}, {"id": "P28", "game": "street", "kind": "拼音", "sub": "台灣讀音", "line": 0, "zh": "會遇到各種突發事件", "cur": "突發：tū fā", "sug": "突發：tú fā（加進這個遊戲的 customPinyin）", "why": "教育部《重編國語辭典修訂本》的讀音。", "es": false}, {"id": "P90", "game": "all", "kind": "拼音", "sub": "讀音不一致", "line": 0, "zh": "衣服和飾品、你和……（念 hàn）／和奶奶、托盤和夾子……（念 hé）", "cur": "「和」有 5 處念 hàn（之前加進 customPinyin 的），7 處念 hé", "sug": "統一一種：全部 hé，或全部 hàn", "why": "hàn 是台灣口語常見的念法，教育部也有收；同一個字前後念法不一樣，學生可能會困惑。請 Ben 決定。", "es": false}, {"id": "P91", "game": "all", "kind": "拼音", "sub": "讀音不一致", "line": 0, "zh": "嗯", "cur": "飲料店念 ēn，其他遊戲念 ǹg", "sug": "統一一種", "why": "同一個字不同遊戲念法不一樣。", "es": false}, {"id": "V01", "game": "drinks", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 END：請客", "cur": "對話裡沒有出現（Ami 說的是「我請你」）", "sug": "換成「拿給」（結局：把飲料拿給 Ami）", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V02", "game": "drinks", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 START：同事", "cur": "只出現在開始畫面的說明，對話裡沒有", "sug": "保留也可以（開始畫面看得到）", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V03", "game": "drinks", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 SIZE：大小", "cur": "店員說的是「大杯、中杯還是小杯？」，沒有「大小」", "sug": "換成「還是」", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V04", "game": "drinks", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 WHO：杯", "cur": "這一關的對話是「你要先點誰的飲料？」，沒有「杯」", "sug": "換成「到了」或刪掉", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V05", "game": "reserva", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 C1_GREET：需要", "cur": "店員說的是「有什麼可以為您服務的嗎？」", "sug": "換成「服務」", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V06", "game": "reserva", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 C1_PEOPLE：一共", "cur": "這一關沒有出現", "sug": "換成「算進去」（店員稱讚「有把小朋友算進去」）", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V07", "game": "reserva", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 C1_NAME：我姓…", "cur": "選項是「我叫…」「我貴姓…」，沒有「我姓…」", "sug": "保留（多教一種說法）或刪掉", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V08", "game": "reserva", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 END：請你吃飯", "cur": "結局沒有出現", "sug": "換成「訂好了」", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V09", "game": "reserva", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 END：說好", "cur": "結局沒有出現", "sug": "換成「不錯」", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V10", "game": "breakfast", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 START：簡稱", "cur": "陳姐說的是「我們會說成什麼」", "sug": "換成「說成」", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V11", "game": "breakfast", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 START：打工", "cur": "只出現在開始畫面的說明", "sug": "保留也可以", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V12", "game": "parcel", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 END：緊張", "cur": "結局沒有出現", "sug": "換成「習慣」（房東太太：慢慢就習慣了啦）", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V13", "game": "parcel", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 Y_ASK：其他", "cur": "這一關沒有出現", "sug": "刪掉或換成這一關的詞", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V14", "game": "nightmarket", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 END：剩下", "cur": "對話是「還剩〔〕元」", "sug": "換成「還剩」", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V15", "game": "nightmarket", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 PAY：百元", "cur": "對話裡沒有出現", "sug": "刪掉", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V16", "game": "nightmarket", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 START：敢", "cur": "只出現在開始畫面的說明", "sug": "保留也可以", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V17", "game": "bakery", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 C_SEP：袋子", "cur": "店員說的是「要分開裝嗎？」", "sug": "刪掉（「分開裝」已經在表裡）", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V18", "game": "bakery", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 C_SLICE：切片", "cur": "對話裡都用「切」", "sug": "刪掉", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V19", "game": "bakery", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 END：辛苦了", "cur": "結局沒有出現", "sug": "換成「公園」或「感謝」", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V20", "game": "bakery", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 K_TIME：取貨", "cur": "店員說的是「什麼時候來拿？」", "sug": "換成「來拿」", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V21", "game": "clinic", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 P_PAY：批價", "cur": "只出現在關卡名稱，對話是「掛號費和部分負擔」", "sug": "換成「部分負擔」", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V22", "game": "clinic", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 M_NOW：洗澡", "cur": "對話是「洗好澡」（中間有「好」）", "sug": "保留也可以", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V23", "game": "mrt", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 T_BLUE：到站", "cur": "廣播說的是「下一站」", "sug": "換成「下一站」", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V24", "game": "street", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 END：辛苦了", "cur": "結局沒有出現", "sug": "換成「你來啦」", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V25", "game": "street", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 E_light：紅綠燈", "cur": "對話用「行人號誌」「紅燈」", "sug": "換成「紅燈」或「行人號誌」", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}, {"id": "V26", "game": "street", "kind": "單字表", "sub": "詞沒出現在對話裡", "line": 0, "zh": "單字表 E_rain：撐傘", "cur": "對話是「一起撐」「撐著傘」", "sug": "換成「撐」", "why": "單字抽屜裡的詞最好是這一關看得到的。", "es": false}]</script>
+<script>
+const ITEMS = JSON.parse(document.getElementById('items').textContent);
+const GN = {drinks:'飲料店',reserva:'訂位',breakfast:'早餐店',parcel:'便利商店',nightmarket:'夜市',bakery:'麵包店',clinic:'診所',mrt:'捷運',street:'街頭',all:'多個遊戲'};
+const KINDS = ['翻譯','拼音','單字表','中文'];
+const F = { kind: '全部', game: '全部', state: '全部' };
+const DEC = {};             // id → {choice, note}
+let db = null;
+const $ = s => document.querySelector(s);
+const el = (t, a = {}, txt) => { const e = document.createElement(t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+
+function chips(box, key, opts) {
+  opts.forEach(([v, label]) => {
+    const b = el('button', { class: 'chip', type: 'button', 'aria-pressed': String(F[key] === v) }, label);
+    b.onclick = () => { F[key] = v; box.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', String(c === b))); render(); };
+    box.appendChild(b);
+  });
+}
+const cnt = (f) => ITEMS.filter(f).length;
+chips($('#f-kind'), 'kind', [['全部', `全部 ${ITEMS.length}`], ...KINDS.map(k => [k, `${k} ${cnt(i => i.kind === k)}`]), ['西文', `西文相關 ${cnt(i => i.es)}`]]);
+const games = [...new Set(ITEMS.map(i => i.game))];
+chips($('#f-game'), 'game', [['全部', '全部'], ...games.map(g => [g, GN[g] || g])]);
+chips($('#f-state'), 'state', [['全部', '全部'], ['未決定', '還沒決定'], ['改', '要改'], ['不改', '不改'], ['再討論', '再討論']]);
+
+function summary() {
+  const c = { 改: 0, 不改: 0, 再討論: 0 };
+  ITEMS.forEach(i => { const d = DEC[i.id]; if (d && c[d.choice] != null) c[d.choice]++; });
+  const done = c.改 + c.不改 + c.再討論, n = ITEMS.length;
+  $('#n-all').textContent = n; $('#n-done').textContent = done;
+  $('#n-yes').textContent = c.改; $('#n-no').textContent = c.不改; $('#n-talk').textContent = c.再討論;
+  $('#b-yes').style.width = (c.改 / n * 100) + '%'; $('#b-no').style.width = (c.不改 / n * 100) + '%'; $('#b-talk').style.width = (c.再討論 / n * 100) + '%';
+}
+
+async function save(id, patch) {
+  DEC[id] = { ...(DEC[id] || {}), ...patch };
+  summary();
+  if (!db) { setStatus('還沒連上，這個決定沒有存到。請重新整理頁面再試。', true); return false; }
+  try {
+    await db.collection('decisions').doc(id).set({ choice: DEC[id].choice || '', note: DEC[id].note || '', updatedAt: Date.now() });
+    return true;
+  } catch (e) {
+    setStatus(e && e.code === 'not_granted' ? '你只有檢視權限，決定不會存。' : '存檔失敗，請稍後再試一次。', true);
+    return false;
+  }
+}
+
+function card(i) {
+  const d = DEC[i.id] || {};
+  const c = el('article', { class: 'card', 'data-kind': i.kind, id: 'c-' + i.id });
+  const meta = el('div', { class: 'meta' });
+  meta.append(el('span', { class: 'kind' }, i.kind), el('span', { class: 'tag' }, GN[i.game] || i.game), el('span', {}, i.sub));
+  if (i.es) meta.append(el('span', { class: 'tag es' }, '西文'));
+  meta.append(el('span', { class: 'id' }, i.id + (i.line ? ` · 第 ${i.line} 行` : '')));
+  const dl = el('dl');
+  [['現在', i.cur, ''], ['建議', i.sug, 'sug'], ['原因', i.why, '']].forEach(([k, v, cls]) => { if (v) { dl.append(el('dt', {}, k), el('dd', cls ? { class: cls } : {}, v)); } });
+  const act = el('div', { class: 'act' });
+  const dec = el('div', { class: 'dec', role: 'group', 'aria-label': '決定' });
+  const saved = el('span', { class: 'saved' });
+  ['改', '不改', '再討論'].forEach(v => {
+    const b = el('button', { type: 'button', 'data-v': v, 'aria-pressed': String(d.choice === v) }, v === '改' ? '要改' : v);
+    b.onclick = async () => {
+      const choice = DEC[i.id]?.choice === v ? '' : v;
+      dec.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === choice)));
+      if (await save(i.id, { choice })) saved.textContent = '已存';
+    };
+    dec.append(b);
+  });
+  const ta = el('textarea', { id: 'note-' + i.id, rows: '1', placeholder: '備註（例如：改成……）', 'aria-label': '備註' });
+  ta.value = d.note || '';
+  ta.addEventListener('change', async () => { if (await save(i.id, { note: ta.value.trim() })) saved.textContent = '已存'; });
+  act.append(dec, ta, saved);
+  c.append(meta, el('div', { class: 'zh' }, i.zh), dl, act);
+  return c;
+}
+
+function visible(i) {
+  if (F.kind === '西文') { if (!i.es) return false; } else if (F.kind !== '全部' && i.kind !== F.kind) return false;
+  if (F.game !== '全部' && i.game !== F.game) return false;
+  const ch = DEC[i.id]?.choice || '';
+  if (F.state === '未決定') return !ch;
+  if (F.state !== '全部') return ch === F.state;
+  return true;
+}
+function render() {
+  const list = $('#list'); list.textContent = '';
+  const vis = ITEMS.filter(visible);
+  if (!vis.length) list.append(el('p', { class: 'empty' }, '這個篩選沒有項目。'));
+  vis.forEach(i => list.append(card(i)));
+  summary();
+}
+function setStatus(t, err) { const s = $('#status'); s.textContent = t; s.classList.toggle('err', !!err); s.hidden = !t; }
+
+render();
+(async () => {
+  db = window.claude ? await window.claude.use('db') : null;
+  if (!db) { setStatus('這個畫面沒辦法存檔（沒有登入或沒有權限），只能看。', true); return; }
+  setStatus('');
+  let first = true;
+  db.collection('decisions').onSnapshot(snap => {
+    snap.docs.forEach(d => { const v = d.data() || {}; DEC[d.id] = { choice: v.choice || '', note: v.note || '' }; });
+    // 第一次讀到、或別人改了：只更新沒在輸入的卡片
+    const active = document.activeElement;
+    if (first || !(active && active.tagName === 'TEXTAREA')) render(); else summary();
+    first = false;
+  }, () => setStatus('讀取決定時出錯，請重新整理頁面。', true));
+})();
+</script>
