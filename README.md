@@ -16,6 +16,8 @@
 ```
 index.html          遊戲選單（之後換成「台灣一週」地圖）
 map/index.html      地圖模式（測試版）：走到建築門口 → iframe 載入 games/<scene>/?embed=1 → 收 scene-complete
+                    20×28 格，畫面一次看 20×14 格，跟著玩家上下捲動。
+                    還不能玩的地點放在 COMING（🚧 維修中／建造中），走到門口只顯示「還在準備中，敬請期待」；開放時搬到 SCENES，slot 不變
 games/<scene>/      每個遊戲：index.html + images/（檔名小寫 .jpg）
 ```
 

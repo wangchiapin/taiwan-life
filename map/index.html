@@ -54,7 +54,7 @@
   canvas:focus { outline: none; }
   canvas { width: 100%; height: auto; display: block; image-rendering: pixelated; border: 4px solid #1b1a22; border-radius: 10px; background: #6bb05a; touch-action: manipulation; }
   #help { color: #cfe3c8; font-size: 13px; padding: 6px 12px; text-align: center; }
-  #toast { position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%) translateY(20px); background: #1b1a22; color: #fff; padding: 10px 18px; border-radius: 12px; opacity: 0; transition: .25s; pointer-events: none; z-index: 30; max-width: 90vw; text-align: center; }
+  #toast { position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%) translateY(20px); background: #1b1a22; color: #fff; padding: 10px 18px; border-radius: 12px; opacity: 0; transition: .25s; pointer-events: none; z-index: 30; max-width: 90vw; text-align: center; white-space: pre-line; }
   #toast.show { opacity: 1; transform: translateX(-50%); }
 
   /* 手機方向鍵 */
@@ -221,15 +221,33 @@ const SCENES = [
   /* 沒有建築的場景：路上會隨機冒出「❗」，走過去就觸發 */
   { id: 'street',      zh: '路上突發事件', es: 'Imprevistos en la calle', en: 'Street surprises', emoji: '❗', virtual: true }
 ];
-const ZHS = { drinks: '饮料店', bakery: '面包店', clinic: '诊所', mrt: '捷运站' };
-/* 8 個建築位置：左上、右上、左下、右下，各兩棟（3 格寬） */
-const BUILD_SLOTS = [
-  { x: 1, top: true }, { x: 5, top: true }, { x: 12, top: true }, { x: 16, top: true },
-  { x: 1, top: false }, { x: 5, top: false }, { x: 12, top: false }, { x: 16, top: false }
+/* 還不能玩的地點（不算進「這週完成」）
+   soon：🚧 維修中（有房子）；build：建造中（工地）。走到門口只會顯示「還在準備中，敬請期待」
+   之後要開放：把它搬到 SCENES，slot 不變 */
+const COMING = [
+  { id: 'school',  zh: '學校',   es: 'Escuela',    en: 'School',      emoji: '🏫', roof: '#b0a07a', wall: '#ece6d6', slot: 8,  status: 'soon' },
+  { id: 'cinema',  zh: '電影院', es: 'Cine',       en: 'Cinema',      emoji: '🎬', roof: '#9a7f9c', wall: '#e9e0ea', slot: 9,  status: 'soon' },
+  { id: 'market',  zh: '菜市場', es: 'Mercado',    en: 'Market',      emoji: '🥬', roof: '#86a07c', wall: '#e1eadb', slot: 10, status: 'soon' },
+  { id: 'site1',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 11, status: 'build' },
+  { id: 'airport', zh: '機場',   es: 'Aeropuerto', en: 'Airport',     emoji: '✈️', roof: '#8697ad', wall: '#e2e8f0', slot: 12, status: 'soon' },
+  { id: 'site2',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 14, status: 'build' },
+  { id: 'site3',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 15, status: 'build' }
 ];
-const COLS = 20, ROWS = 14, T = 32;
-const ROAD_ROWS = [5, 6], ROAD_COLS = [9, 10];
-const SIDEWALK_ROWS = [4, 7, 11];
+const ZHS = { drinks: '饮料店', bakery: '面包店', clinic: '诊所', mrt: '捷运站', school: '学校', cinema: '电影院', market: '菜市场', airport: '机场', site1: '工地', site2: '工地', site3: '工地' };
+/* 建築位置：每條橫向馬路上下各 4 個（3 格寬）。房子的門都在最下面一排，朝向下面的人行道
+   0–7：第一條馬路（原本的地圖）；8–15：第二條馬路（往下延伸的部分）
+   機場佔兩個位置（12、13），寬 7 格 */
+const BUILD_SLOTS = [
+  { x: 1, y: 1 }, { x: 5, y: 1 }, { x: 12, y: 1 }, { x: 16, y: 1 },
+  { x: 1, y: 8 }, { x: 5, y: 8 }, { x: 12, y: 8 }, { x: 16, y: 8 },
+  { x: 1, y: 15 }, { x: 5, y: 15 }, { x: 12, y: 15 }, { x: 16, y: 15 },
+  { x: 1, y: 22, w: 7 }, { x: 5, y: 22 }, { x: 12, y: 22 }, { x: 16, y: 22 }
+];
+const COLS = 20, ROWS = 28, T = 32;
+const VIEW_ROWS = 14;                     // 畫面一次看到的列數（畫面跟著玩家上下捲動）
+const ROAD_ROWS = [5, 6, 19, 20], ROAD_COLS = [9, 10];
+const SIDEWALK_ROWS = [4, 7, 11, 18, 21, 25];
+const CENTER_ROWS = [5, 19];              // 橫向馬路畫黃色中線的那一列
 
 /* ══════════════════════════════════════
    設定與進度
@@ -253,19 +271,19 @@ load();
 const blocked = Array.from({ length: ROWS }, () => Array(COLS).fill(false));
 const doors = {};     // 'x,y' → scene
 const trees = [];
-const buildings = SCENES.filter(sc => !sc.virtual).map(sc => {
-  const s = BUILD_SLOTS[sc.slot];
-  const y0 = s.top ? 1 : 8;
-  const b = { sc, x: s.x, y: y0, w: 3, h: 3, top: s.top, door: { x: s.x + 1, y: y0 + 2 } };
-  for (let yy = b.y; yy < b.y + 3; yy++) for (let xx = b.x; xx < b.x + 3; xx++) blocked[yy][xx] = true;
+const buildings = [...SCENES.filter(sc => !sc.virtual), ...COMING].map(sc => {
+  const s = BUILD_SLOTS[sc.slot], w = s.w || 3, h = 3;
+  const b = { sc, x: s.x, y: s.y, w, h, soon: !!sc.status, door: { x: s.x + Math.floor(w / 2), y: s.y + h - 1 } };
+  for (let yy = b.y; yy < b.y + h; yy++) for (let xx = b.x; xx < b.x + w; xx++) blocked[yy][xx] = true;
   blocked[b.door.y][b.door.x] = false;
   doors[b.door.x + ',' + b.door.y] = b;
-  b.out = { x: b.door.x, y: y0 + 3 };      // 離開遊戲後站的位置
+  b.out = { x: b.door.x, y: b.y + h };     // 離開遊戲後站的位置
   return b;
 });
-/* 樹：放在草地角落，擋路 */
-[[0, 0], [4, 0], [8, 0], [11, 0], [15, 0], [19, 0], [4, 2], [11, 2], [15, 2], [0, 12], [4, 12], [8, 12], [11, 12], [15, 12], [19, 12], [4, 10], [11, 10], [15, 10], [0, 9], [19, 9]]
-  .forEach(([x, y]) => { if (!blocked[y][x] && !ROAD_COLS.includes(x)) { trees.push({ x, y }); blocked[y][x] = true; } });
+/* 樹：放在草地角落，擋路（第二條馬路那一塊和上面一樣，往下 14 列） */
+const TREE_SPOTS = [[0, 0], [4, 0], [8, 0], [11, 0], [15, 0], [19, 0], [4, 2], [11, 2], [15, 2], [0, 12], [4, 12], [8, 12], [11, 12], [15, 12], [19, 12], [4, 10], [11, 10], [15, 10], [0, 9], [19, 9]];
+[...TREE_SPOTS, ...TREE_SPOTS.map(([x, y]) => [x, y + 14])]
+  .forEach(([x, y]) => { if (y < ROWS && !blocked[y][x] && !doors[x + ',' + y] && !ROAD_COLS.includes(x)) { trees.push({ x, y }); blocked[y][x] = true; } });
 
 const isRoad = (x, y) => ROAD_ROWS.includes(y) || ROAD_COLS.includes(x);
 const isWalk = (x, y) => x >= 0 && y >= 0 && x < COLS && y < ROWS && !blocked[y][x];
@@ -323,7 +341,9 @@ const OLD_LOOK = { hair: '#e7e7e7', shirt: '#8a6fb0', pants: '#5a5146' };
 const WALKERS = [
   { row: 4, x0: 0, x1: 8, x: 1.5, dir: 1, speed: 0.8, look: LOOKS[0], line: 'hi' },
   { row: 7, x0: 11, x1: 19, x: 15, dir: -1, speed: 0.9, look: LOOKS[1], line: 'mrt' },
-  { row: 11, x0: 0, x1: 8, x: 6, dir: -1, speed: 0.7, look: LOOKS[2], line: 'drink' }
+  { row: 11, x0: 0, x1: 8, x: 6, dir: -1, speed: 0.7, look: LOOKS[2], line: 'drink' },
+  { row: 18, x0: 11, x1: 19, x: 13, dir: 1, speed: 0.8, look: LOOKS[3], line: 'night' },
+  { row: 21, x0: 0, x1: 8, x: 3, dir: -1, speed: 0.75, look: LOOKS[0], line: 'hot' }
 ].map(w => ({ ...w, pause: 0, phase: Math.random() * 10 }));
 
 /* ── Ami：站在路口 ── */
@@ -334,9 +354,15 @@ blocked[AMI.y][AMI.x] = true;
 const VEHICLES = [
   { axis: 'h', lane: 5, dir: -1, pos: 500, speed: 64, kind: 'scooter', color: '#e94f37' },
   { axis: 'h', lane: 6, dir: 1, pos: 120, speed: 52, kind: 'car', color: '#f2c14e' },
-  { axis: 'v', lane: 9, dir: 1, pos: -40, speed: 62, kind: 'scooter', color: '#59cd90', idle: 6 }
+  { axis: 'v', lane: 9, dir: 1, pos: -40, speed: 62, kind: 'scooter', color: '#59cd90', idle: 6 },
+  { axis: 'h', lane: 19, dir: -1, pos: 300, speed: 58, kind: 'car', color: '#5b8def' },
+  { axis: 'h', lane: 20, dir: 1, pos: 40, speed: 66, kind: 'scooter', color: '#f28c28', idle: 3 },
+  { axis: 'v', lane: 10, dir: -1, pos: 900, speed: 60, kind: 'scooter', color: '#b06ad8', idle: 9 }
 ].map(v => ({ idle: 0, ...v, half: v.kind === 'car' ? 22 : 13, wait: 0 }));
-const W = COLS * T, H = ROWS * T;
+const W = COLS * T, H = ROWS * T, VH = VIEW_ROWS * T;
+/* 路口：直的馬路（第 9、10 行）和每條橫向馬路交叉的地方，橫向和直向的車不能同時在裡面 */
+const XBOX = [9 * T, 11 * T];
+const CROSSINGS = [[5, 6], [19, 20]].map(r => ({ rows: r, box: [r[0] * T, (r[1] + 1) * T] }));
 
 /* ── 看得到的突發事件：走到旁邊就開始「走在路上」，第一件就是你看到的那件 ── */
 const EVENT_TYPES = ['elder', 'fall', 'ask', 'wallet', 'flyer'];
@@ -348,21 +374,21 @@ const EVENT_LINES = {
   flyer:  ['flyer', ['您好，新開的餐廳，請看一下！', '您好，新开的餐厅，请看一下！', 'nín hǎo, xīn kāi de cān tīng, qǐng kàn yí xià!', 'Hola, es un restaurante nuevo, ¡échele un vistazo!', "Hello, it's a new restaurant — take a look!"]]
 };
 const STREET = SCENES.find(sc => sc.virtual);
-const EV = { type: 'fall', x: 0, y: 0, dir: 1, pause: 0 };
+const EV = { type: 'fall', x: 0, y: 0, y0: 4, dir: 1, pause: 0 };
 const sidewalkOk = (x, y) => isWalk(x, y) && SIDEWALK_ROWS.includes(y) && !isRoad(x, y) && !doors[x + ',' + (y - 1)] && !doors[x + ',' + y];
 function respawnEvent(ax, ay) {
   EV.type = EVENT_TYPES[Math.floor(Math.random() * EVENT_TYPES.length)];
   const cand = [];
   if (EV.type === 'elder') {
     // 阿嬤在斑馬線上，慢慢從上面的人行道走到下面
-    for (const x of [2, 3, 6, 7, 13, 14, 16, 17]) if (Math.abs(x - ax) + Math.abs(5 - ay) >= 5) cand.push([x, 4]);
+    for (const top of [4, 18]) for (const x of [2, 3, 6, 7, 13, 14, 16, 17]) if (Math.abs(x - ax) + Math.abs(top + 1 - ay) >= 5) cand.push([x, top]);
   } else {
     for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++)
       if (sidewalkOk(x, y) && Math.abs(x - ax) + Math.abs(y - ay) >= 5 && Math.abs(x - AMI.x) + Math.abs(y - AMI.y) > 2 &&
           (EV.type !== 'wallet' || sidewalkOk(x + 2, y))) cand.push([x, y]);
   }
   const c = cand[Math.floor(Math.random() * cand.length)] || [3, 7];
-  EV.x = c[0]; EV.y = c[1]; EV.dir = 1; EV.pause = 1.2;
+  EV.x = c[0]; EV.y = c[1]; EV.y0 = c[1]; EV.dir = 1; EV.pause = 1.2;
 }
 const evTile = () => ({ x: Math.round(EV.x), y: Math.round(EV.y) });
 
@@ -384,14 +410,20 @@ function updateLife(dt) {
     if (EV.pause > 0) EV.pause -= dt;
     else {
       EV.y += EV.dir * 0.45 * dt;
-      if (EV.y >= 7) { EV.y = 7; EV.dir = -1; EV.pause = 2.5; }
-      if (EV.y <= 4) { EV.y = 4; EV.dir = 1; EV.pause = 2.5; }
+      if (EV.y >= EV.y0 + 3) { EV.y = EV.y0 + 3; EV.dir = -1; EV.pause = 2.5; }
+      if (EV.y <= EV.y0) { EV.y = EV.y0; EV.dir = 1; EV.pause = 2.5; }
     }
   }
   // 路上會擋車的人（玩家、過馬路的阿嬤）：格子座標
   const people = [pt];
   if (EV.type === 'elder') people.push({ x: EV.x, y: EV.y, elder: true });
-  const inBox = v => v.idle <= 0 && v.axis === 'h' ? (v.pos + v.half > 9 * T && v.pos - v.half < 11 * T) : (v.pos + v.half > 5 * T && v.pos - v.half < 7 * T);
+  // 車 o 是不是在第 k 個路口裡
+  const inBox = (o, k) => {
+    if (o.idle > 0) return false;
+    const c = CROSSINGS[k];
+    if (o.axis === 'h') return c.rows.includes(o.lane) && o.pos + o.half > XBOX[0] && o.pos - o.half < XBOX[1];
+    return o.pos + o.half > c.box[0] && o.pos - o.half < c.box[1];
+  };
   for (const v of VEHICLES) {
     if (v.idle > 0) { v.idle -= dt; continue; }      // 在畫面外等一下才開進來
     const front = v.pos + v.dir * v.half;
@@ -408,10 +440,13 @@ function updateLife(dt) {
       if (d > -8 && d < 26) { stop = true; if (!p.elder) byPlayer = true; }
     }
     // 路口：橫向和直向的車不能同時在路口裡
-    const box = v.axis === 'h' ? [9 * T, 11 * T] : [5 * T, 7 * T];
     const next = front + v.dir * v.speed * dt;
-    const entering = !inBox(v) && (v.dir > 0 ? (front <= box[0] && next > box[0] - 4) : (front >= box[1] && next < box[1] + 4));
-    if (entering && VEHICLES.some(o => o.axis !== v.axis && inBox(o))) stop = true;
+    CROSSINGS.forEach((c, k) => {
+      if (v.axis === 'h' && !c.rows.includes(v.lane)) return;
+      const box = v.axis === 'h' ? XBOX : c.box;
+      const entering = !inBox(v, k) && (v.dir > 0 ? (front <= box[0] && next > box[0] - 4) : (front >= box[1] && next < box[1] + 4));
+      if (entering && VEHICLES.some(o => o.axis !== v.axis && inBox(o, k))) stop = true;
+    });
     if (!stop) v.pos += v.dir * v.speed * dt;
     v.wait = byPlayer ? v.wait + dt : 0;
     const len = v.axis === 'h' ? W : H;
@@ -528,7 +563,7 @@ function speakers() {
   return out.filter(s => s.d <= s.r).sort((a, b) => a.d - b.d);
 }
 function updateBubble() {
-  const s = current ? null : speakers()[0];
+  const s = current ? null : speakers().find(o => o.y * T - camY > -T / 2 && o.y * T - camY < VH - T / 2);   // 只看畫面裡的人
   if (!s) { bub.hidden = true; bubNow = null; return; }
   bubNow = s;
   const w = WHO[s.who], who = S.script === 'simp' ? w[1] : w[0];
@@ -536,7 +571,7 @@ function updateBubble() {
   if (bub.dataset.k !== s.key + S.script + zhOf(s.line)) { bub.innerHTML = html; bub.dataset.k = s.key + S.script + zhOf(s.line); }
   bub.hidden = false;
   const r = cv.getBoundingClientRect(), st = document.getElementById('stage').getBoundingClientRect();
-  const sx = r.width / W, cx = r.left - st.left + (s.x * T + T / 2) * sx, top = r.top - st.top + s.y * T * sx;
+  const sx = r.width / W, cx = r.left - st.left + (s.x * T + T / 2) * sx, top = r.top - st.top + (s.y * T - camY) * sx;
   const bw = bub.offsetWidth;
   bub.style.left = Math.max(4, Math.min(st.width - bw - 4, cx - bw / 2)) + 'px';
   bub.style.top = (top - bub.offsetHeight - 4) + 'px';
@@ -592,7 +627,7 @@ function bfs(sx, sy, tx, ty) {
   return null;
 }
 function goTo(tx, ty) {
-  const b = Object.values(doors).find(d => blocked[ty] && blocked[ty][tx] && tx >= d.x && tx < d.x + 3 && ty >= d.y && ty < d.y + 3);
+  const b = Object.values(doors).find(d => blocked[ty] && blocked[ty][tx] && tx >= d.x && tx < d.x + d.w && ty >= d.y && ty < d.y + d.h);
   if (b) { tx = b.door.x; ty = b.door.y; }              // 點到建築 → 走到它的門
   const from = P.moving ? P.moving.to : { x: P.x, y: P.y };
   const p = bfs(from.x, from.y, tx, ty);
@@ -625,10 +660,11 @@ function tick(now) {
     if (k >= 1) {
       P.x = P.moving.to.x; P.y = P.moving.to.y; P.moving = null; P.step++;
       const b = doors[P.x + ',' + P.y];
-      if (b) { P.path = []; P.held = null; openGame(b); }
+      if (b) { P.path = []; P.held = null; if (b.soon) comingSoon(b); else openGame(b); }
     }
   }
   checkEvent();
+  updateCamera(now, dt);
   draw(now);
   updateBubble();
   requestAnimationFrame(tick);
@@ -649,7 +685,7 @@ function drawGround() {
       g.fillStyle = '#555963'; for (let i = 0; i < 4; i++) g.fillRect(px + rnd(x, y, i) * 28, py + rnd(y, x, i) * 28, 3, 2);
       // 中線
       g.fillStyle = '#f2d24b';
-      if (y === 5 && !ROAD_COLS.includes(x)) g.fillRect(px + 4, py + T - 2, 12, 4);
+      if (CENTER_ROWS.includes(y) && !ROAD_COLS.includes(x)) g.fillRect(px + 4, py + T - 2, 12, 4);
       if (x === 9 && !ROAD_ROWS.includes(y)) g.fillRect(px + T - 2, py + 4, 4, 12);
     } else if (SIDEWALK_ROWS.includes(y)) {
       g.fillStyle = '#cfcab8'; g.fillRect(px, py, T, T);
@@ -681,6 +717,7 @@ function pill(text, cx, cy, bg, fg) {
 }
 
 function drawBuilding(b) {
+  if (b.sc.status === 'build') return drawSite(b);
   const sc = b.sc, x = b.x * T, y = b.y * T, w = b.w * T, h = b.h * T;
   const roofY = y, roofH = 2 * T, wallY = y + 2 * T;
   // 陰影
@@ -690,16 +727,24 @@ function drawBuilding(b) {
   g.fillStyle = 'rgba(0,0,0,.12)'; g.fillRect(x, wallY + T - 3, w, 3);
   // 屋頂
   g.fillStyle = sc.roof; g.fillRect(x, roofY, w, roofH);
-  g.fillStyle = 'rgba(255,255,255,.18)'; for (let i = 0; i < 6; i++) g.fillRect(x + 6 + i * 16, roofY + 6, 8, roofH - 12);
+  g.fillStyle = 'rgba(255,255,255,.18)'; for (let xx = x + 6; xx + 8 <= x + w - 4; xx += 16) g.fillRect(xx, roofY + 6, 8, roofH - 12);
   g.fillStyle = 'rgba(0,0,0,.22)'; g.fillRect(x, roofY + roofH - 4, w, 4);
-  // 窗
-  g.fillStyle = '#9fd2ee'; g.fillRect(x + 8, wallY + 8, 14, 14); g.fillRect(x + w - 22, wallY + 8, 14, 14);
-  g.fillStyle = '#fff'; g.fillRect(x + 10, wallY + 10, 4, 4); g.fillRect(x + w - 20, wallY + 10, 4, 4);
-  // 門
+  // 窗（寬的建築，門兩邊各排一排窗）
   const dx = b.door.x * T, dy = b.door.y * T;
+  for (let wx = x + 8; wx + 14 <= x + w - 8; wx += 30) {
+    if (wx + 14 > dx && wx < dx + T) continue;
+    g.fillStyle = '#9fd2ee'; g.fillRect(wx, wallY + 8, 14, 14);
+    g.fillStyle = '#fff'; g.fillRect(wx + 2, wallY + 10, 4, 4);
+  }
+  // 門
   g.fillStyle = '#6b4226'; g.fillRect(dx + 4, dy + 2, 24, 30);
   g.fillStyle = '#8a5a34'; g.fillRect(dx + 7, dy + 5, 8, 12); g.fillRect(dx + 17, dy + 5, 8, 12);
   g.fillStyle = '#f2b632'; g.fillRect(dx + 22, dy + 18, 3, 3);
+  if (b.soon) {   // 維修中：門用木板釘起來，房子蓋一層灰
+    g.fillStyle = 'rgba(120,120,120,.28)'; g.fillRect(x, y, w, h);
+    g.fillStyle = '#c99a5b'; g.fillRect(dx + 2, dy + 8, 28, 5); g.fillRect(dx + 2, dy + 19, 28, 5);
+    g.fillStyle = '#8a6434'; g.fillRect(dx + 5, dy + 9, 2, 2); g.fillRect(dx + 25, dy + 9, 2, 2); g.fillRect(dx + 5, dy + 20, 2, 2); g.fillRect(dx + 25, dy + 20, 2, 2);
+  }
   // 招牌：emoji + 名稱
   g.textAlign = 'center'; g.textBaseline = 'middle';
   g.font = '28px "Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.fillStyle = '#000';
@@ -709,9 +754,55 @@ function drawBuilding(b) {
   g.fillStyle = '#fffdf6'; g.fillRect(x + w / 2 - lw / 2, roofY + 40, lw, 17);
   g.strokeStyle = '#1b1a22'; g.lineWidth = 2; g.strokeRect(x + w / 2 - lw / 2, roofY + 40, lw, 17);
   g.fillStyle = '#1b1a22'; g.fillText(label, x + w / 2, roofY + 49);
+  if (b.soon) { hazardSign(S.script === 'simp' ? '🚧 维修中' : '🚧 維修中', x + w / 2, roofY - 2); return; }   // 牌子掛在屋頂上緣，不擋到 emoji
   // 完成標記
   const r = S.done[sc.id];
   if (r) pill('✓' + r.score, x + w - 24, roofY + 10, '#7de3a2', '#10381f');
+}
+
+/* 黃黑斜紋的告示牌 */
+function hazardSign(text, cx, cy) {
+  g.font = 'bold 12px "Noto Sans TC", sans-serif';
+  const w = g.measureText(text).width + 16, h = 18, x = cx - w / 2, y = cy - h / 2;
+  g.save();
+  g.beginPath(); g.rect(x, y, w, h); g.clip();
+  g.fillStyle = '#f2c230'; g.fillRect(x, y, w, h);
+  g.fillStyle = '#1b1a22'; for (let i = -h; i < w; i += 10) { g.beginPath(); g.moveTo(x + i, y + h); g.lineTo(x + i + 5, y + h); g.lineTo(x + i + 5 + h, y); g.lineTo(x + i + h, y); g.fill(); }
+  g.fillStyle = '#fffdf6'; g.fillRect(x + 4, y + 2, w - 8, h - 4);
+  g.restore();
+  g.strokeStyle = '#1b1a22'; g.lineWidth = 2; g.strokeRect(x, y, w, h);
+  g.fillStyle = '#1b1a22'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, cx, cy + 1);
+}
+
+/* 建造中的工地：泥土地、圍欄、吊車、三角錐；門口是一道柵欄 */
+function drawSite(b) {
+  const x = b.x * T, y = b.y * T, w = b.w * T, h = b.h * T, dx = b.door.x * T, dy = b.door.y * T;
+  // 泥土地
+  g.fillStyle = '#b98d5c'; g.fillRect(x, y, w, h);
+  g.fillStyle = '#a77c4e'; for (let i = 0; i < 14; i++) g.fillRect(x + rnd(b.x, b.y, i) * (w - 6), y + rnd(b.y, b.x, i) * (h - 4), 5, 3);
+  // 地基（灰色水泥）
+  g.fillStyle = '#9a9a9a'; g.fillRect(x + 10, y + 26, w - 20, 26);
+  g.fillStyle = '#b5b5b5'; g.fillRect(x + 10, y + 26, w - 20, 4);
+  g.fillStyle = '#7d7d7d'; for (let xx = x + 16; xx < x + w - 14; xx += 14) g.fillRect(xx, y + 18, 3, 34);   // 鋼筋
+  // 吊車
+  g.fillStyle = '#f2b632'; g.fillRect(x + w - 22, y + 4, 6, 50);
+  g.fillRect(x + 12, y + 4, w - 28, 5);
+  g.fillStyle = '#1b1a22'; g.fillRect(x + 22, y + 9, 1, 14); g.fillRect(x + 18, y + 23, 9, 5);
+  for (let yy = y + 10; yy < y + 54; yy += 8) { g.fillStyle = '#c98f1e'; g.fillRect(x + w - 22, yy, 6, 2); }
+  // 圍欄（門口那格留給柵欄）
+  g.fillStyle = '#f3efe2'; g.strokeStyle = '#1b1a22'; g.lineWidth = 1;
+  const fence = (fx, fy, fw, fh) => { g.fillStyle = '#f3efe2'; g.fillRect(fx, fy, fw, fh); g.fillStyle = '#2f7d3a'; g.fillRect(fx, fy + fh - 3, fw, 3); };
+  fence(x, y, w, 6);                       // 上
+  fence(x, y, 6, h); fence(x + w - 6, y, 6, h);   // 左右
+  fence(x, y + h - 10, dx - x, 10); fence(dx + T, y + h - 10, x + w - dx - T, 10);   // 下面（門口兩邊）
+  // 門口的紅白柵欄
+  g.fillStyle = '#fff'; g.fillRect(dx + 2, dy + 14, 28, 7);
+  g.fillStyle = '#d8402c'; for (let i = 0; i < 4; i++) g.fillRect(dx + 2 + i * 8, dy + 14, 4, 7);
+  g.fillStyle = '#1b1a22'; g.fillRect(dx + 4, dy + 21, 2, 9); g.fillRect(dx + 26, dy + 21, 2, 9);
+  // 三角錐
+  const cone = (cx, cy) => { g.fillStyle = '#f2711c'; g.beginPath(); g.moveTo(cx, cy - 10); g.lineTo(cx + 6, cy + 2); g.lineTo(cx - 6, cy + 2); g.fill(); g.fillStyle = '#fff'; g.fillRect(cx - 3, cy - 4, 6, 2); g.fillStyle = '#1b1a22'; g.fillRect(cx - 7, cy + 2, 14, 2); };
+  cone(dx - 8, dy + 26); cone(dx + T + 8, dy + 26);
+  hazardSign(S.script === 'simp' ? '🏗️ 建造中' : '🏗️ 建造中', x + w / 2, y + 66);
 }
 
 function drawPlayer(now) {
@@ -739,18 +830,31 @@ function drawPlayer(now) {
 }
 
 /* 不會動的部分（地面、樹、建築）先畫在一張背景圖上，每一格只要貼上去 */
-const bg = document.createElement('canvas'); bg.width = cv.width; bg.height = cv.height;
+const bg = document.createElement('canvas'); bg.width = W; bg.height = H;
 function bakeStatic() {
   const keep = g; g = bg.getContext('2d'); g.imageSmoothingEnabled = false;
   drawGround(); trees.forEach(drawTree); buildings.forEach(drawBuilding);
   g = keep;
 }
+/* 鏡頭：畫面只看得到 VIEW_ROWS 列，跟著玩家上下捲動（不超出地圖上下邊） */
+let camY = 0, camSnap = true;
+function updateCamera(now, dt) {
+  let py = P.y * T;
+  if (P.moving) py = (P.moving.from.y + (P.moving.to.y - P.moving.from.y) * Math.min(1, (now - P.moving.t0) / STEP_MS)) * T;
+  const target = Math.max(0, Math.min(H - VH, py + T / 2 - VH / 2));
+  if (camSnap) { camY = target; camSnap = false; }
+  else camY += (target - camY) * Math.min(1, dt * 8);
+  if (Math.abs(target - camY) < 0.5) camY = target;
+}
 function draw(now) {
-  g.drawImage(bg, 0, 0);
+  const cy = Math.round(camY);
+  g.save(); g.translate(0, -cy);
+  g.drawImage(bg, 0, cy, W, VH, 0, cy, W, VH);
   // 目的地提示
   if (P.path.length) { const t = P.path[P.path.length - 1]; g.strokeStyle = '#f2b632'; g.lineWidth = 3; g.strokeRect(t.x * T + 3, t.y * T + 3, T - 6, T - 6); }
   drawLife(now);
   drawPlayer(now);
+  g.restore();
 }
 
 /* ══════════════════════════════════════
@@ -775,7 +879,7 @@ function closeGame() {
   ov.classList.remove('on'); frame.blur(); frame.src = 'about:blank';
   cv.focus({ preventScroll: true }); window.focus();     // 鍵盤焦點交回地圖，方向鍵馬上能用
   if (Music.on) Music.start();
-  P.x = b.out.x; P.y = b.out.y; P.dir = 'down'; P.moving = null; P.path = []; P.locked = false;
+  P.x = b.out.x; P.y = b.out.y; P.dir = 'down'; P.moving = null; P.path = []; P.locked = false; camSnap = true;
   if (b.sc.virtual) respawnEvent(P.x, P.y);
   updateHud();
 }
@@ -798,6 +902,14 @@ document.getElementById('ov-close').onclick = closeGame;
 function toast(msg) {
   const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
   clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 3600);
+}
+/* 維修中／建造中：進不去，顯示「還在準備中，敬請期待」（中文＋玩家選的語言） */
+function comingSoon(b) {
+  const simp = S.script === 'simp', sc = b.sc;
+  const name = simp ? (ZHS[sc.id] || sc.zh) : sc.zh;
+  toast((sc.status === 'build' ? '🏗️ ' : '🚧 ') + name + '：' + (simp ? '还在准备中，敬请期待' : '還在準備中，敬請期待') + '\n' +
+    X('Todavía lo estamos preparando. ¡Muy pronto!', "We're still getting it ready. Coming soon!"));
+  try { gtag('event', 'map_coming_soon', { place: sc.id }); } catch (e) {}
 }
 function updateHud() {
   bakeStatic();
@@ -849,7 +961,7 @@ document.querySelectorAll('#pad button').forEach(b => {
 cv.addEventListener('pointerdown', e => {
   if (current) return;
   const r = cv.getBoundingClientRect();
-  goTo(Math.floor((e.clientX - r.left) / r.width * COLS), Math.floor((e.clientY - r.top) / r.height * ROWS));
+  goTo(Math.floor((e.clientX - r.left) / r.width * COLS), Math.floor(((e.clientY - r.top) / r.height * VH + camY) / T));
 });
 
 respawnEvent(P.x, P.y);
