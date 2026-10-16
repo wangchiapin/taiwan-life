@@ -311,6 +311,8 @@ pinyinPro.customPinyin({
   '同事': 'tóng shì', '冰塊': 'bīng kuài', '加料': 'jiā liào', '找您': 'zhǎo nín',
   '會不會': 'huì bú huì', '算啊': 'suàn a', '了啦': 'le la', '做得': 'zuò de', '時候': 'shí hou', '記得': 'jì de'
 });
+// 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '微糖': 'wéi táng', '微冰': 'wéi bīng', '和': 'hàn', '嗯': 'ēn' });
 
 /* ══════════════════════════════════════
    價目表（元）與翻譯
@@ -357,12 +359,12 @@ const SPEAKER_RE = /^(Ami|Benjamin|我)：/;
    每一關的單字（中文、西文、英文；拼音自動產生）
 ══════════════════════════════════════ */
 const VOCAB = {
-  WHO: [['先', 'primero', 'first'], ['點', 'pedir (en un local)', 'order'], ['誰的', '¿de quién?', 'whose'], ['杯', 'clasificador para bebidas', 'measure word for drinks']],
-  START: [['同事', 'compañero de trabajo', 'coworker'], ['渴', 'tener sed', 'thirsty'], ['飲料店', 'tienda de bebidas', 'drink shop'],
+  WHO: [['先', 'primero', 'first'], ['點', 'pedir (en un local)', 'order'], ['誰的', '¿de quién?', 'whose']],
+  START: [['渴', 'tener sed', 'thirsty'], ['飲料店', 'tienda de bebidas', 'drink shop'],
           ['飲料', 'bebida', 'drink'], ['加', 'agregar', 'add'], ['請', 'invitar (pagar por otro)', 'treat (pay for someone)']],
   TYPE: [['歡迎光臨', 'bienvenido', 'welcome'], ['想喝', 'querer tomar', 'want to drink'], ['奶茶', 'té con leche', 'milk tea'],
-         ['紅茶', 'té negro', 'black tea'], ['綠茶', 'té verde', 'green tea'], ['烏龍茶', 'té oolong', 'oolong tea'], ['還要', 'además querer', 'also want']],
-  SIZE: [['大小', 'tamaño', 'size'], ['大杯', 'vaso grande', 'large'], ['中杯', 'vaso mediano', 'medium'], ['小杯', 'vaso pequeño', 'small']],
+         ['紅茶', 'té negro', 'black tea'], ['綠茶', 'té verde', 'green tea'], ['烏龍茶', 'té oolong', 'oolong tea'], ['還要', 'querer algo más', 'also want']],
+  SIZE: [['大杯', 'vaso grande', 'large'], ['中杯', 'vaso mediano', 'medium'], ['小杯', 'vaso pequeño', 'small'], ['還是', '¿o…? (en preguntas)', 'or (in questions)']],
   SUGAR: [['甜度', 'nivel de azúcar', 'sweetness'], ['無糖', 'sin azúcar', 'no sugar'], ['微糖', 'muy poca azúcar', 'a little sugar'],
           ['少糖', 'poca azúcar', 'less sugar'], ['全糖', 'azúcar normal', 'full sugar']],
   ICE: [['冰塊', 'hielo', 'ice'], ['去冰', 'sin hielo', 'no ice'], ['微冰', 'muy poco hielo', 'a little ice'],
@@ -377,7 +379,7 @@ const VOCAB = {
   CHANGE: [['收', 'recibir', 'receive'], ['找', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give the wrong change']],
   APOLOGIZE: [['少找', 'dar de menos (cambio)', 'short-change'], ['沒關係', 'no pasa nada', "it's OK"]],
   FINISH: [['好了', 'listo', 'ready'], ['謝謝光臨', 'gracias por venir', 'thanks for coming']],
-  END: [['辦公室', 'oficina', 'office'], ['買錯', 'comprar lo equivocado', 'buy the wrong thing'], ['請客', 'invitar', 'treat (someone)']],
+  END: [['辦公室', 'oficina', 'office'], ['買錯', 'comprar lo equivocado', 'buy the wrong thing'], ['拿給', 'darle (algo a alguien)', 'hand (something) to']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 const VOCAB_OF = { TYPE_1: 'TYPE', TYPE_2: 'TYPE', SIZE_1: 'SIZE', SIZE_2: 'SIZE', SUGAR_1: 'SUGAR', SUGAR_2: 'SUGAR',
@@ -543,8 +545,8 @@ const Game = defineGame({
         place: 'office',
         dialogue: () => [
           L(`Ami：${N}，我好渴喔！可以幫我去買一杯${zhOrder(t)}嗎？我要加椰果。`,
-            `${N}, ¡tengo mucha sed! ¿Me compras abajo ${esOrder({ ...t, topping: null })}? Lo quiero con gelatina de coco.`,
-            `${N}, I'm so thirsty! Could you get me ${enOrder({ ...t, topping: null })} downstairs? I want coconut jelly in it.`),
+            `${N}, ¡tengo mucha sed! ¿Me puedes ir a comprar ${esOrder({ ...t, topping: null })}? Lo quiero con gelatina de coco.`,
+            `${N}, I'm so thirsty! Could you go get me ${enOrder({ ...t, topping: null })}? I want coconut jelly in it.`),
           L('Ami：你想喝什麼？我請你！', '¿Y tú qué quieres tomar? ¡Yo invito!', "What do you want to drink? It's on me!"),
           L(`我：那……我要一杯${zhOrder(me)}。`, `Mmm… entonces yo quiero ${esOrder(me)}.`, `Hmm… then I'll have ${enOrder(me)}.`)
         ],
@@ -562,7 +564,7 @@ const Game = defineGame({
       /* ── 第一杯：你自己的 ── */
       TYPE_1: {
         html: () => Game.menuHTML(),
-        dialogue: () => ask('您好，歡迎光臨！今天想喝什麼？', '¡Hola, bienvenido! ¿Qué te gustaría tomar hoy?', 'Hi, welcome! What would you like to drink today?'),
+        dialogue: () => ask('您好，歡迎光臨！今天想喝什麼？', '¡Hola, buenas! ¿Qué te gustaría tomar hoy?', 'Hi, welcome! What would you like to drink today?'),
         options: DRINKS,
         next: c => { o1.drink = c; Game.state = 'SIZE_1'; }
       },
@@ -688,7 +690,7 @@ const Game = defineGame({
         options: () => (Game._payOpts ||= shuffle([`拿出${Game.bill}元`, '拿出50元'])),
         next: c => {
           if (c === '拿出50元') {
-            Game.addMistake(M(`錢不夠，一共要付${Game.total}元。`, 'No te alcanzó: el total era más de 50.', "Not enough money: the total was more than 50."),
+            Game.addMistake(M(`錢不夠，一共要付${Game.total}元。`, `No te alcanzó: el total era ${Game.total} dólares.`, `Not enough money: the total was NT$${Game.total}.`),
               [L(`Benjamin：不好意思，錢不夠喔，還差${Game.total - 50}元。`, `Perdón, no alcanza: faltan ${Game.total - 50} dólares.`, `Sorry, that's not enough: you're NT$${Game.total - 50} short.`)]);
             return;
           }
@@ -737,8 +739,8 @@ const Game = defineGame({
           // 椰果賣完了：沒問 Ami 就自己決定，只要剛好是她會選的也算對
           const amiOK2 = amiOK || (!Game.heard.call && sameOrder(oAmi, t) && oAmi.topping === Game.alt);
           Game._endGood = amiOK2 && meOK;
-          if (!amiOK2) Game.addMistake(M(`Ami 的飲料買錯了，她要的是${zhOrder(t)}加${Game.alt}。`, 'La bebida de Ami no era la que pidió.', "Ami's drink wasn't what she asked for."));
-          if (!meOK) Game.addMistake(M(`你自己的飲料也買錯了，你要的是${zhOrder(me)}。`, 'Tu propia bebida tampoco era la que querías.', "Your own drink wasn't what you wanted either."));
+          if (!amiOK2) Game.addMistake(M(`Ami 的飲料買錯了，她要的是${zhOrder(t)}加${Game.alt}。`, `La bebida de Ami no era la que pidió: ella quería ${esOrder({ ...t, topping: Game.alt })}.`, `Ami's drink was wrong: she wanted ${enOrder({ ...t, topping: Game.alt })}.`));
+          if (!meOK) Game.addMistake(M(`你自己的飲料也買錯了，你要的是${zhOrder(me)}。`, `Tu bebida tampoco era la correcta: querías ${esOrder(me)}.`, `Your own drink was wrong too: you wanted ${enOrder(me)}.`));
           track('game_complete', { game: 'drink', score: Game.score, elapsed: Game.elapsedTime });
           const lines = [L('（回到辦公室，把飲料拿給 Ami……）', '(Vuelves a la oficina y le das la bebida a Ami…)', '(You go back to the office and give Ami her drink…)')];
           if (amiOK2) lines.push(L(`Ami：哇！就是這杯！謝謝你，${N}！`, `¡Guau! ¡Es justo esta! ¡Gracias, ${N}!`, `Wow! This is the one! Thanks, ${N}!`));

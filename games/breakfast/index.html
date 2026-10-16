@@ -360,6 +360,8 @@ pinyinPro.customPinyin({
   '著': 'zhe', '只': 'zhǐ', '囉': 'luo', '啦': 'la', '了啦': 'le la', '耶': 'ye',
   '和一杯': 'hàn yì bēi'                                   // 連接詞「和」用台灣口語 hàn
 });
+// 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '還記得': 'hái jì de', '仔細': 'zǐ xì', '和': 'hàn', '嗯': 'ēn' });
 
 /* ══════════════════════════════════════
    菜單（元）
@@ -449,8 +451,8 @@ const SPEAKER_RE = /^(陳姐|我|李先生|王伯伯|張太太|小朋友|林小�
    每一關的單字（中文、西文、英文；拼音自動產生）
 ══════════════════════════════════════ */
 const VOCAB = {
-  START: [['打工', 'trabajar a medio tiempo', 'work part-time'], ['櫃台', 'mostrador', 'counter'], ['點單機', 'máquina de pedidos', 'ordering machine'], ['市場', 'mercado', 'market'], ['交給', 'dejar a cargo de', 'leave (it) to'], ['點單', 'comanda', 'order slip'],
-          ['簡稱', 'abreviatura', 'short name'], ['賣完了', 'se agotó', 'sold out'], ['老樣子', 'lo de siempre', 'the usual'],
+  START: [['櫃台', 'mostrador', 'counter'], ['點單機', 'máquina de pedidos', 'ordering machine'], ['市場', 'mercado', 'market'], ['交給', 'dejar a cargo de', 'leave (it) to'], ['點單', 'comanda', 'order slip'],
+          ['說成', 'decir como, llamar', 'say it as'], ['賣完了', 'se agotó', 'sold out'], ['老樣子', 'lo de siempre', 'the usual'],
           ['收銀機', 'caja registradora', 'cash register'], ['拜託', 'te lo pido, por favor', 'please (asking a favor)']],
   GREET: [['歡迎光臨', 'bienvenido', 'welcome'], ['還沒開', 'todavía no abre', 'not open yet'], ['快點', 'rápido', 'hurry up'],
           ['客人', 'cliente', 'customer']],
@@ -858,7 +860,7 @@ const Game = defineGame({
               [L('林小姐：咦？我沒有點雞腿堡耶。', '¿Eh? Yo no pedí hamburguesa de pollo.', "Huh? I didn't order a chicken burger.")]);
             return;
           }
-          if (c._asked) Game.good('先問電話後三碼再拿，很仔細！', 'Preguntaste los últimos tres dígitos antes de entregar la bolsa. ¡Muy cuidadoso!', 'You asked for the last three digits before handing over the bag. Very careful!');
+          if (c._asked) Game.good('先問電話後三碼再拿，很仔細！', 'Preguntaste los últimos tres dígitos antes de entregar la bolsa. ¡Bien hecho, con mucho cuidado!', 'You asked for the last three digits before handing over the bag. Very careful!');
           Game.thought = [L(`我：是這袋，${c.pre.food.join('、')}。`, `Es esta bolsa: ${esList(c.pre.food)}.`, `It's this bag: ${enList(c.pre.food)}.`)];
           c.say = c.drinkSay;
           Game.state = 'ORDER';
@@ -879,7 +881,7 @@ const Game = defineGame({
           if (ch.startsWith('請問')) {
             if (c.saidDine) {
               const togo = c.dine === '外帶';
-              Game.addMistake(M(`客人剛剛說了「${c.dine}」。`, 'El cliente ya lo había dicho.', 'The customer had already said it.'),
+              Game.addMistake(M(`客人剛剛說了「${c.dine}」。`, `El cliente ya había dicho «${c.dine === '外帶' ? 'para llevar' : 'para comer aquí'}».`, `The customer had already said "${c.dine === '外帶' ? 'to go' : 'for here'}".`),
                 [L(`${c.who}：我剛剛說${c.dine}了啦！`, togo ? '¡Ya te dije que es para llevar!' : '¡Ya te dije que es para comer aquí!', togo ? 'I just told you: to go!' : 'I just told you: for here!')]);
             } else {
               Game.good('王伯伯沒說內用還是外帶，還好你有問。', 'El tío Wang no dijo si era para comer aquí o para llevar, y menos mal que preguntaste.', "Uncle Wang didn't say for here or to go; good thing you asked.");

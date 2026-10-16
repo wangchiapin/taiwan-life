@@ -334,6 +334,8 @@ pinyinPro.customPinyin({
   '還請': 'hái qǐng', '還交代': 'hái jiāo dài', '還說': 'hái shuō', '電器行': 'diàn qì háng',
   '一個': 'yí ge', '兩個': 'liǎng ge', '一共': 'yí gòng', '悠遊卡': 'yōu yóu kǎ', '包裹': 'bāo guǒ'
 });
+// 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '還收到': 'hái shōu dào', '淑芬': 'shú fēn', '淑芳': 'shú fāng', '淑貞': 'shú zhēn', '訊息': 'xùn xí', '和': 'hàn', '嗯': 'ēn' });
 
 /* ══════════════════════════════════════
    小工具
@@ -389,13 +391,13 @@ const VOCAB = {
   M_CHANGE: [['收', 'recibir', 'receive'], ['找', 'dar el cambio', 'give change'], ['少找', 'dar de menos', 'short-change'], ['不好意思', 'disculpe', 'sorry, excuse me']],
   CALL: [['拿到了', 'ya lo conseguiste', 'got it'], ['忘了', 'olvidar', 'forget'], ['同一家', 'la misma tienda', 'the same store'], ['付過錢', 'ya pagó', 'already paid'], ['拜託', 'te lo pido, por favor', 'please (asking a favor)']],
   D_CONFIRM: V_CONFIRM, Y_CONFIRM: V_CONFIRM,
-  Y_ASK: [['其他', 'otro', 'other'], ['還沒到店', 'todavía no llega a la tienda', 'has not arrived at the store yet'], ['已到店', 'ya llegó a la tienda', 'has arrived at the store'], ['預計', 'se estima', 'expected']],
+  Y_ASK: [['還沒到店', 'todavía no llega a la tienda', 'has not arrived at the store yet'], ['已到店', 'ya llegó a la tienda', 'has arrived at the store'], ['預計', 'se estima', 'expected']],
   Y_NOTFOUND: [['查不到', 'no se encuentra', "can't find it"], ['再找一次', 'buscar otra vez', 'look again'], ['預計到店', 'llegada estimada a la tienda', 'expected arrival at the store'], ['簡訊', 'mensaje de texto (SMS)', 'text message']],
   CARD: [['悠遊卡', 'EasyCard (tarjeta de transporte)', 'EasyCard (transit card)'], ['加值', 'recargar saldo', 'top up'], ['新的', 'nuevo', 'new'], ['買', 'comprar', 'buy']],
   CARD_AMT: [['加多少', '¿cuánto recargar?', 'how much to add?'], ['元', 'dólar (NT$)', 'dollar (NT$)'], ['順便', 'de paso', 'while you are at it']],
   CARD_TAP: [['感應區', 'zona de lectura', 'tap area'], ['放', 'poner', 'place'], ['交給', 'entregar a', 'hand to'], ['櫃台', 'mostrador', 'counter']],
   BAG: [['袋子', 'bolsa', 'bag'], ['需要', 'necesitar', 'need'], ['自己拿', 'llevarlo yo mismo', 'carry it myself'], ['塑膠袋', 'bolsa de plástico', 'plastic bag']],
-  END: [['下班', 'salir del trabajo', 'get off work'], ['剩下', 'lo que sobra', 'left over'], ['厲害', 'genial, impresionante', 'impressive'], ['緊張', 'nervioso', 'nervous'], ['習慣', 'acostumbrarse', 'get used to'], ['油飯', 'yóufàn (arroz glutinoso con aceite)', 'oil rice (savory sticky rice)']],
+  END: [['下班', 'salir del trabajo', 'get off work'], ['剩下', 'lo que sobra', 'left over'], ['厲害', 'genial, impresionante', 'impressive'], ['習慣', 'acostumbrarse', 'get used to'], ['油飯', 'yóufàn (arroz glutinoso con aceite)', 'oil rice (savory sticky rice)']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 
@@ -693,7 +695,7 @@ const Game = defineGame({
       GREET: {
         place: 'store',
         dialogue: () => [L('（叮咚——）', '(¡Ding-dong!)', '(Ding-dong!)'),
-          L('店員：歡迎光臨！請問需要什麼？', '¡Bienvenido! ¿En qué le puedo ayudar?', 'Welcome! How can I help you?')],
+          L('店員：歡迎光臨！請問需要什麼？', '¡Hola, buenas! ¿En qué le puedo ayudar?', 'Welcome! How can I help you?')],
         options: ['我要取貨。', '我要寄貨。', '我要退貨。'],
         next: c => {
           if (c === '我要取貨。') { Game.state = 'M_TAIL'; return; }
@@ -850,7 +852,7 @@ const Game = defineGame({
             Game.addMistake(M('你的包裹已經到店了，簡訊上有寫。', 'Tu paquete ya llegó; el mensaje lo decía.', 'Your parcel had already arrived; the text said so.'),
               [L('（等等，我的簡訊寫的是「已到店」……）', '(Espera, mi mensaje dice «ya llegó a la tienda»…)', '(Wait, my text says "arrived at the store"…)')]); return;
           }
-          if (c.startsWith('我的包裹還沒到店')) Game.good('聰明喔！你有再看一次簡訊，知道包裹還沒到。', '¡Qué listo! Volviste a leer el mensaje y supiste que tu paquete aún no llegaba.', 'Smart! You read the text again and knew your parcel hadn\'t arrived yet.');
+          if (c.startsWith('我的包裹還沒到店')) Game.good('聰明喔！你有再看一次簡訊，知道包裹還沒到。', '¡Bien pensado! Volviste a leer el mensaje y supiste que tu paquete aún no llegaba.', 'Smart! You read the text again and knew your parcel hadn\'t arrived yet.');
           g.waited = true;
           Game.state = 'CARD';
         }
@@ -866,7 +868,7 @@ const Game = defineGame({
                L('（看一下簡訊上的日期？）', '(¿Y si miras la fecha en el mensaje?)', '(Maybe check the date in the text?)')]); return;
           }
           g.waited = true;
-          Game.good('聰明喔！你有再看一次簡訊，知道包裹還沒到。', '¡Qué listo! Volviste a leer el mensaje y supiste que tu paquete aún no llegaba.', 'Smart! You read the text again and knew your parcel hadn\'t arrived yet.');
+          Game.good('聰明喔！你有再看一次簡訊，知道包裹還沒到。', '¡Bien pensado! Volviste a leer el mensaje y supiste que tu paquete aún no llegaba.', 'Smart! You read the text again and knew your parcel hadn\'t arrived yet.');
           Game.thought = [L('店員：沒關係，到了應該會傳簡訊給您。', 'No hay problema; cuando llegue, seguramente le mandarán un mensaje.', "No problem, you should get a text when it arrives.")];
           Game.state = 'CARD';
         }
@@ -917,7 +919,7 @@ const Game = defineGame({
         next: c => {
           const n = { '一百元': 100, '三百元': 300, '五百元': 500, '一千元': 1000 }[c];
           if (n !== t.cardTop) {
-            Game.addMistake(M(`房東太太說加值${t.cardTop}元。`, 'La casera dijo otra cantidad.', 'The landlady said a different amount.')); return;
+            Game.addMistake(M(`房東太太說加值${t.cardTop}元。`, `La casera dijo que recargaras ${esM(t.cardTop)}.`, `The landlady said to add NT$${t.cardTop}.`)); return;
           }
           g.card = n; Game.state = 'CARD_TAP';
         }

@@ -362,6 +362,8 @@ pinyinPro.customPinyin({
   '下一站': 'xià yí zhàn', '下車': 'xià chē', '進站': 'jìn zhàn', '出站': 'chū zhàn', '路線圖': 'lù xiàn tú', '指標': 'zhǐ biāo', '拐杖': 'guǎi zhàng', '年輕人': 'nián qīng rén', '廣播': 'guǎng bò',
   '車廂': 'chē xiāng', '方向': 'fāng xiàng', '票價': 'piào jià', '不夠': 'bú gòu', '喝完': 'hē wán', '手機': 'shǒu jī', '還拿': 'hái ná', '車': 'chē', '搭得': 'dā de', '週六': 'zhōu liù', '還沒': 'hái méi', '怎麼': 'zěn me', '嗯': 'ēn', '一點': 'yì diǎn', '一共': 'yí gòng', '他們': 'tā men', '櫃台': 'guì tái', '前面': 'qián mian', '舒服': 'shū fu', '睡覺': 'shuì jiào', '辛苦了': 'xīn kǔ le', '吃飯': 'chī fàn'
 });
+// 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
 
 /* ══════════════════════════════════════
    小工具
@@ -388,7 +390,7 @@ const VOCAB = {
   X_XFER: [['轉乘', 'hacer transbordo', 'transfer'], ['指標', 'letrero, señal', 'sign'], ['板南線', 'línea Bannan (azul)', 'Bannan Line (Blue)'], ['藍線', 'línea azul', 'Blue Line'], ['出口', 'salida', 'exit']],
   P_BLUE: [['月台', 'andén', 'platform'], ['方向', 'dirección', 'direction'], ['頂埔', 'Dingpu (terminal oeste de la línea azul)', 'Dingpu (west end of the Blue Line)'], ['南港展覽館', 'Nangang Exhibition Center (terminal este)', 'Nangang Exhibition Center (east end)'], ['路線圖', 'mapa de líneas', 'route map']],
   T_SEAT: [['慢慢', 'despacio', 'slowly'], ['讓座', 'ceder el asiento', 'give up your seat'], ['優先席', 'asiento prioritario', 'priority seat'], ['您請坐', 'siéntese, por favor', 'please have a seat'], ['年輕人', 'joven', 'young person']],
-  T_BLUE: [['下一站', 'la próxima estación', 'the next stop'], ['下車', 'bajarse', 'get off'], ['繼續', 'continuar', 'continue'], ['廣播', 'anuncio por altavoz', 'announcement'], ['到站', 'llegar a la estación', 'arrive at a station']],
+  T_BLUE: [['下一站', 'la próxima estación', 'the next stop'], ['下車', 'bajarse', 'get off'], ['繼續', 'continuar', 'continue'], ['廣播', 'anuncio por altavoz', 'announcement']],
   END: [['出站', 'salir de la estación', 'exit the station'], ['解鎖', 'desbloquear (un logro)', 'unlock (an achievement)'], ['複雜', 'complicado', 'complicated'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort'], ['吃飯', 'comer', 'eat a meal']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
@@ -588,7 +590,7 @@ const Game = defineGame({
     return [
       L(`Ami：${N}，我已經在${t.dest}站了！你搭捷運過來，到了再打給我。`,
         `${N}, ¡ya estoy en la estación ${this.destEs()}! Ven en metro y llámame cuando llegues.`,
-        `${N}, I'm already at ${t.dest} Station! Take the MRT over and call me when you get here.`),
+        `${N}, I'm already at ${ROM[t.dest]} Station! Take the MRT over and call me when you get here.`),
       L(`Ami：你在${t.origin}站對吧？先搭紅線，到台北車站轉車。`,
         `¿Estás en la estación ${ROM[t.origin]}, verdad? Primero toma la línea roja y haz transbordo en Taipei Main Station.`,
         `You're at ${ROM[t.origin]} Station, right? Take the Red Line first and transfer at Taipei Main Station.`),
@@ -605,7 +607,7 @@ const Game = defineGame({
     return [
       L(`站務員：到${t.dest}站的話，先搭紅線，往${t.rdir}方向，坐${NZ(rn)}站，在台北車站下車。然後轉搭藍線，往${t.dir}方向，坐${NZ(n)}站就到了。`,
         `Para ir a ${this.destEs()}: primero la línea roja, dirección ${ROM[t.rdir]}, ${rn} ${rn === 1 ? 'parada' : 'paradas'}, y bájese en Taipei Main Station. Luego haga transbordo a la línea azul, dirección ${ROM[t.dir]}; son ${n} ${n === 1 ? 'parada' : 'paradas'}.`,
-        `To get to ${t.dest}: take the Red Line toward ${ROM[t.rdir]} for ${rn} ${rn === 1 ? 'stop' : 'stops'} and get off at Taipei Main Station. Then transfer to the Blue Line toward ${ROM[t.dir]}; it's ${n} ${n === 1 ? 'stop' : 'stops'}.`)
+        `To get to ${ROM[t.dest]}: take the Red Line toward ${ROM[t.rdir]} for ${rn} ${rn === 1 ? 'stop' : 'stops'} and get off at Taipei Main Station. Then transfer to the Blue Line toward ${ROM[t.dir]}; it's ${n} ${n === 1 ? 'stop' : 'stops'}.`)
     ];
   },
 
@@ -613,7 +615,7 @@ const Game = defineGame({
   listHTML() {
     const t = this.task, r = s => this.ruby(s);
     const rows = [
-      { zh: `目的地：${t.dest}站`, es: `Destino: estación ${this.destEs()}`, en: `Destination: ${t.dest} Station` },
+      { zh: `目的地：${t.dest}站`, es: `Destino: estación ${this.destEs()}`, en: `Destination: ${ROM[t.dest]} Station` },
       { zh: `現在在：${t.origin}站（紅線）`, es: `Ahora estás en: ${ROM[t.origin]} (línea roja)`, en: `You're at: ${ROM[t.origin]} (Red Line)` },
       { zh: `悠遊卡餘額：${t.bal}元`, es: `Saldo de tu EasyCard: ${esM(t.bal)}`, en: `EasyCard balance: ${enM(t.bal)}` },
       { zh: `手上有：${t.drink[0]}`, es: `En la mano: ${t.drink[1]}`, en: `In your hand: ${t.drink[2]}` }
@@ -703,7 +705,7 @@ const Game = defineGame({
           const amt = +c.match(/(\d+)/)[1];
           if (Game.balance + amt < 20) {
             Game.addMistake(M(`加${amt}元，餘額只有${Game.balance + amt}元，還是不夠搭車。`, `Con ${esM(amt)} el saldo sería ${esM(Game.balance + amt)}: todavía no alcanza para el viaje.`, `Adding ${enM(amt)} only brings it to ${enM(Game.balance + amt)} — still not enough for the ride.`),
-              [L(`（${Game.balance}元加${amt}元，票價大概二十多元……還是不夠。）`, '(Aun así no alcanza para el pasaje…)', "(That still isn't enough for the fare…)")]); return;
+              [L(`（${Game.balance}元加${amt}元，票價大概二十多元……還是不夠。）`, `(${Game.balance} más ${amt}… el pasaje cuesta veintitantos dólares: todavía no alcanza.)`, `(${Game.balance} plus ${amt}… the fare is twenty-something dollars: still not enough.)`)]); return;
           }
           Game.balance += amt; Game.updateCash();
           goodFirst('G_TOP', '有先見之明喔！你加的錢夠搭好幾趟了。', '¡Qué previsor! Recargaste lo suficiente para varios viajes.', 'Smart thinking ahead! You added enough for several rides.');
@@ -719,7 +721,7 @@ const Game = defineGame({
         options: () => rot([`請問要怎麼搭去${t.dest}站？`, '請問廁所在哪裡？', '請問現在幾點？']),
         next: c => {
           if (c !== `請問要怎麼搭去${t.dest}站？`) {
-            Game.addMistake(M(`你要問的是：到${t.dest}站要怎麼搭。`, `Lo que necesitas preguntar es cómo llegar a la estación ${Game.destEs()}.`, `What you need to ask is how to get to ${t.dest} Station.`),
+            Game.addMistake(M(`你要問的是：到${t.dest}站要怎麼搭。`, `Lo que necesitas preguntar es cómo llegar a la estación ${Game.destEs()}.`, `What you need to ask is how to get to ${ROM[t.dest]} Station.`),
               [staff(c.includes('廁所') ? '廁所在那邊。還有別的事嗎？' : '現在是下午三點多。還有別的事嗎？', c.includes('廁所') ? 'Los baños están allá. ¿Algo más?' : 'Son las tres y pico de la tarde. ¿Algo más?', c.includes('廁所') ? 'The restroom is over there. Anything else?' : "It's a little after three. Anything else?")]); return;
           }
           goodFirst('S_ASK', '沒錯！不知道怎麼走，就問站務員。', '¡Exacto! Si no sabes cómo ir, pregunta al personal de la estación.', "Exactly! If you don't know the way, ask the station staff.");
@@ -736,7 +738,7 @@ const Game = defineGame({
         options: ['往淡水方向', '往象山方向'],
         next: c => {
           if (c !== `往${t.rdir}方向`) {
-            Game.addMistake(M(`站務員說要搭往${t.rdir}方向。`, `La persona del mostrador dijo que había que tomar la dirección ${ROM[t.rdir]}.`, `The staff member said to take the train toward ${ROM[t.rdir]}.`)); return;
+            Game.addMistake(M(`站務員說要搭往${t.rdir}方向。`, `El personal de la estación dijo que había que tomar la dirección ${ROM[t.rdir]}.`, `The staff member said to take the train toward ${ROM[t.rdir]}.`)); return;
           }
           goodFirst('P_RED', '你做得很好！搭捷運要看「往…方向」，也就是終點站的名字。', '¡Muy bien hecho! En el metro se mira «dirección…», es decir, el nombre de la terminal.', 'Well done! On the MRT, look for the "toward…" sign — it\'s the name of the end station.');
           Game.line = 'red'; Game.rstep = 0;
@@ -793,7 +795,7 @@ const Game = defineGame({
         options: () => rot(['往頂埔方向', '往南港展覽館方向']).slice(0, 2),
         next: c => {
           if (c !== `往${t.dir}方向`) {
-            Game.addMistake(M(`到${t.dest}站要搭往${t.dir}方向。`, `Para ir a ${Game.destEs()} hay que tomar la dirección ${DIRES[t.dir]}.`, `To get to ${t.dest} you take the train toward ${DIRES[t.dir]}.`)); return;
+            Game.addMistake(M(`到${t.dest}站要搭往${t.dir}方向。`, `Para ir a ${Game.destEs()} hay que tomar la dirección ${DIRES[t.dir]}.`, `To get to ${ROM[t.dest]} you take the train toward ${DIRES[t.dir]}.`)); return;
           }
           goodFirst('P_BLUE', '太棒了！你看路線圖，選對了方向。', '¡Genial! Miraste el mapa y elegiste bien la dirección.', 'Awesome! You checked the map and chose the right direction.');
           Game.thought = [L('（列車進站了，你走進車廂。）', '(Llega el tren y entras al vagón.)', '(The train arrives and you step inside.)')];
@@ -806,16 +808,16 @@ const Game = defineGame({
         place: 'train',
         html: () => Game.mapHTML(),
         dialogue: () => [
-          L('（你坐在優先席上。）', '(Estás sentado en un asiento prioritario.)', "(You're sitting in a priority seat.)"),
+          L('（你坐在優先席上。）', '(Te sentaste en un asiento prioritario.)', "(You're sitting in a priority seat.)"),
           L(`（一位${t.elder[0]}慢慢走上車，站在你面前。）`, `(Sube lentamente ${t.elder[1]} y se queda de pie frente a ti.)`, `(${t.elder[2][0].toUpperCase() + t.elder[2].slice(1)} slowly boards and stands in front of you.)`)
         ],
         options: () => rot([`${t.elder[0]}，您請坐。`, '低下頭繼續滑手機。', '閉上眼睛假裝睡覺。']),
         next: c => {
           if (!c.includes('您請坐')) {
-            Game.addMistake(M('優先席是要讓給有需要的人，像是老人、孕婦、行動不便的人。', 'Los asientos preferenciales se ceden a quien los necesita: mayores, embarazadas, personas con movilidad reducida.', 'Priority seats go to people who need them: elderly, pregnant, or less mobile passengers.')); return;
+            Game.addMistake(M('優先席是要讓給有需要的人，像是老人、孕婦、行動不便的人。', 'Los asientos prioritarios se ceden a quien los necesita: mayores, embarazadas, personas con movilidad reducida.', 'Priority seats go to people who need them: elderly, pregnant, or less mobile passengers.')); return;
           }
           goodFirst('T_SEAT', '你人真好！看到有需要的人，會主動讓座。', '¡Qué amable eres! Cuando ves a alguien que lo necesita, le ofreces tu asiento.', "How kind of you! When you see someone who needs a seat, you offer yours.");
-          Game.thought = [L(`${t.elder[0]}：謝謝你，年輕人！`, '¡Gracias, jovencito!', 'Thank you, young one!')];
+          Game.thought = [L(`${t.elder[0]}：謝謝你，年輕人！`, '¡Gracias, joven!', 'Thank you, young one!')];
           Game.step = 0;
           Game.state = 'T_BLUE';
         }
@@ -830,7 +832,7 @@ const Game = defineGame({
         next: c => {
           const next = t.stops[Game.step], isDest = next === t.dest, off = c === '下一站下車';
           if (off !== isDest) {
-            Game.addMistake(isDest ? M(`下一站就是${t.dest}站，要下車！`, `¡La próxima es ${Game.destEs()}: hay que bajar!`, `The next stop is ${t.dest} — get off!`) : M(`還沒到。你要去${t.dest}站，下一站是${next}。`, `Todavía no: vas a ${Game.destEs()} y la próxima es ${ROM[next]}.`, `Not yet: you're going to ${t.dest}, and the next stop is ${ROM[next]}.`)); return;
+            Game.addMistake(isDest ? M(`下一站就是${t.dest}站，要下車！`, `¡La próxima es ${Game.destEs()}: hay que bajar!`, `The next stop is ${ROM[t.dest]} — get off!`) : M(`還沒到。你要去${t.dest}站，下一站是${next}。`, `Todavía no: vas a ${Game.destEs()} y la próxima es ${ROM[next]}.`, `Not yet: you're going to ${ROM[t.dest]}, and the next stop is ${ROM[next]}.`)); return;
           }
           if (isDest) {
             Game.at = next; Game.stopTimer();
@@ -848,9 +850,9 @@ const Game = defineGame({
           Game._endGood = Game.mistakes <= 2;
           track('game_complete', { game: 'mrt', score: Game.score, elapsed: Game.elapsedTime });
           return [
-            L(`（你在${t.dest}站下了車，刷卡出站，「嗶」一聲。）`, `(Bajas en ${Game.destEs()} y pasas la tarjeta para salir: «¡bip!».)`, `(You get off at ${t.dest} and tap out — beep!)`),
+            L(`（你在${t.dest}站下了車，刷卡出站，「嗶」一聲。）`, `(Bajas en ${Game.destEs()} y pasas la tarjeta para salir: «¡bip!».)`, `(You get off at ${ROM[t.dest]} and tap out — beep!)`),
             Game._endGood
-              ? L(`Ami：哇，${N}，你解鎖一個人搭捷運欸！我們去吃飯吧！`, `¡Vaya, ${N}, desbloqueaste el logro de viajar solo en metro! ¡Vamos a comer!`, `Wow, ${N}, you unlocked riding the MRT on your own! Let's go eat!`)
+              ? L(`Ami：哇，${N}，你解鎖一個人搭捷運欸！我們去吃飯吧！`, `¡Vaya, ${N}, desbloqueaste el logro de viajar en metro por tu cuenta! ¡Vamos a comer!`, `Wow, ${N}, you unlocked riding the MRT on your own! Let's go eat!`)
               : L('Ami：辛苦了！捷運很複雜吧！我們去吃飯吧！', '¡Gracias por el esfuerzo! El metro es complicado, ¿eh? ¡Vamos a comer!', "Thanks for your effort! The MRT is complicated, huh? Let's go eat!")
           ];
         },

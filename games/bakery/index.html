@@ -351,6 +351,8 @@ pinyinPro.customPinyin({
   '公園': 'gōng yuán', '一條': 'yì tiáo', '切片': 'qiē piàn', '點數': 'diǎn shù', '店員': 'diàn yuán', '結帳': 'jié zhàng', '標籤': 'biāo qiān',
   '對嗎': 'duì ma', '這樣對嗎': 'zhè yàng duì ma', '厲害': 'lì hai', '臨時': 'lín shí', '稱呼': 'chēng hu', '取貨': 'qǔ huò', '複誦': 'fù sòng', '切': 'qiē', '還寫': 'hái xiě', '他們': 'tā men', '怎麼': 'zěn me', '嗯': 'ēn', '幾個': 'jǐ ge', '外面': 'wài mian', '電話': 'diàn huà', '一起': 'yì qǐ', '麵包': 'miàn bāo'
 });
+// 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '累積': 'lěi jī', '因為': 'yīn wèi', '禮貌地': 'lǐ mào de', '仔細': 'zǐ xì', '和': 'hàn', '嗯': 'ēn' });
 
 /* ══════════════════════════════════════
    小工具
@@ -373,9 +375,9 @@ const VOCAB = {
   TONGS: [['托盤', 'bandeja', 'tray'], ['夾子', 'pinzas', 'tongs'], ['空夾', 'cerrar las pinzas en el aire', 'click the tongs in the air'], ['自己拿', 'sírvete tú mismo', 'help yourself']],
   PICK: [['菠蘿麵包', 'pan piña', 'pineapple bun'], ['肉鬆麵包', 'pan con hebras de cerdo', 'pork floss bun'], ['紅豆麵包', 'pan de frijol rojo', 'red bean bun'], ['起司', 'queso', 'cheese'],
          ['杏仁', 'almendra', 'almond'], ['核桃', 'nuez', 'walnut'], ['含', 'contiene', 'contains'], ['標籤', 'etiqueta', 'label'], ['夾', 'tomar con pinzas', 'pick up with tongs']],
-  C_SLICE: [['切', 'cortar', 'cut'], ['切片', 'rebanar', 'slice'], ['一條', 'una barra (de pan)', 'one loaf'], ['幫', 'ayudar a', 'help (do for)']],
+  C_SLICE: [['切', 'cortar', 'cut'], ['一條', 'una barra (de pan)', 'one loaf'], ['幫', 'ayudar a', 'help (do for)']],
   C_HEAT: [['加熱', 'calentar', 'heat up'], ['要', 'querer', 'want'], ['不用', 'no hace falta', 'no need']],
-  C_SEP: [['分開裝', 'poner por separado en bolsas', 'bag separately'], ['裝在一起', 'poner todo junto', 'put together'], ['袋子', 'bolsa', 'bag']],
+  C_SEP: [['分開裝', 'poner por separado en bolsas', 'bag separately'], ['裝在一起', 'poner todo junto', 'put together']],
   C_MEMBER: [['會員卡', 'tarjeta de miembro', 'membership card'], ['辦', 'tramitar, hacerse', 'sign up for'], ['累積', 'acumular', 'accumulate'], ['點數', 'puntos', 'points']],
   C_PAY: [['一共', 'en total', 'in total'], ['不夠', 'no alcanza', 'not enough'], ['收', 'recibir', 'receive'], ['找', 'dar el cambio', 'give change']],
   K_GREET: [['朋友', 'amigo/a', 'friend'], ['生日', 'cumpleaños', 'birthday'], ['訂', 'encargar, reservar', 'order, reserve'], ['蛋糕', 'pastel', 'cake'], ['傳', 'enviar (mensaje)', 'send (a message)']],
@@ -383,11 +385,11 @@ const VOCAB = {
   K_FLAVOR: [['口味', 'sabor', 'flavor'], ['草莓', 'fresa', 'strawberry'], ['鮮奶油', 'crema', 'fresh cream'], ['巧克力', 'chocolate', 'chocolate'], ['咖啡', 'café', 'coffee']],
   K_CANDLE: [['蠟燭', 'vela', 'candle'], ['根', 'clasificador de velas, palitos', 'measure word for sticks/candles'], ['幾根', '¿cuántas?', 'how many?']],
   K_PLATE: [['巧克力片', 'plaquita de chocolate', 'chocolate plaque'], ['寫', 'escribir', 'write'], ['生日快樂', 'feliz cumpleaños', 'happy birthday'], ['名字', 'nombre', 'name']],
-  K_TIME: [['取貨', 'recoger el pedido', 'pick up the order'], ['明天', 'mañana', 'tomorrow'], ['後天', 'pasado mañana', 'the day after tomorrow'], ['上午', 'por la mañana', 'morning (a.m.)'], ['下午', 'por la tarde', 'afternoon (p.m.)']],
+  K_TIME: [['明天', 'mañana', 'tomorrow'], ['後天', 'pasado mañana', 'the day after tomorrow'], ['上午', 'por la mañana', 'morning (a.m.)'], ['下午', 'por la tarde', 'afternoon (p.m.)']],
   K_CONFIRM: [['確認', 'confirmar', 'confirm'], ['這樣對嗎', '¿es correcto?', 'is that right?'], ['不對', 'no es correcto', 'not right'], ['地方', 'lugar, punto', 'place, point']],
   K_FIX: [['哪裡', '¿dónde?', 'where?'], ['尺寸', 'tamaño', 'size'], ['蠟燭', 'vela', 'candle'], ['取貨時間', 'hora de recogida', 'pickup time'], ['改', 'corregir, cambiar', 'fix, change']],
   K_NAME: [['怎麼稱呼', '¿cómo se llama? (cortés)', 'what should I call you? (polite)'], ['朋友', 'amigo/a', 'friend'], ['留', 'dejar', 'leave'], ['名字', 'nombre', 'name']],
-  END: [['講完', 'terminar de hablar', 'finish talking'], ['公園', 'parque', 'park'], ['厲害', 'genial, impresionante', 'impressive'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your hard work'], ['夾子', 'pinzas', 'tongs']],
+  END: [['講完', 'terminar de hablar', 'finish talking'], ['公園', 'parque', 'park'], ['厲害', 'genial, impresionante', 'impressive'], ['感謝', 'agradecer', 'thank'], ['夾子', 'pinzas', 'tongs']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 
@@ -442,6 +444,7 @@ const SHELF = [
   { id: 'toast',  zh: '吐司',       es: 'pan de molde (una barra)',           en: 'sandwich loaf',          price: 60, e: '🍞', toast: true }
 ];
 const BYID = Object.fromEntries(SHELF.map(i => [i.id, i]));
+const short = s => s.replace(/\s*\(.*\)$/, '');      // 西文名稱去掉括號說明：pan piña (bollo…) → pan piña
 /* 麵包小圖：images/bread_<id>.jpg（例：bread_pine.jpg）；檔案還沒放時自動顯示 emoji */
 const breadImg = (id, cls) => `<span class="bimg ${cls || ''}"><img src="images/bread_${id}.jpg" alt="" onerror="this.parentNode.textContent='${BYID[id].e}'"></span>`;
 const BYZH = Object.fromEntries(SHELF.map(i => [i.zh, i]));
@@ -687,7 +690,7 @@ const Game = defineGame({
         place: 'tray',
         dialogue: () => [
           L('（你走進麵包店，一股烤麵包的香味撲鼻而來。）', '(Entras a la panadería y te envuelve el aroma a pan recién horneado.)', '(You step into the bakery, and the smell of fresh-baked bread hits you.)'),
-          L('店員：歡迎光臨！托盤和夾子在那邊，自己拿喔。', '¡Bienvenido! Las bandejas y las pinzas están allí; sírvete tú mismo.', 'Welcome! Trays and tongs are over there — help yourself.'),
+          L('店員：歡迎光臨！托盤和夾子在那邊，自己拿喔。', '¡Hola, buenas! Las bandejas y las pinzas están allí; puedes servirte.', 'Welcome! Trays and tongs are over there — help yourself.'),
           L('（喀喀喀！是什麼聲音呢？）', '(¡Clic, clic, clic! ¿Qué será ese ruido?)', "(Click, click, click! What's that sound?)")
         ],
         options: ['拿起托盤和夾子，先空夾兩下。', '拿起托盤和夾子，直接去夾麵包。'],
@@ -720,14 +723,14 @@ const Game = defineGame({
             else if (toastN !== 1)
               fail(M('Ami要一條吐司。', 'Ami quería una barra de pan de molde.', 'Ami wanted one loaf of sandwich bread.'));
             else if (own !== 1)
-              fail(M(own === 0 ? '你自己也要選一個別種的麵包。' : '你自己的麵包只要一個。', own === 0 ? 'Tú también debías elegir un pan de otro tipo.' : 'Para ti solo hacía falta un pan.', own === 0 ? 'You were supposed to pick one different bread for yourself.' : 'You only needed one bread for yourself.'));
+              fail(M(own === 0 ? '你自己也要選一個別種的麵包。' : '你自己的麵包只要一個。', own === 0 ? 'Tú también debías elegir un pan de otro tipo.' : 'Para ti hacía falta solo un pan.', own === 0 ? 'You were supposed to pick one different bread for yourself.' : 'You only needed one bread for yourself.'));
             else {
               if (Game.checkFails === 0) Game.good('很棒！你記得Ami說過的，沒有買到堅果。', '¡Muy bien! Recordaste lo que dijo Ami: no compraste frutos secos.', 'Great! You remembered what Ami said and avoided nuts.');
               Game.state = 'C_SLICE';
             }
             return;
           }
-          if (c.startsWith('把')) { const id = Game.tray.pop(); Game.thought = [L(`（你把${BYID[id].zh}放回架上。）`, `(Devuelves «${BYID[id].zh}» al estante.)`, `(You put the ${BYID[id].zh} back.)`)]; Game.updateCash(); return; }
+          if (c.startsWith('把')) { const id = Game.tray.pop(); Game.thought = [L(`（你把${BYID[id].zh}放回架上。）`, `(Devuelves el ${short(BYID[id].es)} al estante.)`, `(You put the ${BYID[id].en} back.)`)]; Game.updateCash(); return; }
           const it = BYZH[c];
           if (it.nut) {
             Game.addMistake(M(`你買的麵包含${it.nut}，Ami對堅果過敏。`, `El pan que compraste contiene ${it.nutEs}; Ami es alérgica a los frutos secos.`, `The bread you bought contains ${it.nutEn}; Ami is allergic to nuts.`),
@@ -736,7 +739,7 @@ const Game = defineGame({
           }
           if (it.toast && Game.counts().toast) { Game.thought = [L('（吐司已經夾了一條了。）', '(Ya tienes una barra de pan de molde.)', '(You already have one loaf.)')]; return; }
           Game.tray.push(it.id); Game.updateCash();
-          Game.thought = [L(`（你用夾子把${it.zh}夾進托盤。）`, `(Con las pinzas pones «${it.zh}» en la bandeja.)`, `(You pick up the ${it.zh} with the tongs and put it on the tray.)`)];
+          Game.thought = [L(`（你用夾子把${it.zh}夾進托盤。）`, `(Con las pinzas pones el ${short(it.es)} en la bandeja.)`, `(You pick up the ${it.en} with the tongs and put it on the tray.)`)];
         }
       },
 
@@ -818,7 +821,7 @@ const Game = defineGame({
           }
           Game.thought = [
             L(`店員：收您${given}元，找您${given - total}元。`, `Recibo ${esM(given)}; le doy ${esM(given - total)} de cambio.`, `Out of ${enM(given)}, here's ${enM(given - total)} in change.`),
-            L('（麵包和吐司裝好了！）', '(¡El pan y el pan de molde ya están en la bolsa!)', '(Your bread and toast are bagged!)')
+            L('（麵包和吐司裝好了！）', '(¡El pan y el pan de molde ya están en la bolsa!)', '(Your bread and the sandwich loaf are bagged!)')
           ];
           Game.paid = 1; Game.updateCash();
           Game.state = 'K_GREET';
@@ -891,7 +894,7 @@ const Game = defineGame({
           if (c !== `寫「${t.friend}，生日快樂」。`) {
             Game.addMistake(M(`Ami要寫「${t.friend}，生日快樂」。`, `Ami quería «${t.friend}, feliz cumpleaños».`, `Ami wanted "${t.friend}, happy birthday".`)); return;
           }
-          if (Game.att.K_PLATE === 1) Game.good('很好！你記得Ami朋友的名字。', '¡Muy bien! Recordaste el nombre de la amiga/o de Ami.', 'Well done! You remembered Ami\'s friend\'s name.');
+          if (Game.att.K_PLATE === 1) Game.good('很好！你記得Ami朋友的名字。', `¡Muy bien! Recordaste el nombre ${t.friend === '阿哲' ? 'del amigo' : 'de la amiga'} de Ami.`, 'Well done! You remembered Ami\'s friend\'s name.');
           Game.state = 'K_TIME';
         }
       },
@@ -969,7 +972,7 @@ const Game = defineGame({
             L('我：Ami，麵包買好了，蛋糕也訂好了！', '¡Ami, ya compré el pan y también encargué el pastel!', 'Ami, I got the bread, and I ordered the cake too!'),
             Game._endGood
               ? (Game.clickedTongs
-                ? L(`Ami：哇，${N}，你好厲害！連拿夾子的時候都變成台灣人的樣子了！我們去公園吃吧！`, `¡Vaya, ${N}, qué bien! ¡Hasta cuando usas las pinzas pareces un taiwanés! ¡Vamos a comer al parque!`, `Wow, ${N}, you're great! Even the way you handle the tongs makes you look Taiwanese! Let's go eat at the park!`)
+                ? L(`Ami：哇，${N}，你好厲害！連拿夾子的時候都變成台灣人的樣子了！我們去公園吃吧！`, `¡Vaya, ${N}, qué bien! ¡Hasta usas las pinzas como alguien de Taiwán! ¡Vamos a comer al parque!`, `Wow, ${N}, you're great! Even the way you handle the tongs makes you look Taiwanese! Let's go eat at the park!`)
                 : L(`Ami：哇，${N}，你好厲害！我們去公園吃吧！`, `¡Vaya, ${N}, qué bien! ¡Vamos a comer al parque!`, `Wow, ${N}, you're great! Let's go eat at the park!`))
               : L('Ami：感謝你！下次買麵包再給你練習一次吧！我們去公園吃吧！', '¡Gracias! La próxima vez que compremos pan, ¡te dejo practicar otra vez! ¡Vamos a comer al parque!', "Thank you! Next time we buy bread, I'll let you practice again! Let's go eat at the park!")
           ];

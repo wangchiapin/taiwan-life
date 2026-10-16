@@ -324,6 +324,8 @@ pinyinPro.customPinyin({
   '欸': 'éi', '怎麼': 'zěn me', '為您': 'wèi nín', '個人': 'ge rén', '個大人': 'ge dà rén', '個小孩': 'ge xiǎo hái', '個小朋友': 'ge xiǎo péng yǒu',
   '和素食': 'hàn sù shí'                                  // 連接詞「和」用台灣口語 hàn
 });
+// 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '日期': 'rì qí', '認識': 'rèn shì', '為什麼': 'wèi shén me', '仔細': 'zǐ xì', '和': 'hàn', '嗯': 'ēn' });
 
 /* ══════════════════════════════════════
    小工具
@@ -353,7 +355,7 @@ const esDate = off => { const d = dayAt(off); return `${d.getDate()} de ${MES[d.
 const enDate = off => { const d = dayAt(off); return `${MON[d.getMonth()]} ${d.getDate()}`; };
 const esN = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 /* 角色名稱：翻譯視窗用 [西文, 英文] */
-const WHO = { '店員': ['Empleado', 'Staff'], 'Ami': ['Ami', 'Ami'], '（一個不認識的人）': ['Desconocido', 'Stranger'] };
+const WHO = { '店員': ['Empleada', 'Staff'], 'Ami': ['Ami', 'Ami'], '（一個不認識的人）': ['Desconocido', 'Stranger'] };
 const SPEAKER_RE = /^(店員|Ami|我|（一個不認識的人）)：/;
 
 /* ══════════════════════════════════════
@@ -395,25 +397,25 @@ const VOCAB = {
                  ['打錯了', 'número equivocado', 'wrong number'], ['不好意思', 'disculpe', 'excuse me, sorry']],
   DELIVERY_LINE: [['外送專線', 'línea de entregas', 'delivery line'], ['點', 'pedir (comida)', 'to order (food)'],
                   ['另一支電話', 'otro número de teléfono', 'another phone number']],
-  C1_GREET: [['您好', 'buenas (formal)', 'hello (polite)'], ['需要', 'necesitar', 'need'], ['外帶', 'para llevar', 'takeout'],
+  C1_GREET: [['您好', 'buenas (formal)', 'hello (polite)'], ['服務', 'atender, servicio', 'serve, service'], ['外帶', 'para llevar', 'takeout'],
              ['便當', 'caja de comida', 'lunch box'], ['開門', 'abrir', 'open']],
   C1_DAY: [['哪一天', '¿qué día?', 'which day?'], ['今天', 'hoy', 'today'], ['星期五', 'viernes', 'Friday'],
            ['星期六', 'sábado', 'Saturday'], ['星期日', 'domingo', 'Sunday']],
   C1_DATE_CHECK: [['這個星期六', 'este sábado', 'this Saturday'], ['下個星期六', 'el próximo sábado', 'next Saturday'], ['號', 'día (del mes)', 'day of the month'],
                   ['對', 'correcto', 'right'], ['不對', 'incorrecto', 'not right']],
-  C1_TIME: [['幾點', '¿a qué hora?', 'what time?'], ['晚上', 'noche', 'evening'], ['點', 'en punto (hora)', "o'clock"],
+  C1_TIME: [['幾點', '¿a qué hora?', 'what time?'], ['晚上', 'noche', 'evening'], ['點', 'hora (las …)', "o'clock"],
             ['半', 'y media', 'half past']],
   C1_FULL: [['客滿', 'lleno, sin mesas', 'fully booked'], ['還有位子', 'todavía hay mesa', 'there are still seats'],
             ['等一下', 'un momento', 'one moment'], ['確認', 'confirmar, verificar', 'check, confirm']],
   C1_PEOPLE: [['幾位', '¿cuántas personas?', 'how many people?'], ['位', 'clasificador para personas (formal)', 'measure word for people (polite)'],
-              ['一共', 'en total', 'in total']],
+              ['算進去', 'contar (incluir)', 'count (someone) in']],
   C1_ROOM: [['包廂', 'salón privado', 'private room'], ['低消', 'consumo mínimo', 'minimum charge'],
             ['每個人', 'cada persona', 'per person'], ['一般座位', 'mesa normal', 'regular seating']],
   C1_OTHER: [['其他', 'otro', 'other'], ['素食', 'comida vegetariana', 'vegetarian food'], ['餐點', 'platos, comida', 'dishes'],
              ['靠窗', 'junto a la ventana', 'by the window'], ['備註', 'anotar', 'add a note']],
   C1_CHAIRS: [['張', 'clasificador para sillas y mesas', 'measure word for chairs, tables'], ['兒童椅', 'silla para niños', 'high chair'],
               ['沒問題', 'no hay problema', 'no problem']],
-  C1_NAME: [['怎麼稱呼', '¿cómo le llamo?, ¿a nombre de quién?', 'how should I address you?'], ['叫', 'llamarse', 'to be called'], ['貴姓', '¿su apellido? (formal, para preguntar a otros)', 'your surname? (polite, to ask others)'], ['我姓…', 'mi apellido es…', 'my surname is…']],
+  C1_NAME: [['怎麼稱呼', '¿cómo se llama?, ¿a nombre de quién?', 'how should I address you?'], ['叫', 'llamarse', 'to be called'], ['貴姓', '¿su apellido? (formal, para preguntar a otros)', 'your surname? (polite, to ask others)'], ['我姓…', 'mi apellido es…', 'my surname is…']],
   C1_PHONE: [['手機', 'celular', 'cell phone'], ['號碼', 'número', 'number'], ['零', 'cero', 'zero']],
   CONFIRM: [['確認', 'confirmar', 'confirm'], ['訂位人', 'persona que reserva', 'person booking'], ['沒錯', 'exacto', "that's right"]],
   FIX: [['哪裡', '¿dónde?, ¿qué parte?', 'where?, which part?'], ['日期', 'fecha', 'date'], ['時間', 'hora', 'time'],
@@ -433,7 +435,7 @@ const VOCAB = {
   C2_CHAIRS: [['一樣', 'igual', 'the same'], ['多一張', 'una más', 'one more']],
   C2_ADD_CHAIRS: [['張', 'clasificador para sillas y mesas', 'measure word for chairs, tables'], ['兒童椅', 'silla para niños', 'high chair']],
   C2_BYE: [['來電', 'llamada', 'call'], ['再見', 'adiós', 'goodbye'], ['不客氣', 'de nada', "you're welcome"]],
-  END: [['請你吃飯', 'invitarte a comer', 'treat you to a meal'], ['說好', 'quedar en, acordar', 'agreed on']],
+  END: [['訂好了', 'ya está reservado', 'booked'], ['不錯', 'nada mal, bastante bien', 'not bad, pretty good']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 
@@ -1123,7 +1125,7 @@ const Game = defineGame({
         call: 'shop',
         dialogue: () => b.seat === '包廂'
           ? [L(`店員：${cn(b.people)}位的話，包廂還坐得下，一樣每個人低消五百元。或是改成兩張桌子併在一起，也可以分開坐兩桌。`,
-              `Para ${b.people} personas el salón privado todavía alcanza, con el mismo consumo mínimo de 500 por persona. También puedo juntar dos mesas, o pueden sentarse en dos mesas separadas.`,
+              `Para ${b.people} personas todavía caben en el salón privado, con el mismo consumo mínimo de 500 por persona. También puedo juntar dos mesas, o pueden sentarse en dos mesas separadas.`,
               `For ${b.people} people the private room still fits, with the same NT$500 minimum per person. Or we can push two tables together, or you can sit at two separate tables.`)]
           : [L(`店員：${cn(b.people)}位的話，一張桌子坐不下。可以幫您把兩張桌子併在一起，或是分開坐兩桌，您覺得呢？`,
               `Para ${b.people} personas no caben en una mesa. Puedo juntar dos mesas, o pueden sentarse en dos mesas separadas. ¿Qué prefiere?`,
@@ -1242,7 +1244,7 @@ const Game = defineGame({
         },
         options: ['好，我跟餐廳說。'],
         next: () => {
-          Game.good('聰明喔！知道要先問 Ami。', '¡Muy listo! Sabías que primero había que preguntarle a Ami.', 'Smart! You knew to ask Ami first.');
+          Game.good('聰明喔！知道要先問 Ami。', '¡Muy bien pensado! Sabías que primero había que preguntarle a Ami.', 'Smart! You knew to ask Ami first.');
           Game.thought = [L('我：不好意思，讓您久等了。', 'Perdón por la espera.', 'Sorry to keep you waiting.')];
           Game.state = Game.afterCall;
         }
@@ -1258,7 +1260,7 @@ const Game = defineGame({
           if (b.people !== t.finalPeople) probs.push([`你只有訂${cn(b.people)}個人，我們有${cn(t.finalPeople)}個人耶！`, `¡Solo reservaste para ${b.people}, pero somos ${t.finalPeople}!`, `You only booked for ${b.people}, but there are ${t.finalPeople} of us!`]);
           if (b.seat === '包廂') probs.push(['包廂每個人低消五百元，太貴了啦！', '¡El salón privado tiene consumo mínimo de 500 por persona, es muy caro!', 'The private room has a NT$500 minimum per person, too expensive!']);
           if (b.seat === '分兩桌') probs.push(['為什麼要分兩桌？我說大家要坐在一起耶！', '¿Por qué en dos mesas? ¡Dije que todos juntos!', 'Why two tables? I said we all sit together!']);
-          if (b.chairs !== t.kids) probs.push([`應該是${cnCount(t.kids)}張兒童座椅吧？你怎麼訂了${b.chairs ? cnCount(b.chairs) + '張' : '零張'}？`, `¿No eran ${esN(t.kids, 'silla para niños', 'sillas para niños')}? ¿Por qué reservaste ${b.chairs}?`, `Shouldn't it be ${t.kids} high chair${t.kids > 1 ? 's' : ''}? Why did you book ${b.chairs}?`]);
+          if (b.chairs !== t.kids) probs.push([`應該是${cnCount(t.kids)}張兒童椅吧？你怎麼訂了${b.chairs ? cnCount(b.chairs) + '張' : '零張'}？`, `¿No eran ${esN(t.kids, 'silla para niños', 'sillas para niños')}? ¿Por qué reservaste ${b.chairs}?`, `Shouldn't it be ${t.kids} high chair${t.kids > 1 ? 's' : ''}? Why did you book ${b.chairs}?`]);
           if (!b.veg) probs.push(['你沒問素食，那小美要吃什麼？', 'No preguntaste por comida vegetariana, ¿y entonces qué va a comer Xiaomei?', "You didn't ask about vegetarian food, so what will Xiaomei eat?"]);
           if (b.phone !== Game.myPhone) probs.push(['餐廳記的電話是錯的，有事都聯絡不到你！', '¡El restaurante anotó mal tu teléfono, no podrán contactarte!', "The restaurant has the wrong phone number, they can't reach you!"]);
           probs.forEach(p => Game.addMistake({ zh: p[0], es: p[1], en: p[2] }));

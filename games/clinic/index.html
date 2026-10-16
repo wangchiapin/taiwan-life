@@ -242,7 +242,7 @@
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
     你生病了，Ami 要你去看醫生。你一個人去診所：掛號、等叫號、跟醫生說明症狀、付錢、領藥，最後還要告訴 Ami 醫生怎麼說。<br>
-    <span data-es="Estás enfermo y Ami te pide que vayas al médico. Vas solo a la clínica: te registras, esperas tu turno, le explicas tus síntomas al doctor, pagas, recoges la medicina y por último le cuentas a Ami qué dijo el doctor." data-en="You're sick, and Ami tells you to see a doctor. You go to the clinic alone: register, wait for your number, describe your symptoms to the doctor, pay, pick up your medicine, and finally tell Ami what the doctor said.">Estás enfermo y Ami te pide que vayas al médico. Vas solo a la clínica: te registras, esperas tu turno, le explicas tus síntomas al doctor, pagas, recoges la medicina y por último le cuentas a Ami qué dijo el doctor.</span>
+    <span data-es="Te enfermaste y Ami te pide que vayas al médico. Vas a la clínica por tu cuenta: te registras, esperas tu turno, le explicas tus síntomas al doctor, pagas, recoges la medicina y por último le cuentas a Ami qué dijo el doctor." data-en="You're sick, and Ami tells you to see a doctor. You go to the clinic alone: register, wait for your number, describe your symptoms to the doctor, pay, pick up your medicine, and finally tell Ami what the doctor said.">Te enfermaste y Ami te pide que vayas al médico. Vas a la clínica por tu cuenta: te registras, esperas tu turno, le explicas tus síntomas al doctor, pagas, recoges la medicina y por último le cuentas a Ami qué dijo el doctor.</span>
   </p>
   <p class="flavor-text" style="font-size:12px">
     注意！這個遊戲是中文練習，不是醫療建議。<br>
@@ -358,6 +358,8 @@ pinyinPro.customPinyin({
   '午餐': 'wǔ cān', '洗澡': 'xǐ zǎo', '搞定': 'gǎo dìng', '趕快': 'gǎn kuài', '好起來': 'hǎo qǐ lái', '還沒': 'hái méi', '怎麼': 'zěn me', '嗯': 'ēn',
   '幾個': 'jǐ ge', '一點': 'yì diǎn', '一共': 'yí gòng', '一次': 'yí cì', '切': 'qiē', '他們': 'tā men', '填': 'tián', '體溫': 'tǐ wēn', '櫃台': 'guì tái', '前面': 'qián mian', '舒服': 'shū fu', '位子': 'wèi zi', '還在': 'hái zài', '睡覺': 'shuì jiào', '聽得懂': 'tīng de dǒng'
 });
+// 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '休息': 'xiū xí', '和': 'hàn', '嗯': 'ēn' });
 
 /* ══════════════════════════════════════
    小工具
@@ -385,7 +387,7 @@ const VOCAB = {
   D_FEVER: [['發燒', 'tener fiebre', 'have a fever'], ['有沒有', '¿tiene o no?', 'do you have or not?'], ['一點', 'un poco', 'a little']],
   D_ALLERGY: [['藥物', 'medicamento', 'medication'], ['過敏', 'alergia', 'allergy'], ['止痛藥', 'analgésico', 'painkiller'], ['吃藥', 'tomar medicina', 'take medicine']],
   D_ADVICE: [['喉嚨', 'garganta', 'throat'], ['感冒', 'resfriado', 'a cold'], ['多喝水', 'beber mucha agua', 'drink lots of water'], ['多休息', 'descansar más', 'rest more'], ['回來看', 'volver a consulta', 'come back to be seen']],
-  P_PAY: [['批價', 'pagar la consulta', 'pay the bill'], ['掛號費', 'cuota de registro', 'registration fee'], ['部分負擔', 'copago', 'copayment'], ['一共', 'en total', 'in total'], ['不夠', 'no alcanza', 'not enough']],
+  P_PAY: [['掛號費', 'cuota de registro', 'registration fee'], ['部分負擔', 'copago', 'copayment'], ['一共', 'en total', 'in total'], ['不夠', 'no alcanza', 'not enough']],
   M_MED: [['領藥', 'recoger la medicina', 'pick up medicine'], ['感冒藥', 'medicina para el resfriado', 'cold medicine'], ['止咳藥', 'medicina para la tos', 'cough medicine'], ['飯後', 'después de comer', 'after meals'], ['睡前', 'antes de dormir', 'before bed'], ['藥袋', 'bolsa de medicinas', 'medicine bag']],
   M_NOW: [['午餐', 'almuerzo', 'lunch'], ['洗澡', 'bañarse', 'take a shower'], ['準備', 'prepararse para', 'get ready to'], ['哪一包', '¿cuál sobre?', 'which packet?'], ['都', 'todos', 'both, all']],
   E_ASK: [['怎麼樣', '¿cómo te fue?', 'how did it go?'], ['醫生說', 'el doctor dijo', 'the doctor said'], ['幾天', '¿cuántos días?', 'how many days?'], ['回診', 'volver a consulta', 'follow-up visit']],
@@ -579,7 +581,7 @@ const Game = defineGame({
     const N = this.N;
     return [
       L(`Ami：${N}，你生病好幾天了，去看醫生吧！附近有一家診所，感冒掛家醫科就可以了。記得帶健保卡喔，第一次去要填初診單。`,
-        `${N}, llevas varios días enfermo: ¡ve al médico! Hay una clínica cerca; para un resfriado basta con registrarte en medicina familiar. Acuérdate de llevar tu tarjeta del seguro de salud: la primera vez tienes que llenar un formulario de primera consulta.`,
+        `${N}, hace varios días que no te sientes bien: ¡ve al médico! Hay una clínica cerca; para un resfriado basta con registrarte en medicina familiar. Acuérdate de llevar tu tarjeta del seguro de salud: la primera vez tienes que llenar un formulario de primera consulta.`,
         `${N}, you've been sick for several days — go see a doctor! There's a clinic nearby; for a cold, just register with family medicine. Remember to bring your NHI card: on your first visit you need to fill out a new-patient form.`),
       L('Ami：看醫生的時候，要說清楚哪裡不舒服、不舒服幾天了，有沒有藥物過敏也要跟醫生說喔。',
         'Con el médico, explica bien qué te molesta y desde hace cuántos días, y dile también si tienes alergia a algún medicamento.',
@@ -590,7 +592,7 @@ const Game = defineGame({
     const t = this.task, rx = DAYZH(t.rx);
     const out = [L('醫生：我看一下喉嚨……有一點紅，是感冒喔。', 'Déjame ver la garganta… está un poco roja. Es un resfriado.', "Let me look at your throat… it's a little red. It's a cold.")];
     if (t.fever) out.push(L('醫生：你有一點發燒，要多休息。', 'Tienes un poco de fiebre; hay que descansar más.', "You have a slight fever, so you need more rest."));
-    if (t.allergy) out.push(L('醫生：你說你對止痛藥過敏，我會開別的藥給你。', 'Dices que eres alérgico a los analgésicos; te recetaré otros medicamentos.', "You said you're allergic to painkillers, so I'll prescribe something else."));
+    if (t.allergy) out.push(L('醫生：你說你對止痛藥過敏，我會開別的藥給你。', 'Dices que tienes alergia a los analgésicos; te recetaré otros medicamentos.', "You said you're allergic to painkillers, so I'll prescribe something else."));
     out.push(L(`醫生：藥吃${rx}天，要多喝水、多休息。如果${rx}天後還沒好，再回來看。`,
       `Toma el medicamento ${t.rx} días, bebe mucha agua y descansa. Si después de ${t.rx} días no mejoras, vuelve.`,
       `Take the medicine for ${t.rx} days, drink lots of water and rest. If you're not better after ${t.rx} days, come back.`));
@@ -600,7 +602,7 @@ const Game = defineGame({
     const rx = DAYZH(this.task.rx);
     return [
       L('藥師：這是你的藥。感冒藥一天三次，三餐飯後吃；止咳藥睡前吃。', 'Aquí está su medicina. El de resfriado, tres veces al día después de las comidas; el de la tos, antes de dormir.', 'Here is your medicine. Take the cold medicine three times a day after meals, and the cough medicine before bed.'),
-      L(`藥師：藥一共${rx}天，吃完再看看。`, `El tratamiento es de ${this.task.rx} días en total.`, `The course is ${this.task.rx} days in total.`)
+      L(`藥師：藥一共${rx}天，吃完再看看。`, `Son ${this.task.rx} días de medicina en total; cuando la termines, vemos cómo sigues.`, `That's ${this.task.rx} days of medicine in total; see how you feel when you finish.`)
     ];
   },
 
@@ -613,7 +615,7 @@ const Game = defineGame({
       { zh: `已經${DAYZH(t.days)}天了`, es: `Desde hace ${t.days} días`, en: `For ${t.days} days` },
       { zh: t.fever ? '有一點發燒（三十七度八）' : '沒有發燒（三十六度五）', es: t.fever ? 'Un poco de fiebre (37,8 °C)' : 'Sin fiebre (36,5 °C)', en: t.fever ? 'A slight fever (37.8 °C)' : 'No fever (36.5 °C)' },
       { zh: t.allergy ? '對止痛藥過敏' : '沒有藥物過敏', es: t.allergy ? 'Alergia a los analgésicos' : 'Sin alergia a medicamentos', en: t.allergy ? 'Allergic to painkillers' : 'No drug allergies' },
-      { zh: '有健保卡，是第一次來這家診所', es: 'Tienes tu tarjeta NHI y es tu primera vez en esta clínica', en: "You have your NHI card, and it's your first time at this clinic" }
+      { zh: '有健保卡，是第一次來這家診所', es: 'Tienes tu tarjeta del seguro de salud y es tu primera vez en esta clínica', en: "You have your NHI card, and it's your first time at this clinic" }
     ];
     if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
@@ -655,7 +657,7 @@ const Game = defineGame({
         html: () => Game.listHTML(),
         dialogue: () => [
           L('（你生病了，感覺很不舒服。手機響了，是Ami傳來的LINE。）',
-            '(Estás enfermo y te sientes muy mal. Suena tu celular: es un LINE de Ami.)',
+            '(Te enfermaste y te sientes muy mal. Suena tu celular: es un LINE de Ami.)',
             '(You\'re sick and feel awful. Your phone buzzes — a LINE message from Ami.)'),
           ...Game.amiLines(),
           L('我：好，我現在就去。', 'Bien, voy ahora mismo.', "OK, I'll go right now.")
@@ -678,7 +680,7 @@ const Game = defineGame({
             Game.addMistake(M(`掛號要給健保卡，不是${k}。`, `Para registrarte hay que dar la tarjeta del seguro de salud, no ${es}.`, `To register you hand over your NHI card, not ${en}.`),
               [desk(`這是${k}喔，我們要的是健保卡。`, `Esto es ${es}; necesitamos la tarjeta del seguro de salud.`, `That's ${en}; we need your NHI card.`)]); return;
           }
-          if (Game.att.R_CARD === 1) Game.good('你記得沒錯喔！掛號要先給櫃台看健保卡。', '¡Lo recordaste bien! Para registrarte, primero muestras la tarjeta NHI.', 'You remembered right! To register, you first show your NHI card.');
+          if (Game.att.R_CARD === 1) Game.good('你記得沒錯喔！掛號要先給櫃台看健保卡。', '¡Lo recordaste bien! Para registrarte, primero muestras la tarjeta del seguro de salud.', 'You remembered right! To register, you first show your NHI card.');
           Game.state = 'R_FIRST';
         }
       },
@@ -712,7 +714,7 @@ const Game = defineGame({
         place: 'reception',
         html: () => Game.boardHTML(),
         dialogue: () => [desk(`好，這是你的號碼牌，${NUMZH(t.myNo)}號。前面還有三位，請先坐著等一下。`,
-          `Bien, este es su número: el ${t.myNo}. Hay tres personas antes que usted; espere sentado, por favor.`,
+          `Bien, este es su número: el ${t.myNo}. Hay tres personas antes que usted; tome asiento y espere, por favor.`,
           `OK, here's your number: ${t.myNo}. There are three people ahead of you; please have a seat.`)],
         options: ['好，謝謝。'],
         next: () => { Game.ticket = true; Game.updateCash(); Game.state = 'W_WAIT'; }
@@ -787,7 +789,7 @@ const Game = defineGame({
         next: c => {
           const yes = c.startsWith('有');
           if (yes !== t.allergy) {
-            Game.addMistake(M(t.allergy ? '你對止痛藥過敏，一定要告訴醫生。' : '你沒有藥物過敏。', t.allergy ? 'Eres alérgico a los analgésicos: es imprescindible decírselo al doctor.' : 'No tienes alergia a medicamentos.', t.allergy ? "You're allergic to painkillers — you must tell the doctor." : 'You have no drug allergies.')); return;
+            Game.addMistake(M(t.allergy ? '你對止痛藥過敏，一定要告訴醫生。' : '你沒有藥物過敏。', t.allergy ? 'Tienes alergia a los analgésicos: es imprescindible decírselo al doctor.' : 'No tienes alergia a medicamentos.', t.allergy ? "You're allergic to painkillers — you must tell the doctor." : 'You have no drug allergies.')); return;
           }
           if (t.allergy && Game.att.D_ALLERGY === 1) Game.good('沒錯！有藥物過敏，一定要跟醫生說。', '¡Exacto! Si tienes alergia a un medicamento, siempre díselo al doctor.', 'Exactly! If you have a drug allergy, always tell the doctor.');
           Game.state = 'D_ADVICE';
@@ -874,7 +876,7 @@ const Game = defineGame({
           track('game_complete', { game: 'clinic', score: Game.score, elapsed: Game.elapsedTime });
           return [
             Game._endGood
-              ? L(`Ami：太好了！${N}，你今天真的很厲害，掛號、看醫生、領藥都自己搞定了！多喝水、早點睡，趕快好起來喔！這樣才可以繼續學中文喔！`, `¡Qué bien! ${N}, hoy lo hiciste todo tú solo: registro, consulta y farmacia. ¡Bebe agua, duerme temprano y mejórate pronto! ¡Así podrás seguir estudiando chino!`, `Great! ${N}, you handled everything yourself today — registration, the doctor, the pharmacy! Drink water, sleep early and get well soon! That way you can keep studying Chinese!`)
+              ? L(`Ami：太好了！${N}，你今天真的很厲害，掛號、看醫生、領藥都自己搞定了！多喝水、早點睡，趕快好起來喔！這樣才可以繼續學中文喔！`, `¡Qué bien! ${N}, hoy lo hiciste todo por tu cuenta: registro, consulta y farmacia. ¡Bebe agua, duerme temprano y mejórate pronto! ¡Así podrás seguir estudiando chino!`, `Great! ${N}, you handled everything yourself today — registration, the doctor, the pharmacy! Drink water, sleep early and get well soon! That way you can keep studying Chinese!`)
               : L('Ami：辛苦了！看醫生的時候要說清楚，有些地方下次再注意就好。你先好好休息，趕快好起來喔！', '¡Gracias por el esfuerzo! Con el médico hay que explicar bien las cosas; cuida unos detalles la próxima vez. ¡Descansa y mejórate pronto!', 'Thanks for your hard work! Be clear with the doctor, and watch a few details next time. Rest up and get well soon!'),
             L('（提醒：這個遊戲是中文練習，不是醫療建議。身體不舒服，請去看真正的醫生。）', '(Aviso: este juego es práctica de chino, no un consejo médico. Si te sientes mal, acude a un médico de verdad.)', '(Note: this game is Chinese practice, not medical advice. If you feel unwell, please see a real doctor.)')
           ];

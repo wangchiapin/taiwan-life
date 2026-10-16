@@ -359,6 +359,8 @@ pinyinPro.customPinyin({
   '三個': 'sān ge', '每個': 'měi ge', '現炸': 'xiàn zhá', '還剩': 'hái shèng', '欸': 'éi', '訊息': 'xùn xí',
   '衣服和': 'yī fu hàn', '你和': 'nǐ hàn', '同事': 'tóng shì', '朋友': 'péng yǒu', '清單': 'qīng dān', '會合': 'huì hé', '晚餐': 'wǎn cān', '辛苦': 'xīn kǔ', '試試看': 'shì shi kàn', '學得': 'xué de'
 });
+// 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '切': 'qiē', '突然': 'tú rán', '怎麼': 'zěn me', '還會': 'hái huì', '和': 'hàn', '嗯': 'ēn' });
 
 /* ══════════════════════════════════════
    小工具
@@ -390,7 +392,7 @@ const VOCAB = {
   A_GREET: [['髮夾', 'pasador, horquilla', 'hairpin'], ['老闆娘', 'dueña, vendedora', 'female shop owner'], ['可愛', 'lindo', 'cute'], ['划算', 'conviene, buen trato', 'a good deal'], ['顏色', 'color', 'color']],
   A_QTY: [['一個', 'uno', 'one'], ['三個', 'tres', 'three'], ['便宜', 'barato', 'cheap'], ['划算', 'conviene, buen trato', 'a good deal']],
   HAGGLE: V_HAGGLE,
-  PAY: [['給', 'dar', 'give'], ['收', 'recibir', 'receive'], ['找', 'dar el cambio', 'give change'], ['百元', 'billete de cien', '100-dollar bill'], ['謝謝', 'gracias', 'thank you']],
+  PAY: [['給', 'dar', 'give'], ['收', 'recibir', 'receive'], ['找', 'dar el cambio', 'give change'], ['謝謝', 'gracias', 'thank you']],
   F_GREET: [['雞排', 'pollo frito (filete)', 'fried chicken cutlet'], ['現炸', 'recién frito', 'freshly fried'], ['份', 'porción', 'serving'], ['幾份', '¿cuántas porciones?', 'how many servings?']],
   F_SPICY: [['辣', 'picante', 'spicy'], ['不要辣', 'sin picante', 'not spicy'], ['都', 'todos', 'all'], ['奶奶', 'abuela (paterna)', 'grandma (father\'s side)']],
   F_CUT: [['切', 'cortar', 'cut'], ['要切', 'con corte', 'cut it up'], ['不用', 'no hace falta', 'no need']],
@@ -398,7 +400,7 @@ const VOCAB = {
   CALL: [['變胖', 'engordar', 'gain weight'], ['太小', 'demasiado pequeño', 'too small'], ['換', 'cambiar', 'exchange'], ['拜託', 'por favor (pidiendo un favor)', 'please (asking a favor)']],
   X_GREET: [['換', 'cambiar', 'exchange'], ['退錢', 'devolver el dinero', 'give a refund'], ['不好意思', 'disculpe', 'excuse me'], ['又', 'otra vez', 'again']],
   X_PRICE: [['多加', 'pagar de más', 'add extra'], ['五十塊', 'cincuenta dólares', 'fifty dollars'], ['剛剛', 'hace un momento', 'just now'], ['一樣價錢', 'el mismo precio', 'the same price']],
-  END: [['會合', 'reunirse', 'meet up'], ['花了', 'gastaste', 'spent'], ['剩下', 'lo que sobra', 'left over'], ['省', 'ahorrar', 'save'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your hard work']],
+  END: [['會合', 'reunirse', 'meet up'], ['花了', 'gastaste', 'spent'], ['剩', 'quedar (sobrar)', 'be left'], ['省', 'ahorrar', 'save'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your hard work']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points'], ['獎勵', 'bonificación', 'bonus']]
 };
 
@@ -656,7 +658,7 @@ const Game = defineGame({
         this.setAsk(st, p);
         this.thought = [L('（你轉身要走……）', '(Te das la vuelta para irte…)', '(You turn to leave…)'),
           say(`欸欸欸，等一下！${p}元賣你啦！`, `¡Eh, eh, espera! ¡Te lo vendo por ${esM(p)}!`, `Hey, hey, wait! I'll sell it to you for ${enM(p)}!`)];
-        this.good('聰明喔！你說了「再看看」，老闆就降價了！', '¡Qué lista! Dijiste «mirar un poco más» y el vendedor bajó el precio.', 'Smart! You said you\'d look around some more, and the vendor dropped the price!');
+        this.good('聰明喔！你說了「再看看」，老闆就降價了！', '¡Qué buena idea! Dijiste «mirar un poco más» y el vendedor bajó el precio.', 'Smart! You said you\'d look around some more, and the vendor dropped the price!');
       } else this.thought = [say('這已經是最低價了，不買就算了。', 'Este ya es el precio más bajo; si no compras, no importa.', "That's already my lowest price. If you don't want it, never mind.")];
       return;
     }
@@ -890,7 +892,7 @@ const Game = defineGame({
               [L('老闆：退錢喔？不行耶……你要不要換一件？', '¿Devolución? No se puede… ¿quieres cambiarla por otra?', "A refund? Can't do that… Want to swap it for another one?")]);
           else
             Game.addMistake(M('對老闆不禮貌。', 'Fuiste descortés con el vendedor.', 'You were rude to the vendor.'),
-              [L('老闆：欸，是你自己選的耶！', '¡Oye, tú mismo la elegiste!', 'Hey, you picked it yourself!')]);
+              [L('老闆：欸，是你自己選的耶！', '¡Oye, la elegiste tú!', 'Hey, you picked it yourself!')]);
         }
       },
       X_PRICE: {
@@ -930,7 +932,7 @@ const Game = defineGame({
           ];
           lines.push(Game._endGood
             ? L(`Ami：哇，${N}，你比我還會殺價耶！看來中文學得不錯喔！`, `¡Vaya, ${N}, regateas mejor que yo! ¡Parece que estás aprendiendo muy bien el chino!`, `Wow, ${N}, you're better at haggling than I am! Looks like your Chinese is coming along well!`)
-            : L('Ami：辛苦了！我們下次再一起來夜市試試看。', '¡Gracias por el esfuerzo! La próxima vez volvamos a venir juntas al mercado nocturno a intentarlo otra vez.', "Thanks for your hard work! Let's come to the night market together again next time and give it another try."));
+            : L('Ami：辛苦了！我們下次再一起來夜市試試看。', '¡Gracias por el esfuerzo! La próxima vez volvamos al mercado nocturno para intentarlo de nuevo.', "Thanks for your hard work! Let's come to the night market together again next time and give it another try."));
           lines.push(L(`（殺價獎勵：每省10元加1分，這次加${bonus}分）`, `(Bonificación por regatear: 1 punto por cada ${esM(10)} ahorrados; esta vez +${bonus}.)`, `(Haggling bonus: 1 point for every ${enM(10)} saved; this time +${bonus}.)`));
           return lines;
         },

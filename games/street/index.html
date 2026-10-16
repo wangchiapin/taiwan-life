@@ -344,6 +344,8 @@ pinyinPro.customPinyin({
   '錢包': 'qián bāo', '掉': 'diào', '撿': 'jiǎn', '叫住': 'jiào zhù', '大雨': 'dà yǔ', '傘': 'sǎn', '撐': 'chēng', '撐傘': 'chēng sǎn', '麻煩': 'má fan', '一起': 'yì qǐ', '傳單': 'chuán dān', '趕時間': 'gǎn shí jiān', '不用了': 'bú yòng le', '介紹': 'jiè shào', '咖啡店': 'kā fēi diàn',
   '週六': 'zhōu liù', '手機': 'shǒu jī', '還': 'hái', '還要': 'hái yào', '還沒': 'hái méi', '怎麼': 'zěn me', '嗯': 'ēn', '一點': 'yì diǎn', '一共': 'yí gòng', '他們': 'tā men', '前面': 'qián mian', '舒服': 'shū fu', '辛苦了': 'xīn kǔ le', '順利': 'shùn lì', '處理': 'chǔ lǐ', '一下': 'yí xià', '不好意思': 'bù hǎo yì si', '年輕': 'nián qīng', '終於': 'zhōng yú', '二個': 'èr ge', '三個': 'sān ge', '第一個': 'dì yí ge', '第二個': 'dì èr ge', '第三個': 'dì sān ge'
 });
+// 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '跌倒': 'dié dǎo', '突然': 'tú rán', '嚇了一跳': 'xià le yí tiào', '危險': 'wéi xiǎn', '長輩': 'zhǎng bèi', '突發': 'tú fā', '和': 'hàn', '嗯': 'ēn' });
 
 /* ══════════════════════════════════════
    小工具
@@ -361,7 +363,7 @@ const SPEAKER_RE = /^(Ami|路人|騎士|發傳單的人|阿嬤|阿公|我)：/;
 ══════════════════════════════════════ */
 const VOCAB = {
   START: [['咖啡店', 'cafetería', 'café'], ['趕快', 'rápido, date prisa', 'hurry'], ['小心', 'tener cuidado', 'be careful'], ['路上', 'por el camino', 'on the way']],
-  E_light: [['紅綠燈', 'semáforo', 'traffic light'], ['行人號誌', 'semáforo peatonal', 'pedestrian signal'], ['小綠人', 'hombrecito verde (luz peatonal)', 'little green man (walk signal)'], ['闖紅燈', 'saltarse el semáforo en rojo', 'run a red light'], ['交通規則', 'normas de tráfico', 'traffic rules'], ['三寶', '(jerga) conductor o peatón imprudente', '(slang) reckless road user']],
+  E_light: [['紅燈', 'luz roja', 'red light'], ['行人號誌', 'semáforo peatonal', 'pedestrian signal'], ['小綠人', 'hombrecito verde (luz peatonal)', 'little green man (walk signal)'], ['闖紅燈', 'saltarse el semáforo en rojo', 'run a red light'], ['交通規則', 'normas de tráfico', 'traffic rules'], ['三寶', '(jerga) conductor o peatón imprudente', '(slang) reckless road user']],
   E_honk: [['瞪', 'mirar mal, fulminar con la mirada', 'glare at'], ['點頭', 'asentir con la cabeza', 'nod'], ['機車', 'moto, scooter', 'scooter'], ['按喇叭', 'tocar la bocina', 'honk'], ['借過', 'permiso, déjeme pasar', 'excuse me (let me through)']],
   E_fall: [['跌倒', 'caerse', 'fall down'], ['您還好嗎', '¿se encuentra bien?', 'are you OK? (polite)'], ['哪裡痛', '¿dónde le duele?', 'where does it hurt?'], ['受傷', 'lastimarse', 'get hurt']],
   E_fall2: [['站不起來', 'no poder levantarse', "can't stand up"], ['別動', 'no se mueva', "don't move"], ['打119', 'llamar al 119', 'call 119'], ['救護車', 'ambulancia', 'ambulance']],
@@ -370,7 +372,7 @@ const VOCAB = {
   E_wallet: [['錢包', 'billetera', 'wallet'], ['掉', 'caerse, perder', 'drop'], ['撿', 'recoger del suelo', 'pick up'], ['提醒', 'avisar, recordar', 'remind, let someone know'], ['不好意思', 'disculpe', 'excuse me']],
   E_rain: [['大雨', 'aguacero', 'heavy rain'], ['傘', 'paraguas', 'umbrella'], ['撐傘', 'abrir/sostener un paraguas', 'hold up an umbrella'], ['麻煩', 'molestar, causar molestia', 'trouble'], ['一起', 'juntos', 'together']],
   E_flyer: [['傳單', 'volante', 'flyer'], ['趕時間', 'tener prisa', 'be in a hurry'], ['不用了', 'no hace falta', 'no need'], ['介紹', 'presentar, explicar', 'introduce, explain'], ['拒絕', 'rechazar', 'refuse, turn down']],
-  END: [['順利', 'sin problemas', 'smoothly'], ['處理', 'ocuparse de', 'deal with'], ['經驗', 'experiencia', 'experience'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
+  END: [['順利', 'sin problemas', 'smoothly'], ['處理', 'ocuparse de', 'deal with'], ['經驗', 'experiencia', 'experience']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 
@@ -622,13 +624,13 @@ const Game = defineGame({
           { t: '站在原地不動，回頭瞪他。', m: M('機車按喇叭，你可以先讓一下，保護自己的安全。', 'Si una moto toca la bocina, puedes apartarte primero para protegerte.', 'When a scooter honks, you can step aside first to keep yourself safe.'), th: [L('騎士：欸，借過一下！', '¡Disculpa, déjame pasar!', 'Excuse me, let me through!')] },
           { t: '走到巷子中間，離他遠一點。', m: M('不要走到路中間，那樣更危險。', 'No te pongas en el medio del callejón: es más peligroso.', "Don't walk into the middle of the alley — that's more dangerous."), th: [sc('（機車慢慢跟在你後面，騎士一直按喇叭。）', '(La moto te sigue despacio y el conductor sigue tocando la bocina.)', '(The scooter creeps along behind you, the rider still honking.)')] }
         ],
-        good: ['雖然可能不是你的問題，但是你很有禮貌喔！', 'Quizá no era culpa tuya, ¡pero fuiste muy educado!', "It may not have been your fault, but that was very polite of you!"],
+        good: ['雖然可能不是你的問題，但是你很有禮貌喔！', 'Quizá no era culpa tuya, ¡pero tuviste muy buenos modales!', "It may not have been your fault, but that was very polite of you!"],
         after: [L('騎士：謝謝！', '¡Gracias!', 'Thanks!'), sc('（機車慢慢地從你旁邊騎過去，跟你點點頭感謝。）', '(La moto pasa despacio a tu lado y el conductor te agradece con la cabeza.)', '(The scooter slowly rides past you, and the rider nods in thanks.)')]
       }),
 
       /* ═══ 3 有人跌倒（兩步） ═══ */
       E_fall: mk('fall', {
-        dialogue: () => [sc(`（前面有一位${fw[0]}跌倒了，坐在地上！）`, `(Delante, ¡${fw[1]} se ha caído y está sentado en el suelo!)`, `(Ahead, ${fw[2]} has fallen and is sitting on the ground!)`),
+        dialogue: () => [sc(`（前面有一位${fw[0]}跌倒了，坐在地上！）`, `(Delante, ¡${fw[1]} se ha caído y está ${fw[0] === '阿嬤' ? 'sentada' : 'sentado'} en el suelo!)`, `(Ahead, ${fw[2]} has fallen and is sitting on the ground!)`),
           L(`${fw[0]}：哎喲……`, 'Ay…', 'Ouch…')],
         opts: [
           { t: '「您還好嗎？哪裡痛？」', ok: true },
@@ -642,12 +644,12 @@ const Game = defineGame({
         dialogue: () => [L(`${fw[0]}：我的腳好痛，站不起來……`, 'Me duele mucho el pie y no puedo levantarme…', "My foot really hurts and I can't get up…")],
         opts: [
           { t: '您先別動，我幫您叫救護車。', ok: true },
-          { t: '那您自己慢慢站起來吧。', m: M('他站不起來，要打119，請救護車來。', 'No puede levantarse: hay que llamar al 119 para pedir una ambulancia.', "He/she can't get up — call 119 for an ambulance."), th: [sc('（你看著他，覺得這樣不行。）', '(Lo miras y piensas que así no se puede.)', "(You look at him/her and realize that won't do.)")] },
+          { t: '那您自己慢慢站起來吧。', m: M('他站不起來，要打119，請救護車來。', 'No puede levantarse: hay que llamar al 119 para pedir una ambulancia.', `${fw[0] === '阿嬤' ? 'She' : 'He'} can't get up — call 119 for an ambulance.`), th: [sc('（你看著他，覺得這樣不行。）', `(${fw[0] === '阿嬤' ? 'La' : 'Lo'} miras y piensas que así no se puede.)`, `(You look at ${fw[0] === '阿嬤' ? 'her' : 'him'} and realize that won't do.)`)] },
           { t: '我扶您去搭捷運。', m: M('受傷的人不要自己走，也不要搭捷運，先打119。', 'Una persona herida no debe caminar ni tomar el metro: primero llama al 119.', "An injured person shouldn't walk or take the MRT — call 119 first.")
             , th: [L(`${fw[0]}：不行不行，我真的走不了……`, 'No, no, de verdad no puedo caminar…', "No, no, I really can't walk…")] }
         ],
         good: ['沒錯！在台灣，需要救護車就打119。', '¡Exacto! En Taiwán, si hace falta una ambulancia, se llama al 119.', 'Exactly! In Taiwan, call 119 when you need an ambulance.'],
-        after: [L(`${fw[0]}：謝謝你，年輕人！`, '¡Gracias, jovencito!', 'Thank you, young one!')]
+        after: [L(`${fw[0]}：謝謝你，年輕人！`, '¡Gracias, joven!', 'Thank you, young one!')]
       }),
 
       /* ═══ 4 阿嬤過馬路 ═══ */
@@ -695,7 +697,7 @@ const Game = defineGame({
         opts: [
           { t: '好，謝謝你，那就麻煩你了。', ok: true },
           { t: '你的傘直接給我吧。', m: M('這樣很沒有禮貌，人家好心幫你。', 'Eso es muy descortés: la otra persona te está ayudando de buena voluntad.', "That's very rude — they're kindly trying to help you."), th: [L('路人：什麼？', '¿Qué?', 'What?')] },
-          { t: '不要，你是誰？我不認識你。', m: M('有人好心幫忙，要說謝謝，不要這樣直接拒絕。', 'Si alguien te ayuda con buena intención, da las gracias; no lo rechaces así.', "When someone kindly helps, say thank you — don't just refuse like that."), th: [sc('（你繼續在雨裡走，衣服全濕了。）', '(Sigues bajo la lluvia y acabas empapado.)', '(You keep walking in the rain and get soaked.)')] }
+          { t: '不要，你是誰？我不認識你。', m: M('有人好心幫忙，要說謝謝，不要這樣直接拒絕。', 'Si alguien te ayuda con buena intención, da las gracias; no lo rechaces así.', "When someone kindly helps, say thank you — don't just refuse like that."), th: [sc('（你繼續在雨裡走，衣服全濕了。）', '(Sigues bajo la lluvia y se te empapa toda la ropa.)', '(You keep walking in the rain and get soaked.)')] }
         ],
         good: ['沒錯！我們要感謝別人的好心！', '¡Exacto! Hay que agradecer la amabilidad de los demás.', "Exactly! We should be grateful for other people's kindness!"],
         after: [L('路人：不會不會，雨很大，慢慢走。', 'No hay problema; llueve fuerte, vamos despacio.', "No problem — it's raining hard, so let's walk slowly.")]
