@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>台灣生活地圖 · Mapa de la vida en Taiwán</title>
+<title>台灣生存日記 · Sobrevive en Taiwán</title>
 <style>
   :root { --ink:#24202e; --bg:#2b3a2e; --card:#fffdf6; --line:#d9d2bd; --accent:#cf3a24; --muted:#6b6478; --gold:#f2b632; }
   * { box-sizing: border-box; }
@@ -40,7 +40,7 @@
   #hud .chip { background: rgba(255,255,255,.15); border-radius: 999px; padding: 3px 12px; font-size: 14px; white-space: nowrap; }
   #hud button { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; padding: 3px 12px; font-size: 14px; }
   #stage { width: 100%; max-width: 960px; padding: 0 10px; position: relative; }
-  /* 本週進度條 */
+  /* 星星進度條 */
   #week { width: 100%; max-width: 960px; display: flex; align-items: center; gap: 10px; padding: 0 12px 8px; color: #fff; font-size: 14px; }
   #week .bar { flex: 1; height: 14px; background: rgba(255,255,255,.15); border: 2px solid #1b1a22; border-radius: 999px; overflow: hidden; }
   #week .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #f2b632, #ffd66b); transition: width .6s; }
@@ -85,8 +85,8 @@
 <!-- ── 名字 ── -->
 <div id="intro">
   <div class="box">
-    <h1>台灣生活地圖</h1>
-    <p class="sub" data-es="Mapa de la vida en Taiwán" data-en="Life in Taiwan map">Mapa de la vida en Taiwán</p>
+    <h1 id="intro-title">台灣生存日記</h1>
+    <p class="sub" data-es="Sobrevive en Taiwán" data-en="Survive in Taiwan">Sobrevive en Taiwán</p>
     <label for="name">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
     <input id="name" maxlength="20" autocomplete="off" placeholder="例：María、小明">
     <div class="err" id="name-err"></div>
@@ -114,7 +114,7 @@
 
 <!-- ── 地圖 ── -->
 <div id="hud">
-  <span class="title">🗺️ 台灣生活地圖</span>
+  <span class="title" id="hud-title">台灣生存日記</span>
   <button id="who" title="改名字／語言 · Cambiar nombre o idioma"></button>
   <button id="btn-music" onclick="Music.toggle()">🎵</button>
   <button id="btn-reset"></button>
@@ -240,7 +240,7 @@ const SCENES = [
   /* 沒有建築的場景：路上會隨機冒出「❗」，走過去就觸發 */
   { id: 'street',      zh: '路上突發事件', es: 'Imprevistos en la calle', en: 'Street surprises', emoji: '❗', virtual: true }
 ];
-/* 還不能玩的地點（不算進「這週完成」）
+/* 還不能玩的地點（不算進星星）
    soon：🚧 維修中（有房子）；build：建造中（工地）。走到門口只會顯示「還在準備中，敬請期待」
    之後要開放：把它搬到 SCENES，slot 不變 */
 const COMING = [
@@ -286,10 +286,18 @@ function pushProgress() {
   if (!S.code) return;
   TWFB.when(fb => fb.saveProgress(S.code, { name: S.name, done: S.done }));
 }
-/* 兩邊的進度合在一起：同一個地方取比較高的分數 */
+/* 每個地點記「最好的紀錄」：最高分、最少錯誤（兩個分開記，所以星星和分數都只會變好） */
+function bestOf(a, b) {
+  if (!a) return { score: b.score, mistakes: b.mistakes || 0 };
+  return { score: Math.max(a.score, b.score), mistakes: Math.min(a.mistakes || 0, b.mistakes || 0) };
+}
+/* 星星：0 次錯誤 3 顆、1–5 次 2 顆、6 次以上 1 顆；沒玩過 0 顆 */
+function starsOf(r) { return !r ? 0 : (r.mistakes || 0) === 0 ? 3 : r.mistakes <= 5 ? 2 : 1; }
+function starText(n) { return '★'.repeat(n) + '☆'.repeat(3 - n); }
+/* 兩邊的進度合在一起（例如換裝置） */
 function mergeDone(a, b) {
   const out = { ...a };
-  for (const [k, v] of Object.entries(b || {})) if (v && typeof v.score === 'number' && (!out[k] || v.score > out[k].score)) out[k] = { score: v.score, mistakes: v.mistakes || 0 };
+  for (const [k, v] of Object.entries(b || {})) if (v && typeof v.score === 'number') out[k] = bestOf(out[k], v);
   return out;
 }
 /* 打開地圖時，把雲端的進度合進來（例如在別的裝置玩過） */
@@ -365,8 +373,14 @@ const SUGGEST = {
 function amiLine() {
   const N = S.name || '你';
   const next = SCENES.find(sc => !S.done[sc.id]);
-  if (!next) return [`${N}，這週的任務你都完成了，太厲害了！`, `${N}，这周的任务你都完成了，太厉害了！`, `${N}, zhè zhōu de rèn wù nǐ dōu wán chéng le, tài lì hài le!`,
-    `${N}, ¡terminaste todas las misiones de la semana! ¡Qué crack!`, `${N}, you finished every mission this week. Amazing!`];
+  if (!next) {
+    const more = SCENES.find(sc => starsOf(S.done[sc.id]) < 3);   // 都去過了：推薦還沒拿滿星星的地方
+    if (!more) return [`${N}，你拿到所有的星星了，太厲害了！`, `${N}，你拿到所有的星星了，太厉害了！`, `${N}, nǐ ná dào suǒ yǒu de xīng xing le, tài lì hài le!`,
+      `${N}, ¡conseguiste todas las estrellas! ¡Qué crack!`, `${N}, you got every star. Amazing!`];
+    const m = SUGGEST[more.id];
+    return [`嗨，${N}！要不要再${m[0]}？可以拿更多星星喔！`, `嗨，${N}！要不要再${m[1]}？可以拿更多星星喔！`, `hāi, ${N}! yào bú yào zài ${m[2]}? kě yǐ ná gèng duō xīng xing ō!`,
+      `¡Hola, ${N}! ¿Qué tal si otra vez ${m[3]}? ¡Puedes ganar más estrellas!`, `Hi, ${N}! Why don't you ${m[4]} again? You can earn more stars!`];
+  }
   const s = SUGGEST[next.id];
   return [`嗨，${N}！要不要${s[0]}？`, `嗨，${N}！要不要${s[1]}？`, `hāi, ${N}! yào bú yào ${s[2]}?`, `¡Hola, ${N}! ¿Qué tal si ${s[3]}?`, `Hi, ${N}! Why don't you ${s[4]}?`];
 }
@@ -801,7 +815,7 @@ function drawBuilding(b) {
   if (b.soon) { hazardSign(S.script === 'simp' ? '🚧 维修中' : '🚧 維修中', x + w / 2, roofY - 2); return; }   // 牌子掛在屋頂上緣，不擋到 emoji
   // 完成標記
   const r = S.done[sc.id];
-  if (r) pill('✓' + r.score, x + w - 24, roofY + 10, '#7de3a2', '#10381f');
+  if (r) pill(starText(starsOf(r)), x + w / 2, roofY - 2, '#1b1a22', '#ffd66b');   // 掛在屋頂上緣，不擋到 emoji
 }
 
 /* 黃黑斜紋的告示牌 */
@@ -929,12 +943,11 @@ function closeGame() {
 }
 /* 記下這一關的成績，關掉遊戲視窗 */
 function completeScene(d) {
-  const prev = S.done[d.scene];
-  if (!prev || d.score >= prev.score) S.done[d.scene] = { score: d.score, mistakes: d.mistakes };
+  S.done[d.scene] = bestOf(S.done[d.scene], d);
   save(); pushProgress();
   const sc = SCENES.find(s => s.id === d.scene);
   closeGame();
-  toast('✓ ' + (sc ? sc.zh : d.scene) + '：' + d.score + ' ' + X('puntos', 'points') + (d.mistakes ? ' · ' + d.mistakes + ' ' + X('errores', 'mistakes') : ' · ' + X('¡sin errores!', 'no mistakes!')));
+  toast('✓ ' + (sc ? sc.zh : d.scene) + '：' + d.score + ' ' + X('puntos', 'points') + (d.mistakes ? ' · ' + d.mistakes + ' ' + X('errores', 'mistakes') : ' · ' + X('¡sin errores!', 'no mistakes!')) + '  ' + starText(starsOf(d)));
   try { gtag('event', 'map_complete', { scene: d.scene, score: d.score }); } catch (e) {}
 }
 /* 遊戲送來的訊息：
@@ -965,14 +978,18 @@ function comingSoon(b) {
 }
 function updateHud() {
   bakeStatic();
-  const n = SCENES.filter(s => S.done[s.id]).length;
+  const simp = S.script === 'simp';
+  const stars = SCENES.reduce((t, s) => t + starsOf(S.done[s.id]), 0), maxStars = SCENES.length * 3;
+  const total = SCENES.reduce((t, s) => t + (S.done[s.id] ? Math.max(0, S.done[s.id].score) : 0), 0);
+  document.getElementById('hud-title').textContent = simp ? '台湾生存日记' : '台灣生存日記';
+  document.getElementById('intro-title').textContent = simp ? '台湾生存日记' : '台灣生存日記';
   document.getElementById('who').textContent = '👤 ' + S.name + (S.code ? ' · ' + S.code : '') + ' ✎';
   const cl = document.getElementById('code-line');
   cl.hidden = !S.code;
   if (S.code) cl.innerHTML = `你的代碼 · ${X('Tu código', 'Your code')}：<b>${S.code}</b><br><small>${(S.script === 'simp' ? '记下来，换装置时用。 ' : '記下來，換裝置時用。 ') + X('Anótalo para usarlo en otro dispositivo.', 'Write it down to use on another device.')}</small>`;
-  document.getElementById('wk-label').textContent = (S.script === 'simp' ? '这周完成' : '這週完成') + ' · ' + X('Esta semana', 'This week');
-  document.getElementById('wk-num').textContent = '⭐ ' + n + ' / ' + SCENES.length;
-  document.getElementById('wk-fill').style.width = (n / SCENES.length * 100) + '%';
+  document.getElementById('wk-label').textContent = '收集星星' + ' · ' + X('Estrellas', 'Stars');
+  document.getElementById('wk-num').textContent = '⭐ ' + stars + ' / ' + maxStars + ' · ' + (simp ? '总分' : '總分') + ' ' + total;
+  document.getElementById('wk-fill').style.width = (stars / maxStars * 100) + '%';
   document.getElementById('btn-reset').textContent = X('↻ Borrar progreso', '↻ Reset progress');
   document.getElementById('ov-close').textContent = '✕ ' + X('Salir', 'Exit');
   document.getElementById('help').textContent = X('Flechas / WASD para caminar · toca un edificio para ir a su puerta · toca a una persona para ver pinyin y traducción · si ves un ❗, acércate para ayudar', 'Arrow keys / WASD to walk · tap a building to go to its door · tap a speech bubble for pinyin and translation · if you see a ❗, walk next to it to help');

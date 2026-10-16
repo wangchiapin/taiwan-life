@@ -1,6 +1,6 @@
-# 台灣情境對話遊戲系列（Taiwan Week）
+# 台灣生存日記 · Sobrevive en Taiwán（Survive in Taiwan）
 
-> 飲料店、訂位、早餐店、診所、捷運、夜市、包裹、麵包店、街頭等情境對話遊戲
+> 2026-10-16 起的正式名稱（原「台灣生活地圖」）。飲料店、訂位、早餐店、診所、捷運、夜市、包裹、麵包店、街頭等情境對話遊戲
 
 - **網址：** https://wangchiapin.github.io/taiwan-life/
 - **Firebase 專案：** tiendadebebidas-d75ac
@@ -14,9 +14,11 @@
 
 ## 結構
 ```
-index.html          首頁＝台灣生活地圖（2026-10-16 起正式用地圖模式，原本的遊戲清單頁已刪除）：走到建築門口 → iframe 載入 games/<scene>/?embed=1 → 收 scene-complete
+index.html          首頁＝地圖（2026-10-16 起正式用地圖模式，原本的遊戲清單頁已刪除）：走到建築門口 → iframe 載入 games/<scene>/?embed=1 → 收 scene-complete
 map/index.html      舊的地圖網址，自動轉到首頁
                     20×28 格，畫面一次看 20×14 格，跟著玩家上下捲動。
+                    星星：每個地點記最好的紀錄（最高分、最少錯誤分開記）；0 次錯誤 ★★★、1–5 次 ★★、6 次以上 ★。
+                    上方進度條＝星星總數／（地點數×3）＋總分（每個地點最高分加總，負分算 0）。永久累積，不會每週重算。
                     還不能玩的地點放在 COMING（🚧 維修中／建造中），走到門口只顯示「還在準備中，敬請期待」；開放時搬到 SCENES，slot 不變
 games/<scene>/      每個遊戲：index.html + images/（檔名小寫 .jpg）
 shared/firebase.js  Firebase 設定（只放這裡）＋ window._FB（排行榜、成績紀錄、地圖進度）
