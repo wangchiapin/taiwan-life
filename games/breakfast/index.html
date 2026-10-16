@@ -876,7 +876,7 @@ const Game = defineGame({
       DINE: {
         clock: () => c.clock,
         dialogue: () => [L('（早餐做好了。）', '(El desayuno está listo.)', '(The breakfast is ready.)')],
-        options: ['請問內用還是外帶？', '好，我馬上做。'],
+        options: ['請問內用還是外帶？', '你的早餐好了喔！'],
         next: ch => {
           if (ch.startsWith('請問')) {
             if (c.saidDine) {
