@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>停車場 · Estacionar en Taiwán</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：parkinggame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "parkinggame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #1b2a33;
+    --red: #2c7a8c;        /* 主色；沿用範本的變數名稱 */
+    --red-dark: #1f5d6b;
+    --yolk: #f2b632;
+    --night: #1d2f3a;
+    --kraft: #d7e8ec;
+    --wall: #e8f2f4;
+    --paper: #ffffff;
+    --line: #cfe0e5;
+    --muted: #5a7480;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    margin: 0; min-height: 100vh; color: var(--ink);
+    background: #dcebee;
+    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
+    display: flex; justify-content: center; align-items: flex-start;
+    padding: 24px 16px 40px;
+  }
+  body.embed-boot #login-screen.active { display: none; }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  .screen.active { display: flex; }
+  /* ── 登入：麵包店招牌 ── */
+  .storefront { width: 100%; max-width: 360px; border-radius: 10px; overflow: hidden; }
+  .storefront .awning { height: 20px; background: repeating-linear-gradient(90deg, var(--red) 0 28px, #ffffff 28px 56px); }
+  .storefront .name { background: var(--night); color: var(--yolk); text-align: center; font-size: 30px; font-weight: 700; letter-spacing: 6px; padding: 12px 0; }
+  #login-screen .subtitle { margin: 0; color: var(--muted); font-size: 15px; }
+  .input-group input:focus { border-color: var(--red); }
+  .btn-primary {
+    padding: 14px 44px; font-size: 18px; font-weight: 700; font-family: inherit;
+    background: var(--red); color: #fff; border: none; border-radius: 999px; cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--red-dark); }
+  .flavor-text { color: var(--muted); font-size: 14px; line-height: 1.8; text-align: center; max-width: 420px; margin: 0; }
+  /* ── 遊戲 ── */
+  #game-window.active { display: flex; }
+  .chip { font-size: 13px; padding: 5px 10px; border-radius: 999px; background: var(--wall); white-space: nowrap; }
+  .btn-pinyin {
+    font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--paper); color: var(--red); border: 1.5px solid var(--red);
+  }
+  .btn-pinyin[aria-pressed="true"] { background: var(--red); color: #fff; }
+  #place-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px; background: var(--night); color: #fff;
+    border-bottom: 4px solid var(--yolk);
+  }
+  #place-bar.phone { background: var(--ami); }
+  #place-bar .icon { font-size: 22px; line-height: 1; }
+  #place-bar .who { font-weight: 700; font-size: 16px; }
+  #place-bar .status { font-size: 13px; opacity: .85; }
+  #place-bar .clock { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; }
+  #scene-placeholder {
+    width: 100%; max-width: 360px; aspect-ratio: 16 / 7;
+    border-radius: 12px; background: var(--wall);
+    display: none; place-items: center; font-size: 64px;
+  }
+  #npc-dialogue { padding: 14px 22px 4px; font-size: 21px; line-height: 2.1; }
+  #npc-dialogue .speaker { font-weight: 700; color: var(--red-dark); }
+  #npc-dialogue .speaker.ami { color: var(--ami); }
+  #npc-dialogue .speaker.me { color: var(--muted); }
+  #npc-dialogue .thought { color: var(--muted); font-size: 18px; }
+  ruby rt { color: var(--red); font-size: .5em; font-weight: 400; }
+  /* 購物清單 */
+  .list {
+    margin: 8px 0 10px; padding: 12px 16px; border-radius: 6px;
+    background: #fffdf3; border: 1px dashed #c9bfa4; font-size: 18px; line-height: 1.95;
+  }
+  .list .t { font-weight: 700; color: var(--red-dark); font-size: 15px; display: flex; align-items: center; gap: 2px; }
+  .list .t .grow { flex: 1; }
+  .list .done { text-decoration: line-through; color: var(--muted); }
+  .list .rule { color: var(--muted); font-size: 15px; }
+  @media (hover: hover) {
+    .opt:hover { background: var(--ink); color: #fff; }
+    .opt:hover rt { color: #ffd9cf; }
+  }
+  .opt.deal { border-color: var(--red); background: var(--red); color: #fff; }
+  .opt.deal rt { color: #ffe1d8; }
+  .opt.deal:hover { background: var(--red-dark); }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--yolk); outline-offset: 2px; }
+  /* ── 排行榜 ── */
+  .congrats-banner { background: var(--yolk); color: var(--ink); }
+  .no-rank-banner { background: var(--wall); color: var(--muted); }
+  #lb-table th { background: var(--ink); color: #fff; font-weight: 500; }
+  #lb-table th, #lb-table td { padding: 9px 8px; text-align: center; border-bottom: 1px solid var(--line); }
+  #lb-table tr.highlight-row { background: #fdeccb; font-weight: 700; }
+  @media (max-width: 600px) {
+    .screen { padding: 26px 18px; }
+    .top-bar { gap: 6px; padding: 10px 12px; }
+    .chip { font-size: 12px; padding: 4px 8px; }
+    .btn-pinyin { font-size: 12px; padding: 5px 10px; }
+    #npc-dialogue { font-size: 19px; padding: 12px 16px 2px; }
+    #options-area { grid-template-columns: 1fr; padding: 14px 14px 20px; }
+    #npc-avatar { max-width: 240px; }
+  }
+  /* ── 句子翻譯 ── */
+  .tr-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; margin-left: 6px; padding: 0; vertical-align: middle;
+    border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper); color: var(--red); cursor: pointer;
+  }
+  .tr-btn:hover { background: #fdeccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  @media (max-width: 560px) {
+    .tr-btn { width: 34px; height: 34px; margin-left: 8px; }
+    .tr-btn svg { width: 17px; height: 17px; }
+  }
+  .tr-btn.spk.speaking { background: var(--red); color: #fff; border-color: var(--red); }
+  .v-word .tr-btn { margin-left: 4px; }
+  .tr-pop {
+    position: fixed; width: min(340px, calc(100vw - 16px));
+    background: var(--paper); color: var(--ink); border: 1.5px solid var(--red); border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(60, 40, 30, .18); font-size: 15px; line-height: 1.6;
+  }
+  .tr-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 6px 6px 12px; background: var(--red); color: #fff; border-radius: 10px 10px 0 0;
+    font-size: 13px; cursor: move; touch-action: none; user-select: none;
+  }
+  .tr-lang {
+    flex: none; font-size: 11px; font-weight: 700; color: var(--red);
+    border: 1px solid var(--red); border-radius: 4px; padding: 0 4px; line-height: 1.5;
+  }
+  /* ── 本關單字（右側抽屜） ── */
+  .side-tab {
+    width: 36px; padding: 12px 8px; line-height: 1.25; text-align: center; word-break: break-all; border: none; border-radius: 12px 0 0 12px; cursor: pointer;
+    background: var(--yolk); color: var(--ink); font: inherit; font-weight: 700; font-size: 15px;
+    box-shadow: -2px 2px 10px rgba(60, 40, 30, .15);
+  }
+  .side-tab.hint { background: var(--ink); color: #fff; }
+  .side-tab .v-count { padding: 0 3px !important; min-width: 20px; font-size: 12px !important; white-space: nowrap; letter-spacing: -0.5px; }
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  #vocab-tab .v-count {
+    display: inline-block; margin-top: 6px;
+    background: var(--paper); border-radius: 999px; padding: 0 7px; font-size: 13px;
+  }
+  .drawer {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(320px, 88vw); z-index: 25;
+    background: var(--paper); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(60, 40, 30, .12);
+    transform: translateX(105%); transition: transform .25s ease; display: flex; flex-direction: column;
+  }
+  .drawer.open { transform: none; }
+  @media (prefers-reduced-motion: reduce) { .drawer { transition: none; } }
+  .h-sec { padding: 12px 16px 4px; font-size: 13px; font-weight: 700; color: var(--red); }
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+  .side-tab.log { background: #b5483d; color: #fff; }
+  #log-tab .v-count { display: inline-block; margin-top: 6px; background: var(--paper); color: #b5483d; border-radius: 999px; padding: 0 7px; font-size: 13px; }
+  .v-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 16px; border-bottom: 3px solid var(--yolk); }
+  .v-head b { font-size: 18px; }
+  .v-head small { color: var(--muted); }
+  .v-head button { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink); padding: 2px 6px; }
+  #vocab-list li { padding: 12px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+  .v-py { color: var(--red); font-size: 15px; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; border: 2px solid var(--red); border-radius: 999px; overflow: hidden; }
+  .seg button {
+    font: inherit; font-size: 15px; font-weight: 500; padding: 9px 0; cursor: pointer;
+    background: var(--paper); color: var(--red); border: none;
+  }
+  .seg button + button { border-left: 2px solid var(--red); }
+  .seg button[aria-pressed="true"] { background: var(--red); color: #fff; font-weight: 700; }
+  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
+  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
+  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
+  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
+
+  /* 指示牌（綠色招牌）、柱子牌 */
+  .sign { margin: 8px 0 12px; background: #17453d; color: #fff; border-radius: 10px; padding: 10px 14px; box-shadow: inset 0 0 0 3px #2d6a5f; }
+  .sign .sh { font-weight: 700; color: #f2d36b; margin-bottom: 4px; }
+  .sign .srow2 { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-top: 1px solid #2d6a5f; flex-wrap: wrap; }
+  .sign .srow2 b { flex: 1 1 140px; font-size: 17px; }
+  .sign .fl { background: #0f2f2a; color: #f2d36b; border-radius: 6px; padding: 0 8px; font-weight: 700; font-family: 'Courier New', monospace; }
+  .sign .n { background: #10322d; color: #7df0b5; padding: 2px 12px; border-radius: 6px; font-size: 18px; font-family: 'Courier New', monospace; font-variant-numeric: tabular-nums; }
+  .sign .n.full { color: #ff9a8a; }
+  .sign small { color: #bfe0d8; font-size: 13px; }
+  .sign .hc { background: #2457a8; border-radius: 6px; padding: 2px 10px; font-size: 15px; }
+  .sign ruby rt { color: #bfe0d8; }
+  .pillar { display: flex; justify-content: center; margin: 10px 0 14px; }
+  .pillar .pl { background: #f2b632; color: #1b2a33; border-radius: 10px; padding: 10px 26px; font-size: 34px; font-weight: 700; box-shadow: inset 0 0 0 4px #1b2a33; display: flex; gap: 12px; align-items: center; font-variant-numeric: tabular-nums; }
+  .pillar .pl i { font-style: normal; opacity: .6; }
+
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">停車場</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">停車場</h1>
+  <p class="subtitle" data-es="Estacionar el auto en Taiwán" data-en="Parking a car in Taiwan">Estacionar el auto en Taiwán</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    Ami 借你她的車，請你開去星光百貨。你要把車停進地下停車場、告訴她你停在哪裡，逛完以後還要繳停車費，再把車開出去。<br>
+    <span data-es="Ami te presta su auto para ir al centro comercial Xingguang. Tienes que estacionarlo en el sótano, decirle dónde quedó, y después de las compras pagar el estacionamiento y salir." data-en="Ami lends you her car to drive to the Starlight department store. You park it in the basement garage, tell her where it is, and after shopping you pay the parking fee and drive out.">Ami te presta su auto para ir al centro comercial Xingguang. Tienes que estacionarlo en el sótano, decirle dónde quedó, y después de las compras pagar el estacionamiento y salir.</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-list" aria-pressed="false" onclick="Game.toggleList()" data-es="📝 Mi situación" data-en="📝 My situation">📝 Mi situación</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">📱</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 15 名 · Top 15</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'parking', track: 'parking', settingsKey: 'parking_settings',
+  roles: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '機器': { pitch: 1 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+══════════════════════════════════════ */
+/* 讀音以教育部《重編國語辭典修訂本》為準；一、不的變調交給 pinyin-pro（toneSandhi）。
+   新增遊戲文字時，把套件讀錯的詞加在這裡。 */
+pinyinPro.customPinyin({
+  '星期': 'xīng qí', '期': 'qí', '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '還要': 'hái yào',
+  '還好': 'hái hǎo', '還多': 'hái duō', '還少': 'hái shǎo', '還你': 'huán nǐ',
+  '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '覺得': 'jué de',
+  '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan', '時間': 'shí jiān', '時候': 'shí hou',
+  '袋子': 'dài zi', '太太': 'tài tai', '先生': 'xiān sheng', '老闆': 'lǎo bǎn', '老闆娘': 'lǎo bǎn niáng',
+  '單子': 'dān zi', '東西': 'dōng xi', '告訴': 'gào su', '媽媽': 'mā ma', '爸爸': 'bà ba', '奶奶': 'nǎi nai', '弟弟': 'dì di', '妹妹': 'mèi mei',
+  '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '做得': 'zuò de',
+  '著': 'zhe', '只': 'zhǐ', '囉': 'luo', '啦': 'la', '了啦': 'le la', '耶': 'ye',
+  '意思': 'yì si', '關係': 'guān xi', '這個': 'zhè ge', '那個': 'nà ge',
+  '一個': 'yí ge', '兩個': 'liǎng ge', '一共': 'yí gòng',
+  '髮夾': 'fǎ jiá', '要切': 'yào qiē', '切開': 'qiē kāi', '來喔': 'lái ō', '看看': 'kàn kan', '再看看': 'zài kàn kan',
+  '便宜': 'pián yi', '划算': 'huá suàn', '洗手間': 'xǐ shǒu jiān', '廁所': 'cè suǒ', '殺價': 'shā jià', '雞排': 'jī pái',
+  '價錢': 'jià qián', '衣服': 'yī fu', '尺寸': 'chǐ cùn', '喜歡': 'xǐ huān', '漂亮': 'piào liang', '可愛': 'kě ài',
+  '三個': 'sān ge', '每個': 'měi ge', '現炸': 'xiàn zhá', '還剩': 'hái shèng', '欸': 'éi', '訊息': 'xùn xí',
+  '衣服和': 'yī fu hàn', '你和': 'nǐ hàn', '同事': 'tóng shì', '朋友': 'péng yǒu', '清單': 'qīng dān', '會合': 'huì hé', '晚餐': 'wǎn cān', '辛苦': 'xīn kǔ'
+});
+pinyinPro.customPinyin({
+
+  '停車場': 'tíng chē chǎng', '停車票': 'tíng chē piào', '停車費': 'tíng chē fèi', '停車': 'tíng chē', '停好': 'tíng hǎo', '車位': 'chē wèi', '愛心專用車位': 'ài xīn zhuān yòng chē wèi',
+  '愛心': 'ài xīn', '柵欄': 'zhà lán', '地下': 'dì xià', '繳費機': 'jiǎo fèi jī', '繳費': 'jiǎo fèi', '折抵': 'zhé dǐ', '發票': 'fā piào', '罰單': 'fá dān', '柱子': 'zhù zi',
+  '空位': 'kòng wèi', '滿了': 'mǎn le', '出口': 'chū kǒu', '入口': 'rù kǒu', '按鈕': 'àn niǔ', '喇叭': 'lǎ ba', '區': 'qū', '號': 'hào', '輪椅': 'lún yǐ',
+  '星光百貨': 'xīng guāng bǎi huò', '車道': 'chē dào', '百貨公司': 'bǎi huò gōng sī', '逛': 'guàng', '傳': 'chuán', '書店': 'shū diàn', '雨刷': 'yǔ shuā',
+  '掃描': 'sǎo miáo', '出場': 'chū chǎng', '十五分鐘': 'shí wǔ fēn zhōng', '一般': 'yì bān', '專用': 'zhuān yòng', '停': 'tíng', '一小時': 'yì xiǎo shí'
+
+});
+// 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* ══════════════════════════════════════
+   小工具
+══════════════════════════════════════ */
+const money = n => n + '元';
+const esM = n => `${n} dólares`;
+const enM = n => `NT$${n}`;
+
+/* 中文數字：zhNum(850) → 八百五十；zhNum(1000) → 一千；200 → 兩百 */
+const zhNum = n => {
+  n = Math.round(n);
+  if (n === 0) return '零';
+  const D = '零一二三四五六七八九';
+  const th = Math.floor(n / 1000), h = Math.floor(n / 100) % 10, te = Math.floor(n / 10) % 10, u = n % 10;
+  let s = '';
+  if (th) s += (th === 2 ? '兩' : D[th]) + '千';
+  if (h) s += (h === 2 ? '兩' : D[h]) + '百';
+  else if (th && (te || u)) s += '零';
+  if (te) s += (te === 1 && !th && !h ? '' : D[te]) + '十';
+  else if ((th || h) && u) s += '零';
+  if (u) s += D[u];
+  return s;
+};
+
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '機器': ['La máquina', 'The machine'] };
+const SPEAKER_RE = /^(Ami|機器|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['停車場', 'estacionamiento', 'parking lot'], ['愛心專用車位', 'espacio reservado (personas con discapacidad)', 'priority parking space'], ['停車費', 'tarifa de estacionamiento', 'parking fee'], ['折抵', 'descontar, compensar', 'offset, deduct'], ['發票', 'recibo de compra (factura)', 'receipt'], ['小時', 'hora', 'hour']],
+  ENTRANCE: [['入口', 'entrada', 'entrance'], ['柵欄', 'barrera', 'barrier gate'], ['按鈕', 'botón', 'button'], ['停車票', 'boleto de estacionamiento', 'parking ticket'], ['喇叭', 'bocina', 'car horn']],
+  FLOOR: [['地下一樓', 'sótano 1', 'basement level 1'], ['空位', 'espacio libre', 'free space'], ['滿了', 'lleno', 'full'], ['指示牌', 'letrero indicador', 'sign'], ['開到', 'conducir hasta', 'drive to']],
+  SPOT: [['一般車位', 'espacio normal', 'regular parking space'], ['愛心專用車位', 'espacio reservado', 'priority space'], ['輪椅', 'silla de ruedas', 'wheelchair'], ['車道', 'carril de circulación', 'driving lane'], ['擋住', 'bloquear', 'block']],
+  REMEMBER: [['區', 'zona', 'zone'], ['號', 'número', 'number'], ['柱子', 'columna, pilar', 'pillar'], ['傳', 'enviar', 'send'], ['停在', 'estacionar en', 'park at'], ['清楚', 'claro', 'clear']],
+  PAY: [['繳費機', 'máquina de pago', 'pay station'], ['折抵', 'descontar', 'deduct'], ['掃描', 'escanear', 'scan'], ['發票', 'recibo', 'receipt'], ['一共', 'en total', 'in total'], ['每小時', 'por hora', 'per hour']],
+  FIND_CAR: [['停在哪裡', 'dónde estacionaste', 'where parked'], ['地下二樓', 'sótano 2', 'basement level 2'], ['任務提示', 'pistas', 'hints'], ['記得', 'recordar', 'remember'], ['找到', 'encontrar', 'find']],
+  EXIT: [['出口', 'salida', 'exit'], ['放進', 'meter, introducir', 'put into'], ['機器', 'máquina', 'machine'], ['出場', 'salir (del estacionamiento)', 'exit the lot'], ['十五分鐘', 'quince minutos', 'fifteen minutes']],
+  END: [['罰單', 'multa', 'ticket (fine)'], ['雨刷', 'limpiaparabrisas', 'windshield wiper'], ['開車', 'conducir', 'drive'], ['穩', 'estable, seguro', 'steady'], ['晚餐', 'cena', 'dinner']],
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = (() => {
+  const enter = ['進場', 'entrar', 'entering'], park = ['停車', 'estacionar', 'parking'], msg = ['傳位置', 'avisar dónde', 'telling Ami where'], pay = ['繳費', 'pagar', 'paying'], find = ['找車', 'buscar el auto', 'finding the car'], out = ['出場', 'salir', 'leaving'];
+  return { ENTRANCE: enter, FLOOR: park, SPOT: park, REMEMBER: msg, PAY: pay, FIND_CAR: find, EXIT: out };
+})();
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = {
+  ENTRANCE: '開到入口', FLOOR: '往地下室開', SPOT: '開進這一層', REMEMBER: '下車', PAY: '逛完街，走到繳費機', FIND_CAR: '走去找車', EXIT: '開到出口', END: '開出去'
+};
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const PLACES = {
+  phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
+  gate: ['🚧', '停車場入口', 'Entrada del estacionamiento', 'Parking entrance', ''],
+  sign: ['🅿️', '停車場', 'Estacionamiento', 'Parking garage', ''],
+  garage: ['🚗', '地下停車場', 'Estacionamiento subterráneo', 'Underground garage', ''],
+  machine: ['💳', '自動繳費機', 'Máquina de pago', 'Pay station', ''],
+  exit: ['🚧', '停車場出口', 'Salida del estacionamiento', 'Parking exit', '']
+};
+const FL = f => `地下${CN[f]}樓`;                 // 地下一樓
+const FL_ES = f => `sótano ${f}`, FL_EN = f => `basement level ${f}`;
+const NZ = n => n === 2 ? '兩' : CN[n];
+
+
+/* ══════════════════════════════════════
+   任務提示：只列出 NPC 交代過的原話；不扣分，結果頁顯示看了幾次
+   各遊戲的 Game.hintSections() 回傳 [{ title, lines:[L(…)…] }]
+══════════════════════════════════════ */
+const Hints = {
+  open: false,
+  toggle(force) {
+    this.open = force ?? !this.open;
+    if (this.open) { Vocab.toggle(false); Log.toggle(false); Game.hintViews += 1; this.render(); }
+    document.getElementById('hints').classList.toggle('open', this.open);
+    document.getElementById('hint-tab').setAttribute('aria-expanded', this.open);
+  },
+  render() {
+    if (!Game.task) return;
+    const r = s => Game.ruby(s);
+    const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
+    document.getElementById('hint-body').innerHTML = Game.hintSections().map(sec => `<div class="h-sec">${r(sec.title)}</div>` + sec.lines.map(item).join('')).join('');
+  }
+};
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+
+/* 結果頁（每個遊戲都一樣） */
+const resultCfg = () => ({
+  place: 'phone',
+  dialogue: () => {
+    const w = (zh, es, en) => zh + ' ' + X(es, en);
+    let msg = `【${w('任務成果', 'Resultados', 'Results')}】\n${w('玩家', 'Jugador', 'Player')}：${Game.N}\n${w('最後分數', 'Puntos', 'Score')}：${Game.score} 分\n` +
+      `${w('錯誤次數', 'Errores', 'Mistakes')}：${Game.mistakes} 次\n${w('時間', 'Tiempo', 'Time')}：${Game.elapsedTime} 秒\n` +
+      `${w('看任務提示', 'Pistas consultadas', 'Hints viewed')}：${Game.hintViews} 次\n\n${w('扣分原因', 'Penalizaciones', 'Penalties')}：`;
+    if (!Game.log.length) msg += '\n沒有扣分！' + X('¡Sin errores!', 'No mistakes!') + ' 🎉';
+    else Game.log.forEach((m, i) => { msg += `\n${i + 1}. ${m.zh} ${X(m.es, m.en)}（−10）`; });
+    return msg.split('\n').map(zh => ({ zh }));
+  },
+  options: () => ['查看排行榜 ' + X('Ver clasificación', 'See leaderboard')],
+  next: () => showLeaderboard()
+});
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,   // 過場的話或選錯時的提示（台詞陣列）
+  hintViews: 0,                  // 打開任務提示的次數
+  log: [],                       // 錯誤紀錄（整局）
+  feedback: [],                  // 這一步的回饋卡
+  visit: 0,                      // 第幾次進入關卡（標出「現在這關」的錯誤）
+  att: {},                       // 每一關選了幾次（第一次就對才給綠卡）
+  cash: null,                    // 錢包（有的遊戲才用；null 就不顯示）
+  onStart() { this.updateCash(); },
+  updateCash() {
+    const e = document.getElementById('cash-badge');
+    e.textContent = (this.cash == null || ['START', 'END', 'RESULT'].includes(this.state)) ? '' : '💰 ' + money(this.cash);
+  },
+  /* ── 位置列：PLACES[key] = [圖示, 中文, 西文, 英文, class] ── */
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+
+  IMAGES: {
+    START: ['images/start.jpg', '🚗'], ENTRANCE: ['images/entrance.jpg', '🚧'], FLOOR: ['images/sign.jpg', '🅿️'], SPOT: ['images/spot.jpg', '♿'],
+    REMEMBER: ['images/pillar.jpg', '🔢'], PAY: ['images/machine.jpg', '💳'], FIND_CAR: ['images/garage.jpg', '🚗'], EXIT: ['images/exit.jpg', '🚧'],
+    END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+  },
+  wrongSpot: false,
+  sent: null,          // 你傳給 Ami 的位置訊息
+
+  setup() {
+    const rate = pick([30, 40, 50]), h = pick([4, 5]), R = pick([520, 680, 880, 1200, 1500]), d = R >= 1000 ? 2 : 1;
+    const floor = pick([1, 2, 3]), zone = pick(['A', 'B', 'C']), n = 21 + Math.floor(Math.random() * 18);
+    this.task = {
+      rate, h, R, d, floor, zone, n, n2: n + 10,
+      fee: rate * (h - d), noDisc: rate * h, over: rate * (h - d - 1),
+      free: { 1: 0, 2: 0, 3: 0, [floor]: 8 + Math.floor(Math.random() * 18) },
+      otherFloor: pick([1, 2, 3].filter(f => f !== floor)), otherZone: pick(['A', 'B', 'C'].filter(z => z !== zone)),
+      rot: Math.floor(Math.random() * 3)
+    };
+  },
+  locZh(f = this.task.floor, z = this.task.zone, n = this.task.n) { return `${FL(f)}，${z}區，${zhNum(n)}號`; },
+  locEs(f = this.task.floor, z = this.task.zone, n = this.task.n) { return `${FL_ES(f)}, zona ${z}, número ${n}`; },
+  locEn(f = this.task.floor, z = this.task.zone, n = this.task.n) { return `${FL_EN(f)}, zone ${z}, number ${n}`; },
+
+  amiLines() {
+    const N = this.N, t = this.task;
+    return [
+      L(`Ami：${N}，我在三樓的書店等你。你先把車停好。`, `${N}, te espero en la librería del tercer piso. Primero estaciona el auto.`, `${N}, I'll wait at the bookstore on the 3rd floor. Park the car first.`),
+      L('Ami：停車場在地下室。要停一般車位，不要停愛心專用車位喔！', 'El estacionamiento está en el sótano. Usa un espacio normal, ¡no uno reservado «de corazón» para personas con discapacidad!', "The parking is in the basement. Use a regular space — not a priority \"heart\" space for people with disabilities!"),
+      L('Ami：停好車以後，傳訊息告訴我你停在哪裡，這樣等一下我們才找得到車。', 'Cuando termines, mándame un mensaje diciendo dónde estacionaste, para que después podamos encontrar el auto.', "Once you've parked, message me where you parked so we can find the car later."),
+      L(`Ami：我們大概會逛${NZ(t.h)}個小時。這裡每小時停車${t.rate}元；發票滿五百元折抵一小時，滿一千元折抵兩小時。`,
+        `Vamos a estar unas ${t.h} horas. Aquí se paga ${esM(t.rate)} por hora; un recibo de ${esM(500)} o más descuenta 1 hora, y de ${esM(1000)} o más, 2 horas.`,
+        `We'll be shopping about ${t.h} hours. Parking is ${enM(t.rate)} per hour; a receipt of ${enM(500)} or more takes off 1 hour, and ${enM(1000)} or more takes off 2 hours.`)
+    ];
+  },
+  hintSections() {
+    const ORDER = ['START', 'ENTRANCE', 'FLOOR', 'SPOT', 'REMEMBER', 'PAY', 'FIND_CAR', 'EXIT', 'END', 'RESULT'];
+    const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
+    const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
+    if (at('PAY') && this.sent) out.push({ title: '你傳給 Ami 的訊息', lines: [this.sent] });
+    return out;
+  },
+
+  /* ── 畫面元件 ── */
+  listHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    const rows = [
+      { zh: '目的地：星光百貨（Ami在三樓的書店）', es: 'Destino: centro comercial Xingguang (Ami está en la librería del 3.er piso)', en: 'Destination: Starlight department store (Ami is at the 3rd-floor bookstore)' },
+      { zh: '要停：一般車位，不要停愛心專用車位', es: 'Estacionar: espacio normal, no el reservado', en: 'Park: a regular space, not a priority space' },
+      { zh: `預計逛：${NZ(t.h)}個小時；每小時${t.rate}元`, es: `Tiempo: unas ${t.h} horas; ${esM(t.rate)} por hora`, en: `Time: about ${t.h} hours; ${enM(t.rate)} per hour` },
+      { zh: '發票折抵：滿五百元折一小時，滿一千元折兩小時', es: 'Descuento: recibo de 500 → 1 hora; de 1000 → 2 horas', en: 'Receipt discount: 500 → 1 hour off; 1,000 → 2 hours off' }
+    ];
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` +
+      rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 招牌元素 1：各樓層空位顯示牌 */
+  floorSignHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    return `<div class="sign"><div class="sh">🅿️ ${r('空位')}</div>` + [1, 2, 3].map(f => {
+      const n = t.free[f];
+      return `<div class="srow2"><span class="fl">B${f}</span><b>${r(FL(f))}</b>` + (n ? `<span class="n">${n}</span>` : `<span class="n full">${r('滿')}</span>`) + '</div>';
+    }).join('') + '</div>';
+  },
+  spotSignHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    return `<div class="sign"><div class="sh">${r(FL(t.floor))}</div>` +
+      `<div class="srow2"><b>${r(t.zone + '區')}</b><span class="n">${t.n}</span><span class="n">${t.n + 1}</span><small>${r('空位')}</small></div>` +
+      `<div class="srow2"><b>${r(t.zone + '區')}</b><span class="n">1</span><span class="hc">♿ ${r('愛心專用')}</span></div></div>`;
+  },
+  /* 招牌元素 2：柱子上的牌子 */
+  pillarHTML() {
+    const t = this.task;
+    return `<div class="pillar"><div class="pl"><span>B${t.floor}</span><i>·</i><span>${t.zone}</span><i>·</i><span>${t.n}</span></div></div>`;
+  },
+  machineHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    return `<div class="sign"><div class="sh">💳 ${r('自動繳費機')}</div>` +
+      `<div class="srow2"><b>${r('停車時間')}</b><span class="n">${t.h}</span><small>${r('小時')}</small></div>` +
+      `<div class="srow2"><b>${r('每小時')}</b><span class="n">${t.rate}</span><small>${r('元')}</small></div>` +
+      `<div class="srow2"><b>${r('發票')}</b><span class="n">${t.R}</span><small>${r('元')}</small></div></div>`;
+  },
+
+  /* ── 狀態設定 ── */
+  getConfig() {
+    const N = this.N, t = this.task;
+    const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const ami = (zh, es, en) => L(`Ami：${zh}`, es, en);
+    const okMsg = `我停在${Game.locZh()}。`;
+    const floorOpts = [1, 2, 3].map(f => `開到${FL(f)}`);
+
+    return {
+      /* ═══ Ami 的 LINE ═══ */
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你開著Ami借你的車，到了星光百貨的停車場入口。手機響了一聲，是Ami傳來的LINE。）', '(Llegas en el auto que te prestó Ami a la entrada del estacionamiento del centro comercial. Tu celular suena: es un LINE de Ami.)', "(You drive up in the car Ami lent you to the parking entrance of the department store. Your phone buzzes — a LINE from Ami.)"),
+          ...Game.amiLines(),
+          L('我：好，我先去停車！', '¡Bien, voy a estacionar!', "OK, I'll go park!")
+        ],
+        options: ['開進停車場'],
+        next: () => { Game.startTimer(); Game.state = 'ENTRANCE'; }
+      },
+
+      /* ═══ 入口：拿停車票 ═══ */
+      ENTRANCE: {
+        place: 'gate',
+        dialogue: () => [L('（入口的柵欄擋住了路。旁邊有一台機器，上面有一個按鈕。）', '(La barrera te cierra el paso. A un lado hay una máquina con un botón.)', '(A barrier blocks the way. Next to it is a machine with a button.)')],
+        options: () => rot(['按按鈕，拿停車票。', '直接開過去。', '按喇叭，叫人來開門。']),
+        next: c => {
+          if (c !== '按按鈕，拿停車票。') {
+            Game.addMistake(c === '直接開過去。'
+              ? M('柵欄是關著的，要先拿停車票，柵欄才會升起來。', 'La barrera está cerrada: primero hay que sacar el boleto para que suba.', 'The barrier is down — you need to take a parking ticket first for it to go up.')
+              : M('不用按喇叭，這是自動的，按按鈕拿票就可以了。', 'No hace falta tocar la bocina: es automático, basta con pulsar el botón y tomar el boleto.', "No need to honk — it's automatic. Just press the button and take the ticket."));
+            return;
+          }
+          goodFirst('ENTRANCE', '很好！進停車場要先拿停車票，出去的時候會用到。', '¡Muy bien! Al entrar al estacionamiento se toma el boleto: lo usarás para salir.', 'Good! Take a parking ticket when you enter — you will need it to leave.');
+          Game.thought = [L('（機器「嗶」一聲，吐出一張停車票，柵欄升起來了。）', '(La máquina hace «bip», saca un boleto y la barrera sube.)', '(The machine beeps, prints a parking ticket, and the barrier rises.)')];
+          Game.state = 'FLOOR';
+        }
+      },
+
+      /* ═══ 找有空位的樓層 ═══ */
+      FLOOR: {
+        place: 'sign',
+        html: () => Game.floorSignHTML(),
+        dialogue: () => [L('（地下室的指示牌，顯示每一層還有多少空位。）', '(El letrero del sótano muestra cuántos espacios libres quedan en cada nivel.)', '(The sign in the basement shows how many free spaces each level has.)')],
+        options: () => rot(floorOpts),
+        next: c => {
+          const f = floorOpts.indexOf(c) + 1;
+          if (f !== t.floor) {
+            Game.addMistake(M(`${FL(f)}已經滿了，沒有空位。`, `El ${FL_ES(f)} ya está lleno: no hay espacios libres.`, `${FL_EN(f)[0].toUpperCase() + FL_EN(f).slice(1)} is full — no free spaces.`),
+              [L(`（你開到${FL(f)}，每個位子都停了車，只好開回去。）`, `(Bajas al ${FL_ES(f)}: todos los espacios están ocupados, así que subes de nuevo.)`, `(You drive down to ${FL_EN(f)}: every space is taken, so you drive back.)`)]);
+            return;
+          }
+          goodFirst('FLOOR', '你看得很仔細！「滿」就是沒有空位了。', '¡Qué atento! «滿» significa que ya no hay espacios.', 'Sharp eyes! "滿" means there are no spaces left.');
+          Game.thought = [L(`（你開到${FL(t.floor)}。）`, `(Bajas al ${FL_ES(t.floor)}.)`, `(You drive down to ${FL_EN(t.floor)}.)`)];
+          Game.state = 'SPOT';
+        }
+      },
+
+      /* ═══ 選車位：一般車位，不是愛心專用車位 ═══ */
+      SPOT: {
+        place: 'garage',
+        html: () => Game.spotSignHTML(),
+        dialogue: () => [L('（這一層還有幾個空位。）', '(Quedan algunos espacios libres en este nivel.)', '(There are a few free spaces on this level.)')],
+        options: () => rot([`停在${t.zone}區${zhNum(t.n)}號。`, `停在${t.zone}區一號，旁邊有輪椅的標誌。`, '停在車道中間，先停一下。']),
+        next: c => {
+          if (c !== `停在${t.zone}區${zhNum(t.n)}號。`) {
+            if (c.includes('輪椅')) Game.wrongSpot = true;
+            Game.addMistake(c.includes('輪椅')
+              ? M('有輪椅標誌的是愛心專用車位，只有身心障礙者可以停。', 'El espacio con el símbolo de silla de ruedas es reservado: solo pueden usarlo personas con discapacidad.', 'A space with the wheelchair sign is a priority space — only for people with disabilities.')
+              : M('車道上不能停車，會擋住別人。', 'No se puede estacionar en el carril de circulación: bloquearías a los demás.', "You can't park in the driving lane — you'd block everyone else."));
+            return;
+          }
+          goodFirst('SPOT', '很好！你停在一般車位，沒有停愛心專用車位。', '¡Muy bien! Estacionaste en un espacio normal, no en el reservado.', 'Good! You parked in a regular space, not the priority one.');
+          Game.thought = [L('（你把車停好，下了車。）', '(Estacionas el auto y bajas.)', '(You park the car and get out.)')];
+          Game.state = 'REMEMBER';
+        }
+      },
+
+      /* ═══ 傳位置給 Ami ═══ */
+      REMEMBER: {
+        place: 'phone',
+        html: () => Game.pillarHTML(),
+        dialogue: () => [
+          L('（旁邊的柱子上有一個牌子，寫著這裡的位置。）', '(En el pilar de al lado hay un letrero con la ubicación.)', '(On the pillar next to you is a sign showing where you are.)'),
+          ami('你停好了嗎？你停在哪裡？', '¿Ya estacionaste? ¿Dónde quedó?', 'Did you park? Where are you parked?')
+        ],
+        options: () => rot([okMsg, '我停在地下室，很多車的地方。', `我停在${Game.locZh(t.floor, t.zone, t.n2)}。`]),
+        next: c => {
+          if (c !== okMsg) {
+            Game.addMistake(c.includes('很多車')
+              ? M('Ami要知道哪一層、哪一區、幾號，說得清楚才找得到。', 'Ami necesita saber el nivel, la zona y el número; solo así se encuentra.', 'Ami needs the level, the zone and the number — only then can you find it.')
+              : M(`柱子上寫的是${t.n}號，不是${t.n2}號。`, `En el pilar dice número ${t.n}, no ${t.n2}.`, `The pillar says number ${t.n}, not ${t.n2}.`));
+            return;
+          }
+          goodFirst('REMEMBER', '說得很清楚！哪一層、哪一區、幾號，都說到了。', '¡Lo dijiste muy claro! Nivel, zona y número.', 'Clearly said! Level, zone and number — all there.');
+          Game.sent = L(`我：${okMsg}`, `Estoy en ${Game.locEs()}.`, `I'm at ${Game.locEn()}.`);
+          Game.thought = [ami('好，我知道了！我們逛完就去找車。', '¡Bien, entendido! Después de las compras vamos a buscar el auto.', "Got it! We'll go find the car after shopping."),
+            L(`（你們在百貨公司逛了${NZ(t.h)}個小時。）`, `(Pasan ${t.h} horas en el centro comercial.)`, `(You spend ${t.h} hours in the department store.)`)];
+          Game.state = 'PAY';
+        }
+      },
+
+      /* ═══ 自動繳費機：發票折抵 ═══ */
+      PAY: {
+        place: 'machine',
+        html: () => Game.machineHTML(),
+        dialogue: () => [
+          L('（你們走到一樓的自動繳費機，把停車票放進去。）', '(Llegan a la máquina de pago de la planta baja y meten el boleto.)', '(You walk to the pay station on the ground floor and insert the ticket.)'),
+          ami(`我們今天買了${t.R}元的東西，發票在這裡。`, `Hoy compramos ${esM(t.R)} en cosas; aquí está el recibo.`, `We bought ${enM(t.R)} worth of things today; here's the receipt.`)
+        ],
+        options: () => rot([`掃描發票，付${t.fee}元。`, `不掃描發票，付${t.noDisc}元。`, `掃描發票，付${t.over}元。`]),
+        next: c => {
+          if (c !== `掃描發票，付${t.fee}元。`) {
+            Game.addMistake(c.startsWith('不掃描')
+              ? M('有發票可以折抵，要掃描發票，這樣比較便宜。', 'Con el recibo se puede descontar: hay que escanearlo para pagar menos.', 'The receipt gives you a discount — scan it to pay less.')
+              : M(`發票${t.R}元，折抵${t.d}小時：(${t.h} − ${t.d}) × ${t.rate} = ${t.fee}元。`, `Recibo de ${esM(t.R)}: descuenta ${t.d} hora(s): (${t.h} − ${t.d}) × ${t.rate} = ${t.fee}.`, `A ${enM(t.R)} receipt takes off ${t.d} hour(s): (${t.h} − ${t.d}) × ${t.rate} = ${t.fee}.`));
+            return;
+          }
+          goodFirst('PAY', '你算得很對！發票折抵以後，要付的錢比較少。', '¡Calculaste bien! Con el descuento del recibo se paga menos.', 'You did the math right! With the receipt discount you pay less.');
+          Game.thought = [L(`（你付了${t.fee}元。機器說：「請在十五分鐘內出場。」）`, `(Pagas ${esM(t.fee)}. La máquina dice: «Salga en un plazo de quince minutos».)`, `(You pay ${enM(t.fee)}. The machine says: "Please exit within fifteen minutes.")`)];
+          Game.state = 'FIND_CAR';
+        }
+      },
+
+      /* ═══ 找車：回想你傳給 Ami 的位置 ═══ */
+      FIND_CAR: {
+        place: 'garage',
+        dialogue: () => [
+          L('（你們坐電梯到地下室。）', '(Bajan en el ascensor al sótano.)', '(You take the elevator down to the basement.)'),
+          ami('欸，我們的車停在哪裡呀？', '¿Eh, dónde estaba estacionado el auto?', 'Hey, where did we park the car?')
+        ],
+        options: () => rot([`在${Game.locZh()}。`, `在${Game.locZh(t.otherFloor, t.zone, t.n)}。`, `在${Game.locZh(t.floor, t.otherZone, t.n)}。`]),
+        next: c => {
+          if (c !== `在${Game.locZh()}。`) {
+            Game.addMistake(M(`你傳給Ami的訊息是：${Game.locZh()}。（看「任務提示」）`, `Tu mensaje a Ami decía: ${Game.locEs()}. (Mira las «pistas».)`, `Your message to Ami said: ${Game.locEn()}. (Check the hints.)`),
+              [L(`（你們走到${c.slice(1, -1)}，那裡沒有Ami的車。）`, '(Van hasta allá, pero ahí no está el auto de Ami.)', "(You walk over, but Ami's car isn't there.)")]);
+            return;
+          }
+          goodFirst('FIND_CAR', '你記得很清楚！', '¡Lo recordabas muy bien!', 'You remembered it perfectly!');
+          Game.thought = [L('（你們找到車，上車了。）', '(Encuentran el auto y suben.)', '(You find the car and get in.)')];
+          Game.state = 'EXIT';
+        }
+      },
+
+      /* ═══ 出口：把票放進機器 ═══ */
+      EXIT: {
+        place: 'exit',
+        dialogue: () => [L('（車開到出口，柵欄又擋住了路。）', '(Llegas a la salida y la barrera vuelve a cerrarte el paso.)', '(You reach the exit and the barrier blocks the way again.)')],
+        options: () => rot(['把停車票放進機器裡。', '直接開過去。', '用手把柵欄推開。']),
+        next: c => {
+          if (c !== '把停車票放進機器裡。') {
+            Game.addMistake(c === '直接開過去。'
+              ? M('要先把票放進機器，柵欄才會升起來。', 'Primero hay que meter el boleto en la máquina para que suba la barrera.', 'Put the ticket into the machine first, then the barrier will rise.')
+              : M('不可以推柵欄，會壞掉，也很危險，要用停車票。', 'No se debe empujar la barrera: se rompe y es peligroso. Hay que usar el boleto.', "Don't push the barrier — it could break and it's dangerous. Use the ticket."));
+            return;
+          }
+          goodFirst('EXIT', '沒錯！已經繳過費了，把票放進去就可以出去。', '¡Exacto! Como ya pagaste, metes el boleto y puedes salir.', "Right! You've already paid, so insert the ticket and you can leave.");
+          Game.stopTimer();
+          Game.state = 'END';
+        }
+      },
+
+      /* ═══ 結局 ═══ */
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = !Game.wrongSpot && Game.mistakes <= 2;
+          track('game_complete', { game: 'parking', score: Game.score, elapsed: Game.elapsedTime });
+          return Game._endGood ? [
+            L('（柵欄升起來了，你把車開出停車場。）', '(La barrera sube y sacas el auto del estacionamiento.)', '(The barrier rises and you drive out of the garage.)'),
+            ami(`太好了，${N}，你開車停車都很穩！我們去吃晚餐吧！`, `¡Genial, ${N}, manejas y estacionas con mucha seguridad! ¡Vamos a cenar!`, `Great, ${N} — you drive and park so steadily! Let's go have dinner!`)
+          ] : Game.wrongSpot ? [
+            L('（你們走回車子，發現雨刷上夾著一張罰單。）', '(Vuelven al auto y encuentran una multa bajo el limpiaparabrisas.)', '(You walk back to the car and find a ticket tucked under the wiper.)'),
+            ami('啊！因為停在愛心專用車位，被開罰單了！下次要停一般車位喔。', '¡Ay! ¡Por estacionar en el espacio reservado nos pusieron una multa! La próxima vez, un espacio normal.', "Oh no! We got a fine for parking in the priority space! Next time, a regular space.")
+          ] : [
+            L('（你把車開出停車場。）', '(Sacas el auto del estacionamiento.)', '(You drive out of the garage.)'),
+            ami('辛苦了！停車真的不容易！我們去吃晚餐吧！', '¡Gracias por el esfuerzo! Estacionar no es fácil. ¡Vamos a cenar!', "Thanks for your effort! Parking really isn't easy. Let's go have dinner!")
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: resultCfg()
+    };
+  },
+
+
+  /* ── 台詞：每一行一個 div，有翻譯的在句尾加朗讀和翻譯小圖示 ── */
+  formatText(content) {
+    const items = Array.isArray(content) ? content : [content];
+    return items.map(item => {
+      const m = item.zh.match(SPEAKER_RE);
+      let head = '', rest = item.zh;
+      if (m) {
+        const who = m[1] === '我' ? this.N : m[1];
+        const cls = m[1] === 'Ami' ? 'speaker ami' : m[1] === '我' ? 'speaker me' : 'speaker';
+        head = `<span class="${cls}">${this.ruby(who)}：</span>`;
+        rest = item.zh.slice(m[0].length);
+      }
+      let btn = '';
+      if (item.es) {
+        this._spk.push({ text: rest, who: m ? m[1] : null });
+        btn += spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+        this._tr.push(item);
+        btn += `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+      }
+      return `<div class="line">${head}${this.ruby(rest)}${btn}</div>`;
+    }).join('');
+  },
+
+  /* alt：第二張圖，和第一張輪流出現（像動畫）；開了「減少動態效果」就不動 */
+  setImage(src, emoji, alt) {
+    const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
+    this.stopAnim(); this._anim0 = src;
+    ph.textContent = emoji;
+    if (!src || this.missing.has(src)) { img.style.display = 'none'; ph.style.display = 'grid'; return; }
+    img.style.display = 'block'; ph.style.display = 'none';
+    if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+    const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (alt && !calm && !this.missing.has(alt)) {
+      const pre = new Image(); pre.onerror = () => this.missing.add(alt); pre.src = alt;   // 先載入，避免閃一下
+      this._anim = { alt }; let on = false;
+      this._animTimer = setInterval(() => {
+        if (this.missing.has(alt)) { this.stopAnim(); img.setAttribute('src', src); return; }
+        on = !on; img.setAttribute('src', on ? alt : src);
+      }, 600);
+    }
+  },
+
+  handleChoice(choice) {
+    if (this.state === '_TRANS') {          // 離開過場，進下一關
+      const t = this._trans; this._trans = null;
+      Tr.closeAll(); Speech.stop();
+      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
+      if (this.updateCash) this.updateCash();
+      if (document.getElementById('game-window').classList.contains('active')) this.render();
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
+    Speech.stop();
+    this.thought = null;
+    this.feedback = [];
+    const before = this.state;
+    this.att[before] = (this.att[before] || 0) + 1;
+    cfg.next(choice);
+    this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
+    if (this.thoughtFirst) this.visit += 1;
+    this.updateCash();
+    this.maybeTrans(before);
+    if (document.getElementById('game-window').classList.contains('active')) this.render();
+  },
+
+  render() {
+    if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果
+      const t = this._trans;
+      this.state = t.from;
+      this._transMode = true;
+      try { this.render(); } finally { this._transMode = false; this.state = '_TRANS'; }
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    if (!cfg) { console.error('狀態錯誤：' + this.state); return; }
+    const val = v => typeof v === 'function' ? v() : v;
+    this.setPlace(val(cfg.place) || 'gate');
+
+    // END 的 dialogue 會決定結局，所以只算一次
+    const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
+    let [src, emoji, alt] = this.IMAGES[this.state] || ['', '🚇'];
+    if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
+    this.setImage(src, emoji, alt);
+    Vocab.render(this.state);
+    if (Hints.open) Hints.render();
+    Log.render();
+
+    this._tr = []; this._spk = [];
+    let html = (this.showList && this.state !== 'START' && !['END', 'RESULT'].includes(this.state)) ? this.listHTML() : '';
+    html += cfg.html ? cfg.html() : '';
+    if (this._transMode) html = '';
+    const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
+    const main = this.formatText(raw);
+    html += this.thoughtFirst ? th + main : main + th;
+    html += this.feedbackHTML();
+    const box = document.getElementById('npc-dialogue');
+    box.innerHTML = html;
+    box.querySelectorAll('[data-tr]').forEach(btn => {
+      btn.onclick = () => Tr.open(this._tr[+btn.dataset.tr], btn);
+    });
+    box.querySelectorAll('[data-spk]').forEach(btn => {
+      btn.onclick = () => { const x = this._spk[+btn.dataset.spk]; Speech.speak(x.text, btn, x.who); };
+    });
+
+    if (cfg.mount && !this._transMode) cfg.mount(box);
+    const area = document.getElementById('options-area');
+    area.className = '';
+    area.innerHTML = '';
+    const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
+    area.classList.toggle('single', cfg.single ?? (opts.length === 1 || opts.some(o => o.length > 12)));
+    opts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt' + (false ? ' deal' : '');
+      btn.innerHTML = this.ruby(opt);
+      btn.onclick = () => this.handleChoice(opt);
+      area.appendChild(btn);
+    });
+  }
+});
+
+/* 從「重新開始」或地圖回來：直接用原本的名字開新的一局 */
+GameBoot();
+Music.init({ bpm: 112, tracks: [
+  { wave: 'square', vol: 0.24, notes: 'C5 . E5 G5 . E5 C5 . | D5 . F5 A5 . F5 D5 . | E5 . G5 B5 . G5 E5 . | D5 - C5 - G4 - . .' },
+  { wave: 'triangle', vol: 0.62, notes: 'C3 C3 . C3 G3 . C3 . | D3 D3 . D3 A3 . D3 . | E3 E3 . E3 B3 . E3 . | G2 G2 . G2 D3 . G2 .' },
+  { vol: 0.42, notes: 'k . h . s . h . k . h k s . h h' }] });
+</script>
+</body>
+</html>

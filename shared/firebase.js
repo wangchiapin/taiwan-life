@@ -28,7 +28,9 @@ export const db = getFirestore(app);
 export const SCORE_COLS = {
   drinks: 'drinkgame_scores', reserva: 'reservagame_scores', breakfast: 'breakfastgame_scores',
   parcel: 'parcelgame_scores', nightmarket: 'nightmarket_scores', bakery: 'bakerygame_scores',
-  clinic: 'clinicgame_scores', mrt: 'mrtgame_scores', street: 'streetgame_scores'
+  clinic: 'clinicgame_scores', mrt: 'mrtgame_scores', street: 'streetgame_scores',
+  cinema: 'cinemagame_scores', parking: 'parkinggame_scores', icecream: 'icecreamgame_scores',
+  bookstore: 'bookstoregame_scores', market: 'marketgame_scores', elevator: 'elevatorgame_scores'
 };
 
 /* 管理員頁要用的 Firestore 函式 */

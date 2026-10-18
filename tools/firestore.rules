@@ -13,14 +13,16 @@ service cloud.firestore {
 
     function scoreCols() {
       return ['drinkgame_scores', 'reservagame_scores', 'breakfastgame_scores', 'parcelgame_scores',
-              'nightmarket_scores', 'bakerygame_scores', 'clinicgame_scores', 'mrtgame_scores', 'streetgame_scores'];
+              'nightmarket_scores', 'bakerygame_scores', 'clinicgame_scores', 'mrtgame_scores', 'streetgame_scores',
+              'cinemagame_scores', 'parkinggame_scores', 'icecreamgame_scores', 'bookstoregame_scores', 'marketgame_scores', 'elevatorgame_scores'];
     }
     function scenes() {
-      return ['drinks', 'reserva', 'breakfast', 'parcel', 'nightmarket', 'bakery', 'clinic', 'mrt', 'street'];
+      return ['drinks', 'reserva', 'breakfast', 'parcel', 'nightmarket', 'bakery', 'clinic', 'mrt', 'street',
+              'cinema', 'parking', 'icecream', 'bookstore', 'market', 'elevator'];
     }
     function okName(n) { return n is string && n.size() > 0 && n.size() <= 30; }
 
-    // ── 9 個舊排行榜：任何人可以看、可以新增；不能修改；只有管理員能刪 ──
+    // ── 15 個排行榜：任何人可以看、可以新增；不能修改；只有管理員能刪 ──
     match /{col}/{id} {
       allow read: if col in scoreCols();
       allow create: if col in scoreCols()

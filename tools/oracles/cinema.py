@@ -1,0 +1,14 @@
+# 電影院 cinema：smoke.py 用的正解（照這個玩應該 100 分）
+ORACLE = """() => {
+  const t = Game.task, s = Game.state, nw = (n, w) => (n === 2 ? '兩' : CN[n]) + '張' + w;
+  const combo = (m, tm) => '晚上' + tm.zh + '的《' + m.zh + '》';
+  const m = {
+    START: '走進電影院', BOARD: combo(t.movie, t.time), TICKETS: nw(2, '全票') + '，' + nw(t.kids, '學生票') + '。',
+    SEATS: '確定這些位子', PAY: '給你' + (t.bills === 1 ? '一' : '兩') + '張一千元。',
+    CHANGE: Game.given === t.change ? '好，謝謝。' : '不好意思，你找錯了。',
+    SNACK: '一份' + SNACKS[t.snack][0] + '爆米花。', GATE: '好，這是電影票，這是學生證。',
+    FIND_HALL: '走進' + CN[t.hall] + '廳', SEAT_TAKEN: () => '不好意思，我們的票是' + seatZh(Game.chosen) + '，請你再看一下票。',
+    PHONE: '馬上把手機調成靜音。'
+  };
+  const v = m[s]; return typeof v === 'function' ? v() : (v ?? null);
+}"""

@@ -31,6 +31,12 @@
     <li><button data-k="clinic"><b>🏥 看醫生</b><small>Clínica</small></button></li>
     <li><button data-k="mrt"><b>🚇 搭捷運</b><small>Metro</small></button></li>
     <li><button data-k="street"><b>🚶 走在路上</b><small>En la calle</small></button></li>
+    <li><button data-k="cinema"><b>🎬 電影院</b><small>Cine</small></button></li>
+    <li><button data-k="parking"><b>🅿️ 停車場</b><small>Estacionamiento</small></button></li>
+    <li><button data-k="icecream"><b>🍦 冰淇淋店</b><small>Heladería</small></button></li>
+    <li><button data-k="bookstore"><b>📚 書店</b><small>Librería</small></button></li>
+    <li><button data-k="market"><b>🥬 菜市場</b><small>Mercado</small></button></li>
+    <li><button data-k="elevator"><b>🛗 搭電梯</b><small>Ascensor</small></button></li>
   </ul>
 </main>
 <script>
@@ -158,7 +164,31 @@ const SONGS = {
   street: { bpm: 132, tracks: [
   { wave: 'square', vol: 0.26, notes: 'A4 C5 E5 C5 D5 - C5 B4 | A4 - E4 - G4 - A4 - | C5 D5 E5 G5 E5 - D5 C5 | B4 - G4 - A4 - - .' },
   { wave: 'triangle', vol: 0.65, notes: 'A2 A2 . A2 E3 . A2 . | F2 F2 . F2 C3 . F2 . | C3 C3 . C3 G3 . C3 . | G2 G2 . G2 E3 . E3 .' },
-  { vol: 0.45, notes: 'k . h k s . h .' }] }
+  { vol: 0.45, notes: 'k . h k s . h .' }] },
+  cinema: { bpm: 100, tracks: [
+  { wave: 'triangle', vol: 0.3, notes: 'E5 . G5 . B5 . G5 E5 | D5 . F5 . A5 . F5 D5 | C5 . E5 . G5 . E5 C5 | B4 - A4 - G4 - . .' },
+  { wave: 'triangle', vol: 0.6, notes: 'E3 E3 . E3 B3 . E3 . | D3 D3 . D3 A3 . D3 . | C3 C3 . C3 G3 . C3 . | B2 B2 . B2 F3 . B2 .' },
+  { vol: 0.4, notes: 'k . h . s . h . k . h k s . h h' }] },
+  parking: { bpm: 112, tracks: [
+  { wave: 'square', vol: 0.24, notes: 'C5 . E5 G5 . E5 C5 . | D5 . F5 A5 . F5 D5 . | E5 . G5 B5 . G5 E5 . | D5 - C5 - G4 - . .' },
+  { wave: 'triangle', vol: 0.62, notes: 'C3 C3 . C3 G3 . C3 . | D3 D3 . D3 A3 . D3 . | E3 E3 . E3 B3 . E3 . | G2 G2 . G2 D3 . G2 .' },
+  { vol: 0.42, notes: 'k . h . s . h . k . h k s . h h' }] },
+  icecream: { bpm: 120, tracks: [
+  { wave: 'square', vol: 0.24, notes: 'G5 . E5 G5 . A5 G5 . | F5 . D5 F5 . G5 F5 . | E5 . C5 E5 . F5 E5 . | D5 - E5 - C5 - . .' },
+  { wave: 'triangle', vol: 0.62, notes: 'C3 C3 . C3 G3 . C3 . | D3 D3 . D3 A3 . D3 . | C3 C3 . C3 G3 . C3 . | G2 G2 . G2 D3 . G2 .' },
+  { vol: 0.42, notes: 'k . h . s . h . k . h k s . h h' }] },
+  bookstore: { bpm: 120, tracks: [
+  { wave: 'square', vol: 0.24, notes: 'G5 . E5 G5 . A5 G5 . | F5 . D5 F5 . G5 F5 . | E5 . C5 E5 . F5 E5 . | D5 - E5 - C5 - . .' },
+  { wave: 'triangle', vol: 0.62, notes: 'C3 C3 . C3 G3 . C3 . | D3 D3 . D3 A3 . D3 . | C3 C3 . C3 G3 . C3 . | G2 G2 . G2 D3 . G2 .' },
+  { vol: 0.42, notes: 'k . h . s . h . k . h k s . h h' }] },
+  market: { bpm: 120, tracks: [
+  { wave: 'square', vol: 0.24, notes: 'E5 . G5 E5 . A5 G5 . | D5 . F5 D5 . G5 F5 . | C5 . E5 C5 . F5 E5 . | D5 - G5 - C5 - . .' },
+  { wave: 'triangle', vol: 0.62, notes: 'C3 C3 . C3 G3 . C3 . | D3 D3 . D3 A3 . D3 . | C3 C3 . C3 G3 . C3 . | G2 G2 . G2 D3 . G2 .' },
+  { vol: 0.42, notes: 'k . h . s . h . k . h k s . h h' }] },
+  elevator: { bpm: 120, tracks: [
+  { wave: 'square', vol: 0.24, notes: 'C5 . E5 G5 . E5 C5 . | D5 . F5 A5 . F5 D5 . | E5 . G5 B5 . G5 E5 . | C5 - . - G4 - . .' },
+  { wave: 'triangle', vol: 0.62, notes: 'C3 C3 . C3 G3 . C3 . | D3 D3 . D3 A3 . D3 . | C3 C3 . C3 G3 . C3 . | G2 G2 . G2 D3 . G2 .' },
+  { vol: 0.42, notes: 'k . h . s . h . k . h k s . h h' }] }
 };
 Music.paint = () => {};
 let cur = null;

@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>看電影 · Ir al cine</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：cinemagame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "cinemagame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #2a2036;
+    --red: #7a4f96;        /* 主色；沿用範本的變數名稱 */
+    --red-dark: #5f3a78;
+    --yolk: #f2b632;
+    --night: #2a2038;
+    --kraft: #e6dcee;
+    --wall: #f1eaf6;
+    --paper: #ffffff;
+    --line: #ddd2e8;
+    --muted: #6a5c7a;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    margin: 0; min-height: 100vh; color: var(--ink);
+    background: #e7deef;
+    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
+    display: flex; justify-content: center; align-items: flex-start;
+    padding: 24px 16px 40px;
+  }
+  body.embed-boot #login-screen.active { display: none; }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  .screen.active { display: flex; }
+  /* ── 登入：麵包店招牌 ── */
+  .storefront { width: 100%; max-width: 360px; border-radius: 10px; overflow: hidden; }
+  .storefront .awning { height: 20px; background: repeating-linear-gradient(90deg, var(--red) 0 28px, #ffffff 28px 56px); }
+  .storefront .name { background: var(--night); color: var(--yolk); text-align: center; font-size: 30px; font-weight: 700; letter-spacing: 6px; padding: 12px 0; }
+  #login-screen .subtitle { margin: 0; color: var(--muted); font-size: 15px; }
+  .input-group input:focus { border-color: var(--red); }
+  .btn-primary {
+    padding: 14px 44px; font-size: 18px; font-weight: 700; font-family: inherit;
+    background: var(--red); color: #fff; border: none; border-radius: 999px; cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--red-dark); }
+  .flavor-text { color: var(--muted); font-size: 14px; line-height: 1.8; text-align: center; max-width: 420px; margin: 0; }
+  /* ── 遊戲 ── */
+  #game-window.active { display: flex; }
+  .chip { font-size: 13px; padding: 5px 10px; border-radius: 999px; background: var(--wall); white-space: nowrap; }
+  .btn-pinyin {
+    font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--paper); color: var(--red); border: 1.5px solid var(--red);
+  }
+  .btn-pinyin[aria-pressed="true"] { background: var(--red); color: #fff; }
+  #place-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px; background: var(--night); color: #fff;
+    border-bottom: 4px solid var(--yolk);
+  }
+  #place-bar.phone { background: var(--ami); }
+  #place-bar .icon { font-size: 22px; line-height: 1; }
+  #place-bar .who { font-weight: 700; font-size: 16px; }
+  #place-bar .status { font-size: 13px; opacity: .85; }
+  #place-bar .clock { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; }
+  #scene-placeholder {
+    width: 100%; max-width: 360px; aspect-ratio: 16 / 7;
+    border-radius: 12px; background: var(--wall);
+    display: none; place-items: center; font-size: 64px;
+  }
+  #npc-dialogue { padding: 14px 22px 4px; font-size: 21px; line-height: 2.1; }
+  #npc-dialogue .speaker { font-weight: 700; color: var(--red-dark); }
+  #npc-dialogue .speaker.ami { color: var(--ami); }
+  #npc-dialogue .speaker.me { color: var(--muted); }
+  #npc-dialogue .thought { color: var(--muted); font-size: 18px; }
+  ruby rt { color: var(--red); font-size: .5em; font-weight: 400; }
+  /* 購物清單 */
+  .list {
+    margin: 8px 0 10px; padding: 12px 16px; border-radius: 6px;
+    background: #fffdf3; border: 1px dashed #c9bfa4; font-size: 18px; line-height: 1.95;
+  }
+  .list .t { font-weight: 700; color: var(--red-dark); font-size: 15px; display: flex; align-items: center; gap: 2px; }
+  .list .t .grow { flex: 1; }
+  .list .done { text-decoration: line-through; color: var(--muted); }
+  .list .rule { color: var(--muted); font-size: 15px; }
+  @media (hover: hover) {
+    .opt:hover { background: var(--ink); color: #fff; }
+    .opt:hover rt { color: #ffd9cf; }
+  }
+  .opt.deal { border-color: var(--red); background: var(--red); color: #fff; }
+  .opt.deal rt { color: #ffe1d8; }
+  .opt.deal:hover { background: var(--red-dark); }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--yolk); outline-offset: 2px; }
+  /* ── 排行榜 ── */
+  .congrats-banner { background: var(--yolk); color: var(--ink); }
+  .no-rank-banner { background: var(--wall); color: var(--muted); }
+  #lb-table th { background: var(--ink); color: #fff; font-weight: 500; }
+  #lb-table th, #lb-table td { padding: 9px 8px; text-align: center; border-bottom: 1px solid var(--line); }
+  #lb-table tr.highlight-row { background: #fdeccb; font-weight: 700; }
+  @media (max-width: 600px) {
+    .screen { padding: 26px 18px; }
+    .top-bar { gap: 6px; padding: 10px 12px; }
+    .chip { font-size: 12px; padding: 4px 8px; }
+    .btn-pinyin { font-size: 12px; padding: 5px 10px; }
+    #npc-dialogue { font-size: 19px; padding: 12px 16px 2px; }
+    #options-area { grid-template-columns: 1fr; padding: 14px 14px 20px; }
+    #npc-avatar { max-width: 240px; }
+  }
+  /* ── 句子翻譯 ── */
+  .tr-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; margin-left: 6px; padding: 0; vertical-align: middle;
+    border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper); color: var(--red); cursor: pointer;
+  }
+  .tr-btn:hover { background: #fdeccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  @media (max-width: 560px) {
+    .tr-btn { width: 34px; height: 34px; margin-left: 8px; }
+    .tr-btn svg { width: 17px; height: 17px; }
+  }
+  .tr-btn.spk.speaking { background: var(--red); color: #fff; border-color: var(--red); }
+  .v-word .tr-btn { margin-left: 4px; }
+  .tr-pop {
+    position: fixed; width: min(340px, calc(100vw - 16px));
+    background: var(--paper); color: var(--ink); border: 1.5px solid var(--red); border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(60, 40, 30, .18); font-size: 15px; line-height: 1.6;
+  }
+  .tr-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 6px 6px 12px; background: var(--red); color: #fff; border-radius: 10px 10px 0 0;
+    font-size: 13px; cursor: move; touch-action: none; user-select: none;
+  }
+  .tr-lang {
+    flex: none; font-size: 11px; font-weight: 700; color: var(--red);
+    border: 1px solid var(--red); border-radius: 4px; padding: 0 4px; line-height: 1.5;
+  }
+  /* ── 本關單字（右側抽屜） ── */
+  .side-tab {
+    width: 36px; padding: 12px 8px; line-height: 1.25; text-align: center; word-break: break-all; border: none; border-radius: 12px 0 0 12px; cursor: pointer;
+    background: var(--yolk); color: var(--ink); font: inherit; font-weight: 700; font-size: 15px;
+    box-shadow: -2px 2px 10px rgba(60, 40, 30, .15);
+  }
+  .side-tab.hint { background: var(--ink); color: #fff; }
+  .side-tab .v-count { padding: 0 3px !important; min-width: 20px; font-size: 12px !important; white-space: nowrap; letter-spacing: -0.5px; }
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  #vocab-tab .v-count {
+    display: inline-block; margin-top: 6px;
+    background: var(--paper); border-radius: 999px; padding: 0 7px; font-size: 13px;
+  }
+  .drawer {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(320px, 88vw); z-index: 25;
+    background: var(--paper); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(60, 40, 30, .12);
+    transform: translateX(105%); transition: transform .25s ease; display: flex; flex-direction: column;
+  }
+  .drawer.open { transform: none; }
+  @media (prefers-reduced-motion: reduce) { .drawer { transition: none; } }
+  .h-sec { padding: 12px 16px 4px; font-size: 13px; font-weight: 700; color: var(--red); }
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+  .side-tab.log { background: #b5483d; color: #fff; }
+  #log-tab .v-count { display: inline-block; margin-top: 6px; background: var(--paper); color: #b5483d; border-radius: 999px; padding: 0 7px; font-size: 13px; }
+  .v-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 16px; border-bottom: 3px solid var(--yolk); }
+  .v-head b { font-size: 18px; }
+  .v-head small { color: var(--muted); }
+  .v-head button { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink); padding: 2px 6px; }
+  #vocab-list li { padding: 12px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+  .v-py { color: var(--red); font-size: 15px; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; border: 2px solid var(--red); border-radius: 999px; overflow: hidden; }
+  .seg button {
+    font: inherit; font-size: 15px; font-weight: 500; padding: 9px 0; cursor: pointer;
+    background: var(--paper); color: var(--red); border: none;
+  }
+  .seg button + button { border-left: 2px solid var(--red); }
+  .seg button[aria-pressed="true"] { background: var(--red); color: #fff; font-weight: 700; }
+  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
+  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
+  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
+  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
+
+  /* 電子看板、票價、電影票 */
+  .board { margin: 8px 0 12px; background: #1d1830; color: #fff; border-radius: 10px; padding: 10px 14px; box-shadow: inset 0 0 0 3px #3a3058; }
+  .board .bh { font-weight: 700; color: var(--yolk); margin-bottom: 4px; }
+  .board .brow { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid #3a3058; flex-wrap: wrap; }
+  .board .brow b { flex: 1 1 170px; font-size: 17px; }
+  .board .brow small { color: #cdbfe6; font-size: 13px; }
+  .board .tm { background: #2b2347; border-radius: 6px; padding: 2px 10px; font-variant-numeric: tabular-nums; font-family: 'Courier New', monospace; color: #7df0b5; font-size: 17px; }
+  .board ruby rt { color: #cdbfe6; }
+  .ticket { margin: 8px 0 10px; border: 2px dashed var(--red); border-radius: 10px; padding: 10px 14px; background: #fbf8ff; font-size: 17px; line-height: 1.95; }
+  .ticket .tk-h { font-weight: 700; color: var(--red-dark); }
+  /* 座位表 */
+  .seatmap { max-width: 520px; margin: 8px auto 12px; background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px 8px; }
+  .screenbar { text-align: center; background: linear-gradient(#cfc3e0, #ece6f4); color: var(--red-dark); border-radius: 4px 4px 50% 50% / 4px 4px 14px 14px; padding: 2px 0 4px; font-size: 14px; letter-spacing: 6px; margin: 0 6% 10px 70px; }
+  .srow { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+  .srow .rl { flex: 0 0 64px; font-size: 13px; color: var(--muted); text-align: right; padding-right: 6px; white-space: nowrap; }
+  .seat { flex: 1 1 0; min-width: 0; max-width: 56px; aspect-ratio: 1; border-radius: 8px 8px 4px 4px; border: 1.5px solid var(--red); background: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--red-dark); padding: 0; }
+  .seat.sold { background: #d9d3df; border-color: #cbc3d3; color: #9a90a6; cursor: not-allowed; }
+  .seat.sel { background: var(--red); color: #fff; }
+  .seat:not(.sold):not(.sel):hover { background: #efe6f7; }
+  .seatcount { margin-top: 6px; text-align: center; font-size: 14px; color: var(--muted); }
+  @media (max-width: 600px) { .srow .rl { flex-basis: 52px; font-size: 12px; } .screenbar { margin-left: 56px; } }
+
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">電影院</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">看電影</h1>
+  <p class="subtitle" data-es="Ir al cine en Taiwán" data-en="Going to the movies in Taiwan">Ir al cine en Taiwán</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    Ami 和她弟弟小宇約你週末晚上看電影。你先到電影院：看看板、買票、選座位、買爆米花，還要找到對的廳。<br>
+    <span data-es="Es sábado por la noche y tu amiga Ami y su hermano menor Xiaoyu quedaron en ir al cine contigo. Llegas primero: miras la cartelera, compras las entradas, eliges los asientos, compras palomitas y buscas la sala correcta." data-en="It's Saturday night and your friend Ami and her younger brother Xiaoyu are going to the movies with you. You get there first: check the board, buy the tickets, pick seats, buy popcorn, and find the right theater.">Es sábado por la noche y tu amiga Ami y su hermano menor Xiaoyu quedaron en ir al cine contigo. Llegas primero: miras la cartelera, compras las entradas, eliges los asientos, compras palomitas y buscas la sala correcta.</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-list" aria-pressed="false" onclick="Game.toggleList()" data-es="📝 Mi situación" data-en="📝 My situation">📝 Mi situación</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">📱</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 15 名 · Top 15</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'cinema', track: 'cinema', settingsKey: 'cinema_settings',
+  roles: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '售票員': { pitch: 1 }, '店員': { pitch: 1.05 }, '驗票員': { pitch: 1 },
+    '小宇': { pitch: 0.85, male: true, malePitch: 1 }, '阿伯': { pitch: 0.8, male: true, malePitch: 1 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+══════════════════════════════════════ */
+/* 讀音以教育部《重編國語辭典修訂本》為準；一、不的變調交給 pinyin-pro（toneSandhi）。
+   新增遊戲文字時，把套件讀錯的詞加在這裡。 */
+pinyinPro.customPinyin({
+  '星期': 'xīng qí', '期': 'qí', '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '還要': 'hái yào',
+  '還好': 'hái hǎo', '還多': 'hái duō', '還少': 'hái shǎo', '還你': 'huán nǐ',
+  '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '覺得': 'jué de',
+  '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan', '時間': 'shí jiān', '時候': 'shí hou',
+  '袋子': 'dài zi', '太太': 'tài tai', '先生': 'xiān sheng', '老闆': 'lǎo bǎn', '老闆娘': 'lǎo bǎn niáng',
+  '單子': 'dān zi', '東西': 'dōng xi', '告訴': 'gào su', '媽媽': 'mā ma', '爸爸': 'bà ba', '奶奶': 'nǎi nai', '弟弟': 'dì di', '妹妹': 'mèi mei',
+  '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '做得': 'zuò de',
+  '著': 'zhe', '只': 'zhǐ', '囉': 'luo', '啦': 'la', '了啦': 'le la', '耶': 'ye',
+  '意思': 'yì si', '關係': 'guān xi', '這個': 'zhè ge', '那個': 'nà ge',
+  '一個': 'yí ge', '兩個': 'liǎng ge', '一共': 'yí gòng',
+  '髮夾': 'fǎ jiá', '要切': 'yào qiē', '切開': 'qiē kāi', '來喔': 'lái ō', '看看': 'kàn kan', '再看看': 'zài kàn kan',
+  '便宜': 'pián yi', '划算': 'huá suàn', '洗手間': 'xǐ shǒu jiān', '廁所': 'cè suǒ', '殺價': 'shā jià', '雞排': 'jī pái',
+  '價錢': 'jià qián', '衣服': 'yī fu', '尺寸': 'chǐ cùn', '喜歡': 'xǐ huān', '漂亮': 'piào liang', '可愛': 'kě ài',
+  '三個': 'sān ge', '每個': 'měi ge', '現炸': 'xiàn zhá', '還剩': 'hái shèng', '欸': 'éi', '訊息': 'xùn xí',
+  '衣服和': 'yī fu hàn', '你和': 'nǐ hàn', '同事': 'tóng shì', '朋友': 'péng yǒu', '清單': 'qīng dān', '會合': 'huì hé', '晚餐': 'wǎn cān', '辛苦': 'xīn kǔ'
+});
+pinyinPro.customPinyin({
+
+  '小宇': 'xiǎo yǔ', '小美': 'xiǎo měi', '電影': 'diàn yǐng', '電影院': 'diàn yǐng yuàn', '電影票': 'diàn yǐng piào', '爆米花': 'bào mǐ huā',
+  '全票': 'quán piào', '學生票': 'xué shēng piào', '學生證': 'xué shēng zhèng', '大學生': 'dà xué shēng', '售票員': 'shòu piào yuán',
+  '驗票員': 'yàn piào yuán', '驗票口': 'yàn piào kǒu', '位子': 'wèi zi', '座位': 'zuò wèi', '對號入座': 'duì hào rù zuò', '放映廳': 'fàng yìng tīng',
+  '廳': 'tīng', '靜音': 'jìng yīn', '阿伯': 'ā bó', '看板': 'kàn bǎn', '場次': 'chǎng cì', '找錢': 'zhǎo qián', '找錯': 'zhǎo cuò',
+  '補差價': 'bǔ chā jià', '好看': 'hǎo kàn', '開頭': 'kāi tóu', '錯過': 'cuò guò', '可樂': 'kě lè', '晚上': 'wǎn shang', '一份': 'yí fèn',
+  '鹹的': 'xián de', '甜的': 'tián de', '連在一起': 'lián zài yì qǐ', '劇情': 'jù qíng', '那一場': 'nà yì chǎng', '哪一場': 'nǎ yì chǎng',
+  '排': 'pái', '號': 'hào', '一千': 'yì qiān', '兩百': 'liǎng bǎi', '兩千': 'liǎng qiān', '八百': 'bā bǎi', '七百': 'qī bǎi', '九百': 'jiǔ bǎi',
+  '星空下的約定': 'xīng kōng xià de yuē dìng', '彩虹島大冒險': 'cǎi hóng dǎo dà mào xiǎn', '深夜的鐘聲': 'shēn yè de zhōng shēng', '小熊與魔法森林': 'xiǎo xióng yǔ mó fǎ sēn lín'
+
+});
+// 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* ══════════════════════════════════════
+   小工具
+══════════════════════════════════════ */
+const money = n => n + '元';
+const esM = n => `${n} dólares`;
+const enM = n => `NT$${n}`;
+
+/* 中文數字：zhNum(850) → 八百五十；zhNum(1000) → 一千；200 → 兩百 */
+const zhNum = n => {
+  n = Math.round(n);
+  if (n === 0) return '零';
+  const D = '零一二三四五六七八九';
+  const th = Math.floor(n / 1000), h = Math.floor(n / 100) % 10, te = Math.floor(n / 10) % 10, u = n % 10;
+  let s = '';
+  if (th) s += (th === 2 ? '兩' : D[th]) + '千';
+  if (h) s += (h === 2 ? '兩' : D[h]) + '百';
+  else if (th && (te || u)) s += '零';
+  if (te) s += (te === 1 && !th && !h ? '' : D[te]) + '十';
+  else if ((th || h) && u) s += '零';
+  if (u) s += D[u];
+  return s;
+};
+
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '售票員': ['La persona de la taquilla', 'The ticket seller'], '店員': ['El personal del puesto de dulces', 'The snack-counter staff'],
+  '驗票員': ['El personal de control de entradas', 'The ticket checker'], '阿伯': ['El señor mayor', 'The older gentleman'], '小宇': ['Xiaoyu', 'Xiaoyu'] };
+const SPEAKER_RE = /^(Ami|售票員|店員|驗票員|阿伯|小宇|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['電影院', 'cine', 'cinema'], ['那一場', 'esa función', 'that showing'], ['學生證', 'credencial de estudiante', 'student ID'], ['連在一起', 'juntos (uno al lado del otro)', 'side by side'], ['爆米花', 'palomitas', 'popcorn'], ['鹹的', 'salado', 'salty one'], ['甜的', 'dulce', 'sweet one']],
+  BOARD: [['看板', 'cartelera', 'board'], ['場次', 'horarios de funciones', 'showtimes'], ['哪一場', '¿cuál función?', 'which showing?'], ['晚上', 'por la noche', 'in the evening'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask']],
+  TICKETS: [['全票', 'entrada completa', 'full-price ticket'], ['學生票', 'entrada de estudiante', 'student ticket'], ['張', 'clasificador de entradas', 'measure word for tickets'], ['兩', 'dos (antes de un clasificador)', 'two (before a measure word)'], ['票價', 'precio de la entrada', 'ticket price']],
+  SEATS: [['座位', 'asiento', 'seat'], ['排', 'fila', 'row'], ['號', 'número', 'number'], ['第', 'prefijo de número ordinal', 'ordinal prefix'], ['前面', 'adelante', 'the front'], ['連在一起', 'juntos', 'side by side']],
+  PAY: [['一共', 'en total', 'in total'], ['夠', 'alcanzar, ser suficiente', 'be enough'], ['一千元', 'mil dólares', 'one thousand dollars'], ['便宜一點', 'un poco más barato', 'a little cheaper'], ['固定', 'fijo', 'fixed']],
+  CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give the wrong change'], ['不好意思', 'disculpe', 'excuse me'], ['零錢', 'cambio', 'change (coins)'], ['算一下', 'calcular', 'work it out']],
+  SNACK: [['爆米花', 'palomitas', 'popcorn'], ['一份', 'una porción', 'one serving'], ['鹹的', 'salado', 'salty one'], ['甜的', 'dulce', 'sweet one'], ['點', 'pedir', 'order'], ['可樂', 'cola', 'cola']],
+  GATE: [['驗票口', 'control de entradas', 'ticket check'], ['電影票', 'entrada de cine', 'movie ticket'], ['出示', 'mostrar', 'show'], ['補差價', 'pagar la diferencia', 'pay the difference'], ['規定', 'regla', 'rule']],
+  FIND_HALL: [['廳', 'sala', 'theater (hall)'], ['票上', 'en la entrada', 'on the ticket'], ['找到', 'encontrar', 'find'], ['走進', 'entrar caminando', 'walk into'], ['走廊', 'pasillo', 'corridor']],
+  SEAT_TAKEN: [['位子', 'asiento', 'seat'], ['對號入座', 'sentarse en el asiento que indica la entrada', 'sit in the seat on your ticket'], ['看錯', 'leer mal', 'misread'], ['不好意思', 'disculpe', 'excuse me'], ['再看一下', 'mirar otra vez', 'take another look']],
+  PHONE: [['手機', 'celular', 'phone'], ['靜音', 'silenciar', 'mute'], ['安靜', 'silencio, tranquilo', 'quiet'], ['螢幕', 'pantalla', 'screen'], ['影響', 'molestar, afectar', 'disturb, affect']],
+  END: [['好看', 'buena (de ver)', 'good (to watch)'], ['錯過', 'perderse', 'miss'], ['開頭', 'el comienzo', 'the beginning'], ['劇情', 'trama', 'plot'], ['下次', 'la próxima vez', 'next time']],
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = (() => {
+  const buy = ['買票', 'comprar entradas', 'buying tickets'], seat = ['選座位', 'elegir asientos', 'choosing seats'], pay = ['付錢', 'pagar', 'paying'],
+    snack = ['爆米花', 'palomitas', 'popcorn'], go = ['進場', 'entrar a la sala', 'going in'], watch = ['看電影', 'en la sala', 'in the theater'];
+  return { BOARD: buy, TICKETS: buy, SEATS: seat, PAY: pay, CHANGE: pay, SNACK: snack, GATE: go, FIND_HALL: go, SEAT_TAKEN: watch, PHONE: watch };
+})();
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = {
+  BOARD: '走到售票櫃台', TICKETS: '告訴售票員', SEATS: '看座位表', PAY: '付錢', CHANGE: '看一下找的錢', SNACK: '走到零食櫃台',
+  GATE: '走到驗票口', FIND_HALL: '走進電影院', SEAT_TAKEN: '走到座位', PHONE: '坐好，電影開始了', END: '電影結束了'
+};
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const MOVIES = [
+  { zh: '星空下的約定', es: 'La promesa bajo las estrellas', en: 'The Promise Under the Stars' },
+  { zh: '彩虹島大冒險', es: 'La gran aventura de la Isla Arcoíris', en: 'The Great Rainbow Island Adventure' },
+  { zh: '深夜的鐘聲', es: 'Las campanas de medianoche', en: 'Midnight Bells' },
+  { zh: '小熊與魔法森林', es: 'El osito y el bosque mágico', en: 'The Little Bear and the Magic Forest' }
+];
+const TIMES = [
+  { zh: '七點半', es: '19:30', en: '7:30 PM' },
+  { zh: '八點十五分', es: '20:15', en: '8:15 PM' },
+  { zh: '九點', es: '21:00', en: '9:00 PM' }
+];
+const RULES = {
+  back: { rows: [4, 5, 6], zh: '不要坐太前面，第四排以後比較好。', es: 'No te sientes muy adelante: de la fila 4 hacia atrás es mejor.', en: "Don't sit too close to the front — row 4 or farther back is better." },
+  mid:  { rows: [3, 4],    zh: '我想坐第三排或第四排。',            es: 'Quiero sentarme en la fila 3 o en la 4.',                            en: "I'd like row 3 or row 4." }
+};
+const NZ = n => n === 2 ? '兩' : CN[n];                  // 張、位 前面的「兩」
+const SNACKS = { salty: ['鹹的', 'salado', 'salty', 'saladas'], sweet: ['甜的', 'dulce', 'sweet', 'dulces'] };
+const PLACES = {
+  phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
+  board: ['🎬', '電影院大廳', 'Vestíbulo del cine', 'Cinema lobby', ''],
+  counter: ['🎟️', '售票櫃台', 'Taquilla', 'Ticket counter', ''],
+  snack: ['🍿', '零食櫃台', 'Puesto de dulces', 'Snack counter', ''],
+  gate: ['🚪', '驗票口', 'Control de entradas', 'Ticket check', ''],
+  hall: ['🎞️', '放映廳', 'Sala', 'Theater', '']
+};
+const listEs = (a, and) => a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' ' + and + ' ' + a[a.length - 1];
+/* 座位的說法：keys = ['4-3', '4-4', '4-5'] */
+const seatParts = ks => { const r = +ks[0].split('-')[0], cs = ks.map(k => +k.split('-')[1]).sort((a, b) => a - b); return { r, cs }; };
+const seatZh = ks => { const { r, cs } = seatParts(ks); return `第${CN[r]}排${cs.map(c => CN[c]).join('、')}號`; };
+const seatEs = ks => { const { r, cs } = seatParts(ks); return `fila ${r}, asientos ${listEs(cs, 'y')}`; };
+const seatEn = ks => { const { r, cs } = seatParts(ks); return `row ${r}, seats ${listEs(cs, 'and')}`; };
+
+
+/* ══════════════════════════════════════
+   任務提示：只列出 NPC 交代過的原話；不扣分，結果頁顯示看了幾次
+   各遊戲的 Game.hintSections() 回傳 [{ title, lines:[L(…)…] }]
+══════════════════════════════════════ */
+const Hints = {
+  open: false,
+  toggle(force) {
+    this.open = force ?? !this.open;
+    if (this.open) { Vocab.toggle(false); Log.toggle(false); Game.hintViews += 1; this.render(); }
+    document.getElementById('hints').classList.toggle('open', this.open);
+    document.getElementById('hint-tab').setAttribute('aria-expanded', this.open);
+  },
+  render() {
+    if (!Game.task) return;
+    const r = s => Game.ruby(s);
+    const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
+    document.getElementById('hint-body').innerHTML = Game.hintSections().map(sec => `<div class="h-sec">${r(sec.title)}</div>` + sec.lines.map(item).join('')).join('');
+  }
+};
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+
+/* 結果頁（每個遊戲都一樣） */
+const resultCfg = () => ({
+  place: 'phone',
+  dialogue: () => {
+    const w = (zh, es, en) => zh + ' ' + X(es, en);
+    let msg = `【${w('任務成果', 'Resultados', 'Results')}】\n${w('玩家', 'Jugador', 'Player')}：${Game.N}\n${w('最後分數', 'Puntos', 'Score')}：${Game.score} 分\n` +
+      `${w('錯誤次數', 'Errores', 'Mistakes')}：${Game.mistakes} 次\n${w('時間', 'Tiempo', 'Time')}：${Game.elapsedTime} 秒\n` +
+      `${w('看任務提示', 'Pistas consultadas', 'Hints viewed')}：${Game.hintViews} 次\n\n${w('扣分原因', 'Penalizaciones', 'Penalties')}：`;
+    if (!Game.log.length) msg += '\n沒有扣分！' + X('¡Sin errores!', 'No mistakes!') + ' 🎉';
+    else Game.log.forEach((m, i) => { msg += `\n${i + 1}. ${m.zh} ${X(m.es, m.en)}（−10）`; });
+    return msg.split('\n').map(zh => ({ zh }));
+  },
+  options: () => ['查看排行榜 ' + X('Ver clasificación', 'See leaderboard')],
+  next: () => showLeaderboard()
+});
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,   // 過場的話或選錯時的提示（台詞陣列）
+  hintViews: 0,                  // 打開任務提示的次數
+  log: [],                       // 錯誤紀錄（整局）
+  feedback: [],                  // 這一步的回饋卡
+  visit: 0,                      // 第幾次進入關卡（標出「現在這關」的錯誤）
+  att: {},                       // 每一關選了幾次（第一次就對才給綠卡）
+  cash: null,                    // 錢包（有的遊戲才用；null 就不顯示）
+  onStart() { this.updateCash(); },
+  updateCash() {
+    const e = document.getElementById('cash-badge');
+    e.textContent = (this.cash == null || ['START', 'END', 'RESULT'].includes(this.state)) ? '' : '💰 ' + money(this.cash);
+  },
+  /* ── 位置列：PLACES[key] = [圖示, 中文, 西文, 英文, class] ── */
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+
+  /* 圖片：檔案放在 images/，沒有檔案時會顯示 emoji 佔位 */
+  IMAGES: {
+    START: ['images/start.jpg', '🎬'],
+    BOARD: ['images/board.jpg', '🗓️'], TICKETS: ['images/counter.jpg', '🎟️'], SEATS: ['images/seatmap.jpg', '💺'],
+    PAY: ['images/counter.jpg', '💵'], CHANGE: ['images/counter.jpg', '🪙'],
+    SNACK: ['images/snack.jpg', '🍿'], GATE: ['images/gate.jpg', '🚪'], FIND_HALL: ['images/halldoor.jpg', '🚪'],
+    SEAT_TAKEN: ['images/hall.jpg', '💺'], PHONE: ['images/hall.jpg', '📱'],
+    END: ['images/end_good.jpg', '🎉'],
+    RESULT: ['images/result.jpg', '📊']
+  },
+
+  seats: [],          // 座位表上正在選的位子（'列-號'）
+  chosen: [],         // 買好的座位
+  given: 0,           // 售票員找的錢
+  wrongHall: false, wrongSeat: false,
+
+  /* ── 每局隨機任務 ── */
+  setup() {
+    const movie = pick(MOVIES), time = pick(TIMES), kids = pick([1, 2]);
+    const full = pick([280, 300, 320]), stud = full - 50, people = 2 + kids;
+    const total = 2 * full + kids * stud, rule = pick(['back', 'mid']);
+    const bills = total > 1000 ? 2 : 1;               // 你身上有幾張一千元（四個人時一張不夠）
+    const wrongTime = pick(TIMES.filter(x => x !== time)), wrongMovie = pick(MOVIES.filter(x => x !== movie));
+    this.task = {
+      movie, time, kids, full, stud, people, total, rule, bills, change: bills * 1000 - total, wrongTime, wrongMovie,
+      hall: pick([2, 3, 4, 5, 6]), snack: pick(['salty', 'sweet']),
+      shortChange: Math.random() < 0.5,           // 這局售票員會不會少找錢
+      sold: this.makeSold(people, RULES[rule].rows),
+      rot: Math.floor(Math.random() * 3)
+    };
+    this.cash = bills * 1000;
+    this.given = this.task.shortChange ? this.task.change - 50 : this.task.change;
+  },
+  /* 隨機賣掉一些位子；一定留一組符合 Ami 要求的位子 */
+  makeSold(people, rows) {
+    const sold = new Set();
+    for (let r = 1; r <= 6; r++) for (let c = 1; c <= 8; c++) if (Math.random() < 0.38) sold.add(r + '-' + c);
+    const r0 = pick(rows), c0 = 1 + Math.floor(Math.random() * (8 - people + 1));
+    for (let i = 0; i < people; i++) sold.delete(r0 + '-' + (c0 + i));
+    return sold;
+  },
+  /* 符合條件的一組位子（測試用、也用來確認一定有解） */
+  goodSeats() {
+    const t = this.task;
+    for (const r of RULES[t.rule].rows) for (let c0 = 1; c0 + t.people - 1 <= 8; c0++) {
+      const ks = Array.from({ length: t.people }, (_, i) => r + '-' + (c0 + i));
+      if (ks.every(k => !t.sold.has(k))) return ks;
+    }
+    return null;
+  },
+  /* 測試工具（tools/smoke.py 用）：照正解選位子，或故意選錯 */
+  testPrep(good) {
+    if (this.state !== 'SEATS') return;
+    this.seats = good ? this.goodSeats() : ['1-1'];
+  },
+
+  /* ── 台詞 ── */
+  timeZh() { return '晚上' + this.task.time.zh; },
+  amiLines() {
+    const N = this.N, t = this.task, R = RULES[t.rule], sn = SNACKS[t.snack], other = SNACKS[t.snack === 'salty' ? 'sweet' : 'salty'];
+    const k2 = t.kids === 2;
+    return [
+      L(`Ami：${N}，我們今天晚上要看《${t.movie.zh}》，${this.timeZh()}那一場。`,
+        `${N}, esta noche vamos a ver «${t.movie.es}», la función de las ${t.time.es}.`,
+        `${N}, tonight we're seeing "${t.movie.en}", the ${t.time.en} showing.`),
+      L(k2 ? 'Ami：我、你、小宇和小美，四個人一起去。小宇和小美都是大學生，他們有學生證。' : 'Ami：我、你和小宇，三個人一起去。小宇是大學生，他有學生證。',
+        k2 ? 'Vamos cuatro: yo, tú, Xiaoyu y Xiaomei. Xiaoyu y Xiaomei son universitarios y tienen credencial de estudiante.' : 'Vamos tres: yo, tú y Xiaoyu. Xiaoyu es universitario y tiene credencial de estudiante.',
+        k2 ? "Four of us are going: me, you, Xiaoyu and Xiaomei. Xiaoyu and Xiaomei are university students and have student IDs." : "Three of us are going: me, you and Xiaoyu. Xiaoyu is a university student and has a student ID."),
+      L(`Ami：你先幫我們買票，座位要連在一起喔！${R.zh}`, `Compra tú las entradas primero, ¡y los asientos tienen que estar juntos! ${R.es}`, `Please buy the tickets first, and the seats have to be together! ${R.en}`),
+      L(`Ami：我要吃${sn[0]}爆米花，不要${other[0]}的喔！`, `Yo quiero palomitas ${sn[3]}, ¡no ${other[3]}!`, `I want ${sn[2]} popcorn, not ${other[2]}!`)
+    ];
+  },
+  totalLine() {
+    const t = this.task;
+    return L(`售票員：好的，一共是${zhNum(t.total)}元。`, `Muy bien, son ${esM(t.total)} en total.`, `All right, that's ${enM(t.total)} in total.`);
+  },
+  gateLine() {
+    return L('驗票員：請出示電影票。學生票要一起出示學生證喔。', 'Por favor, muestre las entradas. Para las de estudiante también hay que mostrar la credencial.', 'Please show your tickets. For student tickets, please show the student ID too.');
+  },
+  ticketLine() {
+    const t = this.task, ks = this.chosen;
+    return L(`你們的電影在${CN[t.hall]}廳，座位是${seatZh(ks)}。`, `Su película es en la sala ${t.hall}; sus asientos: ${seatEs(ks)}.`, `Your movie is in theater ${t.hall}; your seats: ${seatEn(ks)}.`);
+  },
+  hintSections() {
+    const ORDER = ['START', 'BOARD', 'TICKETS', 'SEATS', 'PAY', 'CHANGE', 'SNACK', 'GATE', 'FIND_HALL', 'SEAT_TAKEN', 'PHONE', 'END', 'RESULT'];
+    const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
+    const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
+    if (at('CHANGE')) out.push({ title: '售票員說的話', lines: [this.totalLine()] });
+    if (at('FIND_HALL')) out.push({ title: '驗票員說的話', lines: [this.gateLine()] });
+    return out;
+  },
+
+  /* ── 畫面元件 ── */
+  listHTML() {
+    const t = this.task, r = s => this.ruby(s), R = RULES[t.rule], sn = SNACKS[t.snack];
+    const rows = [
+      { zh: `電影：《${t.movie.zh}》`, es: `Película: «${t.movie.es}»`, en: `Movie: "${t.movie.en}"` },
+      { zh: `場次：${this.timeZh()}`, es: `Función: ${t.time.es}`, en: `Showing: ${t.time.en}` },
+      { zh: `人數：${t.people}位（學生${t.kids}位）`, es: `Personas: ${t.people} (estudiantes: ${t.kids})`, en: `People: ${t.people} (students: ${t.kids})` },
+      { zh: `座位：連在一起，${R.zh}`, es: `Asientos: juntos. ${R.es}`, en: `Seats: together. ${R.en}` },
+      { zh: `Ami的爆米花：${sn[0]}`, es: `Palomitas de Ami: ${sn[3]}`, en: `Ami's popcorn: ${sn[2]}` },
+      { zh: `你身上有：${NZ(t.bills)}張一千元`, es: `Llevas: ${t.bills === 1 ? 'un billete' : 'dos billetes'} de mil dólares`, en: `You have: ${t.bills === 1 ? 'one' : 'two'} 1,000-dollar bill${t.bills === 1 ? '' : 's'}` }
+    ];
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` +
+      rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 招牌元素 1：電子看板 */
+  boardHTML() {
+    const r = s => this.ruby(s);
+    return `<div class="board"><div class="bh">🎬 ${r('今晚場次')}</div>` + MOVIES.map(m =>
+      `<div class="brow"><b>${r('《' + m.zh + '》')}</b>${TIMES.map(x => `<span class="tm">${x.es}</span>`).join('')}</div>`).join('') + '</div>';
+  },
+  priceHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    return `<div class="board"><div class="bh">🎟️ ${r('票價')}</div><div class="brow"><b>${r('全票')}</b><span class="tm">${t.full}</span></div>` +
+      `<div class="brow"><b>${r('學生票')}</b><span class="tm">${t.stud}</span><small>${r('要出示學生證')}</small></div></div>`;
+  },
+  /* 招牌元素 2：座位表（可以點） */
+  seatsHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    let h = `<div class="seatmap"><div class="screenbar">${r('螢幕')}</div>`;
+    for (let row = 1; row <= 6; row++) {
+      h += `<div class="srow"><span class="rl">${r('第' + CN[row] + '排')}</span>`;
+      for (let c = 1; c <= 8; c++) {
+        const k = row + '-' + c, sold = t.sold.has(k);
+        h += `<button type="button" class="seat${sold ? ' sold' : ''}${this.seats.includes(k) ? ' sel' : ''}" data-k="${k}" ${sold ? 'disabled' : ''} aria-label="${seatZh([k])}${sold ? ' ✗' : ''}">${sold ? '✗' : c}</button>`;
+      }
+      h += '</div>';
+    }
+    h += `<div class="seatcount" id="seatcount"></div></div>`;
+    return h;
+  },
+  seatCountText() { return `已選 ${this.seats.length} 個位子 · ` + X(`Asientos elegidos: ${this.seats.length}`, `Seats chosen: ${this.seats.length}`); },
+  ticketHTML() {
+    const t = this.task, r = s => this.ruby(s), ks = this.chosen, { r: row, cs } = seatParts(ks);
+    return `<div class="ticket"><div class="tk-h">${r('電影票')}　${r('《' + t.movie.zh + '》')}</div>` +
+      `<div>${r('時間')}：${t.time.es}</div><div>${r('廳')}：<b>${t.hall}</b>　${r('排')}：<b>${row}</b>　${r('號')}：<b>${cs.join('、')}</b></div></div>`;
+  },
+
+  /* ── 狀態設定 ── */
+  getConfig() {
+    const N = this.N, t = this.task, R = RULES[t.rule];
+    const staff = (zh, es, en) => L(`售票員：${zh}`, es, en);
+    const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const sn = SNACKS[t.snack], other = SNACKS[t.snack === 'salty' ? 'sweet' : 'salty'];
+    const combo = (m, tm) => `晚上${tm.zh}的《${m.zh}》`;
+    const nw = (n, w) => `${NZ(n)}張${w}`;                // 兩張全票
+    const payOk = `給你${NZ(t.bills)}張一千元。`;
+    const goodTickets = `${nw(2, '全票')}，${nw(t.kids, '學生票')}。`;
+    const hallOpts = [t.hall, ...[2, 3, 4, 5, 6].filter(h => h !== t.hall).slice(0, 2)];
+
+    return {
+      /* ═══ Ami 的 LINE ═══ */
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你到了電影院門口。手機響了一聲，是Ami傳來的LINE。）', '(Llegas a la entrada del cine. Tu celular suena: es un LINE de Ami.)', "(You arrive at the cinema entrance. Your phone buzzes — a LINE from Ami.)"),
+          ...Game.amiLines(),
+          L('我：好，我先去買票！', '¡Bien, voy a comprar las entradas!', "OK, I'll go buy the tickets!")
+        ],
+        options: ['走進電影院'],
+        next: () => { Game.startTimer(); Game.state = 'BOARD'; }
+      },
+
+      /* ═══ 看板：選對片名和時間 ═══ */
+      BOARD: {
+        place: 'board',
+        html: () => Game.boardHTML(),
+        dialogue: () => [
+          L('（你走到售票櫃台，上面的電子看板列出今晚的電影。）', '(Llegas a la taquilla; la pantalla de arriba muestra las películas de esta noche.)', '(You reach the ticket counter; the screen above lists tonight\'s movies.)'),
+          staff('你好，請問要看哪一場？', 'Hola, ¿qué función desea ver?', 'Hello, which showing would you like?')
+        ],
+        options: () => rot([combo(t.movie, t.time), combo(t.movie, t.wrongTime), combo(t.wrongMovie, t.time)]),
+        next: c => {
+          if (c !== combo(t.movie, t.time)) {
+            const wrongTime = c.includes(t.movie.zh);
+            Game.addMistake(wrongTime
+              ? M(`Ami說的是${Game.timeZh()}那一場。`, `Ami dijo la función de las ${t.time.es}.`, `Ami said the ${t.time.en} showing.`)
+              : M(`Ami要看的是《${t.movie.zh}》。`, `Ami quiere ver «${t.movie.es}».`, `Ami wants to see "${t.movie.en}".`));
+            return;
+          }
+          goodFirst('BOARD', '看得很仔細！買票以前，要先確認片名和時間。', '¡Qué atento! Antes de comprar, confirma el título y el horario.', 'Well done! Before buying, check the title and the time.');
+          Game.thought = [staff('好的。', 'Muy bien.', 'Okay.')];
+          Game.state = 'TICKETS';
+        }
+      },
+
+      /* ═══ 全票、學生票 ═══ */
+      TICKETS: {
+        place: 'counter',
+        html: () => Game.priceHTML(),
+        dialogue: () => [staff('請問要幾張票？', '¿Cuántas entradas desea?', 'How many tickets would you like?')],
+        options: () => rot([goodTickets, `${nw(t.people, '全票')}。`, `${nw(t.people, '學生票')}。`]),
+        next: c => {
+          if (c !== goodTickets) {
+            Game.addMistake(c === `${nw(t.people, '全票')}。`
+              ? M('小宇是大學生，他可以買學生票，比較便宜。', 'Xiaoyu es universitario: puede comprar entrada de estudiante, que es más barata.', 'Xiaoyu is a university student, so he can buy a cheaper student ticket.')
+              : M('你和Ami不是學生，要買全票。', 'Tú y Ami no son estudiantes: tienen que comprar entrada completa.', "You and Ami aren't students, so you need full-price tickets."));
+            return;
+          }
+          goodFirst('TICKETS', '很好！學生票比較便宜，但是要出示學生證。', '¡Muy bien! La entrada de estudiante es más barata, pero hay que mostrar la credencial.', 'Great! Student tickets are cheaper, but you have to show a student ID.');
+          Game.seats = [];
+          Game.thought = [staff('好，我看一下座位。', 'Bien, miro los asientos.', "Okay, let me check the seats.")];
+          Game.state = 'SEATS';
+        }
+      },
+
+      /* ═══ 選座位：點座位表 ═══ */
+      SEATS: {
+        place: 'counter',
+        html: () => Game.seatsHTML(),
+        mount: box => {
+          const upd = () => { const e = box.querySelector('#seatcount'); if (e) e.innerHTML = Game.seatCountText(); };
+          upd();
+          box.querySelectorAll('.seat:not(.sold)').forEach(b => b.onclick = () => {
+            const k = b.dataset.k, i = Game.seats.indexOf(k);
+            if (i >= 0) Game.seats.splice(i, 1); else Game.seats.push(k);
+            b.classList.toggle('sel', i < 0); upd();
+          });
+        },
+        single: true,
+        dialogue: () => [staff('這是座位表，灰色的位子已經賣掉了。請選位子。', 'Este es el plano de asientos; los grises ya están vendidos. Elija sus asientos, por favor.', 'Here is the seat map; the gray seats are already sold. Please choose your seats.')],
+        options: ['確定這些位子'],
+        next: () => {
+          const ks = Game.seats.slice(), rows = [...new Set(ks.map(k => +k.split('-')[0]))], cs = ks.map(k => +k.split('-')[1]).sort((a, b) => a - b);
+          let bad = null;
+          if (ks.length !== t.people) bad = M(`你們有${t.people}個人，要選${t.people}個位子。`, `Son ${t.people} personas: hay que elegir ${t.people} asientos.`, `There are ${t.people} of you, so you need to pick ${t.people} seats.`);
+          else if (rows.length > 1) bad = M('要坐在同一排。', 'Tienen que sentarse en la misma fila.', 'You need to sit in the same row.');
+          else if (cs.some((c, i) => i && c !== cs[i - 1] + 1)) bad = M('號碼要連在一起，才能坐在一起。', 'Los números tienen que ser seguidos para sentarse juntos.', 'The seat numbers have to be consecutive to sit together.');
+          else if (!R.rows.includes(rows[0])) bad = M(`Ami的要求：${R.zh}`, `Lo que pidió Ami: ${R.es}`, `What Ami asked for: ${R.en}`);
+          if (bad) { Game.seats = []; Game.addMistake(bad); return; }
+          goodFirst('SEATS', '選得很好！位子連在一起，也在Ami想坐的地方。', '¡Buena elección! Los asientos están juntos y donde Ami quería.', 'Nice choice! The seats are together and where Ami wanted.');
+          Game.chosen = ks; Game.seats = [];
+          Game.thought = [staff(`好，${seatZh(ks)}。`, `Bien: ${seatEs(ks)}.`, `Okay: ${seatEn(ks)}.`)];
+          Game.state = 'PAY';
+        }
+      },
+
+      /* ═══ 付錢：總價、找錢 ═══ */
+      PAY: {
+        place: 'counter',
+        dialogue: () => [Game.totalLine()],
+        options: () => rot([payOk, '給你五百元。', '可以算便宜一點嗎？']),
+        next: c => {
+          if (c !== payOk) {
+            Game.addMistake(c === '給你五百元。'
+              ? M(`一共是${t.total}元，五百元不夠。`, `El total es ${esM(t.total)}: quinientos no alcanzan.`, `The total is ${enM(t.total)} — 500 isn't enough.`)
+              : M('電影院的票價是固定的，不能殺價。', 'El precio de las entradas de cine es fijo: no se regatea.', "Movie ticket prices are fixed — you can't bargain."));
+            return;
+          }
+          goodFirst('PAY', '沒錯！你沒有零錢，就付整張的錢，他會找錢給你。', '¡Exacto! Si no tienes cambio, entregas los billetes completos y te darán el cambio.', "Right! You don't have small change, so hand over the whole bills and they'll give you change.");
+          Game.cash = 0; Game.updateCash();
+          Game.thought = [staff(`收你${zhNum(t.bills * 1000)}元，找你${zhNum(Game.given)}元。`, `Recibo ${esM(t.bills * 1000)}; le doy ${esM(Game.given)} de cambio.`, `I've got ${enM(t.bills * 1000)} — here's ${enM(Game.given)} change.`)];
+          Game.state = 'CHANGE';
+        }
+      },
+      CHANGE: {
+        place: 'counter',
+        html: () => `<div class="board"><div class="bh">💵 ${Game.ruby('找的錢')}</div><div class="brow"><span class="tm">${Game.given}</span><small>${Game.ruby('元')}</small></div></div>`,
+        dialogue: () => [L('（售票員把電影票和零錢放在桌上。）', '(La persona de la taquilla pone las entradas y el cambio sobre el mostrador.)', '(The ticket seller puts the tickets and the change on the counter.)')],
+        options: () => rot(['好，謝謝。', '不好意思，你找錯了。']).slice(0, 2),
+        next: c => {
+          const right = Game.given === t.change, thanks = c === '好，謝謝。', paid = t.bills * 1000;
+          if (thanks !== right) {
+            Game.addMistake(right
+              ? M(`找的錢是對的：${paid} − ${t.total} = ${t.change}。`, `El cambio está bien: ${paid} − ${t.total} = ${t.change}.`, `The change is correct: ${paid} − ${t.total} = ${t.change}.`)
+              : M(`應該找${t.change}元，不是${Game.given}元。${paid} − ${t.total} = ${t.change}。`, `Deberían darte ${esM(t.change)}, no ${esM(Game.given)}. ${paid} − ${t.total} = ${t.change}.`, `You should get ${enM(t.change)}, not ${enM(Game.given)}. ${paid} − ${t.total} = ${t.change}.`));
+            return;
+          }
+          goodFirst('CHANGE', right ? '你會算！找的錢收下以前，要先數一數。' : '你很細心！找的錢不對，要馬上說。', right ? '¡Sabes calcular! Antes de guardar el cambio, cuéntalo.' : '¡Qué atento! Si el cambio está mal, díselo enseguida.', right ? 'You can do the math! Count your change before you pocket it.' : 'Sharp eyes! If the change is wrong, say so right away.');
+          if (!right) Game.given = t.change;
+          Game.cash = t.change; Game.updateCash();
+          Game.thought = right
+            ? [L('（你收好電影票和零錢。）', '(Guardas las entradas y el cambio.)', '(You put away the tickets and the change.)')]
+            : [staff(`啊，不好意思！這裡是${zhNum(t.change)}元。`, `¡Ay, disculpe! Aquí tiene ${esM(t.change)}.`, `Oh, sorry! Here's ${enM(t.change)}.`), L('（你收好電影票和零錢。）', '(Guardas las entradas y el cambio.)', '(You put away the tickets and the change.)')];
+          Game.state = 'SNACK';
+        }
+      },
+
+      /* ═══ 爆米花 ═══ */
+      SNACK: {
+        place: 'snack',
+        dialogue: () => [L('店員：你好，請問要點什麼？', 'Hola, ¿qué desea pedir?', 'Hello, what would you like?')],
+        options: () => rot([`一份${sn[0]}爆米花。`, `一份${other[0]}爆米花。`, '一杯可樂就好。']),
+        next: c => {
+          if (c !== `一份${sn[0]}爆米花。`) {
+            Game.addMistake(c.includes('可樂')
+              ? M('Ami要吃爆米花，只買可樂不夠。', 'Ami quiere palomitas: solo la cola no basta.', 'Ami wants popcorn — just a cola is not enough.')
+              : M(`Ami說她要${sn[0]}爆米花，不要${other[0]}的。`, `Ami dijo que quería palomitas ${sn[3]}, no ${other[3]}.`, `Ami said she wants ${sn[2]} popcorn, not ${other[2]}.`));
+            return;
+          }
+          goodFirst('SNACK', '你記得Ami說的話，真棒！', '¡Recordaste lo que dijo Ami, genial!', 'You remembered what Ami said — great!');
+          Game.thought = [L('店員：好的，請稍等。', 'Muy bien, un momento, por favor.', 'Sure, one moment please.')];
+          Game.state = 'GATE';
+        }
+      },
+
+      /* ═══ 驗票口：電影票＋學生證 ═══ */
+      GATE: {
+        place: 'gate',
+        html: () => Game.ticketHTML(),
+        dialogue: () => [
+          L(`（你拿著票走到驗票口。小宇${t.kids === 2 ? '和小美' : ''}也剛好到了。）`, `(Llegas al control con las entradas. Xiaoyu${t.kids === 2 ? ' y Xiaomei' : ''} también acaba${t.kids === 2 ? 'n' : ''} de llegar.)`, `(You walk to the ticket check. Xiaoyu${t.kids === 2 ? ' and Xiaomei' : ''} just arrive${t.kids === 2 ? '' : 's'} too.)`),
+          Game.gateLine()
+        ],
+        options: () => rot(['好，這是電影票，這是學生證。', '好，這是電影票。學生證忘了帶，沒關係吧？', '電影票給你，學生證不用看吧？']),
+        next: c => {
+          if (!c.includes('這是學生證')) {
+            Game.addMistake(c.includes('忘了帶')
+              ? M('學生票一定要出示學生證；沒有學生證的話，要補差價買全票。', 'Para la entrada de estudiante hay que mostrar la credencial; si no, se paga la diferencia.', "For a student ticket you must show a student ID; without it, you have to pay the difference.")
+              : M('學生票要看學生證，這是規定。', 'Para la entrada de estudiante hay que ver la credencial: es la regla.', 'Student tickets require a student ID — that is the rule.'),
+              [Game.gateLine()]);
+            return;
+          }
+          goodFirst('GATE', '很好！買學生票，記得帶學生證。', '¡Muy bien! Si compras entrada de estudiante, lleva la credencial.', 'Good! If you buy a student ticket, bring your student ID.');
+          Game.thought = [L('驗票員：好，沒問題。請進，祝你們看得開心！', 'Muy bien, todo en orden. Pasen; ¡que disfruten la película!', 'Alright, no problem. Go on in — enjoy the movie!')];
+          Game.state = 'FIND_HALL';
+        }
+      },
+
+      /* ═══ 找對的廳 ═══ */
+      FIND_HALL: {
+        place: 'hall',
+        html: () => Game.ticketHTML(),
+        dialogue: () => [
+          L('（電影院裡有好幾個廳，每個門口都寫著廳號。）', '(Hay varias salas en el cine y cada puerta tiene el número de sala.)', '(The cinema has several theaters, and each door shows its number.)'),
+          L('我：我們的票上寫幾廳呢？', '¿Qué sala dice en nuestras entradas?', 'Which theater does our ticket say?')
+        ],
+        options: () => rot(hallOpts.map(h => `走進${CN[h]}廳`)),
+        next: c => {
+          if (c !== `走進${CN[t.hall]}廳`) {
+            Game.wrongHall = true;
+            Game.addMistake(M(`票上寫的是${CN[t.hall]}廳。`, `En la entrada dice sala ${t.hall}.`, `The ticket says theater ${t.hall}.`),
+              [L('（你走進去，發現裡面在放另一部電影！你趕快走出來。）', '(Entras y ¡están pasando otra película! Sales rápido.)', "(You walk in and a different movie is playing! You hurry back out.)")]);
+            return;
+          }
+          goodFirst('FIND_HALL', '你會看票上的廳號，很棒！', '¡Sabes leer el número de sala en la entrada, genial!', 'You can read the theater number on the ticket — great!');
+          Game.thought = [L(`（你找到${CN[t.hall]}廳，走進去，裡面很暗。）`, `(Encuentras la sala ${t.hall} y entras: está oscuro.)`, `(You find theater ${t.hall} and step inside. It's dark.)`)];
+          Game.state = 'SEAT_TAKEN';
+        }
+      },
+
+      /* ═══ 對號入座：有人坐了你的位子 ═══ */
+      SEAT_TAKEN: {
+        place: 'hall',
+        html: () => Game.ticketHTML(),
+        dialogue: () => [
+          L('（電影快開始了。你們走到座位，可是有一位阿伯坐在你們的位子上。）', '(La película está por empezar. Llegan a sus asientos, pero un señor mayor está sentado en uno de ellos.)', '(The movie is about to start. You reach your seats, but an older gentleman is sitting in one of them.)'),
+          L('阿伯：欸，這個位子是我的吧？', '¿Eh? Este asiento es mío, ¿no?', 'Huh? This seat is mine, isn\'t it?')
+        ],
+        options: () => rot([`不好意思，我們的票是${seatZh(Game.chosen)}，請你再看一下票。`, '好吧，你坐，我們去坐別的位子。', '喂！你坐錯了，快起來！']),
+        next: c => {
+          if (!c.startsWith('不好意思')) {
+            if (c.startsWith('好吧')) Game.wrongSeat = true;
+            Game.addMistake(c.startsWith('好吧')
+              ? M('票上有位子，要坐票上的位子（對號入座），不能隨便讓給別人。', 'La entrada indica el asiento: hay que sentarse en el que corresponde (no cederlo así como así).', "Your ticket has assigned seats — sit in the seats on it; don't just give them up.")
+              : M('要有禮貌，先說「不好意思」，再請他看票。', 'Hay que ser cortés: di «disculpe» y pídele que revise su entrada.', 'Be polite: say "excuse me" first, then ask him to check his ticket.'),
+              c.startsWith('好吧') ? [L('阿伯：謝謝你喔。', 'Gracias.', 'Thank you.')] : [L('阿伯：什麼？你怎麼這麼沒禮貌！', '¿Qué? ¡Qué falta de respeto!', 'What? How rude!')]);
+            return;
+          }
+          goodFirst('SEAT_TAKEN', '你很有禮貌，也很清楚。這樣不會吵架！', '¡Fuiste cortés y claro! Así se evitan las discusiones.', 'You were polite and clear. That avoids arguments!');
+          Game.thought = [L('阿伯：喔，對不起對不起，我看錯了！', '¡Ay, perdón, perdón, me equivoqué!', 'Oh, sorry, sorry — I misread it!')];
+          Game.state = 'PHONE';
+        }
+      },
+
+      /* ═══ 電影開始：手機響了 ═══ */
+      PHONE: {
+        place: 'hall',
+        dialogue: () => [L('（燈暗了，電影開始了。突然，你的手機響了！）', '(Se apagan las luces y empieza la película. ¡De pronto suena tu celular!)', '(The lights go down and the movie starts. Suddenly your phone rings!)')],
+        options: () => rot(['馬上把手機調成靜音。', '大聲接電話：「喂？」', '打開手機看訊息。']),
+        next: c => {
+          if (c !== '馬上把手機調成靜音。') {
+            Game.addMistake(c.includes('大聲')
+              ? M('電影院裡要安靜，手機要調成靜音。', 'En el cine hay que guardar silencio: pon el celular en silencio.', 'Keep quiet in the cinema — put your phone on silent.')
+              : M('手機的螢幕很亮，會影響旁邊的人。', 'La pantalla del celular es muy brillante y molesta a los demás.', "A phone screen is bright and bothers the people around you."));
+            return;
+          }
+          goodFirst('PHONE', '很好！看電影以前，要把手機調成靜音。', '¡Muy bien! Antes de ver la película, pon el celular en silencio.', 'Well done! Put your phone on silent before the movie starts.');
+          Game.stopTimer();
+          Game.state = 'END';
+        }
+      },
+
+      /* ═══ 結局 ═══ */
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = !Game.wrongHall && !Game.wrongSeat && Game.mistakes <= 2;
+          track('game_complete', { game: 'cinema', score: Game.score, elapsed: Game.elapsedTime });
+          const why = Game.wrongHall ? ['走錯了廳', 'se equivocaron de sala', 'You went into the wrong theater']
+            : Game.wrongSeat ? ['位子被人坐走了', 'les ocuparon los asientos', 'Someone took your seats'] : ['買票的時候出了很多錯', 'hubo muchos errores al comprar', 'You made a lot of mistakes buying the tickets'];
+          return Game._endGood ? [
+            L('（電影結束了，燈亮起來。）', '(Termina la película y se encienden las luces.)', '(The movie ends and the lights come up.)'),
+            L(`Ami：哇，這部電影超好看的！謝謝你幫我們買票，${N}，你太厲害了！`, `¡Guau, qué buena película! Gracias por comprar las entradas, ${N}, ¡eres genial!`, `Wow, that movie was great! Thanks for buying the tickets, ${N} — you're amazing!`)
+          ] : [
+            L(`（電影結束了。因為${why[0]}，你們錯過了前面的劇情。）`, `(Termina la película. Como ${why[1]}, se perdieron el principio de la historia.)`, `(The movie ends. ${why[2]}, so you missed part of the beginning.)`),
+            L('Ami：沒關係啦！下次我們早一點來，先看清楚票上的字！', '¡No pasa nada! La próxima vez llegamos más temprano y leemos bien la entrada.', "It's okay! Next time let's come earlier and read the ticket carefully.")
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: resultCfg()
+    };
+  },
+
+
+  /* ── 台詞：每一行一個 div，有翻譯的在句尾加朗讀和翻譯小圖示 ── */
+  formatText(content) {
+    const items = Array.isArray(content) ? content : [content];
+    return items.map(item => {
+      const m = item.zh.match(SPEAKER_RE);
+      let head = '', rest = item.zh;
+      if (m) {
+        const who = m[1] === '我' ? this.N : m[1];
+        const cls = m[1] === 'Ami' ? 'speaker ami' : m[1] === '我' ? 'speaker me' : 'speaker';
+        head = `<span class="${cls}">${this.ruby(who)}：</span>`;
+        rest = item.zh.slice(m[0].length);
+      }
+      let btn = '';
+      if (item.es) {
+        this._spk.push({ text: rest, who: m ? m[1] : null });
+        btn += spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+        this._tr.push(item);
+        btn += `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+      }
+      return `<div class="line">${head}${this.ruby(rest)}${btn}</div>`;
+    }).join('');
+  },
+
+  /* alt：第二張圖，和第一張輪流出現（像動畫）；開了「減少動態效果」就不動 */
+  setImage(src, emoji, alt) {
+    const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
+    this.stopAnim(); this._anim0 = src;
+    ph.textContent = emoji;
+    if (!src || this.missing.has(src)) { img.style.display = 'none'; ph.style.display = 'grid'; return; }
+    img.style.display = 'block'; ph.style.display = 'none';
+    if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+    const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (alt && !calm && !this.missing.has(alt)) {
+      const pre = new Image(); pre.onerror = () => this.missing.add(alt); pre.src = alt;   // 先載入，避免閃一下
+      this._anim = { alt }; let on = false;
+      this._animTimer = setInterval(() => {
+        if (this.missing.has(alt)) { this.stopAnim(); img.setAttribute('src', src); return; }
+        on = !on; img.setAttribute('src', on ? alt : src);
+      }, 600);
+    }
+  },
+
+  handleChoice(choice) {
+    if (this.state === '_TRANS') {          // 離開過場，進下一關
+      const t = this._trans; this._trans = null;
+      Tr.closeAll(); Speech.stop();
+      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
+      if (this.updateCash) this.updateCash();
+      if (document.getElementById('game-window').classList.contains('active')) this.render();
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
+    Speech.stop();
+    this.thought = null;
+    this.feedback = [];
+    const before = this.state;
+    this.att[before] = (this.att[before] || 0) + 1;
+    cfg.next(choice);
+    this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
+    if (this.thoughtFirst) this.visit += 1;
+    this.updateCash();
+    this.maybeTrans(before);
+    if (document.getElementById('game-window').classList.contains('active')) this.render();
+  },
+
+  render() {
+    if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果
+      const t = this._trans;
+      this.state = t.from;
+      this._transMode = true;
+      try { this.render(); } finally { this._transMode = false; this.state = '_TRANS'; }
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    if (!cfg) { console.error('狀態錯誤：' + this.state); return; }
+    const val = v => typeof v === 'function' ? v() : v;
+    this.setPlace(val(cfg.place) || 'gate');
+
+    // END 的 dialogue 會決定結局，所以只算一次
+    const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
+    let [src, emoji, alt] = this.IMAGES[this.state] || ['', '🚇'];
+    if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
+    this.setImage(src, emoji, alt);
+    Vocab.render(this.state);
+    if (Hints.open) Hints.render();
+    Log.render();
+
+    this._tr = []; this._spk = [];
+    let html = (this.showList && this.state !== 'START' && !['END', 'RESULT'].includes(this.state)) ? this.listHTML() : '';
+    html += cfg.html ? cfg.html() : '';
+    if (this._transMode) html = '';
+    const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
+    const main = this.formatText(raw);
+    html += this.thoughtFirst ? th + main : main + th;
+    html += this.feedbackHTML();
+    const box = document.getElementById('npc-dialogue');
+    box.innerHTML = html;
+    box.querySelectorAll('[data-tr]').forEach(btn => {
+      btn.onclick = () => Tr.open(this._tr[+btn.dataset.tr], btn);
+    });
+    box.querySelectorAll('[data-spk]').forEach(btn => {
+      btn.onclick = () => { const x = this._spk[+btn.dataset.spk]; Speech.speak(x.text, btn, x.who); };
+    });
+
+    if (cfg.mount && !this._transMode) cfg.mount(box);
+    const area = document.getElementById('options-area');
+    area.className = '';
+    area.innerHTML = '';
+    const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
+    area.classList.toggle('single', cfg.single ?? (opts.length === 1 || opts.some(o => o.length > 12)));
+    opts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt' + (false ? ' deal' : '');
+      btn.innerHTML = this.ruby(opt);
+      btn.onclick = () => this.handleChoice(opt);
+      area.appendChild(btn);
+    });
+  }
+});
+
+/* 從「重新開始」或地圖回來：直接用原本的名字開新的一局 */
+GameBoot();
+Music.init({ bpm: 100, tracks: [
+  { wave: 'triangle', vol: 0.3, notes: 'E5 . G5 . B5 . G5 E5 | D5 . F5 . A5 . F5 D5 | C5 . E5 . G5 . E5 C5 | B4 - A4 - G4 - . .' },
+  { wave: 'triangle', vol: 0.6, notes: 'E3 E3 . E3 B3 . E3 . | D3 D3 . D3 A3 . D3 . | C3 C3 . C3 G3 . C3 . | B2 B2 . B2 F3 . B2 .' },
+  { vol: 0.4, notes: 'k . h . s . h . k . h k s . h h' }] });
+</script>
+</body>
+</html>

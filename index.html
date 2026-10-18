@@ -237,6 +237,12 @@ const SCENES = [
   { id: 'nightmarket', zh: '夜市',     es: 'Mercado nocturno',   en: 'Night market',     emoji: '🏮', roof: '#c4382f', wall: '#f4d3cf', slot: 5 },
   { id: 'reserva',     zh: '我家',     es: 'Mi casa (teléfono)', en: 'Home (phone call)',emoji: '📞', roof: '#7a62c4', wall: '#e5defa', slot: 6 },
   { id: 'mrt',         zh: '捷運站',   es: 'Estación de metro',  en: 'MRT station',      emoji: '🚇', roof: '#2f5fa7', wall: '#dbe5f6', slot: 7 },
+  { id: 'cinema',      zh: '電影院',   es: 'Cine',               en: 'Cinema',           emoji: '🎬', roof: '#7a4f96', wall: '#e9e0ea', slot: 9 },
+  { id: 'market',      zh: '菜市場',   es: 'Mercado',            en: 'Market',           emoji: '🥬', roof: '#5d9a3c', wall: '#e1eadb', slot: 10 },
+  { id: 'parking',     zh: '停車場',   es: 'Estacionamiento',    en: 'Parking lot',      emoji: '🅿️', roof: '#2f8f8a', wall: '#dcefee', slot: 11 },
+  { id: 'icecream',    zh: '冰淇淋店', es: 'Heladería',          en: 'Ice cream shop',   emoji: '🍦', roof: '#d9507f', wall: '#fbe4ec', slot: 14 },
+  { id: 'bookstore',   zh: '書店',     es: 'Librería',           en: 'Bookstore',        emoji: '📚', roof: '#3b6ea5', wall: '#e3ecf7', slot: 15 },
+  { id: 'elevator',    zh: '搭電梯',   es: 'Ascensor',           en: 'Elevator',         emoji: '🛗', roof: '#6b7a99', wall: '#e4e8f1', slot: 16 },
   /* 沒有建築的場景：路上會隨機冒出「❗」，走過去就觸發 */
   { id: 'street',      zh: '路上突發事件', es: 'Imprevistos en la calle', en: 'Street surprises', emoji: '❗', virtual: true }
 ];
@@ -245,28 +251,27 @@ const SCENES = [
    之後要開放：把它搬到 SCENES，slot 不變 */
 const COMING = [
   { id: 'school',  zh: '學校',   es: 'Escuela',    en: 'School',      emoji: '🏫', roof: '#b0a07a', wall: '#ece6d6', slot: 8,  status: 'soon' },
-  { id: 'cinema',  zh: '電影院', es: 'Cine',       en: 'Cinema',      emoji: '🎬', roof: '#9a7f9c', wall: '#e9e0ea', slot: 9,  status: 'soon' },
-  { id: 'market',  zh: '菜市場', es: 'Mercado',    en: 'Market',      emoji: '🥬', roof: '#86a07c', wall: '#e1eadb', slot: 10, status: 'soon' },
-  { id: 'site1',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 11, status: 'build' },
   { id: 'airport', zh: '機場',   es: 'Aeropuerto', en: 'Airport',     emoji: '✈️', roof: '#8697ad', wall: '#e2e8f0', slot: 12, status: 'soon' },
-  { id: 'site2',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 14, status: 'build' },
-  { id: 'site3',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 15, status: 'build' }
+  { id: 'site4',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 17, status: 'build' },
+  { id: 'site5',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 18, status: 'build' },
+  { id: 'site6',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 19, status: 'build' }
 ];
-const ZHS = { drinks: '饮料店', bakery: '面包店', clinic: '诊所', mrt: '捷运站', school: '学校', cinema: '电影院', market: '菜市场', airport: '机场', site1: '工地', site2: '工地', site3: '工地' };
+const ZHS = { drinks: '饮料店', bakery: '面包店', clinic: '诊所', mrt: '捷运站', school: '学校', cinema: '电影院', market: '菜市场', parking: '停车场', bookstore: '书店', airport: '机场', site4: '工地', site5: '工地', site6: '工地' };
 /* 建築位置：每條橫向馬路上下各 4 個（3 格寬）。房子的門都在最下面一排，朝向下面的人行道
-   0–7：第一條馬路（原本的地圖）；8–15：第二條馬路（往下延伸的部分）
+   0–7：第一條馬路（原本的地圖）；8–15：第二條馬路；16–19：第三條馬路的上排
    機場佔兩個位置（12、13），寬 7 格 */
 const BUILD_SLOTS = [
   { x: 1, y: 1 }, { x: 5, y: 1 }, { x: 12, y: 1 }, { x: 16, y: 1 },
   { x: 1, y: 8 }, { x: 5, y: 8 }, { x: 12, y: 8 }, { x: 16, y: 8 },
   { x: 1, y: 15 }, { x: 5, y: 15 }, { x: 12, y: 15 }, { x: 16, y: 15 },
-  { x: 1, y: 22, w: 7 }, { x: 5, y: 22 }, { x: 12, y: 22 }, { x: 16, y: 22 }
+  { x: 1, y: 22, w: 7 }, { x: 5, y: 22 }, { x: 12, y: 22 }, { x: 16, y: 22 },
+  { x: 1, y: 29 }, { x: 5, y: 29 }, { x: 12, y: 29 }, { x: 16, y: 29 }
 ];
-const COLS = 20, ROWS = 28, T = 32;
+const COLS = 20, ROWS = 42, T = 32;
 const VIEW_ROWS = 14;                     // 畫面一次看到的列數（畫面跟著玩家上下捲動）
-const ROAD_ROWS = [5, 6, 19, 20], ROAD_COLS = [9, 10];
-const SIDEWALK_ROWS = [4, 7, 11, 18, 21, 25];
-const CENTER_ROWS = [5, 19];              // 橫向馬路畫黃色中線的那一列
+const ROAD_ROWS = [5, 6, 19, 20, 33, 34], ROAD_COLS = [9, 10];
+const SIDEWALK_ROWS = [4, 7, 11, 18, 21, 25, 32, 35, 39];
+const CENTER_ROWS = [5, 19, 33];              // 橫向馬路畫黃色中線的那一列
 
 /* ══════════════════════════════════════
    設定與進度
@@ -334,7 +339,7 @@ const buildings = [...SCENES.filter(sc => !sc.virtual), ...COMING].map(sc => {
 });
 /* 樹：放在草地角落，擋路（第二條馬路那一塊和上面一樣，往下 14 列） */
 const TREE_SPOTS = [[0, 0], [4, 0], [8, 0], [11, 0], [15, 0], [19, 0], [4, 2], [11, 2], [15, 2], [0, 12], [4, 12], [8, 12], [11, 12], [15, 12], [19, 12], [4, 10], [11, 10], [15, 10], [0, 9], [19, 9]];
-[...TREE_SPOTS, ...TREE_SPOTS.map(([x, y]) => [x, y + 14])]
+[...TREE_SPOTS, ...TREE_SPOTS.map(([x, y]) => [x, y + 14]), ...TREE_SPOTS.map(([x, y]) => [x, y + 28])]
   .forEach(([x, y]) => { if (y < ROWS && !blocked[y][x] && !doors[x + ',' + y] && !ROAD_COLS.includes(x)) { trees.push({ x, y }); blocked[y][x] = true; } });
 
 const isRoad = (x, y) => ROAD_ROWS.includes(y) || ROAD_COLS.includes(x);
@@ -401,7 +406,9 @@ const WALKERS = [
   { row: 7, x0: 11, x1: 19, x: 15, dir: -1, speed: 0.9, look: LOOKS[1], line: 'mrt' },
   { row: 11, x0: 0, x1: 8, x: 6, dir: -1, speed: 0.7, look: LOOKS[2], line: 'drink' },
   { row: 18, x0: 11, x1: 19, x: 13, dir: 1, speed: 0.8, look: LOOKS[3], line: 'night' },
-  { row: 21, x0: 0, x1: 8, x: 3, dir: -1, speed: 0.75, look: LOOKS[0], line: 'hot' }
+  { row: 21, x0: 0, x1: 8, x: 3, dir: -1, speed: 0.75, look: LOOKS[0], line: 'hot' },
+  { row: 32, x0: 11, x1: 19, x: 14, dir: -1, speed: 0.8, look: LOOKS[2], line: 'mrt' },
+  { row: 35, x0: 0, x1: 8, x: 4, dir: 1, speed: 0.7, look: LOOKS[1], line: 'drink' }
 ].map(w => ({ ...w, pause: 0, phase: Math.random() * 10 }));
 
 /* ── Ami：站在路口 ── */
@@ -415,12 +422,14 @@ const VEHICLES = [
   { axis: 'v', lane: 9, dir: 1, pos: -40, speed: 62, kind: 'scooter', color: '#59cd90', idle: 6 },
   { axis: 'h', lane: 19, dir: -1, pos: 300, speed: 58, kind: 'car', color: '#5b8def' },
   { axis: 'h', lane: 20, dir: 1, pos: 40, speed: 66, kind: 'scooter', color: '#f28c28', idle: 3 },
-  { axis: 'v', lane: 10, dir: -1, pos: 900, speed: 60, kind: 'scooter', color: '#b06ad8', idle: 9 }
+  { axis: 'v', lane: 10, dir: -1, pos: 900, speed: 60, kind: 'scooter', color: '#b06ad8', idle: 9 },
+  { axis: 'h', lane: 33, dir: -1, pos: 200, speed: 60, kind: 'scooter', color: '#2fb8a0' },
+  { axis: 'h', lane: 34, dir: 1, pos: 420, speed: 54, kind: 'car', color: '#e56b6b' }
 ].map(v => ({ idle: 0, ...v, half: v.kind === 'car' ? 22 : 13, wait: 0 }));
 const W = COLS * T, H = ROWS * T, VH = VIEW_ROWS * T;
 /* 路口：直的馬路（第 9、10 行）和每條橫向馬路交叉的地方，橫向和直向的車不能同時在裡面 */
 const XBOX = [9 * T, 11 * T];
-const CROSSINGS = [[5, 6], [19, 20]].map(r => ({ rows: r, box: [r[0] * T, (r[1] + 1) * T] }));
+const CROSSINGS = [[5, 6], [19, 20], [33, 34]].map(r => ({ rows: r, box: [r[0] * T, (r[1] + 1) * T] }));
 
 /* ── 看得到的突發事件：走到旁邊就開始「走在路上」，第一件就是你看到的那件 ── */
 const EVENT_TYPES = ['elder', 'fall', 'ask', 'wallet', 'flyer'];
