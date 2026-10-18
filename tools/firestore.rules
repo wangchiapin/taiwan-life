@@ -48,6 +48,12 @@ service cloud.firestore {
         && request.resource.data.createdAt is number;
     }
 
+    // ── 地圖開關：任何人可以讀；只有管理員能改 ──
+    match /settings/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // ── 玩家代碼＋地圖進度：知道代碼就能讀、能存；只有管理員能列出全部、能刪 ──
     match /progress/{code} {
       allow get: if true;

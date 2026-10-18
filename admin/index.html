@@ -82,6 +82,7 @@
     <button data-tab="games">遊戲</button>
     <button data-tab="plays">全部紀錄</button>
     <button data-tab="boards">排行榜</button>
+    <button data-tab="switch">地圖開關・連結</button>
     <button data-tab="check">設定檢查</button>
   </nav>
   <div class="filters" id="filters">
@@ -98,7 +99,7 @@
 <div id="status" role="status"></div>
 
 <script type="module">
-import { app, db, SCORE_COLS, collection, doc, getDocs, deleteDoc, query, orderBy, limit, writeBatch } from "../shared/firebase.js";
+import { app, db, SCORE_COLS, collection, doc, getDocs, getDoc, setDoc, deleteDoc, query, orderBy, limit, writeBatch } from "../shared/firebase.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const ADMIN = 'a2224907@gmail.com';
@@ -166,15 +167,16 @@ function playersOf(rows) {
 /* ── 畫面 ── */
 function render() {
   document.querySelectorAll('nav button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === V.tab));
-  $('filters').hidden = V.tab === 'boards' || V.tab === 'check';
+  $('filters').hidden = ['boards', 'check', 'switch'].includes(V.tab);
   const v = $('view');
-  if (!D.loaded && V.tab !== 'check' && V.tab !== 'boards') { v.innerHTML = '<div class="empty">讀取中……</div>'; return; }
+  if (!D.loaded && !['check', 'boards', 'switch'].includes(V.tab)) { v.innerHTML = '<div class="empty">讀取中……</div>'; return; }
   if (V.tab === 'overview') v.innerHTML = overview();
   if (V.tab === 'players') v.innerHTML = V.player ? playerDetail(V.player) : playersTable();
   if (V.tab === 'games') v.innerHTML = V.scene ? gameDetail(V.scene) : gamesTable();
   if (V.tab === 'plays') v.innerHTML = playsTable(filtered(), true);
   if (V.tab === 'boards') { v.innerHTML = boardsShell(); loadBoard(); }
   if (V.tab === 'check') { v.innerHTML = checkShell(); runCheck(); }
+  if (V.tab === 'switch') { v.innerHTML = switchShell(); loadSwitch(); }
 }
 
 function overview() {
@@ -286,6 +288,39 @@ async function loadBoard() {
   } catch (e) { $('b-body').innerHTML = `<div class="empty bad">讀取失敗：${esc(e.code || e.message)}</div>`; }
 }
 
+/* ── 地圖開關＋遊戲連結 ──
+   新遊戲（GATED）預設「維修中」；這裡選「開啟」，地圖上的房子才能進去。設定存在 Firebase settings/map */
+const GATED = ['school', 'ubike', 'bus', 'barber'];
+const OPENMAP = {};
+const gameUrl = id => new URL('../games/' + id + '/', location.href).href;
+function switchShell() {
+  return `<h2 style="margin-top:0">地圖開關・遊戲連結</h2>
+    <p class="muted">「開啟」＝玩家在地圖上可以進去；「維修中」＝房子釘木板、進不去。按了馬上存，玩家重新整理地圖就會看到。舊的遊戲一直是開啟，不用設定。<br>
+    「試玩」會直接開那個遊戲，不管地圖是開啟還是維修中，也不會經過地圖。</p>
+    <div class="panel"><table><tbody>${SCENES.map(([id]) => `<tr><td>${esc(scName(id))}</td>
+      <td>${GATED.includes(id)
+        ? `<select data-sw="${id}" id="sw-${id}"><option value="0">🚧 維修中</option><option value="1">✅ 開啟</option></select> <span class="muted" id="swm-${id}"></span>`
+        : '<span class="muted">一直開啟</span>'}</td>
+      <td><a class="btn small" href="${gameUrl(id)}" target="_blank" rel="noopener">試玩 ↗</a></td></tr>`).join('')}</tbody></table></div>`;
+}
+async function loadSwitch() {
+  try {
+    const s = await getDoc(doc(db, 'settings', 'map'));
+    Object.assign(OPENMAP, s.exists() ? (s.data().open || {}) : {});
+  } catch (e) { status('讀取開關失敗：' + (e.code || e.message), 6000); }
+  GATED.forEach(id => { const el = $('sw-' + id); if (el) el.value = OPENMAP[id] === true ? '1' : '0'; });
+}
+async function setSwitch(id, on) {
+  const m = $('swm-' + id);
+  try {
+    await setDoc(doc(db, 'settings', 'map'), { open: { [id]: on } }, { merge: true });
+    OPENMAP[id] = on; if (m) m.textContent = '已儲存'; status((on ? '已開啟：' : '已改成維修中：') + scName(id));
+  } catch (e) {
+    const el = $('sw-' + id); if (el) el.value = OPENMAP[id] === true ? '1' : '0';
+    status('儲存失敗：' + (e.code || e.message) + '（規則是不是還沒貼？）', 8000);
+  }
+}
+
 /* ── 設定檢查：排行榜索引 ── */
 function checkShell() {
   return `<h2 style="margin-top:0">排行榜索引</h2>
@@ -357,7 +392,7 @@ $('f-clear').onclick = () => { ['f-from', 'f-to', 'f-scene', 'f-name'].forEach(i
 $('btn-csv').onclick = exportCSV;
 $('btn-reload').onclick = loadAll;
 document.querySelectorAll('nav button').forEach(b => b.onclick = () => { V.tab = b.dataset.tab; V.player = null; V.scene = null; render(); window.scrollTo(0, 0); });
-$('view').addEventListener('change', e => { if (e.target.id === 'b-scene') { V.board = e.target.value; render(); } });
+$('view').addEventListener('change', e => { if (e.target.dataset.sw) { setSwitch(e.target.dataset.sw, e.target.value === '1'); return; } if (e.target.id === 'b-scene') { V.board = e.target.value; render(); } });
 $('view').addEventListener('click', e => {
   const t = e.target.closest('[data-del],[data-del-player],[data-del-board],[data-back],[data-player],[data-scene],[data-go-scene],[data-toggle]');
   if (!t || e.target.closest('a')) return;

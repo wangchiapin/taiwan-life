@@ -237,16 +237,20 @@ const SCENES = [
   { id: 'nightmarket', zh: '夜市',     es: 'Mercado nocturno',   en: 'Night market',     emoji: '🏮', roof: '#c4382f', wall: '#f4d3cf', slot: 5 },
   { id: 'reserva',     zh: '我家',     es: 'Mi casa (teléfono)', en: 'Home (phone call)',emoji: '📞', roof: '#7a62c4', wall: '#e5defa', slot: 6 },
   { id: 'mrt',         zh: '捷運站',   es: 'Estación de metro',  en: 'MRT station',      emoji: '🚇', roof: '#2f5fa7', wall: '#dbe5f6', slot: 7 },
-  { id: 'school',  zh: '學校',   es: 'Escuela',    en: 'School',      emoji: '🏫', roof: '#b0a07a', wall: '#ece6d6', slot: 8 },
-  { id: 'bus',     zh: '公車',   es: 'Autobús',    en: 'Bus',         emoji: '🚌', roof: '#e07a2f', wall: '#fbe3cc', slot: 11 },
-  { id: 'ubike',   zh: 'YouBike', es: 'YouBike',   en: 'YouBike',     emoji: '🚲', roof: '#c9b21f', wall: '#f6f0c4', slot: 14 },
-  { id: 'barber',  zh: '理髮店', es: 'Peluquería', en: 'Barbershop',  emoji: '💈', roof: '#b03a48', wall: '#f7e1e3', slot: 15 },
+  { id: 'school',  zh: '學校',   es: 'Escuela',    en: 'School',      emoji: '🏫', roof: '#b0a07a', wall: '#ece6d6', slot: 8, gated: true },
+  { id: 'bus',     zh: '公車',   es: 'Autobús',    en: 'Bus',         emoji: '🚌', roof: '#e07a2f', wall: '#fbe3cc', slot: 11, gated: true },
+  { id: 'ubike',   zh: 'YouBike', es: 'YouBike',   en: 'YouBike',     emoji: '🚲', roof: '#c9b21f', wall: '#f6f0c4', slot: 14, gated: true },
+  { id: 'barber',  zh: '理髮店', es: 'Peluquería', en: 'Barbershop',  emoji: '💈', roof: '#b03a48', wall: '#f7e1e3', slot: 15, gated: true },
   /* 沒有建築的場景：路上會隨機冒出「❗」，走過去就觸發 */
   { id: 'street',      zh: '路上突發事件', es: 'Imprevistos en la calle', en: 'Street surprises', emoji: '❗', virtual: true }
 ];
 /* 還不能玩的地點（不算進星星）
    soon：🚧 維修中（有房子）；build：建造中（工地）。走到門口只會顯示「還在準備中，敬請期待」
    之後要開放：把它搬到 SCENES，slot 不變 */
+/* gated：新遊戲預設「維修中」，管理員頁的「地圖開關」打開後才能進去（設定存在 Firebase settings/map） */
+const OPEN = {};
+const isLive = sc => !sc.gated || !!OPEN[sc.id];
+const liveScenes = () => SCENES.filter(isLive);
 const COMING = [
   { id: 'cinema',  zh: '電影院', es: 'Cine',       en: 'Cinema',      emoji: '🎬', roof: '#9a7f9c', wall: '#e9e0ea', slot: 9,  status: 'soon' },
   { id: 'market',  zh: '菜市場', es: 'Mercado',    en: 'Market',      emoji: '🥬', roof: '#86a07c', wall: '#e1eadb', slot: 10, status: 'soon' },
@@ -335,7 +339,7 @@ const doors = {};     // 'x,y' → scene
 const trees = [];
 const buildings = [...SCENES.filter(sc => !sc.virtual), ...COMING].map(sc => {
   const s = BUILD_SLOTS[sc.slot], w = s.w || 3, h = 3;
-  const b = { sc, x: s.x, y: s.y, w, h, soon: !!sc.status, door: { x: s.x + Math.floor(w / 2), y: s.y + h - 1 } };
+  const b = { sc, x: s.x, y: s.y, w, h, soon: !!sc.status || !isLive(sc), door: { x: s.x + Math.floor(w / 2), y: s.y + h - 1 } };
   for (let yy = b.y; yy < b.y + h; yy++) for (let xx = b.x; xx < b.x + w; xx++) blocked[yy][xx] = true;
   blocked[b.door.y][b.door.x] = false;
   doors[b.door.x + ',' + b.door.y] = b;
@@ -386,9 +390,9 @@ const SUGGEST = {
 };
 function amiLine() {
   const N = S.name || '你';
-  const next = SCENES.find(sc => !S.done[sc.id]);
+  const next = liveScenes().find(sc => !S.done[sc.id]);
   if (!next) {
-    const more = SCENES.find(sc => starsOf(S.done[sc.id]) < 3);   // 都去過了：推薦還沒拿滿星星的地方
+    const more = liveScenes().find(sc => starsOf(S.done[sc.id]) < 3);   // 都去過了：推薦還沒拿滿星星的地方
     if (!more) return [`${N}，你拿到所有的星星了，太厲害了！`, `${N}，你拿到所有的星星了，太厉害了！`, `${N}, nǐ ná dào suǒ yǒu de xīng xing le, tài lì hài le!`,
       `${N}, ¡conseguiste todas las estrellas! ¡Qué crack!`, `${N}, you got every star. Amazing!`];
     const m = SUGGEST[more.id];
@@ -998,8 +1002,9 @@ function comingSoon(b) {
 function updateHud() {
   bakeStatic();
   const simp = S.script === 'simp';
-  const stars = SCENES.reduce((t, s) => t + starsOf(S.done[s.id]), 0), maxStars = SCENES.length * 3;
-  const total = SCENES.reduce((t, s) => t + (S.done[s.id] ? Math.max(0, S.done[s.id].score) : 0), 0);
+  const LV = liveScenes();
+  const stars = LV.reduce((t, s) => t + starsOf(S.done[s.id]), 0), maxStars = LV.length * 3;
+  const total = LV.reduce((t, s) => t + (S.done[s.id] ? Math.max(0, S.done[s.id].score) : 0), 0);
   document.getElementById('hud-title').textContent = simp ? '台湾生存日记' : '台灣生存日記';
   document.getElementById('intro-title').textContent = simp ? '台湾生存日记' : '台灣生存日記';
   document.getElementById('who').textContent = '👤 ' + S.name + (S.code ? ' · ' + S.code : '') + ' ✎';
@@ -1086,6 +1091,13 @@ if (S.name) {
   updateHud(); pullProgress();
 }
 document.getElementById('who').onclick = () => { document.getElementById('name').value = S.name; document.getElementById('intro').style.display = 'flex'; };
+/* 地圖開關：讀 Firebase 的 settings/map，打開的新遊戲才能進去（讀不到就維持維修中） */
+TWFB.when(async fb => {
+  const o = await fb.getMapSettings();
+  Object.keys(o).forEach(k => { OPEN[k] = o[k] === true; });
+  buildings.forEach(b => { b.soon = !!b.sc.status || !isLive(b.sc); });
+  updateHud();
+});
 window.WorldMap = { EV, VEHICLES, WALKERS, AMI, respawnEvent, P, S, SCENES, buildings, goTo, openGame, closeGame };
 requestAnimationFrame(tick);
 Music.init({ bpm: 112, tracks: [

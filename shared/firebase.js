@@ -3,6 +3,7 @@
    ── 集合 ──
    <scene>game_scores / nightmarket_scores  舊排行榜（name, score, elapsed, createdAt）不要改名
    results                                   每局一筆完整紀錄（只有管理員能讀）
+   settings/map                              地圖開關（誰開放、誰維修中；任何人可讀，只有管理員能改）
    progress/<玩家代碼>                        玩家名字＋地圖進度（換裝置時用代碼讀回）
    規則在 tools/firestore.rules
 ══════════════════════════════════════ */
@@ -60,6 +61,11 @@ export function initFB({ scoresCol } = {}) {
     async getProgress(code) {
       try { const s = await getDoc(doc(db, 'progress', code)); return s.exists() ? s.data() : null; }
       catch (e) { console.error("讀取進度失敗", e); throw e; }
+    },
+    /* 地圖開關：settings/map = { open: { school: true, … } }（管理員頁設定；沒設定的新遊戲＝維修中） */
+    async getMapSettings() {
+      try { const s = await getDoc(doc(db, 'settings', 'map')); return s.exists() ? (s.data().open || {}) : {}; }
+      catch (e) { console.error("讀取地圖開關失敗", e); return {}; }
     },
     /* 有 done（地圖進度）就整筆蓋過去（清除進度才會真的清掉）；只有名字就合併，不動到進度 */
     async saveProgress(code, data) {

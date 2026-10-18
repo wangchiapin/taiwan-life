@@ -156,3 +156,10 @@
 - 推上去之後 Ben 要做：把 `tools/firestore.rules` 貼到 Firebase console 發布；管理員頁「設定檢查」建 4 個新排行榜的複合索引（score 降冪＋elapsed 升冪）。
 - 圖片檔名：school: start/chat/classroom/form/office/end_good/result；ubike: start/app/station/seat/road/light/end_good/result（另有 tap/pull/dock 等，缺圖時顯示 emoji）；bus: start/stop/board/hail/reader/driver/inside/end_good/result；barber: start/phone/door/chair/wash/mirror/counter/end_good/result。
 - 台詞和拼音是第一版，需要 Ben 審。
+
+### 地圖開關（2026-10-19）
+- 新遊戲在地圖上預設「維修中」（`index.html` 的 SCENES 裡有 `gated: true`）。管理員頁新分頁「地圖開關・連結」可以逐個改成「開啟」，設定存在 Firestore `settings/map` = { open: { school: true, … } }；讀不到就維持維修中。
+- 同一分頁每個遊戲有「試玩」連結（直接開 games/<id>/）。
+- 要把別的遊戲也納入開關：在 index.html 的 SCENES 該筆加 `gated: true`，並把 id 加進 admin/index.html 的 `GATED`。
+- Ben 要在 Firebase console 貼 `tools/firestore.rules`（新增 settings 規則），否則開關存不進去。
+- 還沒做：電影院、停車場、冰淇淋店、書店、菜市場、搭電梯 六個遊戲的檔案在 Ben 電腦的 `new-games-six`，等取得檔案後再搬進來（照上面的方式加 gated）。
