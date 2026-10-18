@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>請假 · Pedir permiso en la escuela</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：schoolgame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "schoolgame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #1d2a24;
+    --red: #2f6b4f;
+    --red-dark: #235239;
+    --yolk: #f2b632;
+    --night: #1f3d33;
+    --kraft: #d9e8de;
+    --wall: #edf4ee;
+    --paper: #ffffff;
+    --line: #d3e0d7;
+    --muted: #5c6f64;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    margin: 0; min-height: 100vh; color: var(--ink);
+    background: #dde6f3;
+    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
+    display: flex; justify-content: center; align-items: flex-start;
+    padding: 24px 16px 40px;
+  }
+  body.embed-boot #login-screen.active { display: none; }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  .screen.active { display: flex; }
+  /* ── 登入 ── */
+  .storefront { width: 100%; max-width: 360px; border-radius: 10px; overflow: hidden; }
+  .storefront .awning { height: 20px; background: repeating-linear-gradient(90deg, var(--red) 0 28px, #ffffff 28px 56px); }
+  .storefront .name { background: var(--night); color: var(--yolk); text-align: center; font-size: 30px; font-weight: 700; letter-spacing: 6px; padding: 12px 0; }
+  #login-screen .subtitle { margin: 0; color: var(--muted); font-size: 15px; }
+  .input-group input:focus { border-color: var(--red); }
+  .btn-primary {
+    padding: 14px 44px; font-size: 18px; font-weight: 700; font-family: inherit;
+    background: var(--red); color: #fff; border: none; border-radius: 999px; cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--red-dark); }
+  .flavor-text { color: var(--muted); font-size: 14px; line-height: 1.8; text-align: center; max-width: 420px; margin: 0; }
+  /* ── 遊戲 ── */
+  #game-window.active { display: flex; }
+  .chip { font-size: 13px; padding: 5px 10px; border-radius: 999px; background: var(--wall); white-space: nowrap; }
+  .btn-pinyin {
+    font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--paper); color: var(--red); border: 1.5px solid var(--red);
+  }
+  .btn-pinyin[aria-pressed="true"] { background: var(--red); color: #fff; }
+  #place-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px; background: var(--night); color: #fff;
+    border-bottom: 4px solid var(--yolk);
+  }
+  #place-bar.phone { background: var(--ami); }
+  #place-bar .icon { font-size: 22px; line-height: 1; }
+  #place-bar .who { font-weight: 700; font-size: 16px; }
+  #place-bar .status { font-size: 13px; opacity: .85; }
+  #place-bar .clock { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; }
+  #scene-placeholder {
+    width: 100%; max-width: 360px; aspect-ratio: 16 / 7;
+    border-radius: 12px; background: var(--wall);
+    display: none; place-items: center; font-size: 64px;
+  }
+  #npc-dialogue { padding: 14px 22px 4px; font-size: 21px; line-height: 2.1; }
+  #npc-dialogue .speaker { font-weight: 700; color: var(--red-dark); }
+  #npc-dialogue .speaker.ami { color: var(--ami); }
+  #npc-dialogue .speaker.me { color: var(--muted); }
+  #npc-dialogue .thought { color: var(--muted); font-size: 18px; }
+  ruby rt { color: var(--red); font-size: .5em; font-weight: 400; }
+  /* 購物清單 */
+  .list {
+    margin: 8px 0 10px; padding: 12px 16px; border-radius: 6px;
+    background: #fffdf3; border: 1px dashed #c9bfa4; font-size: 18px; line-height: 1.95;
+  }
+  .list .t { font-weight: 700; color: var(--red-dark); font-size: 15px; display: flex; align-items: center; gap: 2px; }
+  .list .t .grow { flex: 1; }
+  .list .done { text-decoration: line-through; color: var(--muted); }
+  .list .rule { color: var(--muted); font-size: 15px; }
+  /* ── 這個遊戲自己的樣式 ── */
+  .form { margin: 8px 0 12px; background: #fffdf3; border: 2px solid #cfc7a8; border-radius: 10px; padding: 12px 16px; }
+  .form .ft { text-align: center; font-weight: 700; font-size: 20px; letter-spacing: 6px; color: var(--red-dark); border-bottom: 2px solid var(--line); padding-bottom: 6px; margin-bottom: 6px; }
+  .form .fr { display: flex; align-items: baseline; gap: 12px; padding: 6px 0; border-bottom: 1px dashed #d9d2b8; font-size: 18px; }
+  .form .fr span { flex: 0 0 5.5em; color: var(--muted); font-size: 15px; }
+  .form .fr b { font-weight: 500; }
+  .form .blank { display: inline-block; min-width: 5em; border-bottom: 2px solid var(--ink); }
+  @media (hover: hover) {
+    .opt:hover { background: var(--ink); color: #fff; }
+    .opt:hover rt { color: #ffd9cf; }
+  }
+  .opt.deal { border-color: var(--red); background: var(--red); color: #fff; }
+  .opt.deal rt { color: #ffe1d8; }
+  .opt.deal:hover { background: var(--red-dark); }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--yolk); outline-offset: 2px; }
+  /* ── 排行榜 ── */
+  .congrats-banner { background: var(--yolk); color: var(--ink); }
+  .no-rank-banner { background: var(--wall); color: var(--muted); }
+  #lb-table th { background: var(--ink); color: #fff; font-weight: 500; }
+  #lb-table th, #lb-table td { padding: 9px 8px; text-align: center; border-bottom: 1px solid var(--line); }
+  #lb-table tr.highlight-row { background: #fdeccb; font-weight: 700; }
+  @media (max-width: 600px) {
+    .screen { padding: 26px 18px; }
+    .top-bar { gap: 6px; padding: 10px 12px; }
+    .chip { font-size: 12px; padding: 4px 8px; }
+    .btn-pinyin { font-size: 12px; padding: 5px 10px; }
+    #npc-dialogue { font-size: 19px; padding: 12px 16px 2px; }
+    #options-area { grid-template-columns: 1fr; padding: 14px 14px 20px; }
+    #npc-avatar { max-width: 240px; }
+    .map { overflow-x: auto; }
+    .mline { flex-direction: column; align-items: stretch; gap: 4px; min-width: 720px; }
+    .mname { align-self: flex-start; font-size: 13px; padding: 1px 10px; }
+    .st { font-size: 12px; white-space: nowrap; } .st.here, .st.goal { font-size: 13px; }
+  }
+  /* ── 句子翻譯 ── */
+  .tr-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; margin-left: 6px; padding: 0; vertical-align: middle;
+    border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper); color: var(--red); cursor: pointer;
+  }
+  .tr-btn:hover { background: #fdeccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  @media (max-width: 560px) {
+    .tr-btn { width: 34px; height: 34px; margin-left: 8px; }
+    .tr-btn svg { width: 17px; height: 17px; }
+  }
+  .tr-btn.spk.speaking { background: var(--red); color: #fff; border-color: var(--red); }
+  .v-word .tr-btn { margin-left: 4px; }
+  .tr-pop {
+    position: fixed; width: min(340px, calc(100vw - 16px));
+    background: var(--paper); color: var(--ink); border: 1.5px solid var(--red); border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(60, 40, 30, .18); font-size: 15px; line-height: 1.6;
+  }
+  .tr-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 6px 6px 12px; background: var(--red); color: #fff; border-radius: 10px 10px 0 0;
+    font-size: 13px; cursor: move; touch-action: none; user-select: none;
+  }
+  .tr-lang {
+    flex: none; font-size: 11px; font-weight: 700; color: var(--red);
+    border: 1px solid var(--red); border-radius: 4px; padding: 0 4px; line-height: 1.5;
+  }
+  /* ── 本關單字（右側抽屜） ── */
+  .side-tab {
+    width: 36px; padding: 12px 8px; line-height: 1.25; text-align: center; word-break: break-all; border: none; border-radius: 12px 0 0 12px; cursor: pointer;
+    background: var(--yolk); color: var(--ink); font: inherit; font-weight: 700; font-size: 15px;
+    box-shadow: -2px 2px 10px rgba(60, 40, 30, .15);
+  }
+  .side-tab.hint { background: var(--ink); color: #fff; }
+  .side-tab .v-count { padding: 0 3px !important; min-width: 20px; font-size: 12px !important; white-space: nowrap; letter-spacing: -0.5px; }
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  #vocab-tab .v-count {
+    display: inline-block; margin-top: 6px;
+    background: var(--paper); border-radius: 999px; padding: 0 7px; font-size: 13px;
+  }
+  .drawer {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(320px, 88vw); z-index: 25;
+    background: var(--paper); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(60, 40, 30, .12);
+    transform: translateX(105%); transition: transform .25s ease; display: flex; flex-direction: column;
+  }
+  .drawer.open { transform: none; }
+  @media (prefers-reduced-motion: reduce) { .drawer { transition: none; } }
+  .h-sec { padding: 12px 16px 4px; font-size: 13px; font-weight: 700; color: var(--red); }
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+  .side-tab.log { background: #b5483d; color: #fff; }
+  #log-tab .v-count { display: inline-block; margin-top: 6px; background: var(--paper); color: #b5483d; border-radius: 999px; padding: 0 7px; font-size: 13px; }
+  .v-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 16px; border-bottom: 3px solid var(--yolk); }
+  .v-head b { font-size: 18px; }
+  .v-head small { color: var(--muted); }
+  .v-head button { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink); padding: 2px 6px; }
+  #vocab-list li { padding: 12px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+  .v-py { color: var(--red); font-size: 15px; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; border: 2px solid var(--red); border-radius: 999px; overflow: hidden; }
+  .seg button {
+    font: inherit; font-size: 15px; font-weight: 500; padding: 9px 0; cursor: pointer;
+    background: var(--paper); color: var(--red); border: none;
+  }
+  .seg button + button { border-left: 2px solid var(--red); }
+  .seg button[aria-pressed="true"] { background: var(--red); color: #fff; font-weight: 700; }
+  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
+  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
+  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
+  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">學校</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">請假</h1>
+  <p class="subtitle" data-es="Pedir permiso en la escuela" data-en="Asking for leave at school">Pedir permiso en la escuela</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    你今天（或明天、後天）不能去上課。你要用 LINE 跟老師請假，回學校後還要跟同學借筆記、填請假單。<br>
+    <span data-es="Hoy (o mañana, o pasado mañana) no puedes ir a clase. Le pides permiso a tu profesora por LINE y, al volver, tienes que pedir los apuntes a tu compañera y llenar el formulario de ausencia." data-en="You can't go to class today (or tomorrow, or the day after). You ask your teacher for leave by LINE, and when you're back you borrow notes from a classmate and fill in a leave form.">Hoy (o mañana, o pasado mañana) no puedes ir a clase. Le pides permiso a tu profesora por LINE y, al volver, tienes que pedir los apuntes a tu compañera y llenar el formulario de ausencia.</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-list" aria-pressed="false" onclick="Game.toggleList()" data-es="📝 Mi situación" data-en="📝 My situation">📝 Mi situación</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">📱</span>
+    <div>
+      <div class="who" id="place-who">老師</div>
+      <div class="status" id="place-status">LINE · Mensaje</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 15 名 · Top 15</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'school', track: 'school', settingsKey: 'school_settings',
+  roles: { '老師': { pitch: 1.1 }, '小美': { pitch: 1.2 }, '我': { pitch: 0.95 } }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+
+pinyinPro.customPinyin({
+  '星期': 'xīng qí', '期': 'qí', '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '還要': 'hái yào',
+  '還好': 'hái hǎo', '還你': 'huán nǐ', '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '覺得': 'jué de',
+  '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan', '時間': 'shí jiān', '時候': 'shí hou',
+  '太太': 'tài tai', '先生': 'xiān sheng', '老闆': 'lǎo bǎn', '東西': 'dōng xi', '告訴': 'gào su',
+  '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '著': 'zhe', '只': 'zhǐ', '囉': 'luo', '啦': 'la', '耶': 'ye',
+  '意思': 'yì si', '關係': 'guān xi', '這個': 'zhè ge', '那個': 'nà ge', '一個': 'yí ge', '兩個': 'liǎng ge', '一共': 'yí gòng',
+  '看看': 'kàn kan', '喜歡': 'xǐ huān', '漂亮': 'piào liang', '可愛': 'kě ài', '每個': 'měi ge', '欸': 'éi',
+  '朋友': 'péng yǒu', '晚餐': 'wǎn cān', '辛苦': 'xīn kǔ', '辛苦了': 'xīn kǔ le', '路上': 'lù shàng', '名字': 'míng zi',
+  '您': 'nín', '怎麼': 'zěn me', '一點': 'yì diǎn', '他們': 'tā men', '前面': 'qián mian', '舒服': 'shū fu',
+  '手機': 'shǒu jī', '吃飯': 'chī fàn', '同事': 'tóng shì', '午餐': 'wǔ cān', '不好意思': 'bù hǎo yì si', '對不起': 'duì bu qǐ',
+  '和': 'hàn', '嗯': 'ēn'
+});
+
+pinyinPro.customPinyin({
+  '請假': 'qǐng jià', '請假單': 'qǐng jià dān', '病假': 'bìng jià', '事假': 'shì jià', '公假': 'gōng jià', '假別': 'jià bié',
+  '發燒': 'fā shāo', '居留證': 'jū liú zhèng', '移民署': 'yí mín shǔ', '牙醫': 'yá yī', '補交': 'bǔ jiāo', '筆記': 'bǐ jì',
+  '拍照': 'pāi zhào', '關心': 'guān xīn', '一整天': 'yì zhěng tiān', '好多了': 'hǎo duō le', '同學': 'tóng xué', '老師': 'lǎo shī',
+  '功課': 'gōng kè', '上課': 'shàng kè', '下課': 'xià kè', '同意': 'tóng yì', '辦公室': 'bàn gōng shì', '聊天室': 'liáo tiān shì',
+  '休息': 'xiū xi', '身體': 'shēn tǐ', '為什麼': 'wèi shén me', '順利': 'shùn lì', '回覆': 'huí fù', '小美': 'xiǎo měi',
+  '後天': 'hòu tiān', '昨天': 'zuó tiān', '明天': 'míng tiān', '今天': 'jīn tiān', '上午': 'shàng wǔ', '下午': 'xià wǔ',
+  '請你': 'qǐng nǐ', '還發燒': 'hái fā shāo', '還順利': 'hái shùn lì', '的假': 'de jià', '借我': 'jiè wǒ', '早安': 'zǎo ān', '填': 'tián', '交': 'jiāo', '辦': 'bàn', '感冒': 'gǎn mào'
+});
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { '老師': ['La profesora', 'The teacher'], '小美': ['Xiaomei (tu compañera)', 'Xiaomei (your classmate)'] };
+const SPEAKER_RE = /^(老師|小美|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['請假', 'pedir permiso (para faltar)', 'ask for leave'], ['老師', 'profesor(a)', 'teacher'], ['發燒', 'tener fiebre', 'have a fever'], ['牙醫', 'dentista', 'dentist'], ['居留證', 'tarjeta de residencia (ARC)', 'residence card (ARC)'], ['移民署', 'Agencia Nacional de Migración', 'National Immigration Agency']],
+  MSG_OPEN: [['請假', 'pedir permiso (para faltar)', 'ask for leave'], ['您', 'usted (formal)', 'you (polite)'], ['老師好', 'buenos días, profesor(a)', 'hello, teacher'], ['聊天室', 'chat', 'chat room']],
+  MSG_REASON: [['因為…，所以…', 'porque…, por eso…', 'because…, so…'], ['感冒', 'resfriado', 'a cold'], ['發燒', 'tener fiebre', 'have a fever'], ['牙醫', 'dentista', 'dentist'], ['居留證', 'tarjeta de residencia (ARC)', 'residence card (ARC)']],
+  MSG_TIME: [['請…的假', 'pedir permiso para (un día/horario)', 'take leave for (a time)'], ['一整天', 'todo el día', 'the whole day'], ['上午', 'por la mañana', 'morning'], ['下午', 'por la tarde', 'afternoon'], ['後天', 'pasado mañana', 'the day after tomorrow']],
+  MSG_OK: [['沒問題', 'no hay problema', 'no problem'], ['補交', 'entregar más tarde', 'hand in later'], ['請假單', 'formulario de ausencia', 'leave form'], ['謝謝老師', 'gracias, profesor(a)', 'thank you, teacher']],
+  BACK: [['關心', 'preocuparse por alguien', 'show concern'], ['好多了', 'mucho mejor', 'much better'], ['順利', 'sin problemas', 'smoothly'], ['辦好', 'terminar un trámite', 'get (something) done'], ['沒事', 'no pasa nada', 'nothing, it\'s fine']],
+  NOTES: [['同學', 'compañero(a) de clase', 'classmate'], ['筆記', 'apuntes', 'notes'], ['借', 'prestar / pedir prestado', 'lend / borrow'], ['拍照', 'sacar una foto', 'take a photo'], ['功課', 'tarea', 'homework']],
+  FORM: [['請假單', 'formulario de ausencia', 'leave form'], ['假別', 'tipo de licencia', 'type of leave'], ['病假', 'licencia por enfermedad', 'sick leave'], ['事假', 'licencia por asuntos personales', 'personal leave'], ['公假', 'licencia por actividades oficiales', 'official leave']],
+  SUBMIT: [['辦公室', 'sala de profesores', 'teachers\' office'], ['交', 'entregar', 'hand in'], ['請假單', 'formulario de ausencia', 'leave form'], ['作業', 'tarea (entregable)', 'assignment']],
+  END: [['收到', 'recibir', 'receive'], ['午餐', 'almuerzo', 'lunch'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* ══════════════════════════════════════
+   任務提示：只列出老師說過的原話，聽到了才出現；不扣分，結果頁顯示看了幾次
+══════════════════════════════════════ */
+const ORDER = ['START', 'MSG_OPEN', 'MSG_REASON', 'MSG_TIME', 'MSG_OK', 'BACK', 'NOTES', 'FORM', 'SUBMIT', 'END', 'RESULT'];
+const Hints = {
+  open: false,
+  toggle(force) {
+    this.open = force ?? !this.open;
+    if (this.open) { Vocab.toggle(false); Log.toggle(false); Game.hintViews += 1; this.render(); }
+    document.getElementById('hints').classList.toggle('open', this.open);
+    document.getElementById('hint-tab').setAttribute('aria-expanded', this.open);
+  },
+  render() {
+    if (!Game.task) return;
+    const r = s => Game.ruby(s);
+    const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
+    const at = ORDER.indexOf(Game.st0);
+    const said = Game.teacherSaid().filter(x => ORDER.indexOf(x.stage) <= at);
+    let html = `<div class="h-sec">${r('老師說的話')}</div>`;
+    html += said.length ? said.map(item).join('') : `<div class="h-item"><div class="h-es">${esc(X('Todavía no ha dicho nada.', "Nothing yet."))}</div></div>`;
+    document.getElementById('hint-body').innerHTML = html;
+  }
+};
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+/* ══════════════════════════════════════
+   錯誤紀錄：整局累積、即時更新、最新的在上面、標出關卡
+══════════════════════════════════════ */
+const STAGE = (() => {
+  const a = ['傳訊息請假', 'mensaje de ausencia', 'leave message'], b = ['回學校', 'de vuelta en clase', 'back in class'], c = ['請假單', 'formulario', 'leave form'];
+  const o = {};
+  ['MSG_OPEN', 'MSG_REASON', 'MSG_TIME', 'MSG_OK'].forEach(x => o[x] = a);
+  ['BACK', 'NOTES'].forEach(x => o[x] = b);
+  ['FORM', 'SUBMIT'].forEach(x => o[x] = c);
+  return o;
+})();
+
+/* ══════════════════════════════════════
+   請假的三種情況（每局隨機一種）
+══════════════════════════════════════ */
+const LEAVES = [
+  { id: 'sick', reasonOpt: '感冒發燒了', reasonForm: '感冒發燒', reasonEs: 'gripe y fiebre', reasonEn: 'a cold and a fever',
+    situation: L('（今天早上，你一醒來就覺得頭很痛，還發燒了。今天的課沒辦法去上。）', '(Esta mañana te despertaste con mucho dolor de cabeza y fiebre. Hoy no puedes ir a clase.)', "(You woke up this morning with a bad headache and a fever. You can't go to class today.)"),
+    time: '今天一整天', timeEs: 'todo el día de hoy', timeEn: 'all day today',
+    type: '病假', typeWhy: M('感冒發燒是身體不舒服，要選病假。', 'Un resfriado con fiebre es un problema de salud: se elige «病假» (licencia por enfermedad).', 'A cold with a fever is an illness, so you choose 病假 (sick leave).'),
+    backQ: L('你的感冒好一點了嗎？', '¿Te sientes mejor del resfriado?', 'Is your cold a little better?'), backA: '好多了，謝謝老師關心。',
+    note: '昨天的筆記', noteEs: 'los apuntes de ayer', noteEn: "yesterday's notes" },
+  { id: 'dental', reasonOpt: '要去看牙醫', reasonForm: '看牙醫', reasonEs: 'ir al dentista', reasonEn: 'a dentist appointment',
+    situation: L('（你明天下午要去看牙醫，可是明天下午有課。）', '(Mañana por la tarde tienes cita con el dentista, pero a esa hora tienes clase.)', '(You have a dentist appointment tomorrow afternoon, but you have class then.)'),
+    time: '明天下午', timeEs: 'mañana por la tarde', timeEn: 'tomorrow afternoon',
+    type: '病假', typeWhy: M('看牙醫是為了身體的事，要選病假。', 'Ir al dentista es por la salud: se elige «病假» (licencia por enfermedad).', 'A dentist visit is about your health, so you choose 病假 (sick leave).'),
+    backQ: L('昨天看牙醫還順利嗎？', '¿Cómo te fue ayer en el dentista?', 'Did your dentist visit go well yesterday?'), backA: '很順利，謝謝老師關心。',
+    note: '昨天下午的筆記', noteEs: 'los apuntes de ayer por la tarde', noteEn: "yesterday afternoon's notes" },
+  { id: 'arc', reasonOpt: '要去辦居留證', reasonForm: '辦居留證', reasonEs: 'hacer el trámite de la tarjeta de residencia (ARC)', reasonEn: 'applying for your residence card (ARC)',
+    situation: L('（你後天上午要去移民署辦居留證，可是後天上午有課。）', '(Pasado mañana por la mañana tienes que ir a Migración a hacer el trámite de tu tarjeta de residencia, pero a esa hora tienes clase.)', '(The day after tomorrow, you need to go to the Immigration Agency in the morning to apply for your residence card, but you have class then.)'),
+    time: '後天上午', timeEs: 'pasado mañana por la mañana', timeEn: 'the morning of the day after tomorrow',
+    type: '事假', typeWhy: M('辦居留證是自己的事，不是生病，要選事假。', 'El trámite de la tarjeta de residencia es un asunto personal, no una enfermedad: se elige «事假» (licencia por asuntos personales).', "Applying for a residence card is a personal matter, not an illness, so you choose 事假 (personal leave)."),
+    backQ: L('居留證辦好了嗎？', '¿Ya terminaste el trámite de la tarjeta de residencia?', 'Did you get your residence card sorted out?'), backA: '辦好了，謝謝老師關心。',
+    note: '昨天上午的筆記', noteEs: 'los apuntes de ayer por la mañana', noteEn: "yesterday morning's notes" }
+];
+const TIME_POOL = ['今天一整天', '明天下午', '後天上午', '今天下午', '明天上午'];
+
+/* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
+const NEXT_LABEL = {
+  MSG_OPEN: '打開老師的聊天室', MSG_REASON: '等老師回覆', MSG_TIME: '等老師回覆', MSG_OK: '等老師回覆',
+  BACK: '第二天，回到學校', NOTES: '坐下來，旁邊是同學', FORM: '下課，拿請假單', SUBMIT: '走去辦公室', END: '走出辦公室'
+};
+
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,   // 過場的話或選錯時的提示（台詞陣列）
+  hintViews: 0,                  // 打開任務提示的次數
+  log: [],                       // 錯誤紀錄（整局）
+  feedback: [],                  // 這一步的回饋卡
+  visit: 0,                      // 第幾次進入關卡（標出「現在這關」的錯誤）
+  att: {},                       // 每一關選了幾次（第一次就對才給綠卡）
+
+  /* 圖片：檔案放在 images/，沒有檔案時會顯示 emoji 佔位 */
+  IMAGES: {
+    START: ['images/start.jpg', '🏫'],
+    MSG_OPEN: ['images/chat.jpg', '💬'], MSG_REASON: ['images/chat.jpg', '💬'], MSG_TIME: ['images/chat.jpg', '🗓️'], MSG_OK: ['images/chat.jpg', '👍'],
+    BACK: ['images/classroom.jpg', '👩‍🏫'], NOTES: ['images/classroom.jpg', '📒'],
+    FORM: ['images/form.jpg', '📝'], SUBMIT: ['images/office.jpg', '🗂️'],
+    END: ['images/end_good.jpg', '🎉'],
+    RESULT: ['images/result.jpg', '📊']
+  },
+
+  /* ── 每局隨機任務 ── */
+  setup() {
+    const leave = pick(LEAVES);
+    this.task = { leave, rot: Math.floor(Math.random() * 3) };
+  },
+
+  /* ── 位置列 ── */
+  setPlace(mode) {
+    const map = {
+      phone: ['📱', '老師', 'LINE · ' + X('Mensaje', 'Message'), 'phone'],
+      classroom: ['🏫', '教室', X('Aula', 'Classroom'), ''],
+      form: ['📝', '請假單', X('Formulario de ausencia', 'Leave form'), ''],
+      office: ['🗂️', '辦公室', X('Sala de profesores', "Teachers' office"), '']
+    };
+    const [icon, who, st, cls] = map[mode] || map.phone;
+    document.getElementById('place-bar').className = cls;
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = st;
+  },
+
+  /* 老師說過的原話（任務提示用） */
+  teacherSaid() {
+    const N = this.N;
+    return [
+      { stage: 'MSG_REASON', ...L(`老師：${N}，你好。有什麼事嗎？`, `${N}, hola. ¿En qué te puedo ayudar?`, `Hello, ${N}. What can I do for you?`) },
+      { stage: 'MSG_TIME', ...L('老師：好，你想請什麼時候的假？', 'Bien, ¿para cuándo quieres pedir permiso?', 'OK, when would you like to take leave?') },
+      { stage: 'MSG_OK', ...L('老師：好，沒問題。你回學校以後，要補交請假單喔。', 'Bien, no hay problema. Cuando vuelvas a la escuela, tienes que entregar el formulario de ausencia.', "OK, no problem. When you come back to school, you'll need to hand in a leave form.") }
+    ];
+  },
+
+  /* ── 畫面元件 ── */
+  listHTML() {
+    const t = this.task.leave, r = s => this.ruby(s);
+    const rows = [
+      { zh: `原因：${t.reasonForm}`, es: `Motivo: ${t.reasonEs}`, en: `Reason: ${t.reasonEn}` },
+      { zh: `請假時間：${t.time}`, es: `Cuándo vas a faltar: ${t.timeEs}`, en: `When you'll be absent: ${t.timeEn}` },
+      { zh: '要請假的對象：老師', es: 'A quién se lo dices: la profesora', en: 'Who you ask: the teacher' }
+    ];
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` +
+      rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 招牌元素：請假單 */
+  formHTML() {
+    const t = this.task.leave, r = s => this.ruby(s);
+    const row = (k, v, blank) => `<div class="fr"><span>${r(k)}</span>${blank ? '<b class="blank"></b>' : `<b>${r(v)}</b>`}</div>`;
+    return `<div class="form"><div class="ft">${r('請假單')}</div>${row('姓名', this.N)}${row('請假時間', t.time)}${row('原因', t.reasonForm)}${row('假別', '', true)}</div>`;
+  },
+
+  /* ── 狀態設定 ── */
+  getConfig() {
+    const N = this.N, t = this.task, lv = t.leave;
+    const tch = (zh, es, en) => L(`老師：${zh}`, es, en);
+    const xm = (zh, es, en) => L(`小美：${zh}`, es, en);
+    const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+
+    return {
+      /* ═══ 開始：你要請假 ═══ */
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          lv.situation,
+          L('（你想跟老師請假，所以拿起手機。）', '(Quieres pedirle permiso a tu profesora, así que tomas tu celular.)', '(You want to ask your teacher for leave, so you pick up your phone.)'),
+          L('我：要怎麼跟老師說呢？', '¿Cómo se lo digo a la profesora?', 'How should I tell the teacher?')
+        ],
+        options: ['打開跟老師的聊天室'],
+        next: () => { Game.startTimer(); Game.state = 'MSG_OPEN'; }
+      },
+
+      /* ═══ 傳 LINE 請假 ═══ */
+      MSG_OPEN: {
+        place: 'phone',
+        dialogue: () => [L('（你打開跟老師的 LINE 聊天室。第一句要怎麼說呢？）', '(Abres el chat de LINE con tu profesora. ¿Cómo empiezas?)', '(You open your LINE chat with the teacher. How do you start?)')],
+        options: () => rot([`老師好，我是${N}。我想跟您請假。`, '老師，我不去上課了。', '哈囉，你在嗎？']),
+        next: c => {
+          if (!c.startsWith('老師好')) {
+            const no = c.startsWith('老師，我不去');
+            Game.addMistake(no ? M('請假要先問老師可不可以，不是只告訴老師「我不去了」。', 'Para pedir permiso primero se pregunta si se puede; no basta con avisar «no voy».', 'When you ask for leave, you ask permission first — you don\'t just announce "I\'m not coming."')
+                                : M('要先打招呼、說明你是誰、為什麼傳訊息，對老師要用「您」。', 'Primero hay que saludar, decir quién eres y para qué escribes; a la profesora se le habla de «您» (usted).', 'Greet first, say who you are and why you\'re writing, and use 您 (polite "you") with a teacher.'),
+              [tch(no ? '嗯？請問你是哪一位同學？要先說明一下喔。' : '請問你是哪一位同學？有什麼事嗎？', no ? 'Mmm, ¿quién eres? Primero tienes que explicarme.' : '¿Quién eres? ¿En qué te puedo ayudar?', no ? "Hmm? Which student are you? Please explain first." : 'Which student are you? What can I do for you?')]); return;
+          }
+          goodFirst('MSG_OPEN', '很有禮貌喔！傳訊息給老師，要先打招呼、說你是誰，還要用「您」。', '¡Muy educado! Al escribirle a un profesor, saluda, di quién eres y usa «您».', 'Very polite! When you message a teacher, greet them, say who you are, and use 您.');
+          Game.state = 'MSG_REASON';
+        }
+      },
+      MSG_REASON: {
+        place: 'phone',
+        dialogue: () => [tch(`${N}，你好。有什麼事嗎？`, `${N}, hola. ¿En qué te puedo ayudar?`, `Hello, ${N}. What can I do for you?`)],
+        options: () => rot(LEAVES.map(x => `因為我${x.reasonOpt}，所以想請假。`)),
+        next: c => {
+          if (c !== `因為我${lv.reasonOpt}，所以想請假。`) {
+            Game.addMistake(M(`你請假的原因是：${lv.reasonForm}。`, `Tu motivo es: ${lv.reasonEs}.`, `Your reason is: ${lv.reasonEn}.`)); return;
+          }
+          goodFirst('MSG_REASON', '你說得很清楚！請假要說明原因，可以用「因為…，所以…」。', '¡Lo explicaste muy claro! Al pedir permiso hay que dar el motivo, con «因為…，所以…».', 'You explained it clearly! When asking for leave, give your reason with 因為…，所以….');
+          Game.state = 'MSG_TIME';
+        }
+      },
+      MSG_TIME: {
+        place: 'phone',
+        dialogue: () => [tch('好，你想請什麼時候的假？', 'Bien, ¿para cuándo quieres pedir permiso?', 'OK, when would you like to take leave?')],
+        options: () => {
+          const others = TIME_POOL.filter(x => x !== lv.time);
+          const start = t.rot % others.length;
+          return rot([`我想請${lv.time}的假。`, `我想請${others[start]}的假。`, `我想請${others[(start + 1) % others.length]}的假。`]);
+        },
+        next: c => {
+          if (c !== `我想請${lv.time}的假。`) {
+            Game.addMistake(M(`你要請的是「${lv.time}」的假。`, `Tienes que pedir permiso para: ${lv.timeEs}.`, `The time you need is: ${lv.timeEn}.`)); return;
+          }
+          goodFirst('MSG_TIME', '時間說得很清楚，老師一看就懂！', '¡Dijiste la hora con mucha claridad: la profesora lo entiende de inmediato!', 'You stated the time clearly — the teacher understands right away!');
+          Game.state = 'MSG_OK';
+        }
+      },
+      MSG_OK: {
+        place: 'phone',
+        dialogue: () => [tch('好，沒問題。你回學校以後，要補交請假單喔。', 'Bien, no hay problema. Cuando vuelvas a la escuela, tienes que entregar el formulario de ausencia.', "OK, no problem. When you come back to school, you'll need to hand in a leave form later.")],
+        options: () => rot(['好的，謝謝老師。', '好，我知道了。', '不用吧，LINE 就可以了。']),
+        next: c => {
+          if (c !== '好的，謝謝老師。') {
+            Game.addMistake(c.startsWith('好，我知道了') ? M('老師同意了，要說「謝謝老師」，這樣比較有禮貌。', 'La profesora aceptó: hay que decir «謝謝老師» (gracias), es más cortés.', 'The teacher agreed, so say 謝謝老師 (thank you) — it\'s more polite.')
+                                                    : M('請假單是學校的規定，用 LINE 請假以後，回學校還是要補交。', 'El formulario es una regla de la escuela: aunque pidas permiso por LINE, igual hay que entregarlo al volver.', "The leave form is a school rule: even if you ask by LINE, you still hand it in when you're back."));
+            return;
+          }
+          goodFirst('MSG_OK', '很有禮貌喔！老師同意了，要說謝謝。', '¡Muy educado! Cuando el profesor acepta, se da las gracias.', 'Very polite! When the teacher agrees, say thank you.');
+          Game.thought = [L('（你傳出去了。第二天，你回到學校。）', '(Envías el mensaje. Al día siguiente, vuelves a la escuela.)', '(You send it. The next day, you go back to school.)')];
+          Game.state = 'BACK';
+        }
+      },
+
+      /* ═══ 回到學校 ═══ */
+      BACK: {
+        place: 'classroom',
+        dialogue: () => [tch(`早安，${N}！`, `¡Buenos días, ${N}!`, `Good morning, ${N}!`), tch(lv.backQ.zh, lv.backQ.es, lv.backQ.en)],
+        options: () => rot([lv.backA, '沒事。', '你為什麼問？']),
+        next: c => {
+          if (c !== lv.backA) {
+            Game.addMistake(M('老師關心你，要有禮貌地回答，還要說「謝謝老師關心」。', 'La profesora se preocupa por ti: responde con cortesía y di «謝謝老師關心» (gracias por preguntar).', 'The teacher is showing concern: answer politely and say 謝謝老師關心 (thanks for asking).'),
+              [tch(c === '沒事。' ? '嗯……那就好。' : '因為老師關心你呀。', c === '沒事。' ? 'Mmm… me alegro.' : 'Porque me importas, claro.', c === '沒事。' ? 'Hmm… that\'s good, then.' : 'Because I care about you!')]); return;
+          }
+          goodFirst('BACK', '你回答得很有禮貌！老師關心你的時候，記得說謝謝。', '¡Respondiste con mucha cortesía! Cuando un profesor se preocupa por ti, recuerda dar las gracias.', 'You answered politely! When a teacher shows concern, remember to say thanks.');
+          Game.thought = [tch('好，請坐，我們要上課了。', 'Bien, siéntate; vamos a empezar la clase.', "OK, please sit down — we're starting class.")];
+          Game.state = 'NOTES';
+        }
+      },
+      NOTES: {
+        place: 'classroom',
+        dialogue: () => [
+          L('（你坐下來，旁邊是同學小美。）', '(Te sientas. A tu lado está tu compañera Xiaomei.)', '(You sit down. Your classmate Xiaomei is beside you.)'),
+          xm(`${N}，你回來了！`, `¡${N}, ya volviste!`, `${N}, you're back!`),
+          L(`（你想到，${lv.note}你還沒有。）`, `(Te acuerdas de que todavía no tienes ${lv.noteEs}.)`, `(You realize you don't have ${lv.noteEn} yet.)`)
+        ],
+        options: () => rot([`小美，不好意思，可以請你把${lv.note}借我拍照嗎？`, '你幫我寫功課。', '筆記給我。']),
+        next: c => {
+          if (!c.startsWith('小美，不好意思')) {
+            Game.addMistake(c.startsWith('你幫我寫') ? M('不能請同學幫你寫功課；你可以請同學把筆記借你拍照。', 'No se le pide a un compañero que te haga la tarea; puedes pedirle que te preste los apuntes para fotografiarlos.', "Don't ask a classmate to do your homework; ask to borrow their notes and take a photo.")
+                                                  : M('「筆記給我」太直接了，要說「不好意思，可以請你……嗎？」。', '«筆記給我» («dame los apuntes») es demasiado directo; di «不好意思，可以請你……嗎？».', '"Give me the notes" is too blunt; say 不好意思，可以請你……嗎？ ("Excuse me, could you…?").'),
+              [xm(c.startsWith('你幫我寫') ? '那怎麼行啊？' : '嗯？什麼？', c.startsWith('你幫我寫') ? '¿Cómo voy a hacer eso?' : '¿Eh? ¿Qué?', c.startsWith('你幫我寫') ? 'How could I do that?' : 'Huh? What?')]); return;
+          }
+          goodFirst('NOTES', '你很有禮貌！請別人幫忙，可以說「不好意思，可以請你……嗎？」。', '¡Qué educado! Para pedir un favor puedes decir «不好意思，可以請你……嗎？».', 'Very polite! To ask a favor, you can say 不好意思，可以請你……嗎？.');
+          Game.thought = [xm('好啊，沒問題！', '¡Claro, no hay problema!', 'Sure, no problem!')];
+          Game.state = 'FORM';
+        }
+      },
+
+      /* ═══ 請假單 ═══ */
+      FORM: {
+        place: 'form',
+        html: () => Game.formHTML(),
+        dialogue: () => [L('（下課了。你拿到一張請假單，要先填「假別」。）', '(Termina la clase. Te dan un formulario de ausencia y tienes que llenar el «tipo de licencia».)', '(Class is over. You get a leave form and need to fill in the "type of leave".)')],
+        options: () => rot(['病假', '事假', '公假']),
+        next: c => {
+          if (c !== lv.type) {
+            const why = c === '公假' ? M('公假是學校派你去做的事，例如比賽，不是自己的事。', '«公假» es para actividades que la escuela te asigna, como una competencia; no para asuntos propios.', '公假 (official leave) is for things the school sends you to do, such as a competition — not your own matters.') : lv.typeWhy;
+            Game.addMistake(why); return;
+          }
+          goodFirst('FORM', '你選對了！病假是生病，事假是自己的事，公假是學校派你去做的事。', '¡Elegiste bien! 病假 es por enfermedad, 事假 por asuntos propios y 公假 por actividades que asigna la escuela.', 'Correct! 病假 is for illness, 事假 for personal matters, and 公假 for things the school assigns.');
+          Game.state = 'SUBMIT';
+        }
+      },
+      SUBMIT: {
+        place: 'office',
+        dialogue: () => [
+          L('（你把請假單填好，走到辦公室。）', '(Terminas de llenar el formulario y vas a la sala de profesores.)', '(You finish the form and walk to the teachers\' office.)'),
+          tch(`${N}，有什麼事嗎？`, `${N}, ¿qué necesitas?`, `${N}, what can I do for you?`)
+        ],
+        options: () => rot(['老師，這是我的請假單，謝謝老師。', '老師，這是我的作業。', '老師，請假單可以不用交嗎？']),
+        next: c => {
+          if (!c.includes('請假單，謝謝')) {
+            Game.addMistake(c.includes('作業') ? M('你要交的是請假單，不是作業。', 'Lo que tienes que entregar es el formulario de ausencia, no la tarea.', "What you're handing in is the leave form, not homework.")
+                                                : M('老師說過要補交請假單，所以一定要交。', 'La profesora dijo que había que entregar el formulario, así que es obligatorio.', 'The teacher said you must hand in the leave form, so it\'s required.'),
+              [tch(c.includes('作業') ? '嗯？這不是請假單喔。' : '要交喔，這是學校的規定。', c.includes('作業') ? 'Mmm, esto no es el formulario.' : 'Sí hay que entregarlo: es una regla de la escuela.', c.includes('作業') ? "Hmm? That's not the leave form." : "You do need to — it's a school rule.")]); return;
+          }
+          goodFirst('SUBMIT', '做得好！你記得老師說的話，還有禮貌地道謝。', '¡Bien hecho! Recordaste lo que dijo la profesora y diste las gracias con cortesía.', 'Well done! You remembered what the teacher said and thanked her politely.');
+          Game.stopTimer();
+          Game.state = 'END';
+        }
+      },
+
+      /* ═══ 結局 ═══ */
+      END: {
+        place: 'office',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2;
+          track('game_complete', { game: 'school', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            L('（老師收下請假單，說：「好，我收到了。」你走出辦公室。）', '(La profesora recibe el formulario y dice: «Bien, lo recibí». Sales de la sala de profesores.)', '(The teacher takes the form and says, "OK, I\'ve got it." You walk out of the office.)'),
+            Game._endGood
+              ? xm(`哇，${N}，你已經會用中文請假了！我們去吃午餐吧！`, `¡Vaya, ${N}, ya sabes pedir permiso en chino! ¡Vamos a almorzar!`, `Wow, ${N}, you can already ask for leave in Chinese! Let's go have lunch!`)
+              : xm('辛苦了！請假的事情很麻煩吧！我們去吃午餐吧！', '¡Gracias por el esfuerzo! Pedir permiso es complicado, ¿eh? ¡Vamos a almorzar!', "Thanks for your effort! Asking for leave is a hassle, huh? Let's go have lunch!")
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: {
+        place: 'phone',
+        dialogue: () => {
+          const w = (zh, es, en) => zh + ' ' + X(es, en);
+          let msg = `【${w('任務成果', 'Resultados', 'Results')}】\n${w('玩家', 'Jugador', 'Player')}：${N}\n${w('最後分數', 'Puntos', 'Score')}：${Game.score} 分\n` +
+            `${w('錯誤次數', 'Errores', 'Mistakes')}：${Game.mistakes} 次\n${w('時間', 'Tiempo', 'Time')}：${Game.elapsedTime} 秒\n` +
+            `${w('看任務提示', 'Pistas consultadas', 'Hints viewed')}：${Game.hintViews} 次\n\n${w('扣分原因', 'Penalizaciones', 'Penalties')}：`;
+          if (!Game.log.length) msg += '\n沒有扣分！' + X('¡Sin errores!', 'No mistakes!') + ' 🎉';
+          else Game.log.forEach((m, i) => { msg += `\n${i + 1}. ${m.zh} ${X(m.es, m.en)}（−10）`; });
+          return msg.split('\n').map(zh => ({ zh }));
+        },
+        options: () => ['查看排行榜 ' + X('Ver clasificación', 'See leaderboard')],
+        next: () => showLeaderboard()
+      }
+    };
+  },
+
+  /* ── 共用：台詞、圖片、過場、畫面（和其他遊戲一樣） ── */
+  /* ── 台詞：每一行一個 div，有翻譯的在句尾加朗讀和翻譯小圖示 ── */
+  formatText(content) {
+    const items = Array.isArray(content) ? content : [content];
+    return items.map(item => {
+      const m = item.zh.match(SPEAKER_RE);
+      let head = '', rest = item.zh;
+      if (m) {
+        const who = m[1] === '我' ? this.N : m[1];
+        const cls = m[1] === 'Ami' ? 'speaker ami' : m[1] === '我' ? 'speaker me' : 'speaker';
+        head = `<span class="${cls}">${this.ruby(who)}：</span>`;
+        rest = item.zh.slice(m[0].length);
+      }
+      let btn = '';
+      if (item.es) {
+        this._spk.push({ text: rest, who: m ? m[1] : null });
+        btn += spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+        this._tr.push(item);
+        btn += `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+      }
+      return `<div class="line">${head}${this.ruby(rest)}${btn}</div>`;
+    }).join('');
+  },
+
+  /* alt：第二張圖，和第一張輪流出現（像動畫）；開了「減少動態效果」就不動 */
+  setImage(src, emoji, alt) {
+    const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
+    this.stopAnim(); this._anim0 = src;
+    ph.textContent = emoji;
+    if (!src || this.missing.has(src)) { img.style.display = 'none'; ph.style.display = 'grid'; return; }
+    img.style.display = 'block'; ph.style.display = 'none';
+    if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+    const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (alt && !calm && !this.missing.has(alt)) {
+      const pre = new Image(); pre.onerror = () => this.missing.add(alt); pre.src = alt;   // 先載入，避免閃一下
+      this._anim = { alt }; let on = false;
+      this._animTimer = setInterval(() => {
+        if (this.missing.has(alt)) { this.stopAnim(); img.setAttribute('src', src); return; }
+        on = !on; img.setAttribute('src', on ? alt : src);
+      }, 600);
+    }
+  },
+
+  handleChoice(choice) {
+    if (this.state === '_TRANS') {          // 離開過場，進下一關
+      const t = this._trans; this._trans = null;
+      Tr.closeAll(); Speech.stop();
+      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
+      
+      if (document.getElementById('game-window').classList.contains('active')) this.render();
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
+    Speech.stop();
+    this.thought = null;
+    this.feedback = [];
+    const before = this.state;
+    this.att[before] = (this.att[before] || 0) + 1;
+    cfg.next(choice);
+    this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
+    if (this.thoughtFirst) this.visit += 1;
+    this.maybeTrans(before);
+    if (document.getElementById('game-window').classList.contains('active')) this.render();
+  },
+
+  render() {
+    if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果
+      const t = this._trans;
+      this.state = t.from;
+      this._transMode = true;
+      try { this.render(); } finally { this._transMode = false; this.state = '_TRANS'; }
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    if (!cfg) { console.error('狀態錯誤：' + this.state); return; }
+    const val = v => typeof v === 'function' ? v() : v;
+    this.setPlace(val(cfg.place) || 'phone');
+
+    // END 的 dialogue 會決定結局，所以只算一次
+    const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
+    let [src, emoji, alt] = this.IMAGES[this.state] || ['', '🏫'];
+    if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
+    this.setImage(src, emoji, alt);
+    Vocab.render(this.state);
+    if (Hints.open) Hints.render();
+    Log.render();
+
+    this._tr = []; this._spk = [];
+    let html = (this.showList && this.state !== 'START' && !['END', 'RESULT'].includes(this.state)) ? this.listHTML() : '';
+    html += cfg.html ? cfg.html() : '';
+    if (this._transMode) html = '';
+    const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
+    const main = this.formatText(raw);
+    html += this.thoughtFirst ? th + main : main + th;
+    html += this.feedbackHTML();
+    const box = document.getElementById('npc-dialogue');
+    box.innerHTML = html;
+    box.querySelectorAll('[data-tr]').forEach(btn => {
+      btn.onclick = () => Tr.open(this._tr[+btn.dataset.tr], btn);
+    });
+    box.querySelectorAll('[data-spk]').forEach(btn => {
+      btn.onclick = () => { const x = this._spk[+btn.dataset.spk]; Speech.speak(x.text, btn, x.who); };
+    });
+
+    const area = document.getElementById('options-area');
+    area.className = '';
+    area.innerHTML = '';
+    const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
+    area.classList.toggle('single', opts.length === 1 || opts.some(o => o.length > 12));
+    opts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt' + (false ? ' deal' : '');
+      btn.innerHTML = this.ruby(opt);
+      btn.onclick = () => this.handleChoice(opt);
+      area.appendChild(btn);
+    });
+  }
+});
+
+GameBoot();
+Music.init({ bpm: 112, tracks: [
+  { wave: 'square', vol: 0.26, notes: 'E5 . G5 . E5 . C5 . | D5 . F5 . D5 . B4 . | C5 . E5 . G5 . E5 . | D5 - - - C5 - . .' },
+  { wave: 'triangle', vol: 0.65, notes: 'C3 C3 C3 C3 C3 C3 C3 C3 | G2 G2 G2 G2 G2 G2 G2 G2 | C3 C3 C3 C3 E3 E3 E3 E3 | G2 G2 G2 G2 C3 C3 C3 C3' },
+  { vol: 0.45, notes: 'k . h . s . h . k . h k s . h h' }] });
+</script>
+</body>
+</html>
