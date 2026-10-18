@@ -1,0 +1,518 @@
+{
+ "game": "elevator",
+ "title": "搭電梯",
+ "rows": [
+  {
+   "id": "elevator-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "電梯"
+  },
+  {
+   "id": "elevator-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "搭電梯"
+  },
+  {
+   "id": "elevator-003",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "Ami 住在公寓大樓。今天你要去她家，要搭電梯上樓。電梯裡有按鈕，還會遇到鄰居，要用客氣的話。"
+  },
+  {
+   "id": "elevator-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到電梯前"
+  },
+  {
+   "id": "elevator-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "電梯來了"
+  },
+  {
+   "id": "elevator-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走進電梯"
+  },
+  {
+   "id": "elevator-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "電梯往上"
+  },
+  {
+   "id": "elevator-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "電梯停了"
+  },
+  {
+   "id": "elevator-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "繼續往上"
+  },
+  {
+   "id": "elevator-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "到Ami家"
+  },
+  {
+   "id": "elevator-011",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "公寓大樓"
+  },
+  {
+   "id": "elevator-012",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "〔名字〕，我住在〔幾樓〕樓。大樓門口進來就有電梯，你自己上來。"
+  },
+  {
+   "id": "elevator-013",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "電梯裡面可能會遇到鄰居，要有禮貌喔！"
+  },
+  {
+   "id": "elevator-014",
+   "kind": "旁白",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "（你走到Ami住的公寓大樓。手機響了一聲，是Ami傳來的LINE。）"
+  },
+  {
+   "id": "elevator-015",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "START",
+   "who": "我",
+   "zh": "好，我現在上去！"
+  },
+  {
+   "id": "elevator-016",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "走進大樓"
+  },
+  {
+   "id": "elevator-017",
+   "kind": "旁白",
+   "stage": "LOBBY",
+   "stageName": "LOBBY",
+   "who": "",
+   "zh": "（你在一樓大廳，電梯門前有兩個按鈕：▲和▼。）"
+  },
+  {
+   "id": "elevator-018",
+   "kind": "台詞",
+   "stage": "LOBBY",
+   "stageName": "LOBBY",
+   "who": "我",
+   "zh": "Ami住在〔幾樓〕樓，我要按哪一個？"
+  },
+  {
+   "id": "elevator-019",
+   "kind": "選項",
+   "stage": "LOBBY",
+   "stageName": "LOBBY",
+   "who": "",
+   "zh": "按▲，往上。"
+  },
+  {
+   "id": "elevator-020",
+   "kind": "選項",
+   "stage": "LOBBY",
+   "stageName": "LOBBY",
+   "who": "",
+   "zh": "按▼，往下。"
+  },
+  {
+   "id": "elevator-021",
+   "kind": "選項",
+   "stage": "LOBBY",
+   "stageName": "LOBBY",
+   "who": "",
+   "zh": "不按，站在旁邊等。"
+  },
+  {
+   "id": "elevator-022",
+   "kind": "錯誤說明",
+   "stage": "LOBBY",
+   "stageName": "LOBBY",
+   "who": "",
+   "zh": "Ami住在〔幾樓〕樓，在一樓要往上。"
+  },
+  {
+   "id": "elevator-023",
+   "kind": "綠卡說明",
+   "stage": "LOBBY",
+   "stageName": "LOBBY",
+   "who": "",
+   "zh": "沒錯！去更高的樓層，要按「往上」。"
+  },
+  {
+   "id": "elevator-024",
+   "kind": "旁白",
+   "stage": "LOBBY",
+   "stageName": "LOBBY",
+   "who": "",
+   "zh": "（電梯來了，門打開了。你走進去。）"
+  },
+  {
+   "id": "elevator-025",
+   "kind": "旁白",
+   "stage": "WAIT",
+   "stageName": "WAIT",
+   "who": "",
+   "zh": "（門快要關了。這時候，一位鄰居跑過來。）"
+  },
+  {
+   "id": "elevator-026",
+   "kind": "台詞",
+   "stage": "WAIT",
+   "stageName": "WAIT",
+   "who": "鄰居",
+   "zh": "等一下！等一下！"
+  },
+  {
+   "id": "elevator-027",
+   "kind": "選項",
+   "stage": "WAIT",
+   "stageName": "WAIT",
+   "who": "",
+   "zh": "按「開門」，等他。"
+  },
+  {
+   "id": "elevator-028",
+   "kind": "選項",
+   "stage": "WAIT",
+   "stageName": "WAIT",
+   "who": "",
+   "zh": "按「關門」。"
+  },
+  {
+   "id": "elevator-029",
+   "kind": "選項",
+   "stage": "WAIT",
+   "stageName": "WAIT",
+   "who": "",
+   "zh": "不要動，假裝沒看到。"
+  },
+  {
+   "id": "elevator-030",
+   "kind": "錯誤說明",
+   "stage": "WAIT",
+   "stageName": "WAIT",
+   "who": "",
+   "zh": "鄰居在跑，要按「開門」等他。"
+  },
+  {
+   "id": "elevator-031",
+   "kind": "綠卡說明",
+   "stage": "WAIT",
+   "stageName": "WAIT",
+   "who": "",
+   "zh": "很有禮貌！在台灣，幫別人按開門鍵很常見。"
+  },
+  {
+   "id": "elevator-032",
+   "kind": "台詞",
+   "stage": "WAIT",
+   "stageName": "WAIT",
+   "who": "鄰居",
+   "zh": "謝謝你！"
+  },
+  {
+   "id": "elevator-033",
+   "kind": "旁白",
+   "stage": "FLOOR",
+   "stageName": "FLOOR",
+   "who": "",
+   "zh": "（電梯裡有一排樓層按鈕。）"
+  },
+  {
+   "id": "elevator-034",
+   "kind": "台詞",
+   "stage": "FLOOR",
+   "stageName": "FLOOR",
+   "who": "我",
+   "zh": "Ami住在〔幾樓〕樓。"
+  },
+  {
+   "id": "elevator-035",
+   "kind": "選項",
+   "stage": "FLOOR",
+   "stageName": "FLOOR",
+   "who": "",
+   "zh": "按〔幾樓〕樓。"
+  },
+  {
+   "id": "elevator-036",
+   "kind": "錯誤說明",
+   "stage": "FLOOR",
+   "stageName": "FLOOR",
+   "who": "",
+   "zh": "Ami住在〔幾樓〕樓。"
+  },
+  {
+   "id": "elevator-037",
+   "kind": "綠卡說明",
+   "stage": "FLOOR",
+   "stageName": "FLOOR",
+   "who": "",
+   "zh": "對了！按〔幾樓〕樓。"
+  },
+  {
+   "id": "elevator-038",
+   "kind": "台詞",
+   "stage": "FLOOR",
+   "stageName": "FLOOR",
+   "who": "鄰居",
+   "zh": "不好意思，我到〔中途幾樓〕樓，麻煩你幫我按。"
+  },
+  {
+   "id": "elevator-039",
+   "kind": "台詞",
+   "stage": "HELP",
+   "stageName": "HELP",
+   "who": "鄰居",
+   "zh": "不好意思，我到〔中途幾樓〕樓，麻煩你幫我按。"
+  },
+  {
+   "id": "elevator-040",
+   "kind": "選項",
+   "stage": "HELP",
+   "stageName": "HELP",
+   "who": "",
+   "zh": "好，我幫你按〔中途幾樓〕樓。"
+  },
+  {
+   "id": "elevator-041",
+   "kind": "選項",
+   "stage": "HELP",
+   "stageName": "HELP",
+   "who": "",
+   "zh": "好，我幫你按〔幾樓〕樓。"
+  },
+  {
+   "id": "elevator-042",
+   "kind": "選項",
+   "stage": "HELP",
+   "stageName": "HELP",
+   "who": "",
+   "zh": "我不會說中文。"
+  },
+  {
+   "id": "elevator-043",
+   "kind": "錯誤說明",
+   "stage": "HELP",
+   "stageName": "HELP",
+   "who": "",
+   "zh": "鄰居只是請你幫忙按一個鈕，很簡單。"
+  },
+  {
+   "id": "elevator-044",
+   "kind": "錯誤說明",
+   "stage": "HELP",
+   "stageName": "HELP",
+   "who": "",
+   "zh": "鄰居要到〔中途幾樓〕樓。"
+  },
+  {
+   "id": "elevator-045",
+   "kind": "綠卡說明",
+   "stage": "HELP",
+   "stageName": "HELP",
+   "who": "",
+   "zh": "很好！你聽懂了他要去幾樓。"
+  },
+  {
+   "id": "elevator-046",
+   "kind": "旁白",
+   "stage": "HELP",
+   "stageName": "HELP",
+   "who": "",
+   "zh": "（電梯往上，在〔中途幾樓〕樓停了，門打開。）"
+  },
+  {
+   "id": "elevator-047",
+   "kind": "台詞",
+   "stage": "HELP",
+   "stageName": "HELP",
+   "who": "鄰居",
+   "zh": "到了，謝謝你！再見！"
+  },
+  {
+   "id": "elevator-048",
+   "kind": "台詞",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "鄰居",
+   "zh": "到了，謝謝你！再見！"
+  },
+  {
+   "id": "elevator-049",
+   "kind": "選項",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "不客氣，慢走！"
+  },
+  {
+   "id": "elevator-050",
+   "kind": "選項",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "你走錯了！"
+  },
+  {
+   "id": "elevator-051",
+   "kind": "選項",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "（不說話）"
+  },
+  {
+   "id": "elevator-052",
+   "kind": "錯誤說明",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "鄰居要下電梯，可以說「慢走」。"
+  },
+  {
+   "id": "elevator-053",
+   "kind": "綠卡說明",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "「慢走」是跟離開的人說的客氣話。"
+  },
+  {
+   "id": "elevator-054",
+   "kind": "旁白",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "（電梯繼續往上，到〔幾樓〕樓了。門口站了很多人，你前面有人擋著。）"
+  },
+  {
+   "id": "elevator-055",
+   "kind": "旁白",
+   "stage": "ARRIVE",
+   "stageName": "ARRIVE",
+   "who": "",
+   "zh": "（〔幾樓〕樓到了，門開了。可是前面有人站著。）"
+  },
+  {
+   "id": "elevator-056",
+   "kind": "台詞",
+   "stage": "ARRIVE",
+   "stageName": "ARRIVE",
+   "who": "我",
+   "zh": "我要出去……"
+  },
+  {
+   "id": "elevator-057",
+   "kind": "選項",
+   "stage": "ARRIVE",
+   "stageName": "ARRIVE",
+   "who": "",
+   "zh": "不好意思，借過一下。"
+  },
+  {
+   "id": "elevator-058",
+   "kind": "選項",
+   "stage": "ARRIVE",
+   "stageName": "ARRIVE",
+   "who": "",
+   "zh": "走開！"
+  },
+  {
+   "id": "elevator-059",
+   "kind": "選項",
+   "stage": "ARRIVE",
+   "stageName": "ARRIVE",
+   "who": "",
+   "zh": "（用力推開）"
+  },
+  {
+   "id": "elevator-060",
+   "kind": "錯誤說明",
+   "stage": "ARRIVE",
+   "stageName": "ARRIVE",
+   "who": "",
+   "zh": "要出去時，客氣地說「借過一下」。"
+  },
+  {
+   "id": "elevator-061",
+   "kind": "綠卡說明",
+   "stage": "ARRIVE",
+   "stageName": "ARRIVE",
+   "who": "",
+   "zh": "很好！「借過」是請別人讓路。"
+  },
+  {
+   "id": "elevator-062",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "END",
+   "who": "",
+   "zh": "（你走到Ami家門口，按了電鈴。）"
+  },
+  {
+   "id": "elevator-063",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "〔名字〕，你來了！電梯很好搭吧？歡迎歡迎！"
+  },
+  {
+   "id": "elevator-064",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "〔名字〕，你終於來了！剛剛好像有點不順利？沒關係，進來吧！"
+  }
+ ]
+}

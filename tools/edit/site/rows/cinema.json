@@ -1,0 +1,822 @@
+{
+ "game": "cinema",
+ "title": "電影院",
+ "rows": [
+  {
+   "id": "cinema-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "電影院"
+  },
+  {
+   "id": "cinema-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "看電影"
+  },
+  {
+   "id": "cinema-003",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "Ami 和她弟弟小宇約你週末晚上看電影。你先到電影院：看看板、買票、選座位、買爆米花，還要找到對的廳。"
+  },
+  {
+   "id": "cinema-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到售票櫃台"
+  },
+  {
+   "id": "cinema-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "告訴售票員"
+  },
+  {
+   "id": "cinema-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "看座位表"
+  },
+  {
+   "id": "cinema-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "付錢"
+  },
+  {
+   "id": "cinema-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "看一下找的錢"
+  },
+  {
+   "id": "cinema-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到零食櫃台"
+  },
+  {
+   "id": "cinema-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到驗票口"
+  },
+  {
+   "id": "cinema-011",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走進電影院"
+  },
+  {
+   "id": "cinema-012",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到座位"
+  },
+  {
+   "id": "cinema-013",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "坐好，電影開始了"
+  },
+  {
+   "id": "cinema-014",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "電影結束了"
+  },
+  {
+   "id": "cinema-015",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "〔名字〕，我們今天晚上要看《〔電影名稱〕》，〔場次時間〕那一場。"
+  },
+  {
+   "id": "cinema-016",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "我、你、小宇和小美，四個人一起去。小宇和小美都是大學生，他們有學生證。"
+  },
+  {
+   "id": "cinema-017",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "我、你和小宇，三個人一起去。小宇是大學生，他有學生證。"
+  },
+  {
+   "id": "cinema-018",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "你先幫我們買票，座位要連在一起喔！〔哪一列座位〕"
+  },
+  {
+   "id": "cinema-019",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "我要吃〔爆米花口味（甜／鹹…）〕爆米花，不要〔另一種爆米花口味〕的喔！"
+  },
+  {
+   "id": "cinema-020",
+   "kind": "旁白",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "（你到了電影院門口。手機響了一聲，是Ami傳來的LINE。）"
+  },
+  {
+   "id": "cinema-021",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "START",
+   "who": "我",
+   "zh": "好，我先去買票！"
+  },
+  {
+   "id": "cinema-022",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "走進電影院"
+  },
+  {
+   "id": "cinema-023",
+   "kind": "旁白",
+   "stage": "BOARD",
+   "stageName": "BOARD",
+   "who": "",
+   "zh": "（你走到售票櫃台，上面的電子看板列出今晚的電影。）"
+  },
+  {
+   "id": "cinema-024",
+   "kind": "台詞",
+   "stage": "BOARD",
+   "stageName": "BOARD",
+   "who": "售票員",
+   "zh": "你好，請問要看哪一場？"
+  },
+  {
+   "id": "cinema-025",
+   "kind": "錯誤說明",
+   "stage": "BOARD",
+   "stageName": "BOARD",
+   "who": "",
+   "zh": "Ami說的是〔場次時間〕那一場。"
+  },
+  {
+   "id": "cinema-026",
+   "kind": "錯誤說明",
+   "stage": "BOARD",
+   "stageName": "BOARD",
+   "who": "",
+   "zh": "Ami要看的是《〔電影名稱〕》。"
+  },
+  {
+   "id": "cinema-027",
+   "kind": "綠卡說明",
+   "stage": "BOARD",
+   "stageName": "BOARD",
+   "who": "",
+   "zh": "看得很仔細！買票以前，要先確認片名和時間。"
+  },
+  {
+   "id": "cinema-028",
+   "kind": "台詞",
+   "stage": "BOARD",
+   "stageName": "BOARD",
+   "who": "售票員",
+   "zh": "好的。"
+  },
+  {
+   "id": "cinema-029",
+   "kind": "台詞",
+   "stage": "TICKETS",
+   "stageName": "TICKETS",
+   "who": "售票員",
+   "zh": "請問要幾張票？"
+  },
+  {
+   "id": "cinema-030",
+   "kind": "選項",
+   "stage": "TICKETS",
+   "stageName": "TICKETS",
+   "who": "",
+   "zh": "〔有時加：全票〕。"
+  },
+  {
+   "id": "cinema-031",
+   "kind": "選項",
+   "stage": "TICKETS",
+   "stageName": "TICKETS",
+   "who": "",
+   "zh": "〔有時加：學生票〕。"
+  },
+  {
+   "id": "cinema-032",
+   "kind": "錯誤說明",
+   "stage": "TICKETS",
+   "stageName": "TICKETS",
+   "who": "",
+   "zh": "小宇是大學生，他可以買學生票，比較便宜。"
+  },
+  {
+   "id": "cinema-033",
+   "kind": "錯誤說明",
+   "stage": "TICKETS",
+   "stageName": "TICKETS",
+   "who": "",
+   "zh": "你和Ami不是學生，要買全票。"
+  },
+  {
+   "id": "cinema-034",
+   "kind": "綠卡說明",
+   "stage": "TICKETS",
+   "stageName": "TICKETS",
+   "who": "",
+   "zh": "很好！學生票比較便宜，但是要出示學生證。"
+  },
+  {
+   "id": "cinema-035",
+   "kind": "台詞",
+   "stage": "TICKETS",
+   "stageName": "TICKETS",
+   "who": "售票員",
+   "zh": "好，我看一下座位。"
+  },
+  {
+   "id": "cinema-036",
+   "kind": "台詞",
+   "stage": "SEATS",
+   "stageName": "SEATS",
+   "who": "售票員",
+   "zh": "這是座位表，灰色的位子已經賣掉了。請選位子。"
+  },
+  {
+   "id": "cinema-037",
+   "kind": "選項",
+   "stage": "SEATS",
+   "stageName": "SEATS",
+   "who": "",
+   "zh": "確定這些位子"
+  },
+  {
+   "id": "cinema-038",
+   "kind": "錯誤說明",
+   "stage": "SEATS",
+   "stageName": "SEATS",
+   "who": "",
+   "zh": "你們有〔人數〕個人，要選〔人數〕個位子。"
+  },
+  {
+   "id": "cinema-039",
+   "kind": "錯誤說明",
+   "stage": "SEATS",
+   "stageName": "SEATS",
+   "who": "",
+   "zh": "要坐在同一排。"
+  },
+  {
+   "id": "cinema-040",
+   "kind": "錯誤說明",
+   "stage": "SEATS",
+   "stageName": "SEATS",
+   "who": "",
+   "zh": "號碼要連在一起，才能坐在一起。"
+  },
+  {
+   "id": "cinema-041",
+   "kind": "錯誤說明",
+   "stage": "SEATS",
+   "stageName": "SEATS",
+   "who": "",
+   "zh": "Ami的要求：〔哪一列座位〕"
+  },
+  {
+   "id": "cinema-042",
+   "kind": "綠卡說明",
+   "stage": "SEATS",
+   "stageName": "SEATS",
+   "who": "",
+   "zh": "選得很好！位子連在一起，也在Ami想坐的地方。"
+  },
+  {
+   "id": "cinema-043",
+   "kind": "台詞",
+   "stage": "SEATS",
+   "stageName": "SEATS",
+   "who": "售票員",
+   "zh": "好，〔座位〕。"
+  },
+  {
+   "id": "cinema-044",
+   "kind": "選項",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "給你五百元。"
+  },
+  {
+   "id": "cinema-045",
+   "kind": "選項",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "可以算便宜一點嗎？"
+  },
+  {
+   "id": "cinema-046",
+   "kind": "錯誤說明",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "一共是〔總價〕元，五百元不夠。"
+  },
+  {
+   "id": "cinema-047",
+   "kind": "錯誤說明",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "電影院的票價是固定的，不能殺價。"
+  },
+  {
+   "id": "cinema-048",
+   "kind": "綠卡說明",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "沒錯！你沒有零錢，就付整張的錢，他會找錢給你。"
+  },
+  {
+   "id": "cinema-049",
+   "kind": "台詞",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "售票員",
+   "zh": "收你〔給的錢（中文）〕元，找你〔售票員找的錢（中文）〕元。"
+  },
+  {
+   "id": "cinema-050",
+   "kind": "旁白",
+   "stage": "CHANGE",
+   "stageName": "CHANGE",
+   "who": "",
+   "zh": "（售票員把電影票和零錢放在桌上。）"
+  },
+  {
+   "id": "cinema-051",
+   "kind": "選項",
+   "stage": "CHANGE",
+   "stageName": "CHANGE",
+   "who": "",
+   "zh": "好，謝謝。"
+  },
+  {
+   "id": "cinema-052",
+   "kind": "選項",
+   "stage": "CHANGE",
+   "stageName": "CHANGE",
+   "who": "",
+   "zh": "不好意思，你找錯了。"
+  },
+  {
+   "id": "cinema-053",
+   "kind": "錯誤說明",
+   "stage": "CHANGE",
+   "stageName": "CHANGE",
+   "who": "",
+   "zh": "找的錢是對的：〔給的錢〕 − 〔總價〕 = 〔應該找的錢〕。"
+  },
+  {
+   "id": "cinema-054",
+   "kind": "錯誤說明",
+   "stage": "CHANGE",
+   "stageName": "CHANGE",
+   "who": "",
+   "zh": "應該找〔應該找的錢〕元，不是〔售票員找的錢〕元。〔給的錢〕 − 〔總價〕 = 〔應該找的錢〕。"
+  },
+  {
+   "id": "cinema-055",
+   "kind": "旁白",
+   "stage": "CHANGE",
+   "stageName": "CHANGE",
+   "who": "",
+   "zh": "（你收好電影票和零錢。）"
+  },
+  {
+   "id": "cinema-056",
+   "kind": "選項",
+   "stage": "CHANGE",
+   "stageName": "CHANGE",
+   "who": "",
+   "zh": "啊，不好意思！這裡是〔應該找的錢（中文）〕元。"
+  },
+  {
+   "id": "cinema-057",
+   "kind": "旁白",
+   "stage": "CHANGE",
+   "stageName": "CHANGE",
+   "who": "",
+   "zh": "（你收好電影票和零錢。）"
+  },
+  {
+   "id": "cinema-058",
+   "kind": "台詞",
+   "stage": "SNACK",
+   "stageName": "SNACK",
+   "who": "店員",
+   "zh": "你好，請問要點什麼？"
+  },
+  {
+   "id": "cinema-059",
+   "kind": "選項",
+   "stage": "SNACK",
+   "stageName": "SNACK",
+   "who": "",
+   "zh": "一份〔爆米花口味（甜／鹹…）〕爆米花。"
+  },
+  {
+   "id": "cinema-060",
+   "kind": "選項",
+   "stage": "SNACK",
+   "stageName": "SNACK",
+   "who": "",
+   "zh": "一份〔另一種爆米花口味〕爆米花。"
+  },
+  {
+   "id": "cinema-061",
+   "kind": "選項",
+   "stage": "SNACK",
+   "stageName": "SNACK",
+   "who": "",
+   "zh": "一杯可樂就好。"
+  },
+  {
+   "id": "cinema-062",
+   "kind": "錯誤說明",
+   "stage": "SNACK",
+   "stageName": "SNACK",
+   "who": "",
+   "zh": "Ami要吃爆米花，只買可樂不夠。"
+  },
+  {
+   "id": "cinema-063",
+   "kind": "錯誤說明",
+   "stage": "SNACK",
+   "stageName": "SNACK",
+   "who": "",
+   "zh": "Ami說她要〔爆米花口味（甜／鹹…）〕爆米花，不要〔另一種爆米花口味〕的。"
+  },
+  {
+   "id": "cinema-064",
+   "kind": "綠卡說明",
+   "stage": "SNACK",
+   "stageName": "SNACK",
+   "who": "",
+   "zh": "你記得Ami說的話，真棒！"
+  },
+  {
+   "id": "cinema-065",
+   "kind": "台詞",
+   "stage": "SNACK",
+   "stageName": "SNACK",
+   "who": "店員",
+   "zh": "好的，請稍等。"
+  },
+  {
+   "id": "cinema-066",
+   "kind": "旁白",
+   "stage": "GATE",
+   "stageName": "GATE",
+   "who": "",
+   "zh": "（你拿著票走到驗票口。小宇〔有時加：和小美〕也剛好到了。）"
+  },
+  {
+   "id": "cinema-067",
+   "kind": "選項",
+   "stage": "GATE",
+   "stageName": "GATE",
+   "who": "",
+   "zh": "好，這是電影票，這是學生證。"
+  },
+  {
+   "id": "cinema-068",
+   "kind": "選項",
+   "stage": "GATE",
+   "stageName": "GATE",
+   "who": "",
+   "zh": "好，這是電影票。學生證忘了帶，沒關係吧？"
+  },
+  {
+   "id": "cinema-069",
+   "kind": "選項",
+   "stage": "GATE",
+   "stageName": "GATE",
+   "who": "",
+   "zh": "電影票給你，學生證不用看吧？"
+  },
+  {
+   "id": "cinema-070",
+   "kind": "錯誤說明",
+   "stage": "GATE",
+   "stageName": "GATE",
+   "who": "",
+   "zh": "學生票一定要出示學生證；沒有學生證的話，要補差價買全票。"
+  },
+  {
+   "id": "cinema-071",
+   "kind": "錯誤說明",
+   "stage": "GATE",
+   "stageName": "GATE",
+   "who": "",
+   "zh": "學生票要看學生證，這是規定。"
+  },
+  {
+   "id": "cinema-072",
+   "kind": "綠卡說明",
+   "stage": "GATE",
+   "stageName": "GATE",
+   "who": "",
+   "zh": "很好！買學生票，記得帶學生證。"
+  },
+  {
+   "id": "cinema-073",
+   "kind": "台詞",
+   "stage": "GATE",
+   "stageName": "GATE",
+   "who": "驗票員",
+   "zh": "好，沒問題。請進，祝你們看得開心！"
+  },
+  {
+   "id": "cinema-074",
+   "kind": "旁白",
+   "stage": "FIND_HALL",
+   "stageName": "FIND_HALL",
+   "who": "",
+   "zh": "（電影院裡有好幾個廳，每個門口都寫著廳號。）"
+  },
+  {
+   "id": "cinema-075",
+   "kind": "台詞",
+   "stage": "FIND_HALL",
+   "stageName": "FIND_HALL",
+   "who": "我",
+   "zh": "我們的票上寫幾廳呢？"
+  },
+  {
+   "id": "cinema-076",
+   "kind": "選項",
+   "stage": "FIND_HALL",
+   "stageName": "FIND_HALL",
+   "who": "",
+   "zh": "走進〔第幾廳〕廳"
+  },
+  {
+   "id": "cinema-077",
+   "kind": "錯誤說明",
+   "stage": "FIND_HALL",
+   "stageName": "FIND_HALL",
+   "who": "",
+   "zh": "票上寫的是〔第幾廳〕廳。"
+  },
+  {
+   "id": "cinema-078",
+   "kind": "旁白",
+   "stage": "FIND_HALL",
+   "stageName": "FIND_HALL",
+   "who": "",
+   "zh": "（你走進去，發現裡面在放另一部電影！你趕快走出來。）"
+  },
+  {
+   "id": "cinema-079",
+   "kind": "綠卡說明",
+   "stage": "FIND_HALL",
+   "stageName": "FIND_HALL",
+   "who": "",
+   "zh": "你會看票上的廳號，很棒！"
+  },
+  {
+   "id": "cinema-080",
+   "kind": "旁白",
+   "stage": "FIND_HALL",
+   "stageName": "FIND_HALL",
+   "who": "",
+   "zh": "（你找到〔第幾廳〕廳，走進去，裡面很暗。）"
+  },
+  {
+   "id": "cinema-081",
+   "kind": "旁白",
+   "stage": "SEAT_TAKEN",
+   "stageName": "SEAT_TAKEN",
+   "who": "",
+   "zh": "（電影快開始了。你們走到座位，可是有一位阿伯坐在你們的位子上。）"
+  },
+  {
+   "id": "cinema-082",
+   "kind": "台詞",
+   "stage": "SEAT_TAKEN",
+   "stageName": "SEAT_TAKEN",
+   "who": "阿伯",
+   "zh": "欸，這個位子是我的吧？"
+  },
+  {
+   "id": "cinema-083",
+   "kind": "選項",
+   "stage": "SEAT_TAKEN",
+   "stageName": "SEAT_TAKEN",
+   "who": "",
+   "zh": "不好意思，我們的票是〔你買的座位〕，請你再看一下票。"
+  },
+  {
+   "id": "cinema-084",
+   "kind": "選項",
+   "stage": "SEAT_TAKEN",
+   "stageName": "SEAT_TAKEN",
+   "who": "",
+   "zh": "好吧，你坐，我們去坐別的位子。"
+  },
+  {
+   "id": "cinema-085",
+   "kind": "選項",
+   "stage": "SEAT_TAKEN",
+   "stageName": "SEAT_TAKEN",
+   "who": "",
+   "zh": "喂！你坐錯了，快起來！"
+  },
+  {
+   "id": "cinema-086",
+   "kind": "錯誤說明",
+   "stage": "SEAT_TAKEN",
+   "stageName": "SEAT_TAKEN",
+   "who": "",
+   "zh": "票上有位子，要坐票上的位子（對號入座），不能隨便讓給別人。"
+  },
+  {
+   "id": "cinema-087",
+   "kind": "錯誤說明",
+   "stage": "SEAT_TAKEN",
+   "stageName": "SEAT_TAKEN",
+   "who": "",
+   "zh": "要有禮貌，先說「不好意思」，再請他看票。"
+  },
+  {
+   "id": "cinema-088",
+   "kind": "台詞",
+   "stage": "SEAT_TAKEN",
+   "stageName": "SEAT_TAKEN",
+   "who": "阿伯",
+   "zh": "謝謝你喔。"
+  },
+  {
+   "id": "cinema-089",
+   "kind": "台詞",
+   "stage": "SEAT_TAKEN",
+   "stageName": "SEAT_TAKEN",
+   "who": "阿伯",
+   "zh": "什麼？你怎麼這麼沒禮貌！"
+  },
+  {
+   "id": "cinema-090",
+   "kind": "綠卡說明",
+   "stage": "SEAT_TAKEN",
+   "stageName": "SEAT_TAKEN",
+   "who": "",
+   "zh": "你很有禮貌，也很清楚。這樣不會吵架！"
+  },
+  {
+   "id": "cinema-091",
+   "kind": "台詞",
+   "stage": "SEAT_TAKEN",
+   "stageName": "SEAT_TAKEN",
+   "who": "阿伯",
+   "zh": "喔，對不起對不起，我看錯了！"
+  },
+  {
+   "id": "cinema-092",
+   "kind": "旁白",
+   "stage": "PHONE",
+   "stageName": "PHONE",
+   "who": "",
+   "zh": "（燈暗了，電影開始了。突然，你的手機響了！）"
+  },
+  {
+   "id": "cinema-093",
+   "kind": "選項",
+   "stage": "PHONE",
+   "stageName": "PHONE",
+   "who": "",
+   "zh": "馬上把手機調成靜音。"
+  },
+  {
+   "id": "cinema-094",
+   "kind": "選項",
+   "stage": "PHONE",
+   "stageName": "PHONE",
+   "who": "",
+   "zh": "大聲接電話：「喂？」"
+  },
+  {
+   "id": "cinema-095",
+   "kind": "選項",
+   "stage": "PHONE",
+   "stageName": "PHONE",
+   "who": "",
+   "zh": "打開手機看訊息。"
+  },
+  {
+   "id": "cinema-096",
+   "kind": "錯誤說明",
+   "stage": "PHONE",
+   "stageName": "PHONE",
+   "who": "",
+   "zh": "電影院裡要安靜，手機要調成靜音。"
+  },
+  {
+   "id": "cinema-097",
+   "kind": "錯誤說明",
+   "stage": "PHONE",
+   "stageName": "PHONE",
+   "who": "",
+   "zh": "手機的螢幕很亮，會影響旁邊的人。"
+  },
+  {
+   "id": "cinema-098",
+   "kind": "綠卡說明",
+   "stage": "PHONE",
+   "stageName": "PHONE",
+   "who": "",
+   "zh": "很好！看電影以前，要把手機調成靜音。"
+  },
+  {
+   "id": "cinema-099",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "END",
+   "who": "",
+   "zh": "（電影結束了，燈亮起來。）"
+  },
+  {
+   "id": "cinema-100",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "哇，這部電影超好看的！謝謝你幫我們買票，〔名字〕，你太厲害了！"
+  },
+  {
+   "id": "cinema-101",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "END",
+   "who": "",
+   "zh": "（電影結束了。因為〔原因〕，你們錯過了前面的劇情。）"
+  },
+  {
+   "id": "cinema-102",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "沒關係啦！下次我們早一點來，先看清楚票上的字！"
+  }
+ ]
+}

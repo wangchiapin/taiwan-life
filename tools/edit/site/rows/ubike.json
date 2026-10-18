@@ -1,0 +1,678 @@
+{
+ "game": "ubike",
+ "title": "YouBike",
+ "rows": [
+  {
+   "id": "ubike-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "騎 YouBike"
+  },
+  {
+   "id": "ubike-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "Ami 在公園（或圖書館、夜市）等你。你要用 App 找到有車的站，用悠遊卡借 YouBike，騎過去，再找有空位的站還車。"
+  },
+  {
+   "id": "ubike-003",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "打開 YouBike 的 App"
+  },
+  {
+   "id": "ubike-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到 YouBike 站"
+  },
+  {
+   "id": "ubike-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "借車"
+  },
+  {
+   "id": "ubike-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "牽著車，坐上去"
+  },
+  {
+   "id": "ubike-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "騎上路"
+  },
+  {
+   "id": "ubike-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "往前騎"
+  },
+  {
+   "id": "ubike-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "快到了，打開 App"
+  },
+  {
+   "id": "ubike-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到 YouBike 站"
+  },
+  {
+   "id": "ubike-011",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "還好車，去找 Ami"
+  },
+  {
+   "id": "ubike-012",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "Ami 的 LINE 訊息"
+  },
+  {
+   "id": "ubike-013",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "YouBike 站"
+  },
+  {
+   "id": "ubike-014",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "馬路"
+  },
+  {
+   "id": "ubike-015",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "路口"
+  },
+  {
+   "id": "ubike-016",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "我在〔目的地〕等你。你騎 YouBike 過來吧，很快！"
+  },
+  {
+   "id": "ubike-017",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "先打開 App，看看哪一個站有車喔。"
+  },
+  {
+   "id": "ubike-018",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "還車的時候，也要看 App，找有空位的站。"
+  },
+  {
+   "id": "ubike-019",
+   "kind": "旁白",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "（你要去〔目的地〕找 Ami。手機響了一聲，是 Ami 傳來的 LINE。）"
+  },
+  {
+   "id": "ubike-020",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "START",
+   "who": "我",
+   "zh": "好，我騎 YouBike 過去！"
+  },
+  {
+   "id": "ubike-021",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "打開 YouBike 的 App"
+  },
+  {
+   "id": "ubike-022",
+   "kind": "台詞",
+   "stage": "FIND",
+   "stageName": "FIND",
+   "who": "我",
+   "zh": "我要去哪一個站借車呢？"
+  },
+  {
+   "id": "ubike-023",
+   "kind": "選項",
+   "stage": "FIND",
+   "stageName": "FIND",
+   "who": "",
+   "zh": "去〔站名〕借車"
+  },
+  {
+   "id": "ubike-024",
+   "kind": "錯誤說明",
+   "stage": "FIND",
+   "stageName": "FIND",
+   "who": "",
+   "zh": "〔站名〕「可借 0 輛」，沒有車可以借，要去有車的站。"
+  },
+  {
+   "id": "ubike-025",
+   "kind": "旁白",
+   "stage": "FIND",
+   "stageName": "FIND",
+   "who": "",
+   "zh": "（你走到〔站名〕，可是車柱都是空的。你只好再回去看 App。）"
+  },
+  {
+   "id": "ubike-026",
+   "kind": "綠卡說明",
+   "stage": "FIND",
+   "stageName": "FIND",
+   "who": "",
+   "zh": "你看懂 App 了！「可借」是可以借的車，要選有車的站。"
+  },
+  {
+   "id": "ubike-027",
+   "kind": "旁白",
+   "stage": "FIND",
+   "stageName": "FIND",
+   "who": "",
+   "zh": "（你走到〔站名〕，車柱上停著很多 YouBike。）"
+  },
+  {
+   "id": "ubike-028",
+   "kind": "台詞",
+   "stage": "TAP",
+   "stageName": "TAP",
+   "who": "我",
+   "zh": "要怎麼借車呢？"
+  },
+  {
+   "id": "ubike-029",
+   "kind": "選項",
+   "stage": "TAP",
+   "stageName": "TAP",
+   "who": "",
+   "zh": "把悠遊卡放在感應區"
+  },
+  {
+   "id": "ubike-030",
+   "kind": "選項",
+   "stage": "TAP",
+   "stageName": "TAP",
+   "who": "",
+   "zh": "投十元硬幣"
+  },
+  {
+   "id": "ubike-031",
+   "kind": "選項",
+   "stage": "TAP",
+   "stageName": "TAP",
+   "who": "",
+   "zh": "直接把車拉出來"
+  },
+  {
+   "id": "ubike-032",
+   "kind": "錯誤說明",
+   "stage": "TAP",
+   "stageName": "TAP",
+   "who": "",
+   "zh": "YouBike 不能投硬幣，要用悠遊卡（或 App）借車。"
+  },
+  {
+   "id": "ubike-033",
+   "kind": "錯誤說明",
+   "stage": "TAP",
+   "stageName": "TAP",
+   "who": "",
+   "zh": "要先用悠遊卡借車，車柱才會打開，不能直接拉。"
+  },
+  {
+   "id": "ubike-034",
+   "kind": "綠卡說明",
+   "stage": "TAP",
+   "stageName": "TAP",
+   "who": "",
+   "zh": "沒錯！悠遊卡放在感應區，就可以借車了。"
+  },
+  {
+   "id": "ubike-035",
+   "kind": "旁白",
+   "stage": "TAP",
+   "stageName": "TAP",
+   "who": "",
+   "zh": "（「嗶」一聲，螢幕寫著「借車成功」。其中一個車柱亮起了綠燈。）"
+  },
+  {
+   "id": "ubike-036",
+   "kind": "台詞",
+   "stage": "PULL",
+   "stageName": "PULL",
+   "who": "我",
+   "zh": "哪一台是我的車呢？"
+  },
+  {
+   "id": "ubike-037",
+   "kind": "選項",
+   "stage": "PULL",
+   "stageName": "PULL",
+   "who": "",
+   "zh": "拉出綠燈亮著的那一台"
+  },
+  {
+   "id": "ubike-038",
+   "kind": "選項",
+   "stage": "PULL",
+   "stageName": "PULL",
+   "who": "",
+   "zh": "拉出旁邊紅燈的那一台"
+  },
+  {
+   "id": "ubike-039",
+   "kind": "選項",
+   "stage": "PULL",
+   "stageName": "PULL",
+   "who": "",
+   "zh": "不用拉，車會自己出來"
+  },
+  {
+   "id": "ubike-040",
+   "kind": "錯誤說明",
+   "stage": "PULL",
+   "stageName": "PULL",
+   "who": "",
+   "zh": "紅燈的車是鎖著的，要拉綠燈亮著的那一台。"
+  },
+  {
+   "id": "ubike-041",
+   "kind": "錯誤說明",
+   "stage": "PULL",
+   "stageName": "PULL",
+   "who": "",
+   "zh": "車不會自己出來，要看綠燈，自己把車拉出來。"
+  },
+  {
+   "id": "ubike-042",
+   "kind": "綠卡說明",
+   "stage": "PULL",
+   "stageName": "PULL",
+   "who": "",
+   "zh": "你很細心！綠燈亮著，表示這台車是你的。"
+  },
+  {
+   "id": "ubike-043",
+   "kind": "旁白",
+   "stage": "PULL",
+   "stageName": "PULL",
+   "who": "",
+   "zh": "（你把車拉出來，牽到旁邊，坐上去。座墊太低，腳伸不直，騎起來不舒服。）"
+  },
+  {
+   "id": "ubike-044",
+   "kind": "台詞",
+   "stage": "SEAT",
+   "stageName": "SEAT",
+   "who": "我",
+   "zh": "要怎麼辦呢？"
+  },
+  {
+   "id": "ubike-045",
+   "kind": "選項",
+   "stage": "SEAT",
+   "stageName": "SEAT",
+   "who": "",
+   "zh": "把座墊調高一點"
+  },
+  {
+   "id": "ubike-046",
+   "kind": "選項",
+   "stage": "SEAT",
+   "stageName": "SEAT",
+   "who": "",
+   "zh": "把座墊調低一點"
+  },
+  {
+   "id": "ubike-047",
+   "kind": "選項",
+   "stage": "SEAT",
+   "stageName": "SEAT",
+   "who": "",
+   "zh": "不調，直接騎"
+  },
+  {
+   "id": "ubike-048",
+   "kind": "錯誤說明",
+   "stage": "SEAT",
+   "stageName": "SEAT",
+   "who": "",
+   "zh": "座墊已經太低了，要調高一點，腳才舒服。"
+  },
+  {
+   "id": "ubike-049",
+   "kind": "錯誤說明",
+   "stage": "SEAT",
+   "stageName": "SEAT",
+   "who": "",
+   "zh": "座墊太低，騎起來不舒服，騎之前要先調整。"
+  },
+  {
+   "id": "ubike-050",
+   "kind": "綠卡說明",
+   "stage": "SEAT",
+   "stageName": "SEAT",
+   "who": "",
+   "zh": "做得好！騎車前先調整座墊，比較舒服也比較安全。"
+  },
+  {
+   "id": "ubike-051",
+   "kind": "旁白",
+   "stage": "SEAT",
+   "stageName": "SEAT",
+   "who": "",
+   "zh": "（你調好座墊，騎上路了。前面有馬路，也有人行道。）"
+  },
+  {
+   "id": "ubike-052",
+   "kind": "台詞",
+   "stage": "ROAD",
+   "stageName": "ROAD",
+   "who": "我",
+   "zh": "我要騎在哪裡呢？"
+  },
+  {
+   "id": "ubike-053",
+   "kind": "選項",
+   "stage": "ROAD",
+   "stageName": "ROAD",
+   "who": "",
+   "zh": "騎在馬路的右邊"
+  },
+  {
+   "id": "ubike-054",
+   "kind": "選項",
+   "stage": "ROAD",
+   "stageName": "ROAD",
+   "who": "",
+   "zh": "騎在馬路的左邊"
+  },
+  {
+   "id": "ubike-055",
+   "kind": "選項",
+   "stage": "ROAD",
+   "stageName": "ROAD",
+   "who": "",
+   "zh": "騎在人行道上"
+  },
+  {
+   "id": "ubike-056",
+   "kind": "錯誤說明",
+   "stage": "ROAD",
+   "stageName": "ROAD",
+   "who": "",
+   "zh": "在台灣，車子要靠右邊騎，不能騎在左邊。"
+  },
+  {
+   "id": "ubike-057",
+   "kind": "錯誤說明",
+   "stage": "ROAD",
+   "stageName": "ROAD",
+   "who": "",
+   "zh": "YouBike 不能騎在人行道上，會撞到行人，要騎在馬路的右邊。"
+  },
+  {
+   "id": "ubike-058",
+   "kind": "綠卡說明",
+   "stage": "ROAD",
+   "stageName": "ROAD",
+   "who": "",
+   "zh": "沒錯！YouBike 要騎在馬路的右邊，人行道是給行人走的。"
+  },
+  {
+   "id": "ubike-059",
+   "kind": "旁白",
+   "stage": "ROAD",
+   "stageName": "ROAD",
+   "who": "",
+   "zh": "（你騎在馬路的右邊。前面是紅燈，有行人正在走斑馬線。）"
+  },
+  {
+   "id": "ubike-060",
+   "kind": "台詞",
+   "stage": "LIGHT",
+   "stageName": "LIGHT",
+   "who": "我",
+   "zh": "要怎麼辦呢？"
+  },
+  {
+   "id": "ubike-061",
+   "kind": "選項",
+   "stage": "LIGHT",
+   "stageName": "LIGHT",
+   "who": "",
+   "zh": "停下來，等綠燈"
+  },
+  {
+   "id": "ubike-062",
+   "kind": "選項",
+   "stage": "LIGHT",
+   "stageName": "LIGHT",
+   "who": "",
+   "zh": "很快騎過去"
+  },
+  {
+   "id": "ubike-063",
+   "kind": "選項",
+   "stage": "LIGHT",
+   "stageName": "LIGHT",
+   "who": "",
+   "zh": "從人行道繞過去"
+  },
+  {
+   "id": "ubike-064",
+   "kind": "錯誤說明",
+   "stage": "LIGHT",
+   "stageName": "LIGHT",
+   "who": "",
+   "zh": "紅燈要停下來，行人正在過馬路，很危險。"
+  },
+  {
+   "id": "ubike-065",
+   "kind": "錯誤說明",
+   "stage": "LIGHT",
+   "stageName": "LIGHT",
+   "who": "",
+   "zh": "不能騎上人行道繞過去，紅燈要停下來等。"
+  },
+  {
+   "id": "ubike-066",
+   "kind": "綠卡說明",
+   "stage": "LIGHT",
+   "stageName": "LIGHT",
+   "who": "",
+   "zh": "你很守規矩！騎 YouBike 也要遵守紅綠燈。"
+  },
+  {
+   "id": "ubike-067",
+   "kind": "旁白",
+   "stage": "LIGHT",
+   "stageName": "LIGHT",
+   "who": "",
+   "zh": "（綠燈亮了，你繼續往前騎。〔目的地〕快到了！）"
+  },
+  {
+   "id": "ubike-068",
+   "kind": "台詞",
+   "stage": "RETURN_FIND",
+   "stageName": "RETURN_FIND",
+   "who": "我",
+   "zh": "我要去哪一個站還車呢？"
+  },
+  {
+   "id": "ubike-069",
+   "kind": "選項",
+   "stage": "RETURN_FIND",
+   "stageName": "RETURN_FIND",
+   "who": "",
+   "zh": "去〔站名〕還車"
+  },
+  {
+   "id": "ubike-070",
+   "kind": "錯誤說明",
+   "stage": "RETURN_FIND",
+   "stageName": "RETURN_FIND",
+   "who": "",
+   "zh": "〔站名〕「可還 0 位」，沒有空位可以還車，要去有空位的站。"
+  },
+  {
+   "id": "ubike-071",
+   "kind": "旁白",
+   "stage": "RETURN_FIND",
+   "stageName": "RETURN_FIND",
+   "who": "",
+   "zh": "（你騎到〔站名〕，可是車柱都滿了，沒辦法還車。你只好再看 App。）"
+  },
+  {
+   "id": "ubike-072",
+   "kind": "綠卡說明",
+   "stage": "RETURN_FIND",
+   "stageName": "RETURN_FIND",
+   "who": "",
+   "zh": "你看懂了！「可還」是還車的空位，要選有空位的站。"
+  },
+  {
+   "id": "ubike-073",
+   "kind": "旁白",
+   "stage": "RETURN_FIND",
+   "stageName": "RETURN_FIND",
+   "who": "",
+   "zh": "（你騎到〔站名〕，這裡還有空的車柱。）"
+  },
+  {
+   "id": "ubike-074",
+   "kind": "台詞",
+   "stage": "DOCK",
+   "stageName": "DOCK",
+   "who": "我",
+   "zh": "要怎麼還車呢？"
+  },
+  {
+   "id": "ubike-075",
+   "kind": "選項",
+   "stage": "DOCK",
+   "stageName": "DOCK",
+   "who": "",
+   "zh": "把車推進車柱，等「嗶」一聲，看螢幕有沒有「還車成功」"
+  },
+  {
+   "id": "ubike-076",
+   "kind": "選項",
+   "stage": "DOCK",
+   "stageName": "DOCK",
+   "who": "",
+   "zh": "把車靠在車柱旁邊就走"
+  },
+  {
+   "id": "ubike-077",
+   "kind": "選項",
+   "stage": "DOCK",
+   "stageName": "DOCK",
+   "who": "",
+   "zh": "把車鎖在附近的欄杆上"
+  },
+  {
+   "id": "ubike-078",
+   "kind": "錯誤說明",
+   "stage": "DOCK",
+   "stageName": "DOCK",
+   "who": "",
+   "zh": "車要推進車柱才算還車，只放在旁邊，費用會一直算下去。"
+  },
+  {
+   "id": "ubike-079",
+   "kind": "錯誤說明",
+   "stage": "DOCK",
+   "stageName": "DOCK",
+   "who": "",
+   "zh": "YouBike 不能鎖在欄杆上，要推進車柱還車。"
+  },
+  {
+   "id": "ubike-080",
+   "kind": "綠卡說明",
+   "stage": "DOCK",
+   "stageName": "DOCK",
+   "who": "",
+   "zh": "你很細心！聽到「嗶」、看到「還車成功」，才表示車真的還完了。"
+  },
+  {
+   "id": "ubike-081",
+   "kind": "旁白",
+   "stage": "DOCK",
+   "stageName": "DOCK",
+   "who": "",
+   "zh": "（「嗶」一聲，螢幕寫著「還車成功」，費用會從悠遊卡扣款。）"
+  },
+  {
+   "id": "ubike-082",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "END",
+   "who": "",
+   "zh": "（你走到〔目的地〕，看到 Ami 在揮手。）"
+  },
+  {
+   "id": "ubike-083",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "哇，〔名字〕，你很會騎 YouBike 欸！很方便吧！我們去走走吧！"
+  },
+  {
+   "id": "ubike-084",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "辛苦了！騎 YouBike 要注意很多事吧！我們去走走吧！"
+  }
+ ]
+}

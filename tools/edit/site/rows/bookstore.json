@@ -1,0 +1,446 @@
+{
+ "game": "bookstore",
+ "title": "書店",
+ "rows": [
+  {
+   "id": "bookstore-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "書店"
+  },
+  {
+   "id": "bookstore-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "書店"
+  },
+  {
+   "id": "bookstore-003",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "Ami 的朋友要過生日，她想送一本書。請你去書店幫她買：找到對的書區、對的書，順便買書籤，還要請店員包裝。"
+  },
+  {
+   "id": "bookstore-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "看招牌"
+  },
+  {
+   "id": "bookstore-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到書架"
+  },
+  {
+   "id": "bookstore-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "找店員"
+  },
+  {
+   "id": "bookstore-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到櫃台"
+  },
+  {
+   "id": "bookstore-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "付錢"
+  },
+  {
+   "id": "bookstore-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "回去找Ami"
+  },
+  {
+   "id": "bookstore-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "書店"
+  },
+  {
+   "id": "bookstore-011",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "〔名字〕，下禮拜是我朋友的生日，我想買一本書當禮物。"
+  },
+  {
+   "id": "bookstore-012",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "她喜歡看〔書區〕，所以去〔書區〕書區找。書名是《〔書名〕》。"
+  },
+  {
+   "id": "bookstore-013",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "還要買一個書籤，然後請店員幫我們包裝。"
+  },
+  {
+   "id": "bookstore-014",
+   "kind": "旁白",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "（你走到書店門口。手機響了一聲，是Ami傳來的LINE。）"
+  },
+  {
+   "id": "bookstore-015",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "START",
+   "who": "我",
+   "zh": "好，我現在去找！"
+  },
+  {
+   "id": "bookstore-016",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "走進書店"
+  },
+  {
+   "id": "bookstore-017",
+   "kind": "旁白",
+   "stage": "SECTION",
+   "stageName": "SECTION",
+   "who": "",
+   "zh": "（書店裡有很多書區。招牌上寫著不同的分類。）"
+  },
+  {
+   "id": "bookstore-018",
+   "kind": "台詞",
+   "stage": "SECTION",
+   "stageName": "SECTION",
+   "who": "我",
+   "zh": "Ami的朋友喜歡看什麼書？我要去哪一區？"
+  },
+  {
+   "id": "bookstore-019",
+   "kind": "選項",
+   "stage": "SECTION",
+   "stageName": "SECTION",
+   "who": "",
+   "zh": "去〔書區〕書區。"
+  },
+  {
+   "id": "bookstore-020",
+   "kind": "錯誤說明",
+   "stage": "SECTION",
+   "stageName": "SECTION",
+   "who": "",
+   "zh": "Ami說朋友喜歡看〔書區〕。"
+  },
+  {
+   "id": "bookstore-021",
+   "kind": "綠卡說明",
+   "stage": "SECTION",
+   "stageName": "SECTION",
+   "who": "",
+   "zh": "沒錯！去"
+  },
+  {
+   "id": "bookstore-022",
+   "kind": "旁白",
+   "stage": "SECTION",
+   "stageName": "SECTION",
+   "who": "",
+   "zh": "（你走到〔書區〕書區。）"
+  },
+  {
+   "id": "bookstore-023",
+   "kind": "旁白",
+   "stage": "FIND",
+   "stageName": "FIND",
+   "who": "",
+   "zh": "（書架上有三本書。書名都很像，要看清楚。）"
+  },
+  {
+   "id": "bookstore-024",
+   "kind": "台詞",
+   "stage": "FIND",
+   "stageName": "FIND",
+   "who": "我",
+   "zh": "Ami要的是哪一本？"
+  },
+  {
+   "id": "bookstore-025",
+   "kind": "選項",
+   "stage": "FIND",
+   "stageName": "FIND",
+   "who": "",
+   "zh": "拿《〔書名〕》。"
+  },
+  {
+   "id": "bookstore-026",
+   "kind": "錯誤說明",
+   "stage": "FIND",
+   "stageName": "FIND",
+   "who": "",
+   "zh": "書名是《〔書名〕》。"
+  },
+  {
+   "id": "bookstore-027",
+   "kind": "綠卡說明",
+   "stage": "FIND",
+   "stageName": "FIND",
+   "who": "",
+   "zh": "找到了！就是《"
+  },
+  {
+   "id": "bookstore-028",
+   "kind": "旁白",
+   "stage": "FIND",
+   "stageName": "FIND",
+   "who": "",
+   "zh": "（你拿到書了。接下來要找書籤。）"
+  },
+  {
+   "id": "bookstore-029",
+   "kind": "旁白",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "",
+   "zh": "（你找不到書籤。你看到一位店員走過來。）"
+  },
+  {
+   "id": "bookstore-030",
+   "kind": "台詞",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "我",
+   "zh": "請問……"
+  },
+  {
+   "id": "bookstore-031",
+   "kind": "選項",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "",
+   "zh": "請問書籤在哪裡？"
+  },
+  {
+   "id": "bookstore-032",
+   "kind": "選項",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "",
+   "zh": "請問書籤幾點下班？"
+  },
+  {
+   "id": "bookstore-033",
+   "kind": "選項",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "",
+   "zh": "請問這本書好看嗎，書籤呢？"
+  },
+  {
+   "id": "bookstore-034",
+   "kind": "錯誤說明",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "",
+   "zh": "要問位置，就說「在哪裡」。"
+  },
+  {
+   "id": "bookstore-035",
+   "kind": "綠卡說明",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "",
+   "zh": "問得很好！「在哪裡」用來問位置。"
+  },
+  {
+   "id": "bookstore-036",
+   "kind": "台詞",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "店員",
+   "zh": "書籤在收銀台旁邊。"
+  },
+  {
+   "id": "bookstore-037",
+   "kind": "台詞",
+   "stage": "WRAP",
+   "stageName": "WRAP",
+   "who": "店員",
+   "zh": "歡迎光臨，這些要結帳嗎？"
+  },
+  {
+   "id": "bookstore-038",
+   "kind": "台詞",
+   "stage": "WRAP",
+   "stageName": "WRAP",
+   "who": "我",
+   "zh": "對。這是生日禮物。"
+  },
+  {
+   "id": "bookstore-039",
+   "kind": "選項",
+   "stage": "WRAP",
+   "stageName": "WRAP",
+   "who": "",
+   "zh": "麻煩幫我包裝。"
+  },
+  {
+   "id": "bookstore-040",
+   "kind": "選項",
+   "stage": "WRAP",
+   "stageName": "WRAP",
+   "who": "",
+   "zh": "不用包裝，謝謝。"
+  },
+  {
+   "id": "bookstore-041",
+   "kind": "選項",
+   "stage": "WRAP",
+   "stageName": "WRAP",
+   "who": "",
+   "zh": "我要把書放回去。"
+  },
+  {
+   "id": "bookstore-042",
+   "kind": "錯誤說明",
+   "stage": "WRAP",
+   "stageName": "WRAP",
+   "who": "",
+   "zh": "Ami說要請店員包裝，這是禮物。"
+  },
+  {
+   "id": "bookstore-043",
+   "kind": "綠卡說明",
+   "stage": "WRAP",
+   "stageName": "WRAP",
+   "who": "",
+   "zh": "很好！「麻煩你……」是有禮貌的請求。"
+  },
+  {
+   "id": "bookstore-044",
+   "kind": "旁白",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "（你只有一張五百元。）"
+  },
+  {
+   "id": "bookstore-045",
+   "kind": "選項",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "給你五百元。"
+  },
+  {
+   "id": "bookstore-046",
+   "kind": "選項",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "給你兩百元。"
+  },
+  {
+   "id": "bookstore-047",
+   "kind": "選項",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "我下次再付，可以嗎？"
+  },
+  {
+   "id": "bookstore-048",
+   "kind": "錯誤說明",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "一共是〔總價〕元，兩百元不夠。"
+  },
+  {
+   "id": "bookstore-049",
+   "kind": "錯誤說明",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "買東西要先付錢，不能賒帳。"
+  },
+  {
+   "id": "bookstore-050",
+   "kind": "綠卡說明",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "沒錯！五百元夠了，他會找錢給你。"
+  },
+  {
+   "id": "bookstore-051",
+   "kind": "台詞",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "店員",
+   "zh": "收你五百元，找你〔找的錢（中文）〕元。"
+  },
+  {
+   "id": "bookstore-052",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "店員",
+   "zh": "這是您的書和書籤，已經包好了。謝謝光臨！"
+  },
+  {
+   "id": "bookstore-053",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "END",
+   "who": "",
+   "zh": "（你回去找Ami，把禮物拿給她。）"
+  },
+  {
+   "id": "bookstore-054",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "太好了，就是這一本！我朋友一定會喜歡。謝謝你，〔名字〕！"
+  },
+  {
+   "id": "bookstore-055",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "謝謝你！不過你花了好多時間……下次要快一點喔！"
+  }
+ ]
+}

@@ -1,0 +1,630 @@
+{
+ "game": "school",
+ "title": "學校請假",
+ "rows": [
+  {
+   "id": "school-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "學校"
+  },
+  {
+   "id": "school-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "請假"
+  },
+  {
+   "id": "school-003",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "你今天（或明天、後天）不能去上課。你要用 LINE 跟老師請假，回學校後還要跟同學借筆記、填請假單。"
+  },
+  {
+   "id": "school-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "打開老師的聊天室"
+  },
+  {
+   "id": "school-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "等老師回覆"
+  },
+  {
+   "id": "school-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "等老師回覆"
+  },
+  {
+   "id": "school-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "等老師回覆"
+  },
+  {
+   "id": "school-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "第二天，回到學校"
+  },
+  {
+   "id": "school-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "坐下來，旁邊是同學"
+  },
+  {
+   "id": "school-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "下課，拿請假單"
+  },
+  {
+   "id": "school-011",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走去辦公室"
+  },
+  {
+   "id": "school-012",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走出辦公室"
+  },
+  {
+   "id": "school-013",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "老師說的話"
+  },
+  {
+   "id": "school-014",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "老師"
+  },
+  {
+   "id": "school-015",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "教室"
+  },
+  {
+   "id": "school-016",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "請假單"
+  },
+  {
+   "id": "school-017",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "辦公室"
+  },
+  {
+   "id": "school-018",
+   "kind": "旁白",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "（你想跟老師請假，所以拿起手機。）"
+  },
+  {
+   "id": "school-019",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "START",
+   "who": "我",
+   "zh": "要怎麼跟老師說呢？"
+  },
+  {
+   "id": "school-020",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "打開跟老師的聊天室"
+  },
+  {
+   "id": "school-021",
+   "kind": "旁白",
+   "stage": "MSG_OPEN",
+   "stageName": "MSG_OPEN",
+   "who": "",
+   "zh": "（你打開跟老師的 LINE 聊天室。第一句要怎麼說呢？）"
+  },
+  {
+   "id": "school-022",
+   "kind": "選項",
+   "stage": "MSG_OPEN",
+   "stageName": "MSG_OPEN",
+   "who": "",
+   "zh": "老師好，我是〔名字〕。我想跟您請假。"
+  },
+  {
+   "id": "school-023",
+   "kind": "選項",
+   "stage": "MSG_OPEN",
+   "stageName": "MSG_OPEN",
+   "who": "",
+   "zh": "老師，我不去上課了。"
+  },
+  {
+   "id": "school-024",
+   "kind": "選項",
+   "stage": "MSG_OPEN",
+   "stageName": "MSG_OPEN",
+   "who": "",
+   "zh": "哈囉，你在嗎？"
+  },
+  {
+   "id": "school-025",
+   "kind": "錯誤說明",
+   "stage": "MSG_OPEN",
+   "stageName": "MSG_OPEN",
+   "who": "",
+   "zh": "請假要先問老師可不可以，不是只告訴老師「我不去了」。"
+  },
+  {
+   "id": "school-026",
+   "kind": "錯誤說明",
+   "stage": "MSG_OPEN",
+   "stageName": "MSG_OPEN",
+   "who": "",
+   "zh": "要先打招呼、說明你是誰、為什麼傳訊息，對老師要用「您」。"
+  },
+  {
+   "id": "school-027",
+   "kind": "綠卡說明",
+   "stage": "MSG_OPEN",
+   "stageName": "MSG_OPEN",
+   "who": "",
+   "zh": "很有禮貌喔！傳訊息給老師，要先打招呼、說你是誰，還要用「您」。"
+  },
+  {
+   "id": "school-028",
+   "kind": "台詞",
+   "stage": "MSG_REASON",
+   "stageName": "MSG_REASON",
+   "who": "老師",
+   "zh": "〔名字〕，你好。有什麼事嗎？"
+  },
+  {
+   "id": "school-029",
+   "kind": "選項",
+   "stage": "MSG_REASON",
+   "stageName": "MSG_REASON",
+   "who": "",
+   "zh": "因為我〔請假原因〕，所以想請假。"
+  },
+  {
+   "id": "school-030",
+   "kind": "錯誤說明",
+   "stage": "MSG_REASON",
+   "stageName": "MSG_REASON",
+   "who": "",
+   "zh": "你請假的原因是：〔請假原因（單子上寫的）〕。"
+  },
+  {
+   "id": "school-031",
+   "kind": "綠卡說明",
+   "stage": "MSG_REASON",
+   "stageName": "MSG_REASON",
+   "who": "",
+   "zh": "你說得很清楚！請假要說明原因，可以用「因為…，所以…」。"
+  },
+  {
+   "id": "school-032",
+   "kind": "台詞",
+   "stage": "MSG_TIME",
+   "stageName": "MSG_TIME",
+   "who": "老師",
+   "zh": "好，你想請什麼時候的假？"
+  },
+  {
+   "id": "school-033",
+   "kind": "選項",
+   "stage": "MSG_TIME",
+   "stageName": "MSG_TIME",
+   "who": "",
+   "zh": "我想請〔請假時間〕的假。"
+  },
+  {
+   "id": "school-034",
+   "kind": "選項",
+   "stage": "MSG_TIME",
+   "stageName": "MSG_TIME",
+   "who": "",
+   "zh": "我想請〔別的請假時間〕的假。"
+  },
+  {
+   "id": "school-035",
+   "kind": "選項",
+   "stage": "MSG_TIME",
+   "stageName": "MSG_TIME",
+   "who": "",
+   "zh": "我想請〔另一個請假時間〕的假。"
+  },
+  {
+   "id": "school-036",
+   "kind": "錯誤說明",
+   "stage": "MSG_TIME",
+   "stageName": "MSG_TIME",
+   "who": "",
+   "zh": "你要請的是「〔請假時間〕」的假。"
+  },
+  {
+   "id": "school-037",
+   "kind": "綠卡說明",
+   "stage": "MSG_TIME",
+   "stageName": "MSG_TIME",
+   "who": "",
+   "zh": "時間說得很清楚，老師一看就懂！"
+  },
+  {
+   "id": "school-038",
+   "kind": "台詞",
+   "stage": "MSG_OK",
+   "stageName": "MSG_OK",
+   "who": "老師",
+   "zh": "好，沒問題。你回學校以後，要補交請假單喔。"
+  },
+  {
+   "id": "school-039",
+   "kind": "選項",
+   "stage": "MSG_OK",
+   "stageName": "MSG_OK",
+   "who": "",
+   "zh": "好的，謝謝老師。"
+  },
+  {
+   "id": "school-040",
+   "kind": "選項",
+   "stage": "MSG_OK",
+   "stageName": "MSG_OK",
+   "who": "",
+   "zh": "好，我知道了。"
+  },
+  {
+   "id": "school-041",
+   "kind": "選項",
+   "stage": "MSG_OK",
+   "stageName": "MSG_OK",
+   "who": "",
+   "zh": "不用吧，LINE 就可以了。"
+  },
+  {
+   "id": "school-042",
+   "kind": "錯誤說明",
+   "stage": "MSG_OK",
+   "stageName": "MSG_OK",
+   "who": "",
+   "zh": "老師同意了，要說「謝謝老師」，這樣比較有禮貌。"
+  },
+  {
+   "id": "school-043",
+   "kind": "錯誤說明",
+   "stage": "MSG_OK",
+   "stageName": "MSG_OK",
+   "who": "",
+   "zh": "請假單是學校的規定，用 LINE 請假以後，回學校還是要補交。"
+  },
+  {
+   "id": "school-044",
+   "kind": "綠卡說明",
+   "stage": "MSG_OK",
+   "stageName": "MSG_OK",
+   "who": "",
+   "zh": "很有禮貌喔！老師同意了，要說謝謝。"
+  },
+  {
+   "id": "school-045",
+   "kind": "旁白",
+   "stage": "MSG_OK",
+   "stageName": "MSG_OK",
+   "who": "",
+   "zh": "（你傳出去了。第二天，你回到學校。）"
+  },
+  {
+   "id": "school-046",
+   "kind": "台詞",
+   "stage": "BACK",
+   "stageName": "BACK",
+   "who": "老師",
+   "zh": "早安，〔名字〕！"
+  },
+  {
+   "id": "school-047",
+   "kind": "選項",
+   "stage": "BACK",
+   "stageName": "BACK",
+   "who": "",
+   "zh": "沒事。"
+  },
+  {
+   "id": "school-048",
+   "kind": "選項",
+   "stage": "BACK",
+   "stageName": "BACK",
+   "who": "",
+   "zh": "你為什麼問？"
+  },
+  {
+   "id": "school-049",
+   "kind": "錯誤說明",
+   "stage": "BACK",
+   "stageName": "BACK",
+   "who": "",
+   "zh": "老師關心你，要有禮貌地回答，還要說「謝謝老師關心」。"
+  },
+  {
+   "id": "school-050",
+   "kind": "綠卡說明",
+   "stage": "BACK",
+   "stageName": "BACK",
+   "who": "",
+   "zh": "你回答得很有禮貌！老師關心你的時候，記得說謝謝。"
+  },
+  {
+   "id": "school-051",
+   "kind": "台詞",
+   "stage": "BACK",
+   "stageName": "BACK",
+   "who": "老師",
+   "zh": "好，請坐，我們要上課了。"
+  },
+  {
+   "id": "school-052",
+   "kind": "旁白",
+   "stage": "NOTES",
+   "stageName": "NOTES",
+   "who": "",
+   "zh": "（你坐下來，旁邊是同學小美。）"
+  },
+  {
+   "id": "school-053",
+   "kind": "台詞",
+   "stage": "NOTES",
+   "stageName": "NOTES",
+   "who": "小美",
+   "zh": "〔名字〕，你回來了！"
+  },
+  {
+   "id": "school-054",
+   "kind": "旁白",
+   "stage": "NOTES",
+   "stageName": "NOTES",
+   "who": "",
+   "zh": "（你想到，〔借筆記的科目〕你還沒有。）"
+  },
+  {
+   "id": "school-055",
+   "kind": "選項",
+   "stage": "NOTES",
+   "stageName": "NOTES",
+   "who": "",
+   "zh": "小美，不好意思，可以請你把〔借筆記的科目〕借我拍照嗎？"
+  },
+  {
+   "id": "school-056",
+   "kind": "選項",
+   "stage": "NOTES",
+   "stageName": "NOTES",
+   "who": "",
+   "zh": "你幫我寫功課。"
+  },
+  {
+   "id": "school-057",
+   "kind": "選項",
+   "stage": "NOTES",
+   "stageName": "NOTES",
+   "who": "",
+   "zh": "筆記給我。"
+  },
+  {
+   "id": "school-058",
+   "kind": "錯誤說明",
+   "stage": "NOTES",
+   "stageName": "NOTES",
+   "who": "",
+   "zh": "不能請同學幫你寫功課；你可以請同學把筆記借你拍照。"
+  },
+  {
+   "id": "school-059",
+   "kind": "錯誤說明",
+   "stage": "NOTES",
+   "stageName": "NOTES",
+   "who": "",
+   "zh": "「筆記給我」太直接了，要說「不好意思，可以請你……嗎？」。"
+  },
+  {
+   "id": "school-060",
+   "kind": "綠卡說明",
+   "stage": "NOTES",
+   "stageName": "NOTES",
+   "who": "",
+   "zh": "你很有禮貌！請別人幫忙，可以說「不好意思，可以請你……嗎？」。"
+  },
+  {
+   "id": "school-061",
+   "kind": "台詞",
+   "stage": "NOTES",
+   "stageName": "NOTES",
+   "who": "小美",
+   "zh": "好啊，沒問題！"
+  },
+  {
+   "id": "school-062",
+   "kind": "旁白",
+   "stage": "FORM",
+   "stageName": "FORM",
+   "who": "",
+   "zh": "（下課了。你拿到一張請假單，要先填「假別」。）"
+  },
+  {
+   "id": "school-063",
+   "kind": "選項",
+   "stage": "FORM",
+   "stageName": "FORM",
+   "who": "",
+   "zh": "病假"
+  },
+  {
+   "id": "school-064",
+   "kind": "選項",
+   "stage": "FORM",
+   "stageName": "FORM",
+   "who": "",
+   "zh": "事假"
+  },
+  {
+   "id": "school-065",
+   "kind": "選項",
+   "stage": "FORM",
+   "stageName": "FORM",
+   "who": "",
+   "zh": "公假"
+  },
+  {
+   "id": "school-066",
+   "kind": "錯誤說明",
+   "stage": "FORM",
+   "stageName": "FORM",
+   "who": "",
+   "zh": "公假是學校派你去做的事，例如比賽，不是自己的事。"
+  },
+  {
+   "id": "school-067",
+   "kind": "綠卡說明",
+   "stage": "FORM",
+   "stageName": "FORM",
+   "who": "",
+   "zh": "你選對了！病假是生病，事假是自己的事，公假是學校派你去做的事。"
+  },
+  {
+   "id": "school-068",
+   "kind": "旁白",
+   "stage": "SUBMIT",
+   "stageName": "SUBMIT",
+   "who": "",
+   "zh": "（你把請假單填好，走到辦公室。）"
+  },
+  {
+   "id": "school-069",
+   "kind": "台詞",
+   "stage": "SUBMIT",
+   "stageName": "SUBMIT",
+   "who": "老師",
+   "zh": "〔名字〕，有什麼事嗎？"
+  },
+  {
+   "id": "school-070",
+   "kind": "選項",
+   "stage": "SUBMIT",
+   "stageName": "SUBMIT",
+   "who": "",
+   "zh": "老師，這是我的請假單，謝謝老師。"
+  },
+  {
+   "id": "school-071",
+   "kind": "選項",
+   "stage": "SUBMIT",
+   "stageName": "SUBMIT",
+   "who": "",
+   "zh": "老師，這是我的作業。"
+  },
+  {
+   "id": "school-072",
+   "kind": "選項",
+   "stage": "SUBMIT",
+   "stageName": "SUBMIT",
+   "who": "",
+   "zh": "老師，請假單可以不用交嗎？"
+  },
+  {
+   "id": "school-073",
+   "kind": "錯誤說明",
+   "stage": "SUBMIT",
+   "stageName": "SUBMIT",
+   "who": "",
+   "zh": "你要交的是請假單，不是作業。"
+  },
+  {
+   "id": "school-074",
+   "kind": "錯誤說明",
+   "stage": "SUBMIT",
+   "stageName": "SUBMIT",
+   "who": "",
+   "zh": "老師說過要補交請假單，所以一定要交。"
+  },
+  {
+   "id": "school-075",
+   "kind": "綠卡說明",
+   "stage": "SUBMIT",
+   "stageName": "SUBMIT",
+   "who": "",
+   "zh": "做得好！你記得老師說的話，還有禮貌地道謝。"
+  },
+  {
+   "id": "school-076",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "END",
+   "who": "",
+   "zh": "（老師收下請假單，說：「好，我收到了。」你走出辦公室。）"
+  },
+  {
+   "id": "school-077",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "小美",
+   "zh": "哇，〔名字〕，你已經會用中文請假了！我們去吃午餐吧！"
+  },
+  {
+   "id": "school-078",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "小美",
+   "zh": "辛苦了！請假的事情很麻煩吧！我們去吃午餐吧！"
+  }
+ ]
+}

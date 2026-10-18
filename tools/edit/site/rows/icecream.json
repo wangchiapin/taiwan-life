@@ -1,0 +1,462 @@
+{
+ "game": "icecream",
+ "title": "冰淇淋店",
+ "rows": [
+  {
+   "id": "icecream-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "冰淇淋"
+  },
+  {
+   "id": "icecream-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "冰淇淋店"
+  },
+  {
+   "id": "icecream-003",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "Ami 想吃冰淇淋，請你去冰淇淋店幫她買。要幾球、什麼口味、杯子還是甜筒、加不加配料、內用還是外帶，都要照她說的點。"
+  },
+  {
+   "id": "icecream-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到櫃台"
+  },
+  {
+   "id": "icecream-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "回答店員"
+  },
+  {
+   "id": "icecream-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "看冰淇淋"
+  },
+  {
+   "id": "icecream-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "繼續點"
+  },
+  {
+   "id": "icecream-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "繼續點"
+  },
+  {
+   "id": "icecream-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "付錢"
+  },
+  {
+   "id": "icecream-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "拿冰淇淋"
+  },
+  {
+   "id": "icecream-011",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "〔名字〕，我〔已經在冰淇淋店裡面坐好了／在公園的長椅這邊等你〕。幫我買一個冰淇淋，好嗎？"
+  },
+  {
+   "id": "icecream-012",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "我要〔幾球（中文）〕球。〔口味順序〕。"
+  },
+  {
+   "id": "icecream-013",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "我要〔容器（杯子／甜筒）〕，〔有時加：不要加配料〕。"
+  },
+  {
+   "id": "icecream-014",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "我們在這裡吃。"
+  },
+  {
+   "id": "icecream-015",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "我要外帶，帶去公園吃。"
+  },
+  {
+   "id": "icecream-016",
+   "kind": "選項",
+   "stage": "",
+   "stageName": "（共用說明）",
+   "who": "",
+   "zh": "加〔另一個配料〕。"
+  },
+  {
+   "id": "icecream-017",
+   "kind": "選項",
+   "stage": "",
+   "stageName": "（共用說明）",
+   "who": "",
+   "zh": "加〔配料〕。"
+  },
+  {
+   "id": "icecream-018",
+   "kind": "旁白",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "（你走到冰淇淋店門口。手機響了一聲，是Ami傳來的LINE。）"
+  },
+  {
+   "id": "icecream-019",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "START",
+   "who": "我",
+   "zh": "好，我現在去買！"
+  },
+  {
+   "id": "icecream-020",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "走進冰淇淋店"
+  },
+  {
+   "id": "icecream-021",
+   "kind": "台詞",
+   "stage": "SCOOPS",
+   "stageName": "SCOOPS",
+   "who": "店員",
+   "zh": "你好，歡迎光臨！請問要幾球？"
+  },
+  {
+   "id": "icecream-022",
+   "kind": "選項",
+   "stage": "SCOOPS",
+   "stageName": "SCOOPS",
+   "who": "",
+   "zh": "一球。"
+  },
+  {
+   "id": "icecream-023",
+   "kind": "選項",
+   "stage": "SCOOPS",
+   "stageName": "SCOOPS",
+   "who": "",
+   "zh": "兩球。"
+  },
+  {
+   "id": "icecream-024",
+   "kind": "選項",
+   "stage": "SCOOPS",
+   "stageName": "SCOOPS",
+   "who": "",
+   "zh": "三球。"
+  },
+  {
+   "id": "icecream-025",
+   "kind": "錯誤說明",
+   "stage": "SCOOPS",
+   "stageName": "SCOOPS",
+   "who": "",
+   "zh": "Ami要〔幾球（中文）〕球。"
+  },
+  {
+   "id": "icecream-026",
+   "kind": "綠卡說明",
+   "stage": "SCOOPS",
+   "stageName": "SCOOPS",
+   "who": "",
+   "zh": "很好！「球」是冰淇淋的量詞。"
+  },
+  {
+   "id": "icecream-027",
+   "kind": "台詞",
+   "stage": "SCOOPS",
+   "stageName": "SCOOPS",
+   "who": "店員",
+   "zh": "好的。"
+  },
+  {
+   "id": "icecream-028",
+   "kind": "台詞",
+   "stage": "CONTAINER",
+   "stageName": "CONTAINER",
+   "who": "店員",
+   "zh": "請問要杯子還是甜筒？"
+  },
+  {
+   "id": "icecream-029",
+   "kind": "選項",
+   "stage": "CONTAINER",
+   "stageName": "CONTAINER",
+   "who": "",
+   "zh": "要杯子。"
+  },
+  {
+   "id": "icecream-030",
+   "kind": "選項",
+   "stage": "CONTAINER",
+   "stageName": "CONTAINER",
+   "who": "",
+   "zh": "要甜筒。"
+  },
+  {
+   "id": "icecream-031",
+   "kind": "錯誤說明",
+   "stage": "CONTAINER",
+   "stageName": "CONTAINER",
+   "who": "",
+   "zh": "Ami要〔容器（杯子／甜筒）〕。"
+  },
+  {
+   "id": "icecream-032",
+   "kind": "綠卡說明",
+   "stage": "CONTAINER",
+   "stageName": "CONTAINER",
+   "who": "",
+   "zh": "你記得Ami說的話，真棒！"
+  },
+  {
+   "id": "icecream-033",
+   "kind": "台詞",
+   "stage": "CONTAINER",
+   "stageName": "CONTAINER",
+   "who": "店員",
+   "zh": "好的，〔容器（杯子／甜筒）〕。"
+  },
+  {
+   "id": "icecream-034",
+   "kind": "台詞",
+   "stage": "FLAVOR",
+   "stageName": "FLAVOR",
+   "who": "店員",
+   "zh": "第〔第幾球〕球要什麼口味？"
+  },
+  {
+   "id": "icecream-035",
+   "kind": "錯誤說明",
+   "stage": "FLAVOR",
+   "stageName": "FLAVOR",
+   "who": "",
+   "zh": "第〔第幾球〕球，Ami要的是〔口味〕。"
+  },
+  {
+   "id": "icecream-036",
+   "kind": "旁白",
+   "stage": "FLAVOR",
+   "stageName": "FLAVOR",
+   "who": "",
+   "zh": "（店員把〔口味〕冰淇淋放在〔容器（杯子／甜筒）〕裡。）"
+  },
+  {
+   "id": "icecream-037",
+   "kind": "旁白",
+   "stage": "FLAVOR",
+   "stageName": "FLAVOR",
+   "who": "",
+   "zh": "（店員把〔口味〕放在最上面。）"
+  },
+  {
+   "id": "icecream-038",
+   "kind": "台詞",
+   "stage": "TOPPING",
+   "stageName": "TOPPING",
+   "who": "店員",
+   "zh": "要加配料嗎？配料一種十元。"
+  },
+  {
+   "id": "icecream-039",
+   "kind": "錯誤說明",
+   "stage": "TOPPING",
+   "stageName": "TOPPING",
+   "who": "",
+   "zh": "Ami要加〔配料〕。"
+  },
+  {
+   "id": "icecream-040",
+   "kind": "錯誤說明",
+   "stage": "TOPPING",
+   "stageName": "TOPPING",
+   "who": "",
+   "zh": "Ami說不要加配料。"
+  },
+  {
+   "id": "icecream-041",
+   "kind": "綠卡說明",
+   "stage": "TOPPING",
+   "stageName": "TOPPING",
+   "who": "",
+   "zh": "很好！你沒有多加配料，也沒有漏掉。"
+  },
+  {
+   "id": "icecream-042",
+   "kind": "旁白",
+   "stage": "TOPPING",
+   "stageName": "TOPPING",
+   "who": "",
+   "zh": "（店員在冰淇淋上面加了〔配料〕。）"
+  },
+  {
+   "id": "icecream-043",
+   "kind": "台詞",
+   "stage": "EAT",
+   "stageName": "EAT",
+   "who": "店員",
+   "zh": "請問內用還是外帶？"
+  },
+  {
+   "id": "icecream-044",
+   "kind": "錯誤說明",
+   "stage": "EAT",
+   "stageName": "EAT",
+   "who": "",
+   "zh": "Ami〔已經在店裡面坐好了，要內用／在公園等你，要外帶〕。"
+  },
+  {
+   "id": "icecream-045",
+   "kind": "旁白",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "（你有一張一百元和一張兩百元。）"
+  },
+  {
+   "id": "icecream-046",
+   "kind": "選項",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "給你一百元。"
+  },
+  {
+   "id": "icecream-047",
+   "kind": "選項",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "我下次再付，可以嗎？"
+  },
+  {
+   "id": "icecream-048",
+   "kind": "錯誤說明",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "一共是〔總價〕元，一百元不夠。"
+  },
+  {
+   "id": "icecream-049",
+   "kind": "錯誤說明",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "買東西要先付錢，不能賒帳。"
+  },
+  {
+   "id": "icecream-050",
+   "kind": "綠卡說明",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "沒錯！一百元不夠，要給兩百元，他會找錢給你。"
+  },
+  {
+   "id": "icecream-051",
+   "kind": "台詞",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "店員",
+   "zh": "收你兩百元，找你〔找的錢（中文）〕元。"
+  },
+  {
+   "id": "icecream-052",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "店員",
+   "zh": "好了，這是您的冰淇淋，請慢用！"
+  },
+  {
+   "id": "icecream-053",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "END",
+   "who": "",
+   "zh": "（你把冰淇淋拿給Ami。）"
+  },
+  {
+   "id": "icecream-054",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "END",
+   "who": "",
+   "zh": "（你走到公園，把冰淇淋拿給Ami。）"
+  },
+  {
+   "id": "icecream-055",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "哇，〔幾球（中文）〕球都是我要的口味！謝謝你，〔名字〕！"
+  },
+  {
+   "id": "icecream-056",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "謝謝你！不過我等了好久……下次要快一點喔！"
+  },
+  {
+   "id": "icecream-057",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "謝謝你！不過冰淇淋有一點融化了……下次要快一點喔！"
+  }
+ ]
+}

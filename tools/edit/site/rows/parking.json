@@ -1,0 +1,646 @@
+{
+ "game": "parking",
+ "title": "停車場",
+ "rows": [
+  {
+   "id": "parking-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "停車場"
+  },
+  {
+   "id": "parking-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "停車場"
+  },
+  {
+   "id": "parking-003",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "Ami 借你她的車，請你開去星光百貨。你要把車停進地下停車場、告訴她你停在哪裡，逛完以後還要繳停車費，再把車開出去。"
+  },
+  {
+   "id": "parking-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "開到入口"
+  },
+  {
+   "id": "parking-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "往地下室開"
+  },
+  {
+   "id": "parking-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "開進這一層"
+  },
+  {
+   "id": "parking-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "下車"
+  },
+  {
+   "id": "parking-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "逛完街，走到繳費機"
+  },
+  {
+   "id": "parking-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走去找車"
+  },
+  {
+   "id": "parking-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "開到出口"
+  },
+  {
+   "id": "parking-011",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "開出去"
+  },
+  {
+   "id": "parking-012",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "〔名字〕，我在三樓的書店等你。你先把車停好。"
+  },
+  {
+   "id": "parking-013",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "停車場在地下室。要停一般車位，不要停愛心專用車位喔！"
+  },
+  {
+   "id": "parking-014",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "停好車以後，傳訊息告訴我你停在哪裡，這樣等一下我們才找得到車。"
+  },
+  {
+   "id": "parking-015",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "我們大概會逛〔小時數（中文）〕個小時。這裡每小時停車〔每小時費用〕元；發票滿五百元折抵一小時，滿一千元折抵兩小時。"
+  },
+  {
+   "id": "parking-016",
+   "kind": "旁白",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "（你開著Ami借你的車，到了星光百貨的停車場入口。手機響了一聲，是Ami傳來的LINE。）"
+  },
+  {
+   "id": "parking-017",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "START",
+   "who": "我",
+   "zh": "好，我先去停車！"
+  },
+  {
+   "id": "parking-018",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "開進停車場"
+  },
+  {
+   "id": "parking-019",
+   "kind": "旁白",
+   "stage": "ENTRANCE",
+   "stageName": "ENTRANCE",
+   "who": "",
+   "zh": "（入口的柵欄擋住了路。旁邊有一台機器，上面有一個按鈕。）"
+  },
+  {
+   "id": "parking-020",
+   "kind": "選項",
+   "stage": "ENTRANCE",
+   "stageName": "ENTRANCE",
+   "who": "",
+   "zh": "按按鈕，拿停車票。"
+  },
+  {
+   "id": "parking-021",
+   "kind": "選項",
+   "stage": "ENTRANCE",
+   "stageName": "ENTRANCE",
+   "who": "",
+   "zh": "直接開過去。"
+  },
+  {
+   "id": "parking-022",
+   "kind": "選項",
+   "stage": "ENTRANCE",
+   "stageName": "ENTRANCE",
+   "who": "",
+   "zh": "按喇叭，叫人來開門。"
+  },
+  {
+   "id": "parking-023",
+   "kind": "錯誤說明",
+   "stage": "ENTRANCE",
+   "stageName": "ENTRANCE",
+   "who": "",
+   "zh": "柵欄是關著的，要先拿停車票，柵欄才會升起來。"
+  },
+  {
+   "id": "parking-024",
+   "kind": "錯誤說明",
+   "stage": "ENTRANCE",
+   "stageName": "ENTRANCE",
+   "who": "",
+   "zh": "不用按喇叭，這是自動的，按按鈕拿票就可以了。"
+  },
+  {
+   "id": "parking-025",
+   "kind": "綠卡說明",
+   "stage": "ENTRANCE",
+   "stageName": "ENTRANCE",
+   "who": "",
+   "zh": "很好！進停車場要先拿停車票，出去的時候會用到。"
+  },
+  {
+   "id": "parking-026",
+   "kind": "旁白",
+   "stage": "ENTRANCE",
+   "stageName": "ENTRANCE",
+   "who": "",
+   "zh": "（機器「嗶」一聲，吐出一張停車票，柵欄升起來了。）"
+  },
+  {
+   "id": "parking-027",
+   "kind": "旁白",
+   "stage": "FLOOR",
+   "stageName": "FLOOR",
+   "who": "",
+   "zh": "（地下室的指示牌，顯示每一層還有多少空位。）"
+  },
+  {
+   "id": "parking-028",
+   "kind": "錯誤說明",
+   "stage": "FLOOR",
+   "stageName": "FLOOR",
+   "who": "",
+   "zh": "〔樓層〕已經滿了，沒有空位。"
+  },
+  {
+   "id": "parking-029",
+   "kind": "旁白",
+   "stage": "FLOOR",
+   "stageName": "FLOOR",
+   "who": "",
+   "zh": "（你開到〔樓層〕，每個位子都停了車，只好開回去。）"
+  },
+  {
+   "id": "parking-030",
+   "kind": "綠卡說明",
+   "stage": "FLOOR",
+   "stageName": "FLOOR",
+   "who": "",
+   "zh": "你看得很仔細！「滿」就是沒有空位了。"
+  },
+  {
+   "id": "parking-031",
+   "kind": "旁白",
+   "stage": "FLOOR",
+   "stageName": "FLOOR",
+   "who": "",
+   "zh": "（你開到〔樓層〕。）"
+  },
+  {
+   "id": "parking-032",
+   "kind": "旁白",
+   "stage": "SPOT",
+   "stageName": "SPOT",
+   "who": "",
+   "zh": "（這一層還有幾個空位。）"
+  },
+  {
+   "id": "parking-033",
+   "kind": "選項",
+   "stage": "SPOT",
+   "stageName": "SPOT",
+   "who": "",
+   "zh": "停在〔區〕區〔車位號碼（中文）〕號。"
+  },
+  {
+   "id": "parking-034",
+   "kind": "選項",
+   "stage": "SPOT",
+   "stageName": "SPOT",
+   "who": "",
+   "zh": "停在〔區〕區一號，旁邊有輪椅的標誌。"
+  },
+  {
+   "id": "parking-035",
+   "kind": "選項",
+   "stage": "SPOT",
+   "stageName": "SPOT",
+   "who": "",
+   "zh": "停在車道中間，先停一下。"
+  },
+  {
+   "id": "parking-036",
+   "kind": "錯誤說明",
+   "stage": "SPOT",
+   "stageName": "SPOT",
+   "who": "",
+   "zh": "有輪椅標誌的是愛心專用車位，只有身心障礙者可以停。"
+  },
+  {
+   "id": "parking-037",
+   "kind": "錯誤說明",
+   "stage": "SPOT",
+   "stageName": "SPOT",
+   "who": "",
+   "zh": "車道上不能停車，會擋住別人。"
+  },
+  {
+   "id": "parking-038",
+   "kind": "綠卡說明",
+   "stage": "SPOT",
+   "stageName": "SPOT",
+   "who": "",
+   "zh": "很好！你停在一般車位，沒有停愛心專用車位。"
+  },
+  {
+   "id": "parking-039",
+   "kind": "旁白",
+   "stage": "SPOT",
+   "stageName": "SPOT",
+   "who": "",
+   "zh": "（你把車停好，下了車。）"
+  },
+  {
+   "id": "parking-040",
+   "kind": "旁白",
+   "stage": "REMEMBER",
+   "stageName": "REMEMBER",
+   "who": "",
+   "zh": "（旁邊的柱子上有一個牌子，寫著這裡的位置。）"
+  },
+  {
+   "id": "parking-041",
+   "kind": "台詞",
+   "stage": "REMEMBER",
+   "stageName": "REMEMBER",
+   "who": "Ami",
+   "zh": "你停好了嗎？你停在哪裡？"
+  },
+  {
+   "id": "parking-042",
+   "kind": "選項",
+   "stage": "REMEMBER",
+   "stageName": "REMEMBER",
+   "who": "",
+   "zh": "我停在地下室，很多車的地方。"
+  },
+  {
+   "id": "parking-043",
+   "kind": "選項",
+   "stage": "REMEMBER",
+   "stageName": "REMEMBER",
+   "who": "",
+   "zh": "我停在〔另一個車位的位置〕。"
+  },
+  {
+   "id": "parking-044",
+   "kind": "錯誤說明",
+   "stage": "REMEMBER",
+   "stageName": "REMEMBER",
+   "who": "",
+   "zh": "Ami要知道哪一層、哪一區、幾號，說得清楚才找得到。"
+  },
+  {
+   "id": "parking-045",
+   "kind": "錯誤說明",
+   "stage": "REMEMBER",
+   "stageName": "REMEMBER",
+   "who": "",
+   "zh": "柱子上寫的是〔車位號碼〕號，不是〔另一個車位號碼〕號。"
+  },
+  {
+   "id": "parking-046",
+   "kind": "綠卡說明",
+   "stage": "REMEMBER",
+   "stageName": "REMEMBER",
+   "who": "",
+   "zh": "說得很清楚！哪一層、哪一區、幾號，都說到了。"
+  },
+  {
+   "id": "parking-047",
+   "kind": "台詞",
+   "stage": "REMEMBER",
+   "stageName": "REMEMBER",
+   "who": "我",
+   "zh": "〔你傳給 Ami 的位置〕"
+  },
+  {
+   "id": "parking-048",
+   "kind": "台詞",
+   "stage": "REMEMBER",
+   "stageName": "REMEMBER",
+   "who": "Ami",
+   "zh": "好，我知道了！我們逛完就去找車。"
+  },
+  {
+   "id": "parking-049",
+   "kind": "旁白",
+   "stage": "REMEMBER",
+   "stageName": "REMEMBER",
+   "who": "",
+   "zh": "（你們在百貨公司逛了〔小時數（中文）〕個小時。）"
+  },
+  {
+   "id": "parking-050",
+   "kind": "旁白",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "（你們走到一樓的自動繳費機，把停車票放進去。）"
+  },
+  {
+   "id": "parking-051",
+   "kind": "台詞",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "Ami",
+   "zh": "我們今天買了〔消費金額〕元的東西，發票在這裡。"
+  },
+  {
+   "id": "parking-052",
+   "kind": "選項",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "掃描發票，付〔停車費〕元。"
+  },
+  {
+   "id": "parking-053",
+   "kind": "選項",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "不掃描發票，付〔沒折抵的費用〕元。"
+  },
+  {
+   "id": "parking-054",
+   "kind": "選項",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "掃描發票，付〔超過的費用〕元。"
+  },
+  {
+   "id": "parking-055",
+   "kind": "錯誤說明",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "有發票可以折抵，要掃描發票，這樣比較便宜。"
+  },
+  {
+   "id": "parking-056",
+   "kind": "錯誤說明",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "發票〔消費金額〕元，折抵〔折抵小時數〕小時：(〔停了幾小時〕 − 〔折抵小時數〕) × 〔每小時費用〕 = 〔停車費〕元。"
+  },
+  {
+   "id": "parking-057",
+   "kind": "綠卡說明",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "你算得很對！發票折抵以後，要付的錢比較少。"
+  },
+  {
+   "id": "parking-058",
+   "kind": "旁白",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "",
+   "zh": "（你付了〔停車費〕元。機器說：「請在十五分鐘內出場。」）"
+  },
+  {
+   "id": "parking-059",
+   "kind": "旁白",
+   "stage": "FIND_CAR",
+   "stageName": "FIND_CAR",
+   "who": "",
+   "zh": "（你們坐電梯到地下室。）"
+  },
+  {
+   "id": "parking-060",
+   "kind": "台詞",
+   "stage": "FIND_CAR",
+   "stageName": "FIND_CAR",
+   "who": "Ami",
+   "zh": "欸，我們的車停在哪裡呀？"
+  },
+  {
+   "id": "parking-061",
+   "kind": "選項",
+   "stage": "FIND_CAR",
+   "stageName": "FIND_CAR",
+   "who": "",
+   "zh": "在〔車位位置〕。"
+  },
+  {
+   "id": "parking-062",
+   "kind": "選項",
+   "stage": "FIND_CAR",
+   "stageName": "FIND_CAR",
+   "who": "",
+   "zh": "在〔錯的位置（樓層錯）〕。"
+  },
+  {
+   "id": "parking-063",
+   "kind": "選項",
+   "stage": "FIND_CAR",
+   "stageName": "FIND_CAR",
+   "who": "",
+   "zh": "在〔錯的位置（區錯）〕。"
+  },
+  {
+   "id": "parking-064",
+   "kind": "錯誤說明",
+   "stage": "FIND_CAR",
+   "stageName": "FIND_CAR",
+   "who": "",
+   "zh": "你傳給Ami的訊息是：〔車位位置〕。（看「任務提示」）"
+  },
+  {
+   "id": "parking-065",
+   "kind": "旁白",
+   "stage": "FIND_CAR",
+   "stageName": "FIND_CAR",
+   "who": "",
+   "zh": "（你們走到〔你選的位置〕，那裡沒有Ami的車。）"
+  },
+  {
+   "id": "parking-066",
+   "kind": "綠卡說明",
+   "stage": "FIND_CAR",
+   "stageName": "FIND_CAR",
+   "who": "",
+   "zh": "你記得很清楚！"
+  },
+  {
+   "id": "parking-067",
+   "kind": "旁白",
+   "stage": "FIND_CAR",
+   "stageName": "FIND_CAR",
+   "who": "",
+   "zh": "（你們找到車，上車了。）"
+  },
+  {
+   "id": "parking-068",
+   "kind": "旁白",
+   "stage": "EXIT",
+   "stageName": "EXIT",
+   "who": "",
+   "zh": "（車開到出口，柵欄又擋住了路。）"
+  },
+  {
+   "id": "parking-069",
+   "kind": "選項",
+   "stage": "EXIT",
+   "stageName": "EXIT",
+   "who": "",
+   "zh": "把停車票放進機器裡。"
+  },
+  {
+   "id": "parking-070",
+   "kind": "選項",
+   "stage": "EXIT",
+   "stageName": "EXIT",
+   "who": "",
+   "zh": "直接開過去。"
+  },
+  {
+   "id": "parking-071",
+   "kind": "選項",
+   "stage": "EXIT",
+   "stageName": "EXIT",
+   "who": "",
+   "zh": "用手把柵欄推開。"
+  },
+  {
+   "id": "parking-072",
+   "kind": "錯誤說明",
+   "stage": "EXIT",
+   "stageName": "EXIT",
+   "who": "",
+   "zh": "要先把票放進機器，柵欄才會升起來。"
+  },
+  {
+   "id": "parking-073",
+   "kind": "錯誤說明",
+   "stage": "EXIT",
+   "stageName": "EXIT",
+   "who": "",
+   "zh": "不可以推柵欄，會壞掉，也很危險，要用停車票。"
+  },
+  {
+   "id": "parking-074",
+   "kind": "綠卡說明",
+   "stage": "EXIT",
+   "stageName": "EXIT",
+   "who": "",
+   "zh": "沒錯！已經繳過費了，把票放進去就可以出去。"
+  },
+  {
+   "id": "parking-075",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "END",
+   "who": "",
+   "zh": "（柵欄升起來了，你把車開出停車場。）"
+  },
+  {
+   "id": "parking-076",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "太好了，〔名字〕，你開車停車都很穩！我們去吃晚餐吧！"
+  },
+  {
+   "id": "parking-077",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "END",
+   "who": "",
+   "zh": "（你們走回車子，發現雨刷上夾著一張罰單。）"
+  },
+  {
+   "id": "parking-078",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "啊！因為停在愛心專用車位，被開罰單了！下次要停一般車位喔。"
+  },
+  {
+   "id": "parking-079",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "END",
+   "who": "",
+   "zh": "（你把車開出停車場。）"
+  },
+  {
+   "id": "parking-080",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "辛苦了！停車真的不容易！我們去吃晚餐吧！"
+  }
+ ]
+}

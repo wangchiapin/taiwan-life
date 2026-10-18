@@ -170,3 +170,9 @@
 - 地圖：地圖第三條街已在 main（ROWS 42）；六個新遊戲用 main 預留的 slot：電影院 9、菜市場 10、停車場 16、冰淇淋 17、書店 18、搭電梯 19，全部 `gated: true`（預設維修中，管理員頁「地圖開關」打開才能玩）。
 - Firestore：`tools/firestore.rules` 的 scoreCols／scenes 已加 6 個，**Ben 要重新貼規則**，並在管理員頁「設定檢查」建 6 個新排行榜複合索引（score desc、elapsed asc）。
 - 測試：`tools/smoke.py` 加了 `Game.testPrep`（座位表用）和新遊戲名單；`tools/oracles/` 有 6 個新正解。
+
+### 十個新遊戲的台詞修改表（2026-10-19）
+- 抽句子用 `tools/edit/rows_new.py <遊戲>`（十個新遊戲共用；〔佔位〕的中文名稱放 `tools/edit/labels_new.json`），產生 `tools/edit/site/rows/<遊戲>.json` 和 `tools/edit/priv/priv_<遊戲>.json`（priv 多一欄 `ph`：〔名稱〕對應原本的 `${…}`，套用時用來還原）。
+- 已發布到同一個線上修改表（https://claude.ai/artifact/WBeNojoGuKyvoHHyjVY8G7）：下拉選單前十個「（新，待修改）」。Ben 改完跟我說，照上面「中文用詞」的流程第 3～5 步套用（要寫 `apply_<遊戲>.py`）。
+- 沒抽出來的：單字表 VOCAB、各遊戲的資料常數（口味、菜名、書名、站名…）、手機／單子等畫面上的 HTML 小字。
+- 圖片提示詞文件：Claude Docs「新增 10 個遊戲 · 圖片提示詞（Gemini）」。

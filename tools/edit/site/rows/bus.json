@@ -1,0 +1,646 @@
+{
+ "game": "bus",
+ "title": "搭公車",
+ "rows": [
+  {
+   "id": "bus-001",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "🚌 公車"
+  },
+  {
+   "id": "bus-002",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "搭公車"
+  },
+  {
+   "id": "bus-003",
+   "kind": "開頭介紹",
+   "stage": "開始畫面",
+   "stageName": "開始畫面",
+   "who": "",
+   "zh": "Ami 在某一站等你。你要看站牌、看電子看板、對公車招手，上車刷卡，問司機，在對的站按下車鈴，下車再刷一次卡。"
+  },
+  {
+   "id": "bus-004",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走去公車站牌"
+  },
+  {
+   "id": "bus-005",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "看電子看板"
+  },
+  {
+   "id": "bus-006",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "公車來了"
+  },
+  {
+   "id": "bus-007",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "車門開了，上車"
+  },
+  {
+   "id": "bus-008",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "走到司機旁邊"
+  },
+  {
+   "id": "bus-009",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "找位子坐，聽廣播"
+  },
+  {
+   "id": "bus-010",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "公車停了，準備下車"
+  },
+  {
+   "id": "bus-011",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "下了車，去找 Ami"
+  },
+  {
+   "id": "bus-012",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "Ami 的 LINE 訊息"
+  },
+  {
+   "id": "bus-013",
+   "kind": "任務提示（標題）",
+   "stage": "提示",
+   "stageName": "提示",
+   "who": "",
+   "zh": "司機說的話"
+  },
+  {
+   "id": "bus-014",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "公車站牌"
+  },
+  {
+   "id": "bus-015",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "公車"
+  },
+  {
+   "id": "bus-016",
+   "kind": "位置名稱",
+   "stage": "位置列",
+   "stageName": "位置列",
+   "who": "",
+   "zh": "司機"
+  },
+  {
+   "id": "bus-017",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "你搭〔路線（中文）〕路公車，往〔方向〕方向。"
+  },
+  {
+   "id": "bus-018",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "在〔目的地〕站下車。"
+  },
+  {
+   "id": "bus-019",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "上車要刷悠遊卡，下車也要刷喔。"
+  },
+  {
+   "id": "bus-020",
+   "kind": "旁白",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "（你要去找 Ami。手機響了一聲，是 Ami 傳來的 LINE。）"
+  },
+  {
+   "id": "bus-021",
+   "kind": "台詞",
+   "stage": "START",
+   "stageName": "START",
+   "who": "我",
+   "zh": "好，我搭公車過去！"
+  },
+  {
+   "id": "bus-022",
+   "kind": "選項",
+   "stage": "START",
+   "stageName": "START",
+   "who": "",
+   "zh": "走去公車站牌"
+  },
+  {
+   "id": "bus-023",
+   "kind": "旁白",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "（馬路兩邊都有站牌。）"
+  },
+  {
+   "id": "bus-024",
+   "kind": "台詞",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "我",
+   "zh": "我要在哪一邊等車呢？"
+  },
+  {
+   "id": "bus-025",
+   "kind": "選項",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "在「往〔方向〕」的站牌等"
+  },
+  {
+   "id": "bus-026",
+   "kind": "選項",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "在「往〔另一邊的方向〕」的站牌等"
+  },
+  {
+   "id": "bus-027",
+   "kind": "選項",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "不看站牌，看到公車就上車"
+  },
+  {
+   "id": "bus-028",
+   "kind": "錯誤說明",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "你要去〔方向〕那個方向，要在「往〔方向〕」的站牌等。"
+  },
+  {
+   "id": "bus-029",
+   "kind": "錯誤說明",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "要先看站牌，確定公車往哪個方向。"
+  },
+  {
+   "id": "bus-030",
+   "kind": "綠卡說明",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "你看對站牌了！搭公車要看「往…」，確定方向。"
+  },
+  {
+   "id": "bus-031",
+   "kind": "旁白",
+   "stage": "WAIT",
+   "stageName": "WAIT",
+   "who": "",
+   "zh": "（站牌旁邊有一個電子看板，寫著公車幾分鐘後到。）"
+  },
+  {
+   "id": "bus-032",
+   "kind": "台詞",
+   "stage": "WAIT",
+   "stageName": "WAIT",
+   "who": "我",
+   "zh": "我要搭〔路線（中文）〕路。"
+  },
+  {
+   "id": "bus-033",
+   "kind": "選項",
+   "stage": "WAIT",
+   "stageName": "WAIT",
+   "who": "",
+   "zh": "等〔路線（中文）〕路公車"
+  },
+  {
+   "id": "bus-034",
+   "kind": "錯誤說明",
+   "stage": "WAIT",
+   "stageName": "WAIT",
+   "who": "",
+   "zh": "你要搭的是〔路線（中文）〕路（〔路線號碼〕），不是〔路線（中文）〕路。"
+  },
+  {
+   "id": "bus-035",
+   "kind": "綠卡說明",
+   "stage": "WAIT",
+   "stageName": "WAIT",
+   "who": "",
+   "zh": "你看得很仔細！路線號碼對了，再看幾分鐘後會到。"
+  },
+  {
+   "id": "bus-036",
+   "kind": "旁白",
+   "stage": "WAIT",
+   "stageName": "WAIT",
+   "who": "",
+   "zh": "（你等了〔分鐘數〕分鐘。遠遠地，公車開過來了！）"
+  },
+  {
+   "id": "bus-037",
+   "kind": "旁白",
+   "stage": "HAIL",
+   "stageName": "HAIL",
+   "who": "",
+   "zh": "（車頭的螢幕寫著：〔路線號碼〕，往〔方向〕。是你要搭的公車！）"
+  },
+  {
+   "id": "bus-038",
+   "kind": "台詞",
+   "stage": "HAIL",
+   "stageName": "HAIL",
+   "who": "我",
+   "zh": "要怎麼辦呢？"
+  },
+  {
+   "id": "bus-039",
+   "kind": "選項",
+   "stage": "HAIL",
+   "stageName": "HAIL",
+   "who": "",
+   "zh": "招手，讓公車停下來"
+  },
+  {
+   "id": "bus-040",
+   "kind": "選項",
+   "stage": "HAIL",
+   "stageName": "HAIL",
+   "who": "",
+   "zh": "站著不動"
+  },
+  {
+   "id": "bus-041",
+   "kind": "選項",
+   "stage": "HAIL",
+   "stageName": "HAIL",
+   "who": "",
+   "zh": "走到馬路中間"
+  },
+  {
+   "id": "bus-042",
+   "kind": "錯誤說明",
+   "stage": "HAIL",
+   "stageName": "HAIL",
+   "who": "",
+   "zh": "在台灣，要對公車招手，司機才知道你要搭車。"
+  },
+  {
+   "id": "bus-043",
+   "kind": "錯誤說明",
+   "stage": "HAIL",
+   "stageName": "HAIL",
+   "who": "",
+   "zh": "不可以走到馬路中間，很危險。要在站牌旁邊招手。"
+  },
+  {
+   "id": "bus-044",
+   "kind": "綠卡說明",
+   "stage": "HAIL",
+   "stageName": "HAIL",
+   "who": "",
+   "zh": "做得好！在台灣，要對公車招手，公車才會停。"
+  },
+  {
+   "id": "bus-045",
+   "kind": "旁白",
+   "stage": "HAIL",
+   "stageName": "HAIL",
+   "who": "",
+   "zh": "（公車停下來，車門打開了。）"
+  },
+  {
+   "id": "bus-046",
+   "kind": "旁白",
+   "stage": "TAP_ON",
+   "stageName": "TAP_ON",
+   "who": "",
+   "zh": "（你上車了。前面有一台刷卡機，旁邊的牌子寫著：「上車刷卡，下車刷卡」。）"
+  },
+  {
+   "id": "bus-047",
+   "kind": "選項",
+   "stage": "TAP_ON",
+   "stageName": "TAP_ON",
+   "who": "",
+   "zh": "刷悠遊卡"
+  },
+  {
+   "id": "bus-048",
+   "kind": "選項",
+   "stage": "TAP_ON",
+   "stageName": "TAP_ON",
+   "who": "",
+   "zh": "下車再刷就好"
+  },
+  {
+   "id": "bus-049",
+   "kind": "選項",
+   "stage": "TAP_ON",
+   "stageName": "TAP_ON",
+   "who": "",
+   "zh": "不刷卡，直接去坐"
+  },
+  {
+   "id": "bus-050",
+   "kind": "錯誤說明",
+   "stage": "TAP_ON",
+   "stageName": "TAP_ON",
+   "who": "",
+   "zh": "牌子寫「上車刷卡，下車刷卡」，上車的時候就要刷，下車還要再刷一次。"
+  },
+  {
+   "id": "bus-051",
+   "kind": "錯誤說明",
+   "stage": "TAP_ON",
+   "stageName": "TAP_ON",
+   "who": "",
+   "zh": "搭公車一定要刷卡付錢，不能不刷。"
+  },
+  {
+   "id": "bus-052",
+   "kind": "綠卡說明",
+   "stage": "TAP_ON",
+   "stageName": "TAP_ON",
+   "who": "",
+   "zh": "沒錯！上車刷卡，下車也要刷卡。"
+  },
+  {
+   "id": "bus-053",
+   "kind": "旁白",
+   "stage": "TAP_ON",
+   "stageName": "TAP_ON",
+   "who": "",
+   "zh": "（「嗶」一聲，刷卡成功。）"
+  },
+  {
+   "id": "bus-054",
+   "kind": "旁白",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "",
+   "zh": "（你不太確定這台公車有沒有到〔目的地〕站，所以你問司機。）"
+  },
+  {
+   "id": "bus-055",
+   "kind": "選項",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "",
+   "zh": "司機，請問這台公車有到〔目的地〕站嗎？"
+  },
+  {
+   "id": "bus-056",
+   "kind": "選項",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "",
+   "zh": "司機，你開快一點！"
+  },
+  {
+   "id": "bus-057",
+   "kind": "選項",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "",
+   "zh": "司機，我要下車！"
+  },
+  {
+   "id": "bus-058",
+   "kind": "錯誤說明",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "",
+   "zh": "不可以叫司機開快一點，這樣不禮貌，也不安全。你要問的是：這台車有沒有到你要去的站。"
+  },
+  {
+   "id": "bus-059",
+   "kind": "錯誤說明",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "",
+   "zh": "你才剛上車，還不用下車。你要先問司機有沒有到你要去的站。"
+  },
+  {
+   "id": "bus-060",
+   "kind": "綠卡說明",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "",
+   "zh": "你很有禮貌！不確定的時候，可以問司機：「請問這台公車有到…嗎？」"
+  },
+  {
+   "id": "bus-061",
+   "kind": "旁白",
+   "stage": "ASK",
+   "stageName": "ASK",
+   "who": "",
+   "zh": "（你找了一個位子坐下來。）"
+  },
+  {
+   "id": "bus-062",
+   "kind": "旁白",
+   "stage": "RING",
+   "stageName": "RING",
+   "who": "",
+   "zh": "（車上廣播：「下一站，〔下一站站名〕。」）"
+  },
+  {
+   "id": "bus-063",
+   "kind": "選項",
+   "stage": "RING",
+   "stageName": "RING",
+   "who": "",
+   "zh": "現在按下車鈴"
+  },
+  {
+   "id": "bus-064",
+   "kind": "選項",
+   "stage": "RING",
+   "stageName": "RING",
+   "who": "",
+   "zh": "先不按，繼續坐"
+  },
+  {
+   "id": "bus-065",
+   "kind": "錯誤說明",
+   "stage": "RING",
+   "stageName": "RING",
+   "who": "",
+   "zh": "下一站就是〔目的地〕站！要按下車鈴，公車才會停。"
+  },
+  {
+   "id": "bus-066",
+   "kind": "錯誤說明",
+   "stage": "RING",
+   "stageName": "RING",
+   "who": "",
+   "zh": "還沒到。你要去〔目的地〕站，下一站是〔下一站站名〕。"
+  },
+  {
+   "id": "bus-067",
+   "kind": "旁白",
+   "stage": "RING",
+   "stageName": "RING",
+   "who": "",
+   "zh": "（你按了下車鈴，「叮咚」一聲，車上的燈亮了。公車慢慢停下來。）"
+  },
+  {
+   "id": "bus-068",
+   "kind": "旁白",
+   "stage": "RING",
+   "stageName": "RING",
+   "who": "",
+   "zh": "（公車到〔下一站站名〕站了，沒有人下車。）"
+  },
+  {
+   "id": "bus-069",
+   "kind": "旁白",
+   "stage": "TAP_OFF",
+   "stageName": "TAP_OFF",
+   "who": "",
+   "zh": "（公車停了，車門打開。）"
+  },
+  {
+   "id": "bus-070",
+   "kind": "台詞",
+   "stage": "TAP_OFF",
+   "stageName": "TAP_OFF",
+   "who": "我",
+   "zh": "要下車了。"
+  },
+  {
+   "id": "bus-071",
+   "kind": "選項",
+   "stage": "TAP_OFF",
+   "stageName": "TAP_OFF",
+   "who": "",
+   "zh": "刷悠遊卡，跟司機說「謝謝」"
+  },
+  {
+   "id": "bus-072",
+   "kind": "選項",
+   "stage": "TAP_OFF",
+   "stageName": "TAP_OFF",
+   "who": "",
+   "zh": "不用刷，直接下車"
+  },
+  {
+   "id": "bus-073",
+   "kind": "選項",
+   "stage": "TAP_OFF",
+   "stageName": "TAP_OFF",
+   "who": "",
+   "zh": "等下一站再下車"
+  },
+  {
+   "id": "bus-074",
+   "kind": "錯誤說明",
+   "stage": "TAP_OFF",
+   "stageName": "TAP_OFF",
+   "who": "",
+   "zh": "牌子寫「下車刷卡」，下車也要刷悠遊卡。"
+  },
+  {
+   "id": "bus-075",
+   "kind": "錯誤說明",
+   "stage": "TAP_OFF",
+   "stageName": "TAP_OFF",
+   "who": "",
+   "zh": "公車已經停在你要下的站了，現在就要下車。"
+  },
+  {
+   "id": "bus-076",
+   "kind": "綠卡說明",
+   "stage": "TAP_OFF",
+   "stageName": "TAP_OFF",
+   "who": "",
+   "zh": "你很有禮貌！下車刷卡，還跟司機說謝謝。"
+  },
+  {
+   "id": "bus-077",
+   "kind": "台詞",
+   "stage": "TAP_OFF",
+   "stageName": "TAP_OFF",
+   "who": "司機",
+   "zh": "不客氣，慢走！"
+  },
+  {
+   "id": "bus-078",
+   "kind": "旁白",
+   "stage": "END",
+   "stageName": "END",
+   "who": "",
+   "zh": "（你在〔目的地〕站下了車，看到 Ami 在前面揮手。）"
+  },
+  {
+   "id": "bus-079",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "哇，〔名字〕，你很會搭公車欸！公車很方便吧！我們去走走吧！"
+  },
+  {
+   "id": "bus-080",
+   "kind": "台詞",
+   "stage": "END",
+   "stageName": "END",
+   "who": "Ami",
+   "zh": "辛苦了！搭公車要注意很多事吧！我們去走走吧！"
+  }
+ ]
+}
