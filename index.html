@@ -241,6 +241,12 @@ const SCENES = [
   { id: 'bus',     zh: '公車',   es: 'Autobús',    en: 'Bus',         emoji: '🚌', roof: '#e07a2f', wall: '#fbe3cc', slot: 11, gated: true },
   { id: 'ubike',   zh: 'YouBike', es: 'YouBike',   en: 'YouBike',     emoji: '🚲', roof: '#c9b21f', wall: '#f6f0c4', slot: 14, gated: true },
   { id: 'barber',  zh: '理髮店', es: 'Peluquería', en: 'Barbershop',  emoji: '💈', roof: '#b03a48', wall: '#f7e1e3', slot: 15, gated: true },
+  { id: 'cinema',    zh: '電影院',   es: 'Cine',            en: 'Cinema',         emoji: '🎬', roof: '#7a4f96', wall: '#e9e0ea', slot: 9, gated: true },
+  { id: 'market',    zh: '菜市場',   es: 'Mercado',         en: 'Market',         emoji: '🥬', roof: '#5d9a3c', wall: '#e1eadb', slot: 10, gated: true },
+  { id: 'parking',   zh: '停車場',   es: 'Estacionamiento', en: 'Parking lot',    emoji: '🅿️', roof: '#2f8f8a', wall: '#dcefee', slot: 16, gated: true },
+  { id: 'icecream',  zh: '冰淇淋店', es: 'Heladería',       en: 'Ice cream shop', emoji: '🍦', roof: '#d9507f', wall: '#fbe4ec', slot: 17, gated: true },
+  { id: 'bookstore', zh: '書店',     es: 'Librería',        en: 'Bookstore',      emoji: '📚', roof: '#3b6ea5', wall: '#e3ecf7', slot: 18, gated: true },
+  { id: 'elevator',  zh: '搭電梯',   es: 'Ascensor',        en: 'Elevator',       emoji: '🛗', roof: '#6b7a99', wall: '#e4e8f1', slot: 19, gated: true },
   /* 沒有建築的場景：路上會隨機冒出「❗」，走過去就觸發 */
   { id: 'street',      zh: '路上突發事件', es: 'Imprevistos en la calle', en: 'Street surprises', emoji: '❗', virtual: true }
 ];
@@ -252,13 +258,7 @@ const OPEN = {};
 const isLive = sc => !sc.gated || !!OPEN[sc.id];
 const liveScenes = () => SCENES.filter(isLive);
 const COMING = [
-  { id: 'cinema',  zh: '電影院', es: 'Cine',       en: 'Cinema',      emoji: '🎬', roof: '#9a7f9c', wall: '#e9e0ea', slot: 9,  status: 'soon' },
-  { id: 'market',  zh: '菜市場', es: 'Mercado',    en: 'Market',      emoji: '🥬', roof: '#86a07c', wall: '#e1eadb', slot: 10, status: 'soon' },
   { id: 'airport', zh: '機場',   es: 'Aeropuerto', en: 'Airport',     emoji: '✈️', roof: '#8697ad', wall: '#e2e8f0', slot: 12, status: 'soon' },
-  { id: 'parking', zh: '停車場', es: 'Estacionamiento', en: 'Parking lot', emoji: '🅿️', roof: '#6f7a8a', wall: '#dfe3e9', slot: 16, status: 'soon' },
-  { id: 'icecream',zh: '冰淇淋店', es: 'Heladería', en: 'Ice cream shop', emoji: '🍦', roof: '#e9a3c0', wall: '#fbe8f0', slot: 17, status: 'soon' },
-  { id: 'bookstore', zh: '書店', es: 'Librería',   en: 'Bookstore',   emoji: '📚', roof: '#8c5a3c', wall: '#efe0cf', slot: 18, status: 'soon' },
-  { id: 'elevator', zh: '搭電梯', es: 'Ascensor',  en: 'Elevator',    emoji: '🛗', roof: '#5f8a8b', wall: '#e0eeee', slot: 19, status: 'soon' },
   { id: 'site1',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 20, status: 'build' },
   { id: 'site2',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 21, status: 'build' },
   { id: 'site3',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 22, status: 'build' },

@@ -28,11 +28,11 @@ tools/firestore.rules  Firestore 規則（改了要貼到 console 發布）
 ```
 
 ## 場景 ID（資料夾名 = scene = collection 前綴 = GA4 game 參數）
-drinks · reserva · breakfast · thsr · gas · nightmarket · parcel · bakery · clinic · mrt · street · school · ubike · bus · barber
+drinks · reserva · breakfast · thsr · gas · nightmarket · parcel · bakery · clinic · mrt · street · school · ubike · bus · barber · cinema · parking · icecream · bookstore · market · elevator
 
 Firestore collection：`<scene>game_scores` 或 `<scene>_scores`（沿用各遊戲現有名稱，不要改，否則舊排行榜會消失）。
 排行榜需要複合索引：score 降冪 + elapsed 升冪。
-管理員頁「設定檢查」會檢查 13 個排行榜索引（school、ubike、bus、barber 新增的 4 個要自己建），缺的會給「建立索引」連結。
+管理員頁「設定檢查」會檢查 19 個排行榜索引（school、ubike、bus、barber、cinema、parking、icecream、bookstore、market、elevator 新增的要自己建），缺的會給「建立索引」連結。
 
 ## 成績紀錄與玩家代碼
 - 每局結果頁出現時上傳一筆到 `results`（遊戲裡呼叫 `uploadResult()`）：playerId（玩家代碼）、name、scene、score、mistakes、errors（每個扣分原因 zh/es/en＋關卡 stage/stageEs/stageEn）、elapsed、hintViews、script、lang、embed、difficulty（先固定 'normal'）、createdAt。

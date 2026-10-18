@@ -30,7 +30,7 @@ def oracle_from(path):
     try: s=open(path,encoding='utf8').read()
     except Exception: return None
     m=re.search(r'ORACLE = """(.*?)"""',s,re.S); return m.group(1) if m else None
-ORACLES={g:oracle_from(os.path.join(HERE,'oracles',g+'.py')) for g in ['bakery','clinic','mrt','street','parcel','nightmarket','school','ubike','bus','barber']}
+ORACLES={g:oracle_from(os.path.join(HERE,'oracles',g+'.py')) for g in ['bakery','clinic','mrt','street','parcel','nightmarket','school','ubike','bus','barber','cinema','parking','icecream','bookstore','market','elevator']}
 EXTRA={'drinks': '''() => {
   const s = Game.state, t = Game.target, me = Game.mine;
   window.__first ??= Math.random() < .5 ? 'ami' : 'me';
@@ -66,8 +66,10 @@ def play(page,g,mode,log):
             page.evaluate("Game.pad.ticket=[...Game.C.target]; Game.padSubmit()"); continue
         opts=texts(page)
         if not opts: page.wait_for_timeout(200); continue
+        use=bool(orc and (mode=='perfect' or random.random()<0.6))
+        page.evaluate("g=>{if(typeof Game.testPrep==='function')Game.testPrep(g)}",use)   # 座位表這類要先「選」再按確定的關卡
         ans=None
-        if orc and (mode=='perfect' or random.random()<0.6):
+        if use:
             try: ans=page.evaluate(orc)
             except Exception: ans=None
         idx=None
