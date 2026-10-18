@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>搭公車 · Tomar el autobús</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：busgame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "busgame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #2b1f1a;
+    --red: #c4501a;
+    --red-dark: #9e3f12;
+    --yolk: #f2b632;
+    --night: #3a2a24;
+    --kraft: #f3dccf;
+    --wall: #fbeee6;
+    --paper: #ffffff;
+    --line: #ead6c9;
+    --muted: #7a6256;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    margin: 0; min-height: 100vh; color: var(--ink);
+    background: #dde6f3;
+    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
+    display: flex; justify-content: center; align-items: flex-start;
+    padding: 24px 16px 40px;
+  }
+  body.embed-boot #login-screen.active { display: none; }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  .screen.active { display: flex; }
+  /* ── 登入 ── */
+  .storefront { width: 100%; max-width: 360px; border-radius: 10px; overflow: hidden; }
+  .storefront .awning { height: 20px; background: repeating-linear-gradient(90deg, var(--red) 0 28px, #ffffff 28px 56px); }
+  .storefront .name { background: var(--night); color: var(--yolk); text-align: center; font-size: 30px; font-weight: 700; letter-spacing: 6px; padding: 12px 0; }
+  #login-screen .subtitle { margin: 0; color: var(--muted); font-size: 15px; }
+  .input-group input:focus { border-color: var(--red); }
+  .btn-primary {
+    padding: 14px 44px; font-size: 18px; font-weight: 700; font-family: inherit;
+    background: var(--red); color: #fff; border: none; border-radius: 999px; cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--red-dark); }
+  .flavor-text { color: var(--muted); font-size: 14px; line-height: 1.8; text-align: center; max-width: 420px; margin: 0; }
+  /* ── 遊戲 ── */
+  #game-window.active { display: flex; }
+  .chip { font-size: 13px; padding: 5px 10px; border-radius: 999px; background: var(--wall); white-space: nowrap; }
+  .btn-pinyin {
+    font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--paper); color: var(--red); border: 1.5px solid var(--red);
+  }
+  .btn-pinyin[aria-pressed="true"] { background: var(--red); color: #fff; }
+  #place-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px; background: var(--night); color: #fff;
+    border-bottom: 4px solid var(--yolk);
+  }
+  #place-bar.phone { background: var(--ami); }
+  #place-bar .icon { font-size: 22px; line-height: 1; }
+  #place-bar .who { font-weight: 700; font-size: 16px; }
+  #place-bar .status { font-size: 13px; opacity: .85; }
+  #place-bar .clock { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; }
+  #scene-placeholder {
+    width: 100%; max-width: 360px; aspect-ratio: 16 / 7;
+    border-radius: 12px; background: var(--wall);
+    display: none; place-items: center; font-size: 64px;
+  }
+  #npc-dialogue { padding: 14px 22px 4px; font-size: 21px; line-height: 2.1; }
+  #npc-dialogue .speaker { font-weight: 700; color: var(--red-dark); }
+  #npc-dialogue .speaker.ami { color: var(--ami); }
+  #npc-dialogue .speaker.me { color: var(--muted); }
+  #npc-dialogue .thought { color: var(--muted); font-size: 18px; }
+  ruby rt { color: var(--red); font-size: .5em; font-weight: 400; }
+  /* 購物清單 */
+  .list {
+    margin: 8px 0 10px; padding: 12px 16px; border-radius: 6px;
+    background: #fffdf3; border: 1px dashed #c9bfa4; font-size: 18px; line-height: 1.95;
+  }
+  .list .t { font-weight: 700; color: var(--red-dark); font-size: 15px; display: flex; align-items: center; gap: 2px; }
+  .list .t .grow { flex: 1; }
+  .list .done { text-decoration: line-through; color: var(--muted); }
+  .list .rule { color: var(--muted); font-size: 15px; }
+  /* ── 這個遊戲自己的樣式 ── */
+  .stops { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0 12px; }
+  .stopsign { background: #fff; border: 2px solid var(--line); border-radius: 10px; overflow: hidden; text-align: center; }
+  .stopsign .sh { background: var(--red); color: #fff; padding: 6px 4px; font-weight: 700; font-size: 17px; }
+  .stopsign .sr { padding: 8px 6px 2px; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  .stopsign .sl { padding: 2px 6px 8px; color: var(--muted); font-size: 14px; }
+  .rchip { background: #fdf0e8; border: 1.5px solid var(--red); color: var(--red-dark); border-radius: 999px; padding: 0 9px; font-weight: 700; font-size: 15px; }
+  .board { background: #16181d; color: #ffb347; border-radius: 10px; padding: 8px 14px; margin: 8px 0 12px; box-shadow: inset 0 0 0 3px #2b2e36; }
+  .board .bh { color: #fff; font-weight: 700; padding-bottom: 4px; border-bottom: 1px solid #2b2e36; margin-bottom: 2px; }
+  .board .br { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #2b2e36; font-size: 18px; }
+  .board .br:last-child { border-bottom: none; }
+  .board .bn { font-family: 'Courier New', monospace; font-weight: 700; font-size: 22px; color: #7df0b5; }
+  .board b { font-size: 22px; font-variant-numeric: tabular-nums; }
+  @media (hover: hover) {
+    .opt:hover { background: var(--ink); color: #fff; }
+    .opt:hover rt { color: #ffd9cf; }
+  }
+  .opt.deal { border-color: var(--red); background: var(--red); color: #fff; }
+  .opt.deal rt { color: #ffe1d8; }
+  .opt.deal:hover { background: var(--red-dark); }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--yolk); outline-offset: 2px; }
+  /* ── 排行榜 ── */
+  .congrats-banner { background: var(--yolk); color: var(--ink); }
+  .no-rank-banner { background: var(--wall); color: var(--muted); }
+  #lb-table th { background: var(--ink); color: #fff; font-weight: 500; }
+  #lb-table th, #lb-table td { padding: 9px 8px; text-align: center; border-bottom: 1px solid var(--line); }
+  #lb-table tr.highlight-row { background: #fdeccb; font-weight: 700; }
+  @media (max-width: 600px) {
+    .screen { padding: 26px 18px; }
+    .top-bar { gap: 6px; padding: 10px 12px; }
+    .chip { font-size: 12px; padding: 4px 8px; }
+    .btn-pinyin { font-size: 12px; padding: 5px 10px; }
+    #npc-dialogue { font-size: 19px; padding: 12px 16px 2px; }
+    #options-area { grid-template-columns: 1fr; padding: 14px 14px 20px; }
+    #npc-avatar { max-width: 240px; }
+    .map { overflow-x: auto; }
+    .mline { flex-direction: column; align-items: stretch; gap: 4px; min-width: 720px; }
+    .mname { align-self: flex-start; font-size: 13px; padding: 1px 10px; }
+    .st { font-size: 12px; white-space: nowrap; } .st.here, .st.goal { font-size: 13px; }
+  }
+  /* ── 句子翻譯 ── */
+  .tr-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; margin-left: 6px; padding: 0; vertical-align: middle;
+    border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper); color: var(--red); cursor: pointer;
+  }
+  .tr-btn:hover { background: #fdeccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  @media (max-width: 560px) {
+    .tr-btn { width: 34px; height: 34px; margin-left: 8px; }
+    .tr-btn svg { width: 17px; height: 17px; }
+  }
+  .tr-btn.spk.speaking { background: var(--red); color: #fff; border-color: var(--red); }
+  .v-word .tr-btn { margin-left: 4px; }
+  .tr-pop {
+    position: fixed; width: min(340px, calc(100vw - 16px));
+    background: var(--paper); color: var(--ink); border: 1.5px solid var(--red); border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(60, 40, 30, .18); font-size: 15px; line-height: 1.6;
+  }
+  .tr-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 6px 6px 12px; background: var(--red); color: #fff; border-radius: 10px 10px 0 0;
+    font-size: 13px; cursor: move; touch-action: none; user-select: none;
+  }
+  .tr-lang {
+    flex: none; font-size: 11px; font-weight: 700; color: var(--red);
+    border: 1px solid var(--red); border-radius: 4px; padding: 0 4px; line-height: 1.5;
+  }
+  /* ── 本關單字（右側抽屜） ── */
+  .side-tab {
+    width: 36px; padding: 12px 8px; line-height: 1.25; text-align: center; word-break: break-all; border: none; border-radius: 12px 0 0 12px; cursor: pointer;
+    background: var(--yolk); color: var(--ink); font: inherit; font-weight: 700; font-size: 15px;
+    box-shadow: -2px 2px 10px rgba(60, 40, 30, .15);
+  }
+  .side-tab.hint { background: var(--ink); color: #fff; }
+  .side-tab .v-count { padding: 0 3px !important; min-width: 20px; font-size: 12px !important; white-space: nowrap; letter-spacing: -0.5px; }
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  #vocab-tab .v-count {
+    display: inline-block; margin-top: 6px;
+    background: var(--paper); border-radius: 999px; padding: 0 7px; font-size: 13px;
+  }
+  .drawer {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(320px, 88vw); z-index: 25;
+    background: var(--paper); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(60, 40, 30, .12);
+    transform: translateX(105%); transition: transform .25s ease; display: flex; flex-direction: column;
+  }
+  .drawer.open { transform: none; }
+  @media (prefers-reduced-motion: reduce) { .drawer { transition: none; } }
+  .h-sec { padding: 12px 16px 4px; font-size: 13px; font-weight: 700; color: var(--red); }
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+  .side-tab.log { background: #b5483d; color: #fff; }
+  #log-tab .v-count { display: inline-block; margin-top: 6px; background: var(--paper); color: #b5483d; border-radius: 999px; padding: 0 7px; font-size: 13px; }
+  .v-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 16px; border-bottom: 3px solid var(--yolk); }
+  .v-head b { font-size: 18px; }
+  .v-head small { color: var(--muted); }
+  .v-head button { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink); padding: 2px 6px; }
+  #vocab-list li { padding: 12px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+  .v-py { color: var(--red); font-size: 15px; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; border: 2px solid var(--red); border-radius: 999px; overflow: hidden; }
+  .seg button {
+    font: inherit; font-size: 15px; font-weight: 500; padding: 9px 0; cursor: pointer;
+    background: var(--paper); color: var(--red); border: none;
+  }
+  .seg button + button { border-left: 2px solid var(--red); }
+  .seg button[aria-pressed="true"] { background: var(--red); color: #fff; font-weight: 700; }
+  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
+  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
+  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
+  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">🚌 公車</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">搭公車</h1>
+  <p class="subtitle" data-es="Tomar el autobús en Taiwán" data-en="Taking the bus in Taiwan">Tomar el autobús en Taiwán</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    Ami 在某一站等你。你要看站牌、看電子看板、對公車招手，上車刷卡，問司機，在對的站按下車鈴，下車再刷一次卡。<br>
+    <span data-es="Ami te espera en una parada. Lee el letrero de la parada y el tablero electrónico, hazle señas al autobús, pasa tu tarjeta al subir, pregunta al conductor, presiona el timbre en la parada correcta y vuelve a pasar la tarjeta al bajar." data-en="Ami is waiting at a stop. Read the bus stop sign and the electronic board, wave down the bus, tap your card on boarding, ask the driver, press the bell at the right stop, and tap off when you get out.">Ami te espera en una parada. Lee el letrero de la parada y el tablero electrónico, hazle señas al autobús, pasa tu tarjeta al subir, pregunta al conductor, presiona el timbre en la parada correcta y vuelve a pasar la tarjeta al bajar.</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-list" aria-pressed="false" onclick="Game.toggleList()" data-es="📝 Mi situación" data-en="📝 My situation">📝 Mi situación</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">📱</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE · Mensaje</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 15 名 · Top 15</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'bus', track: 'bus', settingsKey: 'bus_settings',
+  roles: { 'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '司機': { pitch: 0.8, male: true, malePitch: 1 } }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+
+pinyinPro.customPinyin({
+  '星期': 'xīng qí', '期': 'qí', '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '還要': 'hái yào',
+  '還好': 'hái hǎo', '還你': 'huán nǐ', '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '覺得': 'jué de',
+  '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan', '時間': 'shí jiān', '時候': 'shí hou',
+  '太太': 'tài tai', '先生': 'xiān sheng', '老闆': 'lǎo bǎn', '東西': 'dōng xi', '告訴': 'gào su',
+  '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '著': 'zhe', '只': 'zhǐ', '囉': 'luo', '啦': 'la', '耶': 'ye',
+  '意思': 'yì si', '關係': 'guān xi', '這個': 'zhè ge', '那個': 'nà ge', '一個': 'yí ge', '兩個': 'liǎng ge', '一共': 'yí gòng',
+  '看看': 'kàn kan', '喜歡': 'xǐ huān', '漂亮': 'piào liang', '可愛': 'kě ài', '每個': 'měi ge', '欸': 'éi',
+  '朋友': 'péng yǒu', '晚餐': 'wǎn cān', '辛苦': 'xīn kǔ', '辛苦了': 'xīn kǔ le', '路上': 'lù shàng', '名字': 'míng zi',
+  '您': 'nín', '怎麼': 'zěn me', '一點': 'yì diǎn', '他們': 'tā men', '前面': 'qián mian', '舒服': 'shū fu',
+  '手機': 'shǒu jī', '吃飯': 'chī fàn', '同事': 'tóng shì', '午餐': 'wǔ cān', '不好意思': 'bù hǎo yì si', '對不起': 'duì bu qǐ',
+  '車': 'chē', '車子': 'chē zi', '做得': 'zuò de', '台': 'tái',
+  '和': 'hàn', '嗯': 'ēn'
+});
+
+pinyinPro.customPinyin({
+  '公車': 'gōng chē', '站牌': 'zhàn pái', '招手': 'zhāo shǒu', '刷卡': 'shuā kǎ', '悠遊卡': 'yōu yóu kǎ', '司機': 'sī jī', '下車鈴': 'xià chē líng',
+  '下車': 'xià chē', '上車': 'shàng chē', '路線': 'lù xiàn', '方向': 'fāng xiàng', '往': 'wǎng', '預估': 'yù gū', '分鐘': 'fēn zhōng', '進站': 'jìn zhàn',
+  '廣播': 'guǎng bò', '下一站': 'xià yí zhàn', '一站': 'yì zhàn', '兩站': 'liǎng zhàn', '坐': 'zuò', '座位': 'zuò wèi', '位子': 'wèi zi',
+  '市政府': 'shì zhèng fǔ', '動物園': 'dòng wù yuán', '火車站': 'huǒ chē zhàn', '醫院': 'yī yuàn', '大學': 'dà xué', '公園': 'gōng yuán',
+  '中山路': 'zhōng shān lù', '民生路': 'mín shēng lù', '和平路': 'hé píng lù', '中正路': 'zhōng zhèng lù', '文化路': 'wén huà lù', '成功路': 'chéng gōng lù',
+  '光復路': 'guāng fù lù', '自由路': 'zì yóu lù', '還沒': 'hái méi', '車門': 'chē mén', '車頭': 'chē tóu', '刷': 'shuā', '叮咚': 'dīng dōng',
+  '一路': 'yí lù', '路': 'lù', '零': 'líng', '司機先生': 'sī jī xiān sheng', '開快': 'kāi kuài', '路公車': 'lù gōng chē'
+});
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '司機': ['El conductor', 'The driver'] };
+const SPEAKER_RE = /^(Ami|司機|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['公車', 'autobús', 'bus'], ['路', 'línea / ruta (de autobús)', 'route (bus line)'], ['往…方向', 'en dirección a…', 'toward…'], ['下車', 'bajarse', 'get off'], ['刷卡', 'pasar la tarjeta', 'tap your card'], ['悠遊卡', 'EasyCard (tarjeta de transporte)', 'EasyCard']],
+  STOP: [['站牌', 'parada (el letrero)', 'bus stop sign'], ['往', 'hacia', 'toward'], ['對面', 'el otro lado (de la calle)', 'the opposite side'], ['這一邊', 'este lado', 'this side'], ['方向', 'dirección', 'direction']],
+  WAIT: [['預估', 'estimado', 'estimated'], ['分鐘', 'minuto(s)', 'minute(s)'], ['路', 'línea / ruta (de autobús)', 'route (bus line)'], ['等', 'esperar', 'wait'], ['路線', 'ruta, recorrido', 'route']],
+  HAIL: [['招手', 'hacer señas con la mano', 'wave (to flag it down)'], ['停', 'detenerse', 'stop'], ['車頭', 'frente del vehículo', 'front of the vehicle'], ['公車來了', 'llegó el autobús', 'the bus is here']],
+  TAP_ON: [['刷悠遊卡', 'pasar la EasyCard', 'tap your EasyCard'], ['上車刷卡', 'pagar al subir', 'tap on boarding'], ['下車刷卡', 'pagar al bajar', 'tap when getting off'], ['車門', 'puerta del vehículo', 'door']],
+  ASK: [['司機', 'conductor', 'driver'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['有到', 'llega a / pasa por', 'goes to / stops at'], ['開快一點', 'maneja más rápido', 'drive faster']],
+  RING: [['下一站', 'la próxima parada', 'the next stop'], ['下車鈴', 'timbre para bajar', 'stop bell'], ['按', 'presionar', 'press'], ['廣播', 'anuncio por altavoz', 'announcement'], ['繼續', 'continuar', 'continue']],
+  TAP_OFF: [['下車刷卡', 'pagar al bajar', 'tap when getting off'], ['謝謝', 'gracias', 'thank you'], ['叮咚', 'sonido del timbre', 'ding-dong (bell sound)'], ['停', 'detenerse', 'stop']],
+  END: [['終於', 'por fin', 'finally'], ['方便', 'cómodo, práctico', 'convenient'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* ══════════════════════════════════════
+   任務提示：只列出 Ami 和司機說過的原話；不扣分，結果頁顯示看了幾次
+══════════════════════════════════════ */
+const Hints = {
+  open: false,
+  toggle(force) {
+    this.open = force ?? !this.open;
+    if (this.open) { Vocab.toggle(false); Log.toggle(false); Game.hintViews += 1; this.render(); }
+    document.getElementById('hints').classList.toggle('open', this.open);
+    document.getElementById('hint-tab').setAttribute('aria-expanded', this.open);
+  },
+  render() {
+    if (!Game.task) return;
+    const r = s => Game.ruby(s);
+    const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
+    let html = `<div class="h-sec">${r('Ami 的 LINE 訊息')}</div>` + Game.amiLines().map(item).join('');
+    if (['RING', 'TAP_OFF', 'END', 'RESULT'].includes(Game.st0)) html += `<div class="h-sec">${r('司機說的話')}</div>` + item(Game.driverLine());
+    document.getElementById('hint-body').innerHTML = html;
+  }
+};
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+/* ══════════════════════════════════════
+   錯誤紀錄：整局累積、即時更新、最新的在上面、標出關卡
+══════════════════════════════════════ */
+const STAGE = (() => {
+  const a = ['等公車', 'esperar el autobús', 'waiting for the bus'], b = ['上車', 'subir', 'boarding'], c = ['在車上', 'en el autobús', 'on the bus'], d = ['下車', 'bajar', 'getting off'];
+  const o = {};
+  ['STOP', 'WAIT', 'HAIL'].forEach(x => o[x] = a);
+  ['TAP_ON', 'ASK'].forEach(x => o[x] = b);
+  o.RING = c; o.TAP_OFF = d;
+  return o;
+})();
+
+/* 路線 [阿拉伯數字（站牌上看到的）, 中文念法]；方向 [往哪裡, 另一邊]；站名 */
+const ROUTES = [['26', '二六'], ['212', '二一二'], ['305', '三零五'], ['648', '六四八'], ['15', '一五'], ['88', '八八']];
+const DIRS = [['動物園', '火車站'], ['市政府', '公園'], ['大學', '醫院']];
+const STOPNAMES = ['中山路', '民生路', '和平路', '中正路', '文化路', '成功路', '光復路', '自由路'];
+const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const NZ = n => n === 2 ? '兩' : CN[n];
+/* 方向的西文／英文寫法 */
+const DIRES = { '動物園': ['el zoológico', 'the zoo'], '火車站': ['la estación de tren', 'the train station'], '市政府': ['el ayuntamiento', 'City Hall'], '公園': ['el parque', 'the park'], '大學': ['la universidad', 'the university'], '醫院': ['el hospital', 'the hospital'] };
+
+/* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
+const NEXT_LABEL = {
+  STOP: '走去公車站牌', WAIT: '看電子看板', HAIL: '公車來了', TAP_ON: '車門開了，上車', ASK: '走到司機旁邊',
+  RING: '找位子坐，聽廣播', TAP_OFF: '公車停了，準備下車', END: '下了車，去找 Ami'
+};
+
+const b0 = t => t.board.find(b => b.r[0] === t.route[0]).eta;
+
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,   // 過場的話或選錯時的提示（台詞陣列）
+  hintViews: 0,                  // 打開任務提示的次數
+  log: [],                       // 錯誤紀錄（整局）
+  feedback: [],                  // 這一步的回饋卡
+  visit: 0,                      // 第幾次進入關卡（標出「現在這關」的錯誤）
+  att: {},                       // 每一關選了幾次（第一次就對才給綠卡）
+
+  /* 圖片：檔案放在 images/，沒有檔案時會顯示 emoji 佔位 */
+  IMAGES: {
+    START: ['images/start.jpg', '🚌'],
+    STOP: ['images/stop.jpg', '🚏'], WAIT: ['images/board.jpg', '🕐'], HAIL: ['images/hail.jpg', '🙋'],
+    TAP_ON: ['images/reader.jpg', '💳'], ASK: ['images/driver.jpg', '🧑‍✈️'], RING: ['images/inside.jpg', '🔔'], TAP_OFF: ['images/reader.jpg', '💳'],
+    END: ['images/end_good.jpg', '🎉'],
+    RESULT: ['images/result.jpg', '📊']
+  },
+
+  /* ── 每局隨機任務 ── */
+  setup() {
+    const route = pick(ROUTES), dp = pick(DIRS), n = ri(2, 4), stops = shuffle(STOPNAMES).slice(0, n);
+    const others = shuffle(ROUTES.filter(r => r[0] !== route[0])).slice(0, 2);
+    const board = shuffle([{ r: route, eta: ri(3, 6) }, { r: others[0], eta: ri(2, 9) }, { r: others[1], eta: ri(7, 12) }]);
+    this.task = { route, dir: dp[0], other: dp[1], stops, dest: stops[n - 1], board, rot: Math.floor(Math.random() * 3) };
+    this.step = 0;
+  },
+
+  step: 0,
+
+  /* ── 位置列 ── */
+  setPlace(mode) {
+    const map = {
+      phone: ['📱', 'Ami', 'LINE · ' + X('Mensaje', 'Message'), 'phone'],
+      stop: ['🚏', '公車站牌', X('Parada de autobús', 'Bus stop'), ''],
+      bus: ['🚌', '公車', X('En el autobús', 'On the bus'), ''],
+      driver: ['🧑‍✈️', '司機', X('Conductor', 'Driver'), '']
+    };
+    const [icon, who, st, cls] = map[mode] || map.phone;
+    document.getElementById('place-bar').className = cls;
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = st;
+  },
+
+  /* ── 說明文字（任務提示也會用到：只放 NPC 說過的原話） ── */
+  destEs() { return this.task.dest; },
+  amiLines() {
+    const t = this.task, d = DIRES[t.dir];
+    return [
+      L(`Ami：你搭${t.route[1]}路公車，往${t.dir}方向。`, `Toma el autobús ${t.route[0]}, en dirección a ${d[0]}.`, `Take bus ${t.route[0]}, toward ${d[1]}.`),
+      L(`Ami：在${t.dest}站下車。`, `Bájate en la parada ${t.dest}.`, `Get off at ${t.dest} Stop.`),
+      L('Ami：上車要刷悠遊卡，下車也要刷喔。', 'Pasa tu EasyCard al subir, y también al bajar.', 'Tap your EasyCard when you get on, and again when you get off.')
+    ];
+  },
+  driverLine() {
+    const n = this.task.stops.length;
+    return L(`司機：有喔，坐${NZ(n)}站就到了。`, `Sí, son ${n} ${n === 1 ? 'parada' : 'paradas'}.`, `Yes — it's ${n} ${n === 1 ? 'stop' : 'stops'}.`);
+  },
+
+  /* ── 畫面元件 ── */
+  listHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    const rows = [
+      { zh: `要搭：${t.route[1]}路公車（${t.route[0]}）`, es: `Para tomar: autobús ${t.route[0]}`, en: `To take: bus ${t.route[0]}` },
+      { zh: `方向：往${t.dir}`, es: `Dirección: hacia ${DIRES[t.dir][0]}`, en: `Direction: toward ${DIRES[t.dir][1]}` },
+      { zh: `下車：${t.dest}站`, es: `Dónde bajarte: parada ${t.dest}`, en: `Get off at: ${t.dest} Stop` }
+    ];
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` +
+      rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 招牌元素 1：馬路兩邊的站牌 */
+  stopsHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    const chips = ROUTES.slice(0, 4).map(x => `<span class="rchip">${x[0]}</span>`).join('');
+    const side = (d, label) => `<div class="stopsign"><div class="sh">${r('往' + d)}</div><div class="sr">${chips}</div><div class="sl">${r(label)}</div></div>`;
+    const sides = shuffle([[t.dir, '這一邊'], [t.other, '對面']]);
+    return `<div class="stops">${sides.map(([d, l]) => side(d, l)).join('')}</div>`;
+  },
+  /* 招牌元素 2：電子看板 */
+  boardHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    return `<div class="board"><div class="bh">${r('往' + t.dir)} · ${r('預估到站時間')}</div>` +
+      t.board.map(b => `<div class="br"><span class="bn">${b.r[0]}</span><span>${r('預估')} <b>${b.eta}</b> ${r('分鐘')}</span></div>`).join('') + '</div>';
+  },
+
+  /* ── 狀態設定 ── */
+  getConfig() {
+    const N = this.N, t = this.task;
+    const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const driver = (zh, es, en) => L(`司機：${zh}`, es, en);
+    const dEs = DIRES[t.dir], oEs = DIRES[t.other];
+
+    return {
+      /* ═══ Ami 的 LINE ═══ */
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L(`（你要去找 Ami。手機響了一聲，是 Ami 傳來的 LINE。）`, `(Vas a ir a ver a Ami. Tu celular suena: es un LINE de Ami.)`, `(You're going to meet Ami. Your phone buzzes — a LINE from Ami.)`),
+          ...Game.amiLines(),
+          L('我：好，我搭公車過去！', '¡Bien, voy en autobús!', "OK, I'll take the bus over!")
+        ],
+        options: ['走去公車站牌'],
+        next: () => { Game.startTimer(); Game.state = 'STOP'; }
+      },
+
+      /* ═══ 等公車 ═══ */
+      STOP: {
+        place: 'stop',
+        html: () => Game.stopsHTML(),
+        dialogue: () => [L('（馬路兩邊都有站牌。）', '(Hay paradas en los dos lados de la calle.)', '(There are bus stops on both sides of the road.)'), L('我：我要在哪一邊等車呢？', '¿De qué lado espero el autobús?', 'Which side should I wait on?')],
+        options: () => rot([`在「往${t.dir}」的站牌等`, `在「往${t.other}」的站牌等`, '不看站牌，看到公車就上車']),
+        next: c => {
+          if (c !== `在「往${t.dir}」的站牌等`) {
+            Game.addMistake(c.includes(`往${t.other}`) ? M(`你要去${t.dir}那個方向，要在「往${t.dir}」的站牌等。`, `Tu destino queda en dirección a ${dEs[0]}: hay que esperar en la parada «往${t.dir}».`, `You're heading toward ${dEs[1]}, so wait at the "往${t.dir}" stop.`)
+                                                            : M('要先看站牌，確定公車往哪個方向。', 'Primero hay que mirar el letrero de la parada para saber hacia dónde va el autobús.', 'Check the bus stop sign first to make sure which way the bus goes.')); return;
+          }
+          goodFirst('STOP', '你看對站牌了！搭公車要看「往…」，確定方向。', '¡Leíste bien el letrero! Al tomar el autobús hay que fijarse en «往…» para confirmar la dirección.', 'You read the sign right! When taking a bus, check the "往…" (toward…) to confirm the direction.');
+          Game.state = 'WAIT';
+        }
+      },
+      WAIT: {
+        place: 'stop',
+        html: () => Game.boardHTML(),
+        dialogue: () => [L('（站牌旁邊有一個電子看板，寫著公車幾分鐘後到。）', '(Junto a la parada hay un tablero electrónico que indica en cuántos minutos llega cada autobús.)', '(Beside the stop there is an electronic board showing how many minutes until each bus arrives.)'), L(`我：我要搭${t.route[1]}路。`, `Voy a tomar el autobús ${t.route[0]}.`, `I'm taking bus ${t.route[0]}.`)],
+        options: () => rot(t.board.map(b => `等${b.r[1]}路公車`)),
+        next: c => {
+          const b = t.board.find(x => c === `等${x.r[1]}路公車`);
+          if (b.r[0] !== t.route[0]) {
+            Game.addMistake(M(`你要搭的是${t.route[1]}路（${t.route[0]}），不是${b.r[1]}路。`, `Tienes que tomar el autobús ${t.route[0]}, no el ${b.r[0]}.`, `You need bus ${t.route[0]}, not ${b.r[0]}.`)); return;
+          }
+          goodFirst('WAIT', '你看得很仔細！路線號碼對了，再看幾分鐘後會到。', '¡Qué atento! El número de línea es el correcto; ahora mira en cuántos minutos llega.', 'Nicely done! The route number is right — now see how many minutes until it arrives.');
+          Game.thought = [L(`（你等了${b0(t)}分鐘。遠遠地，公車開過來了！）`, `(Esperas ${b0(t)} minutos. A lo lejos viene el autobús.)`, `(You wait ${b0(t)} minutes. The bus comes down the road!)`)];
+          Game.state = 'HAIL';
+        }
+      },
+      HAIL: {
+        place: 'stop',
+        dialogue: () => [L(`（車頭的螢幕寫著：${t.route[0]}，往${t.dir}。是你要搭的公車！）`, `(La pantalla del frente dice: ${t.route[0]}, hacia ${dEs[0]}. ¡Es tu autobús!)`, `(The sign on the front reads: ${t.route[0]}, toward ${dEs[1]}. It's your bus!)`), L('我：要怎麼辦呢？', '¿Qué hago?', 'What should I do?')],
+        options: () => rot(['招手，讓公車停下來', '站著不動', '走到馬路中間']),
+        next: c => {
+          if (c !== '招手，讓公車停下來') {
+            Game.addMistake(c === '站著不動' ? M('在台灣，要對公車招手，司機才知道你要搭車。', 'En Taiwán hay que hacerle señas al autobús para que el conductor sepa que quieres subir.', 'In Taiwan you wave at the bus so the driver knows you want to board.')
+                                              : M('不可以走到馬路中間，很危險。要在站牌旁邊招手。', 'No se debe caminar al medio de la calle: es muy peligroso. Haz señas desde la parada.', "Never step into the road — it's dangerous. Wave from beside the stop sign.")); return;
+          }
+          goodFirst('HAIL', '做得好！在台灣，要對公車招手，公車才會停。', '¡Bien hecho! En Taiwán hay que hacer señas para que el autobús se detenga.', 'Well done! In Taiwan you have to wave to make the bus stop.');
+          Game.thought = [L('（公車停下來，車門打開了。）', '(El autobús se detiene y se abre la puerta.)', '(The bus stops and the door opens.)')];
+          Game.state = 'TAP_ON';
+        }
+      },
+
+      /* ═══ 上車 ═══ */
+      TAP_ON: {
+        place: 'bus',
+        dialogue: () => [L('（你上車了。前面有一台刷卡機，旁邊的牌子寫著：「上車刷卡，下車刷卡」。）', '(Subes. Delante hay un lector de tarjetas y un letrero que dice: «上車刷卡，下車刷卡» —pasar la tarjeta al subir y al bajar—.)', '(You board. There\'s a card reader at the front with a sign: "上車刷卡，下車刷卡" — tap on and tap off.)')],
+        options: () => rot(['刷悠遊卡', '下車再刷就好', '不刷卡，直接去坐']),
+        next: c => {
+          if (c !== '刷悠遊卡') {
+            Game.addMistake(c.startsWith('下車再刷') ? M('牌子寫「上車刷卡，下車刷卡」，上車的時候就要刷，下車還要再刷一次。', 'El letrero dice «上車刷卡，下車刷卡»: se pasa la tarjeta al subir y otra vez al bajar.', 'The sign says 上車刷卡，下車刷卡: tap when you board, and tap again when you get off.')
+                                                    : M('搭公車一定要刷卡付錢，不能不刷。', 'Para usar el autobús hay que pagar pasando la tarjeta; no se puede evitar.', "You must tap your card to pay — you can't skip it.")); return;
+          }
+          goodFirst('TAP_ON', '沒錯！上車刷卡，下車也要刷卡。', '¡Exacto! Pasa la tarjeta al subir y también al bajar.', 'Exactly! Tap when you board, and tap again when you get off.');
+          Game.thought = [L('（「嗶」一聲，刷卡成功。）', '(¡Bip! Tarjeta aceptada.)', '(Beep! Card accepted.)')];
+          Game.state = 'ASK';
+        }
+      },
+      ASK: {
+        place: 'driver',
+        dialogue: () => [L(`（你不太確定這台公車有沒有到${t.dest}站，所以你問司機。）`, `(No estás seguro de que este autobús llegue a la parada ${t.dest}, así que le preguntas al conductor.)`, `(You're not sure this bus goes to ${t.dest} Stop, so you ask the driver.)`)],
+        options: () => rot([`司機，請問這台公車有到${t.dest}站嗎？`, '司機，你開快一點！', '司機，我要下車！']),
+        next: c => {
+          if (!c.includes('請問')) {
+            Game.addMistake(c.includes('開快') ? M('不可以叫司機開快一點，這樣不禮貌，也不安全。你要問的是：這台車有沒有到你要去的站。', 'No se le pide al conductor que maneje más rápido: es descortés y poco seguro. Lo que debes preguntar es si este autobús llega a tu parada.', "Don't tell the driver to go faster — it's rude and unsafe. What you need to ask is whether this bus goes to your stop.")
+                                              : M('你才剛上車，還不用下車。你要先問司機有沒有到你要去的站。', 'Acabas de subir; todavía no es hora de bajar. Primero pregunta al conductor si el autobús llega a tu parada.', "You've just boarded — it's not time to get off. First ask the driver whether the bus goes to your stop."),
+              [driver(c.includes('開快') ? '嗯？我開得很穩喔。' : '還沒到喔，你先坐好。', c.includes('開快') ? '¿Eh? Voy muy bien de velocidad.' : 'Todavía no llegamos; siéntate.', c.includes('開快') ? "Huh? I'm driving just fine." : "We're not there yet — please take a seat.")]); return;
+          }
+          goodFirst('ASK', '你很有禮貌！不確定的時候，可以問司機：「請問這台公車有到…嗎？」', '¡Muy cortés! Si no estás seguro, puedes preguntar al conductor: «請問這台公車有到…嗎？».', 'Very polite! When you\'re unsure, ask the driver: 請問這台公車有到…嗎？ ("Excuse me, does this bus go to…?").');
+          Game.thought = [Game.driverLine(), L('（你找了一個位子坐下來。）', '(Buscas un asiento y te sientas.)', '(You find a seat and sit down.)')];
+          Game.step = 0;
+          Game.state = 'RING';
+        }
+      },
+
+      /* ═══ 在車上：聽廣播，在對的站按下車鈴 ═══ */
+      RING: {
+        place: 'bus',
+        dialogue: () => [L(`（車上廣播：「下一站，${t.stops[Game.step]}。」）`, `(Anuncio en el autobús: «Próxima parada: ${t.stops[Game.step]}».)`, `(Announcement: "Next stop: ${t.stops[Game.step]}.")`)],
+        options: () => ['現在按下車鈴', '先不按，繼續坐'],
+        next: c => {
+          const next = t.stops[Game.step], isDest = next === t.dest, press = c === '現在按下車鈴';
+          if (press !== isDest) {
+            Game.addMistake(isDest ? M(`下一站就是${t.dest}站！要按下車鈴，公車才會停。`, `¡La próxima parada es ${t.dest}! Hay que presionar el timbre para que el autobús se detenga.`, `The next stop is ${t.dest}! Press the bell so the bus will stop.`)
+                                   : M(`還沒到。你要去${t.dest}站，下一站是${next}。`, `Todavía no: vas a ${t.dest} y la próxima es ${next}.`, `Not yet: you're going to ${t.dest}, and the next stop is ${next}.`)); return;
+          }
+          if (isDest) {
+            Game.thought = [L('（你按了下車鈴，「叮咚」一聲，車上的燈亮了。公車慢慢停下來。）', '(Presionas el timbre: «¡ding-dong!» y se enciende la luz. El autobús se detiene poco a poco.)', '(You press the bell — ding-dong! — and the light comes on. The bus slowly stops.)')];
+            Game.state = 'TAP_OFF'; return;
+          }
+          Game.step += 1;
+          Game.thought = [L(`（公車到${next}站了，沒有人下車。）`, `(El autobús llega a ${next}; nadie baja.)`, `(The bus reaches ${next}; nobody gets off.)`)];
+        }
+      },
+      TAP_OFF: {
+        place: 'bus',
+        dialogue: () => [L('（公車停了，車門打開。）', '(El autobús se detiene y se abre la puerta.)', '(The bus stops and the door opens.)'), L('我：要下車了。', 'Voy a bajar.', 'Time to get off.')],
+        options: () => rot(['刷悠遊卡，跟司機說「謝謝」', '不用刷，直接下車', '等下一站再下車']),
+        next: c => {
+          if (!c.startsWith('刷悠遊卡')) {
+            Game.addMistake(c.startsWith('不用刷') ? M('牌子寫「下車刷卡」，下車也要刷悠遊卡。', 'El letrero decía «下車刷卡»: al bajar también hay que pasar la EasyCard.', 'The sign said 下車刷卡: you tap your EasyCard when you get off, too.')
+                                                    : M('公車已經停在你要下的站了，現在就要下車。', 'El autobús ya está detenido en tu parada: es ahora cuando debes bajar.', "The bus is already stopped at your stop — get off now.")); return;
+          }
+          goodFirst('TAP_OFF', '你很有禮貌！下車刷卡，還跟司機說謝謝。', '¡Muy educado! Pasaste la tarjeta al bajar y diste las gracias al conductor.', 'Very polite! You tapped off and thanked the driver.');
+          Game.thought = [driver('不客氣，慢走！', '¡De nada, cuídate!', "You're welcome — take care!")];
+          Game.stopTimer();
+          Game.state = 'END';
+        }
+      },
+
+      /* ═══ 結局 ═══ */
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2;
+          track('game_complete', { game: 'bus', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            L(`（你在${t.dest}站下了車，看到 Ami 在前面揮手。）`, `(Bajas en la parada ${t.dest} y ves a Ami saludándote con la mano.)`, `(You get off at ${t.dest} Stop and see Ami waving up ahead.)`),
+            Game._endGood
+              ? L(`Ami：哇，${N}，你很會搭公車欸！公車很方便吧！我們去走走吧！`, `¡Vaya, ${N}, qué bien tomas el autobús! ¡Es muy práctico, ¿verdad? ¡Vamos a dar una vuelta!`, `Wow, ${N}, you're really good at taking the bus! It's so convenient, right? Let's go for a stroll!`)
+              : L('Ami：辛苦了！搭公車要注意很多事吧！我們去走走吧！', '¡Gracias por el esfuerzo! Hay que fijarse en muchas cosas al tomar el autobús, ¿no? ¡Vamos a dar una vuelta!', "Thanks for your effort! There's a lot to watch out for on a bus, huh? Let's go for a stroll!")
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: {
+        place: 'phone',
+        dialogue: () => {
+          const w = (zh, es, en) => zh + ' ' + X(es, en);
+          let msg = `【${w('任務成果', 'Resultados', 'Results')}】\n${w('玩家', 'Jugador', 'Player')}：${N}\n${w('最後分數', 'Puntos', 'Score')}：${Game.score} 分\n` +
+            `${w('錯誤次數', 'Errores', 'Mistakes')}：${Game.mistakes} 次\n${w('時間', 'Tiempo', 'Time')}：${Game.elapsedTime} 秒\n` +
+            `${w('看任務提示', 'Pistas consultadas', 'Hints viewed')}：${Game.hintViews} 次\n\n${w('扣分原因', 'Penalizaciones', 'Penalties')}：`;
+          if (!Game.log.length) msg += '\n沒有扣分！' + X('¡Sin errores!', 'No mistakes!') + ' 🎉';
+          else Game.log.forEach((m, i) => { msg += `\n${i + 1}. ${m.zh} ${X(m.es, m.en)}（−10）`; });
+          return msg.split('\n').map(zh => ({ zh }));
+        },
+        options: () => ['查看排行榜 ' + X('Ver clasificación', 'See leaderboard')],
+        next: () => showLeaderboard()
+      }
+    };
+  },
+
+  /* ── 共用：台詞、圖片、過場、畫面（和其他遊戲一樣） ── */
+  /* ── 台詞：每一行一個 div，有翻譯的在句尾加朗讀和翻譯小圖示 ── */
+  formatText(content) {
+    const items = Array.isArray(content) ? content : [content];
+    return items.map(item => {
+      const m = item.zh.match(SPEAKER_RE);
+      let head = '', rest = item.zh;
+      if (m) {
+        const who = m[1] === '我' ? this.N : m[1];
+        const cls = m[1] === 'Ami' ? 'speaker ami' : m[1] === '我' ? 'speaker me' : 'speaker';
+        head = `<span class="${cls}">${this.ruby(who)}：</span>`;
+        rest = item.zh.slice(m[0].length);
+      }
+      let btn = '';
+      if (item.es) {
+        this._spk.push({ text: rest, who: m ? m[1] : null });
+        btn += spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+        this._tr.push(item);
+        btn += `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+      }
+      return `<div class="line">${head}${this.ruby(rest)}${btn}</div>`;
+    }).join('');
+  },
+
+  /* alt：第二張圖，和第一張輪流出現（像動畫）；開了「減少動態效果」就不動 */
+  setImage(src, emoji, alt) {
+    const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
+    this.stopAnim(); this._anim0 = src;
+    ph.textContent = emoji;
+    if (!src || this.missing.has(src)) { img.style.display = 'none'; ph.style.display = 'grid'; return; }
+    img.style.display = 'block'; ph.style.display = 'none';
+    if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+    const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (alt && !calm && !this.missing.has(alt)) {
+      const pre = new Image(); pre.onerror = () => this.missing.add(alt); pre.src = alt;   // 先載入，避免閃一下
+      this._anim = { alt }; let on = false;
+      this._animTimer = setInterval(() => {
+        if (this.missing.has(alt)) { this.stopAnim(); img.setAttribute('src', src); return; }
+        on = !on; img.setAttribute('src', on ? alt : src);
+      }, 600);
+    }
+  },
+
+  handleChoice(choice) {
+    if (this.state === '_TRANS') {          // 離開過場，進下一關
+      const t = this._trans; this._trans = null;
+      Tr.closeAll(); Speech.stop();
+      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
+      
+      if (document.getElementById('game-window').classList.contains('active')) this.render();
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
+    Speech.stop();
+    this.thought = null;
+    this.feedback = [];
+    const before = this.state;
+    this.att[before] = (this.att[before] || 0) + 1;
+    cfg.next(choice);
+    this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
+    if (this.thoughtFirst) this.visit += 1;
+    this.maybeTrans(before);
+    if (document.getElementById('game-window').classList.contains('active')) this.render();
+  },
+
+  render() {
+    if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果
+      const t = this._trans;
+      this.state = t.from;
+      this._transMode = true;
+      try { this.render(); } finally { this._transMode = false; this.state = '_TRANS'; }
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    if (!cfg) { console.error('狀態錯誤：' + this.state); return; }
+    const val = v => typeof v === 'function' ? v() : v;
+    this.setPlace(val(cfg.place) || 'phone');
+
+    // END 的 dialogue 會決定結局，所以只算一次
+    const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
+    let [src, emoji, alt] = this.IMAGES[this.state] || ['', '🚌'];
+    if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
+    this.setImage(src, emoji, alt);
+    Vocab.render(this.state);
+    if (Hints.open) Hints.render();
+    Log.render();
+
+    this._tr = []; this._spk = [];
+    let html = (this.showList && this.state !== 'START' && !['END', 'RESULT'].includes(this.state)) ? this.listHTML() : '';
+    html += cfg.html ? cfg.html() : '';
+    if (this._transMode) html = '';
+    const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
+    const main = this.formatText(raw);
+    html += this.thoughtFirst ? th + main : main + th;
+    html += this.feedbackHTML();
+    const box = document.getElementById('npc-dialogue');
+    box.innerHTML = html;
+    box.querySelectorAll('[data-tr]').forEach(btn => {
+      btn.onclick = () => Tr.open(this._tr[+btn.dataset.tr], btn);
+    });
+    box.querySelectorAll('[data-spk]').forEach(btn => {
+      btn.onclick = () => { const x = this._spk[+btn.dataset.spk]; Speech.speak(x.text, btn, x.who); };
+    });
+
+    const area = document.getElementById('options-area');
+    area.className = '';
+    area.innerHTML = '';
+    const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
+    area.classList.toggle('single', opts.length === 1 || opts.some(o => o.length > 12));
+    opts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt' + (false ? ' deal' : '');
+      btn.innerHTML = this.ruby(opt);
+      btn.onclick = () => this.handleChoice(opt);
+      area.appendChild(btn);
+    });
+  }
+});
+
+GameBoot();
+Music.init({ bpm: 120, tracks: [
+  { wave: 'square', vol: 0.26, notes: 'A4 . C5 . E5 . C5 . | G4 . B4 . D5 . B4 . | F4 . A4 . C5 . A4 . | E5 - D5 - C5 - . .' },
+  { wave: 'triangle', vol: 0.65, notes: 'A2 A2 A2 A2 E3 E3 E3 E3 | G2 G2 G2 G2 D3 D3 D3 D3 | F2 F2 F2 F2 C3 C3 C3 C3 | E3 E3 E3 E3 A2 A2 A2 A2' },
+  { vol: 0.45, notes: 'k . h . s . h . k . h k s . h h' }] });
+</script>
+</body>
+</html>
