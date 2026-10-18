@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>理髮店 · La peluquería</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：barbergame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "barbergame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #2b1f1a;
+    --red: #c4501a;
+    --red-dark: #9e3f12;
+    --yolk: #f2b632;
+    --night: #3a2a24;
+    --kraft: #f3dccf;
+    --wall: #fbeee6;
+    --paper: #ffffff;
+    --line: #ead6c9;
+    --muted: #7a6256;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    margin: 0; min-height: 100vh; color: var(--ink);
+    background: #dde6f3;
+    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
+    display: flex; justify-content: center; align-items: flex-start;
+    padding: 24px 16px 40px;
+  }
+  body.embed-boot #login-screen.active { display: none; }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  .screen.active { display: flex; }
+  /* ── 登入 ── */
+  .storefront { width: 100%; max-width: 360px; border-radius: 10px; overflow: hidden; }
+  .storefront .awning { height: 20px; background: repeating-linear-gradient(90deg, var(--red) 0 28px, #ffffff 28px 56px); }
+  .storefront .name { background: var(--night); color: var(--yolk); text-align: center; font-size: 30px; font-weight: 700; letter-spacing: 6px; padding: 12px 0; }
+  #login-screen .subtitle { margin: 0; color: var(--muted); font-size: 15px; }
+  .input-group input:focus { border-color: var(--red); }
+  .btn-primary {
+    padding: 14px 44px; font-size: 18px; font-weight: 700; font-family: inherit;
+    background: var(--red); color: #fff; border: none; border-radius: 999px; cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--red-dark); }
+  .flavor-text { color: var(--muted); font-size: 14px; line-height: 1.8; text-align: center; max-width: 420px; margin: 0; }
+  /* ── 遊戲 ── */
+  #game-window.active { display: flex; }
+  .chip { font-size: 13px; padding: 5px 10px; border-radius: 999px; background: var(--wall); white-space: nowrap; }
+  .btn-pinyin {
+    font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--paper); color: var(--red); border: 1.5px solid var(--red);
+  }
+  .btn-pinyin[aria-pressed="true"] { background: var(--red); color: #fff; }
+  #place-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px; background: var(--night); color: #fff;
+    border-bottom: 4px solid var(--yolk);
+  }
+  #place-bar.phone { background: var(--ami); }
+  #place-bar .icon { font-size: 22px; line-height: 1; }
+  #place-bar .who { font-weight: 700; font-size: 16px; }
+  #place-bar .status { font-size: 13px; opacity: .85; }
+  #place-bar .clock { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; }
+  #scene-placeholder {
+    width: 100%; max-width: 360px; aspect-ratio: 16 / 7;
+    border-radius: 12px; background: var(--wall);
+    display: none; place-items: center; font-size: 64px;
+  }
+  #npc-dialogue { padding: 14px 22px 4px; font-size: 21px; line-height: 2.1; }
+  #npc-dialogue .speaker { font-weight: 700; color: var(--red-dark); }
+  #npc-dialogue .speaker.ami { color: var(--ami); }
+  #npc-dialogue .speaker.me { color: var(--muted); }
+  #npc-dialogue .thought { color: var(--muted); font-size: 18px; }
+  ruby rt { color: var(--red); font-size: .5em; font-weight: 400; }
+  /* 購物清單 */
+  .list {
+    margin: 8px 0 10px; padding: 12px 16px; border-radius: 6px;
+    background: #fffdf3; border: 1px dashed #c9bfa4; font-size: 18px; line-height: 1.95;
+  }
+  .list .t { font-weight: 700; color: var(--red-dark); font-size: 15px; display: flex; align-items: center; gap: 2px; }
+  .list .t .grow { flex: 1; }
+  .list .done { text-decoration: line-through; color: var(--muted); }
+  .list .rule { color: var(--muted); font-size: 15px; }
+  /* ── 這個遊戲自己的樣式 ── */
+  .slots, .bill { background: #fff; border: 2px solid var(--line); border-radius: 10px; margin: 8px 0 12px; overflow: hidden; }
+  .slots .sh, .bill .sh { background: var(--red); color: #fff; padding: 6px 12px; font-weight: 700; }
+  .slots .sl { padding: 8px 14px; font-size: 19px; font-weight: 700; border-top: 1px solid var(--line); }
+  .bill .bl { display: flex; justify-content: space-between; padding: 8px 14px; font-size: 19px; }
+  .bill b { font-variant-numeric: tabular-nums; font-size: 24px; color: var(--red-dark); }
+  @media (hover: hover) {
+    .opt:hover { background: var(--ink); color: #fff; }
+    .opt:hover rt { color: #ffd9cf; }
+  }
+  .opt.deal { border-color: var(--red); background: var(--red); color: #fff; }
+  .opt.deal rt { color: #ffe1d8; }
+  .opt.deal:hover { background: var(--red-dark); }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--yolk); outline-offset: 2px; }
+  /* ── 排行榜 ── */
+  .congrats-banner { background: var(--yolk); color: var(--ink); }
+  .no-rank-banner { background: var(--wall); color: var(--muted); }
+  #lb-table th { background: var(--ink); color: #fff; font-weight: 500; }
+  #lb-table th, #lb-table td { padding: 9px 8px; text-align: center; border-bottom: 1px solid var(--line); }
+  #lb-table tr.highlight-row { background: #fdeccb; font-weight: 700; }
+  @media (max-width: 600px) {
+    .screen { padding: 26px 18px; }
+    .top-bar { gap: 6px; padding: 10px 12px; }
+    .chip { font-size: 12px; padding: 4px 8px; }
+    .btn-pinyin { font-size: 12px; padding: 5px 10px; }
+    #npc-dialogue { font-size: 19px; padding: 12px 16px 2px; }
+    #options-area { grid-template-columns: 1fr; padding: 14px 14px 20px; }
+    #npc-avatar { max-width: 240px; }
+    .map { overflow-x: auto; }
+    .mline { flex-direction: column; align-items: stretch; gap: 4px; min-width: 720px; }
+    .mname { align-self: flex-start; font-size: 13px; padding: 1px 10px; }
+    .st { font-size: 12px; white-space: nowrap; } .st.here, .st.goal { font-size: 13px; }
+  }
+  /* ── 句子翻譯 ── */
+  .tr-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; margin-left: 6px; padding: 0; vertical-align: middle;
+    border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper); color: var(--red); cursor: pointer;
+  }
+  .tr-btn:hover { background: #fdeccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  @media (max-width: 560px) {
+    .tr-btn { width: 34px; height: 34px; margin-left: 8px; }
+    .tr-btn svg { width: 17px; height: 17px; }
+  }
+  .tr-btn.spk.speaking { background: var(--red); color: #fff; border-color: var(--red); }
+  .v-word .tr-btn { margin-left: 4px; }
+  .tr-pop {
+    position: fixed; width: min(340px, calc(100vw - 16px));
+    background: var(--paper); color: var(--ink); border: 1.5px solid var(--red); border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(60, 40, 30, .18); font-size: 15px; line-height: 1.6;
+  }
+  .tr-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 6px 6px 12px; background: var(--red); color: #fff; border-radius: 10px 10px 0 0;
+    font-size: 13px; cursor: move; touch-action: none; user-select: none;
+  }
+  .tr-lang {
+    flex: none; font-size: 11px; font-weight: 700; color: var(--red);
+    border: 1px solid var(--red); border-radius: 4px; padding: 0 4px; line-height: 1.5;
+  }
+  /* ── 本關單字（右側抽屜） ── */
+  .side-tab {
+    width: 36px; padding: 12px 8px; line-height: 1.25; text-align: center; word-break: break-all; border: none; border-radius: 12px 0 0 12px; cursor: pointer;
+    background: var(--yolk); color: var(--ink); font: inherit; font-weight: 700; font-size: 15px;
+    box-shadow: -2px 2px 10px rgba(60, 40, 30, .15);
+  }
+  .side-tab.hint { background: var(--ink); color: #fff; }
+  .side-tab .v-count { padding: 0 3px !important; min-width: 20px; font-size: 12px !important; white-space: nowrap; letter-spacing: -0.5px; }
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  #vocab-tab .v-count {
+    display: inline-block; margin-top: 6px;
+    background: var(--paper); border-radius: 999px; padding: 0 7px; font-size: 13px;
+  }
+  .drawer {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(320px, 88vw); z-index: 25;
+    background: var(--paper); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(60, 40, 30, .12);
+    transform: translateX(105%); transition: transform .25s ease; display: flex; flex-direction: column;
+  }
+  .drawer.open { transform: none; }
+  @media (prefers-reduced-motion: reduce) { .drawer { transition: none; } }
+  .h-sec { padding: 12px 16px 4px; font-size: 13px; font-weight: 700; color: var(--red); }
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+  .side-tab.log { background: #b5483d; color: #fff; }
+  #log-tab .v-count { display: inline-block; margin-top: 6px; background: var(--paper); color: #b5483d; border-radius: 999px; padding: 0 7px; font-size: 13px; }
+  .v-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 16px; border-bottom: 3px solid var(--yolk); }
+  .v-head b { font-size: 18px; }
+  .v-head small { color: var(--muted); }
+  .v-head button { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink); padding: 2px 6px; }
+  #vocab-list li { padding: 12px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+  .v-py { color: var(--red); font-size: 15px; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; border: 2px solid var(--red); border-radius: 999px; overflow: hidden; }
+  .seg button {
+    font: inherit; font-size: 15px; font-weight: 500; padding: 9px 0; cursor: pointer;
+    background: var(--paper); color: var(--red); border: none;
+  }
+  .seg button + button { border-left: 2px solid var(--red); }
+  .seg button[aria-pressed="true"] { background: var(--red); color: #fff; font-weight: 700; }
+  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
+  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
+  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
+  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">💈 理髮店</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">理髮店</h1>
+  <p class="subtitle" data-es="Ir a la peluquería en Taiwán" data-en="Visiting a hair salon in Taiwan">Ir a la peluquería en Taiwán</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    Ami 說你的頭髮太長了。你要先打電話預約，選對時間、說對電話號碼，到店說「有預約」，說明怎麼剪，水太燙要有禮貌地說，最後付錢、算找錢。<br>
+    <span data-es="Ami dice que tienes el pelo muy largo. Reserva primero por teléfono, elige bien el horario y di tu número; en la tienda di que tienes cita, explica el corte, pide con cortesía que enfríen el agua y al final paga y revisa el cambio." data-en="Ami says your hair is too long. Book by phone first — pick the right time and give your number — then say you have an appointment, explain the cut, politely ask for cooler water, and finally pay and check your change.">Ami dice que tienes el pelo muy largo. Reserva primero por teléfono, elige bien el horario y di tu número; en la tienda di que tienes cita, explica el corte, pide con cortesía que enfríen el agua y al final paga y revisa el cambio.</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-list" aria-pressed="false" onclick="Game.toggleList()" data-es="📝 Mi situación" data-en="📝 My situation">📝 Mi situación</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">📱</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE · Mensaje</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 15 名 · Top 15</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'barber', track: 'barber', settingsKey: 'barber_settings',
+  roles: { 'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '設計師': { pitch: 1.05 }, '老闆': { pitch: 0.85, male: true, malePitch: 1 } }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+
+pinyinPro.customPinyin({
+  '星期': 'xīng qí', '期': 'qí', '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '還要': 'hái yào',
+  '還好': 'hái hǎo', '還你': 'huán nǐ', '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '覺得': 'jué de',
+  '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan', '時間': 'shí jiān', '時候': 'shí hou',
+  '太太': 'tài tai', '先生': 'xiān sheng', '老闆': 'lǎo bǎn', '東西': 'dōng xi', '告訴': 'gào su',
+  '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '著': 'zhe', '只': 'zhǐ', '囉': 'luo', '啦': 'la', '耶': 'ye',
+  '意思': 'yì si', '關係': 'guān xi', '這個': 'zhè ge', '那個': 'nà ge', '一個': 'yí ge', '兩個': 'liǎng ge', '一共': 'yí gòng',
+  '看看': 'kàn kan', '喜歡': 'xǐ huān', '漂亮': 'piào liang', '可愛': 'kě ài', '每個': 'měi ge', '欸': 'éi',
+  '朋友': 'péng yǒu', '晚餐': 'wǎn cān', '辛苦': 'xīn kǔ', '辛苦了': 'xīn kǔ le', '路上': 'lù shàng', '名字': 'míng zi',
+  '您': 'nín', '怎麼': 'zěn me', '一點': 'yì diǎn', '他們': 'tā men', '前面': 'qián mian', '舒服': 'shū fu',
+  '手機': 'shǒu jī', '吃飯': 'chī fàn', '同事': 'tóng shì', '午餐': 'wǔ cān', '不好意思': 'bù hǎo yì si', '對不起': 'duì bu qǐ',
+  '車': 'chē', '車子': 'chē zi', '做得': 'zuò de', '台': 'tái',
+  '和': 'hàn', '嗯': 'ēn'
+});
+
+pinyinPro.customPinyin({
+  '理髮店': 'lǐ fà diàn', '理髮': 'lǐ fà', '頭髮': 'tóu fa', '剪髮': 'jiǎn fà', '洗頭': 'xǐ tóu', '洗髮': 'xǐ fà', '設計師': 'shè jì shī', '瀏海': 'liú hǎi',
+  '預約': 'yù yuē', '約好': 'yuē hǎo', '電話': 'diàn huà', '號碼': 'hào mǎ', '禮拜': 'lǐ bài', '星期': 'xīng qī', '下午': 'xià wǔ', '上午': 'shàng wǔ', '晚上': 'wǎn shang',
+  '點': 'diǎn', '兩點': 'liǎng diǎn', '耳朵': 'ěr duo', '肩膀': 'jiān bǎng', '下巴': 'xià ba', '後面': 'hòu miàn', '鏡子': 'jìng zi', '太短': 'tài duǎn', '短': 'duǎn',
+  '燙': 'tàng', '太燙': 'tài tàng', '冷一點': 'lěng yì diǎn', '找錢': 'zhǎo qián', '找': 'zhǎo', '找錯': 'zhǎo cuò', '一共': 'yí gòng', '元': 'yuán', '五百元': 'wǔ bǎi yuán',
+  '修一下': 'xiū yí xià', '剪': 'jiǎn', '還': 'hái', '還不': 'hái bù', '還好': 'hái hǎo', '有預約': 'yǒu yù yuē', '排隊': 'pái duì', '長': 'cháng', '太長': 'tài cháng',
+  '好像': 'hǎo xiàng', '應該': 'yīng gāi', '這樣': 'zhè yàng', '可以': 'kě yǐ', '一點': 'yì diǎn', '一下': 'yí xià', '沒': 'méi', '行': 'xíng', '我叫': 'wǒ jiào', '欸': 'ēi'
+});
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '設計師': ['El estilista', 'The stylist'] };
+const SPEAKER_RE = /^(Ami|設計師|老闆|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['理髮店', 'peluquería', 'hair salon'], ['剪髮', 'cortarse el pelo', 'get a haircut'], ['預約', 'hacer una cita / reservar', 'make an appointment'], ['頭髮', 'cabello', 'hair'], ['瀏海', 'flequillo', 'bangs / fringe']],
+  BOOK_OPEN: [['預約', 'hacer una cita / reservar', 'make an appointment'], ['電話', 'teléfono', 'phone'], ['排隊', 'hacer fila', 'wait in line'], ['設計師', 'estilista', 'stylist']],
+  BOOK_TIME: [['星期', 'día de la semana', 'day of the week'], ['上午', 'por la mañana', 'a.m. / morning'], ['下午', 'por la tarde', 'p.m. / afternoon'], ['晚上', 'por la noche', 'evening'], ['有空', 'estar libre', 'be free / available']],
+  BOOK_PHONE: [['電話', 'teléfono', 'phone'], ['號碼', 'número', 'number'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['確認', 'confirmar', 'confirm']],
+  ARRIVE: [['有預約', 'tener cita', 'have an appointment'], ['姓名', 'nombre', 'name'], ['排隊', 'hacer fila', 'wait in line'], ['坐', 'sentarse', 'sit']],
+  STYLE_LEN: [['肩膀', 'hombros', 'shoulders'], ['下巴', 'mentón', 'chin'], ['耳朵', 'oreja', 'ear'], ['剪到', 'cortar hasta…', 'cut up to…'], ['多短', 'qué tan corto', 'how short']],
+  STYLE_BANG: [['瀏海', 'flequillo', 'bangs / fringe'], ['修一下', 'retocar un poco', 'trim a little'], ['不用剪', 'no hace falta cortar', 'no need to cut'], ['眉毛', 'ceja', 'eyebrow']],
+  WASH: [['洗頭', 'lavar el cabello', 'wash hair'], ['燙', 'muy caliente', 'scalding hot'], ['冷一點', 'un poco más frío', 'a bit cooler'], ['水', 'agua', 'water'], ['不好意思', 'disculpe', 'excuse me']],
+  MIRROR: [['鏡子', 'espejo', 'mirror'], ['後面', 'atrás', 'the back'], ['短一點', 'un poco más corto', 'a bit shorter'], ['滿意', 'satisfecho', 'satisfied']],
+  PAY: [['一共', 'en total', 'in total'], ['元', 'dólares taiwaneses', 'NT dollars'], ['付錢', 'pagar', 'pay'], ['五百元', '500 dólares', '500 NT dollars'], ['找錢', 'dar el cambio', 'give change']],
+  CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give the wrong change'], ['應該', 'debería', 'should'], ['數', 'contar', 'count']],
+  END: [['剪好', 'ya cortado', 'finished cutting'], ['方便', 'cómodo, práctico', 'convenient'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* ══════════════════════════════════════
+   任務提示：只列出 Ami 和店員說過的原話；不扣分，結果頁顯示看了幾次
+══════════════════════════════════════ */
+const Hints = {
+  open: false,
+  toggle(force) {
+    this.open = force ?? !this.open;
+    if (this.open) { Vocab.toggle(false); Log.toggle(false); Game.hintViews += 1; this.render(); }
+    document.getElementById('hints').classList.toggle('open', this.open);
+    document.getElementById('hint-tab').setAttribute('aria-expanded', this.open);
+  },
+  render() {
+    if (!Game.task) return;
+    const r = s => Game.ruby(s);
+    const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
+    document.getElementById('hint-body').innerHTML = `<div class="h-sec">${r('Ami 的 LINE 訊息')}</div>` + Game.amiLines().map(item).join('');
+  }
+};
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+/* ══════════════════════════════════════
+   錯誤紀錄：整局累積、即時更新、最新的在上面、標出關卡
+══════════════════════════════════════ */
+const STAGE = (() => {
+  const a = ['預約', 'reservar', 'booking'], b = ['剪髮', 'el corte', 'the haircut'], c = ['結帳', 'pagar', 'paying'];
+  const o = {};
+  ['BOOK_OPEN', 'BOOK_TIME', 'BOOK_PHONE', 'ARRIVE'].forEach(x => o[x] = a);
+  ['STYLE_LEN', 'STYLE_BANG', 'WASH', 'MIRROR'].forEach(x => o[x] = b);
+  ['PAY', 'CHANGE'].forEach(x => o[x] = c);
+  return o;
+})();
+
+const DAYS = ['三', '四', '五', '六'];
+const LENS = [['肩膀', 'los hombros', 'your shoulders'], ['下巴', 'el mentón', 'your chin'], ['耳朵', 'las orejas', 'your ears']];
+const BANGS = [['修一下', 'Ami quiere solo un retoque', 'a light trim'], ['剪短', 'Ami quiere cortarlo más corto', 'cut shorter'], ['不用剪', 'Ami no quiere cortar el flequillo', 'leave it alone']];
+const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+/* 數字轉中文：只用到 50 的倍數、最多 500 */
+const HZ = n => { const h = Math.floor(n / 100), t = Math.floor((n % 100) / 10); return (h ? CN[h] + '百' : '') + (t ? CN[t] + '十' : ''); };
+const SLOT = (day, per, hr) => `星期${day}${per}${per === '晚上' ? CN[hr] : (hr === 2 ? '兩' : CN[hr])}點`;
+
+/* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
+const NEXT_LABEL = {
+  BOOK_OPEN: '拿起手機', BOOK_TIME: '電話接通了', BOOK_PHONE: '設計師繼續問', ARRIVE: '預約的日子到了，走進理髮店',
+  STYLE_LEN: '坐到鏡子前面', STYLE_BANG: '設計師拿起剪刀', WASH: '走去洗頭', MIRROR: '洗好了，回到座位', PAY: '剪好了，去櫃台', CHANGE: '付錢', END: '走出理髮店'
+};
+
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,   // 過場的話或選錯時的提示（台詞陣列）
+  hintViews: 0,                  // 打開任務提示的次數
+  log: [],                       // 錯誤紀錄（整局）
+  feedback: [],                  // 這一步的回饋卡
+  visit: 0,                      // 第幾次進入關卡（標出「現在這關」的錯誤）
+  att: {},                       // 每一關選了幾次（第一次就對才給綠卡）
+
+  IMAGES: {
+    START: ['images/start.jpg', '💇'],
+    BOOK_OPEN: ['images/phone.jpg', '📞'], BOOK_TIME: ['images/phone.jpg', '📞'], BOOK_PHONE: ['images/phone.jpg', '📞'],
+    ARRIVE: ['images/door.jpg', '🚪'], STYLE_LEN: ['images/chair.jpg', '🪑'], STYLE_BANG: ['images/chair.jpg', '✂️'],
+    WASH: ['images/wash.jpg', '🚿'], MIRROR: ['images/mirror.jpg', '🪞'], PAY: ['images/counter.jpg', '💴'], CHANGE: ['images/counter.jpg', '💴'],
+    END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+  },
+
+  setup() {
+    const day = pick(DAYS), hr = ri(2, 6), len = pick(LENS), bang = pick(BANGS);
+    const slots = shuffle([[pick(DAYS.filter(d => d !== day)), '上午', 10], [day, '下午', hr], [pick(DAYS), '晚上', 7]]);
+    const mk = () => '09' + String(ri(10000000, 99999999));
+    const real = mk(), d1 = real.split(''), d2 = real.split('');
+    [d1[4], d1[5]] = [d1[5], d1[4]]; [d2[7], d2[8]] = [d2[8], d2[7]];
+    let ph = [real, d1.join(''), d2.join('')]; if (ph[1] === real || ph[2] === real) ph = [real, '09' + ri(10000000, 99999999), '09' + ri(10000000, 99999999)];
+    const fmt = p => p.slice(0, 4) + '-' + p.slice(4, 7) + '-' + p.slice(7);
+    const price = pick([350, 400, 450]), given = Math.random() < 0.5 ? 500 - price : 500 - price - 50;
+    this.task = { day, hr, want: SLOT(day, '下午', hr), slots: slots.map(s => SLOT(s[0], s[1], s[2])), phone: fmt(real), phones: ph.map(fmt), len, bang, rot: Math.floor(Math.random() * 3), price, given, wrong: given !== 500 - price };
+  },
+
+  setPlace(mode) {
+    const map = {
+      phone: ['📱', 'Ami', 'LINE · ' + X('Mensaje', 'Message'), 'phone'],
+      call: ['📞', '理髮店', X('Por teléfono', 'On the phone'), ''],
+      salon: ['💇', '設計師', X('En la peluquería', 'At the salon'), ''],
+      counter: ['💴', '櫃台', X('En la caja', 'At the counter'), '']
+    };
+    const [icon, who, st, cls] = map[mode] || map.phone;
+    document.getElementById('place-bar').className = cls;
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = st;
+  },
+
+  amiLines() {
+    const t = this.task, l = t.len;
+    return [
+      L('Ami：你頭髮太長了，去剪一剪吧！先預約比較不用等喔。', 'Tienes el pelo muy largo, ¡ve a cortártelo! Es mejor reservar primero para no esperar.', 'Your hair is too long — go get it cut! Booking first means less waiting.'),
+      L(`Ami：你這個${t.want.slice(0, 3)}下午${t.hr === 2 ? '兩' : CN[t.hr]}點有空，對吧？`, `Tienes libre ese día a las ${t.hr} de la tarde, ¿verdad?`, `You're free that day at ${t.hr} p.m., right?`),
+      L(`Ami：剪到${l[0]}就好，瀏海${t.bang[0]}。`, `Cortar hasta ${l[1]} es suficiente; flequillo: ${t.bang[1]}.`, `Cut it to ${l[2]}; bangs: ${t.bang[2]}.`)
+    ];
+  },
+
+  listHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    const rows = [
+      { zh: `有空：${t.want}`, es: `Estoy libre: ${t.want}`, en: `Free: ${t.want}` },
+      { zh: `我的電話：${t.phone}`, es: `Mi teléfono: ${t.phone}`, en: `My phone: ${t.phone}` },
+      { zh: `頭髮剪到${t.len[0]}`, es: `Cortar hasta ${t.len[1]}`, en: `Cut to ${t.len[2]}` },
+      { zh: `瀏海：${t.bang[0]}`, es: `Flequillo: ${t.bang[1]}`, en: `Bangs: ${t.bang[2]}` }
+    ];
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  slotsHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    return `<div class="slots"><div class="sh">${r('這個星期的空檔')}</div>` + t.slots.map(s => `<div class="sl">${r(s)}</div>`).join('') + '</div>';
+  },
+  billHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    return `<div class="bill"><div class="sh">${r('帳單')}</div><div class="bl"><span>${r('剪髮 + 洗頭')}</span><b>${t.price}</b></div></div>`;
+  },
+  changeHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    return `<div class="bill"><div class="sh">${r('我給老闆')}</div><div class="bl"><span>${r('五百元')}</span><b>500</b></div><div class="sh">${r('老闆找給我')}</div><div class="bl"><span>${r('找錢')}</span><b>${t.given}</b></div></div>`;
+  },
+
+  getConfig() {
+    const N = this.N, t = this.task;
+    const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const sd = (zh, es, en) => L(`設計師：${zh}`, es, en);
+    const boss = (zh, es, en) => L(`老闆：${zh}`, es, en);
+    const change = 500 - t.price;
+
+    return {
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [L('（你的頭髮太長了。手機響了一聲，是 Ami 傳來的 LINE。）', '(Tienes el pelo muy largo. Tu celular suena: es un LINE de Ami.)', '(Your hair is too long. Your phone buzzes — a LINE from Ami.)'), ...Game.amiLines(), L('我：好，我先預約！', '¡Bien, primero reservo!', "OK, I'll book first!")],
+        options: ['拿起手機'],
+        next: () => { Game.startTimer(); Game.state = 'BOOK_OPEN'; }
+      },
+
+      BOOK_OPEN: {
+        place: 'phone',
+        dialogue: () => [L('（你找到一間理髮店，門口貼著：「歡迎預約，電話 0900-000-000」。）', '(Encuentras una peluquería. En la puerta dice: «歡迎預約»: se aceptan reservas por teléfono.)', '(You find a salon. A sign on the door reads 歡迎預約 — reservations welcome.)'), L('我：我要怎麼做呢？', '¿Qué hago?', 'What should I do?')],
+        options: () => rot(['打電話預約', '直接去，在門口排隊', '等頭髮更長再說']),
+        next: c => {
+          if (c !== '打電話預約') {
+            Game.addMistake(c.startsWith('直接') ? M('Ami 說先預約比較不用等。打電話預約，就可以選自己有空的時間。', 'Ami dijo que reservar evita la espera. Si llamas, puedes elegir el horario en que estás libre.', 'Ami said booking means less waiting. Call, and you can choose a time you are free.')
+                                              : M('頭髮太長了，現在就預約吧。', 'Tu pelo ya está largo: reserva ahora.', 'Your hair is already too long — book now.')); return;
+          }
+          goodFirst('BOOK_OPEN', '對！先預約，就不用在店裡等很久。', '¡Correcto! Si reservas antes, no tendrás que esperar mucho en la tienda.', "Right! Book first and you won't wait long at the shop.");
+          Game.thought = [boss('喂，這裡是理髮店，要預約嗎？', 'Aló, peluquería. ¿Quiere reservar?', "Hello, hair salon. Would you like to book?")];
+          Game.state = 'BOOK_TIME';
+        }
+      },
+      BOOK_TIME: {
+        place: 'call',
+        html: () => Game.slotsHTML(),
+        dialogue: () => [boss('這個星期有三個空檔，請看一下。你要哪一個？', 'Esta semana hay tres horarios libres; mira cuál prefieres.', 'We have three open slots this week. Which one would you like?')],
+        options: () => rot(t.slots.map(s => '我要' + s)),
+        next: c => {
+          if (c !== '我要' + t.want) {
+            Game.addMistake(M(`你${t.want.slice(0, 3)}下午${t.hr === 2 ? '兩' : CN[t.hr]}點才有空，要選「${t.want}」。`, `Solo estás libre el día indicado a las ${t.hr} de la tarde: elige «${t.want}».`, `You're only free at ${t.hr} p.m. on that day: pick "${t.want}".`)); return;
+          }
+          goodFirst('BOOK_TIME', '你選對時間了！星期和幾點都要聽清楚。', '¡Elegiste bien! Hay que escuchar con atención el día y la hora.', 'You picked the right time! Listen carefully to both the day and the hour.');
+          Game.thought = [boss(`好，${t.want}。請問你的電話幾號？`, `Bien, ${t.want}. ¿Cuál es su número de teléfono?`, `OK, ${t.want}. And your phone number?`)];
+          Game.state = 'BOOK_PHONE';
+        }
+      },
+      BOOK_PHONE: {
+        place: 'call',
+        dialogue: () => [L('（老闆在電腦上打字，等你說電話號碼。）', '(El dueño teclea en la computadora, esperando tu número.)', '(The owner types on a computer, waiting for your number.)'), L('我：我的電話是……', 'Mi teléfono es…', 'My number is…')],
+        options: () => rot(t.phones.map(p => p)),
+        next: c => {
+          if (c !== t.phone) {
+            Game.addMistake(M(`你的電話是 ${t.phone}。要看清楚每個數字。`, `Tu número es ${t.phone}. Revisa bien cada dígito.`, `Your number is ${t.phone}. Check every digit.`)); return;
+          }
+          goodFirst('BOOK_PHONE', '電話號碼對了！', '¡El número es correcto!', 'The phone number is right!');
+          Game.thought = [boss(`好，${t.want}，我們等你。`, `Bien, ${t.want}; te esperamos.`, `OK, ${t.want} — we'll see you then.`), L('（預約的日子到了。你走進理髮店。）', '(Llega el día de tu cita. Entras a la peluquería.)', '(The day arrives. You walk into the salon.)')];
+          Game.state = 'ARRIVE';
+        }
+      },
+      ARRIVE: {
+        place: 'salon',
+        dialogue: () => [L('（店裡有幾個客人在等。設計師看到你走進來。）', '(Hay varios clientes esperando. El estilista te ve entrar.)', '(Several customers are waiting. The stylist sees you come in.)'), sd('歡迎光臨！請問有預約嗎？', '¡Bienvenido! ¿Tiene cita?', 'Welcome! Do you have an appointment?')],
+        options: () => rot([`有，我有預約，我叫${N}。`, '沒有，我要排隊。', '我要剪頭髮。']),
+        next: c => {
+          if (!c.startsWith('有，')) {
+            Game.addMistake(M('你已經預約了，要說「我有預約」，再說名字，設計師才會找到你。', 'Ya reservaste: di «我有預約» y tu nombre para que el estilista te encuentre.', 'You already booked — say 我有預約 and your name so the stylist can find you.')); return;
+          }
+          goodFirst('ARRIVE', '很好！先說「我有預約」，再說名字。', '¡Muy bien! Primero «我有預約» y luego tu nombre.', 'Good! Say 我有預約 first, then your name.');
+          Game.thought = [sd(`${N}，對，${t.want}，這邊請坐。`, `${N}, sí, ${t.want}. Siéntese aquí, por favor.`, `${N}, yes, ${t.want}. Please sit here.`)];
+          Game.state = 'STYLE_LEN';
+        }
+      },
+      STYLE_LEN: {
+        place: 'salon',
+        dialogue: () => [sd('想剪多短呢？', '¿Qué tan corto lo quiere?', 'How short would you like it?')],
+        options: () => rot(LENS.map(l => `剪到${l[0]}`)),
+        next: c => {
+          if (c !== `剪到${t.len[0]}`) {
+            Game.addMistake(M(`Ami 說剪到${t.len[0]}就好。`, `Ami dijo que bastaba con cortar hasta ${t.len[1]}.`, `Ami said to cut it to ${t.len[2]}.`)); return;
+          }
+          goodFirst('STYLE_LEN', '你說得很清楚！', '¡Lo dijiste muy claro!', 'You said it clearly!');
+          Game.state = 'STYLE_BANG';
+        }
+      },
+      STYLE_BANG: {
+        place: 'salon',
+        dialogue: () => [sd('瀏海呢？', '¿Y el flequillo?', 'And the bangs?')],
+        options: () => rot(BANGS.map(b => `瀏海${b[0]}`)),
+        next: c => {
+          if (c !== `瀏海${t.bang[0]}`) {
+            Game.addMistake(M(`Ami 說瀏海${t.bang[0]}。`, `Ami dijo: flequillo, ${t.bang[1]}.`, `Ami said the bangs: ${t.bang[2]}.`)); return;
+          }
+          goodFirst('STYLE_BANG', '很好，設計師知道怎麼剪了。', 'Muy bien, el estilista ya sabe cómo cortar.', 'Good — now the stylist knows how to cut.');
+          Game.thought = [sd('好，先去洗頭吧。', 'Bien, primero vamos a lavarle el cabello.', "OK, let's wash your hair first.")];
+          Game.state = 'WASH';
+        }
+      },
+      WASH: {
+        place: 'salon',
+        dialogue: () => [L('（助理幫你洗頭。水太燙了！）', '(Una asistente te lava el cabello. ¡El agua está demasiado caliente!)', '(An assistant washes your hair. The water is scalding!)'), L('我：要怎麼說呢？', '¿Cómo lo digo?', 'What do I say?')],
+        options: () => rot(['不好意思，水有點燙，可以冷一點嗎？', '沒關係，我忍一下。', '啊！好燙！你想燙死我嗎？']),
+        next: c => {
+          if (!c.startsWith('不好意思')) {
+            Game.addMistake(c.startsWith('沒關係') ? M('水太燙會受傷，要說出來。用「不好意思…可以…嗎？」很有禮貌。', 'El agua muy caliente puede lastimar: hay que decirlo. «不好意思…可以…嗎？» es muy cortés.', 'Scalding water can hurt — speak up. 不好意思…可以…嗎？ is very polite.')
+                                              : M('不要生氣，禮貌地說就好：「不好意思，水有點燙，可以冷一點嗎？」', 'No te enojes; di con cortesía: «不好意思，水有點燙，可以冷一點嗎？».', "Don't get angry — just say politely: 不好意思，水有點燙，可以冷一點嗎？")); return;
+          }
+          goodFirst('WASH', '很有禮貌！「不好意思，可以…嗎？」很好用。', '¡Muy cortés! «不好意思，可以…嗎？» es muy útil.', '很有禮貌！「不好意思，可以…嗎？」 is a very handy pattern.');
+          Game.thought = [L('（助理說：「好的，這樣可以嗎？」水剛剛好。洗好了，你回到座位，設計師開始剪。）', '(La asistente dice: «Claro, ¿así está bien?». El agua queda perfecta. Terminan de lavarte y el estilista empieza a cortar.)', '(The assistant says, "Sure — is this OK?" The water is just right. You return to your seat and the stylist begins cutting.)')];
+          Game.state = 'MIRROR';
+        }
+      },
+      MIRROR: {
+        place: 'salon',
+        dialogue: () => [sd('剪好了。你看一下鏡子，後面看得到嗎？有沒有想再修的地方？', 'Ya está. Mire el espejo: ¿ve la parte de atrás? ¿Quiere retocar algo?', 'All done. Take a look in the mirror — can you see the back? Anything you want adjusted?'), L('（你覺得後面還是有一點長。）', '(Sientes que atrás sigue un poco largo.)', '(You feel the back is still a bit long.)')],
+        options: () => rot(['後面可以再短一點嗎？', '很好，謝謝。', '（不說話，回家再自己剪）']),
+        next: c => {
+          if (c !== '後面可以再短一點嗎？') {
+            Game.addMistake(M('你覺得後面還有點長，現在就要說。設計師不會知道你在想什麼。', 'Sientes que atrás sigue largo: dilo ahora; el estilista no puede adivinarlo.', "You feel the back is still long, so say so now — the stylist can't read your mind.")); return;
+          }
+          goodFirst('MIRROR', '你有說出自己的想法，很好！', '¡Dijiste lo que pensabas, muy bien!', 'Good — you said what you were thinking!');
+          Game.thought = [sd('好，我再修一下。……這樣可以嗎？', 'Bien, lo retoco… ¿así está bien?', 'OK, I\'ll trim a bit more… How is that?'), L('我：可以了，謝謝！', '¡Así está bien, gracias!', "That's good, thanks!")];
+          Game.state = 'PAY';
+        }
+      },
+      PAY: {
+        place: 'counter',
+        html: () => Game.billHTML(),
+        dialogue: () => [boss(`謝謝，一共${HZ(t.price)}元。`, `Gracias, son ${t.price} dólares en total.`, `Thank you — that's ${t.price} dollars in total.`), L('（你的錢包裡只有一張五百元。）', '(En tu cartera solo hay un billete de quinientos.)', '(You only have one 500-dollar bill in your wallet.)')],
+        options: () => rot(['給老闆五百元，請他找錢', '給老闆一百元', '給老闆一千元']),
+        next: c => {
+          if (!c.startsWith('給老闆五百')) {
+            Game.addMistake(c.includes('一百') ? M(`一共${HZ(t.price)}元，一百元不夠。`, `Son ${t.price} en total: cien no alcanza.`, `The total is ${t.price}; 100 isn't enough.`) : M('你只有一張五百元，沒有一千元。', 'Solo tienes un billete de quinientos, no de mil.', 'You only have a 500 bill, not a 1000.')); return;
+          }
+          goodFirst('PAY', '對！聽清楚金額，再付錢。', '¡Correcto! Escucha bien el monto y luego paga.', 'Right! Listen carefully to the amount, then pay.');
+          Game.thought = [boss('好，找你錢。', 'Bien, le doy el cambio.', "OK, here's your change.")];
+          Game.state = 'CHANGE';
+        }
+      },
+      CHANGE: {
+        place: 'counter',
+        html: () => Game.changeHTML(),
+        dialogue: () => [L(`（你付了五百元，總共${t.price}元。老闆找給你${t.given}元。）`, `(Pagaste 500; el total es ${t.price}. El dueño te devuelve ${t.given}.)`, `(You paid 500 for a total of ${t.price}. The owner hands you ${t.given} in change.)`), L('我：找的錢對嗎？', '¿Está bien el cambio?', 'Is the change right?')],
+        options: () => rot(['算一算，沒錯，收下，謝謝', `老闆，好像找錯了，應該找${HZ(change)}元`]),
+        next: c => {
+          const claimWrong = c.startsWith('老闆');
+          if (claimWrong !== t.wrong) {
+            Game.addMistake(t.wrong ? M(`五百減${t.price}，應該找${change}元，老闆只找了${t.given}元。`, `500 menos ${t.price} son ${change}; el dueño solo te dio ${t.given}.`, `500 minus ${t.price} is ${change}, but the owner gave only ${t.given}.`)
+                                    : M(`五百減${t.price}，剛好是${change}元，沒有找錯。`, `500 menos ${t.price} son exactamente ${change}; el cambio está bien.`, `500 minus ${t.price} is exactly ${change} — the change is right.`)); return;
+          }
+          goodFirst('CHANGE', t.wrong ? '你有算錢，很棒！' : '你算過了，沒錯。', t.wrong ? '¡Contaste el dinero, genial!' : 'Lo contaste y estaba bien.', t.wrong ? 'You counted the money — great!' : 'You counted and it was right.');
+          Game.thought = [t.wrong ? boss('啊，不好意思，我算錯了。這是剩下的。', 'Ay, perdón, me equivoqué. Aquí está el resto.', 'Oh, sorry, I miscounted. Here is the rest.') : boss('謝謝，下次再來！', '¡Gracias, vuelva pronto!', 'Thank you, come again!')];
+          Game.stopTimer();
+          Game.state = 'END';
+        }
+      },
+
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2;
+          track('game_complete', { game: 'barber', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            L('（你走出理髮店，傳了一張照片給 Ami。）', '(Sales de la peluquería y le mandas una foto a Ami.)', '(You step out of the salon and send Ami a photo.)'),
+            Game._endGood
+              ? L(`Ami：哇，${N}，剪得很好看欸！預約真的很方便吧！我們去走走吧！`, `¡Vaya, ${N}, qué bien te quedó! ¡Reservar es muy práctico, ¿verdad? ¡Vamos a dar una vuelta!`, `Wow, ${N}, it looks great! Booking really is convenient, right? Let's go for a stroll!`)
+              : L('Ami：辛苦了！剪頭髮要說很多話吧！我們去走走吧！', '¡Gracias por el esfuerzo! Hay que hablar mucho al cortarse el pelo, ¿no? ¡Vamos a dar una vuelta!', "Thanks for your effort! There's a lot to say at a haircut, huh? Let's go for a stroll!")
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: {
+        place: 'phone',
+        dialogue: () => {
+          const w = (zh, es, en) => zh + ' ' + X(es, en);
+          let msg = `【${w('任務成果', 'Resultados', 'Results')}】\n${w('玩家', 'Jugador', 'Player')}：${N}\n${w('最後分數', 'Puntos', 'Score')}：${Game.score} 分\n` +
+            `${w('錯誤次數', 'Errores', 'Mistakes')}：${Game.mistakes} 次\n${w('時間', 'Tiempo', 'Time')}：${Game.elapsedTime} 秒\n` +
+            `${w('看任務提示', 'Pistas consultadas', 'Hints viewed')}：${Game.hintViews} 次\n\n${w('扣分原因', 'Penalizaciones', 'Penalties')}：`;
+          if (!Game.log.length) msg += '\n沒有扣分！' + X('¡Sin errores!', 'No mistakes!') + ' 🎉';
+          else Game.log.forEach((m, i) => { msg += `\n${i + 1}. ${m.zh} ${X(m.es, m.en)}（−10）`; });
+          return msg.split('\n').map(zh => ({ zh }));
+        },
+        options: () => ['查看排行榜 ' + X('Ver clasificación', 'See leaderboard')],
+        next: () => showLeaderboard()
+      }
+    };
+  },
+
+  /* ── 共用：台詞、圖片、過場、畫面（和其他遊戲一樣） ── */
+  /* ── 台詞：每一行一個 div，有翻譯的在句尾加朗讀和翻譯小圖示 ── */
+  formatText(content) {
+    const items = Array.isArray(content) ? content : [content];
+    return items.map(item => {
+      const m = item.zh.match(SPEAKER_RE);
+      let head = '', rest = item.zh;
+      if (m) {
+        const who = m[1] === '我' ? this.N : m[1];
+        const cls = m[1] === 'Ami' ? 'speaker ami' : m[1] === '我' ? 'speaker me' : 'speaker';
+        head = `<span class="${cls}">${this.ruby(who)}：</span>`;
+        rest = item.zh.slice(m[0].length);
+      }
+      let btn = '';
+      if (item.es) {
+        this._spk.push({ text: rest, who: m ? m[1] : null });
+        btn += spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+        this._tr.push(item);
+        btn += `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+      }
+      return `<div class="line">${head}${this.ruby(rest)}${btn}</div>`;
+    }).join('');
+  },
+
+  /* alt：第二張圖，和第一張輪流出現（像動畫）；開了「減少動態效果」就不動 */
+  setImage(src, emoji, alt) {
+    const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
+    this.stopAnim(); this._anim0 = src;
+    ph.textContent = emoji;
+    if (!src || this.missing.has(src)) { img.style.display = 'none'; ph.style.display = 'grid'; return; }
+    img.style.display = 'block'; ph.style.display = 'none';
+    if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+    const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (alt && !calm && !this.missing.has(alt)) {
+      const pre = new Image(); pre.onerror = () => this.missing.add(alt); pre.src = alt;   // 先載入，避免閃一下
+      this._anim = { alt }; let on = false;
+      this._animTimer = setInterval(() => {
+        if (this.missing.has(alt)) { this.stopAnim(); img.setAttribute('src', src); return; }
+        on = !on; img.setAttribute('src', on ? alt : src);
+      }, 600);
+    }
+  },
+
+  handleChoice(choice) {
+    if (this.state === '_TRANS') {          // 離開過場，進下一關
+      const t = this._trans; this._trans = null;
+      Tr.closeAll(); Speech.stop();
+      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
+      
+      if (document.getElementById('game-window').classList.contains('active')) this.render();
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
+    Speech.stop();
+    this.thought = null;
+    this.feedback = [];
+    const before = this.state;
+    this.att[before] = (this.att[before] || 0) + 1;
+    cfg.next(choice);
+    this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
+    if (this.thoughtFirst) this.visit += 1;
+    this.maybeTrans(before);
+    if (document.getElementById('game-window').classList.contains('active')) this.render();
+  },
+
+  render() {
+    if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果
+      const t = this._trans;
+      this.state = t.from;
+      this._transMode = true;
+      try { this.render(); } finally { this._transMode = false; this.state = '_TRANS'; }
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    if (!cfg) { console.error('狀態錯誤：' + this.state); return; }
+    const val = v => typeof v === 'function' ? v() : v;
+    this.setPlace(val(cfg.place) || 'phone');
+
+    // END 的 dialogue 會決定結局，所以只算一次
+    const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
+    let [src, emoji, alt] = this.IMAGES[this.state] || ['', '💈'];
+    if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
+    this.setImage(src, emoji, alt);
+    Vocab.render(this.state);
+    if (Hints.open) Hints.render();
+    Log.render();
+
+    this._tr = []; this._spk = [];
+    let html = (this.showList && this.state !== 'START' && !['END', 'RESULT'].includes(this.state)) ? this.listHTML() : '';
+    html += cfg.html ? cfg.html() : '';
+    if (this._transMode) html = '';
+    const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
+    const main = this.formatText(raw);
+    html += this.thoughtFirst ? th + main : main + th;
+    html += this.feedbackHTML();
+    const box = document.getElementById('npc-dialogue');
+    box.innerHTML = html;
+    box.querySelectorAll('[data-tr]').forEach(btn => {
+      btn.onclick = () => Tr.open(this._tr[+btn.dataset.tr], btn);
+    });
+    box.querySelectorAll('[data-spk]').forEach(btn => {
+      btn.onclick = () => { const x = this._spk[+btn.dataset.spk]; Speech.speak(x.text, btn, x.who); };
+    });
+
+    const area = document.getElementById('options-area');
+    area.className = '';
+    area.innerHTML = '';
+    const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
+    area.classList.toggle('single', opts.length === 1 || opts.some(o => o.length > 12));
+    opts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt' + (false ? ' deal' : '');
+      btn.innerHTML = this.ruby(opt);
+      btn.onclick = () => this.handleChoice(opt);
+      area.appendChild(btn);
+    });
+  }
+});
+
+GameBoot();
+Music.init({ bpm: 120, tracks: [
+  { wave: 'square', vol: 0.26, notes: 'A4 . C5 . E5 . C5 . | G4 . B4 . D5 . B4 . | F4 . A4 . C5 . A4 . | E5 - D5 - C5 - . .' },
+  { wave: 'triangle', vol: 0.65, notes: 'A2 A2 A2 A2 E3 E3 E3 E3 | G2 G2 G2 G2 D3 D3 D3 D3 | F2 F2 F2 F2 C3 C3 C3 C3 | E3 E3 E3 E3 A2 A2 A2 A2' },
+  { vol: 0.45, notes: 'k . h . s . h . k . h k s . h h' }] });
+</script>
+</body>
+</html>
