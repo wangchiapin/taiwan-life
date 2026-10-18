@@ -24,6 +24,10 @@
 - 地圖模式玩完也進排行榜：結果頁 →「查看排行榜」→ 按鈕變成「回到地圖」才送 scene-complete（`shared/game.js` 的 `showLeaderboard`）。smoke.py embed 測試會檢查排行榜有寫、scene-complete 有送。排行榜一出現，遊戲先送 `scene-result`；這時學生按地圖右上角「✕ Salir」也算完成（Ben 決定）。玩到一半按 Salir 不算。
 - 第 4 步的檢查清單（https://claude.ai/artifact/EgrTFKHk5Y41FgR1tZML3X，db 集合 `decisions`，文件 id＝項目 id、內容 {choice: 改/不改/再討論, note}）：2026-10-16 已照 Ben 的決定改完（82 項：79 改、3 不改）。統一的決定：連接詞「和」全部念 hàn、「嗯」全部念 ēn（每個遊戲最後一個 customPinyin）；西文對玩家說話不分男女（不用 listo/solo/bienvenido…）；店員招呼用「¡Hola, buenas!」。檢查工具在 `tools/review/`，之後改台詞可以重跑 pinyin_rules.js、pinyin_check.js、vocab_live.py。
 
+## 2026-10-19 地圖第三條街（Ben 決定）
+- 地圖擴充成 20×42（第三條馬路在第 33、34 列），BUILD_SLOTS 0–23。新增維修中的房子：公車(11)、YouBike(14)、理髮店(15)、停車場(16)、冰淇淋店(17)、書店(18)、搭電梯(19)；剩 4 個工地（20–23）。
+- 學校、YouBike、公車、理髮店之後要做成真的遊戲（學校＝請假、理髮店含預約、公車跟捷運內容區分）；電影院、停車場、冰淇淋店、書店、菜市場、搭電梯 Ben 之前在本機做過六個遊戲，目前地圖上維持維修中，之後再細修。
+
 ## 下一階段（2026-10-15 Ben 確認的計畫，照順序做）
 九個遊戲的中文用詞 Ben 已經全部改完（見下面「中文用詞」）。Ben 說之後會自己全部玩一次。接下來照這個順序：
 
