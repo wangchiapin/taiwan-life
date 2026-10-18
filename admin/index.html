@@ -104,7 +104,8 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signO
 const ADMIN = 'a2224907@gmail.com';
 const SCENES = [
   ['drinks', '🧋', '飲料店'], ['reserva', '📞', '打電話訂位'], ['breakfast', '🍳', '早餐店'], ['parcel', '📦', '超商領包裹'],
-  ['nightmarket', '🏮', '夜市'], ['bakery', '🥐', '麵包店'], ['clinic', '🏥', '看醫生'], ['mrt', '🚇', '搭捷運'], ['street', '🚶', '走在路上']
+  ['nightmarket', '🏮', '夜市'], ['bakery', '🥐', '麵包店'], ['clinic', '🏥', '看醫生'], ['mrt', '🚇', '搭捷運'], ['street', '🚶', '走在路上'],
+  ['school', '🏫', '學校請假'], ['ubike', '🚲', 'YouBike'], ['bus', '🚌', '搭公車'], ['barber', '💈', '理髮店']
 ];
 const SC = Object.fromEntries(SCENES.map(([id, e, zh]) => [id, { e, zh }]));
 const scName = id => SC[id] ? SC[id].e + ' ' + SC[id].zh : id;

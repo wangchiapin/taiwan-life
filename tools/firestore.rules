@@ -13,10 +13,11 @@ service cloud.firestore {
 
     function scoreCols() {
       return ['drinkgame_scores', 'reservagame_scores', 'breakfastgame_scores', 'parcelgame_scores',
-              'nightmarket_scores', 'bakerygame_scores', 'clinicgame_scores', 'mrtgame_scores', 'streetgame_scores'];
+              'nightmarket_scores', 'bakerygame_scores', 'clinicgame_scores', 'mrtgame_scores', 'streetgame_scores',
+              'schoolgame_scores', 'ubikegame_scores', 'busgame_scores', 'barbergame_scores'];
     }
     function scenes() {
-      return ['drinks', 'reserva', 'breakfast', 'parcel', 'nightmarket', 'bakery', 'clinic', 'mrt', 'street'];
+      return ['drinks', 'reserva', 'breakfast', 'parcel', 'nightmarket', 'bakery', 'clinic', 'mrt', 'street', 'school', 'ubike', 'bus', 'barber'];
     }
     function okName(n) { return n is string && n.size() > 0 && n.size() <= 30; }
 

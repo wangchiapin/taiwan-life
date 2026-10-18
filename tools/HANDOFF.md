@@ -147,3 +147,12 @@
 - 選項：049 改「我幫您叫救護車」（`tools/oracles/street.py` 一起改；判斷看 `ok`，不看文字）、018、028、040、064、091、094、106。
 - 單字表：START 路口、處理→趕快、路上；E_light 斑馬線→交通規則、三寶；E_honk 小巷、人行道→瞪、點頭；E_elder 菜籃、閃→催、紅燈；E_wallet 叫住→提醒；E_flyer 加 拒絕；END 加 經驗。
 - 我順手修的：customPinyin 加 路上、走得、處理得、慢慢地、客氣地、認識。
+
+
+## 2026-10-19 四個新遊戲（學校請假、YouBike、公車、理髮店）
+- 分支 `four-games`（接在 `more-games-map` 後面），**尚未推上去**；Ben 說「推」才推。
+- 遊戲檔：`games/school|ubike|bus|barber/index.html`，排行榜 `schoolgame_scores`、`ubikegame_scores`、`busgame_scores`、`barbergame_scores`；正解在 `tools/oracles/`；smoke perfect／mixed／embed／trans 都過。
+- 最後一個 commit「登記」把四個地點從 COMING 搬到 SCENES（slot 不變：school 8、bus 11、ubike 14、barber 15），並更新 `firestore.rules`、`shared/firebase.js`、`admin/index.html`、`music.html`。只推地圖（維修中）時，不要含這個 commit。
+- 推上去之後 Ben 要做：把 `tools/firestore.rules` 貼到 Firebase console 發布；管理員頁「設定檢查」建 4 個新排行榜的複合索引（score 降冪＋elapsed 升冪）。
+- 圖片檔名：school: start/chat/classroom/form/office/end_good/result；ubike: start/app/station/seat/road/light/end_good/result（另有 tap/pull/dock 等，缺圖時顯示 emoji）；bus: start/stop/board/hail/reader/driver/inside/end_good/result；barber: start/phone/door/chair/wash/mirror/counter/end_good/result。
+- 台詞和拼音是第一版，需要 Ben 審。
