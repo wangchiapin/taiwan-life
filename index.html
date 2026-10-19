@@ -7,7 +7,7 @@
 <style>
   :root { --ink:#24202e; --bg:#2b3a2e; --card:#fffdf6; --line:#d9d2bd; --accent:#cf3a24; --muted:#6b6478; --gold:#f2b632; }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; }
+  html, body { margin: 0; min-height: 100%; }
   body { background: var(--bg); color: var(--ink); font-family: 'Noto Sans TC','Segoe UI',sans-serif; display: flex; flex-direction: column; align-items: center; overscroll-behavior: none; }
   button { font: inherit; cursor: pointer; }
 
@@ -35,13 +35,13 @@
   .code-row button { border: 2px solid var(--ink); border-radius: 10px; background: #fff; padding: 0 12px; white-space: nowrap; }
 
   /* ── 地圖畫面 ── */
-  #hud { width: 100%; max-width: 960px; display: flex; align-items: center; gap: 8px; padding: 8px 10px; flex-wrap: wrap; color: #fff; }
-  #hud .title { font-weight: 700; font-size: 18px; margin-right: auto; }
+  #hud { width: 100%; max-width: 960px; display: flex; align-items: center; gap: 6px; padding: 4px 10px; flex-wrap: wrap; color: #fff; }
+  #hud .title { font-weight: 700; font-size: 17px; margin-right: auto; }
   #hud .chip { background: rgba(255,255,255,.15); border-radius: 999px; padding: 3px 12px; font-size: 14px; white-space: nowrap; }
   #hud button { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; padding: 3px 12px; font-size: 14px; }
-  #stage { width: 100%; max-width: 960px; padding: 0 10px; position: relative; }
+  #stage { width: 100%; max-width: 960px; padding: 0 6px; position: relative; }
   /* 星星進度條 */
-  #week { width: 100%; max-width: 960px; display: flex; align-items: center; gap: 10px; padding: 0 12px 8px; color: #fff; font-size: 14px; }
+  #week { width: 100%; max-width: 960px; display: flex; align-items: center; gap: 10px; padding: 0 12px 4px; color: #fff; font-size: 14px; }
   #week .bar { flex: 1; height: 14px; background: rgba(255,255,255,.15); border: 2px solid #1b1a22; border-radius: 999px; overflow: hidden; }
   #week .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #f2b632, #ffd66b); transition: width .6s; }
   #week b { white-space: nowrap; }
@@ -61,15 +61,10 @@
   #card button { border: 2px solid #1b1a22; border-radius: 999px; background: #fff; padding: 4px 14px; font-size: 15px; }
   canvas:focus { outline: none; }
   canvas { width: 100%; height: auto; display: block; image-rendering: pixelated; border: 4px solid #1b1a22; border-radius: 10px; background: #6bb05a; touch-action: manipulation; }
-  #help { color: #cfe3c8; font-size: 13px; padding: 6px 12px; text-align: center; }
+  #help { color: #cfe3c8; font-size: 12px; line-height: 1.3; padding: 3px 12px; text-align: center; }
   #toast { position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%) translateY(20px); background: #1b1a22; color: #fff; padding: 10px 18px; border-radius: 12px; opacity: 0; transition: .25s; pointer-events: none; z-index: 30; max-width: 90vw; text-align: center; white-space: pre-line; }
   #toast.show { opacity: 1; transform: translateX(-50%); }
 
-  /* 手機方向鍵 */
-  #pad { display: none; position: fixed; right: 14px; bottom: 14px; width: 150px; height: 150px; z-index: 5; }
-  #pad button { display: grid; place-items: center; color: #1b1a22; padding: 0; position: absolute; width: 50px; height: 50px; border-radius: 12px; border: 2px solid #1b1a22; background: rgba(255,253,246,.9); font-size: 22px; touch-action: none; }
-  #pad .u { left: 50px; top: 0; } #pad .d { left: 50px; top: 100px; } #pad .l { left: 0; top: 50px; } #pad .r { left: 100px; top: 50px; }
-  @media (pointer: coarse) { #pad { display: block; } #card { bottom: 176px; } }
 
   /* ── 遊戲視窗 ── */
   #overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: none; flex-direction: column; align-items: center; z-index: 20; }
@@ -125,7 +120,6 @@
   <div class="c-btns"><button class="c-say" type="button">🔊</button><button class="c-close" type="button">✕</button></div></div>
 <div id="help"></div>
 <div id="toast" role="status"></div>
-<div id="pad" aria-hidden="true"><button class="u" data-d="up"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" style="transform:rotate(0deg)"><path d="M12 5 L20 16 H4 Z" fill="currentColor"/></svg></button><button class="l" data-d="left"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" style="transform:rotate(-90deg)"><path d="M12 5 L20 16 H4 Z" fill="currentColor"/></svg></button><button class="r" data-d="right"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" style="transform:rotate(90deg)"><path d="M12 5 L20 16 H4 Z" fill="currentColor"/></svg></button><button class="d" data-d="down"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M12 5 L20 16 H4 Z" fill="currentColor"/></svg></button></div>
 
 <!-- ── 遊戲 ── -->
 <div id="overlay">
@@ -277,7 +271,7 @@ const BUILD_SLOTS = [
   { x: 1, y: 36 }, { x: 5, y: 36 }, { x: 12, y: 36 }, { x: 16, y: 36 }
 ];
 const COLS = 20, ROWS = 42, T = 32;
-const VIEW_ROWS = 14;                     // 畫面一次看到的列數（畫面跟著玩家上下捲動）
+let VIEW_ROWS = 14;                       // 畫面一次看到的列數（會依螢幕高度自動調整；畫面跟著玩家上下捲動）
 const ROAD_ROWS = [5, 6, 19, 20, 33, 34], ROAD_COLS = [9, 10];
 const SIDEWALK_ROWS = [4, 7, 11, 18, 21, 25, 32, 35, 39];
 const CENTER_ROWS = [5, 19, 33];              // 橫向馬路畫黃色中線的那一列
@@ -446,7 +440,7 @@ const VEHICLES = [
   { axis: 'h', lane: 33, dir: -1, pos: 420, speed: 60, kind: 'scooter', color: '#2fb5a3', idle: 2 },
   { axis: 'h', lane: 34, dir: 1, pos: 200, speed: 55, kind: 'car', color: '#d95b5b', idle: 4 }
 ].map(v => ({ idle: 0, ...v, half: v.kind === 'car' ? 22 : 13, wait: 0 }));
-const W = COLS * T, H = ROWS * T, VH = VIEW_ROWS * T;
+const W = COLS * T, H = ROWS * T; let VH = VIEW_ROWS * T;
 /* 路口：直的馬路（第 9、10 行）和每條橫向馬路交叉的地方，橫向和直向的車不能同時在裡面 */
 const XBOX = [9 * T, 11 * T];
 const CROSSINGS = [[5, 6], [19, 20], [33, 34]].map(r => ({ rows: r, box: [r[0] * T, (r[1] + 1) * T] }));
@@ -1022,7 +1016,9 @@ function updateHud() {
   document.getElementById('wk-fill').style.width = (stars / maxStars * 100) + '%';
   document.getElementById('btn-reset').textContent = X('↻ Borrar progreso', '↻ Reset progress');
   document.getElementById('ov-close').textContent = '✕ ' + X('Salir', 'Exit');
-  document.getElementById('help').textContent = X('Flechas / WASD para caminar · toca un edificio para ir a su puerta · toca a una persona para ver pinyin y traducción · si ves un ❗, acércate para ayudar', 'Arrow keys / WASD to walk · tap a building to go to its door · tap a speech bubble for pinyin and translation · if you see a ❗, walk next to it to help');
+  const touch = matchMedia('(pointer: coarse)').matches;
+  document.getElementById('help').textContent = touch ? X('Toca un edificio para ir a su puerta · toca a una persona para ver pinyin y traducción · si ves un ❗, acércate', 'Tap a building to go to its door · tap a person for pinyin and translation · if you see a ❗, walk next to it') : X('Flechas / WASD para caminar · toca un edificio para ir a su puerta · toca a una persona para ver pinyin y traducción · si ves un ❗, acércate para ayudar', 'Arrow keys / WASD to walk · tap a building to go to its door · tap a speech bubble for pinyin and translation · if you see a ❗, walk next to it to help');
+  fitView();
 }
 function applyLang() {
   document.querySelectorAll('[data-es]').forEach(el => { el.textContent = X(el.dataset.es, el.dataset.en); });
@@ -1077,19 +1073,27 @@ addEventListener('keydown', e => {
   if (e.key === 'Escape') card.hidden = true;
 });
 addEventListener('keyup', e => { const d = KEYMAP[e.key]; if (d && P.held === d) P.held = null; });
-document.querySelectorAll('#pad button').forEach(b => {
-  b.addEventListener('pointerdown', e => { e.preventDefault(); P.held = b.dataset.d; P.path = []; });
-  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, () => { if (P.held === b.dataset.d) P.held = null; }));
-});
 cv.addEventListener('pointerdown', e => {
   if (current) return;
   const r = cv.getBoundingClientRect();
   goTo(Math.floor((e.clientX - r.left) / r.width * COLS), Math.floor(((e.clientY - r.top) / r.height * VH + camY) / T));
 });
 
+/* 地圖鋪滿整個螢幕：依螢幕高度算能看到幾列（建築大小不變，只是看到更多街道） */
+function fitView() {
+  const scale = (cv.clientWidth - 8) / W; if (!(scale > 0)) return;
+  const top = cv.getBoundingClientRect().top + scrollY, helpH = document.getElementById('help').offsetHeight;
+  const avail = innerHeight - top - helpH - 20;
+  const rows = Math.max(10, Math.min(ROWS, Math.floor(avail / (T * scale))));
+  if (rows === VIEW_ROWS && cv.height === rows * T) return;
+  VIEW_ROWS = rows; VH = rows * T; cv.height = VH; g.imageSmoothingEnabled = false; camSnap = true;
+}
+addEventListener('resize', () => { fitView(); });
+addEventListener('orientationchange', () => setTimeout(fitView, 200));
 respawnEvent(P.x, P.y);
 applyLang();
-try { document.fonts.ready.then(bakeStatic); } catch (e) {}
+try { document.fonts.ready.then(() => { bakeStatic(); fitView(); }); } catch (e) {}
+fitView();
 // 已經有名字（在清單頁或上次輸入過）：直接進地圖；點 👤 可以改
 if (S.name) {
   document.getElementById('intro').style.display = 'none';
