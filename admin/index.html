@@ -298,7 +298,10 @@ function switchShell() {
   return `<h2 style="margin-top:0">地圖開關・遊戲連結</h2>
     <p class="muted">「開啟」＝玩家在地圖上可以進去；「維修中」＝房子釘木板、進不去。按了馬上存，玩家重新整理地圖就會看到。舊的遊戲一直是開啟，不用設定。<br>
     「試玩」會直接開那個遊戲，不管地圖是開啟還是維修中，也不會經過地圖。</p>
-    <div class="panel"><table><tbody>${SCENES.map(([id]) => `<tr><td>${esc(scName(id))}</td>
+    <div class="panel"><table><tbody>
+      <tr><td>🗺️ 地圖（所有遊戲的入口）</td><td><span class="muted">玩家看到的地圖</span></td>
+      <td><a class="btn small" href="${new URL('../', location.href).href}" target="_blank" rel="noopener">開啟地圖 ↗</a></td></tr>
+      ${SCENES.map(([id]) => `<tr><td>${esc(scName(id))}</td>
       <td>${GATED.includes(id)
         ? `<select data-sw="${id}" id="sw-${id}"><option value="0">🚧 維修中</option><option value="1">✅ 開啟</option></select> <span class="muted" id="swm-${id}"></span>`
         : '<span class="muted">一直開啟</span>'}</td>
