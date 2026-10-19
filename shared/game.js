@@ -46,18 +46,70 @@ if (EMBED && QS.get('name')) document.body.classList.add('embed-boot');
    設定：中文字體（繁／簡）、說明語言（西／英）
    遊戲內部一律用繁體判斷答案，只在顯示時轉成簡體；拼音一律用台灣讀音（由繁體算出）
 ══════════════════════════════════════ */
-const Settings = { script: 'trad', lang: 'es' };
-try {
-  const saved = JSON.parse(localStorage.getItem(GAME.settingsKey) || '{}');
-  if (saved.script === 'simp') Settings.script = 'simp';
-  if (saved.lang === 'en') Settings.lang = 'en';
-} catch (e) {}
-(() => {   // 從「重新開始」回來時，沿用這一局的設定
+/* 共用設定：和小狗找寶藏等所有遊戲同一份（localStorage 的 hanziGames.settings）；舊的各遊戲設定第一次會搬過來 */
+const SETTINGS_KEY = 'hanziGames.settings';
+const SET_OPTS = { script:['trad','simp'], lang:['es','en','zh'], phon:['pinyin','zhuyin','both','off'], rate:['slow','normal','fast'] };
+const RATE_VALUE = { slow:0.45, normal:0.65, fast:0.85 };
+const Settings = { script: 'trad', lang: 'es', phon: 'pinyin', rate: 'normal' };
+function readSettings() {
+  let saved = null, firstRun = false;
+  try { saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null'); } catch (e) {}
+  if (saved && typeof saved === 'object') {
+    Object.keys(SET_OPTS).forEach(k => { if (SET_OPTS[k].includes(saved[k])) Settings[k] = saved[k]; });
+  } else {
+    firstRun = true;
+    try {
+      const old = JSON.parse(localStorage.getItem(GAME.settingsKey) || 'null');
+      if (old && old.script === 'simp') Settings.script = 'simp';
+      if (old && old.lang === 'en') Settings.lang = 'en';
+    } catch (e) {}
+  }
+  return firstRun;
+}
+function saveSettings() {
+  try {
+    let cur = {};
+    try { cur = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') || {}; } catch (e) {}
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(Object.assign(cur, { v: 1, script: Settings.script, lang: Settings.lang, phon: Settings.phon, rate: Settings.rate })));
+  } catch (e) {}
+}
+if (readSettings()) saveSettings();
+(() => {   // 從「重新開始」或地圖進來時，沿用這一局的字體與語言
   const q = new URLSearchParams(location.search);
   if (q.get('s') === 'simp' || q.get('s') === 'trad') Settings.script = q.get('s');
-  if (q.get('l') === 'es' || q.get('l') === 'en') Settings.lang = q.get('l');
+  if (SET_OPTS.lang.includes(q.get('l'))) Settings.lang = q.get('l');
 })();
-const X = (es, en) => Settings.lang === 'en' ? en : es;     // 依語言選西文或英文
+const ONLYZH = () => Settings.lang === 'zh';
+const X = (es, en) => Settings.lang === 'zh' ? '' : (Settings.lang === 'en' ? en : es);     // 依語言選西文或英文；只有中文時是空字串
+/* 拼音 → 注音（台灣讀音；和小狗找寶藏同一份轉換） */
+const ZY=(function(){
+  var INI={b:'ㄅ',p:'ㄆ',m:'ㄇ',f:'ㄈ',d:'ㄉ',t:'ㄊ',n:'ㄋ',l:'ㄌ',g:'ㄍ',k:'ㄎ',h:'ㄏ',j:'ㄐ',q:'ㄑ',x:'ㄒ',zh:'ㄓ',ch:'ㄔ',sh:'ㄕ',r:'ㄖ',z:'ㄗ',c:'ㄘ',s:'ㄙ'};
+  var FIN={a:'ㄚ',o:'ㄛ',e:'ㄜ',ê:'ㄝ',ai:'ㄞ',ei:'ㄟ',ao:'ㄠ',ou:'ㄡ',an:'ㄢ',en:'ㄣ',ang:'ㄤ',eng:'ㄥ',er:'ㄦ',
+    i:'ㄧ',ia:'ㄧㄚ',io:'ㄧㄛ',ie:'ㄧㄝ',iao:'ㄧㄠ',iu:'ㄧㄡ',iou:'ㄧㄡ',ian:'ㄧㄢ',in:'ㄧㄣ',iang:'ㄧㄤ',ing:'ㄧㄥ',
+    u:'ㄨ',ua:'ㄨㄚ',uo:'ㄨㄛ',uai:'ㄨㄞ',ui:'ㄨㄟ',uei:'ㄨㄟ',uan:'ㄨㄢ',un:'ㄨㄣ',uen:'ㄨㄣ',uang:'ㄨㄤ',ong:'ㄨㄥ',ueng:'ㄨㄥ',
+    v:'ㄩ',ve:'ㄩㄝ',van:'ㄩㄢ',vn:'ㄩㄣ',iong:'ㄩㄥ'};
+  var MARK=['','','ˊ','ˇ','ˋ'];
+  function one(syl){
+    var s=syl.normalize('NFD'),tone=5;
+    if(/̄/.test(s))tone=1;else if(/́/.test(s))tone=2;else if(/̌/.test(s))tone=3;else if(/̀/.test(s))tone=4;
+    s=s.replace(/ü/g,'v').replace(/ü/g,'v').replace(/Ü/g,'v').replace(/[̀-ͯ]/g,'').toLowerCase();
+    if(!/^[a-zê]+$/.test(s))return syl;
+    var ini='',rest=s,m;
+    if(s==='n'||s==='m'){var zz=s==='n'?'ㄣ':'ㄇㄨ';return tone===5?'˙'+zz:zz+MARK[tone];}
+    if(s==='er'||s==='r'){rest='er';}
+    else if((m=s.match(/^(zh|ch|sh|[bpmfdtnlgkhjqxrzcs])/))){ini=m[1];rest=s.slice(ini.length);}
+    else if(s[0]==='y'){rest=s.slice(1);if(/^u/.test(rest))rest=rest.replace(/^u/,'v');else if(!(rest==='i'||rest==='in'||rest==='ing'))rest='i'+rest;}
+    else if(s[0]==='w'){rest=s.slice(1);rest=(rest==='u')?'u':'u'+rest;}
+    if(ini&&/^[jqx]$/.test(ini))rest=rest.replace(/^u/,'v');
+    if(/^(zh|ch|sh|r|z|c|s)$/.test(ini)&&rest==='i')rest='';
+    var f=rest===''?'':FIN[rest];
+    if(f===undefined)return syl;
+    var z=(ini?INI[ini]:'')+f;
+    return tone===5?'˙'+z:z+MARK[tone];
+  }
+  function conv(py){return String(py||'').trim().split(/\s+/).filter(Boolean).map(one).join(' ');}
+  return {one:one,conv:conv};
+})();
 let _t2s = null;                                            // 繁→簡轉換器（選簡體時才載入）
 const Z = s => (Settings.script === 'simp' && _t2s) ? _t2s(String(s)) : String(s);
 function loadT2S() {
@@ -70,33 +122,61 @@ function loadT2S() {
     document.head.appendChild(sc);
   });
 }
-/* 登入畫面以外的文字，一出現就轉成簡體（逐行轉換，保留詞的上下文） */
+/* 登入畫面以外的文字，一出現就轉成簡體（逐行轉換，保留詞的上下文）；改回繁體時用記下來的原文還原 */
+const _orig = new WeakMap(), _out = new WeakMap();
 function convertNode(root) {
-  if (Settings.script !== 'simp' || !_t2s) return;
+  const simp = Settings.script === 'simp' && _t2s;
   const walk = n => {
     if (n.nodeType === 3) {
-      if (!/[一-鿿]/.test(n.nodeValue)) return;
       const el = n.parentElement;
-      if (!el || el.closest('#login-screen, script, style, rt')) return;
-      const v = _t2s(n.nodeValue);
+      if (!el || el.closest('#login-screen, script, style, rt, #set-ov')) return;
+      if (_out.has(n) && _out.get(n) === n.nodeValue) {           // 這個節點還是我們轉過的樣子
+        const o = _orig.get(n);
+        const v = simp ? _t2s(o) : o;
+        if (v !== n.nodeValue) { n.nodeValue = v; _out.set(n, v); }
+        return;
+      }
+      if (!/[一-鿿]/.test(n.nodeValue)) return;
+      _orig.set(n, n.nodeValue);
+      const v = simp ? _t2s(n.nodeValue) : n.nodeValue;
+      _out.set(n, v);
       if (v !== n.nodeValue) n.nodeValue = v;
+    } else if (n.nodeType === 1) n.childNodes.forEach(walk);
+  };
+  walk(root);
+}
+/* 只有中文時，拿掉因為少了翻譯而留在行尾／行首的 ·、｜、/ */
+function cleanZh(root) {
+  if (!ONLYZH() || !root) return;
+  const walk = n => {
+    if (n.nodeType === 3) {
+      const el = n.parentElement;
+      if (!el || el.closest('script, style, rt, #set-ov')) return;
+      const v = n.nodeValue.replace(/\s*[·｜|\/]\s*$/, '').replace(/^\s*[·｜|]\s*/, '');
+      if (v !== n.nodeValue && /\S/.test(v)) n.nodeValue = v;
     } else if (n.nodeType === 1) n.childNodes.forEach(walk);
   };
   walk(root);
 }
 const simpObserver = new MutationObserver(muts => {
   muts.forEach(m => {
-    if (m.type === 'characterData') convertNode(m.target);
-    else m.addedNodes.forEach(convertNode);
+    if (m.type === 'characterData') { convertNode(m.target); }
+    else m.addedNodes.forEach(n => { convertNode(n); cleanZh(n); });
   });
 });
 function applyLang() {
   document.querySelectorAll('[data-es]').forEach(el => {
-    el.textContent = (el.dataset.zh ? el.dataset.zh + ' ' : '') + el.dataset[Settings.lang];
+    el.textContent = ONLYZH() ? (el.dataset.zh || '') : (el.dataset.zh ? el.dataset.zh + ' ' : '') + el.dataset[Settings.lang];
   });
+  document.documentElement.dataset.ui = Settings.lang;
+  const so = document.getElementById('set-open');
+  if (so) so.textContent = '⚙️ ' + Z('設定') + (ONLYZH() ? '' : ' · ' + X('Ajustes', 'Settings'));
+  const nameLab = document.querySelector('label[for="player-name-input"]');
+  if (nameLab && nameLab.firstChild && nameLab.firstChild.nodeType === 3) {
+    if (!nameLab.dataset.o) nameLab.dataset.o = nameLab.firstChild.nodeValue;
+    nameLab.firstChild.nodeValue = ONLYZH() ? nameLab.dataset.o.replace(/\s*\/\s*$/, '') : nameLab.dataset.o;
+  }
   document.documentElement.lang = Settings.script === 'simp' ? 'zh-Hans' : 'zh-Hant';
-  document.querySelectorAll('[data-script]').forEach(b => b.setAttribute('aria-pressed', b.dataset.script === Settings.script));
-  document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === Settings.lang));
   convertLogin();
 }
 /* 開始畫面：選了简体就馬上轉換，按回繁體就換回原文（「繁體｜简体」按鈕本身不轉） */
@@ -108,14 +188,29 @@ function convertLogin() {
       const o = _loginOrig.get(n);
       const v = (Settings.script === 'simp' && _t2s) ? _t2s(o) : o;
       if (v !== n.nodeValue) n.nodeValue = v;
-    } else if (n.nodeType === 1 && !n.hasAttribute('data-script')) n.childNodes.forEach(walk);
+    } else if (n.nodeType === 1 && !n.closest('#set-ov, #set-open')) n.childNodes.forEach(walk);
   };
   walk(document.getElementById('login-screen'));
+  cleanZh(document.getElementById('login-screen'));
   const inp = document.getElementById('player-name-input');
   if (!inp.dataset.ph) inp.dataset.ph = inp.placeholder;
   inp.placeholder = (Settings.script === 'simp' && _t2s) ? _t2s(inp.dataset.ph) : inp.dataset.ph;
 }
-function saveSettings() { try { localStorage.setItem(GAME.settingsKey, JSON.stringify(Settings)); } catch (e) {} }
+/* 一個音節的拼音／注音／兩者（放在 <rt> 裡）；phon = off 時回傳空字串 */
+function phInner(p) {
+  if (!p || Settings.phon === 'off') return '';
+  const py = esc(p), zy = esc(ZY.one(p));
+  if (Settings.phon === 'zhuyin') return zy;
+  if (Settings.phon === 'both') return `${py} ${zy}`;
+  return py;
+}
+/* 一個詞的拼音／注音（單字表用） */
+function phLine(zh) {
+  if (Settings.phon === 'off') return '';
+  const py = toPinyin(zh, false), zy = ZY.conv(py);
+  return Settings.phon === 'zhuyin' ? zy : Settings.phon === 'both' ? py + '　' + zy : py;
+}
+
 /* ══════════════════════════════════════
    翻譯小視窗：可拖曳、可關閉，選了選項就全部關掉
 ══════════════════════════════════════ */
@@ -277,7 +372,7 @@ const Speech = {
     u.lang = v ? v.lang : 'zh-TW';
     if (v) u.voice = v;
     u.pitch = useMale ? role.malePitch : (role.pitch || 1);
-    u.rate = 0.9;
+    u.rate = RATE_VALUE[Settings.rate];
     if (btn) { btn.classList.add('speaking'); this._btn = btn; }
     u.onend = u.onerror = () => { Music.duck(false); if (btn) btn.classList.remove('speaking'); };
     Music.duck(true);
@@ -310,8 +405,7 @@ const Vocab = {
     document.getElementById('vocab-tab').hidden = !list.length;
     document.getElementById('side-tabs').hidden = false;
     document.getElementById('vocab-list').innerHTML = list.map(([zh, es, en]) => {
-      const py = toPinyin(zh, false);
-      return `<li><div class="v-word"><span class="v-zh">${esc(Z(zh))}</span>${spkBtn(zh, '朗讀')}</div><div class="v-py">${esc(py)}</div>
+      return `<li><div class="v-word"><span class="v-zh">${esc(Z(zh))}</span>${spkBtn(zh, '朗讀')}</div><div class="v-py">${esc(phLine(zh))}</div>
         <div class="v-tr">${esc(X(es, en))}</div></li>`;
     }).join('');
     document.querySelectorAll('#vocab-list [data-spk]').forEach(btn => { btn.onclick = () => Speech.speak(btn.dataset.spk, btn); });
@@ -360,7 +454,7 @@ function startGame() {
   }
   if (Settings.script === 'simp' && !_t2s) { loadT2S().then(() => { if (!_t2s) Settings.script = 'trad'; startGame(); }); return; }
   saveSettings(); applyLang();
-  if (Settings.script === 'simp') { simpObserver.observe(document.body, { childList: true, subtree: true, characterData: true }); convertNode(document.body); }
+  simpObserver.observe(document.body, { childList: true, subtree: true, characterData: true }); convertNode(document.body); cleanZh(document.body);
   Game.playerName = name;
   Game.setup();
   document.getElementById('player-badge').textContent = '玩家：' + name;
@@ -371,11 +465,6 @@ function startGame() {
   Game.render();
 }
 document.getElementById('player-name-input').addEventListener('keydown', e => { if (e.key === 'Enter') startGame(); });
-document.querySelectorAll('[data-script]').forEach(b => b.onclick = () => {
-  Settings.script = b.dataset.script; applyLang();
-  if (Settings.script === 'simp' && !_t2s) loadT2S().then(applyLang);
-});
-document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { Settings.lang = b.dataset.lang; applyLang(); });
 applyLang();
 if (Settings.script === 'simp' && !_t2s) loadT2S().then(applyLang);   // 上次選了简体：開始畫面也先轉好
 
@@ -484,12 +573,7 @@ const GameCore = {
     clearTimeout(this._toastTimer);
     this._toastTimer = setTimeout(() => t.classList.remove('show'), 3600);
   },
-  togglePinyin() {
-    this.showPinyin = !this.showPinyin;
-    document.getElementById('btn-pinyin').setAttribute('aria-pressed', this.showPinyin);
-    this.render();
-    if (Hints.open) Hints.render();
-  },
+  togglePinyin() { SetUI.open(); },
   toggleList() {
     this.showList = !this.showList;
     document.getElementById('btn-list').setAttribute('aria-pressed', this.showList);
@@ -502,7 +586,11 @@ const GameCore = {
       const py = toPinyin(seg, true);                 // 台灣讀音由繁體算
       const shown = [...Z(seg)], orig = [...seg];
       const chars = shown.length === orig.length ? shown : orig;
-      return chars.map((c, i) => `<ruby>${c}<rt>${py[i] || ''}</rt></ruby>`).join('');
+      return chars.map((c, i) => {
+        const p = py[i] || '';
+        if (Settings.phon === 'both' && p) return `<ruby class="r2"><ruby class="r-in">${c}<rt>${esc(ZY.one(p))}</rt></ruby><rt>${esc(p)}</rt></ruby>`;   // 拼音在上、注音在下
+        return `<ruby>${c}<rt>${phInner(p)}</rt></ruby>`;
+      }).join('');
     }).join('');
   },
   missing: new Set(),
@@ -538,8 +626,92 @@ function defineGame(own) {
   const g = {};
   Object.defineProperties(g, Object.getOwnPropertyDescriptors(GameCore));
   Object.defineProperties(g, Object.getOwnPropertyDescriptors(own));
+  // 拼音／注音要不要顯示，一律看共用設定（各遊戲原本的 showPinyin: false 不再使用）
+  Object.defineProperty(g, 'showPinyin', { get: () => Settings.phon !== 'off', set() {}, configurable: true });
   return g;
 }
+
+
+/* ══════════════════════════════════════
+   ⚙️ 設定：字體、語言、拼音／注音、語速（和小狗找寶藏同一組選項，全部遊戲共用）
+══════════════════════════════════════ */
+const SetUI = {
+  T: {
+    title: ['設定', 'Ajustes', 'Settings'], script: ['字體', 'Caracteres', 'Characters'], lang: ['語言', 'Idioma', 'Language'],
+    phon: ['拼音／注音', 'Pinyin / Zhuyin', 'Pinyin / Zhuyin'], rate: ['語速', 'Velocidad de voz', 'Voice speed'],
+    pinyin: ['拼音', 'Pinyin', 'Pinyin'], zhuyin: ['注音', 'Zhuyin', 'Zhuyin'], both: ['兩者', 'Ambos', 'Both'], off: ['關閉', 'Ninguno', 'Off'],
+    slow: ['慢', 'Lento', 'Slow'], normal: ['正常', 'Normal', 'Normal'], fast: ['快', 'Rápido', 'Fast'], done: ['完成', 'Listo', 'Done']
+  },
+  tx(k) { const v = this.T[k]; const sub = ONLYZH() ? '' : (Settings.lang === 'en' ? v[2] : v[1]); return esc(Z(v[0])) + (sub ? `<small>${esc(sub)}</small>` : ''); },
+  opt(label, on, k, v) { return `<button type="button" class="set-opt${on ? ' on' : ''}" data-k="${k}" data-v="${v}">${label}</button>`; },
+  draw() {
+    const o = document.getElementById('set-ov'), S = Settings;
+    o.innerHTML = `<div class="set-card" role="dialog" aria-label="設定">
+      <h2>⚙️ ${esc(Z(this.T.title[0]))}${ONLYZH() ? '' : ' · ' + esc(X(this.T.title[1], this.T.title[2]))}</h2>
+      <div class="set-group"><h3>${this.tx('script')}</h3><div class="set-opts">${this.opt('繁體', S.script === 'trad', 'script', 'trad')}${this.opt('简体', S.script === 'simp', 'script', 'simp')}</div></div>
+      <div class="set-group"><h3>${this.tx('lang')}</h3><div class="set-opts">${this.opt('中文＋<small>Español</small>', S.lang === 'es', 'lang', 'es')}${this.opt('中文＋<small>English</small>', S.lang === 'en', 'lang', 'en')}${this.opt(esc(Z('只有中文')), S.lang === 'zh', 'lang', 'zh')}</div></div>
+      <div class="set-group"><h3>${this.tx('phon')}</h3><div class="set-opts two">${['pinyin', 'zhuyin', 'both', 'off'].map(v => this.opt(this.tx(v), S.phon === v, 'phon', v)).join('')}</div></div>
+      <div class="set-group"><h3>${this.tx('rate')}</h3><div class="set-opts">${['slow', 'normal', 'fast'].map(v => this.opt(this.tx(v), S.rate === v, 'rate', v)).join('')}</div></div>
+      <button type="button" class="set-done" id="set-done">${esc(Z(this.T.done[0]))}${ONLYZH() ? '' : ' · ' + esc(X(this.T.done[1], this.T.done[2]))}</button></div>`;
+    o.querySelectorAll('.set-opt').forEach(b => b.onclick = () => this.set(b.dataset.k, b.dataset.v));
+    document.getElementById('set-done').onclick = () => this.close();
+  },
+  open() { this.draw(); document.getElementById('set-ov').classList.add('show'); },
+  close() { document.getElementById('set-ov').classList.remove('show'); },
+  set(k, v) {
+    if (!SET_OPTS[k] || !SET_OPTS[k].includes(v)) return;
+    Settings[k] = v; saveSettings();
+    const go = () => { this.refresh(); if (k === 'rate' && Speech.ok) Speech.speak('你好，歡迎光臨'); };
+    if (k === 'script' && v === 'simp' && !_t2s) loadT2S().then(go); else go();
+  },
+  refresh() {   // 把目前設定套到整個畫面
+    applyLang();
+    convertNode(document.body);
+    if (document.getElementById('game-window').classList.contains('active')) { try { Game.render(); if (Hints.open) Hints.render(); Vocab.render(Game.state); if (Log.open) Log.render(); } catch (e) {} }
+    cleanZh(document.body);
+    if (document.getElementById('set-ov').classList.contains('show')) this.draw();
+  },
+  init() {
+    const st = document.createElement('style');
+    st.textContent = `
+      .set-gear { font: inherit; cursor: pointer; }
+      #set-open { margin: 0 auto; padding: 8px 18px; border-radius: 999px; border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); font: inherit; font-size: 15px; }
+      #set-ov { position: fixed; inset: 0; z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(46,36,28,.55); overflow-y: auto; }
+      #set-ov.show { display: flex; }
+      .set-card { width: 100%; max-width: 380px; margin: auto; background: var(--paper, #fff); color: var(--ink, #2B2620); border: 2px solid var(--ink, #2B2620); border-radius: 18px; padding: 18px 16px; text-align: center; }
+      .set-card h2 { margin: 0 0 10px; font-size: 20px; }
+      .set-group { margin: 12px 0; text-align: left; }
+      .set-group h3 { font-size: 13px; margin: 0 0 6px; }
+      .set-group h3 small { font-size: 11px; font-weight: 400; opacity: .7; } .set-group h3 small::before { content: " · "; }
+      .set-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+      .set-opt { flex: 1 1 0; min-width: 0; padding: 7px 8px; border-radius: 999px; border: 1.5px solid var(--ink, #2B2620); background: #fff; color: var(--ink, #2B2620); font: inherit; font-size: 14px; line-height: 1.25; cursor: pointer; }
+      .set-opt small { display: block; font-size: 10.5px; opacity: .8; }
+      .set-opts.two .set-opt { flex: 1 1 40%; }
+      .set-opt.on { background: var(--ink, #2B2620); color: #fff; font-weight: 700; }
+      .set-done { margin-top: 6px; padding: 10px 26px; border-radius: 999px; border: 0; background: var(--ink, #2B2620); color: #fff; font: inherit; font-size: 15px; cursor: pointer; }
+      ruby.r-in { ruby-position: under; } ruby.r2 { padding-bottom: 2px; }
+      html[data-ui="zh"] .subtitle, html[data-ui="zh"] .tr-btn:not(.spk), html[data-ui="zh"] .h-es:empty, html[data-ui="zh"] .fb-es:empty, html[data-ui="zh"] .l-es:empty, html[data-ui="zh"] .v-tr:empty { display: none; }`;
+    document.head.appendChild(st);
+    const ov = document.createElement('div'); ov.id = 'set-ov';
+    ov.addEventListener('click', e => { if (e.target === ov) this.close(); });
+    document.body.appendChild(ov);
+    // 遊戲裡的「看拼音」按鈕 → ⚙️ 設定
+    const pb = document.getElementById('btn-pinyin');
+    if (pb) { pb.removeAttribute('data-es'); pb.removeAttribute('data-en'); pb.removeAttribute('aria-pressed'); pb.textContent = '⚙️'; pb.title = '設定 · Ajustes'; pb.setAttribute('aria-label', '設定'); pb.onclick = () => this.open(); }
+    // 開始畫面的「繁體｜简体」「Español｜English」按鈕 → 一顆 ⚙️ 設定
+    const sg = document.querySelector('.seg-group');
+    if (sg) sg.innerHTML = '<button type="button" id="set-open">⚙️ 設定 · Ajustes</button>';
+    const so = document.getElementById('set-open');
+    if (so) so.onclick = () => this.open();
+    // 別的分頁（其他遊戲）改了共用設定 → 這裡跟著更新
+    window.addEventListener('storage', e => {
+      if (e.key !== SETTINGS_KEY) return;
+      readSettings();
+      if (Settings.script === 'simp' && !_t2s) loadT2S().then(() => this.refresh()); else this.refresh();
+    });
+  }
+};
+SetUI.init();
 
 /* 從「重新開始」或清單頁回來：直接用原本的名字開新的一局（遊戲最後呼叫） */
 function GameBoot() {

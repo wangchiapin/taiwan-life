@@ -54,6 +54,21 @@
   #card { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); width: min(420px, calc(100vw - 32px)); background: #fffdf6; border: 3px solid #1b1a22; border-radius: 16px; box-shadow: 4px 4px 0 #1b1a22; padding: 14px 16px; z-index: 15; }
   #card .c-who { font-size: 13px; color: #6b6478; font-weight: 700; }
   #card .c-zh { font-size: 24px; font-weight: 700; margin: 4px 0 2px; }
+  #set-open { padding: 8px 18px; border-radius: 999px; border: 1.5px solid #2B2620; background: #fff; color: #2B2620; font: inherit; font-size: 15px; cursor: pointer; }
+  #set-ov { position: fixed; inset: 0; z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(46,36,28,.55); overflow-y: auto; }
+  #set-ov.show { display: flex; }
+  .set-card { width: 100%; max-width: 380px; margin: auto; background: #fff; color: #2B2620; border: 2px solid #2B2620; border-radius: 18px; padding: 18px 16px; text-align: center; }
+  .set-card h2 { margin: 0 0 10px; font-size: 20px; }
+  .set-group { margin: 12px 0; text-align: left; }
+  .set-group h3 { font-size: 13px; margin: 0 0 6px; }
+  .set-group h3 small { font-size: 11px; font-weight: 400; opacity: .7; } .set-group h3 small::before { content: " · "; }
+  .set-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .set-opt { flex: 1 1 0; min-width: 0; padding: 7px 8px; border-radius: 999px; border: 1.5px solid #2B2620; background: #fff; color: #2B2620; font: inherit; font-size: 14px; line-height: 1.25; cursor: pointer; }
+  .set-opt small { display: block; font-size: 10.5px; opacity: .8; }
+  .set-opts.two .set-opt { flex: 1 1 40%; }
+  .set-opt.on { background: #2B2620; color: #fff; font-weight: 700; }
+  .set-done { margin-top: 6px; padding: 10px 26px; border-radius: 999px; border: 0; background: #2B2620; color: #fff; font: inherit; font-size: 15px; cursor: pointer; }
+  html[data-ui="zh"] .sub { display: none; }
   #card .c-py { font-size: 16px; color: #2f5fa7; }
   #card .c-tr { font-size: 15px; margin-top: 6px; }
   #card .c-hint { font-size: 13px; color: #cf3a24; margin-top: 6px; }
@@ -92,16 +107,7 @@
       <div class="err" id="code-err"></div>
       <p class="note" data-es="¿Usas otro dispositivo? Escribe tu código para recuperar tu nombre y tu progreso." data-en="On another device? Enter your code to get back your name and progress.">¿Usas otro dispositivo? Escribe tu código para recuperar tu nombre y tu progreso.</p>
     </details>
-    <div class="seg-row">
-      <div class="seg" role="group" aria-label="中文字體">
-        <button type="button" data-script="trad" aria-pressed="true">繁體</button>
-        <button type="button" data-script="simp" aria-pressed="false">简体</button>
-      </div>
-      <div class="seg" role="group" aria-label="Idioma / Language">
-        <button type="button" data-lang="es" aria-pressed="true">Español</button>
-        <button type="button" data-lang="en" aria-pressed="false">English</button>
-      </div>
-    </div>
+    <div class="seg-row"><button type="button" id="set-open">⚙️ 設定 · Ajustes</button></div>
     <button class="go" id="start">開始探索</button>
     <p class="note" data-es="Camina hasta la puerta de un lugar para empezar su misión. Teclas de flecha / WASD, o toca el mapa." data-en="Walk to a building's door to start its mission. Arrow keys / WASD, or tap the map.">Camina hasta la puerta de un lugar para empezar su misión. Teclas de flecha / WASD, o toca el mapa.</p>
   </div>
@@ -116,6 +122,7 @@
 </div>
 <div id="week"><span id="wk-label"></span><div class="bar"><i id="wk-fill"></i></div><b id="wk-num"></b></div>
 <div id="stage"><canvas id="cv" width="640" height="448" tabindex="0" aria-label="地圖 / Mapa"></canvas><button id="bubble" type="button" hidden></button></div>
+<div id="set-ov"></div>
 <div id="card" hidden role="dialog"><div class="c-who"></div><div class="c-zh"></div><div class="c-py"></div><div class="c-tr"></div><div class="c-hint"></div>
   <div class="c-btns"><button class="c-say" type="button">🔊</button><button class="c-close" type="button">✕</button></div></div>
 <div id="help"></div>
@@ -258,6 +265,7 @@ const COMING = [
   { id: 'site3',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 22, status: 'build' },
   { id: 'site4',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 23, status: 'build' }
 ];
+const ZHT = { '設定': '设置', '字體': '字体', '語言': '语言', '拼音／注音': '拼音／注音', '語速': '语速', '拼音': '拼音', '注音': '注音', '兩者': '两者', '關閉': '关闭', '慢': '慢', '正常': '正常', '快': '快', '完成': '完成', '只有中文': '只有中文' };
 const ZHS = { drinks: '饮料店', bakery: '面包店', clinic: '诊所', mrt: '捷运站', school: '学校', cinema: '电影院', market: '菜市场', airport: '机场', bus: '公车', barber: '理发店', parking: '停车场', icecream: '冰淇淋店', bookstore: '书店', elevator: '搭电梯', site1: '工地', site2: '工地', site3: '工地', site4: '工地' };
 /* 建築位置：每條橫向馬路上下各 4 個（3 格寬）。房子的門都在最下面一排，朝向下面的人行道
    0–7：第一條馬路（原本的地圖）；8–15：第二條馬路；16–23：第三條馬路
@@ -281,13 +289,33 @@ const CENTER_ROWS = [5, 19, 33];              // 橫向馬路畫黃色中線的�
 ══════════════════════════════════════ */
 const KEY = 'taiwan_map_v1';             // 地圖進度
 const PKEY = 'taiwan_player';            // 玩家資料（名字、字體、語言），和遊戲清單頁共用
-const S = { name: '', script: 'trad', lang: 'es', code: '', done: {} };
+const S = { name: '', script: 'trad', lang: 'es', phon: 'pinyin', rate: 'normal', code: '', done: {} };
+/* 共用設定：和小狗找寶藏、每個情境遊戲同一份（hanziGames.settings） */
+const SETTINGS_KEY = 'hanziGames.settings';
+const SET_OPTS = { script:['trad','simp'], lang:['es','en','zh'], phon:['pinyin','zhuyin','both','off'], rate:['slow','normal','fast'] };
+const RATE_VALUE = { slow:0.45, normal:0.65, fast:0.85 };
+function readShared() {
+  let sv = null;
+  try { sv = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null'); } catch (e) {}
+  if (sv && typeof sv === 'object') { Object.keys(SET_OPTS).forEach(k => { if (SET_OPTS[k].includes(sv[k])) S[k] = sv[k]; }); return true; }
+  return false;
+}
+function writeShared() {
+  try {
+    let cur = {};
+    try { cur = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') || {}; } catch (e) {}
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(Object.assign(cur, { v: 1, script: S.script, lang: S.lang, phon: S.phon, rate: S.rate })));
+  } catch (e) {}
+}
 function load() {
   try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
   try { const p = JSON.parse(localStorage.getItem(PKEY) || '{}'); if (p.name) S.name = p.name; if (p.script) S.script = p.script; if (p.lang) S.lang = p.lang; if (p.code) S.code = p.code; } catch (e) {}
+  if (!readShared()) writeShared();      // 第一次：把原本的設定寫成共用設定
+  if (!SET_OPTS.lang.includes(S.lang)) S.lang = 'es';
 }
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(PKEY, JSON.stringify({ name: S.name, script: S.script, lang: S.lang, code: S.code })); } catch (e) {}
+  writeShared();
 }
 /* ── 進度存到 Firebase：progress/<玩家代碼>，換裝置輸入代碼就能讀回 ── */
 function pushProgress() {
@@ -322,7 +350,35 @@ function pullProgress() {
     if (JSON.stringify(merged) !== JSON.stringify(d.done || {}) || d.name !== S.name) pushProgress();
   });
 }
-const X = (es, en) => S.lang === 'en' ? en : es;
+const X = (es, en) => S.lang === 'zh' ? '' : (S.lang === 'en' ? en : es);
+const ZY=(function(){
+  var INI={b:'ㄅ',p:'ㄆ',m:'ㄇ',f:'ㄈ',d:'ㄉ',t:'ㄊ',n:'ㄋ',l:'ㄌ',g:'ㄍ',k:'ㄎ',h:'ㄏ',j:'ㄐ',q:'ㄑ',x:'ㄒ',zh:'ㄓ',ch:'ㄔ',sh:'ㄕ',r:'ㄖ',z:'ㄗ',c:'ㄘ',s:'ㄙ'};
+  var FIN={a:'ㄚ',o:'ㄛ',e:'ㄜ',ê:'ㄝ',ai:'ㄞ',ei:'ㄟ',ao:'ㄠ',ou:'ㄡ',an:'ㄢ',en:'ㄣ',ang:'ㄤ',eng:'ㄥ',er:'ㄦ',
+    i:'ㄧ',ia:'ㄧㄚ',io:'ㄧㄛ',ie:'ㄧㄝ',iao:'ㄧㄠ',iu:'ㄧㄡ',iou:'ㄧㄡ',ian:'ㄧㄢ',in:'ㄧㄣ',iang:'ㄧㄤ',ing:'ㄧㄥ',
+    u:'ㄨ',ua:'ㄨㄚ',uo:'ㄨㄛ',uai:'ㄨㄞ',ui:'ㄨㄟ',uei:'ㄨㄟ',uan:'ㄨㄢ',un:'ㄨㄣ',uen:'ㄨㄣ',uang:'ㄨㄤ',ong:'ㄨㄥ',ueng:'ㄨㄥ',
+    v:'ㄩ',ve:'ㄩㄝ',van:'ㄩㄢ',vn:'ㄩㄣ',iong:'ㄩㄥ'};
+  var MARK=['','','ˊ','ˇ','ˋ'];
+  function one(syl){
+    var s=syl.normalize('NFD'),tone=5;
+    if(/̄/.test(s))tone=1;else if(/́/.test(s))tone=2;else if(/̌/.test(s))tone=3;else if(/̀/.test(s))tone=4;
+    s=s.replace(/ü/g,'v').replace(/ü/g,'v').replace(/Ü/g,'v').replace(/[̀-ͯ]/g,'').toLowerCase();
+    if(!/^[a-zê]+$/.test(s))return syl;
+    var ini='',rest=s,m;
+    if(s==='n'||s==='m'){var zz=s==='n'?'ㄣ':'ㄇㄨ';return tone===5?'˙'+zz:zz+MARK[tone];}
+    if(s==='er'||s==='r'){rest='er';}
+    else if((m=s.match(/^(zh|ch|sh|[bpmfdtnlgkhjqxrzcs])/))){ini=m[1];rest=s.slice(ini.length);}
+    else if(s[0]==='y'){rest=s.slice(1);if(/^u/.test(rest))rest=rest.replace(/^u/,'v');else if(!(rest==='i'||rest==='in'||rest==='ing'))rest='i'+rest;}
+    else if(s[0]==='w'){rest=s.slice(1);rest=(rest==='u')?'u':'u'+rest;}
+    if(ini&&/^[jqx]$/.test(ini))rest=rest.replace(/^u/,'v');
+    if(/^(zh|ch|sh|r|z|c|s)$/.test(ini)&&rest==='i')rest='';
+    var f=rest===''?'':FIN[rest];
+    if(f===undefined)return syl;
+    var z=(ini?INI[ini]:'')+f;
+    return tone===5?'˙'+z:z+MARK[tone];
+  }
+  function conv(py){return String(py||'').trim().split(/\s+/).filter(Boolean).map(one).join(' ');}
+  return {one:one,conv:conv};
+})();
 load();
 
 /* ══════════════════════════════════════
@@ -663,8 +719,9 @@ function openCard(s) {
   const w = WHO[s.who];
   card.querySelector('.c-who').textContent = (S.script === 'simp' ? w[1] : w[0]) + ' · ' + X(w[2], w[3]);
   card.querySelector('.c-zh').textContent = zhOf(s.line);
-  card.querySelector('.c-py').textContent = s.line[2];
+  card.querySelector('.c-py').textContent = S.phon === 'off' ? '' : S.phon === 'zhuyin' ? ZY.conv(s.line[2]) : S.phon === 'both' ? s.line[2] + '　' + ZY.conv(s.line[2]) : s.line[2];
   card.querySelector('.c-tr').textContent = X(s.line[3], s.line[4]);
+  card.querySelector('.c-tr').style.display = S.lang === 'zh' ? 'none' : '';
   card.querySelector('.c-hint').textContent = s.ev ? X('Acércate (a una casilla) para ayudar.', 'Walk next to them to help.') : '';
   card.dataset.say = s.line[0];
   card.hidden = false;
@@ -672,16 +729,17 @@ function openCard(s) {
 bub.addEventListener('pointerdown', e => { e.stopPropagation(); });
 bub.addEventListener('click', e => { e.stopPropagation(); openCard(bubNow); });
 card.querySelector('.c-close').onclick = () => { card.hidden = true; try { speechSynthesis.cancel(); } catch (e) {} };
-card.querySelector('.c-say').onclick = () => {
+function say(text) {
   try {
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(card.dataset.say.replace(/[（）()]/g, ''));
+    const u = new SpeechSynthesisUtterance(text.replace(/[（）()]/g, ''));
     const v = speechSynthesis.getVoices().find(v => /zh[-_]TW/i.test(v.lang)) || speechSynthesis.getVoices().find(v => /^zh/i.test(v.lang));
-    u.lang = v ? v.lang : 'zh-TW'; if (v) u.voice = v; u.rate = 0.9;
+    u.lang = v ? v.lang : 'zh-TW'; if (v) u.voice = v; u.rate = RATE_VALUE[S.rate];
     Music.duck(true); u.onend = u.onerror = () => Music.duck(false);
     speechSynthesis.speak(u);
   } catch (e) {}
-};
+}
+card.querySelector('.c-say').onclick = () => say(card.dataset.say);
 
 /* ══════════════════════════════════════
    玩家與移動
@@ -1020,14 +1078,68 @@ function updateHud() {
   document.getElementById('help').textContent = touch ? X('Toca un edificio para ir a su puerta · toca a una persona para ver pinyin y traducción · si ves un ❗, acércate', 'Tap a building to go to its door · tap a person for pinyin and translation · if you see a ❗, walk next to it') : X('Flechas / WASD para caminar · toca un edificio para ir a su puerta · toca a una persona para ver pinyin y traducción · si ves un ❗, acércate para ayudar', 'Arrow keys / WASD to walk · tap a building to go to its door · tap a speech bubble for pinyin and translation · if you see a ❗, walk next to it to help');
   fitView();
 }
+/* 只有中文時，拿掉因為少了翻譯而留在行尾的「 · 」；改回有翻譯時再還原 */
+const _zhOrig = new WeakMap();
+function cleanZh() {
+  const walk = n => {
+    if (n.nodeType === 3) {
+      if (!/[·｜|]\s*$/.test(_zhOrig.get(n) ?? n.nodeValue)) return;
+      if (!_zhOrig.has(n)) _zhOrig.set(n, n.nodeValue);
+      const o = _zhOrig.get(n);
+      const v = S.lang === 'zh' ? o.replace(/\s*[·｜|]\s*$/, '') : o;
+      if (v !== n.nodeValue) n.nodeValue = v;
+    } else if (n.nodeType === 1 && !/^(SCRIPT|STYLE)$/.test(n.tagName)) n.childNodes.forEach(walk);
+  };
+  walk(document.body);
+}
 function applyLang() {
   document.querySelectorAll('[data-es]').forEach(el => { el.textContent = X(el.dataset.es, el.dataset.en); });
-  document.querySelectorAll('[data-script]').forEach(b => b.setAttribute('aria-pressed', b.dataset.script === S.script));
-  document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === S.lang));
+  document.documentElement.dataset.ui = S.lang;
+  const nameLab = document.querySelector('label[for="name"]');
+  if (nameLab && nameLab.firstChild && nameLab.firstChild.nodeType === 3) {
+    if (!nameLab.dataset.o) nameLab.dataset.o = nameLab.firstChild.nodeValue;
+    nameLab.firstChild.nodeValue = S.lang === 'zh' ? nameLab.dataset.o.replace(/\s*\/\s*$/, '') : nameLab.dataset.o;
+  }
+  bub.dataset.k = '';
+  const so = document.getElementById('set-open');
+  if (so && typeof SetUI !== 'undefined') so.textContent = '⚙️ ' + SetUI.zh('設定') + (S.lang === 'zh' ? '' : ' · ' + X('Ajustes', 'Settings'));
   updateHud();
+  cleanZh();
 }
-document.querySelectorAll('[data-script]').forEach(b => b.onclick = () => { S.script = b.dataset.script; save(); applyLang(); });
-document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { S.lang = b.dataset.lang; save(); applyLang(); });
+/* ⚙️ 設定：字體、語言、拼音／注音、語速（和所有遊戲同一組） */
+const SetUI = {
+  T: {
+    title: ['設定', 'Ajustes', 'Settings'], script: ['字體', 'Caracteres', 'Characters'], lang: ['語言', 'Idioma', 'Language'],
+    phon: ['拼音／注音', 'Pinyin / Zhuyin', 'Pinyin / Zhuyin'], rate: ['語速', 'Velocidad de voz', 'Voice speed'],
+    pinyin: ['拼音', 'Pinyin', 'Pinyin'], zhuyin: ['注音', 'Zhuyin', 'Zhuyin'], both: ['兩者', 'Ambos', 'Both'], off: ['關閉', 'Ninguno', 'Off'],
+    slow: ['慢', 'Lento', 'Slow'], normal: ['正常', 'Normal', 'Normal'], fast: ['快', 'Rápido', 'Fast'], done: ['完成', 'Listo', 'Done']
+  },
+  zh(t) { return S.script === 'simp' ? (ZHT[t] || t) : t; },
+  tx(k) { const v = this.T[k], sub = S.lang === 'zh' ? '' : (S.lang === 'en' ? v[2] : v[1]); return this.zh(v[0]) + (sub ? '<small>' + sub + '</small>' : ''); },
+  opt(label, on, k, v) { return '<button type="button" class="set-opt' + (on ? ' on' : '') + '" data-k="' + k + '" data-v="' + v + '">' + label + '</button>'; },
+  draw() {
+    const o = document.getElementById('set-ov');
+    o.innerHTML = '<div class="set-card" role="dialog"><h2>⚙️ ' + this.zh('設定') + (S.lang === 'zh' ? '' : ' · ' + X('Ajustes', 'Settings')) + '</h2>' +
+      '<div class="set-group"><h3>' + this.tx('script') + '</h3><div class="set-opts">' + this.opt('繁體', S.script === 'trad', 'script', 'trad') + this.opt('简体', S.script === 'simp', 'script', 'simp') + '</div></div>' +
+      '<div class="set-group"><h3>' + this.tx('lang') + '</h3><div class="set-opts">' + this.opt('中文＋<small>Español</small>', S.lang === 'es', 'lang', 'es') + this.opt('中文＋<small>English</small>', S.lang === 'en', 'lang', 'en') + this.opt(this.zh('只有中文'), S.lang === 'zh', 'lang', 'zh') + '</div></div>' +
+      '<div class="set-group"><h3>' + this.tx('phon') + '</h3><div class="set-opts two">' + ['pinyin', 'zhuyin', 'both', 'off'].map(v => this.opt(this.tx(v), S.phon === v, 'phon', v)).join('') + '</div></div>' +
+      '<div class="set-group"><h3>' + this.tx('rate') + '</h3><div class="set-opts">' + ['slow', 'normal', 'fast'].map(v => this.opt(this.tx(v), S.rate === v, 'rate', v)).join('') + '</div></div>' +
+      '<button type="button" class="set-done" id="set-done">' + this.zh('完成') + (S.lang === 'zh' ? '' : ' · ' + X('Listo', 'Done')) + '</button></div>';
+    o.querySelectorAll('.set-opt').forEach(b => b.onclick = () => this.set(b.dataset.k, b.dataset.v));
+    document.getElementById('set-done').onclick = () => this.close();
+  },
+  open() { this.draw(); document.getElementById('set-ov').classList.add('show'); },
+  close() { document.getElementById('set-ov').classList.remove('show'); },
+  set(k, v) {
+    if (!SET_OPTS[k] || !SET_OPTS[k].includes(v)) return;
+    S[k] = v; save(); applyLang(); this.draw();
+    if (!card.hidden && bubNow) openCard(bubNow);
+    if (k === 'rate') say('你好，歡迎光臨');
+  }
+};
+document.getElementById('set-open').onclick = () => SetUI.open();
+document.getElementById('set-ov').addEventListener('click', e => { if (e.target.id === 'set-ov') SetUI.close(); });
+window.addEventListener('storage', e => { if (e.key === SETTINGS_KEY && readShared()) { applyLang(); if (document.getElementById('set-ov').classList.contains('show')) SetUI.draw(); } });
 document.getElementById('name').value = S.name || '';
 function begin() {
   const v = document.getElementById('name').value.trim();
