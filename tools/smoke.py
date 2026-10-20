@@ -46,7 +46,8 @@ EXTRA={'drinks': '''() => {
 }'''}
 TRANS=set()  # 每個遊戲額外的 oracle（覆蓋）
 def texts(page):
-    return page.evaluate("[...document.querySelectorAll('#options-area .opt')].map(b=>b.dataset.raw||b.innerText.replace(/\\n/g,''))")
+    # 拼音預設開啟時選項裡有 <rt>，先拿掉才對得上正解文字
+    return page.evaluate("[...document.querySelectorAll('#options-area .opt')].map(b=>{if(b.dataset.raw)return b.dataset.raw;const c=b.cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.innerText.replace(/\\n/g,'')})")
 def click_i(page,i): page.locator('#options-area .opt').nth(i).click()
 def play(page,g,mode,log):
     bad=set(); trans=0; steps=0; seen=[]

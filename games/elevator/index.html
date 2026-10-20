@@ -226,8 +226,8 @@
   </div>
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
-    Ami 住在公寓大樓。今天你要去她家，要搭電梯上樓。電梯裡有按鈕，還會遇到鄰居，要用客氣的話。<br>
-    <span data-es="Ami vive en un edificio de apartamentos. Hoy vas a su casa y tienes que subir en ascensor: hay botones que presionar y vecinos con quienes ser cortés." data-en="Ami lives in an apartment building. Today you visit her and take the elevator up. There are buttons to press and neighbors to be polite to.">Ami vive en un edificio de apartamentos. Hoy vas a su casa y tienes que subir en ascensor: hay botones que presionar y vecinos con quienes ser cortés.</span>
+    你今天要去Ami家，她住在一棟大樓，所以你要搭電梯上樓。搭電梯可能會遇到Ami的鄰居，說話的時候要客氣一點。<br>
+    <span data-es="Hoy vas a la casa de Ami. Ella vive en un edificio, así que tienes que subir en ascensor. En el ascensor puedes encontrarte con vecinos de Ami; sé cortés al hablar." data-en="Today you're going to Ami's home. She lives in a tall building, so you take the elevator up. You may meet Ami's neighbors in the elevator, so speak politely.">Hoy vas a la casa de Ami. Ella vive en un edificio, así que tienes que subir en ascensor. En el ascensor puedes encontrarte con vecinos de Ami; sé cortés al hablar.</span>
   </p>
 </div>
 
@@ -337,6 +337,7 @@ pinyinPro.customPinyin({
 });
 // 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
 pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+pinyinPro.customPinyin({ '著': 'zhe', '喔': 'ō', '啦': 'la', '關係': 'guān xi', '還順利': 'hái shùn lì' });
 
 /* ══════════════════════════════════════
    小工具
@@ -366,14 +367,14 @@ const WHO = { 'Ami': ['Ami', 'Ami'], '鄰居': ['El vecino', 'The neighbor'] };
 const SPEAKER_RE = /^(Ami|鄰居|我)：/;
 
 const VOCAB = {
-  START: [['電梯', 'ascensor', 'elevator'], ['樓', 'piso', 'floor'], ['公寓', 'edificio de apartamentos', 'apartment building'], ['鄰居', 'vecino(a)', 'neighbor']],
-  LOBBY: [['大廳', 'vestíbulo', 'lobby'], ['按鈕', 'botón', 'button'], ['往上', 'hacia arriba', 'up'], ['往下', 'hacia abajo', 'down']],
+  START: [['電梯', 'ascensor', 'elevator'], ['樓', 'piso', 'floor'], ['大樓', 'edificio', 'building'], ['住在', 'vivir en', 'live at']],
+  LOBBY: [['按', 'presionar', 'press'], ['哪一個', '¿cuál?', 'which one?'], ['往上', 'hacia arriba', 'up'], ['往下', 'hacia abajo', 'down']],
   WAIT: [['開門', 'abrir la puerta', 'open the door'], ['關門', 'cerrar la puerta', 'close the door'], ['等一下', 'espera un momento', 'wait a moment']],
-  FLOOR: [['樓', 'piso', 'floor'], ['按', 'presionar', 'press'], ['幾樓', '¿qué piso?', 'which floor?']],
+  FLOOR: [['樓', 'piso', 'floor'], ['按', 'presionar', 'press'], ['住在', 'vivir en', 'live at']],
   HELP: [['麻煩', 'por favor, molestar', 'please / trouble'], ['幫我', 'ayúdame a', 'help me'], ['不好意思', 'disculpa', 'sorry / excuse me']],
   STOP: [['到了', 'ya llegó', 'arrived'], ['慢走', 'que le vaya bien', 'take care (to someone leaving)'], ['再見', 'adiós', 'goodbye']],
   ARRIVE: [['借過', 'con permiso', 'excuse me (let me pass)'], ['不好意思', 'disculpa', 'excuse me'], ['到了', 'ya llegó', 'arrived']],
-  END: [['按電鈴', 'tocar el timbre', 'ring the doorbell'], ['歡迎', 'bienvenido', 'welcome']],
+  END: [['電鈴', 'timbre', 'doorbell'], ['歡迎', 'bienvenido', 'welcome']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 const STAGE = { LOBBY: ['大廳', 'vestíbulo', 'lobby'], WAIT: ['等人', 'esperar', 'waiting'], FLOOR: ['按樓層', 'elegir piso', 'choosing a floor'], HELP: ['幫忙', 'ayudar', 'helping'], STOP: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], ARRIVE: ['出電梯', 'salir', 'exiting'] };
@@ -381,7 +382,7 @@ const NEXT_LABEL = { LOBBY: '走到電梯前', WAIT: '電梯來了', FLOOR: '走
 
 const PLACES = {
   phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
-  shop: ['🏢', '公寓大樓', 'Edificio', 'Apartment building', '']
+  shop: ['🏢', '大樓', 'Edificio', 'Building', '']
 };
 const FL = n => n + '樓';
 
@@ -469,8 +470,7 @@ const Game = defineGame({
   amiLines() {
     const N = this.N, t = this.task;
     return [
-      L(`Ami：${N}，我住在${t.n}樓。大樓門口進來就有電梯，你自己上來。`, `${N}, vivo en el piso ${t.n}. El ascensor está justo al entrar; sube tú solo.`, `${N}, I live on floor ${t.n}. The elevator is right inside the entrance — come up on your own.`),
-      L('Ami：電梯裡面可能會遇到鄰居，要有禮貌喔！', 'Quizá te encuentres con algún vecino en el ascensor; ¡sé cortés!', 'You may meet a neighbor in the elevator — be polite!')
+      L(`Ami：${N}，我住在${t.n}樓。大樓門口進來就有電梯，你自己上來。`, `${N}, vivo en el piso ${t.n}. El ascensor está justo al entrar; sube tú solo.`, `${N}, I live on floor ${t.n}. The elevator is right inside the entrance — come up on your own.`)
     ];
   },
   hintSections() {
@@ -504,7 +504,7 @@ const Game = defineGame({
         place: 'phone',
         html: () => Game.listHTML(),
         dialogue: () => [
-          L('（你走到Ami住的公寓大樓。手機響了一聲，是Ami傳來的LINE。）', '(Llegas al edificio de Ami. Tu celular suena: es un LINE de Ami.)', '(You arrive at Ami’s apartment building. Your phone buzzes — a LINE from Ami.)'),
+          L('（你到Ami住的地方了。手機響了一聲，是Ami傳來的LINE。）', '(Llegas al lugar donde vive Ami. Tu celular suena: es un LINE de Ami.)', '(You arrive at Ami’s place. Your phone buzzes — a LINE from Ami.)'),
           ...Game.amiLines(),
           L('我：好，我現在上去！', '¡Bien, subo ahora!', "OK, I'm coming up!")
         ],
@@ -514,12 +514,11 @@ const Game = defineGame({
       LOBBY: {
         place: 'shop',
         html: () => Game.displayHTML(),
-        dialogue: () => [L('（你在一樓大廳，電梯門前有兩個按鈕：▲和▼。）', '(Estás en el vestíbulo del primer piso; frente al ascensor hay dos botones: ▲ y ▼.)', '(You are in the first-floor lobby. There are two buttons by the elevator: ▲ and ▼.)'), L(`我：Ami住在${t.n}樓，我要按哪一個？`, `Ami vive en el piso ${t.n}; ¿cuál botón presiono?`, `Ami lives on floor ${t.n}. Which button do I press?`)],
+        dialogue: () => [L(`我：Ami住在${t.n}樓，我要按哪一個？`, `Ami vive en el piso ${t.n}; ¿cuál botón presiono?`, `Ami lives on floor ${t.n}. Which button do I press?`)],
         options: () => rot(['按▲，往上。', '按▼，往下。', '不按，站在旁邊等。']),
         next: c => {
-          if (c !== '按▲，往上。') { Game.addMistake(M(`Ami住在${t.n}樓，在一樓要往上。`, `Ami vive en el piso ${t.n}; desde el primero hay que subir.`, `Ami lives on floor ${t.n}; from floor 1 you go up.`)); return; }
+          if (c !== '按▲，往上。') { Game.addMistake(M(`Ami住在${t.n}樓，在一樓要往上啦。`, `Ami vive en el piso ${t.n}; desde el primero hay que subir.`, `Ami lives on floor ${t.n}; from floor 1 you go up.`)); return; }
           goodFirst('LOBBY', '沒錯！去更高的樓層，要按「往上」。', '¡Exacto! Para ir a un piso más alto se presiona «hacia arriba».', 'Right! To go to a higher floor, press "up".');
-          Game.thought = [L('（電梯來了，門打開了。你走進去。）', '(Llega el ascensor y se abre la puerta. Entras.)', '(The elevator arrives and the door opens. You step in.)')];
           Game.state = 'WAIT';
         }
       },
@@ -529,7 +528,7 @@ const Game = defineGame({
         dialogue: () => [L('（門快要關了。這時候，一位鄰居跑過來。）', '(La puerta casi se cierra cuando un vecino viene corriendo.)', '(The door is about to close when a neighbor runs over.)'), nb('等一下！等一下！', '¡Espere, espere!', 'Wait! Wait!')],
         options: () => rot(['按「開門」，等他。', '按「關門」。', '不要動，假裝沒看到。']),
         next: c => {
-          if (c !== '按「開門」，等他。') { Game.addMistake(M('鄰居在跑，要按「開門」等他。', 'El vecino viene corriendo: hay que presionar «abrir» y esperarlo.', 'The neighbor is running — press "open" and wait.')); return; }
+          if (c !== '按「開門」，等他。') { Game.addMistake(M('鄰居要來了，要好心一點幫他按著「開」。', 'El vecino ya viene: sé amable y mantén presionado el botón «abrir» para él.', 'The neighbor is coming — be kind and hold the "open" button for them.')); return; }
           goodFirst('WAIT', '很有禮貌！在台灣，幫別人按開門鍵很常見。', '¡Muy cortés! En Taiwán es común sostener la puerta para otros.', 'Very polite! In Taiwan it is common to hold the door for others.');
           Game.thought = [nb('謝謝你！', '¡Gracias!', 'Thank you!')];
           Game.state = 'FLOOR';
@@ -538,25 +537,25 @@ const Game = defineGame({
       FLOOR: {
         place: 'shop',
         html: () => Game.displayHTML(),
-        dialogue: () => [L('（電梯裡有一排樓層按鈕。）', '(En el ascensor hay una fila de botones de piso.)', '(There is a row of floor buttons in the elevator.)'), L(`我：Ami住在${t.n}樓。`, `Ami vive en el piso ${t.n}.`, `Ami lives on floor ${t.n}.`)],
+        dialogue: () => [L(`我：Ami住在${t.n}樓。`, `Ami vive en el piso ${t.n}.`, `Ami lives on floor ${t.n}.`)],
         options: () => rot([t.n, t.n + 1, t.n - 1]).map(n => `按${n}樓。`),
         next: c => {
-          if (c !== `按${t.n}樓。`) { Game.addMistake(M(`Ami住在${t.n}樓。`, `Ami vive en el piso ${t.n}.`, `Ami lives on floor ${t.n}.`)); return; }
+          if (c !== `按${t.n}樓。`) { Game.addMistake(M(`你記錯了喔！Ami住在${t.n}樓。`, `¡Te equivocaste! Ami vive en el piso ${t.n}.`, `You got it wrong! Ami lives on floor ${t.n}.`)); return; }
           goodFirst('FLOOR', `對了！按${t.n}樓。`, `¡Correcto! Presiona el ${t.n}.`, `Right! Press ${t.n}.`);
-          Game.thought = [nb(`不好意思，我到${t.m}樓，麻煩你幫我按。`, `Disculpe, voy al piso ${t.m}. ¿Me hace el favor de presionarlo?`, `Excuse me, I'm going to floor ${t.m}. Could you press it for me?`)];
+          Game.thought = [nb(`不好意思，我要到${t.m}樓，麻煩你幫我按一下。`, `Disculpe, voy al piso ${t.m}. ¿Me hace el favor de presionarlo?`, `Excuse me, I'm going to floor ${t.m}. Could you press it for me?`)];
           Game.state = 'HELP';
         }
       },
       HELP: {
         place: 'shop',
         html: () => Game.displayHTML(),
-        dialogue: () => [nb(`不好意思，我到${t.m}樓，麻煩你幫我按。`, `Disculpe, voy al piso ${t.m}. ¿Me hace el favor de presionarlo?`, `Excuse me, I'm going to floor ${t.m}. Could you press it for me?`)],
-        options: () => rot([`好，我幫你按${t.m}樓。`, `好，我幫你按${t.n}樓。`, '我不會說中文。']),
+        dialogue: () => [nb(`不好意思，我要到${t.m}樓，麻煩你幫我按一下。`, `Disculpe, voy al piso ${t.m}. ¿Me hace el favor de presionarlo?`, `Excuse me, I'm going to floor ${t.m}. Could you press it for me?`)],
+        options: () => rot([`好，我幫你按${t.m}樓。`, `好，我幫你按${t.n}樓。`, '我中文不好。']),
         next: c => {
-          if (c !== `好，我幫你按${t.m}樓。`) { Game.addMistake(c.includes('不會') ? M('鄰居只是請你幫忙按一個鈕，很簡單。', 'El vecino solo te pide presionar un botón; es fácil.', 'The neighbor only asks you to press a button — easy.') : M(`鄰居要到${t.m}樓。`, `El vecino va al piso ${t.m}.`, `The neighbor is going to floor ${t.m}.`)); return; }
+          if (c !== `好，我幫你按${t.m}樓。`) { Game.addMistake(c.includes('不好') ? M('鄰居只是請你幫忙按一個鈕，應該不難吧！', 'El vecino solo te pide presionar un botón; ¡no debería ser difícil!', 'The neighbor only asks you to press a button — it shouldn\'t be hard!') : M(`聽清楚一點，鄰居要到${t.m}樓。`, `Escucha con más atención: el vecino va al piso ${t.m}.`, `Listen more carefully: the neighbor is going to floor ${t.m}.`)); return; }
           goodFirst('HELP', '很好！你聽懂了他要去幾樓。', '¡Bien! Entendiste a qué piso va.', 'Good! You understood which floor he is going to.');
           Game.cur = t.m;
-          Game.thought = [L(`（電梯往上，在${t.m}樓停了，門打開。）`, `(El ascensor sube, se detiene en el piso ${t.m} y se abre la puerta.)`, `(The elevator goes up, stops at floor ${t.m} and the door opens.)`), nb('到了，謝謝你！再見！', 'Ya llegamos, ¡gracias! ¡Adiós!', 'Here we are — thanks! Bye!')];
+          Game.thought = [L(`（電梯向上，在${t.m}樓的時候電梯停了下來。）`, `(El ascensor sube y se detiene en el piso ${t.m}.)`, `(The elevator goes up and stops at floor ${t.m}.)`), nb('到了，謝謝你！再見！', 'Ya llegamos, ¡gracias! ¡Adiós!', 'Here we are — thanks! Bye!')];
           Game.state = 'STOP';
         }
       },
@@ -566,20 +565,20 @@ const Game = defineGame({
         dialogue: () => [nb('到了，謝謝你！再見！', 'Ya llegamos, ¡gracias! ¡Adiós!', 'Here we are — thanks! Bye!')],
         options: () => rot(['不客氣，慢走！', '你走錯了！', '（不說話）']),
         next: c => {
-          if (c !== '不客氣，慢走！') { Game.addMistake(M('鄰居要下電梯，可以說「慢走」。', 'El vecino se baja: puedes decir «慢走».', 'The neighbor is leaving — you can say "慢走".')); return; }
-          goodFirst('STOP', '「慢走」是跟離開的人說的客氣話。', '«慢走» es una frase cortés para quien se va.', '"慢走" is a polite thing to say to someone leaving.');
+          if (c !== '不客氣，慢走！') { Game.addMistake(M('鄰居要出電梯了，可以禮貌地說「慢走」。', 'El vecino va a salir del ascensor: puedes decirle «慢走» con cortesía.', 'The neighbor is getting out — you can politely say "慢走".')); return; }
+          goodFirst('STOP', '你學會了！「慢走」是跟離開的人說的客氣話。', '¡Lo aprendiste! «慢走» es una frase cortés para quien se va.', 'You learned it! "慢走" is a polite thing to say to someone leaving.');
           Game.cur = t.n;
-          Game.thought = [L(`（電梯繼續往上，到${t.n}樓了。門口站了很多人，你前面有人擋著。）`, `(El ascensor sigue subiendo y llega al piso ${t.n}. Hay gente delante de ti, bloqueando la salida.)`, `(The elevator continues up to floor ${t.n}. There are people in front of you, blocking the way.)`)];
+          Game.thought = [L(`（電梯繼續往上，到${t.n}樓了。）`, `(El ascensor sigue subiendo y llega al piso ${t.n}.)`, `(The elevator continues up to floor ${t.n}.)`)];
           Game.state = 'ARRIVE';
         }
       },
       ARRIVE: {
         place: 'shop',
         html: () => Game.displayHTML(),
-        dialogue: () => [L(`（${t.n}樓到了，門開了。可是前面有人站著。）`, `(Piso ${t.n}: la puerta se abre, pero hay gente de pie delante.)`, `(Floor ${t.n}: the door opens, but people are standing in front.)`), L('我：我要出去……', 'Quiero salir…', 'I want to get out…')],
+        dialogue: () => [L(`（${t.n}樓到了，門開了。前面站著人。）`, `(Piso ${t.n}: la puerta se abre, pero hay gente de pie delante.)`, `(Floor ${t.n}: the door opens, but people are standing in front.)`), L('我：我要出去……', 'Quiero salir…', 'I want to get out…')],
         options: () => rot(['不好意思，借過一下。', '走開！', '（用力推開）']),
         next: c => {
-          if (c !== '不好意思，借過一下。') { Game.addMistake(M('要出去時，客氣地說「借過一下」。', 'Para salir, di cortésmente «借過一下».', 'To get out, politely say "借過一下".')); return; }
+          if (c !== '不好意思，借過一下。') { Game.addMistake(M('要出去時，客氣地說「借過一下」比較好喔！', 'Para salir, es mejor decir cortésmente «借過一下».', 'To get out, it\'s better to politely say "借過一下".')); return; }
           goodFirst('ARRIVE', '很好！「借過」是請別人讓路。', '¡Muy bien! «借過» es pedir permiso para pasar.', 'Good! "借過" asks people to let you pass.');
           Game.stopTimer();
           Game.state = 'END';
@@ -591,10 +590,10 @@ const Game = defineGame({
           Game._endGood = Game.mistakes <= 2;
           track('game_complete', { game: 'elevator', score: Game.score, elapsed: Game.elapsedTime });
           return [
-            L(`（你走到Ami家門口，按了電鈴。）`, '(Llegas a la puerta de Ami y tocas el timbre.)', "(You reach Ami's door and ring the bell.)"),
+            L(`（你到Ami家門口，按了電鈴。）`, '(Llegas a la puerta de Ami y tocas el timbre.)', "(You reach Ami's door and ring the bell.)"),
             Game._endGood
-              ? L(`Ami：${N}，你來了！電梯很好搭吧？歡迎歡迎！`, `¡${N}, llegaste! ¿Fue fácil el ascensor? ¡Bienvenido!`, `${N}, you made it! The elevator was easy, right? Welcome!`)
-              : L(`Ami：${N}，你終於來了！剛剛好像有點不順利？沒關係，進來吧！`, `¡${N}, por fin llegaste! ¿Parece que hubo problemas? No pasa nada, ¡pasa!`, `${N}, you're finally here! Looks like it didn't go smoothly? No worries — come in!`)
+              ? L(`Ami：${N}，你來了！搭電梯不難吧？歡迎歡迎！`, `¡${N}, llegaste! ¿Verdad que subir en ascensor no fue difícil? ¡Qué bueno que viniste!`, `${N}, you made it! Taking the elevator wasn't hard, right? Welcome!`)
+              : L(`Ami：${N}，你終於來了！用中文搭電梯還順利嗎？沒關係，進來吧！`, `¡${N}, por fin llegaste! ¿Cómo te fue subiendo en ascensor en chino? No pasa nada, ¡pasa!`, `${N}, you're finally here! How did taking the elevator in Chinese go? No worries — come in!`)
           ];
         },
         options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
