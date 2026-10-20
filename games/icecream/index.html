@@ -237,8 +237,8 @@
   </div>
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
-    Ami 想吃冰淇淋，請你去冰淇淋店幫她買。要幾球、什麼口味、杯子還是甜筒、加不加配料、內用還是外帶，都要照她說的點。<br>
-    <span data-es="Ami quiere un helado y te pide que lo compres. Tienes que pedirlo exactamente como ella dijo: cuántas bolas, de qué sabores, en vaso o en cono, con o sin topping, para comer ahí o para llevar." data-en="Ami wants ice cream and asks you to buy it. Order it exactly as she said: how many scoops, which flavors, cup or cone, toppings or not, for here or to go.">Ami quiere un helado y te pide que lo compres. Tienes que pedirlo exactamente como ella dijo: cuántas bolas, de qué sabores, en vaso o en cono, con o sin topping, para comer ahí o para llevar.</span>
+    Ami 請你去冰淇淋店幫她買冰淇淋。她有很多要求喔！記得都要照她說的點，Ami才不會生氣。<br>
+    <span data-es="Ami te pide que vayas a la heladería a comprarle un helado. ¡Tiene muchas peticiones! Recuerda pedirlo todo tal como ella dijo, para que Ami no se enoje." data-en="Ami asks you to go to the ice cream shop and buy her some ice cream. She has a lot of requests! Remember to order everything exactly as she said, so Ami won't get upset.">Ami te pide que vayas a la heladería a comprarle un helado. ¡Tiene muchas peticiones! Recuerda pedirlo todo tal como ella dijo, para que Ami no se enoje.</span>
   </p>
 </div>
 
@@ -390,7 +390,7 @@ const VOCAB = {
   TOPPING: [['配料', 'topping', 'topping'], ['彩色糖粒', 'chispas de colores', 'sprinkles'], ['巧克力醬', 'salsa de chocolate', 'chocolate sauce'], ['草莓醬', 'salsa de fresa', 'strawberry sauce'], ['不用', 'no hace falta', 'no need']],
   EAT: [['內用', 'para comer ahí', 'for here'], ['外帶', 'para llevar', 'to go'], ['公園', 'parque', 'park'], ['融化', 'derretirse', 'melt'], ['店裡', 'dentro de la tienda', 'in the shop']],
   PAY: [['一共', 'en total', 'in total'], ['夠', 'alcanzar, ser suficiente', 'be enough'], ['找錢', 'dar el cambio', 'give change'], ['賒帳', 'comprar a crédito', 'buy on credit'], ['先付錢', 'pagar primero', 'pay first']],
-  END: [['融化', 'derretirse', 'melt'], ['好吃', 'rico, delicioso', 'delicious'], ['下次', 'la próxima vez', 'next time'], ['快一點', 'más rápido', 'a bit faster'], ['拿給', 'entregar a', 'hand to']],
+  END: [['融化', 'derretirse', 'melt'], ['好吃', 'rico, delicioso', 'delicious'], ['下次', 'la próxima vez', 'next time'], ['快一點', 'más rápido', 'a bit faster'], ['請慢用', 'buen provecho', 'enjoy']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 
@@ -523,9 +523,9 @@ const Game = defineGame({
     const ordZh = t.flavors.map((f, i) => `第${CN[i + 1]}球是${f.zh}`).join('，');
     const ordEs = t.flavors.map((f, i) => `la bola ${i + 1}: ${f.es}`).join('; '), ordEn = t.flavors.map((f, i) => `scoop ${i + 1}: ${f.en}`).join('; ');
     return [
-      L(`Ami：${N}，我${here ? '已經在冰淇淋店裡面坐好了' : '在公園的長椅這邊等你'}。幫我買一個冰淇淋，好嗎？`,
+      L(`Ami：${N}，我${here ? '已經在冰淇淋店裡面坐好了' : '在公園的長椅這邊等你'}。幫我買冰淇淋，好嗎？`,
         `${N}, ${here ? 'ya estoy sentada dentro de la heladería' : 'te espero en una banca del parque'}. ¿Me compras un helado?`,
-        `${N}, ${here ? "I'm already sitting inside the ice cream shop" : "I'm waiting on a bench in the park"}. Could you buy me an ice cream?`),
+        `${N}, ${here ? "I'm already sitting inside the ice cream shop" : "I'm waiting on a bench in the park"}. Could you buy me some ice cream?`),
       L(`Ami：我要${NZ(t.n)}球。${ordZh}。`, `Quiero ${t.n} bolas: ${ordEs}.`, `I want ${t.n} scoops — ${ordEn}.`),
       L(`Ami：我要${t.vessel.zh}，${t.top ? `還要加${t.top.zh}` : '不要加配料'}。`, `Lo quiero ${t.vessel.es}, ${t.top ? `y con ${t.top.es}` : 'sin topping'}.`, `I want it ${t.vessel.en}, ${t.top ? `with ${t.top.en}` : 'with no toppings'}.`),
       L(here ? 'Ami：我們在這裡吃。' : 'Ami：我要外帶，帶去公園吃。', here ? 'Lo comemos aquí.' : 'Lo quiero para llevar; lo comeré en el parque.', here ? "We'll eat it here." : "I want it to go — I'll eat it in the park.")
@@ -628,7 +628,7 @@ const Game = defineGame({
         options: () => pair(['要杯子。', '要甜筒。']),
         next: c => {
           if (c !== `要${t.vessel.zh}。`) {
-            Game.addMistake(M(`Ami要${t.vessel.zh}。`, `Ami lo quiere ${t.vessel.es}.`, `Ami wants it ${t.vessel.en}.`));
+            Game.addMistake(M(`你記錯了啦！Ami要${t.vessel.zh}。`, `¡Te equivocaste! Ami lo quiere ${t.vessel.es}.`, `You got it wrong! Ami wants it ${t.vessel.en}.`));
             return;
           }
           goodFirst('CONTAINER', '你記得Ami說的話，真棒！', '¡Recordaste lo que dijo Ami, genial!', 'You remembered what Ami said — great!');
@@ -647,13 +647,13 @@ const Game = defineGame({
         next: c => {
           const f = t.flavors[Game.k];
           if (c !== `${f.zh}。`) {
-            Game.addMistake(M(`第${CN[Game.k + 1]}球，Ami要的是${f.zh}。`, `Para la bola ${Game.k + 1}, Ami pidió ${f.es}.`, `For scoop ${Game.k + 1}, Ami asked for ${f.en}.`));
+            Game.addMistake(M(`不對不對！第${CN[Game.k + 1]}球Ami要的是${f.zh}。`, `¡No, no! Para la bola ${Game.k + 1}, Ami pidió ${f.es}.`, `No, no! For scoop ${Game.k + 1}, Ami asked for ${f.en}.`));
             return;
           }
           goodFirst('FLAVOR' + Game.k, `第${CN[Game.k + 1]}球，選對了！`, `¡Bola ${Game.k + 1}, bien elegida!`, `Scoop ${Game.k + 1} — correct!`);
           Game.chosen.push(f); Game.k += 1;
-          if (Game.k < t.n) { Game.thought = [L(`（店員把${f.zh}冰淇淋放在${Game.vessel.zh}裡。）`, `(La persona pone el helado de ${f.es} ${Game.vessel.es}.)`, `(The staff scoops ${f.en} ice cream ${Game.vessel.en}.)`)]; return; }
-          Game.thought = [L(`（店員把${f.zh}放在最上面。）`, `(La persona pone el de ${f.es} arriba de todo.)`, `(The staff puts the ${f.en} on top.)`)];
+          if (Game.k < t.n) { Game.thought = [L(`（店員把${f.zh}的冰淇淋放在${Game.vessel.zh}裡。）`, `(La persona pone el helado de ${f.es} ${Game.vessel.es}.)`, `(The staff scoops ${f.en} ice cream ${Game.vessel.en}.)`)]; return; }
+          Game.thought = null;
           Game.state = 'TOPPING';
         }
       },
@@ -662,16 +662,16 @@ const Game = defineGame({
       TOPPING: {
         place: 'shop',
         html: () => Game.iceHTML(),
-        dialogue: () => [staff('要加配料嗎？配料一種十元。', '¿Quiere agregar algún topping? Cada uno cuesta diez dólares.', 'Would you like a topping? Each one is ten dollars.')],
+        dialogue: () => [staff('要加配料嗎？配料每種十元。', '¿Quiere agregar algún topping? Cada uno cuesta diez dólares.', 'Would you like a topping? Each one is ten dollars.')],
         options: () => rot(topOpts),
         next: c => {
           if (c !== topCorrect) {
-            Game.addMistake(t.top ? M(`Ami要加${t.top.zh}。`, `Ami quiere ${t.top.es}.`, `Ami wants ${t.top.en}.`) : M('Ami說不要加配料。', 'Ami dijo que no quería topping.', 'Ami said no toppings.'));
+            Game.addMistake(t.top ? M(`拜託～Ami要加的是${t.top.zh}。`, `¡Por favor! Ami quiere ${t.top.es}.`, `Come on! Ami wants ${t.top.en}.`) : M('你完蛋了！Ami說不要加配料。', '¡Estás frito! Ami dijo que no quería topping.', "You're doomed! Ami said no toppings."));
             return;
           }
           goodFirst('TOPPING', '很好！你沒有多加配料，也沒有漏掉。', '¡Muy bien! No agregaste de más ni olvidaste nada.', 'Good! You did not add extras or forget anything.');
           Game.top = t.top;
-          Game.thought = t.top ? [L(`（店員在冰淇淋上面加了${t.top.zh}。）`, `(La persona agrega ${t.top.es} al helado.)`, `(The staff adds ${t.top.en} on top.)`)] : null;
+          Game.thought = null;
           Game.state = 'EAT';
         }
       },
@@ -684,11 +684,10 @@ const Game = defineGame({
         options: () => eatOpts,
         next: c => {
           if (c !== `${EATS[t.eat].zh}。`) {
-            Game.addMistake(M(`Ami${t.eat === 'here' ? '已經在店裡面坐好了，要內用' : '在公園等你，要外帶'}。`, `Ami ${t.eat === 'here' ? 'ya está sentada en la tienda: es para comer aquí' : 'te espera en el parque: es para llevar'}.`, `Ami ${t.eat === 'here' ? "is already seated in the shop — it's for here" : "is waiting in the park — it's to go"}.`));
+            Game.addMistake(M(`不對喔！Ami${t.eat === 'here' ? '已經在店裡面坐好了，要內用' : '在公園等你，要外帶'}。`, `¡No! Ami ${t.eat === 'here' ? 'ya está sentada en la tienda: es para comer aquí' : 'te espera en el parque: es para llevar'}.`, `No! Ami ${t.eat === 'here' ? "is already seated in the shop — it's for here" : "is waiting in the park — it's to go"}.`));
             return;
           }
           goodFirst('EAT', t.eat === 'here' ? '沒錯！Ami在店裡面，所以要內用。' : '沒錯！Ami在公園，所以要外帶。', t.eat === 'here' ? '¡Exacto! Ami está dentro de la tienda: es para comer aquí.' : '¡Exacto! Ami está en el parque: es para llevar.', t.eat === 'here' ? 'Right! Ami is inside the shop, so it is for here.' : 'Right! Ami is in the park, so it is to go.');
-          Game.thought = [Game.priceLine()];
           Game.state = 'PAY';
         }
       },
@@ -697,13 +696,13 @@ const Game = defineGame({
       PAY: {
         place: 'shop',
         html: () => Game.iceHTML(),
-        dialogue: () => [L('（你有一張一百元和一張兩百元。）', '(Tienes un billete de cien y uno de doscientos dólares.)', '(You have a 100-dollar bill and a 200-dollar bill.)')],
+        dialogue: () => [Game.priceLine()],
         options: () => rot([payOk, '給你一百元。', '我下次再付，可以嗎？']),
         next: c => {
           if (c !== payOk) {
             Game.addMistake(c === '給你一百元。'
-              ? M(`一共是${t.total}元，一百元不夠。`, `El total es ${esM(t.total)}: cien no alcanzan.`, `The total is ${enM(t.total)} — 100 isn't enough.`)
-              : M('買東西要先付錢，不能賒帳。', 'Hay que pagar primero: no se compra a crédito.', "You have to pay first — no buying on credit."));
+              ? M(`一共是${t.total}元，一百元不夠啦。`, `El total es ${esM(t.total)}: cien no alcanzan.`, `The total is ${enM(t.total)} — 100 isn't enough.`)
+              : M('這樣不行喔！買東西要先付錢，不能賒帳。', '¡Así no se puede! Hay que pagar primero: no se compra a crédito.', "That won't do! You have to pay first — no buying on credit."));
             return;
           }
           goodFirst('PAY', '沒錯！一百元不夠，要給兩百元，他會找錢給你。', '¡Exacto! Cien no alcanza: das doscientos y te dan el cambio.', "Right! 100 isn't enough, so hand over 200 and you'll get change.");
@@ -723,7 +722,6 @@ const Game = defineGame({
           const here = t.eat === 'here';
           return [
             staff('好了，這是您的冰淇淋，請慢用！', 'Listo, aquí tiene su helado. ¡Buen provecho!', "Here's your ice cream — enjoy!"),
-            L(here ? '（你把冰淇淋拿給Ami。）' : '（你走到公園，把冰淇淋拿給Ami。）', here ? '(Le llevas el helado a Ami.)' : '(Caminas al parque y le das el helado a Ami.)', here ? '(You bring the ice cream to Ami.)' : '(You walk to the park and hand Ami the ice cream.)'),
             Game._endGood
               ? L(`Ami：哇，${NZ(t.n)}球都是我要的口味！謝謝你，${N}！`, `¡Guau, las ${t.n} bolas son justo los sabores que quería! ¡Gracias, ${N}!`, `Wow, all ${t.n} scoops are exactly the flavors I wanted! Thanks, ${N}!`)
               : L(here ? 'Ami：謝謝你！不過我等了好久……下次要快一點喔！' : 'Ami：謝謝你！不過冰淇淋有一點融化了……下次要快一點喔！', here ? '¡Gracias! Pero esperé mucho… ¡la próxima vez más rápido!' : '¡Gracias! Pero el helado se derritió un poco… ¡la próxima vez más rápido!', here ? 'Thanks! But I waited a long time… faster next time!' : 'Thanks! But the ice cream melted a little… faster next time!')
