@@ -274,7 +274,7 @@ function playsTable(rows, showPlayer = true, inPlayer = false) {
 
 /* ── 舊排行榜：看、刪 ── */
 function boardsShell() {
-  return `<p class="muted">遊戲結束時顯示給玩家看的排行榜（前 15 名）。有人亂填名字可以在這裡刪。</p>
+  return `<p class="muted">遊戲結束時顯示給玩家看的排行榜（前 10 名）。有人亂填名字可以在這裡刪。</p>
     <div class="filters"><label>遊戲 <select id="b-scene">${SCENES.map(([id]) => `<option value="${id}"${id === V.board ? ' selected' : ''}>${esc(scName(id))}</option>`).join('')}</select></label>
     <span class="code">${SCORE_COLS[V.board]}</span></div><div id="b-body"><div class="empty">讀取中……</div></div>`;
 }

@@ -49,7 +49,7 @@ export function initFB({ scoresCol } = {}) {
     async getLeaderboard() {
       try {
         // 需要複合索引：score 降冪 + elapsed 升冪（管理員頁可以檢查、一鍵建立）
-        const q = query(collection(db, scoresCol), orderBy("score", "desc"), orderBy("elapsed", "asc"), limit(15));
+        const q = query(collection(db, scoresCol), orderBy("score", "desc"), orderBy("elapsed", "asc"), limit(10));
         const snap = await getDocs(q);
         return snap.docs.map(d => d.data());
       } catch (e) { console.error("Firebase 讀取失敗", e); return []; }

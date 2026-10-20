@@ -733,7 +733,7 @@ function say(text) {
   try {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text.replace(/[（）()]/g, ''));
-    const v = speechSynthesis.getVoices().find(v => /zh[-_]TW/i.test(v.lang)) || speechSynthesis.getVoices().find(v => /^zh/i.test(v.lang));
+    const v = speechSynthesis.getVoices().find(v => /zh[-_]TW/i.test(v.lang)) || speechSynthesis.getVoices().find(v => /^zh/i.test(v.lang) && !/^(yue|zh[-_]hk)/i.test(v.lang));   // 排除廣東話
     u.lang = v ? v.lang : 'zh-TW'; if (v) u.voice = v; u.rate = RATE_VALUE[S.rate];
     Music.duck(true); u.onend = u.onerror = () => Music.duck(false);
     speechSynthesis.speak(u);

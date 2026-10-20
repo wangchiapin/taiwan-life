@@ -522,7 +522,7 @@ async function showLeaderboard() {
 
   document.getElementById('rank-banner').innerHTML = myRank
     ? `<div class="congrats-banner">${medals[myRank - 1] || '🎉'} 恭喜 ${esc(myName)}！你是第 ${myRank} 名！<br><small>${X(`¡Felicidades! Quedaste en el puesto #${myRank}`, `Congratulations! You're #${myRank}`)}</small></div>`
-    : `<div class="no-rank-banner">可惜，${esc(myName)}，這次沒進前 15 名，再試一次吧！<br><small>${X('No entraste al top 15. ¡Inténtalo otra vez!', "You didn't make the top 15. Try again!")}</small></div>`;
+    : `<div class="no-rank-banner">可惜，${esc(myName)}，這次沒進前 10 名，再試一次吧！<br><small>${X('No entraste al top 10. ¡Inténtalo otra vez!', "You didn't make the top 10. Try again!")}</small></div>`;
 
   const body = document.getElementById('lb-body');
   body.innerHTML = rows.length ? '' : `<tr><td colspan="4">還沒有紀錄 ${X('Sin registros', 'No records yet')}</td></tr>`;
