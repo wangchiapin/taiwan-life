@@ -225,8 +225,8 @@
   </div>
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
-    Ami 想在家煮晚餐，請你去傳統市場買菜。每種東西的量詞不一樣，還可以試試看殺價。<br>
-    <span data-es="Ami quiere cocinar la cena en casa y te manda al mercado tradicional. Cada producto usa un clasificador distinto, ¡y también puedes intentar regatear!" data-en="Ami wants to cook dinner at home and sends you to the traditional market. Each item uses a different measure word — and you can try bargaining!">Ami quiere cocinar la cena en casa y te manda al mercado tradicional. Cada producto usa un clasificador distinto, ¡y también puedes intentar regatear!</span>
+    Ami 說今天想要自己煮晚餐，請你去傳統市場買菜。每種東西的量詞不一樣，還可以試試看殺價唷！<br>
+    <span data-es="Ami dice que hoy quiere cocinar la cena ella misma y te manda al mercado tradicional. Cada producto usa un clasificador distinto, ¡y también puedes intentar regatear!" data-en="Ami says she wants to cook dinner herself today and sends you to the traditional market. Each item uses a different measure word — and you can try bargaining!">Ami dice que hoy quiere cocinar la cena ella misma y te manda al mercado tradicional. Cada producto usa un clasificador distinto, ¡y también puedes intentar regatear!</span>
   </p>
 </div>
 
@@ -331,7 +331,7 @@ pinyinPro.customPinyin({
 
   '菜市場': 'cài shì chǎng', '老闆': 'lǎo bǎn', '青菜': 'qīng cài', '番茄': 'fān qié', '一把': 'yì bǎ', '兩把': 'liǎng bǎ', '三把': 'sān bǎ', '一條': 'yì tiáo', '兩條': 'liǎng tiáo',
   '一盒': 'yì hé', '兩盒': 'liǎng hé', '三顆': 'sān kē', '兩顆': 'liǎng kē', '一塊': 'yí kuài', '兩塊': 'liǎng kuài', '雞蛋': 'jī dàn', '豬肉': 'zhū ròu', '算': 'suàn',
-  '便宜': 'pián yi', '環保袋': 'huán bǎo dài', '塑膠袋': 'sù jiāo dài', '一共': 'yì gòng', '賒帳': 'shē zhàng', '兩百': 'liǎng bǎi', '五百': 'wǔ bǎi', '殺價': 'shā jià', '歡迎光臨': 'huān yíng guāng lín'
+  '便宜': 'pián yi', '環保袋': 'huán bǎo dài', '塑膠袋': 'sù jiāo dài', '一共': 'yì gòng', '賒帳': 'shē zhàng', '兩百': 'liǎng bǎi', '五百': 'wǔ bǎi', '殺價': 'shā jià', '歡迎光臨': 'huān yíng guāng lín', '還可以': 'hái kě yǐ', '還省': 'hái shěng'
 
 });
 // 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
@@ -370,7 +370,7 @@ const VOCAB = {
   BARGAIN: [['算', 'cobrar, contar', 'charge, count'], ['便宜', 'barato', 'cheap'], ['一點', 'un poco', 'a bit'], ['殺價', 'regatear', 'bargain']],
   PAY: [['一共', 'en total', 'in total'], ['夠', 'alcanzar', 'be enough'], ['找錢', 'dar el cambio', 'give change'], ['賒帳', 'comprar a crédito', 'buy on credit']],
   BAG: [['環保袋', 'bolsa reutilizable', 'reusable bag'], ['塑膠袋', 'bolsa de plástico', 'plastic bag'], ['自己的', 'propio', 'one’s own']],
-  END: [['新鮮', 'fresco', 'fresh'], ['晚餐', 'cena', 'dinner']],
+  END: [['新鮮', 'fresco', 'fresh'], ['好吃', 'rico / delicioso', 'delicious']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 const STAGE = { ITEM: ['買菜', 'comprar', 'buying'], BARGAIN: ['殺價', 'regatear', 'bargaining'], PAY: ['付錢', 'pagar', 'paying'], BAG: ['袋子', 'bolsa', 'bag'] };
@@ -475,9 +475,9 @@ const Game = defineGame({
   amiLines() {
     const N = this.N, t = this.task;
     return [
-      L(`Ami：${N}，我今天晚上要在家煮飯，你可以幫我去菜市場買菜嗎？`, `${N}, esta noche cocino en casa. ¿Puedes ir al mercado a comprar?`, `${N}, I'm cooking at home tonight. Could you buy groceries at the market?`),
+      L(`Ami：${N}，我今天晚上要在家煮飯，你來我家一起吃吧！不過，你可以幫我去菜市場買菜嗎？`, `${N}, esta noche cocino en casa: ¡ven a mi casa a cenar conmigo! Pero antes, ¿puedes ir al mercado a comprar?`, `${N}, I'm cooking at home tonight — come over and eat with me! But first, could you buy groceries at the market?`),
       L('Ami：我要買：' + t.items.map(it => `${QN(it.q)}${it.m}${it.zh}`).join('、') + '。', 'Necesito: ' + t.items.map(it => `${it.q} ${it.es}`).join(', ') + '.', 'I need: ' + t.items.map(it => `${it.q} ${it.en}`).join(', ') + '.'),
-      L('Ami：記得帶我的環保袋，不要拿塑膠袋。還有，可以問問看能不能算便宜一點喔！', 'Lleva mi bolsa reutilizable, no aceptes bolsa de plástico. ¡Y pregunta si te pueden hacer un descuento!', "Take my reusable bag — don't take a plastic one. And ask if they can give you a discount!")
+      L('Ami：記得帶環保袋，不要拿塑膠袋。還有，可以問問看能不能算便宜一點喔！', 'Lleva una bolsa reutilizable, no aceptes bolsa de plástico. ¡Y pregunta si te pueden hacer un descuento!', "Bring a reusable bag — don't take a plastic one. And ask if they can give you a discount!")
     ];
   },
   priceLine() {
@@ -532,7 +532,7 @@ const Game = defineGame({
         options: () => { const it = t.items[Game.k]; const ms = [it.m, ...shuffle(MEASURES.filter(x => x !== it.m)).slice(0, 2)]; return rot(ms).map(m => `我要${QN(it.q)}${m}${it.zh}。`); },
         next: c => {
           const it = t.items[Game.k];
-          if (c !== `我要${QN(it.q)}${it.m}${it.zh}。`) { Game.addMistake(M(`${it.zh}的量詞是「${it.m}」。`, `El clasificador de ${it.es} es «${it.m}».`, `The measure word for ${it.en} is "${it.m}".`)); return; }
+          if (c !== `我要${QN(it.q)}${it.m}${it.zh}。`) { Game.addMistake(M(`記住！${it.zh}的量詞是「${it.m}」。`, `¡Recuerda! El clasificador de ${it.es} es «${it.m}».`, `Remember! The measure word for ${it.en} is "${it.m}".`)); return; }
           goodFirst('ITEM' + Game.k, `對了！${it.zh}用「${it.m}」。`, `¡Correcto! Para ${it.es} se usa «${it.m}».`, `Right! Use "${it.m}" for ${it.en}.`);
           Game.k += 1;
           if (Game.k < t.items.length) { Game.thought = [vend('好，還要什麼？', 'Bien, ¿algo más?', 'OK, anything else?')]; return; }
@@ -542,25 +542,24 @@ const Game = defineGame({
       },
       BARGAIN: {
         place: 'shop',
-        dialogue: () => [Game.priceLine(), L('我：Ami說可以問問看……', 'Ami dijo que podía preguntar…', 'Ami said I could try asking…')],
+        dialogue: () => [Game.priceLine()],
         options: () => rot(['可以算便宜一點嗎？', '太貴了，我不買了！', '我只付一半。']),
         next: c => {
-          if (c !== '可以算便宜一點嗎？') { Game.addMistake(M('客氣地問「可以算便宜一點嗎？」。', 'Se pide con amabilidad: «可以算便宜一點嗎？».', 'Ask politely: "可以算便宜一點嗎？".')); return; }
-          goodFirst('BARGAIN', '問得很客氣！在菜市場常常可以這樣問。', '¡Muy cortés! En el mercado se suele preguntar así.', 'Very polite! At the market this is a common question.');
-          Game.thought = [vend(`好啦，算你${zhNum(t.final)}元。`, `Está bien, se lo dejo en ${esM(t.final)}.`, `Alright, I'll make it ${enM(t.final)}.`)];
+          if (c !== '可以算便宜一點嗎？') { Game.addMistake(M('客氣一點問「可以算便宜一點嗎？」，會比較有禮貌喔！', 'Pregunta con más amabilidad: «可以算便宜一點嗎？». ¡Es más cortés!', 'Ask more politely: "可以算便宜一點嗎？" — it sounds more courteous!')); return; }
+          goodFirst('BARGAIN', '不錯喔！問得很客氣！', '¡Muy bien! ¡Qué cortés!', 'Nice! Very polite!');
           Game.state = 'PAY';
         }
       },
       PAY: {
         place: 'shop',
-        dialogue: () => [L('（你只有一張五百元。）', '(Solo tienes un billete de quinientos dólares.)', '(You only have a 500-dollar bill.)')],
+        dialogue: () => [vend(`好啦，算你${zhNum(t.final)}元。`, `Está bien, se lo dejo en ${esM(t.final)}.`, `Alright, I'll make it ${enM(t.final)}.`)],
         options: () => rot(['給你五百元。', '給你兩百元。', '我下次再付，可以嗎？']),
         next: c => {
           if (c !== '給你五百元。') {
-            Game.addMistake(c === '給你兩百元。' ? M(`要${t.final}元，兩百元不夠。`, `Son ${esM(t.final)}: doscientos no alcanzan.`, `It's ${enM(t.final)} — 200 isn't enough.`) : M('買東西要先付錢，不能賒帳。', 'Hay que pagar primero: no se compra a crédito.', 'You have to pay first — no buying on credit.'));
+            Game.addMistake(c === '給你兩百元。' ? M(`要${t.final}元，兩百元不夠。`, `Son ${esM(t.final)}: doscientos no alcanzan.`, `It's ${enM(t.final)} — 200 isn't enough.`) : M('不行啦！買東西要先付錢，不能賒帳。', '¡No se puede! Hay que pagar primero: no se compra a crédito.', 'No way! You have to pay first — no buying on credit.'));
             return;
           }
-          goodFirst('PAY', '沒錯！五百元夠了。', '¡Exacto! Quinientos alcanzan.', 'Right! 500 is enough.');
+          goodFirst('PAY', '沒錯！五百元就夠了。', '¡Exacto! Con quinientos alcanza.', 'Right! 500 is enough.');
           Game.thought = [vend(`收你五百元，找你${zhNum(500 - t.final)}元。`, `Recibo quinientos; le doy ${esM(500 - t.final)} de cambio.`, `Out of 500 — here's ${enM(500 - t.final)} change.`), vend('要袋子嗎？', '¿Quiere bolsa?', 'Do you want a bag?')];
           Game.state = 'BAG';
         }
@@ -570,8 +569,8 @@ const Game = defineGame({
         dialogue: () => [vend('要塑膠袋嗎？', '¿Quiere una bolsa de plástico?', 'Would you like a plastic bag?')],
         options: () => rot(['不用，我有環保袋。', '要，給我五個塑膠袋。', '我不要菜了。']),
         next: c => {
-          if (c !== '不用，我有環保袋。') { Game.addMistake(M('Ami說不要拿塑膠袋，要用環保袋。', 'Ami dijo que no tomaras bolsa de plástico y usaras la reutilizable.', 'Ami said no plastic bags — use the reusable one.')); return; }
-          goodFirst('BAG', '很好！「不用，我有……」可以客氣地拒絕。', '¡Muy bien! «不用，我有…» es una forma amable de rechazar.', 'Good! "不用，我有…" is a polite way to decline.');
+          if (c !== '不用，我有環保袋。') { Game.addMistake(M('Ami說不要拿塑膠袋，要用環保袋。保護地球！', 'Ami dijo que no tomaras bolsa de plástico y usaras la reutilizable. ¡Cuida el planeta!', 'Ami said no plastic bags — use the reusable one. Protect the planet!')); return; }
+          goodFirst('BAG', '很好！「不用，我有……」可以很客氣地拒絕。', '¡Muy bien! «不用，我有…» es una forma muy amable de rechazar.', 'Good! "不用，我有…" is a very polite way to decline.');
           Game.stopTimer();
           Game.state = 'END';
         }
@@ -583,10 +582,9 @@ const Game = defineGame({
           track('game_complete', { game: 'market', score: Game.score, elapsed: Game.elapsedTime });
           return [
             vend('東西都在這裡，小心拿喔！謝謝！', 'Aquí está todo, ¡cuidado al llevarlo! ¡Gracias!', 'Everything is here — carry it carefully! Thanks!'),
-            L('（你提著環保袋回家，把菜拿給Ami。）', '(Vuelves a casa con la bolsa reutilizable y le das las compras a Ami.)', '(You go home with the reusable bag and give the groceries to Ami.)'),
             Game._endGood
-              ? L(`Ami：哇，菜都好新鮮，還省了錢！謝謝你，${N}！今天晚餐會很好吃。`, `¡Guau, todo está muy fresco y además ahorraste! ¡Gracias, ${N}! La cena estará riquísima.`, `Wow, everything is so fresh and you even saved money! Thanks, ${N}! Dinner will be great.`)
-              : L('Ami：謝謝你！不過好像買錯了一些東西……下次要看清楚喔！', '¡Gracias! Pero parece que compraste mal algunas cosas… ¡la próxima vez fíjate bien!', 'Thanks! But it seems you got a few things wrong… check carefully next time!')
+              ? L(`Ami：哇，菜都好新鮮唷，還省了不少錢！謝謝你，${N}！我來煮好吃的給你吃。`, `¡Guau, todo está muy fresco y además ahorraste bastante! ¡Gracias, ${N}! Yo cocino algo rico para ti.`, `Wow, everything is so fresh, and you saved quite a bit! Thanks, ${N}! I'll cook something delicious for you.`)
+              : L('Ami：謝謝你！不過好像有一些東西買錯了……下次要看清楚喔！', '¡Gracias! Pero parece que compraste mal algunas cosas… ¡la próxima vez fíjate bien!', 'Thanks! But it seems you got a few things wrong… check carefully next time!')
           ];
         },
         options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
