@@ -237,8 +237,8 @@
   </div>
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
-    Ami 借你她的車，請你開去星光百貨。你要把車停進地下停車場、告訴她你停在哪裡，逛完以後還要繳停車費，再把車開出去。<br>
-    <span data-es="Ami te presta su auto para ir al centro comercial Xingguang. Tienes que estacionarlo en el sótano, decirle dónde quedó, y después de las compras pagar el estacionamiento y salir." data-en="Ami lends you her car to drive to the Starlight department store. You park it in the basement garage, tell her where it is, and after shopping you pay the parking fee and drive out.">Ami te presta su auto para ir al centro comercial Xingguang. Tienes que estacionarlo en el sótano, decirle dónde quedó, y después de las compras pagar el estacionamiento y salir.</span>
+    你跟Ami 開車去星光百貨逛街。Ami已經先去逛了，你要自己把車子停在地下停車場，你知道該怎麼停嗎？<br>
+    <span data-es="Vas con Ami en auto al centro comercial Xingguang. Ami ya se adelantó a pasear; tú tienes que estacionar el auto en el estacionamiento del sótano. ¿Sabes cómo hacerlo?" data-en="You and Ami drive to the Starlight department store to go shopping. Ami has already gone ahead, so you have to park the car in the basement garage yourself. Do you know how?">Vas con Ami en auto al centro comercial Xingguang. Ami ya se adelantó a pasear; tú tienes que estacionar el auto en el estacionamiento del sótano. ¿Sabes cómo hacerlo?</span>
   </p>
 </div>
 
@@ -386,10 +386,10 @@ const VOCAB = {
   START: [['停車場', 'estacionamiento', 'parking lot'], ['愛心專用車位', 'espacio reservado (personas con discapacidad)', 'priority parking space'], ['停車費', 'tarifa de estacionamiento', 'parking fee'], ['折抵', 'descontar, compensar', 'offset, deduct'], ['發票', 'recibo de compra (factura)', 'receipt'], ['小時', 'hora', 'hour']],
   ENTRANCE: [['入口', 'entrada', 'entrance'], ['柵欄', 'barrera', 'barrier gate'], ['按鈕', 'botón', 'button'], ['停車票', 'boleto de estacionamiento', 'parking ticket'], ['喇叭', 'bocina', 'car horn']],
   FLOOR: [['地下一樓', 'sótano 1', 'basement level 1'], ['空位', 'espacio libre', 'free space'], ['滿了', 'lleno', 'full'], ['指示牌', 'letrero indicador', 'sign'], ['開到', 'conducir hasta', 'drive to']],
-  SPOT: [['一般車位', 'espacio normal', 'regular parking space'], ['愛心專用車位', 'espacio reservado', 'priority space'], ['輪椅', 'silla de ruedas', 'wheelchair'], ['車道', 'carril de circulación', 'driving lane'], ['擋住', 'bloquear', 'block']],
-  REMEMBER: [['區', 'zona', 'zone'], ['號', 'número', 'number'], ['柱子', 'columna, pilar', 'pillar'], ['傳', 'enviar', 'send'], ['停在', 'estacionar en', 'park at'], ['清楚', 'claro', 'clear']],
+  SPOT: [['一般車位', 'espacio normal', 'regular parking space'], ['愛心專用車位', 'espacio reservado', 'priority space'], ['輪椅', 'silla de ruedas', 'wheelchair'], ['車道', 'carril de circulación', 'driving lane'], ['空位', 'espacio libre', 'free space']],
+  REMEMBER: [['區', 'zona', 'zone'], ['號', 'número', 'number'], ['地下室', 'sótano', 'basement'], ['傳', 'enviar', 'send'], ['停在', 'estacionar en', 'park at'], ['哪裡', 'dónde', 'where']],
   PAY: [['繳費機', 'máquina de pago', 'pay station'], ['折抵', 'descontar', 'deduct'], ['掃描', 'escanear', 'scan'], ['發票', 'recibo', 'receipt'], ['一共', 'en total', 'in total'], ['每小時', 'por hora', 'per hour']],
-  FIND_CAR: [['停在哪裡', 'dónde estacionaste', 'where parked'], ['地下二樓', 'sótano 2', 'basement level 2'], ['任務提示', 'pistas', 'hints'], ['記得', 'recordar', 'remember'], ['找到', 'encontrar', 'find']],
+  FIND_CAR: [['停在哪裡', 'dónde estacionaste', 'where parked'], ['地下二樓', 'sótano 2', 'basement level 2'], ['車', 'auto, coche', 'car'], ['記得', 'recordar', 'remember'], ['找到', 'encontrar', 'find']],
   EXIT: [['出口', 'salida', 'exit'], ['放進', 'meter, introducir', 'put into'], ['機器', 'máquina', 'machine'], ['出場', 'salir (del estacionamiento)', 'exit the lot'], ['十五分鐘', 'quince minutos', 'fifteen minutes']],
   END: [['罰單', 'multa', 'ticket (fine)'], ['雨刷', 'limpiaparabrisas', 'windshield wiper'], ['開車', 'conducir', 'drive'], ['穩', 'estable, seguro', 'steady'], ['晚餐', 'cena', 'dinner']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
@@ -518,12 +518,11 @@ const Game = defineGame({
   amiLines() {
     const N = this.N, t = this.task;
     return [
-      L(`Ami：${N}，我在三樓的書店等你。你先把車停好。`, `${N}, te espero en la librería del tercer piso. Primero estaciona el auto.`, `${N}, I'll wait at the bookstore on the 3rd floor. Park the car first.`),
-      L('Ami：停車場在地下室。要停一般車位，不要停愛心專用車位喔！', 'El estacionamiento está en el sótano. Usa un espacio normal, ¡no uno reservado «de corazón» para personas con discapacidad!', "The parking is in the basement. Use a regular space — not a priority \"heart\" space for people with disabilities!"),
+      L(`Ami：${N}，我在三樓的書局等你。你先把車停到地下室。不要占用愛心專用車位喔！`, `${N}, te espero en la librería del tercer piso. Primero estaciona el auto en el sótano. ¡No ocupes un espacio reservado «de corazón» para personas con discapacidad!`, `${N}, I'll wait at the bookstore on the 3rd floor. First park the car in the basement. Don't take a priority "heart" space!`),
       L('Ami：停好車以後，傳訊息告訴我你停在哪裡，這樣等一下我們才找得到車。', 'Cuando termines, mándame un mensaje diciendo dónde estacionaste, para que después podamos encontrar el auto.', "Once you've parked, message me where you parked so we can find the car later."),
-      L(`Ami：我們大概會逛${NZ(t.h)}個小時。這裡每小時停車${t.rate}元；發票滿五百元折抵一小時，滿一千元折抵兩小時。`,
-        `Vamos a estar unas ${t.h} horas. Aquí se paga ${esM(t.rate)} por hora; un recibo de ${esM(500)} o más descuenta 1 hora, y de ${esM(1000)} o más, 2 horas.`,
-        `We'll be shopping about ${t.h} hours. Parking is ${enM(t.rate)} per hour; a receipt of ${enM(500)} or more takes off 1 hour, and ${enM(1000)} or more takes off 2 hours.`)
+      L(`Ami：我們大概會逛${NZ(t.h)}個小時。停車每小時${t.rate}元；不過好像發票滿五百元折抵一小時，以此類推。`,
+        `Vamos a estar unas ${t.h} horas. El estacionamiento cuesta ${esM(t.rate)} por hora; pero parece que un recibo de ${esM(500)} o más descuenta 1 hora, y así sucesivamente.`,
+        `We'll be shopping about ${t.h} hours. Parking is ${enM(t.rate)} per hour; but it seems a receipt of ${enM(500)} or more takes off 1 hour, and so on.`)
     ];
   },
   hintSections() {
@@ -592,7 +591,7 @@ const Game = defineGame({
         place: 'phone',
         html: () => Game.listHTML(),
         dialogue: () => [
-          L('（你開著Ami借你的車，到了星光百貨的停車場入口。手機響了一聲，是Ami傳來的LINE。）', '(Llegas en el auto que te prestó Ami a la entrada del estacionamiento del centro comercial. Tu celular suena: es un LINE de Ami.)', "(You drive up in the car Ami lent you to the parking entrance of the department store. Your phone buzzes — a LINE from Ami.)"),
+          L('（你開著車到了星光百貨的停車場入口。手機響了一聲，是Ami傳來的LINE。）', '(Llegas en el auto a la entrada del estacionamiento del centro comercial. Tu celular suena: es un LINE de Ami.)', "(You drive up to the parking entrance of the department store. Your phone buzzes — a LINE from Ami.)"),
           ...Game.amiLines(),
           L('我：好，我先去停車！', '¡Bien, voy a estacionar!', "OK, I'll go park!")
         ],
@@ -603,7 +602,7 @@ const Game = defineGame({
       /* ═══ 入口：拿停車票 ═══ */
       ENTRANCE: {
         place: 'gate',
-        dialogue: () => [L('（入口的柵欄擋住了路。旁邊有一台機器，上面有一個按鈕。）', '(La barrera te cierra el paso. A un lado hay una máquina con un botón.)', '(A barrier blocks the way. Next to it is a machine with a button.)')],
+        dialogue: () => [L('（入口柵欄旁邊有一台機器，上面有一個按鈕。）', '(Junto a la barrera de la entrada hay una máquina con un botón.)', '(Next to the entrance barrier is a machine with a button.)')],
         options: () => rot(['按按鈕，拿停車票。', '直接開過去。', '按喇叭，叫人來開門。']),
         next: c => {
           if (c !== '按按鈕，拿停車票。') {
@@ -628,7 +627,7 @@ const Game = defineGame({
           const f = floorOpts.indexOf(c) + 1;
           if (f !== t.floor) {
             Game.addMistake(M(`${FL(f)}已經滿了，沒有空位。`, `El ${FL_ES(f)} ya está lleno: no hay espacios libres.`, `${FL_EN(f)[0].toUpperCase() + FL_EN(f).slice(1)} is full — no free spaces.`),
-              [L(`（你開到${FL(f)}，每個位子都停了車，只好開回去。）`, `(Bajas al ${FL_ES(f)}: todos los espacios están ocupados, así que subes de nuevo.)`, `(You drive down to ${FL_EN(f)}: every space is taken, so you drive back.)`)]);
+              [L(`（你開到${FL(f)}，好像都停滿了。）`, `(Bajas al ${FL_ES(f)}: parece que todo está lleno.)`, `(You drive down to ${FL_EN(f)}: it looks like everything is full.)`)]);
             return;
           }
           goodFirst('FLOOR', '你看得很仔細！「滿」就是沒有空位了。', '¡Qué atento! «滿» significa que ya no hay espacios.', 'Sharp eyes! "滿" means there are no spaces left.');
@@ -652,7 +651,7 @@ const Game = defineGame({
             return;
           }
           goodFirst('SPOT', '很好！你停在一般車位，沒有停愛心專用車位。', '¡Muy bien! Estacionaste en un espacio normal, no en el reservado.', 'Good! You parked in a regular space, not the priority one.');
-          Game.thought = [L('（你把車停好，下了車。）', '(Estacionas el auto y bajas.)', '(You park the car and get out.)')];
+          Game.thought = null;
           Game.state = 'REMEMBER';
         }
       },
@@ -662,7 +661,6 @@ const Game = defineGame({
         place: 'phone',
         html: () => Game.pillarHTML(),
         dialogue: () => [
-          L('（旁邊的柱子上有一個牌子，寫著這裡的位置。）', '(En el pilar de al lado hay un letrero con la ubicación.)', '(On the pillar next to you is a sign showing where you are.)'),
           ami('你停好了嗎？你停在哪裡？', '¿Ya estacionaste? ¿Dónde quedó?', 'Did you park? Where are you parked?')
         ],
         options: () => rot([okMsg, '我停在地下室，很多車的地方。', `我停在${Game.locZh(t.floor, t.zone, t.n2)}。`]),
@@ -675,7 +673,7 @@ const Game = defineGame({
           }
           goodFirst('REMEMBER', '說得很清楚！哪一層、哪一區、幾號，都說到了。', '¡Lo dijiste muy claro! Nivel, zona y número.', 'Clearly said! Level, zone and number — all there.');
           Game.sent = L(`我：${okMsg}`, `Estoy en ${Game.locEs()}.`, `I'm at ${Game.locEn()}.`);
-          Game.thought = [ami('好，我知道了！我們逛完就去找車。', '¡Bien, entendido! Después de las compras vamos a buscar el auto.', "Got it! We'll go find the car after shopping."),
+          Game.thought = [ami('好，我知道了！', '¡Bien, entendido!', 'Got it!'),
             L(`（你們在百貨公司逛了${NZ(t.h)}個小時。）`, `(Pasan ${t.h} horas en el centro comercial.)`, `(You spend ${t.h} hours in the department store.)`)];
           Game.state = 'PAY';
         }
@@ -707,18 +705,16 @@ const Game = defineGame({
       FIND_CAR: {
         place: 'garage',
         dialogue: () => [
-          L('（你們坐電梯到地下室。）', '(Bajan en el ascensor al sótano.)', '(You take the elevator down to the basement.)'),
           ami('欸，我們的車停在哪裡呀？', '¿Eh, dónde estaba estacionado el auto?', 'Hey, where did we park the car?')
         ],
         options: () => rot([`在${Game.locZh()}。`, `在${Game.locZh(t.otherFloor, t.zone, t.n)}。`, `在${Game.locZh(t.floor, t.otherZone, t.n)}。`]),
         next: c => {
           if (c !== `在${Game.locZh()}。`) {
-            Game.addMistake(M(`你傳給Ami的訊息是：${Game.locZh()}。（看「任務提示」）`, `Tu mensaje a Ami decía: ${Game.locEs()}. (Mira las «pistas».)`, `Your message to Ami said: ${Game.locEn()}. (Check the hints.)`),
-              [L(`（你們走到${c.slice(1, -1)}，那裡沒有Ami的車。）`, '(Van hasta allá, pero ahí no está el auto de Ami.)', "(You walk over, but Ami's car isn't there.)")]);
+            Game.addMistake(M(`你傳給Ami的訊息是：${Game.locZh()}。`, `Tu mensaje a Ami decía: ${Game.locEs()}.`, `Your message to Ami said: ${Game.locEn()}.`));
             return;
           }
           goodFirst('FIND_CAR', '你記得很清楚！', '¡Lo recordabas muy bien!', 'You remembered it perfectly!');
-          Game.thought = [L('（你們找到車，上車了。）', '(Encuentran el auto y suben.)', '(You find the car and get in.)')];
+          Game.thought = null;
           Game.state = 'EXIT';
         }
       },
@@ -748,13 +744,11 @@ const Game = defineGame({
           Game._endGood = !Game.wrongSpot && Game.mistakes <= 2;
           track('game_complete', { game: 'parking', score: Game.score, elapsed: Game.elapsedTime });
           return Game._endGood ? [
-            L('（柵欄升起來了，你把車開出停車場。）', '(La barrera sube y sacas el auto del estacionamiento.)', '(The barrier rises and you drive out of the garage.)'),
-            ami(`太好了，${N}，你開車停車都很穩！我們去吃晚餐吧！`, `¡Genial, ${N}, manejas y estacionas con mucha seguridad! ¡Vamos a cenar!`, `Great, ${N} — you drive and park so steadily! Let's go have dinner!`)
+            ami(`太好了，${N}，你開車停車都很穩喔！我們去吃晚餐吧！`, `¡Genial, ${N}, manejas y estacionas con mucha seguridad! ¡Vamos a cenar!`, `Great, ${N} — you drive and park so steadily! Let's go have dinner!`)
           ] : Game.wrongSpot ? [
             L('（你們走回車子，發現雨刷上夾著一張罰單。）', '(Vuelven al auto y encuentran una multa bajo el limpiaparabrisas.)', '(You walk back to the car and find a ticket tucked under the wiper.)'),
             ami('啊！因為停在愛心專用車位，被開罰單了！下次要停一般車位喔。', '¡Ay! ¡Por estacionar en el espacio reservado nos pusieron una multa! La próxima vez, un espacio normal.', "Oh no! We got a fine for parking in the priority space! Next time, a regular space.")
           ] : [
-            L('（你把車開出停車場。）', '(Sacas el auto del estacionamiento.)', '(You drive out of the garage.)'),
             ami('辛苦了！停車真的不容易！我們去吃晚餐吧！', '¡Gracias por el esfuerzo! Estacionar no es fácil. ¡Vamos a cenar!', "Thanks for your effort! Parking really isn't easy. Let's go have dinner!")
           ];
         },
