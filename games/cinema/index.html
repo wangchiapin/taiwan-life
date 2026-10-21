@@ -244,8 +244,8 @@
   </div>
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
-    Ami 和她弟弟小宇約你週末晚上看電影。你先到電影院：看看板、買票、選座位、買爆米花，還要找到對的廳。<br>
-    <span data-es="Es sábado por la noche y tu amiga Ami y su hermano menor Xiaoyu quedaron en ir al cine contigo. Llegas primero: miras la cartelera, compras las entradas, eliges los asientos, compras palomitas y buscas la sala correcta." data-en="It's Saturday night and your friend Ami and her younger brother Xiaoyu are going to the movies with you. You get there first: check the board, buy the tickets, pick seats, buy popcorn, and find the right theater.">Es sábado por la noche y tu amiga Ami y su hermano menor Xiaoyu quedaron en ir al cine contigo. Llegas primero: miras la cartelera, compras las entradas, eliges los asientos, compras palomitas y buscas la sala correcta.</span>
+    Ami 和她弟弟小宇約你週末晚上看電影。你提早先到電影院，要幫大家買票。<br>
+    <span data-es="Es sábado por la noche y tu amiga Ami y su hermano menor Xiaoyu quedaron en ir al cine contigo. Llegas temprano y tienes que comprar las entradas para todos." data-en="It's Saturday night and your friend Ami and her younger brother Xiaoyu are going to the movies with you. You arrive early and have to buy the tickets for everyone.">Es sábado por la noche y tu amiga Ami y su hermano menor Xiaoyu quedaron en ir al cine contigo. Llegas temprano y tienes que comprar las entradas para todos.</span>
   </p>
 </div>
 
@@ -396,7 +396,7 @@ const SPEAKER_RE = /^(Ami|售票員|店員|驗票員|阿伯|小宇|我)：/;
 ══════════════════════════════════════ */
 const VOCAB = {
   START: [['電影院', 'cine', 'cinema'], ['那一場', 'esa función', 'that showing'], ['學生證', 'credencial de estudiante', 'student ID'], ['連在一起', 'juntos (uno al lado del otro)', 'side by side'], ['爆米花', 'palomitas', 'popcorn'], ['鹹的', 'salado', 'salty one'], ['甜的', 'dulce', 'sweet one']],
-  BOARD: [['看板', 'cartelera', 'board'], ['場次', 'horarios de funciones', 'showtimes'], ['哪一場', '¿cuál función?', 'which showing?'], ['晚上', 'por la noche', 'in the evening'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask']],
+  BOARD: [['螢幕', 'pantalla', 'screen'], ['場次', 'horarios de funciones', 'showtimes'], ['哪一場', '¿cuál función?', 'which showing?'], ['晚上', 'por la noche', 'in the evening'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask']],
   TICKETS: [['全票', 'entrada completa', 'full-price ticket'], ['學生票', 'entrada de estudiante', 'student ticket'], ['張', 'clasificador de entradas', 'measure word for tickets'], ['兩', 'dos (antes de un clasificador)', 'two (before a measure word)'], ['票價', 'precio de la entrada', 'ticket price']],
   SEATS: [['座位', 'asiento', 'seat'], ['排', 'fila', 'row'], ['號', 'número', 'number'], ['第', 'prefijo de número ordinal', 'ordinal prefix'], ['前面', 'adelante', 'the front'], ['連在一起', 'juntos', 'side by side']],
   PAY: [['一共', 'en total', 'in total'], ['夠', 'alcanzar, ser suficiente', 'be enough'], ['一千元', 'mil dólares', 'one thousand dollars'], ['便宜一點', 'un poco más barato', 'a little cheaper'], ['固定', 'fijo', 'fixed']],
@@ -704,7 +704,7 @@ const Game = defineGame({
         place: 'board',
         html: () => Game.boardHTML(),
         dialogue: () => [
-          L('（你走到售票櫃台，上面的電子看板列出今晚的電影。）', '(Llegas a la taquilla; la pantalla de arriba muestra las películas de esta noche.)', '(You reach the ticket counter; the screen above lists tonight\'s movies.)'),
+          L('（你走到售票櫃台，上面的螢幕列出今晚的電影。）', '(Llegas a la taquilla; la pantalla de arriba muestra las películas de esta noche.)', '(You reach the ticket counter; the screen above lists tonight\'s movies.)'),
           staff('你好，請問要看哪一場？', 'Hola, ¿qué función desea ver?', 'Hello, which showing would you like?')
         ],
         options: () => rot([combo(t.movie, t.time), combo(t.movie, t.wrongTime), combo(t.wrongMovie, t.time)]),
@@ -712,8 +712,8 @@ const Game = defineGame({
           if (c !== combo(t.movie, t.time)) {
             const wrongTime = c.includes(t.movie.zh);
             Game.addMistake(wrongTime
-              ? M(`Ami說的是${Game.timeZh()}那一場。`, `Ami dijo la función de las ${t.time.es}.`, `Ami said the ${t.time.en} showing.`)
-              : M(`Ami要看的是《${t.movie.zh}》。`, `Ami quiere ver «${t.movie.es}».`, `Ami wants to see "${t.movie.en}".`));
+              ? M(`你記錯了啦！Ami說的是${Game.timeZh()}那一場。`, `¡Te equivocaste! Ami dijo la función de las ${t.time.es}.`, `You got it wrong! Ami said the ${t.time.en} showing.`)
+              : M(`Ami要看的是《${t.movie.zh}》欸。`, `Ami quiere ver «${t.movie.es}», ¿eh?`, `Ami wants to see "${t.movie.en}", you know.`));
             return;
           }
           goodFirst('BOARD', '看得很仔細！買票以前，要先確認片名和時間。', '¡Qué atento! Antes de comprar, confirma el título y el horario.', 'Well done! Before buying, check the title and the time.');
@@ -732,7 +732,7 @@ const Game = defineGame({
           if (c !== goodTickets) {
             Game.addMistake(c === `${nw(t.people, '全票')}。`
               ? M('小宇是大學生，他可以買學生票，比較便宜。', 'Xiaoyu es universitario: puede comprar entrada de estudiante, que es más barata.', 'Xiaoyu is a university student, so he can buy a cheaper student ticket.')
-              : M('你和Ami不是學生，要買全票。', 'Tú y Ami no son estudiantes: tienen que comprar entrada completa.', "You and Ami aren't students, so you need full-price tickets."));
+              : M('你和Ami已經不是學生了，要買全票。', 'Tú y Ami ya no son estudiantes: tienen que comprar entrada completa.', "You and Ami aren't students anymore, so you need full-price tickets."));
             return;
           }
           goodFirst('TICKETS', '很好！學生票比較便宜，但是要出示學生證。', '¡Muy bien! La entrada de estudiante es más barata, pero hay que mostrar la credencial.', 'Great! Student tickets are cheaper, but you have to show a student ID.');
@@ -756,13 +756,13 @@ const Game = defineGame({
           });
         },
         single: true,
-        dialogue: () => [staff('這是座位表，灰色的位子已經賣掉了。請選位子。', 'Este es el plano de asientos; los grises ya están vendidos. Elija sus asientos, por favor.', 'Here is the seat map; the gray seats are already sold. Please choose your seats.')],
+        dialogue: () => [staff('這是座位表，灰色的位子已經賣掉了。你看你想坐哪裡。', 'Este es el plano de asientos; los grises ya están vendidos. Mire dónde le gustaría sentarse.', "Here is the seat map; the gray seats are already sold. Take a look at where you'd like to sit.")],
         options: ['確定這些位子'],
         next: () => {
           const ks = Game.seats.slice(), rows = [...new Set(ks.map(k => +k.split('-')[0]))], cs = ks.map(k => +k.split('-')[1]).sort((a, b) => a - b);
           let bad = null;
           if (ks.length !== t.people) bad = M(`你們有${t.people}個人，要選${t.people}個位子。`, `Son ${t.people} personas: hay que elegir ${t.people} asientos.`, `There are ${t.people} of you, so you need to pick ${t.people} seats.`);
-          else if (rows.length > 1) bad = M('要坐在同一排。', 'Tienen que sentarse en la misma fila.', 'You need to sit in the same row.');
+          else if (rows.length > 1) bad = M('你忘記Ami說座位要連在一起嗎？要坐在同一排。', '¿Olvidaste que Ami dijo que los asientos fueran juntos? Tienen que sentarse en la misma fila.', 'Did you forget Ami said the seats should be together? You need to sit in the same row.');
           else if (cs.some((c, i) => i && c !== cs[i - 1] + 1)) bad = M('號碼要連在一起，才能坐在一起。', 'Los números tienen que ser seguidos para sentarse juntos.', 'The seat numbers have to be consecutive to sit together.');
           else if (!R.rows.includes(rows[0])) bad = M(`Ami的要求：${R.zh}`, `Lo que pidió Ami: ${R.es}`, `What Ami asked for: ${R.en}`);
           if (bad) { Game.seats = []; Game.addMistake(bad); return; }
@@ -787,14 +787,13 @@ const Game = defineGame({
           }
           goodFirst('PAY', '沒錯！你沒有零錢，就付整張的錢，他會找錢給你。', '¡Exacto! Si no tienes cambio, entregas los billetes completos y te darán el cambio.', "Right! You don't have small change, so hand over the whole bills and they'll give you change.");
           Game.cash = 0; Game.updateCash();
-          Game.thought = [staff(`收你${zhNum(t.bills * 1000)}元，找你${zhNum(Game.given)}元。`, `Recibo ${esM(t.bills * 1000)}; le doy ${esM(Game.given)} de cambio.`, `I've got ${enM(t.bills * 1000)} — here's ${enM(Game.given)} change.`)];
           Game.state = 'CHANGE';
         }
       },
       CHANGE: {
         place: 'counter',
         html: () => `<div class="board"><div class="bh">💵 ${Game.ruby('找的錢')}</div><div class="brow"><span class="tm">${Game.given}</span><small>${Game.ruby('元')}</small></div></div>`,
-        dialogue: () => [L('（售票員把電影票和零錢放在桌上。）', '(La persona de la taquilla pone las entradas y el cambio sobre el mostrador.)', '(The ticket seller puts the tickets and the change on the counter.)')],
+        dialogue: () => [staff(`收你${zhNum(t.bills * 1000)}元，找你${zhNum(Game.given)}元。`, `Recibo ${esM(t.bills * 1000)}; le doy ${esM(Game.given)} de cambio.`, `I've got ${enM(t.bills * 1000)} — here's ${enM(Game.given)} change.`)],
         options: () => rot(['好，謝謝。', '不好意思，你找錯了。']).slice(0, 2),
         next: c => {
           const right = Game.given === t.change, thanks = c === '好，謝謝。', paid = t.bills * 1000;
@@ -808,8 +807,8 @@ const Game = defineGame({
           if (!right) Game.given = t.change;
           Game.cash = t.change; Game.updateCash();
           Game.thought = right
-            ? [L('（你收好電影票和零錢。）', '(Guardas las entradas y el cambio.)', '(You put away the tickets and the change.)')]
-            : [staff(`啊，不好意思！這裡是${zhNum(t.change)}元。`, `¡Ay, disculpe! Aquí tiene ${esM(t.change)}.`, `Oh, sorry! Here's ${enM(t.change)}.`), L('（你收好電影票和零錢。）', '(Guardas las entradas y el cambio.)', '(You put away the tickets and the change.)')];
+            ? null
+            : [staff(`啊，不好意思！這裡是${zhNum(t.change)}元。`, `¡Ay, disculpe! Aquí tiene ${esM(t.change)}.`, `Oh, sorry! Here's ${enM(t.change)}.`)];
           Game.state = 'SNACK';
         }
       },
@@ -822,7 +821,7 @@ const Game = defineGame({
         next: c => {
           if (c !== `一份${sn[0]}爆米花。`) {
             Game.addMistake(c.includes('可樂')
-              ? M('Ami要吃爆米花，只買可樂不夠。', 'Ami quiere palomitas: solo la cola no basta.', 'Ami wants popcorn — just a cola is not enough.')
+              ? M('Ami還要吃爆米花，只買可樂不夠。', 'Ami también quiere palomitas: solo la cola no basta.', 'Ami wants popcorn too — just a cola is not enough.')
               : M(`Ami說她要${sn[0]}爆米花，不要${other[0]}的。`, `Ami dijo que quería palomitas ${sn[3]}, no ${other[3]}.`, `Ami said she wants ${sn[2]} popcorn, not ${other[2]}.`));
             return;
           }
@@ -850,7 +849,7 @@ const Game = defineGame({
             return;
           }
           goodFirst('GATE', '很好！買學生票，記得帶學生證。', '¡Muy bien! Si compras entrada de estudiante, lleva la credencial.', 'Good! If you buy a student ticket, bring your student ID.');
-          Game.thought = [L('驗票員：好，沒問題。請進，祝你們看得開心！', 'Muy bien, todo en orden. Pasen; ¡que disfruten la película!', 'Alright, no problem. Go on in — enjoy the movie!')];
+          Game.thought = [L('驗票員：好，沒問題。請進！', 'Muy bien, todo en orden. Pasen.', 'Alright, no problem. Go on in!')];
           Game.state = 'FIND_HALL';
         }
       },
@@ -860,7 +859,6 @@ const Game = defineGame({
         place: 'hall',
         html: () => Game.ticketHTML(),
         dialogue: () => [
-          L('（電影院裡有好幾個廳，每個門口都寫著廳號。）', '(Hay varias salas en el cine y cada puerta tiene el número de sala.)', '(The cinema has several theaters, and each door shows its number.)'),
           L('我：我們的票上寫幾廳呢？', '¿Qué sala dice en nuestras entradas?', 'Which theater does our ticket say?')
         ],
         options: () => rot(hallOpts.map(h => `走進${CN[h]}廳`)),
@@ -890,7 +888,7 @@ const Game = defineGame({
           if (!c.startsWith('不好意思')) {
             if (c.startsWith('好吧')) Game.wrongSeat = true;
             Game.addMistake(c.startsWith('好吧')
-              ? M('票上有位子，要坐票上的位子（對號入座），不能隨便讓給別人。', 'La entrada indica el asiento: hay que sentarse en el que corresponde (no cederlo así como así).', "Your ticket has assigned seats — sit in the seats on it; don't just give them up.")
+              ? M('票上有位子，要對號入座，不要隨便讓給別人。', 'La entrada indica el asiento: hay que sentarse en el que corresponde (no cederlo así como así).', "Your ticket has assigned seats — sit in the seats on it; don't just give them up.")
               : M('要有禮貌，先說「不好意思」，再請他看票。', 'Hay que ser cortés: di «disculpe» y pídele que revise su entrada.', 'Be polite: say "excuse me" first, then ask him to check his ticket.'),
               c.startsWith('好吧') ? [L('阿伯：謝謝你喔。', 'Gracias.', 'Thank you.')] : [L('阿伯：什麼？你怎麼這麼沒禮貌！', '¿Qué? ¡Qué falta de respeto!', 'What? How rude!')]);
             return;
@@ -928,7 +926,6 @@ const Game = defineGame({
           const why = Game.wrongHall ? ['走錯了廳', 'se equivocaron de sala', 'You went into the wrong theater']
             : Game.wrongSeat ? ['位子被人坐走了', 'les ocuparon los asientos', 'Someone took your seats'] : ['買票的時候出了很多錯', 'hubo muchos errores al comprar', 'You made a lot of mistakes buying the tickets'];
           return Game._endGood ? [
-            L('（電影結束了，燈亮起來。）', '(Termina la película y se encienden las luces.)', '(The movie ends and the lights come up.)'),
             L(`Ami：哇，這部電影超好看的！謝謝你幫我們買票，${N}，你太厲害了！`, `¡Guau, qué buena película! Gracias por comprar las entradas, ${N}, ¡eres genial!`, `Wow, that movie was great! Thanks for buying the tickets, ${N} — you're amazing!`)
           ] : [
             L(`（電影結束了。因為${why[0]}，你們錯過了前面的劇情。）`, `(Termina la película. Como ${why[1]}, se perdieron el principio de la historia.)`, `(The movie ends. ${why[2]}, so you missed part of the beginning.)`),
