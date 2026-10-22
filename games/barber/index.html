@@ -232,8 +232,8 @@
   </div>
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
-    Ami 說你的頭髮太長了。你要先打電話預約，選對時間、說對電話號碼，到店說「有預約」，說明怎麼剪，水太燙要有禮貌地說，最後付錢、算找錢。<br>
-    <span data-es="Ami dice que tienes el pelo muy largo. Reserva primero por teléfono, elige bien el horario y di tu número; en la tienda di que tienes cita, explica el corte, pide con cortesía que enfríen el agua y al final paga y revisa el cambio." data-en="Ami says your hair is too long. Book by phone first — pick the right time and give your number — then say you have an appointment, explain the cut, politely ask for cooler water, and finally pay and check your change.">Ami dice que tienes el pelo muy largo. Reserva primero por teléfono, elige bien el horario y di tu número; en la tienda di que tienes cita, explica el corte, pide con cortesía que enfríen el agua y al final paga y revisa el cambio.</span>
+    Ami 說你的頭髮太長了，要找時間去剪頭髮。對了，你有自己去剪頭髮過嗎？<br>
+    <span data-es="Ami dice que tienes el pelo muy largo y que tienes que buscar un momento para cortártelo. Por cierto, ¿alguna vez has ido a cortarte el pelo por tu cuenta?" data-en="Ami says your hair is too long and you should find time to get it cut. By the way, have you ever gone for a haircut on your own?">Ami dice que tienes el pelo muy largo y que tienes que buscar un momento para cortártelo. Por cierto, ¿alguna vez has ido a cortarte el pelo por tu cuenta?</span>
   </p>
 </div>
 
@@ -346,15 +346,15 @@ const VOCAB = {
   START: [['理髮店', 'peluquería', 'hair salon'], ['剪髮', 'cortarse el pelo', 'get a haircut'], ['預約', 'hacer una cita / reservar', 'make an appointment'], ['頭髮', 'cabello', 'hair'], ['瀏海', 'flequillo', 'bangs / fringe']],
   BOOK_OPEN: [['預約', 'hacer una cita / reservar', 'make an appointment'], ['電話', 'teléfono', 'phone'], ['排隊', 'hacer fila', 'wait in line'], ['設計師', 'estilista', 'stylist']],
   BOOK_TIME: [['星期', 'día de la semana', 'day of the week'], ['上午', 'por la mañana', 'a.m. / morning'], ['下午', 'por la tarde', 'p.m. / afternoon'], ['晚上', 'por la noche', 'evening'], ['有空', 'estar libre', 'be free / available']],
-  BOOK_PHONE: [['電話', 'teléfono', 'phone'], ['號碼', 'número', 'number'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['確認', 'confirmar', 'confirm']],
+  BOOK_PHONE: [['電話', 'teléfono', 'phone'], ['我的', 'mi', 'my'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['確認', 'confirmar', 'confirm']],
   ARRIVE: [['有預約', 'tener cita', 'have an appointment'], ['姓名', 'nombre', 'name'], ['排隊', 'hacer fila', 'wait in line'], ['坐', 'sentarse', 'sit']],
   STYLE_LEN: [['肩膀', 'hombros', 'shoulders'], ['下巴', 'mentón', 'chin'], ['耳朵', 'oreja', 'ear'], ['剪到', 'cortar hasta…', 'cut up to…'], ['多短', 'qué tan corto', 'how short']],
   STYLE_BANG: [['瀏海', 'flequillo', 'bangs / fringe'], ['修一下', 'retocar un poco', 'trim a little'], ['不用剪', 'no hace falta cortar', 'no need to cut'], ['眉毛', 'ceja', 'eyebrow']],
-  WASH: [['洗頭', 'lavar el cabello', 'wash hair'], ['燙', 'muy caliente', 'scalding hot'], ['冷一點', 'un poco más frío', 'a bit cooler'], ['水', 'agua', 'water'], ['不好意思', 'disculpe', 'excuse me']],
+  WASH: [['有點', 'un poco', 'a bit'], ['燙', 'muy caliente', 'scalding hot'], ['沒關係', 'no importa', "it's fine"], ['水', 'agua', 'water'], ['不好意思', 'disculpe', 'excuse me']],
   MIRROR: [['鏡子', 'espejo', 'mirror'], ['後面', 'atrás', 'the back'], ['短一點', 'un poco más corto', 'a bit shorter'], ['滿意', 'satisfecho', 'satisfied']],
   PAY: [['一共', 'en total', 'in total'], ['元', 'dólares taiwaneses', 'NT dollars'], ['付錢', 'pagar', 'pay'], ['五百元', '500 dólares', '500 NT dollars'], ['找錢', 'dar el cambio', 'give change']],
   CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give the wrong change'], ['應該', 'debería', 'should'], ['數', 'contar', 'count']],
-  END: [['剪好', 'ya cortado', 'finished cutting'], ['方便', 'cómodo, práctico', 'convenient'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
+  END: [['剪好', 'ya cortado', 'finished cutting'], ['好看', 'bonito', 'good-looking'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 
@@ -455,9 +455,8 @@ const Game = defineGame({
   amiLines() {
     const t = this.task, l = t.len;
     return [
-      L('Ami：你頭髮太長了，去剪一剪吧！先預約比較不用等喔。', 'Tienes el pelo muy largo, ¡ve a cortártelo! Es mejor reservar primero para no esperar.', 'Your hair is too long — go get it cut! Booking first means less waiting.'),
-      L(`Ami：你這個${t.want.slice(0, 3)}下午${t.hr === 2 ? '兩' : CN[t.hr]}點有空，對吧？`, `Tienes libre ese día a las ${t.hr} de la tarde, ¿verdad?`, `You're free that day at ${t.hr} p.m., right?`),
-      L(`Ami：剪到${l[0]}就好，瀏海${t.bang[0]}。`, `Cortar hasta ${l[1]} es suficiente; flequillo: ${t.bang[1]}.`, `Cut it to ${l[2]}; bangs: ${t.bang[2]}.`)
+      L(`Ami：你頭髮太長了，去剪一剪吧！你這個${t.want.slice(0, 3)}下午${t.hr === 2 ? '兩' : CN[t.hr]}點有空，對吧？先預約比較不用等喔。`, `Tienes el pelo muy largo, ¡ve a cortártelo! Tienes libre ese día a las ${t.hr} de la tarde, ¿verdad? Es mejor reservar primero para no esperar.`, `Your hair is too long — go get it cut! You're free that day at ${t.hr} p.m., right? Booking first means less waiting.`),
+      L(`Ami：我覺得你剪到${l[0]}就好，瀏海${t.bang[0]}。`, `Creo que cortar hasta ${l[1]} es suficiente; flequillo: ${t.bang[1]}.`, `I think cutting it to ${l[2]} is enough; bangs: ${t.bang[2]}.`)
     ];
   },
 
@@ -500,19 +499,19 @@ const Game = defineGame({
       START: {
         place: 'phone',
         html: () => Game.listHTML(),
-        dialogue: () => [L('（你的頭髮太長了。手機響了一聲，是 Ami 傳來的 LINE。）', '(Tienes el pelo muy largo. Tu celular suena: es un LINE de Ami.)', '(Your hair is too long. Your phone buzzes — a LINE from Ami.)'), ...Game.amiLines(), L('我：好，我先預約！', '¡Bien, primero reservo!', "OK, I'll book first!")],
+        dialogue: () => [L('（手機響了一聲，是 Ami 傳來的 LINE。）', '(Tu celular suena: es un LINE de Ami.)', '(Your phone buzzes — a LINE from Ami.)'), ...Game.amiLines(), L('我：好，我先預約！', '¡Bien, primero reservo!', "OK, I'll book first!")],
         options: ['拿起手機'],
         next: () => { Game.startTimer(); Game.state = 'BOOK_OPEN'; }
       },
 
       BOOK_OPEN: {
         place: 'phone',
-        dialogue: () => [L('（你找到一間理髮店，門口貼著：「歡迎預約，電話 0900-000-000」。）', '(Encuentras una peluquería. En la puerta dice: «歡迎預約»: se aceptan reservas por teléfono.)', '(You find a salon. A sign on the door reads 歡迎預約 — reservations welcome.)'), L('我：我要怎麼做呢？', '¿Qué hago?', 'What should I do?')],
+        dialogue: () => [L('（你在手機上找到一間理髮店，上面寫著：「歡迎預約，電話 0900-000-000」。）', '(Encuentras una peluquería en tu celular. Dice: «歡迎預約»: se aceptan reservas por teléfono.)', '(You find a salon on your phone. It says 歡迎預約 — reservations welcome.)'), L('我：我要怎麼做呢？', '¿Qué hago?', 'What should I do?')],
         options: () => rot(['打電話預約', '直接去，在門口排隊', '等頭髮更長再說']),
         next: c => {
           if (c !== '打電話預約') {
             Game.addMistake(c.startsWith('直接') ? M('Ami 說先預約比較不用等。打電話預約，就可以選自己有空的時間。', 'Ami dijo que reservar evita la espera. Si llamas, puedes elegir el horario en que estás libre.', 'Ami said booking means less waiting. Call, and you can choose a time you are free.')
-                                              : M('頭髮太長了，現在就預約吧。', 'Tu pelo ya está largo: reserva ahora.', 'Your hair is already too long — book now.')); return;
+                                              : M('頭髮太長了啦，現在就預約吧。', 'Tu pelo ya está largo: reserva ahora.', 'Your hair is already too long — book now.')); return;
           }
           goodFirst('BOOK_OPEN', '對！先預約，就不用在店裡等很久。', '¡Correcto! Si reservas antes, no tendrás que esperar mucho en la tienda.', "Right! Book first and you won't wait long at the shop.");
           Game.thought = [boss('喂，這裡是理髮店，要預約嗎？', 'Aló, peluquería. ¿Quiere reservar?', "Hello, hair salon. Would you like to book?")];
@@ -526,7 +525,7 @@ const Game = defineGame({
         options: () => rot(t.slots.map(s => '我要' + s)),
         next: c => {
           if (c !== '我要' + t.want) {
-            Game.addMistake(M(`你${t.want.slice(0, 3)}下午${t.hr === 2 ? '兩' : CN[t.hr]}點才有空，要選「${t.want}」。`, `Solo estás libre el día indicado a las ${t.hr} de la tarde: elige «${t.want}».`, `You're only free at ${t.hr} p.m. on that day: pick "${t.want}".`)); return;
+            Game.addMistake(M(`想清楚一點，你${t.want.slice(0, 3)}下午${t.hr === 2 ? '兩' : CN[t.hr]}點才有空，要選「${t.want}」。`, `Piénsalo bien: solo estás libre el día indicado a las ${t.hr} de la tarde; elige «${t.want}».`, `Think it through: you're only free at ${t.hr} p.m. on that day — pick "${t.want}".`)); return;
           }
           goodFirst('BOOK_TIME', '你選對時間了！星期和幾點都要聽清楚。', '¡Elegiste bien! Hay que escuchar con atención el día y la hora.', 'You picked the right time! Listen carefully to both the day and the hour.');
           Game.thought = [boss(`好，${t.want}。請問你的電話幾號？`, `Bien, ${t.want}. ¿Cuál es su número de teléfono?`, `OK, ${t.want}. And your phone number?`)];
@@ -535,20 +534,20 @@ const Game = defineGame({
       },
       BOOK_PHONE: {
         place: 'call',
-        dialogue: () => [L('（老闆在電腦上打字，等你說電話號碼。）', '(El dueño teclea en la computadora, esperando tu número.)', '(The owner types on a computer, waiting for your number.)'), L('我：我的電話是……', 'Mi teléfono es…', 'My number is…')],
+        dialogue: () => [L('我：我的電話是……', 'Mi teléfono es…', 'My number is…')],
         options: () => rot(t.phones.map(p => p)),
         next: c => {
           if (c !== t.phone) {
-            Game.addMistake(M(`你的電話是 ${t.phone}。要看清楚每個數字。`, `Tu número es ${t.phone}. Revisa bien cada dígito.`, `Your number is ${t.phone}. Check every digit.`)); return;
+            Game.addMistake(M(`你的電話是 ${t.phone}。怎麼會忘記了呢？`, `Tu número es ${t.phone}. ¿Cómo pudiste olvidarlo?`, `Your number is ${t.phone}. How could you forget?`)); return;
           }
           goodFirst('BOOK_PHONE', '電話號碼對了！', '¡El número es correcto!', 'The phone number is right!');
-          Game.thought = [boss(`好，${t.want}，我們等你。`, `Bien, ${t.want}; te esperamos.`, `OK, ${t.want} — we'll see you then.`), L('（預約的日子到了。你走進理髮店。）', '(Llega el día de tu cita. Entras a la peluquería.)', '(The day arrives. You walk into the salon.)')];
+          Game.thought = [boss(`好，${t.want}，謝謝。`, `Bien, ${t.want}; gracias.`, `OK, ${t.want} — thank you.`)];
           Game.state = 'ARRIVE';
         }
       },
       ARRIVE: {
         place: 'salon',
-        dialogue: () => [L('（店裡有幾個客人在等。設計師看到你走進來。）', '(Hay varios clientes esperando. El estilista te ve entrar.)', '(Several customers are waiting. The stylist sees you come in.)'), sd('歡迎光臨！請問有預約嗎？', '¡Bienvenido! ¿Tiene cita?', 'Welcome! Do you have an appointment?')],
+        dialogue: () => [sd('歡迎光臨！請問有預約嗎？', '¡Bienvenido! ¿Tiene cita?', 'Welcome! Do you have an appointment?')],
         options: () => rot([`有，我有預約，我叫${N}。`, '沒有，我要排隊。', '我要剪頭髮。']),
         next: c => {
           if (!c.startsWith('有，')) {
@@ -565,9 +564,9 @@ const Game = defineGame({
         options: () => rot(LENS.map(l => `剪到${l[0]}`)),
         next: c => {
           if (c !== `剪到${t.len[0]}`) {
-            Game.addMistake(M(`Ami 說剪到${t.len[0]}就好。`, `Ami dijo que bastaba con cortar hasta ${t.len[1]}.`, `Ami said to cut it to ${t.len[2]}.`)); return;
+            Game.addMistake(M(`Ami 建議剪到${t.len[0]}就好，聽她的建議吧！`, `Ami sugirió cortar hasta ${t.len[1]}: ¡hazle caso!`, `Ami suggested cutting it to ${t.len[2]} — take her advice!`)); return;
           }
-          goodFirst('STYLE_LEN', '你說得很清楚！', '¡Lo dijiste muy claro!', 'You said it clearly!');
+          goodFirst('STYLE_LEN', '你說得很清楚唷！', '¡Lo dijiste muy claro!', 'You said it clearly!');
           Game.state = 'STYLE_BANG';
         }
       },
@@ -577,7 +576,7 @@ const Game = defineGame({
         options: () => rot(BANGS.map(b => `瀏海${b[0]}`)),
         next: c => {
           if (c !== `瀏海${t.bang[0]}`) {
-            Game.addMistake(M(`Ami 說瀏海${t.bang[0]}。`, `Ami dijo: flequillo, ${t.bang[1]}.`, `Ami said the bangs: ${t.bang[2]}.`)); return;
+            Game.addMistake(M(`Ami 建議瀏海${t.bang[0]}，聽她的建議吧！`, `Ami sugirió: flequillo, ${t.bang[1]}. ¡Hazle caso!`, `Ami suggested the bangs: ${t.bang[2]} — take her advice!`)); return;
           }
           goodFirst('STYLE_BANG', '很好，設計師知道怎麼剪了。', 'Muy bien, el estilista ya sabe cómo cortar.', 'Good — now the stylist knows how to cut.');
           Game.thought = [sd('好，先去洗頭吧。', 'Bien, primero vamos a lavarle el cabello.', "OK, let's wash your hair first.")];
@@ -586,15 +585,15 @@ const Game = defineGame({
       },
       WASH: {
         place: 'salon',
-        dialogue: () => [L('（助理幫你洗頭。水太燙了！）', '(Una asistente te lava el cabello. ¡El agua está demasiado caliente!)', '(An assistant washes your hair. The water is scalding!)'), L('我：要怎麼說呢？', '¿Cómo lo digo?', 'What do I say?')],
-        options: () => rot(['不好意思，水有點燙，可以冷一點嗎？', '沒關係，我忍一下。', '啊！好燙！你想燙死我嗎？']),
+        dialogue: () => [L('（水太燙了！）', '(¡El agua está demasiado caliente!)', '(The water is scalding!)'), L('我：要怎麼說呢？', '¿Cómo lo digo?', 'What do I say?')],
+        options: () => rot(['不好意思，水有點燙。', '沒關係，我忍一下。', '媽的！好燙！你想燙死我嗎？']),
         next: c => {
           if (!c.startsWith('不好意思')) {
-            Game.addMistake(c.startsWith('沒關係') ? M('水太燙會受傷，要說出來。用「不好意思…可以…嗎？」很有禮貌。', 'El agua muy caliente puede lastimar: hay que decirlo. «不好意思…可以…嗎？» es muy cortés.', 'Scalding water can hurt — speak up. 不好意思…可以…嗎？ is very polite.')
-                                              : M('不要生氣，禮貌地說就好：「不好意思，水有點燙，可以冷一點嗎？」', 'No te enojes; di con cortesía: «不好意思，水有點燙，可以冷一點嗎？».', "Don't get angry — just say politely: 不好意思，水有點燙，可以冷一點嗎？")); return;
+            Game.addMistake(c.startsWith('沒關係') ? M('水太燙要說，不然會燙傷！', '¡Si el agua está muy caliente, hay que decirlo; si no, te quemas!', 'If the water is too hot, say so — or you will get burned!')
+                                              : M('不要生氣，禮貌地說就好：「不好意思，水有點燙。」', 'No te enojes; di con cortesía: «不好意思，水有點燙».', "Don't get angry — just say politely: 不好意思，水有點燙。")); return;
           }
-          goodFirst('WASH', '很有禮貌！「不好意思，可以…嗎？」很好用。', '¡Muy cortés! «不好意思，可以…嗎？» es muy útil.', '很有禮貌！「不好意思，可以…嗎？」 is a very handy pattern.');
-          Game.thought = [L('（助理說：「好的，這樣可以嗎？」水剛剛好。洗好了，你回到座位，設計師開始剪。）', '(La asistente dice: «Claro, ¿así está bien?». El agua queda perfecta. Terminan de lavarte y el estilista empieza a cortar.)', '(The assistant says, "Sure — is this OK?" The water is just right. You return to your seat and the stylist begins cutting.)')];
+          goodFirst('WASH', '很有禮貌！說「不好意思」就不會讓人不舒服。', '¡Muy cortés! Decir «不好意思» evita que la otra persona se sienta incómoda.', 'Very polite! Saying 不好意思 keeps things comfortable for everyone.');
+          Game.thought = [L('助理：好的，這樣可以嗎？', 'Claro, ¿así está bien?', 'Sure — is this OK?'), L('（洗好了，你回到座位，設計師開始剪。）', '(Terminan de lavarte y vuelves a tu asiento; el estilista empieza a cortar.)', '(You are done washing and return to your seat; the stylist begins cutting.)')];
           Game.state = 'MIRROR';
         }
       },
@@ -604,7 +603,7 @@ const Game = defineGame({
         options: () => rot(['後面可以再短一點嗎？', '很好，謝謝。', '（不說話，回家再自己剪）']),
         next: c => {
           if (c !== '後面可以再短一點嗎？') {
-            Game.addMistake(M('你覺得後面還有點長，現在就要說。設計師不會知道你在想什麼。', 'Sientes que atrás sigue largo: dilo ahora; el estilista no puede adivinarlo.', "You feel the back is still long, so say so now — the stylist can't read your mind.")); return;
+            Game.addMistake(M('你覺得後面還有點長就要說，不然設計師不知道你在想什麼。', 'Sientes que atrás sigue largo: dilo ahora; el estilista no puede adivinarlo.', "You feel the back is still long, so say so now — the stylist can't read your mind.")); return;
           }
           goodFirst('MIRROR', '你有說出自己的想法，很好！', '¡Dijiste lo que pensabas, muy bien!', 'Good — you said what you were thinking!');
           Game.thought = [sd('好，我再修一下。……這樣可以嗎？', 'Bien, lo retoco… ¿así está bien?', 'OK, I\'ll trim a bit more… How is that?'), L('我：可以了，謝謝！', '¡Así está bien, gracias!', "That's good, thanks!")];
@@ -629,7 +628,7 @@ const Game = defineGame({
         place: 'counter',
         html: () => Game.changeHTML(),
         dialogue: () => [L(`（你付了五百元，總共${t.price}元。老闆找給你${t.given}元。）`, `(Pagaste 500; el total es ${t.price}. El dueño te devuelve ${t.given}.)`, `(You paid 500 for a total of ${t.price}. The owner hands you ${t.given} in change.)`), L('我：找的錢對嗎？', '¿Está bien el cambio?', 'Is the change right?')],
-        options: () => rot(['算一算，沒錯，收下，謝謝', `老闆，好像找錯了，應該找${HZ(change)}元`]),
+        options: () => rot(['沒錯，謝謝', `老闆，好像找錯了，應該找${HZ(change)}元`]),
         next: c => {
           const claimWrong = c.startsWith('老闆');
           if (claimWrong !== t.wrong) {
@@ -651,7 +650,7 @@ const Game = defineGame({
           return [
             L('（你走出理髮店，傳了一張照片給 Ami。）', '(Sales de la peluquería y le mandas una foto a Ami.)', '(You step out of the salon and send Ami a photo.)'),
             Game._endGood
-              ? L(`Ami：哇，${N}，剪得很好看欸！預約真的很方便吧！我們去走走吧！`, `¡Vaya, ${N}, qué bien te quedó! ¡Reservar es muy práctico, ¿verdad? ¡Vamos a dar una vuelta!`, `Wow, ${N}, it looks great! Booking really is convenient, right? Let's go for a stroll!`)
+              ? L(`Ami：哇，${N}，剪得很好看欸！很帥喔！我們去走走吧！`, `¡Vaya, ${N}, qué bien te quedó! ¡Te ves genial! ¡Vamos a dar una vuelta!`, `Wow, ${N}, it looks great! You look awesome! Let's go for a stroll!`)
               : L('Ami：辛苦了！剪頭髮要說很多話吧！我們去走走吧！', '¡Gracias por el esfuerzo! Hay que hablar mucho al cortarse el pelo, ¿no? ¡Vamos a dar una vuelta!', "Thanks for your effort! There's a lot to say at a haircut, huh? Let's go for a stroll!")
           ];
         },
