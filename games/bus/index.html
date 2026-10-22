@@ -239,8 +239,8 @@
   </div>
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
-    Ami 在某一站等你。你要看站牌、看電子看板、對公車招手，上車刷卡，問司機，在對的站按下車鈴，下車再刷一次卡。<br>
-    <span data-es="Ami te espera en una parada. Lee el letrero de la parada y el tablero electrónico, hazle señas al autobús, pasa tu tarjeta al subir, pregunta al conductor, presiona el timbre en la parada correcta y vuelve a pasar la tarjeta al bajar." data-en="Ami is waiting at a stop. Read the bus stop sign and the electronic board, wave down the bus, tap your card on boarding, ask the driver, press the bell at the right stop, and tap off when you get out.">Ami te espera en una parada. Lee el letrero de la parada y el tablero electrónico, hazle señas al autobús, pasa tu tarjeta al subir, pregunta al conductor, presiona el timbre en la parada correcta y vuelve a pasar la tarjeta al bajar.</span>
+    Ami 在某個公車站等你。你要搭公車過去找她，搭公車要注意的事情你都知道嗎？<br>
+    <span data-es="Ami te espera en una parada de autobús. Tienes que ir a buscarla en autobús. ¿Sabes todo lo que hay que tener en cuenta al tomar el autobús?" data-en="Ami is waiting at a bus stop. You need to take the bus to meet her. Do you know everything you should watch out for when riding the bus?">Ami te espera en una parada de autobús. Tienes que ir a buscarla en autobús. ¿Sabes todo lo que hay que tener en cuenta al tomar el autobús?</span>
   </p>
 </div>
 
@@ -354,8 +354,8 @@ const VOCAB = {
   START: [['公車', 'autobús', 'bus'], ['路', 'línea / ruta (de autobús)', 'route (bus line)'], ['往…方向', 'en dirección a…', 'toward…'], ['下車', 'bajarse', 'get off'], ['刷卡', 'pasar la tarjeta', 'tap your card'], ['悠遊卡', 'EasyCard (tarjeta de transporte)', 'EasyCard']],
   STOP: [['站牌', 'parada (el letrero)', 'bus stop sign'], ['往', 'hacia', 'toward'], ['對面', 'el otro lado (de la calle)', 'the opposite side'], ['這一邊', 'este lado', 'this side'], ['方向', 'dirección', 'direction']],
   WAIT: [['預估', 'estimado', 'estimated'], ['分鐘', 'minuto(s)', 'minute(s)'], ['路', 'línea / ruta (de autobús)', 'route (bus line)'], ['等', 'esperar', 'wait'], ['路線', 'ruta, recorrido', 'route']],
-  HAIL: [['招手', 'hacer señas con la mano', 'wave (to flag it down)'], ['停', 'detenerse', 'stop'], ['車頭', 'frente del vehículo', 'front of the vehicle'], ['公車來了', 'llegó el autobús', 'the bus is here']],
-  TAP_ON: [['刷悠遊卡', 'pasar la EasyCard', 'tap your EasyCard'], ['上車刷卡', 'pagar al subir', 'tap on boarding'], ['下車刷卡', 'pagar al bajar', 'tap when getting off'], ['車門', 'puerta del vehículo', 'door']],
+  HAIL: [['招手', 'hacer señas con la mano', 'wave (to flag it down)'], ['停', 'detenerse', 'stop'], ['寫', 'escribir, decir', 'say, write'], ['公車來了', 'llegó el autobús', 'the bus is here']],
+  TAP_ON: [['刷悠遊卡', 'pasar la EasyCard', 'tap your EasyCard'], ['上下車刷卡', 'pasar la tarjeta al subir y bajar', 'tap on and off'], ['不刷卡', 'sin pasar la tarjeta', 'without tapping'], ['車門', 'puerta del vehículo', 'door']],
   ASK: [['司機', 'conductor', 'driver'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['有到', 'llega a / pasa por', 'goes to / stops at'], ['開快一點', 'maneja más rápido', 'drive faster']],
   RING: [['下一站', 'la próxima parada', 'the next stop'], ['下車鈴', 'timbre para bajar', 'stop bell'], ['按', 'presionar', 'press'], ['廣播', 'anuncio por altavoz', 'announcement'], ['繼續', 'continuar', 'continue']],
   TAP_OFF: [['下車刷卡', 'pagar al bajar', 'tap when getting off'], ['謝謝', 'gracias', 'thank you'], ['叮咚', 'sonido del timbre', 'ding-dong (bell sound)'], ['停', 'detenerse', 'stop']],
@@ -468,9 +468,8 @@ const Game = defineGame({
   amiLines() {
     const t = this.task, d = DIRES[t.dir];
     return [
-      L(`Ami：你搭${t.route[1]}路公車，往${t.dir}方向。`, `Toma el autobús ${t.route[0]}, en dirección a ${d[0]}.`, `Take bus ${t.route[0]}, toward ${d[1]}.`),
-      L(`Ami：在${t.dest}站下車。`, `Bájate en la parada ${t.dest}.`, `Get off at ${t.dest} Stop.`),
-      L('Ami：上車要刷悠遊卡，下車也要刷喔。', 'Pasa tu EasyCard al subir, y también al bajar.', 'Tap your EasyCard when you get on, and again when you get off.')
+      L(`Ami：你搭${t.route[1]}路公車，往${t.dir}方向，在${t.dest}站下車。`, `Toma el autobús ${t.route[0]}, en dirección a ${d[0]}, y bájate en la parada ${t.dest}.`, `Take bus ${t.route[0]}, toward ${d[1]}, and get off at ${t.dest} Stop.`),
+      L('Ami：記得，上車要刷悠遊卡，下車也要刷喔。', 'Recuerda: pasa tu EasyCard al subir, y también al bajar.', 'Remember: tap your EasyCard when you get on, and again when you get off.')
     ];
   },
   driverLine() {
@@ -534,43 +533,43 @@ const Game = defineGame({
       STOP: {
         place: 'stop',
         html: () => Game.stopsHTML(),
-        dialogue: () => [L('（馬路兩邊都有站牌。）', '(Hay paradas en los dos lados de la calle.)', '(There are bus stops on both sides of the road.)'), L('我：我要在哪一邊等車呢？', '¿De qué lado espero el autobús?', 'Which side should I wait on?')],
+        dialogue: () => [L('（馬路兩邊都有站牌。）', '(Hay paradas en los dos lados de la calle.)', '(There are bus stops on both sides of the road.)')],
         options: () => rot([`在「往${t.dir}」的站牌等`, `在「往${t.other}」的站牌等`, '不看站牌，看到公車就上車']),
         next: c => {
           if (c !== `在「往${t.dir}」的站牌等`) {
-            Game.addMistake(c.includes(`往${t.other}`) ? M(`你要去${t.dir}那個方向，要在「往${t.dir}」的站牌等。`, `Tu destino queda en dirección a ${dEs[0]}: hay que esperar en la parada «往${t.dir}».`, `You're heading toward ${dEs[1]}, so wait at the "往${t.dir}" stop.`)
-                                                            : M('要先看站牌，確定公車往哪個方向。', 'Primero hay que mirar el letrero de la parada para saber hacia dónde va el autobús.', 'Check the bus stop sign first to make sure which way the bus goes.')); return;
+            Game.addMistake(c.includes(`往${t.other}`) ? M(`走錯了啦！你要去${t.dir}那個方向，要在「往${t.dir}」的站牌等。`, `¡Te equivocaste de lado! Tu destino queda en dirección a ${dEs[0]}: hay que esperar en la parada «往${t.dir}».`, `Wrong side! You're heading toward ${dEs[1]}, so wait at the "往${t.dir}" stop.`)
+                                                            : M('要先看站牌，才可以確定公車往哪個方向。', 'Primero hay que mirar el letrero de la parada para poder saber hacia dónde va el autobús.', 'Check the bus stop sign first so you can be sure which way the bus goes.')); return;
           }
-          goodFirst('STOP', '你看對站牌了！搭公車要看「往…」，確定方向。', '¡Leíste bien el letrero! Al tomar el autobús hay que fijarse en «往…» para confirmar la dirección.', 'You read the sign right! When taking a bus, check the "往…" (toward…) to confirm the direction.');
+          goodFirst('STOP', '你看對站牌了！搭公車要看往哪裡，確定方向。', '¡Leíste bien el letrero! Al tomar el autobús hay que fijarse hacia dónde va para confirmar la dirección.', 'You read the sign right! When taking a bus, check where it is heading to confirm the direction.');
           Game.state = 'WAIT';
         }
       },
       WAIT: {
         place: 'stop',
         html: () => Game.boardHTML(),
-        dialogue: () => [L('（站牌旁邊有一個電子看板，寫著公車幾分鐘後到。）', '(Junto a la parada hay un tablero electrónico que indica en cuántos minutos llega cada autobús.)', '(Beside the stop there is an electronic board showing how many minutes until each bus arrives.)'), L(`我：我要搭${t.route[1]}路。`, `Voy a tomar el autobús ${t.route[0]}.`, `I'm taking bus ${t.route[0]}.`)],
+        dialogue: () => [L(`我：我要搭${t.route[1]}路。`, `Voy a tomar el autobús ${t.route[0]}.`, `I'm taking bus ${t.route[0]}.`)],
         options: () => rot(t.board.map(b => `等${b.r[1]}路公車`)),
         next: c => {
           const b = t.board.find(x => c === `等${x.r[1]}路公車`);
           if (b.r[0] !== t.route[0]) {
-            Game.addMistake(M(`你要搭的是${t.route[1]}路（${t.route[0]}），不是${b.r[1]}路。`, `Tienes que tomar el autobús ${t.route[0]}, no el ${b.r[0]}.`, `You need bus ${t.route[0]}, not ${b.r[0]}.`)); return;
+            Game.addMistake(M(`你要搭的是${t.route[1]}路（${t.route[0]}），不是${b.r[1]}路喔。`, `Tienes que tomar el autobús ${t.route[0]}, no el ${b.r[0]}.`, `You need bus ${t.route[0]}, not ${b.r[0]}.`)); return;
           }
           goodFirst('WAIT', '你看得很仔細！路線號碼對了，再看幾分鐘後會到。', '¡Qué atento! El número de línea es el correcto; ahora mira en cuántos minutos llega.', 'Nicely done! The route number is right — now see how many minutes until it arrives.');
-          Game.thought = [L(`（你等了${b0(t)}分鐘。遠遠地，公車開過來了！）`, `(Esperas ${b0(t)} minutos. A lo lejos viene el autobús.)`, `(You wait ${b0(t)} minutes. The bus comes down the road!)`)];
+          Game.thought = [L(`（你等了${b0(t)}分鐘，公車終於來了！）`, `(Esperas ${b0(t)} minutos y por fin llega el autobús.)`, `(You wait ${b0(t)} minutes, and the bus finally comes!)`)];
           Game.state = 'HAIL';
         }
       },
       HAIL: {
         place: 'stop',
-        dialogue: () => [L(`（車頭的螢幕寫著：${t.route[0]}，往${t.dir}。是你要搭的公車！）`, `(La pantalla del frente dice: ${t.route[0]}, hacia ${dEs[0]}. ¡Es tu autobús!)`, `(The sign on the front reads: ${t.route[0]}, toward ${dEs[1]}. It's your bus!)`), L('我：要怎麼辦呢？', '¿Qué hago?', 'What should I do?')],
+        dialogue: () => [L(`（公車上面寫：${t.route[0]}，往${t.dir}。）`, `(El autobús dice: ${t.route[0]}, hacia ${dEs[0]}.)`, `(The bus says: ${t.route[0]}, toward ${dEs[1]}.)`)],
         options: () => rot(['招手，讓公車停下來', '站著不動', '走到馬路中間']),
         next: c => {
           if (c !== '招手，讓公車停下來') {
-            Game.addMistake(c === '站著不動' ? M('在台灣，要對公車招手，司機才知道你要搭車。', 'En Taiwán hay que hacerle señas al autobús para que el conductor sepa que quieres subir.', 'In Taiwan you wave at the bus so the driver knows you want to board.')
-                                              : M('不可以走到馬路中間，很危險。要在站牌旁邊招手。', 'No se debe caminar al medio de la calle: es muy peligroso. Haz señas desde la parada.', "Never step into the road — it's dangerous. Wave from beside the stop sign.")); return;
+            Game.addMistake(c === '站著不動' ? M('要對公車招手，司機才知道你要搭車。', 'Hay que hacerle señas al autobús para que el conductor sepa que quieres subir.', 'Wave at the bus so the driver knows you want to board.')
+                                              : M('不可以走到馬路中間，很危險。', 'No se debe caminar al medio de la calle: es muy peligroso.', "Never step into the road — it's dangerous.")); return;
           }
-          goodFirst('HAIL', '做得好！在台灣，要對公車招手，公車才會停。', '¡Bien hecho! En Taiwán hay que hacer señas para que el autobús se detenga.', 'Well done! In Taiwan you have to wave to make the bus stop.');
-          Game.thought = [L('（公車停下來，車門打開了。）', '(El autobús se detiene y se abre la puerta.)', '(The bus stops and the door opens.)')];
+          goodFirst('HAIL', '做得好！要對公車招手，公車才會停。', '¡Bien hecho! Hay que hacer señas para que el autobús se detenga.', 'Well done! You have to wave to make the bus stop.');
+          Game.thought = null;
           Game.state = 'TAP_ON';
         }
       },
@@ -578,11 +577,11 @@ const Game = defineGame({
       /* ═══ 上車 ═══ */
       TAP_ON: {
         place: 'bus',
-        dialogue: () => [L('（你上車了。前面有一台刷卡機，旁邊的牌子寫著：「上車刷卡，下車刷卡」。）', '(Subes. Delante hay un lector de tarjetas y un letrero que dice: «上車刷卡，下車刷卡» —pasar la tarjeta al subir y al bajar—.)', '(You board. There\'s a card reader at the front with a sign: "上車刷卡，下車刷卡" — tap on and tap off.)')],
+        dialogue: () => [L('（「上下車刷卡」。）', '(El letrero dice: «上下車刷卡» —pasar la tarjeta al subir y al bajar—.)', '(The sign reads: "上下車刷卡" — tap on and tap off.)')],
         options: () => rot(['刷悠遊卡', '下車再刷就好', '不刷卡，直接去坐']),
         next: c => {
           if (c !== '刷悠遊卡') {
-            Game.addMistake(c.startsWith('下車再刷') ? M('牌子寫「上車刷卡，下車刷卡」，上車的時候就要刷，下車還要再刷一次。', 'El letrero dice «上車刷卡，下車刷卡»: se pasa la tarjeta al subir y otra vez al bajar.', 'The sign says 上車刷卡，下車刷卡: tap when you board, and tap again when you get off.')
+            Game.addMistake(c.startsWith('下車再刷') ? M('牌子寫「上下車刷卡」，上車的時候就要刷，下車還要再刷一次。', 'El letrero dice «上下車刷卡»: se pasa la tarjeta al subir y otra vez al bajar.', 'The sign says 上下車刷卡: tap when you board, and tap again when you get off.')
                                                     : M('搭公車一定要刷卡付錢，不能不刷。', 'Para usar el autobús hay que pagar pasando la tarjeta; no se puede evitar.', "You must tap your card to pay — you can't skip it.")); return;
           }
           goodFirst('TAP_ON', '沒錯！上車刷卡，下車也要刷卡。', '¡Exacto! Pasa la tarjeta al subir y también al bajar.', 'Exactly! Tap when you board, and tap again when you get off.');
@@ -592,16 +591,16 @@ const Game = defineGame({
       },
       ASK: {
         place: 'driver',
-        dialogue: () => [L(`（你不太確定這台公車有沒有到${t.dest}站，所以你問司機。）`, `(No estás seguro de que este autobús llegue a la parada ${t.dest}, así que le preguntas al conductor.)`, `(You're not sure this bus goes to ${t.dest} Stop, so you ask the driver.)`)],
-        options: () => rot([`司機，請問這台公車有到${t.dest}站嗎？`, '司機，你開快一點！', '司機，我要下車！']),
+        dialogue: () => [L(`（你不太確定這台公車有沒有到${t.dest}站，所以你想問問看司機。）`, `(No estás seguro de que este autobús llegue a la parada ${t.dest}, así que quieres preguntarle al conductor.)`, `(You're not sure this bus goes to ${t.dest} Stop, so you want to ask the driver.)`)],
+        options: () => rot([`司機大哥，請問這台公車有到${t.dest}站嗎？`, '司機，你開快一點！', '司機，我要下車！']),
         next: c => {
           if (!c.includes('請問')) {
-            Game.addMistake(c.includes('開快') ? M('不可以叫司機開快一點，這樣不禮貌，也不安全。你要問的是：這台車有沒有到你要去的站。', 'No se le pide al conductor que maneje más rápido: es descortés y poco seguro. Lo que debes preguntar es si este autobús llega a tu parada.', "Don't tell the driver to go faster — it's rude and unsafe. What you need to ask is whether this bus goes to your stop.")
-                                              : M('你才剛上車，還不用下車。你要先問司機有沒有到你要去的站。', 'Acabas de subir; todavía no es hora de bajar. Primero pregunta al conductor si el autobús llega a tu parada.', "You've just boarded — it's not time to get off. First ask the driver whether the bus goes to your stop."),
+            Game.addMistake(c.includes('開快') ? M('不可以叫司機開快一點，這樣不禮貌，也不安全。', 'No se le pide al conductor que maneje más rápido: es descortés y poco seguro.', "Don't tell the driver to go faster — it's rude and unsafe.")
+                                              : M('你才剛上車，還不用下車。可以先問問司機有沒有到你要去的站。', 'Acabas de subir; todavía no es hora de bajar. Puedes preguntar primero al conductor si el autobús llega a tu parada.', "You've just boarded — it's not time to get off. You can first ask the driver whether the bus goes to your stop."),
               [driver(c.includes('開快') ? '嗯？我開得很穩喔。' : '還沒到喔，你先坐好。', c.includes('開快') ? '¿Eh? Voy muy bien de velocidad.' : 'Todavía no llegamos; siéntate.', c.includes('開快') ? "Huh? I'm driving just fine." : "We're not there yet — please take a seat.")]); return;
           }
           goodFirst('ASK', '你很有禮貌！不確定的時候，可以問司機：「請問這台公車有到…嗎？」', '¡Muy cortés! Si no estás seguro, puedes preguntar al conductor: «請問這台公車有到…嗎？».', 'Very polite! When you\'re unsure, ask the driver: 請問這台公車有到…嗎？ ("Excuse me, does this bus go to…?").');
-          Game.thought = [Game.driverLine(), L('（你找了一個位子坐下來。）', '(Buscas un asiento y te sientas.)', '(You find a seat and sit down.)')];
+          Game.thought = [Game.driverLine()];
           Game.step = 0;
           Game.state = 'RING';
         }
@@ -619,20 +618,20 @@ const Game = defineGame({
                                    : M(`還沒到。你要去${t.dest}站，下一站是${next}。`, `Todavía no: vas a ${t.dest} y la próxima es ${next}.`, `Not yet: you're going to ${t.dest}, and the next stop is ${next}.`)); return;
           }
           if (isDest) {
-            Game.thought = [L('（你按了下車鈴，「叮咚」一聲，車上的燈亮了。公車慢慢停下來。）', '(Presionas el timbre: «¡ding-dong!» y se enciende la luz. El autobús se detiene poco a poco.)', '(You press the bell — ding-dong! — and the light comes on. The bus slowly stops.)')];
+            Game.thought = null;
             Game.state = 'TAP_OFF'; return;
           }
           Game.step += 1;
-          Game.thought = [L(`（公車到${next}站了，沒有人下車。）`, `(El autobús llega a ${next}; nadie baja.)`, `(The bus reaches ${next}; nobody gets off.)`)];
+          Game.thought = [L(`（公車到站：${next}。）`, `(El autobús llega a la parada: ${next}.)`, `(The bus reaches the stop: ${next}.)`)];
         }
       },
       TAP_OFF: {
         place: 'bus',
-        dialogue: () => [L('（公車停了，車門打開。）', '(El autobús se detiene y se abre la puerta.)', '(The bus stops and the door opens.)'), L('我：要下車了。', 'Voy a bajar.', 'Time to get off.')],
+        dialogue: () => [L('我：要下車了。', 'Voy a bajar.', 'Time to get off.')],
         options: () => rot(['刷悠遊卡，跟司機說「謝謝」', '不用刷，直接下車', '等下一站再下車']),
         next: c => {
           if (!c.startsWith('刷悠遊卡')) {
-            Game.addMistake(c.startsWith('不用刷') ? M('牌子寫「下車刷卡」，下車也要刷悠遊卡。', 'El letrero decía «下車刷卡»: al bajar también hay que pasar la EasyCard.', 'The sign said 下車刷卡: you tap your EasyCard when you get off, too.')
+            Game.addMistake(c.startsWith('不用刷') ? M('你忘記了嗎？牌子寫「上下車刷卡」，下車也要刷悠遊卡。', '¿Lo olvidaste? El letrero decía «上下車刷卡»: al bajar también hay que pasar la EasyCard.', 'Did you forget? The sign said 上下車刷卡: you tap your EasyCard when you get off, too.')
                                                     : M('公車已經停在你要下的站了，現在就要下車。', 'El autobús ya está detenido en tu parada: es ahora cuando debes bajar.', "The bus is already stopped at your stop — get off now.")); return;
           }
           goodFirst('TAP_OFF', '你很有禮貌！下車刷卡，還跟司機說謝謝。', '¡Muy educado! Pasaste la tarjeta al bajar y diste las gracias al conductor.', 'Very polite! You tapped off and thanked the driver.');
@@ -651,7 +650,7 @@ const Game = defineGame({
           return [
             L(`（你在${t.dest}站下了車，看到 Ami 在前面揮手。）`, `(Bajas en la parada ${t.dest} y ves a Ami saludándote con la mano.)`, `(You get off at ${t.dest} Stop and see Ami waving up ahead.)`),
             Game._endGood
-              ? L(`Ami：哇，${N}，你很會搭公車欸！公車很方便吧！我們去走走吧！`, `¡Vaya, ${N}, qué bien tomas el autobús! ¡Es muy práctico, ¿verdad? ¡Vamos a dar una vuelta!`, `Wow, ${N}, you're really good at taking the bus! It's so convenient, right? Let's go for a stroll!`)
+              ? L(`Ami：哇，${N}，解鎖自己搭公車欸！公車很方便吧！我們去走走吧！`, `¡Vaya, ${N}, desbloqueaste el logro de tomar el autobús por tu cuenta! ¡Es muy práctico, ¿verdad? ¡Vamos a dar una vuelta!`, `Wow, ${N}, you unlocked taking the bus on your own! It's so convenient, right? Let's go for a stroll!`)
               : L('Ami：辛苦了！搭公車要注意很多事吧！我們去走走吧！', '¡Gracias por el esfuerzo! Hay que fijarse en muchas cosas al tomar el autobús, ¿no? ¡Vamos a dar una vuelta!', "Thanks for your effort! There's a lot to watch out for on a bus, huh? Let's go for a stroll!")
           ];
         },
