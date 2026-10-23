@@ -351,15 +351,15 @@ const SPEAKER_RE = /^(Ami|司機|我)：/;
    每一關的單字（中文、西文、英文；拼音自動產生）
 ══════════════════════════════════════ */
 const VOCAB = {
-  START: [['公車', 'autobús', 'bus'], ['路', 'línea / ruta (de autobús)', 'route (bus line)'], ['往…方向', 'en dirección a…', 'toward…'], ['下車', 'bajarse', 'get off'], ['刷卡', 'pasar la tarjeta', 'tap your card'], ['悠遊卡', 'EasyCard (tarjeta de transporte)', 'EasyCard']],
+  START: [['公車', 'autobús', 'bus'], ['路', 'línea / ruta (de autobús)', 'route (bus line)'], ['下車', 'bajarse', 'get off'], ['悠遊卡', 'EasyCard (tarjeta de transporte)', 'EasyCard']],
   STOP: [['站牌', 'parada (el letrero)', 'bus stop sign'], ['往', 'hacia', 'toward'], ['對面', 'el otro lado (de la calle)', 'the opposite side'], ['這一邊', 'este lado', 'this side'], ['方向', 'dirección', 'direction']],
-  WAIT: [['預估', 'estimado', 'estimated'], ['分鐘', 'minuto(s)', 'minute(s)'], ['路', 'línea / ruta (de autobús)', 'route (bus line)'], ['等', 'esperar', 'wait'], ['路線', 'ruta, recorrido', 'route']],
-  HAIL: [['招手', 'hacer señas con la mano', 'wave (to flag it down)'], ['停', 'detenerse', 'stop'], ['寫', 'escribir, decir', 'say, write'], ['公車來了', 'llegó el autobús', 'the bus is here']],
-  TAP_ON: [['刷悠遊卡', 'pasar la EasyCard', 'tap your EasyCard'], ['上下車刷卡', 'pasar la tarjeta al subir y bajar', 'tap on and off'], ['不刷卡', 'sin pasar la tarjeta', 'without tapping'], ['車門', 'puerta del vehículo', 'door']],
+  WAIT: [['預估', 'estimado', 'estimated'], ['分鐘', 'minuto(s)', 'minute(s)'], ['路', 'línea / ruta (de autobús)', 'route (bus line)'], ['等', 'esperar', 'wait'], ['路線', 'ruta, recorrido', 'route'], ['終於', 'por fin', 'finally']],
+  HAIL: [['招手', 'hacer señas con la mano', 'wave (to flag it down)'], ['停', 'detenerse', 'stop'], ['寫', 'escribir, decir', 'say, write'], ['往…方向', 'en dirección a…', 'toward…']],
+  TAP_ON: [['刷悠遊卡', 'pasar la EasyCard', 'tap your EasyCard'], ['上下車刷卡', 'pasar la tarjeta al subir y bajar', 'tap on and off'], ['不刷卡', 'sin pasar la tarjeta', 'without tapping']],
   ASK: [['司機', 'conductor', 'driver'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['有到', 'llega a / pasa por', 'goes to / stops at'], ['開快一點', 'maneja más rápido', 'drive faster']],
   RING: [['下一站', 'la próxima parada', 'the next stop'], ['下車鈴', 'timbre para bajar', 'stop bell'], ['按', 'presionar', 'press'], ['廣播', 'anuncio por altavoz', 'announcement'], ['繼續', 'continuar', 'continue']],
-  TAP_OFF: [['下車刷卡', 'pagar al bajar', 'tap when getting off'], ['謝謝', 'gracias', 'thank you'], ['叮咚', 'sonido del timbre', 'ding-dong (bell sound)'], ['停', 'detenerse', 'stop']],
-  END: [['終於', 'por fin', 'finally'], ['方便', 'cómodo, práctico', 'convenient'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
+  TAP_OFF: [['下車刷卡', 'pagar al bajar', 'tap when getting off'], ['謝謝', 'gracias', 'thank you'], ['停', 'detenerse', 'stop']],
+  END: [['方便', 'cómodo, práctico', 'convenient'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 

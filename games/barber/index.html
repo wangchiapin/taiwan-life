@@ -343,18 +343,18 @@ const SPEAKER_RE = /^(Ami|設計師|老闆|我)：/;
    每一關的單字（中文、西文、英文；拼音自動產生）
 ══════════════════════════════════════ */
 const VOCAB = {
-  START: [['理髮店', 'peluquería', 'hair salon'], ['剪髮', 'cortarse el pelo', 'get a haircut'], ['預約', 'hacer una cita / reservar', 'make an appointment'], ['頭髮', 'cabello', 'hair'], ['瀏海', 'flequillo', 'bangs / fringe']],
-  BOOK_OPEN: [['預約', 'hacer una cita / reservar', 'make an appointment'], ['電話', 'teléfono', 'phone'], ['排隊', 'hacer fila', 'wait in line'], ['設計師', 'estilista', 'stylist']],
+  START: [['預約', 'hacer una cita / reservar', 'make an appointment'], ['頭髮', 'cabello', 'hair'], ['瀏海', 'flequillo', 'bangs / fringe']],
+  BOOK_OPEN: [['預約', 'hacer una cita / reservar', 'make an appointment'], ['電話', 'teléfono', 'phone'], ['排隊', 'hacer fila', 'wait in line'], ['理髮店', 'peluquería', 'hair salon']],
   BOOK_TIME: [['星期', 'día de la semana', 'day of the week'], ['上午', 'por la mañana', 'a.m. / morning'], ['下午', 'por la tarde', 'p.m. / afternoon'], ['晚上', 'por la noche', 'evening'], ['有空', 'estar libre', 'be free / available']],
-  BOOK_PHONE: [['電話', 'teléfono', 'phone'], ['我的', 'mi', 'my'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['確認', 'confirmar', 'confirm']],
-  ARRIVE: [['有預約', 'tener cita', 'have an appointment'], ['姓名', 'nombre', 'name'], ['排隊', 'hacer fila', 'wait in line'], ['坐', 'sentarse', 'sit']],
+  BOOK_PHONE: [['電話', 'teléfono', 'phone'], ['我的', 'mi', 'my']],
+  ARRIVE: [['有預約', 'tener cita', 'have an appointment'], ['排隊', 'hacer fila', 'wait in line'], ['坐', 'sentarse', 'sit'], ['設計師', 'estilista', 'stylist'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask']],
   STYLE_LEN: [['肩膀', 'hombros', 'shoulders'], ['下巴', 'mentón', 'chin'], ['耳朵', 'oreja', 'ear'], ['剪到', 'cortar hasta…', 'cut up to…'], ['多短', 'qué tan corto', 'how short']],
-  STYLE_BANG: [['瀏海', 'flequillo', 'bangs / fringe'], ['修一下', 'retocar un poco', 'trim a little'], ['不用剪', 'no hace falta cortar', 'no need to cut'], ['眉毛', 'ceja', 'eyebrow']],
+  STYLE_BANG: [['瀏海', 'flequillo', 'bangs / fringe'], ['修一下', 'retocar un poco', 'trim a little'], ['不用剪', 'no hace falta cortar', 'no need to cut']],
   WASH: [['有點', 'un poco', 'a bit'], ['燙', 'muy caliente', 'scalding hot'], ['沒關係', 'no importa', "it's fine"], ['水', 'agua', 'water'], ['不好意思', 'disculpe', 'excuse me']],
-  MIRROR: [['鏡子', 'espejo', 'mirror'], ['後面', 'atrás', 'the back'], ['短一點', 'un poco más corto', 'a bit shorter'], ['滿意', 'satisfecho', 'satisfied']],
+  MIRROR: [['鏡子', 'espejo', 'mirror'], ['後面', 'atrás', 'the back'], ['短一點', 'un poco más corto', 'a bit shorter'], ['剪好', 'ya cortado', 'finished cutting']],
   PAY: [['一共', 'en total', 'in total'], ['元', 'dólares taiwaneses', 'NT dollars'], ['付錢', 'pagar', 'pay'], ['五百元', '500 dólares', '500 NT dollars'], ['找錢', 'dar el cambio', 'give change']],
-  CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give the wrong change'], ['應該', 'debería', 'should'], ['數', 'contar', 'count']],
-  END: [['剪好', 'ya cortado', 'finished cutting'], ['好看', 'bonito', 'good-looking'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
+  CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give the wrong change'], ['應該', 'debería', 'should']],
+  END: [['好看', 'bonito', 'good-looking'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 

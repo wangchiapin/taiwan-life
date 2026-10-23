@@ -362,8 +362,8 @@ const VOCAB = {
   WHO: [['先', 'primero', 'first'], ['點', 'pedir (en un local)', 'order'], ['誰的', '¿de quién?', 'whose']],
   START: [['渴', 'tener sed', 'thirsty'], ['飲料店', 'tienda de bebidas', 'drink shop'],
           ['飲料', 'bebida', 'drink'], ['加', 'agregar', 'add'], ['請', 'invitar (pagar por otro)', 'treat (pay for someone)']],
-  TYPE: [['歡迎光臨', 'bienvenido', 'welcome'], ['想喝', 'querer tomar', 'want to drink'], ['奶茶', 'té con leche', 'milk tea'],
-         ['紅茶', 'té negro', 'black tea'], ['綠茶', 'té verde', 'green tea'], ['烏龍茶', 'té oolong', 'oolong tea'], ['還要', 'querer algo más', 'also want']],
+  TYPE_1: [['歡迎光臨', 'bienvenido', 'welcome'], ['想喝', 'querer tomar', 'want to drink'], ['奶茶', 'té con leche', 'milk tea'], ['紅茶', 'té negro', 'black tea'], ['綠茶', 'té verde', 'green tea'], ['烏龍茶', 'té oolong', 'oolong tea']],
+  TYPE_2: [['還要', 'querer algo más', 'also want'], ['奶茶', 'té con leche', 'milk tea'], ['紅茶', 'té negro', 'black tea'], ['綠茶', 'té verde', 'green tea'], ['烏龍茶', 'té oolong', 'oolong tea']],
   SIZE: [['大杯', 'vaso grande', 'large'], ['中杯', 'vaso mediano', 'medium'], ['小杯', 'vaso pequeño', 'small'], ['還是', '¿o…? (en preguntas)', 'or (in questions)']],
   SUGAR: [['甜度', 'nivel de azúcar', 'sweetness'], ['無糖', 'sin azúcar', 'no sugar'], ['微糖', 'muy poca azúcar', 'a little sugar'],
           ['少糖', 'poca azúcar', 'less sugar'], ['全糖', 'azúcar normal', 'full sugar']],
@@ -382,7 +382,7 @@ const VOCAB = {
   END: [['辦公室', 'oficina', 'office'], ['買錯', 'comprar lo equivocado', 'buy the wrong thing'], ['拿給', 'darle (algo a alguien)', 'hand (something) to']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
-const VOCAB_OF = { TYPE_1: 'TYPE', TYPE_2: 'TYPE', SIZE_1: 'SIZE', SIZE_2: 'SIZE', SUGAR_1: 'SUGAR', SUGAR_2: 'SUGAR',
+const VOCAB_OF = { SIZE_1: 'SIZE', SIZE_2: 'SIZE', SUGAR_1: 'SUGAR', SUGAR_2: 'SUGAR',
   ICE_1: 'ICE', ICE_2: 'ICE', CHECK_1: 'CHECK', CORRECT_1: 'CORRECT', TOPPING_2: 'TOPPING', TOPPING_3: 'TOPPING' };
 
 /* ══════════════════════════════════════
