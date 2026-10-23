@@ -345,12 +345,15 @@ const SPEAKER_RE = /^(老師|小美|我)：/;
    每一關的單字（中文、西文、英文；拼音自動產生）
 ══════════════════════════════════════ */
 const VOCAB = {
-  START: [['請假', 'pedir permiso (para faltar)', 'ask for leave'], ['老師', 'profesor(a)', 'teacher'], ['發燒', 'tener fiebre', 'have a fever'], ['牙醫', 'dentista', 'dentist'], ['居留證', 'tarjeta de residencia (ARC)', 'residence card (ARC)'], ['移民署', 'Agencia Nacional de Migración', 'National Immigration Agency']],
+  // 三種請假情況每局隨機一種：單字抽屜只放這一局用得到的詞
+  get START() { const id = Game.task && Game.task.leave.id; const all = [['請假', 'pedir permiso (para faltar)', 'ask for leave'], ['老師', 'profesor(a)', 'teacher'], ['發燒', 'tener fiebre', 'have a fever'], ['牙醫', 'dentista', 'dentist'], ['居留證', 'tarjeta de residencia (ARC)', 'residence card (ARC)'], ['移民署', 'Agencia Nacional de Migración', 'National Immigration Agency']];
+    return all.filter(w => !['發燒', '牙醫', '居留證', '移民署'].includes(w[0]) || (id === 'sick' && w[0] === '發燒') || (id === 'dental' && w[0] === '牙醫') || (id === 'arc' && (w[0] === '居留證' || w[0] === '移民署')) || !id); },
   MSG_OPEN: [['請假', 'pedir permiso (para faltar)', 'ask for leave'], ['您', 'usted (formal)', 'you (polite)'], ['老師好', 'buenos días, profesor(a)', 'hello, teacher']],
   MSG_REASON: [['因為…，所以…', 'porque…, por eso…', 'because…, so…'], ['感冒', 'resfriado', 'a cold'], ['發燒', 'tener fiebre', 'have a fever'], ['牙醫', 'dentista', 'dentist'], ['居留證', 'tarjeta de residencia (ARC)', 'residence card (ARC)']],
   MSG_TIME: [['請…的假', 'pedir permiso para (un día/horario)', 'take leave for (a time)'], ['一整天', 'todo el día', 'the whole day'], ['上午', 'por la mañana', 'morning'], ['下午', 'por la tarde', 'afternoon'], ['後天', 'pasado mañana', 'the day after tomorrow']],
   MSG_OK: [['沒問題', 'no hay problema', 'no problem'], ['補交', 'entregar más tarde', 'hand in later'], ['請假單', 'formulario de ausencia', 'leave form'], ['謝謝老師', 'gracias, profesor(a)', 'thank you, teacher']],
-  BACK: [['關心', 'preocuparse por alguien', 'show concern'], ['好多了', 'mucho mejor', 'much better'], ['順利', 'sin problemas', 'smoothly'], ['辦好', 'terminar un trámite', 'get (something) done'], ['沒事', 'no pasa nada', 'nothing, it\'s fine']],
+  get BACK() { const id = Game.task && Game.task.leave.id; const all = [['關心', 'preocuparse por alguien', 'show concern'], ['好多了', 'mucho mejor', 'much better'], ['順利', 'sin problemas', 'smoothly'], ['辦好', 'terminar un trámite', 'get (something) done'], ['沒事', 'no pasa nada', 'nothing, it\'s fine']];
+    return all.filter(w => !['好多了', '順利', '辦好'].includes(w[0]) || (id === 'sick' && w[0] === '好多了') || (id === 'dental' && w[0] === '順利') || (id === 'arc' && w[0] === '辦好') || !id); },
   NOTES: [['同學', 'compañero(a) de clase', 'classmate'], ['筆記', 'apuntes', 'notes'], ['借', 'prestar / pedir prestado', 'lend / borrow'], ['拍照', 'sacar una foto', 'take a photo'], ['功課', 'tarea', 'homework']],
   FORM: [['請假單', 'formulario de ausencia', 'leave form'], ['假別', 'tipo de licencia', 'type of leave'], ['病假', 'licencia por enfermedad', 'sick leave'], ['事假', 'licencia por asuntos personales', 'personal leave'], ['公假', 'licencia por actividades oficiales', 'official leave']],
   SUBMIT: [['辦公室', 'sala de profesores', 'teachers\' office'], ['交', 'entregar', 'hand in'], ['請假單', 'formulario de ausencia', 'leave form'], ['作業', 'tarea (entregable)', 'assignment']],
