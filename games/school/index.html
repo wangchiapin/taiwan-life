@@ -233,8 +233,8 @@
   </div>
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
-    你今天（或明天、後天）不能去上課。你要用 LINE 跟老師請假，回學校後還要跟同學借筆記、填請假單。<br>
-    <span data-es="Hoy (o mañana, o pasado mañana) no puedes ir a clase. Le pides permiso a tu profesora por LINE y, al volver, tienes que pedir los apuntes a tu compañera y llenar el formulario de ausencia." data-en="You can't go to class today (or tomorrow, or the day after). You ask your teacher for leave by LINE, and when you're back you borrow notes from a classmate and fill in a leave form.">Hoy (o mañana, o pasado mañana) no puedes ir a clase. Le pides permiso a tu profesora por LINE y, al volver, tienes que pedir los apuntes a tu compañera y llenar el formulario de ausencia.</span>
+    你好像有一天沒辦法去上課。你要用 LINE 跟老師請假，回學校後還要跟同學借筆記、填請假單。<br>
+    <span data-es="Parece que un día no puedes ir a clase. Le pides permiso a tu profesora por LINE y, al volver, tienes que pedir los apuntes a tu compañera y llenar el formulario de ausencia." data-en="It looks like there's a day you can't go to class. You ask your teacher for leave by LINE, and when you're back you borrow notes from a classmate and fill in a leave form.">Parece que un día no puedes ir a clase. Le pides permiso a tu profesora por LINE y, al volver, tienes que pedir los apuntes a tu compañera y llenar el formulario de ausencia.</span>
   </p>
 </div>
 
@@ -346,7 +346,7 @@ const SPEAKER_RE = /^(老師|小美|我)：/;
 ══════════════════════════════════════ */
 const VOCAB = {
   START: [['請假', 'pedir permiso (para faltar)', 'ask for leave'], ['老師', 'profesor(a)', 'teacher'], ['發燒', 'tener fiebre', 'have a fever'], ['牙醫', 'dentista', 'dentist'], ['居留證', 'tarjeta de residencia (ARC)', 'residence card (ARC)'], ['移民署', 'Agencia Nacional de Migración', 'National Immigration Agency']],
-  MSG_OPEN: [['請假', 'pedir permiso (para faltar)', 'ask for leave'], ['您', 'usted (formal)', 'you (polite)'], ['老師好', 'buenos días, profesor(a)', 'hello, teacher'], ['聊天室', 'chat', 'chat room']],
+  MSG_OPEN: [['請假', 'pedir permiso (para faltar)', 'ask for leave'], ['您', 'usted (formal)', 'you (polite)'], ['老師好', 'buenos días, profesor(a)', 'hello, teacher']],
   MSG_REASON: [['因為…，所以…', 'porque…, por eso…', 'because…, so…'], ['感冒', 'resfriado', 'a cold'], ['發燒', 'tener fiebre', 'have a fever'], ['牙醫', 'dentista', 'dentist'], ['居留證', 'tarjeta de residencia (ARC)', 'residence card (ARC)']],
   MSG_TIME: [['請…的假', 'pedir permiso para (un día/horario)', 'take leave for (a time)'], ['一整天', 'todo el día', 'the whole day'], ['上午', 'por la mañana', 'morning'], ['下午', 'por la tarde', 'afternoon'], ['後天', 'pasado mañana', 'the day after tomorrow']],
   MSG_OK: [['沒問題', 'no hay problema', 'no problem'], ['補交', 'entregar más tarde', 'hand in later'], ['請假單', 'formulario de ausencia', 'leave form'], ['謝謝老師', 'gracias, profesor(a)', 'thank you, teacher']],
@@ -354,7 +354,7 @@ const VOCAB = {
   NOTES: [['同學', 'compañero(a) de clase', 'classmate'], ['筆記', 'apuntes', 'notes'], ['借', 'prestar / pedir prestado', 'lend / borrow'], ['拍照', 'sacar una foto', 'take a photo'], ['功課', 'tarea', 'homework']],
   FORM: [['請假單', 'formulario de ausencia', 'leave form'], ['假別', 'tipo de licencia', 'type of leave'], ['病假', 'licencia por enfermedad', 'sick leave'], ['事假', 'licencia por asuntos personales', 'personal leave'], ['公假', 'licencia por actividades oficiales', 'official leave']],
   SUBMIT: [['辦公室', 'sala de profesores', 'teachers\' office'], ['交', 'entregar', 'hand in'], ['請假單', 'formulario de ausencia', 'leave form'], ['作業', 'tarea (entregable)', 'assignment']],
-  END: [['收到', 'recibir', 'receive'], ['午餐', 'almuerzo', 'lunch'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
+  END: [['請假', 'pedir permiso (para faltar)', 'ask for leave'], ['已經', 'ya', 'already'], ['麻煩', 'complicado, molesto', 'troublesome']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 
@@ -508,6 +508,7 @@ const Game = defineGame({
     const N = this.N, t = this.task, lv = t.leave;
     const tch = (zh, es, en) => L(`老師：${zh}`, es, en);
     const xm = (zh, es, en) => L(`小美：${zh}`, es, en);
+    const me = (zh, es, en) => L(`我：${zh}`, es, en);
     const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
     const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
 
@@ -528,7 +529,7 @@ const Game = defineGame({
       /* ═══ 傳 LINE 請假 ═══ */
       MSG_OPEN: {
         place: 'phone',
-        dialogue: () => [L('（你打開跟老師的 LINE 聊天室。第一句要怎麼說呢？）', '(Abres el chat de LINE con tu profesora. ¿Cómo empiezas?)', '(You open your LINE chat with the teacher. How do you start?)')],
+        dialogue: () => [me('第一句要怎麼說呢？', '¿Cómo empiezas el mensaje?', 'How do you start the message?')],
         options: () => rot([`老師好，我是${N}。我想跟您請假。`, '老師，我不去上課了。', '哈囉，你在嗎？']),
         next: c => {
           if (!c.startsWith('老師好')) {
@@ -563,7 +564,7 @@ const Game = defineGame({
         },
         next: c => {
           if (c !== `我想請${lv.time}的假。`) {
-            Game.addMistake(M(`你要請的是「${lv.time}」的假。`, `Tienes que pedir permiso para: ${lv.timeEs}.`, `The time you need is: ${lv.timeEn}.`)); return;
+            Game.addMistake(M(`不對吧！你是要請「${lv.time}」的假。`, `¡No es eso! Lo que quieres pedir es permiso para: ${lv.timeEs}.`, `That's not right! You need to ask for leave for: ${lv.timeEn}.`)); return;
           }
           goodFirst('MSG_TIME', '時間說得很清楚，老師一看就懂！', '¡Dijiste la hora con mucha claridad: la profesora lo entiende de inmediato!', 'You stated the time clearly — the teacher understands right away!');
           Game.state = 'MSG_OK';
@@ -575,12 +576,12 @@ const Game = defineGame({
         options: () => rot(['好的，謝謝老師。', '好，我知道了。', '不用吧，LINE 就可以了。']),
         next: c => {
           if (c !== '好的，謝謝老師。') {
-            Game.addMistake(c.startsWith('好，我知道了') ? M('老師同意了，要說「謝謝老師」，這樣比較有禮貌。', 'La profesora aceptó: hay que decir «謝謝老師» (gracias), es más cortés.', 'The teacher agreed, so say 謝謝老師 (thank you) — it\'s more polite.')
-                                                    : M('請假單是學校的規定，用 LINE 請假以後，回學校還是要補交。', 'El formulario es una regla de la escuela: aunque pidas permiso por LINE, igual hay que entregarlo al volver.', "The leave form is a school rule: even if you ask by LINE, you still hand it in when you're back."));
+            Game.addMistake(c.startsWith('好，我知道了') ? M('要當個有禮貌的學生！要說「謝謝老師」！', '¡Hay que ser cortés! ¡Debes decir «謝謝老師» (gracias, profesora)!', 'Be a polite student! Say 謝謝老師 (thank you, teacher)!')
+                                                    : M('請假單是學校的規定，我們都要遵守規定！', 'El formulario es una regla de la escuela: ¡todos tenemos que cumplir las reglas!', 'The leave form is a school rule — we all have to follow the rules!'));
             return;
           }
           goodFirst('MSG_OK', '很有禮貌喔！老師同意了，要說謝謝。', '¡Muy educado! Cuando el profesor acepta, se da las gracias.', 'Very polite! When the teacher agrees, say thank you.');
-          Game.thought = [L('（你傳出去了。第二天，你回到學校。）', '(Envías el mensaje. Al día siguiente, vuelves a la escuela.)', '(You send it. The next day, you go back to school.)')];
+          Game.thought = [L('（你把訊息傳出去了。）', '(Envías el mensaje.)', '(You send the message.)')];
           Game.state = 'BACK';
         }
       },
@@ -588,11 +589,11 @@ const Game = defineGame({
       /* ═══ 回到學校 ═══ */
       BACK: {
         place: 'classroom',
-        dialogue: () => [tch(`早安，${N}！`, `¡Buenos días, ${N}!`, `Good morning, ${N}!`), tch(lv.backQ.zh, lv.backQ.es, lv.backQ.en)],
+        dialogue: () => [L('（第二天，你回到學校。）', '(Al día siguiente, vuelves a la escuela.)', '(The next day, you go back to school.)'), tch(`早安，${N}！`, `¡Buenos días, ${N}!`, `Good morning, ${N}!`), tch(lv.backQ.zh, lv.backQ.es, lv.backQ.en)],
         options: () => rot([lv.backA, '沒事。', '你為什麼問？']),
         next: c => {
           if (c !== lv.backA) {
-            Game.addMistake(M('老師關心你，要有禮貌地回答，還要說「謝謝老師關心」。', 'La profesora se preocupa por ti: responde con cortesía y di «謝謝老師關心» (gracias por preguntar).', 'The teacher is showing concern: answer politely and say 謝謝老師關心 (thanks for asking).'),
+            Game.addMistake(M('不要忽略了老師的關心，要有禮貌。', 'No ignores la preocupación de la profesora: responde con cortesía.', "Don't ignore the teacher's concern — be polite."),
               [tch(c === '沒事。' ? '嗯……那就好。' : '因為老師關心你呀。', c === '沒事。' ? 'Mmm… me alegro.' : 'Porque me importas, claro.', c === '沒事。' ? 'Hmm… that\'s good, then.' : 'Because I care about you!')]); return;
           }
           goodFirst('BACK', '你回答得很有禮貌！老師關心你的時候，記得說謝謝。', '¡Respondiste con mucha cortesía! Cuando un profesor se preocupa por ti, recuerda dar las gracias.', 'You answered politely! When a teacher shows concern, remember to say thanks.');
@@ -603,15 +604,14 @@ const Game = defineGame({
       NOTES: {
         place: 'classroom',
         dialogue: () => [
-          L('（你坐下來，旁邊是同學小美。）', '(Te sientas. A tu lado está tu compañera Xiaomei.)', '(You sit down. Your classmate Xiaomei is beside you.)'),
           xm(`${N}，你回來了！`, `¡${N}, ya volviste!`, `${N}, you're back!`),
-          L(`（你想到，${lv.note}你還沒有。）`, `(Te acuerdas de que todavía no tienes ${lv.noteEs}.)`, `(You realize you don't have ${lv.noteEn} yet.)`)
+          L(`（你突然想到你沒有${lv.note}。）`, `(De pronto recuerdas que no tienes ${lv.noteEs}.)`, `(You suddenly realize you don't have ${lv.noteEn}.)`)
         ],
         options: () => rot([`小美，不好意思，可以請你把${lv.note}借我拍照嗎？`, '你幫我寫功課。', '筆記給我。']),
         next: c => {
           if (!c.startsWith('小美，不好意思')) {
-            Game.addMistake(c.startsWith('你幫我寫') ? M('不能請同學幫你寫功課；你可以請同學把筆記借你拍照。', 'No se le pide a un compañero que te haga la tarea; puedes pedirle que te preste los apuntes para fotografiarlos.', "Don't ask a classmate to do your homework; ask to borrow their notes and take a photo.")
-                                                  : M('「筆記給我」太直接了，要說「不好意思，可以請你……嗎？」。', '«筆記給我» («dame los apuntes») es demasiado directo; di «不好意思，可以請你……嗎？».', '"Give me the notes" is too blunt; say 不好意思，可以請你……嗎？ ("Excuse me, could you…?").'),
+            Game.addMistake(c.startsWith('你幫我寫') ? M('不能請同學幫你寫功課，自己寫！', 'No le pidas a un compañero que te haga la tarea: ¡hazla tú!', "Don't ask a classmate to do your homework — do it yourself!")
+                                                  : M('你說得太直接了啦！有禮貌一點！', '¡Eso suena demasiado directo! ¡Sé más cortés!', 'That was too blunt! Be more polite!'),
               [xm(c.startsWith('你幫我寫') ? '那怎麼行啊？' : '嗯？什麼？', c.startsWith('你幫我寫') ? '¿Cómo voy a hacer eso?' : '¿Eh? ¿Qué?', c.startsWith('你幫我寫') ? 'How could I do that?' : 'Huh? What?')]); return;
           }
           goodFirst('NOTES', '你很有禮貌！請別人幫忙，可以說「不好意思，可以請你……嗎？」。', '¡Qué educado! Para pedir un favor puedes decir «不好意思，可以請你……嗎？».', 'Very polite! To ask a favor, you can say 不好意思，可以請你……嗎？.');
@@ -624,7 +624,7 @@ const Game = defineGame({
       FORM: {
         place: 'form',
         html: () => Game.formHTML(),
-        dialogue: () => [L('（下課了。你拿到一張請假單，要先填「假別」。）', '(Termina la clase. Te dan un formulario de ausencia y tienes que llenar el «tipo de licencia».)', '(Class is over. You get a leave form and need to fill in the "type of leave".)')],
+        dialogue: () => [me('要填哪一種假別？', '¿Qué «tipo de licencia» debo llenar?', 'Which type of leave should I fill in?')],
         options: () => rot(['病假', '事假', '公假']),
         next: c => {
           if (c !== lv.type) {
@@ -638,13 +638,12 @@ const Game = defineGame({
       SUBMIT: {
         place: 'office',
         dialogue: () => [
-          L('（你把請假單填好，走到辦公室。）', '(Terminas de llenar el formulario y vas a la sala de profesores.)', '(You finish the form and walk to the teachers\' office.)'),
           tch(`${N}，有什麼事嗎？`, `${N}, ¿qué necesitas?`, `${N}, what can I do for you?`)
         ],
         options: () => rot(['老師，這是我的請假單，謝謝老師。', '老師，這是我的作業。', '老師，請假單可以不用交嗎？']),
         next: c => {
           if (!c.includes('請假單，謝謝')) {
-            Game.addMistake(c.includes('作業') ? M('你要交的是請假單，不是作業。', 'Lo que tienes que entregar es el formulario de ausencia, no la tarea.', "What you're handing in is the leave form, not homework.")
+            Game.addMistake(c.includes('作業') ? M('你要交的是請假單，不是作業唷！', '¡Lo que tienes que entregar es el formulario de ausencia, no la tarea!', "What you're handing in is the leave form, not homework!")
                                                 : M('老師說過要補交請假單，所以一定要交。', 'La profesora dijo que había que entregar el formulario, así que es obligatorio.', 'The teacher said you must hand in the leave form, so it\'s required.'),
               [tch(c.includes('作業') ? '嗯？這不是請假單喔。' : '要交喔，這是學校的規定。', c.includes('作業') ? 'Mmm, esto no es el formulario.' : 'Sí hay que entregarlo: es una regla de la escuela.', c.includes('作業') ? "Hmm? That's not the leave form." : "You do need to — it's a school rule.")]); return;
           }
@@ -661,10 +660,9 @@ const Game = defineGame({
           Game._endGood = Game.mistakes <= 2;
           track('game_complete', { game: 'school', score: Game.score, elapsed: Game.elapsedTime });
           return [
-            L('（老師收下請假單，說：「好，我收到了。」你走出辦公室。）', '(La profesora recibe el formulario y dice: «Bien, lo recibí». Sales de la sala de profesores.)', '(The teacher takes the form and says, "OK, I\'ve got it." You walk out of the office.)'),
             Game._endGood
-              ? xm(`哇，${N}，你已經會用中文請假了！我們去吃午餐吧！`, `¡Vaya, ${N}, ya sabes pedir permiso en chino! ¡Vamos a almorzar!`, `Wow, ${N}, you can already ask for leave in Chinese! Let's go have lunch!`)
-              : xm('辛苦了！請假的事情很麻煩吧！我們去吃午餐吧！', '¡Gracias por el esfuerzo! Pedir permiso es complicado, ¿eh? ¡Vamos a almorzar!', "Thanks for your effort! Asking for leave is a hassle, huh? Let's go have lunch!")
+              ? me('哇，我已經會用中文請假了！', '¡Vaya, ya sé pedir permiso en chino!', 'Wow, I can already ask for leave in Chinese!')
+              : me('唉，用中文請假還是有點麻煩。', 'Uf, pedir permiso en chino sigue siendo un poco complicado.', 'Ugh, asking for leave in Chinese is still a bit of a hassle.')
           ];
         },
         options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
