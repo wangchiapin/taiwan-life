@@ -235,8 +235,8 @@
   </div>
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
-    Ami 在公園（或圖書館、夜市）等你。你要用 App 找到有車的站，用悠遊卡借 YouBike，騎過去，再找有空位的站還車。<br>
-    <span data-es="Ami te espera en el parque (o en la biblioteca, o en el mercado nocturno). Usa la app para encontrar una estación con bicis, alquila una YouBike con tu EasyCard, pedalea hasta allá y devuélvela en una estación con espacio libre." data-en="Ami is waiting for you at the park (or the library, or the night market). Use the app to find a station with bikes, borrow a YouBike with your EasyCard, ride over, and return it at a station with a free dock.">Ami te espera en el parque (o en la biblioteca, o en el mercado nocturno). Usa la app para encontrar una estación con bicis, alquila una YouBike con tu EasyCard, pedalea hasta allá y devuélvela en una estación con espacio libre.</span>
+    你常常在路上看到很多人騎YouBike腳踏車，今天你也想試試看騎YouBike去找Ami。趕快找到一台腳踏車，然後出發吧！<br>
+    <span data-es="Es común ver a mucha gente andar en bicicletas YouBike por la calle, y hoy tú también quieres probarlo para ir a buscar a Ami. ¡Encuentra una bicicleta y arranca!" data-en="You often see lots of people riding YouBike bikes on the street, and today you want to try riding one to meet Ami. Find a bike quickly and set off!">Es común ver a mucha gente andar en bicicletas YouBike por la calle, y hoy tú también quieres probarlo para ir a buscar a Ami. ¡Encuentra una bicicleta y arranca!</span>
   </p>
 </div>
 
@@ -345,10 +345,10 @@ const SPEAKER_RE = /^(Ami|我)：/;
    每一關的單字（中文、西文、英文；拼音自動產生）
 ══════════════════════════════════════ */
 const VOCAB = {
-  START: [['騎', 'andar (en bicicleta/moto)', 'ride'], ['App', 'aplicación', 'app'], ['悠遊卡', 'EasyCard (tarjeta de transporte)', 'EasyCard'], ['公園', 'parque', 'park'], ['很快', 'muy rápido', 'very quickly']],
+  START: [['騎', 'andar (en bicicleta/moto)', 'ride'], ['App', 'aplicación', 'app'], ['悠遊卡', 'EasyCard (tarjeta de transporte)', 'EasyCard'], ['公園', 'parque', 'park'], ['空位', 'espacio libre', 'free dock / space']],
   FIND: [['站', 'estación (de bicicletas)', 'station'], ['可借', 'disponibles para alquilar', 'available to borrow'], ['可還', 'espacios libres para devolver', 'open docks for returning'], ['輛', 'clasificador de vehículos', 'measure word for vehicles'], ['借車', 'alquilar una bicicleta', 'borrow a bike']],
   TAP: [['悠遊卡', 'EasyCard (tarjeta de transporte)', 'EasyCard'], ['感應區', 'zona del sensor', 'card reader area'], ['硬幣', 'moneda', 'coin'], ['借車', 'alquilar una bicicleta', 'borrow a bike'], ['車柱', 'poste/anclaje de la bicicleta', 'bike dock post']],
-  PULL: [['借車成功', 'alquiler exitoso', 'rental successful'], ['綠燈', 'luz verde', 'green light'], ['紅燈', 'luz roja', 'red light'], ['車柱', 'poste/anclaje de la bicicleta', 'bike dock post'], ['拉出', 'sacar (jalando)', 'pull out']],
+  PULL: [['綠燈', 'luz verde', 'green light'], ['紅燈', 'luz roja', 'red light'], ['拉出', 'sacar (jalando)', 'pull out'], ['亮', 'encenderse (una luz)', 'light up (be lit)'], ['自己', 'uno mismo, solo', 'by itself / yourself']],
   SEAT: [['座墊', 'asiento (de la bici)', 'bike seat'], ['調高', 'subir (ajustar más alto)', 'raise'], ['調低', 'bajar (ajustar más bajo)', 'lower'], ['太低', 'demasiado bajo', 'too low'], ['不舒服', 'incómodo', 'uncomfortable']],
   ROAD: [['馬路', 'calle', 'road'], ['右邊', 'derecha', 'right side'], ['左邊', 'izquierda', 'left side'], ['人行道', 'acera', 'sidewalk']],
   LIGHT: [['紅燈', 'luz roja', 'red light'], ['綠燈', 'luz verde', 'green light'], ['斑馬線', 'paso de cebra', 'crosswalk'], ['行人', 'peatón', 'pedestrian'], ['等', 'esperar', 'wait']],
@@ -455,9 +455,7 @@ const Game = defineGame({
   amiLines() {
     const d = this.task.dest;
     return [
-      L(`Ami：我在${d[0]}等你。你騎 YouBike 過來吧，很快！`, `Estoy esperándote en ${d[1]}. ¡Ven en YouBike, es muy rápido!`, `I'm waiting for you at ${d[2]}. Come by YouBike — it's really quick!`),
-      L('Ami：先打開 App，看看哪一個站有車喔。', 'Primero abre la app y mira en qué estación hay bicicletas.', 'First open the app and see which station has bikes.'),
-      L('Ami：還車的時候，也要看 App，找有空位的站。', 'Cuando vayas a devolverla, también mira la app y busca una estación con espacio libre.', 'When you return it, check the app too and find a station with a free dock.')
+      L(`Ami：我在${d[0]}等你。你剛剛說要騎 YouBike 過來嗎？太好了！可以先看看App，上面會寫哪裡有車，或是哪裡有空位可以停車喔！`, `Te espero en ${d[1]}. ¿Dijiste que vendrías en YouBike? ¡Genial! Primero mira la app: ahí dice dónde hay bicicletas y dónde hay espacio libre para estacionar.`, `I'm waiting for you at ${d[2]}. Did you say you're coming by YouBike? Great! First check the app — it shows where there are bikes and where there's a free dock to park.`)
     ];
   },
 
@@ -514,7 +512,7 @@ const Game = defineGame({
           const s = t.borrow.find(x => c === `去${x.name}借車`);
           if (s.bikes === 0) {
             Game.addMistake(M(`${s.name}「可借 0 輛」，沒有車可以借，要去有車的站。`, `En «${s.name}» dice «可借 0 輛»: no hay bicicletas para alquilar. Hay que ir a una estación que tenga.`, `At ${s.name} it says "可借 0 輛" — there are no bikes to borrow. Go to a station that has some.`),
-              [L(`（你走到${s.name}，可是車柱都是空的。你只好再回去看 App。）`, `(Llegas a ${s.name}, pero todos los anclajes están vacíos. Tienes que volver a mirar la app.)`, `(You walk to ${s.name}, but all the docks are empty. You have to check the app again.)`)]); return;
+              [L(`（你走到${s.name}，可是車柱都是空的。）`, `(Llegas a ${s.name}, pero todos los anclajes están vacíos.)`, `(You walk to ${s.name}, but all the docks are empty.)`)]); return;
           }
           goodFirst('FIND', '你看懂 App 了！「可借」是可以借的車，要選有車的站。', '¡Entendiste la app! «可借» son las bicis disponibles: hay que elegir una estación que tenga.', 'You read the app correctly! 可借 is how many bikes you can borrow — pick a station that has some.');
           Game.thought = [L(`（你走到${s.name}，車柱上停著很多 YouBike。）`, `(Llegas a ${s.name}; hay muchas YouBike en los anclajes.)`, `(You reach ${s.name}; lots of YouBikes are parked in the docks.)`)];
@@ -527,11 +525,11 @@ const Game = defineGame({
         options: () => rot(['把悠遊卡放在感應區', '投十元硬幣', '直接把車拉出來']),
         next: c => {
           if (c !== '把悠遊卡放在感應區') {
-            Game.addMistake(c === '投十元硬幣' ? M('YouBike 不能投硬幣，要用悠遊卡（或 App）借車。', 'En YouBike no se pagan monedas: se alquila con la EasyCard (o con la app).', "YouBike doesn't take coins — you borrow with your EasyCard (or the app).")
-                                              : M('要先用悠遊卡借車，車柱才會打開，不能直接拉。', 'Primero hay que alquilar con la EasyCard; si no, el anclaje no se abre y no se puede jalar la bici.', "You have to unlock it with your EasyCard first — you can't just pull the bike out.")); return;
+            Game.addMistake(c === '投十元硬幣' ? M('你不知道嗎？YouBike 不能投硬幣，要用悠遊卡（或 App）借車。', '¿No lo sabías? En YouBike no se pagan monedas: se alquila con la EasyCard (o con la app).', "Didn't you know? YouBike doesn't take coins — you borrow with your EasyCard (or the app).")
+                                              : M('車子會被你拉壞啦！要先用嗶卡借車，車柱才會打開。', '¡Vas a romper la bici si la jalas así! Primero hay que alquilar pasando la tarjeta; solo entonces se abre el anclaje.', "You'll break the bike pulling it like that! Tap your card to borrow it first — only then does the dock open.")); return;
           }
           goodFirst('TAP', '沒錯！悠遊卡放在感應區，就可以借車了。', '¡Exacto! Pon la EasyCard en la zona del sensor y podrás alquilar.', 'Exactly! Put your EasyCard on the reader and you can borrow a bike.');
-          Game.thought = [L('（「嗶」一聲，螢幕寫著「借車成功」。其中一個車柱亮起了綠燈。）', '(¡Bip! La pantalla dice «借車成功» (alquiler exitoso). Uno de los anclajes enciende una luz verde.)', '(Beep! The screen says "借車成功" (rental successful). One of the docks lights up green.)')];
+          Game.thought = null;
           Game.state = 'PULL';
         }
       },
@@ -545,7 +543,7 @@ const Game = defineGame({
                                                  : M('車不會自己出來，要看綠燈，自己把車拉出來。', 'La bici no sale sola: mira la luz verde y jálala tú.', "The bike won't come out by itself — look for the green light and pull it out yourself.")); return;
           }
           goodFirst('PULL', '你很細心！綠燈亮著，表示這台車是你的。', '¡Qué atento! La luz verde indica que esa bici es la tuya.', 'Nicely done! The green light means that bike is yours.');
-          Game.thought = [L('（你把車拉出來，牽到旁邊，坐上去。座墊太低，腳伸不直，騎起來不舒服。）', '(Sacas la bici, la llevas a un lado y te subes. El asiento está demasiado bajo y no puedes estirar las piernas: es incómodo.)', "(You pull the bike out, wheel it aside and climb on. The seat is too low — you can't straighten your legs, and it's uncomfortable.)")];
+          Game.thought = [L('（座墊好像太低了，騎起來不舒服。）', '(El asiento parece demasiado bajo; es incómodo para pedalear.)', "(The seat seems too low — it's uncomfortable to ride.)")];
           Game.state = 'SEAT';
         }
       },
@@ -559,7 +557,7 @@ const Game = defineGame({
                                                : M('座墊太低，騎起來不舒服，騎之前要先調整。', 'Con el asiento tan bajo es incómodo: antes de salir hay que ajustarlo.', "With the seat so low it's uncomfortable — adjust it before you ride.")); return;
           }
           goodFirst('SEAT', '做得好！騎車前先調整座墊，比較舒服也比較安全。', '¡Bien hecho! Ajustar el asiento antes de salir es más cómodo y más seguro.', 'Well done! Adjusting the seat before riding is more comfortable and safer.');
-          Game.thought = [L('（你調好座墊，騎上路了。前面有馬路，也有人行道。）', '(Ajustas el asiento y te pones en marcha. Delante hay una calle y también una acera.)', '(You adjust the seat and set off. Ahead there is a road and also a sidewalk.)')];
+          Game.thought = null;
           Game.state = 'ROAD';
         }
       },
@@ -585,8 +583,8 @@ const Game = defineGame({
         options: () => rot(['停下來，等綠燈', '很快騎過去', '從人行道繞過去']),
         next: c => {
           if (c !== '停下來，等綠燈') {
-            Game.addMistake(c.includes('很快') ? M('紅燈要停下來，行人正在過馬路，很危險。', 'Con luz roja hay que detenerse; hay peatones cruzando y es muy peligroso.', 'Stop at a red light — pedestrians are crossing and it\'s dangerous.')
-                                                 : M('不能騎上人行道繞過去，紅燈要停下來等。', 'No se puede rodear por la acera: con luz roja se espera.', "You can't ride around on the sidewalk — wait at the red light.")); return;
+            Game.addMistake(c.includes('很快') ? M('紅燈要停下來，而且行人正在過馬路，不然很危險！', '¡Con luz roja hay que detenerse, y además hay peatones cruzando; si no, es muy peligroso!', "Stop at a red light — pedestrians are crossing, otherwise it's dangerous!")
+                                                 : M('不能騎上人行道繞過去喔，紅燈要停下來等欸！', '¡No se puede rodear por la acera! Con luz roja hay que esperar.', "You can't ride around on the sidewalk! You have to wait at the red light.")); return;
           }
           goodFirst('LIGHT', '你很守規矩！騎 YouBike 也要遵守紅綠燈。', '¡Muy bien! Andando en YouBike también hay que respetar los semáforos.', 'Good job following the rules! On a YouBike you also have to obey traffic lights.');
           Game.thought = [L(`（綠燈亮了，你繼續往前騎。${t.dest[0]}快到了！）`, `(Se pone en verde y sigues pedaleando. ¡Ya casi llegas a ${t.dest[1]}!)`, `(The light turns green and you keep riding. You're almost at ${t.dest[2]}!)`)];
@@ -603,8 +601,8 @@ const Game = defineGame({
         next: c => {
           const s = t.ret.find(x => c === `去${x.name}還車`);
           if (s.docks === 0) {
-            Game.addMistake(M(`${s.name}「可還 0 位」，沒有空位可以還車，要去有空位的站。`, `En «${s.name}» dice «可還 0 位»: no hay espacio libre para devolver la bici. Hay que ir a una estación con espacio.`, `At ${s.name} it says "可還 0 位" — there are no free docks to return the bike. Go to a station with space.`),
-              [L(`（你騎到${s.name}，可是車柱都滿了，沒辦法還車。你只好再看 App。）`, `(Llegas a ${s.name}, pero todos los anclajes están llenos y no puedes devolver la bici. Tienes que volver a mirar la app.)`, `(You ride to ${s.name}, but all the docks are full, so you can't return the bike. You have to check the app again.)`)]); return;
+            Game.addMistake(M(`${s.name}「可還 0 位」，沒有空位可以還車了，要去有空位的站。`, `En «${s.name}» dice «可還 0 位»: no hay espacio libre para devolver la bici. Hay que ir a una estación con espacio.`, `At ${s.name} it says "可還 0 位" — there are no free docks to return the bike. Go to a station with space.`),
+              [L(`（你騎到${s.name}，可是車柱都滿了，沒辦法還車。）`, `(Llegas a ${s.name}, pero todos los anclajes están llenos y no puedes devolver la bici.)`, `(You ride to ${s.name}, but all the docks are full, so you can't return the bike.)`)]); return;
           }
           goodFirst('RETURN_FIND', '你看懂了！「可還」是還車的空位，要選有空位的站。', '¡Lo entendiste! «可還» son los espacios libres para devolver: hay que elegir una estación que tenga.', 'You got it! 可還 is the number of free docks for returning — pick a station that has some.');
           Game.thought = [L(`（你騎到${s.name}，這裡還有空的車柱。）`, `(Llegas a ${s.name}; aquí todavía hay anclajes libres.)`, `(You ride to ${s.name}; there are still empty docks here.)`)];
@@ -617,8 +615,8 @@ const Game = defineGame({
         options: () => rot(['把車推進車柱，等「嗶」一聲，看螢幕有沒有「還車成功」', '把車靠在車柱旁邊就走', '把車鎖在附近的欄杆上']),
         next: c => {
           if (!c.startsWith('把車推進車柱')) {
-            Game.addMistake(c.includes('靠在') ? M('車要推進車柱才算還車，只放在旁邊，費用會一直算下去。', 'La bici debe quedar encajada en el anclaje para contar como devuelta; si solo la dejas al lado, el cobro sigue corriendo.', "The bike has to be pushed into a dock to count as returned — if you just leave it beside the dock, the fee keeps running.")
-                                              : M('YouBike 不能鎖在欄杆上，要推進車柱還車。', 'No se puede dejar la YouBike atada a una baranda: hay que encajarla en un anclaje.', "You can't lock a YouBike to a railing — push it into a dock to return it."));
+            Game.addMistake(c.includes('靠在') ? M('車要推進車柱才算還車，只放在旁邊的話，費用會一直算下去喔。', 'La bici debe quedar encajada en el anclaje para contar como devuelta; si solo la dejas al lado, el cobro sigue corriendo.', "The bike has to be pushed into a dock to count as returned — if you just leave it beside the dock, the fee keeps running.")
+                                              : M('YouBike 不能鎖在欄杆上啦，要推進車柱還車。', 'No se puede dejar la YouBike atada a una baranda: hay que encajarla en un anclaje.', "You can't lock a YouBike to a railing — push it into a dock to return it."));
             return;
           }
           goodFirst('DOCK', '你很細心！聽到「嗶」、看到「還車成功」，才表示車真的還完了。', '¡Qué cuidadoso! Solo cuando oyes el «bip» y ves «還車成功» la bici está realmente devuelta.', 'Careful! Only when you hear the beep and see 還車成功 is the bike really returned.');
@@ -637,7 +635,7 @@ const Game = defineGame({
           return [
             L(`（你走到${t.dest[0]}，看到 Ami 在揮手。）`, `(Llegas a ${t.dest[1]} y ves a Ami saludándote con la mano.)`, `(You arrive at ${t.dest[2]} and see Ami waving.)`),
             Game._endGood
-              ? L(`Ami：哇，${N}，你很會騎 YouBike 欸！很方便吧！我們去走走吧！`, `¡Vaya, ${N}, qué bien manejas la YouBike! ¡Es muy práctica, ¿verdad? ¡Vamos a dar una vuelta!`, `Wow, ${N}, you're really good at riding a YouBike! It's so convenient, right? Let's go for a stroll!`)
+              ? L(`Ami：哇，${N}，騎 YouBike 很方便吧！我們去走走吧！`, `¡Vaya, ${N}, qué práctico es andar en YouBike, ¿verdad? ¡Vamos a dar una vuelta!`, `Wow, ${N}, riding a YouBike is so convenient, right? Let's go for a stroll!`)
               : L('Ami：辛苦了！騎 YouBike 要注意很多事吧！我們去走走吧！', '¡Gracias por el esfuerzo! Hay que fijarse en muchas cosas al usar la YouBike, ¿no? ¡Vamos a dar una vuelta!', "Thanks for your effort! There's a lot to watch out for on a YouBike, huh? Let's go for a stroll!")
           ];
         },
