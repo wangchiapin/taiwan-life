@@ -346,8 +346,13 @@ const rev = s => s.split('').reverse().join('');
 const rot = s => s.slice(1) + s[0];
 const digitsCN = s => String(s).replace(/\d/g, d => CN[+d]);
 const sp = s => String(s).split('').join(' ');
-/* 日期用真實的今天：md(0) 是今天，md(2) 是兩天後，顯示成「月/日」 */
-const md = off => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + off); return `${d.getMonth() + 1}/${d.getDate()}`; };
+/* 日期用真實的今天：md(0) 是今天，md(2) 是兩天後。中文寫「10月25日」（不要寫 10/25：朗讀會唸成「25分之10」），西文「25 de octubre」，英文「Oct 25」 */
+const dayOff = off => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + off); return d; };
+const MES_P = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const MON_P = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const md = off => { const d = dayOff(off); return `${d.getMonth() + 1}月${d.getDate()}日`; };
+const mdEs = off => { const d = dayOff(off); return `${d.getDate()} de ${MES_P[d.getMonth()]}`; };
+const mdEn = off => { const d = dayOff(off); return `${MON_P[d.getMonth()]} ${d.getDate()}`; };
 const money = n => n + '元';
 const esM = n => `${n} dólares`;
 const enM = n => `NT$${n}`;
@@ -593,13 +598,13 @@ const Game = defineGame({
     ];
   },
   momSmsLines() {
-    const t = this.task, d = md(7);
+    const t = this.task, d = md(7), dEs = mdEs(7), dEn = mdEn(7);
     return [
       { zh: '您的包裹已到店', es: 'Su paquete ya llegó a la tienda', en: 'Your parcel has arrived at the store' },
       { zh: `取件門市：${t.store}`, es: `Tienda de recogida: ${stES(t.store)}`, en: `Pickup store: ${stEN(t.store)}`, b: true },
       { zh: `包裹編號：${t.momNo}`, es: `Número de paquete: ${t.momNo}`, en: `Parcel number: ${t.momNo}` },
       { zh: `取貨付款：${t.cod}元`, es: `Pago al recoger: ${esM(t.cod)}`, en: `Pay on pickup: ${enM(t.cod)}`, b: true },
-      { zh: `取件期限：${d}`, es: `Plazo de recogida: ${d}`, en: `Pickup deadline: ${d}` }
+      { zh: `取件期限：${d}`, es: `Plazo de recogida: ${dEs}`, en: `Pickup deadline: ${dEn}` }
     ];
   },
   yourSmsLines() {
@@ -608,12 +613,12 @@ const Game = defineGame({
       { zh: '您的包裹已到店', es: 'Su paquete ya llegó a la tienda', en: 'Your parcel has arrived at the store' },
       { zh: `取件門市：${t.store}`, es: `Tienda de recogida: ${stES(t.store)}`, en: `Pickup store: ${stEN(t.store)}`, b: true },
       { zh: '取貨不付款（已付款）', es: 'Sin pago al recoger (ya pagado)', en: 'No payment on pickup (already paid)' },
-      { zh: `取件期限：${md(7)}`, es: `Plazo de recogida: ${md(7)}`, en: `Pickup deadline: ${md(7)}` }
+      { zh: `取件期限：${md(7)}`, es: `Plazo de recogida: ${mdEs(7)}`, en: `Pickup deadline: ${mdEn(7)}` }
     ];
     return [
       { zh: '您的包裹已寄出', es: 'Su paquete fue enviado', en: 'Your parcel has been shipped' },
       { zh: `取件門市：${t.store}`, es: `Tienda de recogida: ${stES(t.store)}`, en: `Pickup store: ${stEN(t.store)}`, b: true },
-      { zh: `預計到店：${md(2)}`, es: `Llegada estimada a la tienda: ${md(2)}`, en: `Expected arrival at the store: ${md(2)}`, warn: true },
+      { zh: `預計到店：${md(2)}`, es: `Llegada estimada a la tienda: ${mdEs(2)}`, en: `Expected arrival at the store: ${mdEn(2)}`, warn: true },
       { zh: '到店後會再通知您', es: 'Le avisaremos cuando llegue a la tienda', en: "We'll notify you when it arrives at the store" }
     ];
   },
@@ -967,8 +972,8 @@ const Game = defineGame({
           const lines = [
             L('（晚上，房東太太下班回來了。）', '(Por la noche, la casera vuelve del trabajo.)', '(In the evening, your landlady comes home from work.)'),
             L(`我：房東太太，${zhItems.join('、')}都拿回來了，悠遊卡也加值了${t.cardTop}元。${t.yourArrived ? '' : '結果我自己的包裹還沒到，' + md(2) + '才會到。'}`,
-              `Casera, ya traje ${joinEs(esItems)}, y también recargué la EasyCard con ${esM(t.cardTop)}.${t.yourArrived ? '' : ' Al final, mi propio paquete aún no llega; llegará el ' + md(2) + '.'}`,
-              `Landlady, I brought back ${joinEn(enItems)}, and I topped up the EasyCard with ${enM(t.cardTop)}.${t.yourArrived ? '' : " As it turns out, my own parcel hasn't arrived yet; it will arrive on " + md(2) + '.'}`)
+              `Casera, ya traje ${joinEs(esItems)}, y también recargué la EasyCard con ${esM(t.cardTop)}.${t.yourArrived ? '' : ' Al final, mi propio paquete aún no llega; llegará el ' + mdEs(2) + '.'}`,
+              `Landlady, I brought back ${joinEn(enItems)}, and I topped up the EasyCard with ${enM(t.cardTop)}.${t.yourArrived ? '' : " As it turns out, my own parcel hasn't arrived yet; it will arrive on " + mdEn(2) + '.'}`)
           ];
           lines.push(L(`我：這是剩下的${money(Game.cash)}。`, `Aquí está el dinero que sobró: ${esM(Game.cash)}.`, `Here's the money that's left: ${enM(Game.cash)}.`));
           lines.push(good

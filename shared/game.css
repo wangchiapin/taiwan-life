@@ -31,6 +31,13 @@
 #scene { display: flex; justify-content: center; padding: 16px 16px 0; }
 #npc-avatar { width: 100%; max-width: 360px; aspect-ratio: 1; object-fit: contain; border-radius: 12px; }
 ruby { ruby-position: over; }
+/* 手機：拼音／注音不要貼在一起；頁尾不被左下角 🔊 擋住 */
+@media (max-width: 831px) {
+  ruby rt { letter-spacing: 0; }
+  :has(> ruby.r2) { line-height: 2.45; }   /* 拼音＋注音一起顯示時，行距加大 */
+  #hgMute { width: 34px !important; height: 34px !important; font-size: 16px !important; opacity: .55; }
+  #hgCopy { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important; }
+}
 #options-area { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 18px 22px 24px; }
 #options-area.single { grid-template-columns: 1fr; }
 .opt {

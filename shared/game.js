@@ -215,8 +215,22 @@ HGPlays.gameFn = function () { return 'tw_' + GAME.scene; };   // 共用引擎�
 ══════════════════════════════════════ */
 const PY_OPT = { toneType: 'symbol', toneSandhi: true };
 const isDigits = seg => /^[零一二三四五六七八九]+$/.test(seg);   // 念號碼：一不變調
+/* 「個」：口語幾乎都念輕聲 ge（一個、這個、三個人）；只有「個人、個別、個性…」這種詞開頭才念 gè。
+   前一個字是數字／量詞指示（一、這、每…）時，一律輕聲。 */
+const GE_WORD = /^個(人|別|性|子|體|案|頭|位|數|資|展|户|戶)/;
+const GE_PREV = /[0-9零一二兩三四五六七八九十百千萬幾這那哪每某整半多好上下前後]/;
 function toPinyin(seg, asArray) {
-  return pinyinPro.pinyin(seg, { ...PY_OPT, toneSandhi: !isDigits(seg), type: asArray ? 'array' : 'string' });
+  const arr = pinyinPro.pinyin(seg, { ...PY_OPT, toneSandhi: !isDigits(seg), type: 'array' });
+  const chars = Array.from(seg);
+  if (chars.length === arr.length) {
+    for (let i = 0; i < chars.length; i++) {
+      if (chars[i] !== '個') continue;
+      const prev = i > 0 ? chars[i - 1] : '';
+      const wordHead = GE_WORD.test(chars.slice(i, i + 2).join('')) || (chars[i + 1] === '個');
+      arr[i] = (wordHead && !GE_PREV.test(prev)) ? 'gè' : 'ge';
+    }
+  }
+  return asArray ? arr : arr.join(' ');
 }
 
 /* ══════════════════════════════════════
