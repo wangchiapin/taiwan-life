@@ -25,10 +25,11 @@ ORACLE = """() => {
   if (s === 'PICK') {
     const c = Game.counts();
     const nm = BYID[t.bread].zh;
-    if ((c[t.bread]||0) < t.n) return nm;
+    // 麵包改成點架子圖片／托盤＋：這裡直接用同樣的入口補齊托盤，再按結帳
+    while ((Game.counts()[t.bread]||0) < t.n) Game.handleChoice(nm);
     const own = Game.tray.filter(id => id !== t.bread && !BYID[id].toast).length;
-    if (own < 1) return '紅豆麵包' === nm ? '起司麵包' : '紅豆麵包';
-    if (!c.toast) return '吐司';
+    if (own < 1) Game.handleChoice('紅豆麵包' === nm ? '起司麵包' : '紅豆麵包');
+    if (!Game.counts().toast) Game.handleChoice('吐司');
     return '夾好了，去結帳';
   }
   const m = {

@@ -120,6 +120,18 @@
   .tray .th { font-weight: 700; font-size: 14px; color: var(--red-dark); }
   .tray .row { display: flex; justify-content: space-between; gap: 10px; }
   .tray .empty { color: var(--muted); }
+  .tray .th small { font-weight: 400; color: var(--muted); margin-left: 8px; font-size: 12px; }
+  .tray .row { align-items: center; }
+  .tray .row > span:first-child { flex: 1; min-width: 0; }
+  .tray .adj { display: inline-flex; align-items: center; gap: 3px; }
+  .tray .adj button { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #b99764; background: #fffaf0; color: var(--red-dark); font: inherit; font-size: 20px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0; }
+  .tray .adj button:disabled { opacity: .35; cursor: default; }
+  .tray .adj i { min-width: 18px; text-align: center; font-style: normal; font-weight: 700; }
+  .tray .row > b { min-width: 52px; text-align: right; }
+  .tray .act { margin: 2px 0 4px; font-size: 14px; color: var(--ink); }
+  .tray .act small { display: block; color: var(--muted); font-size: 12px; line-height: 1.4; }
+  .shelf .bun { cursor: pointer; }
+  .shelf .bun:active { transform: translateY(1px); }
   .tray .total { display: flex; justify-content: space-between; border-top: 2px dashed #b99764; margin-top: 4px; padding-top: 4px; font-size: 18px; }
   .tray .total b { color: var(--red-dark); font-size: 22px; }
   @media (hover: hover) {
@@ -374,7 +386,7 @@ const VOCAB = {
           ['加熱', 'calentar', 'heat up'], ['分開裝', 'poner por separado en bolsas', 'bag separately'], ['會員', 'miembro, socio', 'member']],
   TONGS: [['托盤', 'bandeja', 'tray'], ['夾子', 'pinzas', 'tongs'], ['空夾', 'cerrar las pinzas en el aire', 'click the tongs in the air'], ['自己拿', 'sírvete tú mismo', 'help yourself']],
   PICK: [['菠蘿麵包', 'pan piña', 'pineapple bun'], ['肉鬆麵包', 'pan con hebras de cerdo', 'pork floss bun'], ['紅豆麵包', 'pan de frijol rojo', 'red bean bun'], ['起司', 'queso', 'cheese'],
-         ['杏仁', 'almendra', 'almond'], ['核桃', 'nuez', 'walnut'], ['含', 'contiene', 'contains'], ['標籤', 'etiqueta', 'label'], ['夾', 'tomar con pinzas', 'pick up with tongs']],
+         ['杏仁', 'almendra', 'almond'], ['核桃', 'nuez', 'walnut'], ['含', 'contiene', 'contains'], ['標籤', 'etiqueta', 'label'], ['夾', 'tomar con pinzas', 'pick up with tongs'], ['放回去', 'devolver al estante', 'put back']],
   C_SLICE: [['切', 'cortar', 'cut'], ['一條', 'una barra (de pan)', 'one loaf'], ['幫', 'ayudar a', 'help (do for)']],
   C_HEAT: [['加熱', 'calentar', 'heat up'], ['要', 'querer', 'want'], ['不用', 'no hace falta', 'no need']],
   C_SEP: [['分開裝', 'poner por separado en bolsas', 'bag separately'], ['裝在一起', 'poner todo junto', 'put together']],
@@ -514,6 +526,7 @@ const Game = defineGame({
       err: pick([null, 'size', 'candle', 'time'])    // 店員複誦訂單時故意講錯的地方（有時候沒有）
     };
     this.tray = [];
+    this.lastAct = null;
     this.checkFails = 0;
     this.paid = 0;
   },
@@ -652,11 +665,14 @@ const Game = defineGame({
   /* 招牌元素：麵包架 + 托盤（累計金額） */
   trayHTML(withShelf) {
     const r = s => this.ruby(s), c = this.counts();
-    const shelf = withShelf ? `<div class="shelf">${SHELF.map(i => `<div class="bun${i.nut ? ' nut' : ''}"><span class="e">${breadImg(i.id)}</span>
+    const shelf = withShelf ? `<div class="shelf">${SHELF.map(i => `<div class="bun${i.nut ? ' nut' : ''}" data-bun="${i.zh}"><span class="e">${breadImg(i.id)}</span>
       <div class="nm">${r(i.zh)}</div><div class="pr">${i.price}${r('元')}</div>${i.nut ? `<div class="lab">${r('含' + i.nut)}</div>` : ''}</div>`).join('')}</div>` : '';
-    const rows = Object.keys(c).map(id => `<div class="row"><span>${breadImg(id, 'sm')} ${r(BYID[id].zh)} × ${c[id]}</span><b>${BYID[id].price * c[id]}${r('元')}</b></div>`).join('')
+    const adj = id => withShelf ? `<span class="adj"><button type="button" data-adj="${id}" data-d="-1" aria-label="－">－</button><i>${c[id]}</i><button type="button" data-adj="${id}" data-d="1" aria-label="＋"${BYID[id].toast ? ' disabled' : ''}>＋</button></span>` : ` × ${c[id]}`;
+    const rows = Object.keys(c).map(id => `<div class="row"><span>${breadImg(id, 'sm')} ${r(BYID[id].zh)}</span>${adj(id)}<b>${BYID[id].price * c[id]}${r('元')}</b></div>`).join('')
       || `<div class="empty">${r('托盤是空的')}</div>`;
-    return shelf + `<div class="tray"><div class="th">${r('托盤')}</div>${rows}<div class="total"><span>${r('合計')}</span><b>${this.trayTotal()}${r('元')}</b></div></div>`;
+    const tip = withShelf ? `<small>${r('＋夾進托盤　－放回去')}</small>` : '';
+    const act = (withShelf && this.lastAct) ? `<div class="act">${r(this.lastAct.zh)}${ONLYZH() ? '' : `<small>${esc(X(this.lastAct.es, this.lastAct.en))}</small>`}</div>` : '';
+    return shelf + `<div class="tray"><div class="th">${r('托盤')}${tip}</div>${act}${rows}<div class="total"><span>${r('合計')}</span><b>${this.trayTotal()}${r('元')}</b></div></div>`;
   },
 
   /* ── 狀態設定 ── */
@@ -708,10 +724,7 @@ const Game = defineGame({
         html: () => Game.trayHTML(true),
         dialogue: () => [],
         options: () => {
-          const o = SHELF.map(i => i.zh);
-          if (Game.tray.length) o.push(`把${BYID[Game.tray[Game.tray.length - 1]].zh}放回去`);
-          o.push('夾好了，去結帳');
-          return o;
+          return ['夾好了，去結帳'];     // 麵包改成點架子上的圖片或托盤的＋，下面只留結帳
         },
         next: c => {
           if (c === '夾好了，去結帳') {
@@ -730,7 +743,6 @@ const Game = defineGame({
             }
             return;
           }
-          if (c.startsWith('把')) { const id = Game.tray.pop(); Game.thought = [L(`（你把${BYID[id].zh}放回架上。）`, `(Devuelves el ${short(BYID[id].es)} al estante.)`, `(You put the ${BYID[id].en} back.)`)]; Game.updateCash(); return; }
           const it = BYZH[c];
           if (it.nut) {
             Game.addMistake(M(`你買的麵包含${it.nut}，Ami對堅果過敏。`, `El pan que compraste contiene ${it.nutEs}; Ami es alérgica a los frutos secos.`, `The bread you bought contains ${it.nutEn}; Ami is allergic to nuts.`),
@@ -739,7 +751,7 @@ const Game = defineGame({
           }
           if (it.toast && Game.counts().toast) { Game.thought = [L('（吐司已經夾了一條了。）', '(Ya tienes una barra de pan de molde.)', '(You already have one loaf.)')]; return; }
           Game.tray.push(it.id); Game.updateCash();
-          Game.thought = [L(`（你用夾子把${it.zh}夾進托盤。）`, `(Con las pinzas pones el ${short(it.es)} en la bandeja.)`, `(You pick up the ${it.en} with the tongs and put it on the tray.)`)];
+          Game.lastAct = L(`你用夾子把${it.zh}夾進托盤。`, `Con las pinzas pones el ${short(it.es)} en la bandeja.`, `You pick up the ${it.en} with the tongs and put it on the tray.`);
         }
       },
 
@@ -997,6 +1009,23 @@ const Game = defineGame({
     };
   },
 
+  /* 托盤每一列的「－」：把這一種麵包少拿一個（不用管順序） */
+  removeOne(id) {
+    const i = this.tray.lastIndexOf(id);
+    if (i < 0) return;
+    this.tray.splice(i, 1);
+    this.lastAct = L(`你把${BYID[id].zh}放回去。`, `Devuelves el ${short(BYID[id].es)} al estante.`, `You put the ${BYID[id].en} back.`);
+    Tr.closeAll(); Speech.stop();
+    this.thought = null; this.feedback = []; this.thoughtFirst = false;
+    this.updateCash(); this.render();
+  },
+  testPrep(use) {   // 自動測試用：沒有麵包按鈕了，亂玩時由這裡隨機放幾個麵包進托盤（不含堅果）
+    if (this.state !== 'PICK') return;
+    if (this.tray.length > 8) this.tray = [];
+    if (!use) { const ok = SHELF.filter(i => !i.nut && !i.toast); const n = Math.floor(Math.random() * 3); for (let k = 0; k < n; k++) this.tray.push(ok[Math.floor(Math.random() * ok.length)].id); }
+    this.updateCash();
+  },
+
   handleChoice(choice) {
     if (this.state === '_TRANS') {          // 離開過場，進下一關
       const t = this._trans; this._trans = null;
@@ -1055,6 +1084,10 @@ const Game = defineGame({
     box.querySelectorAll('[data-tr]').forEach(btn => {
       btn.onclick = () => Tr.open(this._tr[+btn.dataset.tr], btn);
     });
+    box.querySelectorAll('[data-adj]').forEach(btn => {
+      btn.onclick = () => { const id = btn.dataset.adj; if (+btn.dataset.d < 0) this.removeOne(id); else this.handleChoice(BYID[id].zh); };
+    });
+    box.querySelectorAll('[data-bun]').forEach(el => { el.onclick = () => this.handleChoice(el.dataset.bun); });
     box.querySelectorAll('[data-spk]').forEach(btn => {
       btn.onclick = () => { const x = this._spk[+btn.dataset.spk]; Speech.speak(x.text, btn, x.who); };
     });

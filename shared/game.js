@@ -657,6 +657,30 @@ const Log = {
   }
 };
 document.getElementById('log-tab').onclick = () => Log.toggle();
+
+/* ══════════════════════════════════════
+   「任務提示」分頁籤輕輕閃（呼吸）：
+   ① 剛開始玩、還沒點過提示的人，進遊戲時閃幾下；② 同一頁沒動作超過 1 分鐘，也閃幾下
+══════════════════════════════════════ */
+const HintPulse = (() => {
+  const KEY = 'hanziGames.hintSeen';
+  const seen = () => { try { return !!localStorage.getItem(KEY); } catch (e) { return false; } };
+  const mark = () => { try { localStorage.setItem(KEY, '1'); } catch (e) {} };
+  let last = Date.now(), pulsed = false, timer = 0;
+  const tab = () => document.getElementById('hint-tab');
+  const gameOn = () => document.getElementById('game-window').classList.contains('active') && !document.getElementById('side-tabs').hidden;
+  function pulse() {
+    const t = tab(); if (!t || Hints.open) return;
+    t.classList.remove('pulse'); void t.offsetWidth; t.classList.add('pulse');
+    clearTimeout(timer); timer = setTimeout(() => t.classList.remove('pulse'), 6500);
+  }
+  function stop() { const t = tab(); if (t) t.classList.remove('pulse'); clearTimeout(timer); }
+  const act = () => { last = Date.now(); pulsed = false; };
+  ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, act, true));
+  tab().addEventListener('click', () => { mark(); stop(); });
+  setInterval(() => { if (gameOn() && !pulsed && Date.now() - last > 60000) { pulsed = true; pulse(); } }, 5000);
+  return { start() { last = Date.now(); pulsed = false; if (!seen()) setTimeout(() => { if (gameOn()) pulse(); }, 1200); } };
+})();
 document.getElementById('log-close').onclick = () => Log.toggle(false);
 
 /* ══════════════════════════════════════
@@ -678,6 +702,7 @@ function startGame() {
   if (Game.onStart) Game.onStart();
   document.getElementById('login-screen').classList.remove('active');
   document.getElementById('game-window').classList.add('active');
+  HintPulse.start();
   try { window.HGPlays && HGPlays.start(EMBED ? 'map' : 'solo', name); } catch (e) {}
   track('game_start', { game: GAME.track, script: Settings.script, lang: Settings.lang, embed: EMBED ? 1 : 0 });
   Game.render();
