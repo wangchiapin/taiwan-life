@@ -379,6 +379,13 @@ function applyLang() {
     el.textContent = ONLYZH() ? (el.dataset.zh || '') : (el.dataset.zh ? el.dataset.zh + ' ' : '') + el.dataset[Settings.lang];
   });
   document.documentElement.dataset.ui = Settings.lang;
+  const TAB_L2 = { 'hint-tab': ['Pistas', 'Hints'], 'vocab-tab': ['Palabras', 'Words'], 'log-tab': ['Errores', 'Errors'] };
+  for (const id in TAB_L2) {
+    const b = document.getElementById(id); if (!b) continue;
+    let l2 = b.querySelector('.tab-l2');
+    if (!l2) { l2 = document.createElement('span'); l2.className = 'tab-l2'; const c = b.querySelector('.v-count'); b.insertBefore(l2, c || null); }
+    l2.textContent = TAB_L2[id][Settings.lang === 'en' ? 1 : 0];
+  }
   const so = document.getElementById('set-open');
   if (so) so.textContent = '⚙️ ' + Z('設定') + (ONLYZH() ? '' : ' · ' + X('Ajustes', 'Settings'));
   const nameLab = document.querySelector('label[for="player-name-input"]');
