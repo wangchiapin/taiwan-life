@@ -94,3 +94,13 @@ Gemini 畫出來的 2048×2048 原圖請先縮小再上傳（原圖保留在自�
 
 ## 地圖開關
 新遊戲在 SCENES 加 `gated: true` ＝ 預設維修中；管理員頁「地圖開關・連結」可改成開啟（存 Firestore `settings/map`），也有每個遊戲的試玩連結。
+
+## 手機瀏覽器備註：捲動後回不到頂端（2026-10-24）
+iPhone 版 Chrome 上，頁面可以捲動時，往下捲之後有時回不到最上面（Safari 正常）。
+處理方式（已套用在本遊戲）：
+- `<meta name="viewport">` 設 `maximum-scale=1`，不使用 `viewport-fit=cover`。
+- `<html>` 加 `html{color-scheme:light}`。
+
+兩項一起改後，手機 Chrome 測試恢復正常；尚未分開測是哪一項有效。新增頁面請照這個寫。
+
+（範圍：首頁、music.html，以及 games/ 底下全部小遊戲；admin、map、tools 沒動。）
