@@ -560,8 +560,8 @@ const Game = defineGame({
       OUT: {
         place: 'station',
         dialogue: () => [
-          L('（你按了「啟動靠卡」，把悠遊卡放在感應區。螢幕寫著「本車暫停服務」。App 明明顯示這個站有車。）', '(Pulsas «啟動靠卡» y pones la EasyCard en el sensor. La pantalla dice «本車暫停服務» (esta bici está fuera de servicio). ¡Pero la app mostraba que había bicis en esta estación!)', '(You press 啟動靠卡 and put your EasyCard on the reader. The screen says "本車暫停服務" (this bike is out of service). Yet the app showed bikes at this station!)'),
-          L('我：要怎麼辦呢？', '¿Qué hago?', 'What should I do?')
+          L('（螢幕顯示「本車暫停服務」。）', '(La pantalla muestra «本車暫停服務»: esta bici está fuera de servicio.)', '(The screen shows "本車暫停服務": this bike is out of service.)'),
+          L('我：App 明明顯示可以用，該怎麼辦呢？', 'La app decía que se podía usar... ¿qué hago?', 'The app clearly showed it was available. What should I do?')
         ],
         options: () => rot(['換旁邊另一台車', '再刷一次卡', '用力把車拉出來']),
         next: c => {
