@@ -568,10 +568,10 @@ const Game = defineGame({
       MSG_OK: {
         place: 'phone',
         dialogue: () => [tch('好，沒問題。你回學校以後，要補交請假單喔。', 'Bien, no hay problema. Cuando vuelvas a la escuela, tienes que entregar el formulario de ausencia.', "OK, no problem. When you come back to school, you'll need to hand in a leave form later.")],
-        options: () => rot(['好的，謝謝老師。', '好，我知道了。', '不用吧，LINE 就可以了。']),
+        options: () => rot(['好的，謝謝老師。', '喔。', '不用吧，LINE 就可以了。']),
         next: c => {
           if (c !== '好的，謝謝老師。') {
-            Game.addMistake(c.startsWith('好，我知道了') ? M('要當個有禮貌的學生！要說「謝謝老師」！', '¡Hay que ser cortés! ¡Debes decir «謝謝老師» (gracias, profesora)!', 'Be a polite student! Say 謝謝老師 (thank you, teacher)!')
+            Game.addMistake(c === '喔。' ? M('要當個有禮貌的學生！要說「謝謝老師」！', '¡Hay que ser cortés! ¡Debes decir «謝謝老師» (gracias, profesora)!', 'Be a polite student! Say 謝謝老師 (thank you, teacher)!')
                                                     : M('請假單是學校的規定，我們都要遵守規定！', 'El formulario es una regla de la escuela: ¡todos tenemos que cumplir las reglas!', 'The leave form is a school rule — we all have to follow the rules!'));
             return;
           }
