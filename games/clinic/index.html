@@ -414,7 +414,7 @@ const Hints = {
     let html = `<div class="h-sec">${r('我的身體狀況')}</div>` + Game.statusRows().map(item).join('') +
       `<div class="h-sec">${r('Ami 的 LINE 訊息')}</div>` + Game.amiLines().map(item).join('');
     const st = Game.st0, past = (...a) => a.includes(st);
-    if (past('D_ADVICE', 'P_PAY', 'M_MED', 'M_NOW', 'E_ASK', 'END', 'RESULT')) html += `<div class="h-sec">${r('醫生說的話')}</div>` + Game.docLines().map(item).join('');
+    if (past('D_ADVICE', 'P_PAY', 'M_MED', 'M_NOW', 'E_ASK', 'END', 'RESULT')) html += `<div class="h-sec">${r('醫生說的話')}</div>` + Game.docLines().slice(-1).map(item).join('');
     if (past('M_MED', 'M_NOW', 'E_ASK', 'END', 'RESULT')) html += `<div class="h-sec">${r('藥師說的話')}</div>` + Game.pharmLines().map(item).join('');
     document.getElementById('hint-body').innerHTML = html;
   }

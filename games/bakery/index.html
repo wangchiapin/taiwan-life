@@ -421,11 +421,12 @@ const Hints = {
     if (!Game.task) return;
     const r = s => Game.ruby(s);
     const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
+    const sit = `<div class="h-sec">${r('我的狀況')}</div>` + Game.listHTML(true).map(x => `<div class="h-item"><div class="h-zh">${r(x.zh)}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`).join('');
     let html = `<div class="h-sec">${r('Ami 在店門口說的話')}</div>` + Game.amiLines().map(item).join('');
     if (Game.st0.startsWith('K_') || ['END', 'RESULT'].includes(Game.st0)) {
       html += `<div class="h-sec">${r('Ami 的 LINE 訊息')}</div>` + Game.cakeLines().slice(1).map(item).join('');
     }
-    document.getElementById('hint-body').innerHTML = html;
+    document.getElementById('hint-body').innerHTML = sit + html;
   }
 };
 document.getElementById('hint-tab').onclick = () => Hints.toggle();
@@ -629,7 +630,7 @@ const Game = defineGame({
 
   /* ── 畫面元件 ── */
   counts() { const c = {}; this.tray.forEach(id => { c[id] = (c[id] || 0) + 1; }); return c; },
-  listHTML() {
+  listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s);
     const c = this.counts();
     const inCake = this.state.startsWith('K_');
@@ -654,6 +655,7 @@ const Game = defineGame({
       ];
       rule = L('Ami對堅果過敏。', 'Ami es alérgica a los frutos secos.', 'Ami is allergic to nuts.');
     }
+    if (rowsOnly) return rule ? [...rows, rule] : rows;
     const all = rule ? [...rows, rule] : rows;
     this._spk.push({ text: all.map(x => x.zh.replace('：', '，')).join('。'), who: 'Ami' });
     const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));

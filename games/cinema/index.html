@@ -476,7 +476,8 @@ const Hints = {
     if (!Game.task) return;
     const r = s => Game.ruby(s);
     const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
-    document.getElementById('hint-body').innerHTML = Game.hintSections().map(sec => `<div class="h-sec">${r(sec.title)}</div>` + sec.lines.map(item).join('')).join('');
+    const sit = `<div class="h-sec">${r('我的狀況')}</div>` + Game.listHTML(true).map(x => `<div class="h-item"><div class="h-zh">${r(x.zh)}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`).join('');
+    document.getElementById('hint-body').innerHTML = sit + Game.hintSections().map(sec => `<div class="h-sec">${r(sec.title)}</div>` + sec.lines.map(item).join('')).join('');
   }
 };
 document.getElementById('hint-tab').onclick = () => Hints.toggle();
@@ -618,12 +619,11 @@ const Game = defineGame({
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
     if (at('CHANGE')) out.push({ title: '售票員說的話', lines: [this.totalLine()] });
-    if (at('FIND_HALL')) out.push({ title: '驗票員說的話', lines: [this.gateLine()] });
     return out;
   },
 
   /* ── 畫面元件 ── */
-  listHTML() {
+  listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s), R = RULES[t.rule], sn = SNACKS[t.snack];
     const rows = [
       { zh: `電影：《${t.movie.zh}》`, es: `Película: «${t.movie.es}»`, en: `Movie: "${t.movie.en}"` },
@@ -633,6 +633,7 @@ const Game = defineGame({
       { zh: `Ami的爆米花：${sn[0]}`, es: `Palomitas de Ami: ${sn[3]}`, en: `Ami's popcorn: ${sn[2]}` },
       { zh: `你身上有：${NZ(t.bills)}張一千元`, es: `Llevas: ${t.bills === 1 ? 'un billete' : 'dos billetes'} de mil dólares`, en: `You have: ${t.bills === 1 ? 'one' : 'two'} 1,000-dollar bill${t.bills === 1 ? '' : 's'}` }
     ];
+    if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
     const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
     this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });

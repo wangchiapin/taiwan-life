@@ -411,10 +411,11 @@ const Hints = {
     if (!Game.task) return;
     const r = s => Game.ruby(s);
     const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
+    const sit = `<div class="h-sec">${r('我的狀況')}</div>` + Game.listHTML(true).map(x => `<div class="h-item"><div class="h-zh">${r(x.zh)}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`).join('');
     let html = `<div class="h-sec">${r('Ami 的 LINE 訊息')}</div>` + Game.amiLines().map(item).join('');
     const st = Game.st0;
     if (['P_RED', 'T_RED', 'X_XFER', 'P_BLUE', 'T_SEAT', 'T_BLUE', 'END', 'RESULT'].includes(st)) html += `<div class="h-sec">${r('站務員說的話')}</div>` + Game.routeLines().map(item).join('');
-    document.getElementById('hint-body').innerHTML = html;
+    document.getElementById('hint-body').innerHTML = sit + html;
   }
 };
 document.getElementById('hint-tab').onclick = () => Hints.toggle();
@@ -613,7 +614,7 @@ const Game = defineGame({
   },
 
   /* ── 畫面元件 ── */
-  listHTML() {
+  listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s);
     const rows = [
       { zh: `目的地：${t.dest}站`, es: `Destino: estación ${this.destEs()}`, en: `Destination: ${ROM[t.dest]} Station` },
@@ -621,6 +622,7 @@ const Game = defineGame({
       { zh: `悠遊卡餘額：${t.bal}元`, es: `Saldo de tu EasyCard: ${esM(t.bal)}`, en: `EasyCard balance: ${enM(t.bal)}` },
       { zh: `手上有：${t.drink[0]}`, es: `En la mano: ${t.drink[1]}`, en: `In your hand: ${t.drink[2]}` }
     ];
+    if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
     const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
     this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });

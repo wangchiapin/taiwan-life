@@ -420,12 +420,13 @@ const Hints = {
     if (!Game.task) return;
     const r = s => Game.ruby(s);
     const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
+    const sit = `<div class="h-sec">${r('我的狀況')}</div>` + Game.listHTML(true).map(x => `<div class="h-item"><div class="h-zh">${r(x.zh)}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`).join('');
     let html = `<div class="h-sec">${r('Ami 說的話')}</div>` + Game.amiLines().map(item).join('');
     if (['CALL', 'X_GREET', 'X_PRICE', 'END', 'RESULT'].includes(Game.st0)) {
       html += `<div class="h-sec">${r('Ami 來電')}</div>` + Game.callLines().slice(1).map(item).join('');
     }
     if (Game.seenT) html += `<div class="h-sec">${r('衣服攤老闆說的話')}</div>` + item(Game.tShirtLine());
-    document.getElementById('hint-body').innerHTML = html;
+    document.getElementById('hint-body').innerHTML = sit + html;
   }
 };
 document.getElementById('hint-tab').onclick = () => Hints.toggle();
@@ -584,7 +585,7 @@ const Game = defineGame({
   },
 
   /* ── 畫面元件 ── */
-  listHTML() {
+  listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s), d = this.done;
     const tc = TCOL[t.tColor], ac = ACOL[t.aColor];
     const rows = [
@@ -593,6 +594,7 @@ const Game = defineGame({
       { k: 'F', zh: `晚餐：雞排${t.chicken}份，一份不要辣（奶奶的），要切`, es: `Cena: ${t.chicken} porciones de pollo frito, una sin picante (la de la abuela), cortado`, en: `Dinner: ${t.chicken} servings of fried chicken, one not spicy (grandma's), cut up` }
     ];
     const rule = L('衣服、飾品可以殺價，吃的不要殺價。', 'En ropa y accesorios se puede regatear; en la comida no.', 'You can haggle for clothes and accessories, but not for food.');
+    if (rowsOnly) return [...rows, rule];
     const all = [...rows, rule];
     this._spk.push({ text: all.map(x => x.zh.replace('：', '，')).join('。'), who: 'Ami' });
     const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));

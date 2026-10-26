@@ -374,7 +374,8 @@ const Hints = {
     if (!Game.task) return;
     const r = s => Game.ruby(s);
     const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
-    document.getElementById('hint-body').innerHTML = `<div class="h-sec">${r('Ami 的 LINE 訊息')}</div>` + Game.amiLines().map(item).join('');
+    const sit = `<div class="h-sec">${r('我的狀況')}</div>` + Game.listHTML(true).map(x => `<div class="h-item"><div class="h-zh">${r(x.zh)}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`).join('');
+    document.getElementById('hint-body').innerHTML = sit + `<div class="h-sec">${r('Ami 的 LINE 訊息')}</div>` + Game.amiLines().map(item).join('');
   }
 };
 document.getElementById('hint-tab').onclick = () => Hints.toggle();
@@ -461,7 +462,7 @@ const Game = defineGame({
     ];
   },
 
-  listHTML() {
+  listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s);
     const rows = [
       { zh: `有空：${t.want}`, es: `Estoy libre: ${t.want}`, en: `Free: ${t.want}` },
@@ -469,6 +470,7 @@ const Game = defineGame({
       { zh: `頭髮剪到${t.len[0]}`, es: `Cortar hasta ${t.len[1]}`, en: `Cut to ${t.len[2]}` },
       { zh: `瀏海：${t.bang[0]}`, es: `Flequillo: ${t.bang[1]}`, en: `Bangs: ${t.bang[2]}` }
     ];
+    if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
     const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
     this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });

@@ -379,9 +379,10 @@ const Hints = {
     if (!Game.task) return;
     const r = s => Game.ruby(s);
     const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
+    const sit = `<div class="h-sec">${r('我的狀況')}</div>` + Game.listHTML(true).map(x => `<div class="h-item"><div class="h-zh">${r(x.zh)}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`).join('');
     let html = `<div class="h-sec">${r('Ami 的 LINE 訊息')}</div>` + Game.amiLines().map(item).join('');
     if (['RING', 'TAP_OFF', 'END', 'RESULT'].includes(Game.st0)) html += `<div class="h-sec">${r('司機說的話')}</div>` + item(Game.driverLine());
-    document.getElementById('hint-body').innerHTML = html;
+    document.getElementById('hint-body').innerHTML = sit + html;
   }
 };
 document.getElementById('hint-tab').onclick = () => Hints.toggle();
@@ -479,13 +480,14 @@ const Game = defineGame({
   },
 
   /* ── 畫面元件 ── */
-  listHTML() {
+  listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s);
     const rows = [
       { zh: `要搭：${t.route[1]}路公車（${t.route[0]}）`, es: `Para tomar: autobús ${t.route[0]}`, en: `To take: bus ${t.route[0]}` },
       { zh: `方向：往${t.dir}`, es: `Dirección: hacia ${DIRES[t.dir][0]}`, en: `Direction: toward ${DIRES[t.dir][1]}` },
       { zh: `下車：${t.dest}站`, es: `Dónde bajarte: parada ${t.dest}`, en: `Get off at: ${t.dest} Stop` }
     ];
+    if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
     const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
     this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });

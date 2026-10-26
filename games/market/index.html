@@ -408,7 +408,8 @@ const Hints = {
     if (!Game.task) return;
     const r = s => Game.ruby(s);
     const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
-    document.getElementById('hint-body').innerHTML = Game.hintSections().map(sec => `<div class="h-sec">${r(sec.title)}</div>` + sec.lines.map(item).join('')).join('');
+    const sit = `<div class="h-sec">${r('我的狀況')}</div>` + Game.listHTML(true).map(x => `<div class="h-item"><div class="h-zh">${r(x.zh)}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`).join('');
+    document.getElementById('hint-body').innerHTML = sit + Game.hintSections().map(sec => `<div class="h-sec">${r(sec.title)}</div>` + sec.lines.map(item).join('')).join('');
   }
 };
 document.getElementById('hint-tab').onclick = () => Hints.toggle();
@@ -491,13 +492,14 @@ const Game = defineGame({
     if (ORDER.indexOf(this.st0) >= ORDER.indexOf('PAY')) out.push({ title: '老闆說的話', lines: [this.priceLine()] });
     return out;
   },
-  listHTML() {
+  listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s);
     const rows = [
       ...t.items.map(it => ({ zh: `${it.icon} ${QN(it.q)}${it.m}${it.zh}`, es: `${it.q} ${it.es}`, en: `${it.q} ${it.en}` })),
       { zh: '要帶環保袋，不拿塑膠袋', es: 'Lleva la bolsa reutilizable, sin plástico', en: 'Use the reusable bag, no plastic' },
       { zh: '你身上有：一張五百元', es: 'Llevas: un billete de quinientos dólares', en: 'You have: a 500-dollar bill' }
     ];
+    if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace(/^\S+ /, '')).join('。'), who: '我' });
     const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
     this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
