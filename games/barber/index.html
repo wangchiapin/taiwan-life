@@ -526,10 +526,10 @@ const Game = defineGame({
       BOOK_SEARCH: {
         place: 'phone',
         html: () => Game.shopsHTML(),
-        dialogue: () => [L('（你在手機上搜尋「理髮店」，跑出三個結果。）', '(Buscas «理髮店» en tu celular y aparecen tres resultados.)', '(You search for 理髮店 on your phone and three results come up.)'), L('我：我要找剪頭髮的理髮店。', 'Busco una peluquería para cortarme el pelo.', "I'm looking for a salon for a haircut.")],
-        options: () => t.shopOrder.map(x => `打電話：${x.zh}`),
+        dialogue: () => [L('（你在手機上搜尋「理髮店」，跑出三個結果。）', '(Buscas «理髮店» en tu celular y aparecen tres resultados.)', '(You search for 理髮店 on your phone and three results come up.)'), L('我：哪支電話才是對的呢？', '¿Cuál es el teléfono correcto?', 'Which phone number is the right one?')],
+        options: () => t.shopOrder.map(x => x.zh),
         next: c => {
-          const x = t.shops.find(s => c === `打電話：${s.zh}`);
+          const x = t.shops.find(s => c === s.zh);
           if (x.k === 'wig') { Game.addMistake(M(`那是假髮店，賣假髮，不是剪頭髮的店。你要找「理髮店」：${t.shops[0].show}。`, `Es una tienda de pelucas, no una peluquería. Tienes que llamar a la «理髮店»: ${t.shops[0].show}.`, `That is a wig shop, not a place for a haircut. You want the 理髮店: ${t.shops[0].show}.`)); return; }
           if (x.k === 'adult') { Game.addMistake(M(`那不是剪頭髮的正常理髮店，不要打去那裡喔！你要找「理髮店」：${t.shops[0].show}。`, `Ese no es una peluquería normal (es un local para adultos): ¡no llames ahí! Tienes que llamar a la «理髮店»: ${t.shops[0].show}.`, `That is not a normal haircut place (it is an adult venue) — don't call it! You want the 理髮店: ${t.shops[0].show}.`)); return; }
           goodFirst('BOOK_SEARCH', '你找對了！沒有打到奇怪的電話喔！', '¡Lo encontraste! ¡No llamaste a un número raro!', 'You got it! You didn\'t call any weird numbers!');
