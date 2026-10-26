@@ -94,7 +94,7 @@ html{color-scheme:light}
   #npc-dialogue .speaker { font-weight: 700; color: var(--red); }
   #npc-dialogue .speaker.landlady { color: var(--landlady); }
   #npc-dialogue .speaker.me { color: var(--muted); }
-  #npc-dialogue .thought { color: var(--muted); font-size: 18px; }
+  #npc-dialogue .thought .line.narr { color: var(--muted); font-size: 18px; }
   ruby rt { color: var(--red); font-size: .5em; font-weight: 400; }
   /* 手機：LINE 和簡訊 */
   .sms-wrap { margin: 8px 0 10px; display: grid; gap: 8px; }
@@ -559,7 +559,7 @@ const Game = defineGame({
         this._tr.push(item);
         btn += `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
       }
-      return `<div class="line">${head}${this.ruby(rest)}${btn}</div>`;
+      return `<div class="line${/^[（(]/.test(String(item.zh).trim()) ? ' narr' : ''}">${head}${this.ruby(rest)}${btn}</div>`;
     }).join('');
   },
 
