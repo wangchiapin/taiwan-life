@@ -108,6 +108,11 @@ html{color-scheme:light}
   /* ── 這個遊戲自己的樣式 ── */
   .slots, .bill { background: #fff; border: 2px solid var(--line); border-radius: 10px; margin: 8px 0 12px; overflow: hidden; }
   .slots .sh, .bill .sh { background: var(--red); color: #fff; padding: 6px 12px; font-weight: 700; }
+  .shops { background: #fff; border: 2px solid var(--line); border-radius: 10px; margin: 8px 0 12px; overflow: hidden; }
+  .shops .sh { background: var(--red); color: #fff; padding: 6px 12px; font-weight: 700; }
+  .shops .sp { padding: 8px 14px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .shops .sp b { font-size: 19px; }
+  .shops .sp span { font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; color: #2b6cb0; }
   .slots .sl { padding: 8px 14px; font-size: 19px; font-weight: 700; border-top: 1px solid var(--line); }
   .bill .bl { display: flex; justify-content: space-between; padding: 8px 14px; font-size: 19px; }
   .bill b { font-variant-numeric: tabular-nums; font-size: 24px; color: var(--red-dark); }
@@ -344,6 +349,7 @@ const SPEAKER_RE = /^(Ami|設計師|老闆|我)：/;
 ══════════════════════════════════════ */
 const VOCAB = {
   START: [['預約', 'hacer una cita / reservar', 'make an appointment'], ['頭髮', 'cabello', 'hair'], ['瀏海', 'flequillo', 'bangs / fringe']],
+  BOOK_SEARCH: [['搜尋', 'buscar', 'search'], ['理髮店', 'peluquería', 'hair salon'], ['假髮店', 'tienda de pelucas', 'wig shop'], ['電話', 'teléfono', 'phone'], ['剪頭髮', 'cortarse el pelo', 'get a haircut']],
   BOOK_OPEN: [['預約', 'hacer una cita / reservar', 'make an appointment'], ['電話', 'teléfono', 'phone'], ['排隊', 'hacer fila', 'wait in line'], ['理髮店', 'peluquería', 'hair salon']],
   BOOK_TIME: [['星期', 'día de la semana', 'day of the week'], ['上午', 'por la mañana', 'a.m. / morning'], ['下午', 'por la tarde', 'p.m. / afternoon'], ['晚上', 'por la noche', 'evening'], ['有空', 'estar libre', 'be free / available']],
   BOOK_PHONE: [['電話', 'teléfono', 'phone'], ['我的', 'mi', 'my']],
@@ -386,7 +392,7 @@ document.getElementById('hint-close').onclick = () => Hints.toggle(false);
 const STAGE = (() => {
   const a = ['預約', 'reservar', 'booking'], b = ['剪髮', 'el corte', 'the haircut'], c = ['結帳', 'pagar', 'paying'];
   const o = {};
-  ['BOOK_OPEN', 'BOOK_TIME', 'BOOK_PHONE', 'ARRIVE'].forEach(x => o[x] = a);
+  ['BOOK_SEARCH', 'BOOK_OPEN', 'BOOK_TIME', 'BOOK_PHONE', 'ARRIVE'].forEach(x => o[x] = a);
   ['STYLE_LEN', 'STYLE_BANG', 'WASH', 'MIRROR'].forEach(x => o[x] = b);
   ['PAY', 'CHANGE'].forEach(x => o[x] = c);
   return o;
@@ -402,7 +408,7 @@ const SLOT = (day, per, hr) => `星期${day}${per}${per === '晚上' ? CN[hr] : 
 
 /* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
 const NEXT_LABEL = {
-  BOOK_OPEN: '拿起手機', BOOK_TIME: '電話接通了', BOOK_PHONE: '設計師繼續問', ARRIVE: '預約的日子到了，走進理髮店',
+  BOOK_SEARCH: '拿起手機', BOOK_OPEN: '點進理髮店的頁面', BOOK_TIME: '電話接通了', BOOK_PHONE: '設計師繼續問', ARRIVE: '預約的日子到了，走進理髮店',
   STYLE_LEN: '坐到鏡子前面', STYLE_BANG: '設計師拿起剪刀', WASH: '走去洗頭', MIRROR: '洗好了，回到座位', PAY: '剪好了，去櫃台', CHANGE: '付錢', END: '走出理髮店'
 };
 
@@ -421,13 +427,14 @@ const Game = defineGame({
 
   IMAGES: {
     START: ['images/start.jpg', '💇'],
-    BOOK_OPEN: ['images/phone.jpg', '📞'], BOOK_TIME: ['images/phone.jpg', '📞'], BOOK_PHONE: ['images/phone.jpg', '📞'],
+    BOOK_SEARCH: ['images/phone.jpg', '🔍'], BOOK_OPEN: ['images/phone.jpg', '📞'], BOOK_TIME: ['images/phone.jpg', '📞'], BOOK_PHONE: ['images/phone.jpg', '📞'],
     ARRIVE: ['images/door.jpg', '🚪'], STYLE_LEN: ['images/chair.jpg', '🪑'], STYLE_BANG: ['images/chair.jpg', '✂️'],
     WASH: ['images/wash.jpg', '🚿'], MIRROR: ['images/mirror.jpg', '🪞'], PAY: ['images/counter.jpg', '💴'], CHANGE: ['images/counter.jpg', '💴'],
     END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
 
   setup() {
+    this.shopSeen = false;
     const day = pick(DAYS), hr = ri(2, 6), len = pick(LENS), bang = pick(BANGS);
     const slots = shuffle([[pick(DAYS.filter(d => d !== day)), '上午', 10], [day, '下午', hr], [pick(DAYS), '晚上', 7]]);
     const mk = () => '09' + String(ri(10000000, 99999999));
@@ -435,8 +442,13 @@ const Game = defineGame({
     [d1[4], d1[5]] = [d1[5], d1[4]]; [d2[7], d2[8]] = [d2[8], d2[7]];
     let ph = [real, d1.join(''), d2.join('')]; if (ph[1] === real || ph[2] === real) ph = [real, '09' + ri(10000000, 99999999), '09' + ri(10000000, 99999999)];
     const fmt = p => p.slice(0, 4) + '-' + p.slice(4, 7) + '-' + p.slice(7);
+    /* 搜尋結果：理髮店、假髮店、色情理髮店各一支市話（區碼＋8 碼），選項用中文數字念法 */
+    const ZD = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+    const areas = shuffle(['02', '03', '04', '06', '07']);
+    const shopTel = a => { const d = String(ri(2000, 8999)) + String(ri(1000, 9999)); return { d: a + d, show: `(${a}) ${d.slice(0, 4)}-${d.slice(4)}`, zh: `${[...a].map(c => ZD[c]).join('')}，${[...d.slice(0, 4)].map(c => ZD[c]).join('')}，${[...d.slice(4)].map(c => ZD[c]).join('')}` }; };
+    const shops = [{ k: 'salon', n: '理髮店', ...shopTel(areas[0]) }, { k: 'wig', n: '假髮店', ...shopTel(areas[1]) }, { k: 'adult', n: '色情理髮店', ...shopTel(areas[2]) }];
     const price = pick([350, 400, 450]), given = Math.random() < 0.5 ? 500 - price : 500 - price - 50;
-    this.task = { day, hr, want: SLOT(day, '下午', hr), slots: slots.map(s => SLOT(s[0], s[1], s[2])), phone: fmt(real), phones: ph.map(fmt), len, bang, rot: Math.floor(Math.random() * 3), price, given, wrong: given !== 500 - price };
+    this.task = { day, hr, want: SLOT(day, '下午', hr), slots: slots.map(s => SLOT(s[0], s[1], s[2])), shops, shopOrder: shuffle(shops.slice()), phone: fmt(real), phones: ph.map(fmt), len, bang, rot: Math.floor(Math.random() * 3), price, given, wrong: given !== 500 - price };
   },
 
   setPlace(mode) {
@@ -465,6 +477,7 @@ const Game = defineGame({
     const t = this.task, r = s => this.ruby(s);
     const rows = [
       { zh: `有空：${t.want}`, es: `Estoy libre: ${t.want}`, en: `Free: ${t.want}` },
+      ...(this.shopSeen ? [{ zh: `理髮店電話：${t.shops[0].show}`, es: `Teléfono de la peluquería: ${t.shops[0].show}`, en: `Salon phone: ${t.shops[0].show}` }] : []),
       { zh: `我的電話：${t.phone}`, es: `Mi teléfono: ${t.phone}`, en: `My phone: ${t.phone}` },
       { zh: `頭髮剪到${t.len[0]}`, es: `Cortar hasta ${t.len[1]}`, en: `Cut to ${t.len[2]}` },
       { zh: `瀏海：${t.bang[0]}`, es: `Flequillo: ${t.bang[1]}`, en: `Bangs: ${t.bang[2]}` }
@@ -475,6 +488,10 @@ const Game = defineGame({
     this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
     const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
     return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  shopsHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    return `<div class="shops"><div class="sh">${r('搜尋：理髮店')}</div>` + t.shopOrder.map(x => `<div class="sp"><b>${r(x.n)}</b><span>${x.show}</span></div>`).join('') + '</div>';
   },
   slotsHTML() {
     const t = this.task, r = s => this.ruby(s);
@@ -503,12 +520,28 @@ const Game = defineGame({
         html: () => Game.listHTML(),
         dialogue: () => [L('（手機響了一聲，是 Ami 傳來的 LINE。）', '(Tu celular suena: es un LINE de Ami.)', '(Your phone buzzes — a LINE from Ami.)'), ...Game.amiLines(), L('我：好，我先預約！', '¡Bien, primero reservo!', "OK, I'll book first!")],
         options: ['拿起手機'],
-        next: () => { Game.startTimer(); Game.state = 'BOOK_OPEN'; }
+        next: () => { Game.startTimer(); Game.shopSeen = false; Game.state = 'BOOK_SEARCH'; }
+      },
+
+      BOOK_SEARCH: {
+        place: 'phone',
+        html: () => Game.shopsHTML(),
+        dialogue: () => [L('（你在手機上搜尋「理髮店」，跑出三個結果。）', '(Buscas «理髮店» en tu celular y aparecen tres resultados.)', '(You search for 理髮店 on your phone and three results come up.)'), L('我：我要找剪頭髮的理髮店。', 'Busco una peluquería para cortarme el pelo.', "I'm looking for a salon for a haircut.")],
+        options: () => t.shopOrder.map(x => `打電話：${x.zh}`),
+        next: c => {
+          const x = t.shops.find(s => c === `打電話：${s.zh}`);
+          if (x.k === 'wig') { Game.addMistake(M(`那是假髮店，賣假髮，不是剪頭髮的店。你要找「理髮店」：${t.shops[0].show}。`, `Es una tienda de pelucas, no una peluquería. Tienes que llamar a la «理髮店»: ${t.shops[0].show}.`, `That is a wig shop, not a place for a haircut. You want the 理髮店: ${t.shops[0].show}.`)); return; }
+          if (x.k === 'adult') { Game.addMistake(M(`那不是剪頭髮的正常理髮店，不要打去那裡喔！你要找「理髮店」：${t.shops[0].show}。`, `Ese no es una peluquería normal (es un local para adultos): ¡no llames ahí! Tienes que llamar a la «理髮店»: ${t.shops[0].show}.`, `That is not a normal haircut place (it is an adult venue) — don't call it! You want the 理髮店: ${t.shops[0].show}.`)); return; }
+          goodFirst('BOOK_SEARCH', '你找對了！電話的數字，要會用中文念出來。', '¡Lo encontraste! Los números de teléfono hay que saber leerlos en chino.', 'You found it! You need to be able to read phone digits aloud in Chinese.');
+          Game.shopSeen = true;
+          Game.thought = null;
+          Game.state = 'BOOK_OPEN';
+        }
       },
 
       BOOK_OPEN: {
         place: 'phone',
-        dialogue: () => [L('（你在手機上找到一間理髮店，上面寫著：「歡迎預約，電話 0900-000-000」。）', '(Encuentras una peluquería en tu celular. Dice: «歡迎預約»: se aceptan reservas por teléfono.)', '(You find a salon on your phone. It says 歡迎預約 — reservations welcome.)'), L('我：我要怎麼做呢？', '¿Qué hago?', 'What should I do?')],
+        dialogue: () => [L(`（你點進那家理髮店的頁面，上面寫著：「歡迎預約，電話 ${t.shops[0].show}」。）`, `(Entras a la página de la peluquería. Dice: «歡迎預約»: se aceptan reservas por teléfono, ${t.shops[0].show}.)`, `(You open the salon's page. It says 歡迎預約 — reservations welcome, phone ${t.shops[0].show}.)`), L('我：我要怎麼做呢？', '¿Qué hago?', 'What should I do?')],
         options: () => rot(['打電話預約', '直接去，在門口排隊', '等頭髮更長再說']),
         next: c => {
           if (c !== '打電話預約') {
