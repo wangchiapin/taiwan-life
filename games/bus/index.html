@@ -353,6 +353,8 @@ const SPEAKER_RE = /^(Ami|司機|我)：/;
 const VOCAB = {
   START: [['公車', 'autobús', 'bus'], ['路', 'línea / ruta (de autobús)', 'route (bus line)'], ['下車', 'bajarse', 'get off'], ['悠遊卡', 'EasyCard (tarjeta de transporte)', 'EasyCard']],
   STOP: [['站牌', 'parada (el letrero)', 'bus stop sign'], ['往', 'hacia', 'toward'], ['對面', 'el otro lado (de la calle)', 'the opposite side'], ['這一邊', 'este lado', 'this side'], ['方向', 'dirección', 'direction']],
+  PASS1: [['進站','llegar a la parada','pull into the stop'],['不上車','no subir','not board'],['繼續等','seguir esperando','keep waiting'],['號碼','número','number']],
+  PASS2: [['進站','llegar a la parada','pull into the stop'],['上錯車','subir al autobús equivocado','board the wrong bus'],['繼續等','seguir esperando','keep waiting'],['號碼','número','number']],
   WAIT: [['預估', 'estimado', 'estimated'], ['分鐘', 'minuto(s)', 'minute(s)'], ['路', 'línea / ruta (de autobús)', 'route (bus line)'], ['等', 'esperar', 'wait'], ['路線', 'ruta, recorrido', 'route'], ['終於', 'por fin', 'finally']],
   HAIL: [['招手', 'hacer señas con la mano', 'wave (to flag it down)'], ['停', 'detenerse', 'stop'], ['寫', 'escribir, decir', 'say, write'], ['往…方向', 'en dirección a…', 'toward…']],
   TAP_ON: [['刷悠遊卡', 'pasar la EasyCard', 'tap your EasyCard'], ['上下車刷卡', 'pasar la tarjeta al subir y bajar', 'tap on and off'], ['不刷卡', 'sin pasar la tarjeta', 'without tapping']],
@@ -393,7 +395,7 @@ document.getElementById('hint-close').onclick = () => Hints.toggle(false);
 const STAGE = (() => {
   const a = ['等公車', 'esperar el autobús', 'waiting for the bus'], b = ['上車', 'subir', 'boarding'], c = ['在車上', 'en el autobús', 'on the bus'], d = ['下車', 'bajar', 'getting off'];
   const o = {};
-  ['STOP', 'WAIT', 'HAIL'].forEach(x => o[x] = a);
+  ['STOP', 'WAIT', 'PASS1', 'PASS2', 'HAIL'].forEach(x => o[x] = a);
   ['TAP_ON', 'ASK'].forEach(x => o[x] = b);
   o.RING = c; o.TAP_OFF = d;
   return o;
@@ -410,7 +412,7 @@ const DIRES = { '動物園': ['el zoológico', 'the zoo'], '火車站': ['la est
 
 /* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
 const NEXT_LABEL = {
-  STOP: '走去公車站牌', WAIT: '看電子看板', HAIL: '公車來了', TAP_ON: '車門開了，上車', ASK: '走到司機旁邊',
+  STOP: '走去公車站牌', WAIT: '看電子看板', PASS1: '有一台公車進站了', PASS2: '又有一台公車進站了', HAIL: '公車來了', TAP_ON: '車門開了，上車', ASK: '走到司機旁邊',
   RING: '找位子坐，聽廣播', TAP_OFF: '公車停了，準備下車', END: '下了車，去找 Ami'
 };
 
@@ -432,7 +434,7 @@ const Game = defineGame({
   /* 圖片：檔案放在 images/，沒有檔案時會顯示 emoji 佔位 */
   IMAGES: {
     START: ['images/start.jpg', '🚌'],
-    STOP: ['images/board.jpg', '🚏'], WAIT: ['images/board.jpg', '🕐'], HAIL: ['images/hail.jpg', '🙋'],
+    STOP: ['images/board.jpg', '🚏'], WAIT: ['images/board.jpg', '🕐'], HAIL: ['images/hail.jpg', '🙋'], PASS1: ['images/hail.jpg', '🚌'], PASS2: ['images/hail.jpg', '🚌'],
     TAP_ON: ['images/reader.jpg', '💳'], ASK: ['images/driver.jpg', '🧑‍✈️'], RING: ['images/inside.jpg', '🔔'], TAP_OFF: ['images/reader.jpg', '💳'],
     END: ['images/end_good.jpg', '🎉'],
     RESULT: ['images/result.jpg', '📊']
@@ -442,8 +444,14 @@ const Game = defineGame({
   setup() {
     const route = pick(ROUTES), dp = pick(DIRS), n = ri(2, 4), stops = shuffle(STOPNAMES).slice(0, n);
     const others = shuffle(ROUTES.filter(r => r[0] !== route[0])).slice(0, 2);
-    const board = shuffle([{ r: route, eta: ri(3, 6) }, { r: others[0], eta: ri(2, 9) }, { r: others[1], eta: ri(7, 12) }]);
-    this.task = { route, dir: dp[0], other: dp[1], stops, dest: stops[n - 1], board, rot: Math.floor(Math.random() * 3) };
+    /* 要搭的車之前，先有 1～2 班別的號碼進站（電子看板上的時間要對得上） */
+    const k = ri(1, 2);
+    const e1 = k === 2 ? ri(2, 3) : ri(2, 5), e2 = ri(4, 5), me = ri(6, 8);
+    const early = k === 2 ? [{ r: others[0], eta: e1 }, { r: others[1], eta: e2 }] : [{ r: others[0], eta: e1 }];
+    const rest = k === 2 ? [] : [{ r: others[1], eta: ri(9, 12) }];
+    const mine = { r: route, eta: me };
+    const board = shuffle([mine, ...early, ...rest]);
+    this.task = { route, dir: dp[0], other: dp[1], stops, dest: stops[n - 1], board, early, rot: Math.floor(Math.random() * 3) };
     this.step = 0;
   },
 
@@ -509,6 +517,33 @@ const Game = defineGame({
       t.board.map(b => `<div class="br"><span class="bn">${b.r[0]}</span><span>${r('預估')} <b>${b.eta}</b> ${r('分鐘')}</span></div>`).join('') + '</div>';
   },
 
+  /* 別班公車進站：看清楚號碼，不是要搭的就不上車 */
+  passCfg(i) {
+    const t = this.task, dEs = DIRES[t.dir], key = 'PASS' + (i + 1);
+    const bus = () => t.early[i];
+    return {
+      place: 'stop',
+      dialogue: () => !bus() ? [] : [L(`（公車上面寫：${bus().r[0]}，往${t.dir}。）`, `(El autobús dice: ${bus().r[0]}, hacia ${dEs[0]}.)`, `(The bus says: ${bus().r[0]}, toward ${dEs[1]}.)`)],
+      options: () => ['不上車，繼續等', '上車'].map((_, j, o) => o[(j + t.rot) % 2]),
+      next: c => {
+        const b = bus();
+        if (c === '上車') {
+          Game.addMistake(M(`這台是${b.r[1]}路（${b.r[0]}），你要搭的是${t.route[1]}路（${t.route[0]}）。不要上錯車喔！`, `Este es el autobús ${b.r[0]}, pero tú tienes que tomar el ${t.route[0]}. ¡No te subas al equivocado!`, `This is bus ${b.r[0]}, but you need bus ${t.route[0]}. Don't board the wrong one!`)); return;
+        }
+        if (Game.att[key] === 1) Game.good('你看清楚號碼了！不是要搭的車，就不上車，繼續等。', '¡Miraste bien el número! Si no es tu autobús, no subes y sigues esperando.', "You checked the number! If it's not your bus, don't board — keep waiting.");
+        const next = t.early[i + 1];
+        if (next) {
+          Game.thought = [L(`（你繼續等。過了一會兒，又有一台公車進站了。）`, `(Sigues esperando. Poco después entra otro autobús.)`, `(You keep waiting. Soon another bus pulls in.)`)];
+          Game.state = 'PASS2';
+        } else {
+          const me = t.board.find(x => x.r[0] === t.route[0]).eta;
+          Game.thought = [L(`（你等了${me}分鐘，你要搭的公車終於來了！）`, `(Esperas ${me} minutos y por fin llega tu autobús.)`, `(You wait ${me} minutes, and your bus finally comes!)`)];
+          Game.state = 'HAIL';
+        }
+      }
+    };
+  },
+
   /* ── 狀態設定 ── */
   getConfig() {
     const N = this.N, t = this.task;
@@ -557,10 +592,18 @@ const Game = defineGame({
             Game.addMistake(M(`你要搭的是${t.route[1]}路（${t.route[0]}），不是${b.r[1]}路喔。`, `Tienes que tomar el autobús ${t.route[0]}, no el ${b.r[0]}.`, `You need bus ${t.route[0]}, not ${b.r[0]}.`)); return;
           }
           goodFirst('WAIT', '你看得很仔細！路線號碼對了，再看幾分鐘後會到。', '¡Qué atento! El número de línea es el correcto; ahora mira en cuántos minutos llega.', 'Nicely done! The route number is right — now see how many minutes until it arrives.');
-          Game.thought = [L(`（你等了${b0(t)}分鐘，公車終於來了！）`, `(Esperas ${b0(t)} minutos y por fin llega el autobús.)`, `(You wait ${b0(t)} minutes, and the bus finally comes!)`)];
-          Game.state = 'HAIL';
+          if (t.early.length) {
+            const e = t.early[0];
+            Game.thought = [L(`（你等了${e.eta}分鐘，有一台公車進站了。）`, `(Esperas ${e.eta} minutos y un autobús entra a la parada.)`, `(You wait ${e.eta} minutes, and a bus pulls into the stop.)`)];
+            Game.state = 'PASS1';
+          } else {
+            Game.thought = [L(`（你等了${b0(t)}分鐘，公車終於來了！）`, `(Esperas ${b0(t)} minutos y por fin llega el autobús.)`, `(You wait ${b0(t)} minutes, and the bus finally comes!)`)];
+            Game.state = 'HAIL';
+          }
         }
       },
+      PASS1: Game.passCfg(0),
+      PASS2: Game.passCfg(1),
       HAIL: {
         place: 'stop',
         dialogue: () => [L(`（公車上面寫：${t.route[0]}，往${t.dir}。）`, `(El autobús dice: ${t.route[0]}, hacia ${dEs[0]}.)`, `(The bus says: ${t.route[0]}, toward ${dEs[1]}.)`)],
