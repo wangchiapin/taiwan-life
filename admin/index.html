@@ -80,6 +80,7 @@
     <button data-tab="overview" aria-selected="true">總覽</button>
     <button data-tab="players">玩家</button>
     <button data-tab="games">遊戲</button>
+    <button data-tab="daily">每日</button>
     <button data-tab="plays">全部紀錄</button>
     <button data-tab="boards">排行榜</button>
     <button data-tab="switch">地圖開關・連結</button>
@@ -174,6 +175,7 @@ function render() {
   if (V.tab === 'overview') v.innerHTML = overview();
   if (V.tab === 'players') v.innerHTML = V.player ? playerDetail(V.player) : playersTable();
   if (V.tab === 'games') v.innerHTML = V.scene ? gameDetail(V.scene) : gamesTable();
+  if (V.tab === 'daily') v.innerHTML = dailyTable();
   if (V.tab === 'plays') v.innerHTML = playsTable(filtered(), true);
   if (V.tab === 'boards') { v.innerHTML = boardsShell(); loadBoard(); }
   if (V.tab === 'check') { v.innerHTML = checkShell(); runCheck(); }
@@ -237,6 +239,34 @@ function gamesTable() {
         <td class="num">${n ? Math.round(a(r => r.score)) : '·'}</td><td class="num">${n ? rs.filter(r => r.score === 100).length : '·'}</td>
         <td class="num">${n ? fmtSec(a(r => r.elapsed)) : '·'}</td><td class="num">${n ? a(r => r.hintViews).toFixed(1) : '·'}</td></tr>`;
     }).join('')}</tbody></table></div>`;
+}
+
+/* 每個遊戲每天的遊玩次數（一天一列，最新在上；沒人玩的日子也列出來） */
+function dayKey(t) { const d = new Date(t); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function dailyTable() {
+  const rows = filtered();
+  if (!rows.length) return '<div class="empty">沒有符合的紀錄</div>';
+  const cnt = {}, tot = {}, perGame = {}; let all = 0, max = 1;
+  for (const r of rows) {
+    const k = dayKey(r.createdAt);
+    (cnt[k] = cnt[k] || {})[r.scene] = ((cnt[k] || {})[r.scene] || 0) + 1;
+    tot[k] = (tot[k] || 0) + 1; perGame[r.scene] = (perGame[r.scene] || 0) + 1; all++;
+    if (cnt[k][r.scene] > max) max = cnt[k][r.scene];
+  }
+  const ts = rows.map(r => r.createdAt);
+  const first = new Date(Math.min(...ts)), last = new Date(Math.max(...ts));
+  const days = [];
+  for (let d = new Date(last.getFullYear(), last.getMonth(), last.getDate()); d >= new Date(first.getFullYear(), first.getMonth(), first.getDate()); d.setDate(d.getDate() - 1)) days.push(new Date(d));
+  const wk = '日一二三四五六';
+  const cell = n => n ? `<td class="num" style="background:rgba(207,58,36,${(0.12 + 0.55 * n / max).toFixed(2)})"><b>${n}</b></td>` : '<td class="num muted">·</td>';
+  return `<p class="muted">一天一列，格子是那天這個遊戲玩完幾局。顏色越深次數越多。上面的日期、遊戲、名字篩選都能用。</p>
+  <div class="panel"><table>
+    <thead><tr><th>日期</th>${SCENES.map(([id, e]) => `<th class="num" title="${SC[id].zh}">${e}</th>`).join('')}<th class="num">當天合計</th></tr></thead>
+    <tbody>
+      <tr><td><b>全部合計</b></td>${SCENES.map(([id]) => `<td class="num"><b>${perGame[id] || '·'}</b></td>`).join('')}<td class="num"><b>${all}</b></td></tr>
+      ${days.map(d => { const k = dayKey(d.getTime()), c = cnt[k] || {};
+        return `<tr><td>${k.slice(5).replace('-', '/')}（${wk[d.getDay()]}）</td>${SCENES.map(([id]) => cell(c[id] || 0)).join('')}<td class="num"><b>${tot[k] || 0}</b></td></tr>`; }).join('')}
+    </tbody></table></div>`;
 }
 
 function gameDetail(id) {
