@@ -334,7 +334,9 @@ pinyinPro.customPinyin({
   '借車': 'jiè chē', '還車': 'huán chē', '可借': 'kě jiè', '可還': 'kě huán', '輛': 'liàng', '馬路': 'mǎ lù', '人行道': 'rén xíng dào',
   '調高': 'tiáo gāo', '調低': 'tiáo dī', '調整': 'tiáo zhěng', '不調': 'bù tiáo', '還好車': 'huán hǎo chē', '還完': 'huán wán', '調好': 'tiáo hǎo', '推進': 'tuī jìn', '空位': 'kòng wèi', '成功': 'chéng gōng', '行人': 'xíng rén',
   '騎': 'qí', '站': 'zhàn', '圖書館': 'tú shū guǎn', '夜市': 'yè shì', '公園': 'gōng yuán', '區公所': 'qū gōng suǒ', '體育館': 'tǐ yù guǎn',
-  '火車站': 'huǒ chē zhàn', '郵局': 'yóu jú', '醫院': 'yī yuàn', '市場': 'shì chǎng', '學校': 'xué xiào', '硬幣': 'yìng bì', '扣款': 'kòu kuǎn'
+  '火車站': 'huǒ chē zhàn', '郵局': 'yóu jú', '醫院': 'yī yuàn', '市場': 'shì chǎng', '學校': 'xué xiào', '硬幣': 'yìng bì', '扣款': 'kòu kuǎn',
+  '啟動靠卡': 'qǐ dòng kào kǎ', '靠卡': 'kào kǎ', '暫停服務': 'zàn tíng fú wù', '請取車': 'qǐng qǔ chē', '取車': 'qǔ chē', '把手': 'bǎ shǒu', '雙手': 'shuāng shǒu',
+  '往後': 'wǎng hòu', '反過來': 'fǎn guò lái', '餘額': 'yú é', '彈出來': 'tán chū lái', '換到': 'huàn dào'
 });
 
 /* 角色名稱：翻譯視窗用 [西文, 英文] */
@@ -347,13 +349,15 @@ const SPEAKER_RE = /^(Ami|我)：/;
 const VOCAB = {
   START: [['騎', 'andar (en bicicleta/moto)', 'ride'], ['App', 'aplicación', 'app'], ['悠遊卡', 'EasyCard (tarjeta de transporte)', 'EasyCard'], ['公園', 'parque', 'park'], ['空位', 'espacio libre', 'free dock / space']],
   FIND: [['站', 'estación (de bicicletas)', 'station'], ['可借', 'disponibles para alquilar', 'available to borrow'], ['可還', 'espacios libres para devolver', 'open docks for returning'], ['輛', 'clasificador de vehículos', 'measure word for vehicles'], ['借車', 'alquilar una bicicleta', 'borrow a bike']],
-  TAP: [['悠遊卡', 'EasyCard (tarjeta de transporte)', 'EasyCard'], ['感應區', 'zona del sensor', 'card reader area'], ['硬幣', 'moneda', 'coin'], ['借車', 'alquilar una bicicleta', 'borrow a bike'], ['車柱', 'poste/anclaje de la bicicleta', 'bike dock post']],
-  PULL: [['綠燈', 'luz verde', 'green light'], ['紅燈', 'luz roja', 'red light'], ['拉出', 'sacar (jalando)', 'pull out'], ['亮', 'encenderse (una luz)', 'light up (be lit)'], ['自己', 'uno mismo, solo', 'by itself / yourself']],
+  CHOOSE: [['座墊', 'asiento (de la bici)', 'bike seat'], ['反過來', 'al revés (dado la vuelta)', 'turned around / reversed'], ['有問題', 'tener un problema', 'has a problem'], ['正常', 'normal', 'normal'], ['借', 'alquilar, pedir prestado', 'borrow']],
+  TAP: [['悠遊卡', 'EasyCard (tarjeta de transporte)', 'EasyCard'], ['啟動靠卡', 'activar la lectura de tarjeta (botón verde)', 'start card tap (green button)'], ['感應區', 'zona del sensor', 'card reader area'], ['硬幣', 'moneda', 'coin'], ['車柱', 'poste/anclaje de la bicicleta', 'bike dock post']],
+  OUT: [['暫停服務', 'fuera de servicio', 'out of service'], ['螢幕', 'pantalla', 'screen'], ['換', 'cambiar', 'switch / change'], ['旁邊', 'al lado', 'next to / beside'], ['用力', 'con fuerza', 'forcefully']],
+  PULL: [['請取車', 'retire la bicicleta (mensaje en pantalla)', 'please take the bike (screen message)'], ['把手', 'manillar, asa', 'handlebar / grip'], ['雙手', 'ambas manos', 'both hands'], ['往後拉', 'jalar hacia atrás', 'pull back'], ['自己', 'uno mismo, solo', 'by itself / yourself']],
   SEAT: [['座墊', 'asiento (de la bici)', 'bike seat'], ['調高', 'subir (ajustar más alto)', 'raise'], ['調低', 'bajar (ajustar más bajo)', 'lower'], ['太低', 'demasiado bajo', 'too low'], ['不舒服', 'incómodo', 'uncomfortable']],
   ROAD: [['馬路', 'calle', 'road'], ['右邊', 'derecha', 'right side'], ['左邊', 'izquierda', 'left side'], ['人行道', 'acera', 'sidewalk'], ['斑馬線', 'paso de cebra', 'crosswalk']],
   LIGHT: [['紅燈', 'luz roja', 'red light'], ['綠燈', 'luz verde', 'green light'], ['行人', 'peatón', 'pedestrian'], ['等', 'esperar', 'wait'], ['快到了', 'ya casi llegas', 'almost there']],
   RETURN_FIND: [['還車', 'devolver la bicicleta', 'return the bike'], ['可還', 'espacios libres para devolver', 'open docks for returning'], ['沒有空位', 'no hay espacio libre', 'no free docks']],
-  DOCK: [['推進', 'empujar hacia adentro', 'push in'], ['車柱', 'poste/anclaje de la bicicleta', 'bike dock post'], ['還車成功', 'devolución exitosa', 'return successful'], ['扣款', 'cobrar (descontar del saldo)', 'deduct payment'], ['螢幕', 'pantalla', 'screen']],
+  DOCK: [['推進', 'empujar hacia adentro', 'push in'], ['車柱', 'poste/anclaje de la bicicleta', 'bike dock post'], ['還車成功', 'devolución exitosa', 'return successful'], ['靠卡', 'pasar la tarjeta por el sensor', 'tap the card'], ['扣款', 'cobrar (descontar del saldo)', 'deduct payment']],
   END: [['方便', 'cómodo, práctico', 'convenient'], ['走走', 'dar una vuelta', 'stroll around'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
@@ -386,7 +390,7 @@ document.getElementById('hint-close').onclick = () => Hints.toggle(false);
 const STAGE = (() => {
   const a = ['借車', 'alquilar la bici', 'borrowing a bike'], b = ['騎車', 'andar en bici', 'riding'], c = ['還車', 'devolver la bici', 'returning the bike'];
   const o = {};
-  ['FIND', 'TAP', 'PULL', 'SEAT'].forEach(x => o[x] = a);
+  ['FIND', 'CHOOSE', 'TAP', 'OUT', 'PULL', 'SEAT'].forEach(x => o[x] = a);
   ['ROAD', 'LIGHT'].forEach(x => o[x] = b);
   ['RETURN_FIND', 'DOCK'].forEach(x => o[x] = c);
   return o;
@@ -399,7 +403,7 @@ const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 
 /* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
 const NEXT_LABEL = {
-  FIND: '打開 YouBike 的 App', TAP: '走到 YouBike 站', PULL: '借車', SEAT: '牽著車，坐上去', ROAD: '騎上路',
+  FIND: '打開 YouBike 的 App', CHOOSE: '走到 YouBike 站', TAP: '走到那台車前面', OUT: '看看螢幕', PULL: '換一台車，再靠卡', SEAT: '牽著車，坐上去', ROAD: '騎上路',
   LIGHT: '往前騎', RETURN_FIND: '快到了，打開 App', DOCK: '走到 YouBike 站', END: '還好車，去找 Ami'
 };
 
@@ -419,9 +423,9 @@ const Game = defineGame({
   /* 圖片：檔案放在 images/，沒有檔案時會顯示 emoji 佔位 */
   IMAGES: {
     START: ['images/start.jpg', '🚲'],
-    FIND: ['images/app.jpg', '📲'], TAP: ['images/station.jpg', '💳'], PULL: ['images/station.jpg', '🟢'], SEAT: ['images/seat.jpg', '🚲'],
+    FIND: ['images/app.jpg', '📲'], CHOOSE: ['images/choose.jpg', '👀'], TAP: ['images/tap.jpg', '💳'], OUT: ['images/tap.jpg', '🚫'], PULL: ['images/pull.jpg', '🚲'], SEAT: ['images/seat.jpg', '🚲'],
     ROAD: ['images/road.jpg', '🛣️'], LIGHT: ['images/light.jpg', '🚦'],
-    RETURN_FIND: ['images/app.jpg', '📲'], DOCK: ['images/station.jpg', '🅿️'],
+    RETURN_FIND: ['images/app.jpg', '📲'], DOCK: ['images/dock.jpg', '🅿️'],
     END: ['images/end_good.jpg', '🎉'],
     RESULT: ['images/result.jpg', '📊']
   },
@@ -517,41 +521,82 @@ const Game = defineGame({
               [L(`（你走到${s.name}，可是車柱都是空的。）`, `(Llegas a ${s.name}, pero todos los anclajes están vacíos.)`, `(You walk to ${s.name}, but all the docks are empty.)`)]); return;
           }
           goodFirst('FIND', '你看懂 App 了！「可借」是可以借的車，要選有車的站。', '¡Entendiste la app! «可借» son las bicis disponibles: hay que elegir una estación que tenga.', 'You read the app correctly! 可借 is how many bikes you can borrow — pick a station that has some.');
-          Game.thought = [L(`（你走到${s.name}，車柱上停著很多 YouBike。）`, `(Llegas a ${s.name}; hay muchas YouBike en los anclajes.)`, `(You reach ${s.name}; lots of YouBikes are parked in the docks.)`)];
+          t.at = s.name;
+          Game.thought = null;
+          Game.state = 'CHOOSE';
+        }
+      },
+      CHOOSE: {
+        place: 'station',
+        dialogue: () => [
+          L(`（你走到${t.at}。車柱上停著很多 YouBike，有一台的座墊是反過來的。）`, `(Llegas a ${t.at}. Hay muchas YouBike en los anclajes y una tiene el asiento al revés.)`, `(You reach ${t.at}. Lots of YouBikes are parked in the docks, and one has its seat turned around.)`),
+          L('我：我要借哪一台呢？', '¿Cuál alquilo?', 'Which one should I borrow?')
+        ],
+        options: () => rot(['借座墊正常的那一台', '借座墊反過來的那一台', '哪一台都可以，隨便借']),
+        next: c => {
+          if (c !== '借座墊正常的那一台') {
+            Game.addMistake(c.includes('反過來') ? M('座墊反過來，表示這台車有問題，不能借。', 'Un asiento al revés significa que esa bici tiene un problema y no se puede usar.', "A seat turned around means that bike has a problem and can't be used.")
+                                                 : M('不能隨便借，要先看座墊。座墊反過來的車有問題。', 'No vale cualquiera: primero mira el asiento. Una bici con el asiento al revés tiene un problema.', "Don't just pick any bike — check the seat first. A bike with a reversed seat has a problem.")); return;
+          }
+          goodFirst('CHOOSE', '你很細心！座墊反過來的車有問題，要借座墊正常的。', '¡Qué atento! Una bici con el asiento al revés tiene un problema; hay que elegir una con el asiento normal.', 'Careful! A bike with a reversed seat has a problem — pick one with a normal seat.');
+          Game.thought = null;
           Game.state = 'TAP';
         }
       },
       TAP: {
         place: 'station',
         dialogue: () => [L('我：要怎麼借車呢？', '¿Cómo alquilo la bicicleta?', 'How do I borrow a bike?')],
-        options: () => rot(['把悠遊卡放在感應區', '投十元硬幣', '直接把車拉出來']),
+        options: () => rot(['按綠色的「啟動靠卡」，再把悠遊卡放在感應區', '投十元硬幣', '直接把車拉出來']),
         next: c => {
-          if (c !== '把悠遊卡放在感應區') {
+          if (!c.startsWith('按綠色')) {
             Game.addMistake(c === '投十元硬幣' ? M('你不知道嗎？YouBike 不能投硬幣，要用悠遊卡（或 App）借車。', '¿No lo sabías? En YouBike no se pagan monedas: se alquila con la EasyCard (o con la app).', "Didn't you know? YouBike doesn't take coins — you borrow with your EasyCard (or the app).")
-                                              : M('車子會被你拉壞啦！要先用嗶卡借車，車柱才會打開。', '¡Vas a romper la bici si la jalas así! Primero hay que alquilar pasando la tarjeta; solo entonces se abre el anclaje.', "You'll break the bike pulling it like that! Tap your card to borrow it first — only then does the dock open.")); return;
+                                              : M('車子會被你拉壞啦！要先按綠色的「啟動靠卡」，用悠遊卡借車，車才會解鎖。', '¡Vas a romper la bici si la jalas así! Primero pulsa el botón verde «啟動靠卡» y pasa la EasyCard; solo entonces se desbloquea.', "You'll break the bike pulling it like that! Press the green 啟動靠卡 button and tap your EasyCard first — only then does it unlock.")); return;
           }
-          goodFirst('TAP', '沒錯！悠遊卡放在感應區，就可以借車了。', '¡Exacto! Pon la EasyCard en la zona del sensor y podrás alquilar.', 'Exactly! Put your EasyCard on the reader and you can borrow a bike.');
+          goodFirst('TAP', '沒錯！先按綠色的「啟動靠卡」，再把悠遊卡放在感應區，才可以借車。', '¡Exacto! Primero pulsa el botón verde «啟動靠卡» y luego pon la EasyCard en la zona del sensor para alquilar.', 'Exactly! Press the green 啟動靠卡 button first, then put your EasyCard on the reader to borrow a bike.');
+          Game.thought = null;
+          Game.state = 'OUT';
+        }
+      },
+      OUT: {
+        place: 'station',
+        dialogue: () => [
+          L('（你按了「啟動靠卡」，把悠遊卡放在感應區。螢幕寫著「本車暫停服務」。App 明明顯示這個站有車。）', '(Pulsas «啟動靠卡» y pones la EasyCard en el sensor. La pantalla dice «本車暫停服務» (esta bici está fuera de servicio). ¡Pero la app mostraba que había bicis en esta estación!)', '(You press 啟動靠卡 and put your EasyCard on the reader. The screen says "本車暫停服務" (this bike is out of service). Yet the app showed bikes at this station!)'),
+          L('我：要怎麼辦呢？', '¿Qué hago?', 'What should I do?')
+        ],
+        options: () => rot(['換旁邊另一台車', '再刷一次卡', '用力把車拉出來']),
+        next: c => {
+          if (c !== '換旁邊另一台車') {
+            Game.addMistake(c.includes('再刷') ? M('這台車暫停服務了，再刷幾次也一樣，要換一台。', 'Esta bici está fuera de servicio; por más veces que pases la tarjeta será igual. Hay que cambiar a otra.', "This bike is out of service — tapping again won't change anything. Switch to another one.")
+                                                : M('車還沒解鎖，用力拉會把車拉壞，而且這台暫停服務，要換一台。', 'La bici no está desbloqueada: si jalas con fuerza la romperás, y además esta está fuera de servicio. Cambia a otra.', "The bike isn't unlocked — pulling hard will break it, and this one is out of service anyway. Switch to another.")); return;
+          }
+          goodFirst('OUT', '沒錯！App 顯示有車，不代表每一台都能借。這台暫停服務，就換旁邊另一台。', '¡Exacto! Que la app muestre bicis no significa que todas se puedan usar. Esta está fuera de servicio: cambia a la de al lado.', "Exactly! The app showing bikes doesn't mean every one works. This one is out of service — switch to the one next to it.");
           Game.thought = null;
           Game.state = 'PULL';
         }
       },
       PULL: {
         place: 'station',
-        dialogue: () => [L('我：哪一台是我的車呢？', '¿Cuál es mi bici?', 'Which one is my bike?')],
-        options: () => rot(['拉出綠燈亮著的那一台', '拉出旁邊紅燈的那一台', '不用拉，車會自己出來']),
+        dialogue: () => [
+          L('（你換到旁邊的車，按了「啟動靠卡」，再把悠遊卡放在感應區。螢幕寫著「請取車」。）', '(Cambias a la bici de al lado, pulsas «啟動靠卡» y pasas la EasyCard por el sensor. La pantalla dice «請取車» (retire la bicicleta).)', '(You switch to the bike beside it, press 啟動靠卡, and tap your EasyCard on the reader. The screen says "請取車" (please take the bike).)'),
+          L('我：現在要怎麼取車呢？', '¿Cómo saco la bici ahora?', 'How do I take the bike out now?')
+        ],
+        options: () => rot(['雙手握住把手，往後拉出來', '等車自己彈出來', '再刷一次卡']),
         next: c => {
-          if (c !== '拉出綠燈亮著的那一台') {
-            Game.addMistake(c.includes('紅燈') ? M('紅燈的車是鎖著的，要拉綠燈亮著的那一台。', 'Las bicis con luz roja siguen bloqueadas: hay que jalar la que tiene la luz verde.', 'A bike with a red light is still locked — pull the one with the green light.')
-                                                 : M('車不會自己出來，要看綠燈，自己把車拉出來。', 'La bici no sale sola: mira la luz verde y jálala tú.', "The bike won't come out by itself — look for the green light and pull it out yourself.")); return;
+          if (c !== '雙手握住把手，往後拉出來') {
+            Game.addMistake(c.includes('自己') ? M('車不會自己彈出來，要自己雙手握住把手，往後拉。', 'La bici no sale sola: hay que agarrar el manillar con las dos manos y jalar hacia atrás.', "The bike won't pop out by itself — hold the handlebars with both hands and pull back.")
+                                                : M('螢幕已經寫「請取車」，表示借車成功了，不用再刷卡，直接把車拉出來。', 'La pantalla ya dice «請取車»: el alquiler está hecho y no hace falta pasar la tarjeta otra vez; saca la bici.', 'The screen already says 請取車, so the rental went through — no need to tap again. Just pull the bike out.')); return;
           }
-          goodFirst('PULL', '你很細心！綠燈亮著，表示這台車是你的。', '¡Qué atento! La luz verde indica que esa bici es la tuya.', 'Nicely done! The green light means that bike is yours.');
-          Game.thought = [L('（座墊好像太低了，騎起來不舒服。）', '(El asiento parece demasiado bajo; es incómodo para pedalear.)', "(The seat seems too low — it's uncomfortable to ride.)")];
+          goodFirst('PULL', '做得好！螢幕寫「請取車」，就雙手握住把手，往後把車拉出來。', '¡Bien hecho! Cuando la pantalla dice «請取車», agarra el manillar con las dos manos y jala hacia atrás.', 'Well done! When the screen says 請取車, hold the handlebars with both hands and pull the bike back out.');
+          Game.thought = null;
           Game.state = 'SEAT';
         }
       },
       SEAT: {
         place: 'station',
-        dialogue: () => [L('我：要怎麼辦呢？', '¿Qué hago?', 'What should I do?')],
+        dialogue: () => [
+          L('（座墊好像太低了，騎起來不舒服。）', '(El asiento parece demasiado bajo; es incómodo para pedalear.)', "(The seat seems too low — it's uncomfortable to ride.)"),
+          L('我：要怎麼辦呢？', '¿Qué hago?', 'What should I do?')
+        ],
         options: () => rot(['把座墊調高一點', '把座墊調低一點', '不調，直接騎']),
         next: c => {
           if (c !== '把座墊調高一點') {
@@ -614,15 +659,15 @@ const Game = defineGame({
       DOCK: {
         place: 'station',
         dialogue: () => [L('我：要怎麼還車呢？', '¿Cómo devuelvo la bici?', 'How do I return the bike?')],
-        options: () => rot(['把車推進車柱，等「嗶」一聲，看螢幕有沒有「還車成功」', '把車靠在車柱旁邊就走', '把車鎖在附近的欄杆上']),
+        options: () => rot(['把車推進車柱，看到「還車成功」，再靠一次悠遊卡', '把車靠在車柱旁邊就走', '把車鎖在附近的欄杆上']),
         next: c => {
           if (!c.startsWith('把車推進車柱')) {
             Game.addMistake(c.includes('靠在') ? M('車要推進車柱才算還車，只放在旁邊的話，費用會一直算下去喔。', 'La bici debe quedar encajada en el anclaje para contar como devuelta; si solo la dejas al lado, el cobro sigue corriendo.', "The bike has to be pushed into a dock to count as returned — if you just leave it beside the dock, the fee keeps running.")
                                               : M('YouBike 不能鎖在欄杆上啦，要推進車柱還車。', 'No se puede dejar la YouBike atada a una baranda: hay que encajarla en un anclaje.', "You can't lock a YouBike to a railing — push it into a dock to return it."));
             return;
           }
-          goodFirst('DOCK', '你很細心！聽到「嗶」、看到「還車成功」，才表示車真的還完了。', '¡Qué cuidadoso! Solo cuando oyes el «bip» y ves «還車成功» la bici está realmente devuelta.', 'Careful! Only when you hear the beep and see 還車成功 is the bike really returned.');
-          Game.thought = [L('（「嗶」一聲，螢幕寫著「還車成功」，費用會從悠遊卡扣款。）', '(¡Bip! La pantalla dice «還車成功» (devolución exitosa) y el costo se descuenta de tu EasyCard.)', '(Beep! The screen says "還車成功" (return successful), and the fee is deducted from your EasyCard.)')];
+          goodFirst('DOCK', '你很細心！看到「還車成功」之後，還要再靠一次悠遊卡，看到扣款，才表示車真的還完了。', '¡Qué cuidadoso! Después de ver «還車成功» hay que pasar la EasyCard otra vez y ver el cobro: solo entonces la bici está realmente devuelta.', 'Careful! After 還車成功 appears, you still tap your EasyCard again and see the fee — only then is the bike really returned.');
+          Game.thought = [L('（螢幕寫著「還車成功」。你再把悠遊卡放在感應區，螢幕顯示扣款金額和卡片餘額。）', '(La pantalla dice «還車成功» (devolución exitosa). Pasas la EasyCard otra vez por el sensor y la pantalla muestra el importe cobrado y el saldo de tu tarjeta.)', '(The screen says "還車成功" (return successful). You tap your EasyCard on the reader again, and the screen shows the fee deducted and your card balance.)')];
           Game.stopTimer();
           Game.state = 'END';
         }
