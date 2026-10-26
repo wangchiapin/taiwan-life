@@ -585,13 +585,13 @@ const Game = defineGame({
         place: 'stop',
         html: () => Game.boardHTML(),
         dialogue: () => [L(`我：我要搭${t.route[1]}路。`, `Voy a tomar el autobús ${t.route[0]}.`, `I'm taking bus ${t.route[0]}.`)],
-        options: () => rot(t.board.map(b => `等${b.r[1]}路公車`)),
+        options: () => rot(t.board.slice().sort((a, b) => a.eta - b.eta).map(b => `等${b.eta}分鐘`)),
         next: c => {
-          const b = t.board.find(x => c === `等${x.r[1]}路公車`);
+          const b = t.board.find(x => c === `等${x.eta}分鐘`);
           if (b.r[0] !== t.route[0]) {
-            Game.addMistake(M(`你要搭的是${t.route[1]}路（${t.route[0]}），不是${b.r[1]}路喔。`, `Tienes que tomar el autobús ${t.route[0]}, no el ${b.r[0]}.`, `You need bus ${t.route[0]}, not ${b.r[0]}.`)); return;
+            Game.addMistake(M(`你要搭的是${t.route[1]}路（${t.route[0]}），看${t.route[0]}那一行：${b0(t)}分鐘。${b.r[0]}路是別台車喔。`, `Tú tomas el ${t.route[0]}: mira esa fila, llega en ${b0(t)} minutos. El ${b.r[0]} es otro autobús.`, `You need bus ${t.route[0]} — look at its row: ${b0(t)} minutes. Bus ${b.r[0]} is a different one.`)); return;
           }
-          goodFirst('WAIT', '你看得很仔細！路線號碼對了，再看幾分鐘後會到。', '¡Qué atento! El número de línea es el correcto; ahora mira en cuántos minutos llega.', 'Nicely done! The route number is right — now see how many minutes until it arrives.');
+          goodFirst('WAIT', '你看得很仔細！看清楚自己要搭的路線，再看幾分鐘後會到。', '¡Qué atento! Fíjate en la fila de tu línea y mira en cuántos minutos llega.', 'Nicely done! Find your own route, then see how many minutes until it arrives.');
           if (t.early.length) {
             const e = t.early[0];
             Game.thought = [L(`（你等了${e.eta}分鐘，有一台公車進站了。）`, `(Esperas ${e.eta} minutos y un autobús entra a la parada.)`, `(You wait ${e.eta} minutes, and a bus pulls into the stop.)`)];
