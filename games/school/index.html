@@ -350,7 +350,7 @@ const VOCAB = {
     return all.filter(w => !['發燒', '牙醫', '居留證', '移民署'].includes(w[0]) || (id === 'sick' && w[0] === '發燒') || (id === 'dental' && w[0] === '牙醫') || (id === 'arc' && (w[0] === '居留證' || w[0] === '移民署')) || !id); },
   MSG_OPEN: [['請假', 'pedir permiso (para faltar)', 'ask for leave'], ['您', 'usted (formal)', 'you (polite)'], ['老師好', 'buenos días, profesora', 'hello, teacher']],
   MSG_REASON: [['因為…，所以…', 'porque…, por eso…', 'because…, so…'], ['感冒', 'resfriado', 'a cold'], ['發燒', 'tener fiebre', 'have a fever'], ['牙醫', 'dentista', 'dentist'], ['居留證', 'tarjeta de residencia (ARC)', 'residence card (ARC)']],
-  MSG_TIME: [['請…的假', 'pedir permiso para (un día/horario)', 'take leave for (a time)'], ['一整天', 'todo el día', 'the whole day'], ['上午', 'por la mañana', 'morning'], ['下午', 'por la tarde', 'afternoon'], ['後天', 'pasado mañana', 'the day after tomorrow']],
+  MSG_TIME: [['請…的假', 'pedir permiso para (un día/horario)', 'take leave for (a time)'], ['一整天', 'todo el día', 'the whole day'], ['上午', 'por la mañana', 'morning'], ['下午', 'por la tarde', 'afternoon'], ['明天', 'mañana', 'tomorrow'], ['後天', 'pasado mañana', 'the day after tomorrow']],
   MSG_OK: [['沒問題', 'no hay problema', 'no problem'], ['補交', 'entregar más tarde', 'hand in later'], ['請假單', 'formulario de ausencia', 'leave form'], ['謝謝老師', 'gracias, profesora', 'thank you, teacher']],
   get BACK() { const id = Game.task && Game.task.leave.id; const all = [['關心', 'preocuparse por alguien', 'show concern'], ['好多了', 'mucho mejor', 'much better'], ['順利', 'sin problemas', 'smoothly'], ['辦好', 'terminar un trámite', 'get (something) done'], ['隨便', 'a la ligera, sin cuidado', 'casually, carelessly'], ['關你屁事', 'no es asunto tuyo (muy grosero; no se lo digas a la profesora)', 'none of your business (very rude — never say it to a teacher)']];
     return all.filter(w => !['好多了', '順利', '辦好'].includes(w[0]) || (id === 'sick' && w[0] === '好多了') || (id === 'dental' && w[0] === '順利') || (id === 'arc' && w[0] === '辦好') || !id); },
@@ -401,25 +401,64 @@ const STAGE = (() => {
 ══════════════════════════════════════ */
 const LEAVES = [
   { id: 'sick', reasonOpt: '感冒發燒了', reasonForm: '感冒發燒', reasonEs: 'gripe y fiebre', reasonEn: 'a cold and a fever',
-    situation: L('（今天早上，你一醒來就覺得頭很痛，還發燒了。今天的課沒辦法去上。）', '(Esta mañana te despertaste con mucho dolor de cabeza y fiebre. Hoy no puedes ir a clase.)', "(You woke up this morning with a bad headache and a fever. You can't go to class today.)"),
-    time: '今天一整天', timeEs: 'todo el día de hoy', timeEn: 'all day today',
+    slots: [['今天', '一整天'], ['今天', '上午']],
     type: '病假', typeWhy: M('感冒發燒是身體不舒服，要選病假。', 'Un resfriado con fiebre es un problema de salud: se elige «病假» (licencia por enfermedad).', 'A cold with a fever is an illness, so you choose 病假 (sick leave).'),
     backQ: L('你的感冒好一點了嗎？', '¿Te sientes mejor del resfriado?', 'Is your cold a little better?'), backA: '好多了，謝謝老師關心。',
-    note: '昨天的筆記', noteEs: 'los apuntes de ayer', noteEn: "yesterday's notes" },
+    backNarr: L('（請完病假的隔天，你回到學校。）', '(Al día siguiente de tu licencia por enfermedad, vuelves a la escuela.)', '(The day after your sick leave, you go back to school.)') },
   { id: 'dental', reasonOpt: '要去看牙醫', reasonForm: '看牙醫', reasonEs: 'ir al dentista', reasonEn: 'a dentist appointment',
-    situation: L('（你明天下午要去看牙醫，可是明天下午有課。）', '(Mañana por la tarde tienes cita con el dentista, pero a esa hora tienes clase.)', '(You have a dentist appointment tomorrow afternoon, but you have class then.)'),
-    time: '明天下午', timeEs: 'mañana por la tarde', timeEn: 'tomorrow afternoon',
+    slots: [['明天', '上午'], ['明天', '下午'], ['後天', '上午'], ['後天', '下午']],
     type: '病假', typeWhy: M('看牙醫是為了身體的事，要選病假。', 'Ir al dentista es por la salud: se elige «病假» (licencia por enfermedad).', 'A dentist visit is about your health, so you choose 病假 (sick leave).'),
     backQ: L('昨天看牙醫還順利嗎？', '¿Cómo te fue ayer en el dentista?', 'Did your dentist visit go well yesterday?'), backA: '很順利，謝謝老師關心。',
-    note: '昨天下午的筆記', noteEs: 'los apuntes de ayer por la tarde', noteEn: "yesterday afternoon's notes" },
+    backNarr: L('（看完牙醫的隔天，你回到學校。）', '(Al día siguiente de ir al dentista, vuelves a la escuela.)', '(The day after your dentist visit, you go back to school.)') },
   { id: 'arc', reasonOpt: '要去辦居留證', reasonForm: '辦居留證', reasonEs: 'hacer el trámite de la tarjeta de residencia (ARC)', reasonEn: 'applying for your residence card (ARC)',
-    situation: L('（你後天上午要去移民署辦居留證，可是後天上午有課。）', '(Pasado mañana por la mañana tienes que ir a Migración a hacer el trámite de tu tarjeta de residencia, pero a esa hora tienes clase.)', '(The day after tomorrow, you need to go to the Immigration Agency in the morning to apply for your residence card, but you have class then.)'),
-    time: '後天上午', timeEs: 'pasado mañana por la mañana', timeEn: 'the morning of the day after tomorrow',
+    slots: [['明天', '上午'], ['明天', '下午'], ['明天', '一整天'], ['後天', '上午'], ['後天', '下午'], ['後天', '一整天']],
     type: '事假', typeWhy: M('辦居留證是自己的事，不是生病，要選事假。', 'El trámite de la tarjeta de residencia es un asunto personal, no una enfermedad: se elige «事假» (licencia por asuntos personales).', "Applying for a residence card is a personal matter, not an illness, so you choose 事假 (personal leave)."),
     backQ: L('居留證辦好了嗎？', '¿Ya terminaste el trámite de la tarjeta de residencia?', 'Did you get your residence card sorted out?'), backA: '辦好了，謝謝老師關心。',
-    note: '昨天上午的筆記', noteEs: 'los apuntes de ayer por la mañana', noteEn: "yesterday morning's notes" }
+    backNarr: L('（辦完居留證的隔天，你回到學校。）', '(Al día siguiente de hacer el trámite de la tarjeta de residencia, vuelves a la escuela.)', '(The day after applying for your residence card, you go back to school.)') }
 ];
-const TIME_POOL = ['今天一整天', '明天下午', '後天上午', '今天下午', '明天上午'];
+const DAYS = ['今天', '明天', '後天'], PARTS = ['上午', '下午', '一整天'];
+const DAY_ES = { 今天: 'hoy', 明天: 'mañana', 後天: 'pasado mañana' };
+/* 把「哪一天＋哪個時段」組成中文／西文／英文 */
+function timeInfo(day, part) {
+  const zh = day + part;
+  let es, en;
+  if (part === '一整天') {
+    es = day === '後天' ? 'todo el día pasado mañana' : `todo el día de ${DAY_ES[day]}`;
+    en = day === '後天' ? 'all day the day after tomorrow' : `all day ${day === '今天' ? 'today' : 'tomorrow'}`;
+  } else {
+    const p = part === '上午' ? ['por la mañana', 'morning'] : ['por la tarde', 'afternoon'];
+    es = `${DAY_ES[day]} ${p[0]}`;
+    en = day === '後天' ? `the ${p[1]} of the day after tomorrow` : day === '今天' ? `this ${p[1]}` : `tomorrow ${p[1]}`;
+  }
+  return { zh, es, en };
+}
+/* 組出這一局的請假資料：理由決定可選的時間；錯的選項一個只錯日期、一個只錯時段 */
+function makeLeave() {
+  const base = pick(LEAVES);
+  const [day, part] = pick(base.slots);
+  const ti = timeInfo(day, part), whole = part === '一整天';
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  let situation;
+  if (base.id === 'sick') {
+    situation = whole
+      ? L('（今天早上，你一醒來就覺得頭很痛，還發燒了。今天的課沒辦法去上。）', '(Esta mañana te despertaste con mucho dolor de cabeza y fiebre. Hoy no puedes ir a clase.)', "(You woke up this morning with a bad headache and a fever. You can't go to class today.)")
+      : L('（今天早上，你一醒來就覺得頭很痛，還發燒了。今天上午的課沒辦法去上。）', '(Esta mañana te despertaste con mucho dolor de cabeza y fiebre. Hoy por la mañana no puedes ir a clase.)', "(You woke up this morning with a bad headache and a fever. You can't go to class this morning.)");
+  } else if (base.id === 'dental') {
+    situation = L(`（你${ti.zh}要去看牙醫，可是${ti.zh}有課。）`, `(${cap(ti.es)} tienes cita con el dentista, pero a esa hora tienes clase.)`, `(You have a dentist appointment ${ti.en}, but you have class then.)`);
+  } else {
+    situation = L(`（你${ti.zh}要去移民署辦居留證，可是${whole ? '那天' : ti.zh}有課。）`, `(${cap(ti.es)} tienes que ir a Migración a hacer el trámite de tu tarjeta de residencia, pero ${whole ? 'ese día' : 'a esa hora'} tienes clase.)`, `(${cap(ti.en)}, you need to go to the Immigration Agency to apply for your residence card, but you have class ${whole ? 'that day' : 'then'}.)`);
+  }
+  // 錯的時間：只錯日期（時段相同）、只錯時段（日期相同）
+  const otherDay = pick(DAYS.filter(d => d !== day)), otherPart = pick(PARTS.filter(p => p !== part));
+  const wrong = [otherDay + part, day + otherPart];
+  const pre = whole ? '昨天' : '昨天' + part;
+  const preEs = whole ? 'ayer' : `ayer ${part === '上午' ? 'por la mañana' : 'por la tarde'}`;
+  const preEn = whole ? 'yesterday' : `yesterday ${part === '上午' ? 'morning' : 'afternoon'}`;
+  return Object.assign({}, base, {
+    day, part, time: ti.zh, timeEs: ti.es, timeEn: ti.en, situation, wrong,
+    note: `${pre}的筆記`, noteEs: `los apuntes de ${preEs}`, noteEn: `${preEn}'s notes`
+  });
+}
 
 /* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
 const NEXT_LABEL = {
@@ -452,7 +491,7 @@ const Game = defineGame({
 
   /* ── 每局隨機任務 ── */
   setup() {
-    const leave = pick(LEAVES);
+    const leave = makeLeave();
     this.task = { leave, rot: Math.floor(Math.random() * 3) };
   },
 
@@ -540,9 +579,7 @@ const Game = defineGame({
         place: 'phone',
         dialogue: () => [tch('好，你想請什麼時候的假？', 'Bien, ¿para cuándo quieres pedir permiso?', 'OK, when would you like to take leave?')],
         options: () => {
-          const others = TIME_POOL.filter(x => x !== lv.time);
-          const start = t.rot % others.length;
-          return rot([`我想請${lv.time}的假。`, `我想請${others[start]}的假。`, `我想請${others[(start + 1) % others.length]}的假。`]);
+          return rot([`我想請${lv.time}的假。`, `我想請${lv.wrong[0]}的假。`, `我想請${lv.wrong[1]}的假。`]);
         },
         next: c => {
           if (c !== `我想請${lv.time}的假。`) {
@@ -571,7 +608,7 @@ const Game = defineGame({
       /* ═══ 回到學校 ═══ */
       BACK: {
         place: 'classroom',
-        dialogue: () => [L('（第二天，你回到學校。）', '(Al día siguiente, vuelves a la escuela.)', '(The next day, you go back to school.)'), tch(`早安，${N}！${lv.backQ.zh}`, `¡Buenos días, ${N}! ${lv.backQ.es}`, `Good morning, ${N}! ${lv.backQ.en}`)],
+        dialogue: () => [lv.backNarr, tch(`早安，${N}！${lv.backQ.zh}`, `¡Buenos días, ${N}! ${lv.backQ.es}`, `Good morning, ${N}! ${lv.backQ.en}`)],
         options: () => rot([lv.backA, '我怎麼了嗎？', '關你屁事。']),
         next: c => {
           if (c !== lv.backA) {
