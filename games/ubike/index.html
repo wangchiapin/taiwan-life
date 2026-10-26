@@ -620,13 +620,16 @@ const Game = defineGame({
                                                : M('YouBike 不能騎在人行道上啦！', '¡No se puede andar en YouBike por la acera!', "You can't ride a YouBike on the sidewalk!")); return;
           }
           goodFirst('ROAD', '沒錯！YouBike 要騎在馬路的右邊，人行道是給行人走的。', '¡Exacto! La YouBike va por la derecha de la calle; la acera es para los peatones.', 'Exactly! Ride a YouBike on the right side of the road — the sidewalk is for pedestrians.');
-          Game.thought = [L('（你騎在馬路的右邊。前面是紅燈，有行人正在走斑馬線。）', '(Vas por la derecha de la calle. Delante hay una luz roja y unos peatones cruzan por el paso de cebra.)', '(You ride on the right side of the road. Ahead is a red light, and pedestrians are crossing at the crosswalk.)')];
+          Game.thought = [L('（你騎在馬路的右邊。）', '(Vas por la derecha de la calle.)', '(You ride on the right side of the road.)')];
           Game.state = 'LIGHT';
         }
       },
       LIGHT: {
         place: 'light',
-        dialogue: () => [L('我：要怎麼辦呢？', '¿Qué hago?', 'What should I do?')],
+        dialogue: () => [
+          L('（前面是紅燈，有行人正在走斑馬線。）', '(Delante hay una luz roja y unos peatones cruzan por el paso de cebra.)', '(Ahead is a red light, and pedestrians are crossing at the crosswalk.)'),
+          L('我：要怎麼辦呢？', '¿Qué hago?', 'What should I do?')
+        ],
         options: () => rot(['停下來，等綠燈', '很快騎過去', '從人行道繞過去']),
         next: c => {
           if (c !== '停下來，等綠燈') {
