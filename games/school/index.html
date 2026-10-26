@@ -585,7 +585,9 @@ const Game = defineGame({
         options: () => rot([lv.backA, '我怎麼了嗎？', '關你屁事。']),
         next: c => {
           if (c !== lv.backA) {
-            Game.addMistake(M('不要忽略了老師的關心，要有禮貌。', 'No ignores la preocupación de la profesora: responde con cortesía.', "Don't ignore the teacher's concern — be polite."),
+            Game.addMistake(c === '我怎麼了嗎？'
+              ? M('你這樣回答別人會認為你隨便請假喔！', '¡Si respondes así, la gente pensará que pides permiso a la ligera!', 'If you answer like that, people will think you take leave casually!')
+              : M('不要忽略了老師的關心，要有禮貌。', 'No ignores la preocupación de la profesora: responde con cortesía.', "Don't ignore the teacher's concern — be polite."),
               [c === '關你屁事。'
                 ? tch('這樣說話不太禮貌喔。老師只是關心你。', 'Hablar así no es muy educado. Solo me preocupo por ti.', "That's not a very polite way to talk. I'm just concerned about you.")
                 : tch('你昨天請假了，所以老師問問你呀。', 'Ayer pediste permiso, por eso te pregunto.', 'You took leave yesterday, so I wanted to check on you.')]); return;
