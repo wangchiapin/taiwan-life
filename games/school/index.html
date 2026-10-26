@@ -425,7 +425,7 @@ const TIME_POOL = ['今天一整天', '明天下午', '後天上午', '今天下
 /* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
 const NEXT_LABEL = {
   MSG_OPEN: '打開老師的聊天室', MSG_REASON: '等老師回覆', MSG_TIME: '等老師回覆', MSG_OK: '等老師回覆',
-  BACK: '第二天，回到學校', NOTES: '坐下來，旁邊是同學', FORM: '下課，拿請假單', SUBMIT: '走去辦公室', END: '走出辦公室'
+  NOTES: '坐下來，旁邊是同學', FORM: '下課，拿請假單', SUBMIT: '走去辦公室', END: '走出辦公室'
 };
 
 const Game = defineGame({
@@ -584,7 +584,7 @@ const Game = defineGame({
       /* ═══ 回到學校 ═══ */
       BACK: {
         place: 'classroom',
-        dialogue: () => [L('（第二天，你回到學校。）', '(Al día siguiente, vuelves a la escuela.)', '(The next day, you go back to school.)'), tch(`早安，${N}！`, `¡Buenos días, ${N}!`, `Good morning, ${N}!`), tch(lv.backQ.zh, lv.backQ.es, lv.backQ.en)],
+        dialogue: () => [L('（第二天，你回到學校。）', '(Al día siguiente, vuelves a la escuela.)', '(The next day, you go back to school.)'), tch(`早安，${N}！${lv.backQ.zh}`, `¡Buenos días, ${N}! ${lv.backQ.es}`, `Good morning, ${N}! ${lv.backQ.en}`)],
         options: () => rot([lv.backA, '沒事。', '你為什麼問？']),
         next: c => {
           if (c !== lv.backA) {
