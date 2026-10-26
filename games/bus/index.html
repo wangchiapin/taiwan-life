@@ -334,7 +334,7 @@ pinyinPro.customPinyin({
 });
 
 pinyinPro.customPinyin({
-  '公車': 'gōng chē', '站牌': 'zhàn pái', '招手': 'zhāo shǒu', '刷卡': 'shuā kǎ', '悠遊卡': 'yōu yóu kǎ', '司機': 'sī jī', '下車鈴': 'xià chē líng',
+  '靠北': 'kào běi', '公車': 'gōng chē', '站牌': 'zhàn pái', '招手': 'zhāo shǒu', '刷卡': 'shuā kǎ', '悠遊卡': 'yōu yóu kǎ', '司機': 'sī jī', '下車鈴': 'xià chē líng',
   '下車': 'xià chē', '上車': 'shàng chē', '路線': 'lù xiàn', '方向': 'fāng xiàng', '往': 'wǎng', '預估': 'yù gū', '分鐘': 'fēn zhōng', '進站': 'jìn zhàn',
   '廣播': 'guǎng bò', '下一站': 'xià yí zhàn', '一站': 'yì zhàn', '兩站': 'liǎng zhàn', '坐': 'zuò', '座位': 'zuò wèi', '位子': 'wèi zi',
   '市政府': 'shì zhèng fǔ', '動物園': 'dòng wù yuán', '火車站': 'huǒ chē zhàn', '醫院': 'yī yuàn', '大學': 'dà xué', '公園': 'gōng yuán',
@@ -637,12 +637,12 @@ const Game = defineGame({
       ASK: {
         place: 'driver',
         dialogue: () => [L(`（你不太確定這台公車有沒有到${t.dest}站，所以你想問問看司機。）`, `(No estás seguro de que este autobús llegue a la parada ${t.dest}, así que quieres preguntarle al conductor.)`, `(You're not sure this bus goes to ${t.dest} Stop, so you want to ask the driver.)`)],
-        options: () => rot([`司機大哥，請問這台公車有到${t.dest}站嗎？`, '司機，你開快一點！', '司機，我要下車！']),
+        options: () => rot([`司機大哥，請問這台公車有到${t.dest}站嗎？`, '司機，你開快一點！', '靠北喔！搭錯車了！我要下車啦！']),
         next: c => {
           if (!c.includes('請問')) {
             Game.addMistake(c.includes('開快') ? M('不可以叫司機開快一點，這樣不禮貌，也不安全。', 'No se le pide al conductor que maneje más rápido: es descortés y poco seguro.', "Don't tell the driver to go faster — it's rude and unsafe.")
-                                              : M('你才剛上車，還不用下車。可以先問問司機有沒有到你要去的站。', 'Acabas de subir; todavía no es hora de bajar. Puedes preguntar primero al conductor si el autobús llega a tu parada.', "You've just boarded — it's not time to get off. You can first ask the driver whether the bus goes to your stop."),
-              [driver(c.includes('開快') ? '嗯？我開得很穩喔。' : '還沒到喔，你先坐好。', c.includes('開快') ? '¿Eh? Voy muy bien de velocidad.' : 'Todavía no llegamos; siéntate.', c.includes('開快') ? "Huh? I'm driving just fine." : "We're not there yet — please take a seat.")]); return;
+                                              : M('你還不確定有沒有搭錯車，也不可以這樣說話。先禮貌地問司機有沒有到你要去的站。', 'Todavía no sabes si te equivocaste de autobús, y tampoco se habla así. Primero pregúntale con cortesía al conductor si llega a tu parada.', "You don't even know yet whether it's the wrong bus, and that's no way to talk. First politely ask the driver whether it goes to your stop."),
+              [driver(c.includes('開快') ? '嗯？我開得很穩喔。' : '先別急，你先坐好，慢慢說。', c.includes('開快') ? '¿Eh? Voy muy bien de velocidad.' : 'Tranquilo, siéntate y dime con calma.', c.includes('開快') ? "Huh? I'm driving just fine." : "Easy now — take a seat and tell me calmly.")]); return;
           }
           goodFirst('ASK', '你很有禮貌！不確定的時候，可以問司機：「請問這台公車有到…嗎？」', '¡Muy cortés! Si no estás seguro, puedes preguntar al conductor: «請問這台公車有到…嗎？».', 'Very polite! When you\'re unsure, ask the driver: 請問這台公車有到…嗎？ ("Excuse me, does this bus go to…?").');
           Game.thought = [Game.driverLine()];
