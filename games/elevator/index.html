@@ -701,8 +701,8 @@ const Game = defineGame({
     if (this._transMode) html = '';
     const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
     const main = this.formatText(raw);
-    html += this.thoughtFirst ? th + main : main + th;
-    html += this.feedbackHTML();
+    // 過場畫面：先給評語（綠卡），再接旁白，最後才是過場按鈕
+    html += this._transMode ? this.feedbackHTML() + th : (this.thoughtFirst ? th + main : main + th) + this.feedbackHTML();
     const box = document.getElementById('npc-dialogue');
     box.innerHTML = html;
     box.querySelectorAll('[data-tr]').forEach(btn => {
