@@ -408,7 +408,7 @@ const SLOT = (day, per, hr) => `星期${day}${per}${per === '晚上' ? CN[hr] : 
 
 /* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
 const NEXT_LABEL = {
-  BOOK_SEARCH: '拿起手機', BOOK_OPEN: '點進理髮店的頁面', BOOK_TIME: '電話接通了', BOOK_PHONE: '設計師繼續問', ARRIVE: '預約的日子到了，走進理髮店',
+  BOOK_SEARCH: '拿起手機', BOOK_OPEN: '點進理髮店的網頁', BOOK_TIME: '電話接通了', BOOK_PHONE: '設計師繼續問', ARRIVE: '預約的日子到了，走進理髮店',
   STYLE_LEN: '坐到鏡子前面', STYLE_BANG: '設計師拿起剪刀', WASH: '走去洗頭', MIRROR: '洗好了，回到座位', PAY: '剪好了，去櫃台', CHANGE: '付錢', END: '走出理髮店'
 };
 
@@ -562,14 +562,12 @@ const Game = defineGame({
           if (c !== '我要' + t.want) {
             Game.addMistake(M(`想清楚一點，你${t.want.slice(0, 3)}下午${t.hr === 2 ? '兩' : CN[t.hr]}點才有空，要選「${t.want}」。`, `Piénsalo bien: solo estás libre el día indicado a las ${t.hr} de la tarde; elige «${t.want}».`, `Think it through: you're only free at ${t.hr} p.m. on that day — pick "${t.want}".`)); return;
           }
-          goodFirst('BOOK_TIME', '你選對時間了！星期和幾點都要聽清楚。', '¡Elegiste bien! Hay que escuchar con atención el día y la hora.', 'You picked the right time! Listen carefully to both the day and the hour.');
-          Game.thought = [boss(`好，${t.want}。請問你的電話幾號？`, `Bien, ${t.want}. ¿Cuál es su número de teléfono?`, `OK, ${t.want}. And your phone number?`)];
           Game.state = 'BOOK_PHONE';
         }
       },
       BOOK_PHONE: {
         place: 'call',
-        dialogue: () => [L('我：我的電話是……', 'Mi teléfono es…', 'My number is…')],
+        dialogue: () => [boss(`好，${t.want}。請問你的電話幾號？`, `Bien, ${t.want}. ¿Cuál es su número de teléfono?`, `OK, ${t.want}. And your phone number?`), L('我：我的電話是……', 'Mi teléfono es…', 'My number is…')],
         options: () => rot(t.phones.map(p => p)),
         next: c => {
           if (c !== t.phone) {
