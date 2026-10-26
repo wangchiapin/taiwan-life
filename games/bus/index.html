@@ -250,7 +250,6 @@ html{color-scheme:light}
   <div class="top-bar">
     <div class="tb-btns">
       <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
-      <button class="btn-pinyin" id="btn-list" aria-pressed="false" onclick="Game.toggleList()" data-es="📝 Mi situación" data-en="📝 My situation">📝 Mi situación</button>
       <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
       <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
     </div>
@@ -401,7 +400,7 @@ const STAGE = (() => {
 })();
 
 /* 路線 [阿拉伯數字（站牌上看到的）, 中文念法]；方向 [往哪裡, 另一邊]；站名 */
-const ROUTES = [['26', '二六'], ['212', '二一二'], ['305', '三零五'], ['648', '六四八'], ['15', '一五'], ['88', '八八']];
+const ROUTES = [['26', '二十六'], ['212', '二一二'], ['305', '三零五'], ['648', '六四八'], ['15', '十五'], ['88', '八十八']];
 const DIRS = [['動物園', '火車站'], ['市政府', '公園'], ['大學', '醫院']];
 const STOPNAMES = ['中山路', '民生路', '和平路', '中正路', '文化路', '成功路', '光復路', '自由路'];
 const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
@@ -470,7 +469,7 @@ const Game = defineGame({
   amiLines() {
     const t = this.task, d = DIRES[t.dir];
     return [
-      L(`Ami：你搭${t.route[1]}路公車，往${t.dir}方向，在${t.dest}站下車。`, `Toma el autobús ${t.route[0]}, en dirección a ${d[0]}, y bájate en la parada ${t.dest}.`, `Take bus ${t.route[0]}, toward ${d[1]}, and get off at ${t.dest} Stop.`),
+      L(`Ami：你等等要坐公車來嗎？搭${t.route[1]}路公車，往${t.dir}方向，在${t.dest}下車喔！`, `Toma el autobús ${t.route[0]}, en dirección a ${d[0]}, y bájate en la parada ${t.dest}.`, `Take bus ${t.route[0]}, toward ${d[1]}, and get off at ${t.dest} Stop.`),
       L('Ami：記得，上車要刷悠遊卡，下車也要刷喔。', 'Recuerda: pasa tu EasyCard al subir, y también al bajar.', 'Remember: tap your EasyCard when you get on, and again when you get off.')
     ];
   },
