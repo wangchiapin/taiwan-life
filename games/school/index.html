@@ -346,13 +346,13 @@ const SPEAKER_RE = /^(老師|小美|我)：/;
 ══════════════════════════════════════ */
 const VOCAB = {
   // 三種請假情況每局隨機一種：單字抽屜只放這一局用得到的詞
-  get START() { const id = Game.task && Game.task.leave.id; const all = [['請假', 'pedir permiso (para faltar)', 'ask for leave'], ['老師', 'profesor(a)', 'teacher'], ['發燒', 'tener fiebre', 'have a fever'], ['牙醫', 'dentista', 'dentist'], ['居留證', 'tarjeta de residencia (ARC)', 'residence card (ARC)'], ['移民署', 'Agencia Nacional de Migración', 'National Immigration Agency']];
+  get START() { const id = Game.task && Game.task.leave.id; const all = [['請假', 'pedir permiso (para faltar)', 'ask for leave'], ['老師', 'profesora', 'teacher'], ['發燒', 'tener fiebre', 'have a fever'], ['牙醫', 'dentista', 'dentist'], ['居留證', 'tarjeta de residencia (ARC)', 'residence card (ARC)'], ['移民署', 'Agencia Nacional de Migración', 'National Immigration Agency']];
     return all.filter(w => !['發燒', '牙醫', '居留證', '移民署'].includes(w[0]) || (id === 'sick' && w[0] === '發燒') || (id === 'dental' && w[0] === '牙醫') || (id === 'arc' && (w[0] === '居留證' || w[0] === '移民署')) || !id); },
-  MSG_OPEN: [['請假', 'pedir permiso (para faltar)', 'ask for leave'], ['您', 'usted (formal)', 'you (polite)'], ['老師好', 'buenos días, profesor(a)', 'hello, teacher']],
+  MSG_OPEN: [['請假', 'pedir permiso (para faltar)', 'ask for leave'], ['您', 'usted (formal)', 'you (polite)'], ['老師好', 'buenos días, profesora', 'hello, teacher']],
   MSG_REASON: [['因為…，所以…', 'porque…, por eso…', 'because…, so…'], ['感冒', 'resfriado', 'a cold'], ['發燒', 'tener fiebre', 'have a fever'], ['牙醫', 'dentista', 'dentist'], ['居留證', 'tarjeta de residencia (ARC)', 'residence card (ARC)']],
   MSG_TIME: [['請…的假', 'pedir permiso para (un día/horario)', 'take leave for (a time)'], ['一整天', 'todo el día', 'the whole day'], ['上午', 'por la mañana', 'morning'], ['下午', 'por la tarde', 'afternoon'], ['後天', 'pasado mañana', 'the day after tomorrow']],
-  MSG_OK: [['沒問題', 'no hay problema', 'no problem'], ['補交', 'entregar más tarde', 'hand in later'], ['請假單', 'formulario de ausencia', 'leave form'], ['謝謝老師', 'gracias, profesor(a)', 'thank you, teacher']],
-  get BACK() { const id = Game.task && Game.task.leave.id; const all = [['關心', 'preocuparse por alguien', 'show concern'], ['好多了', 'mucho mejor', 'much better'], ['順利', 'sin problemas', 'smoothly'], ['辦好', 'terminar un trámite', 'get (something) done'], ['沒事', 'no pasa nada', 'nothing, it\'s fine']];
+  MSG_OK: [['沒問題', 'no hay problema', 'no problem'], ['補交', 'entregar más tarde', 'hand in later'], ['請假單', 'formulario de ausencia', 'leave form'], ['謝謝老師', 'gracias, profesora', 'thank you, teacher']],
+  get BACK() { const id = Game.task && Game.task.leave.id; const all = [['關心', 'preocuparse por alguien', 'show concern'], ['好多了', 'mucho mejor', 'much better'], ['順利', 'sin problemas', 'smoothly'], ['辦好', 'terminar un trámite', 'get (something) done'], ['隨便', 'a la ligera, sin cuidado', 'casually, carelessly'], ['關你屁事', 'no es asunto tuyo (muy grosero; no se lo digas a la profesora)', 'none of your business (very rude — never say it to a teacher)']];
     return all.filter(w => !['好多了', '順利', '辦好'].includes(w[0]) || (id === 'sick' && w[0] === '好多了') || (id === 'dental' && w[0] === '順利') || (id === 'arc' && w[0] === '辦好') || !id); },
   NOTES: [['同學', 'compañero(a) de clase', 'classmate'], ['筆記', 'apuntes', 'notes'], ['借', 'prestar / pedir prestado', 'lend / borrow'], ['拍照', 'sacar una foto', 'take a photo'], ['功課', 'tarea', 'homework']],
   FORM: [['請假單', 'formulario de ausencia', 'leave form'], ['假別', 'tipo de licencia', 'type of leave'], ['病假', 'licencia por enfermedad', 'sick leave'], ['事假', 'licencia por asuntos personales', 'personal leave'], ['公假', 'licencia por actividades oficiales', 'official leave']],
@@ -480,16 +480,6 @@ const Game = defineGame({
       { zh: '要請假的對象：老師', es: 'A quién se lo dices: la profesora', en: 'Who you ask: the teacher' }
     ];
   },
-  listHTML() {
-    const r = s => this.ruby(s);
-    const rows = this.situationRows();
-    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
-    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
-    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
-    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
-    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` +
-      rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
-  },
   /* 招牌元素：請假單 */
   formHTML() {
     const t = this.task.leave, r = s => this.ruby(s);
@@ -530,7 +520,7 @@ const Game = defineGame({
                                 : M('要先打招呼、說明你是誰、為什麼傳訊息，對老師要用「您」。', 'Primero hay que saludar, decir quién eres y para qué escribes; a la profesora se le habla de «您» (usted).', 'Greet first, say who you are and why you\'re writing, and use 您 (polite "you") with a teacher.'),
               [tch(no ? '嗯？請問你是哪一位同學？要先說明一下喔。' : '請問你是哪一位同學？有什麼事嗎？', no ? 'Mmm, ¿quién eres? Primero tienes que explicarme.' : '¿Quién eres? ¿En qué te puedo ayudar?', no ? "Hmm? Which student are you? Please explain first." : 'Which student are you? What can I do for you?')]); return;
           }
-          goodFirst('MSG_OPEN', '很有禮貌喔！傳訊息給老師，要先打招呼、說你是誰，還要用「您」。', '¡Muy educado! Al escribirle a un profesor, saluda, di quién eres y usa «您».', 'Very polite! When you message a teacher, greet them, say who you are, and use 您.');
+          goodFirst('MSG_OPEN', '很有禮貌喔！傳訊息給老師，要先打招呼、說你是誰，還要用「您」。', '¡Muy educado! Al escribirle a una profesora, saluda, di quién eres y usa «您».', 'Very polite! When you message a teacher, greet them, say who you are, and use 您.');
           Game.state = 'MSG_REASON';
         }
       },
@@ -572,7 +562,7 @@ const Game = defineGame({
                                                     : M('請假單是學校的規定，我們都要遵守規定！', 'El formulario es una regla de la escuela: ¡todos tenemos que cumplir las reglas!', 'The leave form is a school rule — we all have to follow the rules!'));
             return;
           }
-          goodFirst('MSG_OK', '很有禮貌喔！老師同意了，要說謝謝。', '¡Muy educado! Cuando el profesor acepta, se da las gracias.', 'Very polite! When the teacher agrees, say thank you.');
+          goodFirst('MSG_OK', '很有禮貌喔！老師同意了，要說謝謝。', '¡Muy educado! Cuando la profesora acepta, se da las gracias.', 'Very polite! When the teacher agrees, say thank you.');
           Game.thought = [L('（你把訊息傳出去了。）', '(Envías el mensaje.)', '(You send the message.)')];
           Game.state = 'BACK';
         }
@@ -592,7 +582,7 @@ const Game = defineGame({
                 ? tch('這樣說話不太禮貌喔。老師只是關心你。', 'Hablar así no es muy educado. Solo me preocupo por ti.', "That's not a very polite way to talk. I'm just concerned about you.")
                 : tch('你昨天請假了，所以老師問問你呀。', 'Ayer pediste permiso, por eso te pregunto.', 'You took leave yesterday, so I wanted to check on you.')]); return;
           }
-          goodFirst('BACK', '你回答得很有禮貌！老師關心你的時候，記得說謝謝。', '¡Respondiste con mucha cortesía! Cuando un profesor se preocupa por ti, recuerda dar las gracias.', 'You answered politely! When a teacher shows concern, remember to say thanks.');
+          goodFirst('BACK', '你回答得很有禮貌！老師關心你的時候，記得說謝謝。', '¡Respondiste con mucha cortesía! Cuando una profesora se preocupa por ti, recuerda dar las gracias.', 'You answered politely! When a teacher shows concern, remember to say thanks.');
           Game.thought = [tch('好，請坐，我們要上課了。', 'Bien, siéntate; vamos a empezar la clase.', "OK, please sit down — we're starting class.")];
           Game.state = 'NOTES';
         }
@@ -770,7 +760,7 @@ const Game = defineGame({
     Log.render();
 
     this._tr = []; this._spk = [];
-    let html = (this.showList && this.state !== 'START' && !['END', 'RESULT'].includes(this.state)) ? this.listHTML() : '';
+    let html = '';
     html += cfg.html ? cfg.html() : '';
     if (this._transMode) html = '';
     const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
