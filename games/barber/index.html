@@ -353,6 +353,7 @@ const VOCAB = {
   BOOK_OPEN: [['預約', 'hacer una cita / reservar', 'make an appointment'], ['電話', 'teléfono', 'phone'], ['排隊', 'hacer fila', 'wait in line'], ['理髮店', 'peluquería', 'hair salon']],
   BOOK_CALL: [['預約', 'hacer una cita / reservar', 'make an appointment'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['打錯', 'marcar mal', 'dial the wrong number']],
   BOOK_TIME: [['星期', 'día de la semana', 'day of the week'], ['上午', 'por la mañana', 'a.m. / morning'], ['下午', 'por la tarde', 'p.m. / afternoon'], ['晚上', 'por la noche', 'evening'], ['有空', 'estar libre', 'be free / available']],
+  BOOK_CONFIRM: [['提早', 'llegar antes', 'arrive early'], ['分鐘', 'minuto', 'minute'], ['不對', 'no es correcto', 'that is not right'], ['再見', 'adiós', 'goodbye']],
   BOOK_PHONE: [['電話', 'teléfono', 'phone'], ['我的', 'mi', 'my']],
   ARRIVE: [['有預約', 'tener cita', 'have an appointment'], ['排隊', 'hacer fila', 'wait in line'], ['坐', 'sentarse', 'sit'], ['設計師', 'estilista', 'stylist'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask']],
   STYLE_LEN: [['肩膀', 'hombros', 'shoulders'], ['下巴', 'mentón', 'chin'], ['耳朵', 'oreja', 'ear'], ['剪到', 'cortar hasta…', 'cut up to…'], ['多短', 'qué tan corto', 'how short']],
@@ -393,7 +394,7 @@ document.getElementById('hint-close').onclick = () => Hints.toggle(false);
 const STAGE = (() => {
   const a = ['預約', 'reservar', 'booking'], b = ['剪髮', 'el corte', 'the haircut'], c = ['結帳', 'pagar', 'paying'];
   const o = {};
-  ['BOOK_SEARCH', 'BOOK_OPEN', 'BOOK_CALL', 'BOOK_TIME', 'BOOK_PHONE', 'ARRIVE'].forEach(x => o[x] = a);
+  ['BOOK_SEARCH', 'BOOK_OPEN', 'BOOK_CALL', 'BOOK_TIME', 'BOOK_CONFIRM', 'BOOK_PHONE', 'ARRIVE'].forEach(x => o[x] = a);
   ['STYLE_LEN', 'STYLE_BANG', 'WASH', 'MIRROR'].forEach(x => o[x] = b);
   ['PAY', 'CHANGE'].forEach(x => o[x] = c);
   return o;
@@ -409,7 +410,7 @@ const SLOT = (day, per, hr) => `星期${day}${per}${per === '晚上' ? CN[hr] : 
 
 /* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
 const NEXT_LABEL = {
-  BOOK_SEARCH: '拿起手機', BOOK_OPEN: '點進理髮店的網頁', BOOK_TIME: '電話接通了', BOOK_PHONE: '設計師繼續問', ARRIVE: '預約的日子到了，走進理髮店',
+  BOOK_SEARCH: '拿起手機', BOOK_OPEN: '點進理髮店的網頁', BOOK_TIME: '電話接通了', ARRIVE: '預約的日子到了，走進理髮店',
   STYLE_LEN: '坐到鏡子前面', STYLE_BANG: '設計師拿起剪刀', WASH: '走去洗頭', MIRROR: '洗好了，回到座位', PAY: '剪好了，去櫃台', CHANGE: '付錢', END: '走出理髮店'
 };
 
@@ -428,7 +429,7 @@ const Game = defineGame({
 
   IMAGES: {
     START: ['images/start.jpg', '💇'],
-    BOOK_SEARCH: ['images/search.jpg', '🔍'], BOOK_OPEN: ['images/phone.jpg', '📞'], BOOK_CALL: ['images/phone.jpg', '📞'], BOOK_TIME: ['images/phone.jpg', '📞'], BOOK_PHONE: ['images/phone.jpg', '📞'],
+    BOOK_SEARCH: ['images/search.jpg', '🔍'], BOOK_OPEN: ['images/phone.jpg', '📞'], BOOK_CALL: ['images/phone.jpg', '📞'], BOOK_TIME: ['images/phone.jpg', '📞'], BOOK_PHONE: ['images/phone.jpg', '📞'], BOOK_CONFIRM: ['images/phone.jpg', '📞'],
     ARRIVE: ['images/door.jpg', '🚪'], STYLE_LEN: ['images/chair.jpg', '🪑'], STYLE_BANG: ['images/chair.jpg', '✂️'],
     WASH: ['images/wash.jpg', '🚿'], MIRROR: ['images/mirror.jpg', '🪞'], PAY: ['images/counter.jpg', '💴'], CHANGE: ['images/counter.jpg', '💴'],
     END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
@@ -450,7 +451,11 @@ const Game = defineGame({
     const shopTel = a => { const d = String(ri(2000, 8999)) + String(ri(1000, 9999)); return { d: a + d, show: `(${a}) ${d.slice(0, 4)}-${d.slice(4)}`, zh: `${[...a].map(c => ZD[c]).join('')}，${[...d.slice(0, 4)].map(c => ZD[c]).join('')}，${[...d.slice(4)].map(c => ZD[c]).join('')}` }; };
     const shops = [{ k: 'salon', n: '理髮店', ...shopTel(areas[0]) }, { k: 'wig', n: '假髮店', ...shopTel(areas[1]) }, { k: 'adult', n: '色情理髮店', ...shopTel(areas[2]) }];
     const price = pick([350, 400, 450]), given = Math.random() < 0.5 ? 500 - price : 500 - price - 50;
-    this.task = { day, hr, want: SLOT(day, '下午', hr), slots: slots.map(s => SLOT(s[0], s[1], s[2])), shops, shopOrder: shuffle(shops.slice()), phone: fmt(real), phones: ph.map(fmt), phoneZh: zhNum(real), phonesZh: ph.map(zhNum), len, bang, rot: Math.floor(Math.random() * 3), price, given, wrong: given !== 500 - price };
+    const bossWrong = Math.random() < 0.5;
+    let said = SLOT(day, '下午', hr);
+    if (bossWrong) { said = Math.random() < 0.5 ? SLOT(day, '下午', pick([2, 3, 4, 5, 6].filter(h => h !== hr))) : SLOT(pick(DAYS.filter(d => d !== day)), '下午', hr); }
+    this.carry = null; this._cs = false;
+    this.task = { day, hr, want: SLOT(day, '下午', hr), said, bossWrong, slots: slots.map(s => SLOT(s[0], s[1], s[2])), shops, shopOrder: shuffle(shops.slice()), phone: fmt(real), phones: ph.map(fmt), phoneZh: zhNum(real), phonesZh: ph.map(zhNum), len, bang, rot: Math.floor(Math.random() * 3), price, given, wrong: given !== 500 - price };
   },
 
   setPlace(mode) {
@@ -491,6 +496,7 @@ const Game = defineGame({
     const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
     return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
   },
+  carryHTML() { return this.carry ? this.feedbackHTML.call({ feedback: [this.carry], ruby: s => Game.ruby(s) }) : ''; },
   shopsHTML() {
     const t = this.task, r = s => this.ruby(s);
     return `<div class="shops"><div class="sh">${r('搜尋：理髮店')}</div>` + t.shopOrder.map(x => `<div class="sp"><b>${r(x.n)}</b><span>${x.show}</span></div>`).join('') + '</div>';
@@ -512,6 +518,8 @@ const Game = defineGame({
     const N = this.N, t = this.task;
     const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
     const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    /* 綠卡直接放在下一頁老闆台詞的上面（不經過過場頁） */
+    const carryGood = (key, zh, es, en) => { Game.carry = Game.att[key] === 1 ? { type: 'good', zh, es, en } : null; Game._cs = true; };
     const sd = (zh, es, en) => L(`設計師：${zh}`, es, en);
     const boss = (zh, es, en) => L(`老闆：${zh}`, es, en);
     const change = 500 - t.price;
@@ -574,29 +582,52 @@ const Game = defineGame({
           if (c !== '我要' + t.want) {
             Game.addMistake(M(`想清楚一點，你${t.want.slice(0, 3)}下午${t.hr === 2 ? '兩' : CN[t.hr]}點才有空，要選「${t.want}」。`, `Piénsalo bien: solo estás libre el día indicado a las ${t.hr} de la tarde; elige «${t.want}».`, `Think it through: you're only free at ${t.hr} p.m. on that day — pick "${t.want}".`)); return;
           }
+          carryGood('BOOK_TIME', '你選對時間了！星期和幾點都要聽清楚。', '¡Elegiste bien! Hay que escuchar con atención el día y la hora.', 'You picked the right time! Listen carefully to both the day and the hour.');
           Game.state = 'BOOK_PHONE';
         }
       },
       BOOK_PHONE: {
         place: 'call',
+        html: () => Game.carryHTML(),
         dialogue: () => [boss(`好，${t.want}。請問你的電話幾號？`, `Bien, ${t.want}. ¿Cuál es su número de teléfono?`, `OK, ${t.want}. And your phone number?`), L('我：我的電話是……', 'Mi teléfono es…', 'My number is…')],
         options: () => rot(t.phonesZh.slice()),
         next: c => {
           if (c !== t.phoneZh) {
             Game.addMistake(M(`你的電話是 ${t.phone}。怎麼會忘記了呢？`, `Tu número es ${t.phone}. ¿Cómo pudiste olvidarlo?`, `Your number is ${t.phone}. How could you forget?`)); return;
           }
-          goodFirst('BOOK_PHONE', '電話號碼對了！', '¡El número es correcto!', 'The phone number is right!');
-          Game.thought = [boss(`好，${t.want}，謝謝。`, `Bien, ${t.want}; gracias.`, `OK, ${t.want} — thank you.`)];
+          carryGood('BOOK_PHONE', '電話號碼對了！', '¡El número es correcto!', 'The phone number is right!');
+          Game.state = 'BOOK_CONFIRM';
+        }
+      },
+      BOOK_CONFIRM: {
+        place: 'call',
+        html: () => Game.carryHTML(),
+        dialogue: () => [boss(`好，${t.said}，請提早十分鐘到喔！`, `Bien, ${t.said}. ¡Llegue 10 minutos antes, por favor!`, `OK, ${t.said}. Please arrive 10 minutes early!`)],
+        options: () => rot(['好，謝謝，再見！', `不對，我要的是${t.want}。`]),
+        next: c => {
+          const fix = c.startsWith('不對');
+          if (fix !== t.bossWrong) {
+            Game.addMistake(t.bossWrong
+              ? M(`老闆說錯時間了！你預約的是${t.want}，不是${t.said}。要馬上告訴他。`, `¡El dueño se equivocó de horario! Tu cita es ${t.want}, no ${t.said}. Díselo enseguida.`, `The owner got the time wrong! Your booking is ${t.want}, not ${t.said}. Tell him right away.`)
+              : M(`老闆說的時間沒有錯，就是${t.want}。不用更正喔。`, `El horario que dijo el dueño es correcto: ${t.want}. No hace falta corregirlo.`, `The owner's time is right: ${t.want}. No need to correct him.`)); return;
+          }
+          if (t.bossWrong) {
+            goodFirst('BOOK_CONFIRM', '你聽得很清楚！老闆說錯時間，你馬上更正了。', '¡Escuchaste muy bien! El dueño se equivocó de horario y lo corregiste enseguida.', 'Well listened! The owner got the time wrong and you corrected him right away.');
+            Game.thought = [boss(`啊，不好意思，是${t.want}，我改過來了。`, `Ah, disculpe: es ${t.want}. Ya lo corregí.`, `Oh, sorry — it's ${t.want}. I've fixed it.`)];
+          } else {
+            goodFirst('BOOK_CONFIRM', '你聽得很清楚！老闆說的時間沒有錯。', '¡Escuchaste muy bien! El horario que dijo el dueño era correcto.', 'Well listened! The time the owner said was right.');
+          }
           Game.state = 'ARRIVE';
         }
       },
       ARRIVE: {
         place: 'salon',
         dialogue: () => [sd('歡迎光臨！請問有預約嗎？', '¡Bienvenido! ¿Tiene cita?', 'Welcome! Do you have an appointment?')],
-        options: () => rot([`有，我有預約，我叫${N}。`, '沒有，我要排隊。', '我要剪頭髮。']),
+        options: () => rot([`有，我有預約，我叫${N}。`, '沒有，我要排隊。', '有，我預約兩位。']),
         next: c => {
-          if (!c.startsWith('有，')) {
-            Game.addMistake(M('你已經預約了，要說「我有預約」，再說名字，設計師才會找到你。', 'Ya reservaste: di «我有預約» y tu nombre para que el estilista te encuentre.', 'You already booked — say 我有預約 and your name so the stylist can find you.')); return;
+          if (c !== `有，我有預約，我叫${N}。`) {
+            Game.addMistake(c.includes('兩位') ? M('你只有一個人，預約的也只有你自己。要說「我有預約」，再說名字，設計師才會找到你。', 'Vienes solo y la cita es solo para ti. Di «我有預約» y tu nombre para que el estilista te encuentre.', 'You came alone and the booking is only for you. Say 我有預約 and your name so the stylist can find you.')
+              : M('你已經預約了，要說「我有預約」，再說名字，設計師才會找到你。', 'Ya reservaste: di «我有預約» y tu nombre para que el estilista te encuentre.', 'You already booked — say 我有預約 and your name so the stylist can find you.')); return;
           }
           goodFirst('ARRIVE', '很好！先說「我有預約」，再說名字。', '¡Muy bien! Primero «我有預約» y luego tu nombre.', 'Good! Say 我有預約 first, then your name.');
           Game.thought = [sd(`${N}，對，${t.want}，這邊請坐。`, `${N}, sí, ${t.want}. Siéntese aquí, por favor.`, `${N}, yes, ${t.want}. Please sit here.`)];
@@ -778,7 +809,9 @@ const Game = defineGame({
     this.feedback = [];
     const before = this.state;
     this.att[before] = (this.att[before] || 0) + 1;
+    this._cs = false;
     cfg.next(choice);
+    if (this.state !== before && !this._cs) this.carry = null;
     this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
     if (this.thoughtFirst) this.visit += 1;
     this.maybeTrans(before);
