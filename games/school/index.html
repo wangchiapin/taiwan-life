@@ -291,7 +291,7 @@ html{color-scheme:light}
   <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
 </div>
 <aside id="hints" class="drawer" aria-label="任務提示 Pistas">
-  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Mi situación" data-en="My situation">Mi situación</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
   <div id="hint-body"></div>
 </aside>
 <aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
@@ -363,7 +363,7 @@ const VOCAB = {
 };
 
 /* ══════════════════════════════════════
-   任務提示：只列出老師說過的原話，聽到了才出現；不扣分，結果頁顯示看了幾次
+   任務提示：放「我的狀況」（原因、請假時間、對象）；不扣分，結果頁顯示看了幾次
 ══════════════════════════════════════ */
 const ORDER = ['START', 'MSG_OPEN', 'MSG_REASON', 'MSG_TIME', 'MSG_OK', 'BACK', 'NOTES', 'FORM', 'SUBMIT', 'END', 'RESULT'];
 const Hints = {
@@ -378,10 +378,7 @@ const Hints = {
     if (!Game.task) return;
     const r = s => Game.ruby(s);
     const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
-    const at = ORDER.indexOf(Game.st0);
-    const said = Game.teacherSaid().filter(x => ORDER.indexOf(x.stage) <= at);
-    let html = `<div class="h-sec">${r('老師說的話')}</div>`;
-    html += said.length ? said.map(item).join('') : `<div class="h-item"><div class="h-es">${esc(X('Todavía no ha dicho nada.', "Nothing yet."))}</div></div>`;
+    let html = `<div class="h-sec">${r('我的狀況')}</div>` + Game.situationRows().map(item).join('');
     document.getElementById('hint-body').innerHTML = html;
   }
 };
@@ -475,24 +472,18 @@ const Game = defineGame({
     document.getElementById('place-status').textContent = st;
   },
 
-  /* 老師說過的原話（任務提示用） */
-  teacherSaid() {
-    const N = this.N;
-    return [
-      { stage: 'MSG_REASON', ...L(`老師：${N}，你好。有什麼事嗎？`, `${N}, hola. ¿En qué te puedo ayudar?`, `Hello, ${N}. What can I do for you?`) },
-      { stage: 'MSG_TIME', ...L('老師：好，你想請什麼時候的假？', 'Bien, ¿para cuándo quieres pedir permiso?', 'OK, when would you like to take leave?') },
-      { stage: 'MSG_OK', ...L('老師：好，沒問題。你回學校以後，要補交請假單喔。', 'Bien, no hay problema. Cuando vuelvas a la escuela, tienes que entregar el formulario de ausencia.', "OK, no problem. When you come back to school, you'll need to hand in a leave form.") }
-    ];
-  },
-
   /* ── 畫面元件 ── */
-  listHTML() {
-    const t = this.task.leave, r = s => this.ruby(s);
-    const rows = [
+  situationRows() {
+    const t = this.task.leave;
+    return [
       { zh: `原因：${t.reasonForm}`, es: `Motivo: ${t.reasonEs}`, en: `Reason: ${t.reasonEn}` },
       { zh: `請假時間：${t.time}`, es: `Cuándo vas a faltar: ${t.timeEs}`, en: `When you'll be absent: ${t.timeEn}` },
       { zh: '要請假的對象：老師', es: 'A quién se lo dices: la profesora', en: 'Who you ask: the teacher' }
     ];
+  },
+  listHTML() {
+    const r = s => this.ruby(s);
+    const rows = this.situationRows();
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
     const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
     this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
