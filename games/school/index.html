@@ -514,8 +514,7 @@ const Game = defineGame({
         html: () => Game.listHTML(),
         dialogue: () => [
           lv.situation,
-          L('（你想跟老師請假，所以拿起手機。）', '(Quieres pedirle permiso a tu profesora, así que tomas tu celular.)', '(You want to ask your teacher for leave, so you pick up your phone.)'),
-          L('我：要怎麼跟老師說呢？', '¿Cómo se lo digo a la profesora?', 'How should I tell the teacher?')
+          L('（你想跟老師請假，所以拿起手機。）', '(Quieres pedirle permiso a tu profesora, así que tomas tu celular.)', '(You want to ask your teacher for leave, so you pick up your phone.)')
         ],
         options: ['打開跟老師的聊天室'],
         next: () => { Game.startTimer(); Game.state = 'MSG_OPEN'; }
@@ -524,7 +523,7 @@ const Game = defineGame({
       /* ═══ 傳 LINE 請假 ═══ */
       MSG_OPEN: {
         place: 'phone',
-        dialogue: () => [me('第一句要怎麼說呢？', '¿Cómo empiezas el mensaje?', 'How do you start the message?')],
+        dialogue: () => [me('我該說什麼呢？', '¿Qué le digo?', 'What should I say?')],
         options: () => rot([`老師好，我是${N}。我想跟您請假。`, '老師，我不去上課了。', '哈囉，你在嗎？']),
         next: c => {
           if (!c.startsWith('老師好')) {
