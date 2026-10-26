@@ -1038,7 +1038,62 @@ function draw(now) {
   if (P.path.length) { const t = P.path[P.path.length - 1]; g.strokeStyle = '#f2b632'; g.lineWidth = 3; g.strokeRect(t.x * T + 3, t.y * T + 3, T - 6, T - 6); }
   drawLife(now);
   drawPlayer(now);
+  if (isNight()) drawNight(cy);
   g.restore();
+}
+
+/* ══════════════════════════════════════
+   夜間模式：照玩家手機的時間自動切換（晚上 6 點～早上 6 點）
+   網址加 ?night=1 強制夜間、?night=0 強制白天（測試用）
+══════════════════════════════════════ */
+const NIGHT_FORCE = new URLSearchParams(location.search).get('night');
+const isNight = () => NIGHT_FORCE === '1' || (NIGHT_FORCE !== '0' && (new Date().getHours() >= 18 || new Date().getHours() < 6));
+let _lamps = null;
+function drawNight(cy) {   // 呼叫時已經 translate(0, -cy)
+  if (!_lamps) { _lamps = []; for (let y = 0; y < ROWS; y++) { if (!SIDEWALK_ROWS.includes(y)) continue; for (let x = 1; x < COLS; x += 4) if (!isRoad(x, y)) _lamps.push([x * T + T / 2, y * T + T / 2]); } }
+  const live = buildings.filter(b => b.sc.status !== 'build');
+  // 1) 整體變暗偏藍（招牌的名稱牌和圖示不變暗，像亮著的燈箱）
+  g.font = 'bold 14px "Noto Sans TC", sans-serif';
+  g.save(); g.beginPath(); g.rect(0, cy, W, VH);
+  live.forEach(b => { const x = b.x * T, y = b.y * T, w = b.w * T, lw = g.measureText(S.script === 'simp' ? (ZHS[b.sc.id] || b.sc.zh) : b.sc.zh).width + 14; g.rect(x + w / 2 - lw / 2 - 1, y + 39, lw + 2, 19); g.rect(x + w / 2 - 20, y + 4, 40, 38); });
+  g.clip('evenodd');
+  g.globalCompositeOperation = 'multiply'; g.fillStyle = '#8593c8'; g.fillRect(0, cy, W, VH);
+  g.globalCompositeOperation = 'source-over'; g.fillStyle = 'rgba(10,14,50,.10)'; g.fillRect(0, cy, W, VH);
+  g.restore();
+  // 2) 光
+  g.globalCompositeOperation = 'screen';
+  const glow = (x, y, r, c, a) => { const gr = g.createRadialGradient(x, y, 2, x, y, r); gr.addColorStop(0, `rgba(${c},${a})`); gr.addColorStop(1, `rgba(${c},0)`); g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); };
+  _lamps.forEach(([x, y]) => { if (y > cy - 60 && y < cy + VH + 60) glow(x, y - 8, 52, '255,214,120', .55); });
+  live.forEach(b => {
+    const x = b.x * T, y = b.y * T, w = b.w * T, wallY = y + 2 * T, dx = b.door.x * T, dy = b.door.y * T;
+    if (y > cy + VH || y + b.h * T < cy) return;
+    glow(x + w / 2, y + 36, 64, '255,235,170', b.soon ? .3 : .5);
+    if (b.soon) return;
+    glow(dx + 16, dy + 18, 48, '255,196,92', .6);
+    for (let wx = x + 8; wx + 14 <= x + w - 8; wx += 30) { if (wx + 14 > dx && wx < dx + T) continue; glow(wx + 7, wallY + 15, 24, '255,214,110', .5); }
+  });
+  // 車頭燈
+  VEHICLES.forEach(v => {
+    const cx = v.axis === 'h' ? v.pos : v.lane * T + T / 2, cyv = v.axis === 'h' ? v.lane * T + T / 2 : v.pos;
+    g.save(); g.translate(cx, cyv); if (v.axis === 'v') g.rotate(Math.PI / 2); if (v.dir < 0) g.scale(-1, 1);
+    const L = v.kind === 'car' ? 95 : 70, w2 = v.kind === 'car' ? 26 : 16, x0 = v.kind === 'car' ? 22 : 12;
+    const gr = g.createLinearGradient(x0, 0, x0 + L, 0); gr.addColorStop(0, 'rgba(255,240,180,.75)'); gr.addColorStop(1, 'rgba(255,240,180,0)');
+    g.fillStyle = gr; g.beginPath(); g.moveTo(x0, -3); g.lineTo(x0 + L, -w2); g.lineTo(x0 + L, w2); g.lineTo(x0, 3); g.closePath(); g.fill();
+    g.restore();
+    glow(cx + (v.axis === 'h' ? v.dir * 22 : 0), cyv + (v.axis === 'v' ? v.dir * 22 : 0), 22, '255,240,170', .7);
+  });
+  g.globalCompositeOperation = 'source-over';
+  // 3) 亮起來的窗戶和門、路燈
+  live.forEach(b => {
+    if (b.soon) return;
+    const x = b.x * T, y = b.y * T, w = b.w * T, wallY = y + 2 * T, dx = b.door.x * T, dy = b.door.y * T;
+    for (let wx = x + 8; wx + 14 <= x + w - 8; wx += 30) { if (wx + 14 > dx && wx < dx + T) continue; g.fillStyle = '#ffd36a'; g.fillRect(wx, wallY + 8, 14, 14); g.fillStyle = '#fff3b8'; g.fillRect(wx + 2, wallY + 10, 6, 6); }
+    g.fillStyle = 'rgba(255,190,80,.55)'; g.fillRect(dx + 4, dy + 2, 24, 30);
+  });
+  _lamps.forEach(([x, y]) => { g.fillStyle = '#22242e'; g.fillRect(x - 1, y - 12, 3, 16); g.fillRect(x - 4, y - 14, 9, 3); g.fillStyle = '#fff3b8'; g.fillRect(x - 3, y - 11, 7, 3); });
+  // 4) 暗角
+  const vg = g.createRadialGradient(W / 2, cy + VH / 2, VH * .35, W / 2, cy + VH / 2, VH * .95); vg.addColorStop(0, 'rgba(0,0,30,0)'); vg.addColorStop(1, 'rgba(0,0,30,.22)');
+  g.fillStyle = vg; g.fillRect(0, cy, W, VH);
 }
 
 /* ══════════════════════════════════════
