@@ -577,7 +577,7 @@ const Game = defineGame({
       PULL: {
         place: 'station',
         dialogue: () => [
-          L('（你換到旁邊的車，按了「啟動靠卡」，再把悠遊卡放在感應區。螢幕寫著「請取車」。）', '(Cambias a la bici de al lado, pulsas «啟動靠卡» y pasas la EasyCard por el sensor. La pantalla dice «請取車» (retire la bicicleta).)', '(You switch to the bike beside it, press 啟動靠卡, and tap your EasyCard on the reader. The screen says "請取車" (please take the bike).)'),
+          L('（螢幕顯示「請取車」。）', '(La pantalla muestra «請取車»: retire la bicicleta.)', '(The screen shows "請取車": please take the bike.)'),
           L('我：現在要怎麼取車呢？', '¿Cómo saco la bici ahora?', 'How do I take the bike out now?')
         ],
         options: () => rot(['雙手握住把手，往後拉出來', '等車自己彈出來', '再刷一次卡']),
@@ -617,7 +617,7 @@ const Game = defineGame({
         next: c => {
           if (c !== '騎在馬路的右邊') {
             Game.addMistake(c.includes('左邊') ? M('在台灣，車子要靠右邊騎，不能騎在左邊。', 'En Taiwán se circula por la derecha; no se puede ir por la izquierda.', 'In Taiwan you ride on the right side of the road, not the left.')
-                                               : M('YouBike 不能騎在人行道上，會撞到行人，要騎在馬路的右邊。', 'No se puede andar en YouBike por la acera: podrías chocar con peatones. Hay que ir por la derecha de la calle.', "You shouldn't ride a YouBike on the sidewalk — you could hit pedestrians. Ride on the right side of the road.")); return;
+                                               : M('YouBike 不能騎在人行道上啦！', '¡No se puede andar en YouBike por la acera!', "You can't ride a YouBike on the sidewalk!")); return;
           }
           goodFirst('ROAD', '沒錯！YouBike 要騎在馬路的右邊，人行道是給行人走的。', '¡Exacto! La YouBike va por la derecha de la calle; la acera es para los peatones.', 'Exactly! Ride a YouBike on the right side of the road — the sidewalk is for pedestrians.');
           Game.thought = [L('（你騎在馬路的右邊。前面是紅燈，有行人正在走斑馬線。）', '(Vas por la derecha de la calle. Delante hay una luz roja y unos peatones cruzan por el paso de cebra.)', '(You ride on the right side of the road. Ahead is a red light, and pedestrians are crossing at the crosswalk.)')];
