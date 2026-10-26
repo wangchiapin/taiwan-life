@@ -460,11 +460,16 @@ const LINES = {
   drink: ['那家飲料店很好喝喔！', '那家饮料店很好喝喔！', 'nà jiā yǐn liào diàn hěn hǎo hē ō!', '¡Las bebidas de esa tienda están muy ricas!', 'That drink shop is really good!'],
   night: ['晚上要不要去逛夜市？', '晚上要不要去逛夜市？', 'wǎn shàng yào bú yào qù guàng yè shì?', '¿Vamos al mercado nocturno esta noche?', 'Want to go to the night market tonight?'],
   hot:   ['今天好熱喔！', '今天好热喔！', 'jīn tiān hǎo rè ō!', '¡Hoy hace mucho calor!', "It's so hot today!"],
+  cat:    ['喵～喵～', '喵～喵～', 'miāo~ miāo~', '¡Miau, miau!', 'Meow~ meow~'],
+  catSit: ['小貓在曬太陽。', '小猫在晒太阳。', 'xiǎo māo zài shài tài yáng.', 'El gatito está tomando el sol.', 'The kitten is sunbathing.'],
+  dog:    ['汪！汪！', '汪！汪！', 'wāng! wāng!', '¡Guau, guau!', 'Woof! Woof!'],
+  dogSit: ['小狗在等主人。', '小狗在等主人。', 'xiǎo gǒu zài děng zhǔ rén.', 'El perrito está esperando a su dueño.', 'The puppy is waiting for its owner.'],
   honk:  ['嗶嗶！借過一下！', '哔哔！借过一下！', 'bì bì! jiè guò yí xià!', '¡Bip, bip! ¡Déjame pasar!', 'Beep beep! Coming through!']
 };
 /* 說話的人：[繁, 簡, 西, 英] */
 const WHO = {
   ami: ['Ami', 'Ami', 'Ami', 'Ami'], walker: ['路人', '路人', 'Transeúnte', 'Passer-by'], rider: ['騎士', '骑士', 'Motociclista', 'Scooter rider'],
+  cat: ['小貓', '小猫', 'Gatito', 'Kitten'], dog: ['小狗', '小狗', 'Perrito', 'Puppy'],
   ama: ['阿嬤', '阿嬷', 'Abuelita', 'Grandma'], agong: ['阿公', '阿公', 'Abuelito', 'Grandpa'], flyer: ['發傳單的人', '发传单的人', 'Repartidor de volantes', 'Flyer person'], me: ['（你）', '（你）', '(Tú)', '(You)']
 };
 /* Ami 建議下一個地方 [繁, 簡, 拼音, 西（「¿qué tal si …?」的後半）, 英（"Why don't you …?" 的後半）] */
@@ -525,6 +530,16 @@ const WALKERS = [
   { row: 35, x0: 0, x1: 8, x: 5, dir: 1, speed: 0.85, look: LOOKS[3], line: 'hot' },
   { row: 39, x0: 11, x1: 19, x: 12, dir: 1, speed: 0.7, look: LOOKS[1], line: 'night' }
 ].map(w => ({ ...w, pause: 0, phase: Math.random() * 10 }));
+
+/* ── 小貓小狗：在人行道上慢慢走，走一段就坐下來；走近會出現對話框 ── */
+const PETS = [
+  { kind: 'cat', row: 4,  x0: 12, x1: 18, x: 15, dir: -1, look: { color: '#e8963c', stripe: '#b8661e', belly: '#f6ecd8' } },
+  { kind: 'dog', row: 7,  x0: 1,  x1: 7,  x: 4,  dir: 1,  look: { color: '#c98b4a', belly: '#f6ecd8', ear: '#8a5a2b' } },
+  { kind: 'cat', row: 11, x0: 11, x1: 18, x: 13, dir: 1,  look: { color: '#3a3a44', belly: '#f4f0e8' } },
+  { kind: 'dog', row: 18, x0: 1,  x1: 7,  x: 5,  dir: -1, look: { color: '#4a3a30', belly: '#cdb89a', ear: '#2a2018' } },
+  { kind: 'cat', row: 21, x0: 11, x1: 18, x: 16, dir: -1, look: { color: '#f2f0ea', stripe: '#cfcab8', belly: '#ffffff' } },
+  { kind: 'dog', row: 35, x0: 11, x1: 18, x: 14, dir: 1,  look: { color: '#d8a866', belly: '#f6ecd8' } }
+].map(p => ({ ...p, pose: Math.random() < .5 ? 'sit' : 'walk', t: 2 + Math.random() * 5, speed: p.kind === 'cat' ? 0.55 : 0.75, phase: Math.random() * 10 }));
 
 /* ── Ami：站在路口 ── */
 const AMI = { x: 11, y: 4 };
@@ -587,6 +602,16 @@ function updateLife(dt) {
     if (w.x <= w.x0) { w.x = w.x0; w.dir = 1; w.pause = 1 + Math.random() * 2; }
     if (w.x >= w.x1) { w.x = w.x1; w.dir = -1; w.pause = 1 + Math.random() * 2; }
     if (Math.random() < dt * 0.08) w.pause = 1.5 + Math.random() * 2;
+  }
+  for (const p of PETS) {
+    p.phase += dt; p.t -= dt;
+    if (p.pose === 'sit') { if (p.t <= 0) { p.pose = 'walk'; p.t = 4 + Math.random() * 6; if (Math.random() < .5) p.dir = -p.dir; } continue; }
+    if (p.t <= 0) { p.pose = 'sit'; p.t = 3 + Math.random() * 5; continue; }
+    const ahead = pt.y === p.row && (pt.x + 0.5 - (p.x + 0.5)) * p.dir > 0 && Math.abs(pt.x - p.x) < 1.1;
+    if (ahead) { p.pose = 'sit'; p.t = 1.5; continue; }
+    p.x += p.dir * p.speed * dt;
+    if (p.x <= p.x0) { p.x = p.x0; p.dir = 1; }
+    if (p.x >= p.x1) { p.x = p.x1; p.dir = -1; }
   }
   if (EV.type === 'elder') {
     if (EV.pause > 0) EV.pause -= dt;
@@ -720,9 +745,55 @@ function drawEventScene(now) {
   g.strokeStyle = '#1b1a22'; g.lineWidth = 2; g.stroke();
   g.fillStyle = '#1b1a22'; g.font = 'bold 12px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('!', bx, by + 1);
 }
+function drawPet(kind, px, py, o) {   // o: {color, belly, dir, pose:'walk'|'sit', leg}
+  g.save();
+  if (o.dir < 0) { g.translate(px + 32, 0); g.scale(-1, 1); px = 0; }
+  const R = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(px + x, py + y, w, h); };
+  const D = '#1b1a22', leg = o.leg ? 1 : 0;
+  R(5, 27, 22, 3, 'rgba(0,0,0,.22)');
+  if (kind === 'cat') {
+    const c = o.color, s = o.stripe || null, b = o.belly || c;
+    if (o.pose === 'sit') {
+      R(4, 22, 3, 5, c); R(6, 25, 5, 2, c);                      // 尾巴繞在腳邊
+      R(10, 15, 11, 12, c); R(13, 19, 5, 8, b);                   // 身體（坐直）＋白肚子
+      R(11, 7, 11, 9, c); R(11, 4, 3, 4, c); R(19, 4, 3, 4, c);   // 頭＋耳朵
+      R(12, 5, 1, 2, '#f4a6a6'); R(20, 5, 1, 2, '#f4a6a6');
+      R(13, 10, 2, 2, D); R(18, 10, 2, 2, D); R(16, 12, 1, 1, '#e58a8a');
+      R(11, 25, 4, 2, b); R(17, 25, 4, 2, b);
+      if (s) { R(11, 8, 11, 1, s); R(10, 17, 3, 1, s); R(10, 20, 3, 1, s); R(19, 17, 2, 1, s); }
+    } else {
+      R(3, 12, 3, 9, c); R(4, 10, 3, 3, c);                       // 翹起來的尾巴
+      R(7, 18, 14, 7, c); R(9, 23, 8, 2, b);                      // 身體
+      R(20, 14, 9, 8, c); R(20, 11, 3, 4, c); R(26, 11, 3, 4, c); // 頭＋耳朵
+      R(21, 12, 1, 2, '#f4a6a6'); R(27, 12, 1, 2, '#f4a6a6');
+      R(24, 17, 2, 2, D); R(28, 19, 1, 1, '#e58a8a');
+      R(8, 25, 3, 3 - leg, c); R(12, 25, 3, 2 + leg, c); R(17, 25, 3, 3 - leg, c); R(21, 25, 3, 2 + leg, c);
+      if (s) { R(9, 18, 1, 4, s); R(13, 18, 1, 4, s); R(17, 18, 1, 4, s); R(21, 15, 6, 1, s); }
+    }
+  } else {
+    const c = o.color, b = o.belly || '#f6ecd8', ear = o.ear || '#7a4e2b';
+    if (o.pose === 'sit') {
+      R(3, 22, 5, 3, c);                                          // 尾巴
+      R(7, 14, 12, 13, c); R(10, 19, 6, 8, b);                    // 身體（坐著）
+      R(15, 7, 11, 10, c); R(25, 12, 5, 4, b); R(29, 12, 2, 2, D); // 頭＋口鼻
+      R(14, 6, 3, 8, ear); R(24, 6, 3, 3, ear);                   // 耳朵
+      R(20, 10, 2, 2, D); R(8, 25, 4, 2, b); R(14, 25, 4, 2, b);
+    } else {
+      R(2, 13, 3, 6, c); R(4, 12, 3, 3, c);                       // 尾巴翹起來
+      R(5, 16, 17, 9, c); R(8, 22, 11, 3, b);                     // 身體＋白肚子
+      R(20, 10, 9, 9, c); R(26, 15, 5, 4, b); R(30, 15, 2, 2, D); // 頭＋口鼻
+      R(19, 9, 3, 7, ear); R(26, 9, 3, 3, ear);                   // 耳朵
+      R(24, 13, 2, 2, D);
+      R(6, 24, 3, 4 - leg, c); R(11, 24, 3, 3 + leg, c); R(17, 24, 3, 4 - leg, c); R(21, 24, 3, 3 + leg, c);
+    }
+  }
+  g.restore();
+}
+
 function drawLife(now) {
   VEHICLES.forEach(drawVehicle);
   const items = WALKERS.map(w => ({ y: w.row, f: () => drawPerson(w.x * T, w.row * T, { ...w.look, dir: w.dir, leg: w.pause > 0 ? 0 : Math.floor(w.phase * 4) % 2 }) }));
+  PETS.forEach(p => items.push({ y: p.row + .1, f: () => drawPet(p.kind, p.x * T, p.row * T, { ...p.look, dir: p.dir, pose: p.pose, leg: Math.floor(p.phase * 5) % 2 }) }));
   items.push({ y: AMI.y, f: () => drawPerson(AMI.x * T, AMI.y * T, { ...AMI_LOOK, dir: 0 }) });
   items.push({ y: EV.y, f: () => drawEventScene(now) });
   items.sort((a, b) => a.y - b.y).forEach(i => i.f());
@@ -739,6 +810,7 @@ function speakers() {
   const dist = (x, y) => Math.hypot(x - pt.x, y - pt.y);
   out.push({ key: 'ami', who: 'ami', line: amiLine(), x: AMI.x, y: AMI.y, d: dist(AMI.x, AMI.y), r: 1.6 });
   WALKERS.forEach((w, i) => out.push({ key: 'w' + i, who: 'walker', line: LINES[w.line], x: w.x, y: w.row, d: dist(w.x, w.row), r: 1.6 }));
+  PETS.forEach((p, i) => out.push({ key: 'p' + i + p.pose, who: p.kind, line: LINES[p.kind + (p.pose === 'sit' ? 'Sit' : '')], x: p.x, y: p.row, d: dist(p.x, p.row), r: 1.4 }));
   const [ew, el] = EVENT_LINES[EV.type];
   out.push({ key: 'ev', who: ew, line: el, x: EV.x, y: EV.y, d: dist(EV.x, EV.y), r: 3, ev: true });
   VEHICLES.forEach((v, i) => { if (v.wait > 0.5) out.push({ key: 'v' + i, who: 'rider', line: LINES.honk, x: (v.axis === 'h' ? v.pos / T - 0.5 : v.lane), y: (v.axis === 'h' ? v.lane : v.pos / T - 0.5), d: 0, r: 9 }); });
