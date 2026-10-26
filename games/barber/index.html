@@ -351,6 +351,7 @@ const VOCAB = {
   START: [['預約', 'hacer una cita / reservar', 'make an appointment'], ['頭髮', 'cabello', 'hair'], ['瀏海', 'flequillo', 'bangs / fringe']],
   BOOK_SEARCH: [['搜尋', 'buscar', 'search'], ['理髮店', 'peluquería', 'hair salon'], ['假髮店', 'tienda de pelucas', 'wig shop'], ['電話', 'teléfono', 'phone'], ['剪頭髮', 'cortarse el pelo', 'get a haircut']],
   BOOK_OPEN: [['預約', 'hacer una cita / reservar', 'make an appointment'], ['電話', 'teléfono', 'phone'], ['排隊', 'hacer fila', 'wait in line'], ['理髮店', 'peluquería', 'hair salon']],
+  BOOK_CALL: [['預約', 'hacer una cita / reservar', 'make an appointment'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['打錯', 'marcar mal', 'dial the wrong number']],
   BOOK_TIME: [['星期', 'día de la semana', 'day of the week'], ['上午', 'por la mañana', 'a.m. / morning'], ['下午', 'por la tarde', 'p.m. / afternoon'], ['晚上', 'por la noche', 'evening'], ['有空', 'estar libre', 'be free / available']],
   BOOK_PHONE: [['電話', 'teléfono', 'phone'], ['我的', 'mi', 'my']],
   ARRIVE: [['有預約', 'tener cita', 'have an appointment'], ['排隊', 'hacer fila', 'wait in line'], ['坐', 'sentarse', 'sit'], ['設計師', 'estilista', 'stylist'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask']],
@@ -392,7 +393,7 @@ document.getElementById('hint-close').onclick = () => Hints.toggle(false);
 const STAGE = (() => {
   const a = ['預約', 'reservar', 'booking'], b = ['剪髮', 'el corte', 'the haircut'], c = ['結帳', 'pagar', 'paying'];
   const o = {};
-  ['BOOK_SEARCH', 'BOOK_OPEN', 'BOOK_TIME', 'BOOK_PHONE', 'ARRIVE'].forEach(x => o[x] = a);
+  ['BOOK_SEARCH', 'BOOK_OPEN', 'BOOK_CALL', 'BOOK_TIME', 'BOOK_PHONE', 'ARRIVE'].forEach(x => o[x] = a);
   ['STYLE_LEN', 'STYLE_BANG', 'WASH', 'MIRROR'].forEach(x => o[x] = b);
   ['PAY', 'CHANGE'].forEach(x => o[x] = c);
   return o;
@@ -427,7 +428,7 @@ const Game = defineGame({
 
   IMAGES: {
     START: ['images/start.jpg', '💇'],
-    BOOK_SEARCH: ['images/search.jpg', '🔍'], BOOK_OPEN: ['images/phone.jpg', '📞'], BOOK_TIME: ['images/phone.jpg', '📞'], BOOK_PHONE: ['images/phone.jpg', '📞'],
+    BOOK_SEARCH: ['images/search.jpg', '🔍'], BOOK_OPEN: ['images/phone.jpg', '📞'], BOOK_CALL: ['images/phone.jpg', '📞'], BOOK_TIME: ['images/phone.jpg', '📞'], BOOK_PHONE: ['images/phone.jpg', '📞'],
     ARRIVE: ['images/door.jpg', '🚪'], STYLE_LEN: ['images/chair.jpg', '🪑'], STYLE_BANG: ['images/chair.jpg', '✂️'],
     WASH: ['images/wash.jpg', '🚿'], MIRROR: ['images/mirror.jpg', '🪞'], PAY: ['images/counter.jpg', '💴'], CHANGE: ['images/counter.jpg', '💴'],
     END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
@@ -549,8 +550,18 @@ const Game = defineGame({
             Game.addMistake(c.startsWith('直接') ? M('Ami 說先預約比較不用等。打電話預約，就可以選自己有空的時間。', 'Ami dijo que reservar evita la espera. Si llamas, puedes elegir el horario en que estás libre.', 'Ami said booking means less waiting. Call, and you can choose a time you are free.')
                                               : M('頭髮太長了啦，現在就預約吧。', 'Tu pelo ya está largo: reserva ahora.', 'Your hair is already too long — book now.')); return;
           }
-          goodFirst('BOOK_OPEN', '對！先預約，就不用在店裡等很久。', '¡Correcto! Si reservas antes, no tendrás que esperar mucho en la tienda.', "Right! Book first and you won't wait long at the shop.");
-          Game.thought = [boss('喂，這裡是理髮店，要預約嗎？', 'Aló, peluquería. ¿Quiere reservar?', "Hello, hair salon. Would you like to book?")];
+          Game.state = 'BOOK_CALL';
+        }
+      },
+      BOOK_CALL: {
+        place: 'call',
+        dialogue: () => [boss('喂，這裡是理髮店，要預約嗎？', 'Aló, peluquería. ¿Quiere reservar?', 'Hello, hair salon. Would you like to book?')],
+        options: () => rot(['對，我要預約', '靠北！我打錯電話了！', '喂，請問你是誰']),
+        next: c => {
+          if (c !== '對，我要預約') {
+            Game.addMistake(c.startsWith('靠北') ? M('你沒有打錯，這裡就是你要找的理髮店。老闆問你要不要預約，回答「對，我要預約」就可以了。', 'No te equivocaste: esta es la peluquería que buscabas. El dueño pregunta si quieres reservar; responde «對，我要預約».', 'You did not dial wrong — this is the salon you wanted. The owner asks if you want to book; answer 對，我要預約.')
+                                            : M('老闆已經說「這裡是理髮店」了，你不用再問他是誰。你是來預約的，直接說「對，我要預約」。', 'El dueño ya dijo «這裡是理髮店»; no hace falta preguntarle quién es. Vienes a reservar: di «對，我要預約».', 'The owner already said this is the hair salon, so there is no need to ask who it is. You are here to book: say 對，我要預約.')); return;
+          }
           Game.state = 'BOOK_TIME';
         }
       },
