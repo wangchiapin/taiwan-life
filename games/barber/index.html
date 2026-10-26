@@ -442,13 +442,14 @@ const Game = defineGame({
     [d1[4], d1[5]] = [d1[5], d1[4]]; [d2[7], d2[8]] = [d2[8], d2[7]];
     let ph = [real, d1.join(''), d2.join('')]; if (ph[1] === real || ph[2] === real) ph = [real, '09' + ri(10000000, 99999999), '09' + ri(10000000, 99999999)];
     const fmt = p => p.slice(0, 4) + '-' + p.slice(4, 7) + '-' + p.slice(7);
+    const zhNum = p => [p.slice(0, 4), p.slice(4, 7), p.slice(7)].map(g => [...g].map(c => ZD[c]).join('')).join('，');
     /* 搜尋結果：理髮店、假髮店、色情理髮店各一支市話（區碼＋8 碼），選項用中文數字念法 */
     const ZD = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
     const areas = shuffle(['02', '03', '04', '06', '07']);
     const shopTel = a => { const d = String(ri(2000, 8999)) + String(ri(1000, 9999)); return { d: a + d, show: `(${a}) ${d.slice(0, 4)}-${d.slice(4)}`, zh: `${[...a].map(c => ZD[c]).join('')}，${[...d.slice(0, 4)].map(c => ZD[c]).join('')}，${[...d.slice(4)].map(c => ZD[c]).join('')}` }; };
     const shops = [{ k: 'salon', n: '理髮店', ...shopTel(areas[0]) }, { k: 'wig', n: '假髮店', ...shopTel(areas[1]) }, { k: 'adult', n: '色情理髮店', ...shopTel(areas[2]) }];
     const price = pick([350, 400, 450]), given = Math.random() < 0.5 ? 500 - price : 500 - price - 50;
-    this.task = { day, hr, want: SLOT(day, '下午', hr), slots: slots.map(s => SLOT(s[0], s[1], s[2])), shops, shopOrder: shuffle(shops.slice()), phone: fmt(real), phones: ph.map(fmt), len, bang, rot: Math.floor(Math.random() * 3), price, given, wrong: given !== 500 - price };
+    this.task = { day, hr, want: SLOT(day, '下午', hr), slots: slots.map(s => SLOT(s[0], s[1], s[2])), shops, shopOrder: shuffle(shops.slice()), phone: fmt(real), phones: ph.map(fmt), phoneZh: zhNum(real), phonesZh: ph.map(zhNum), len, bang, rot: Math.floor(Math.random() * 3), price, given, wrong: given !== 500 - price };
   },
 
   setPlace(mode) {
@@ -568,9 +569,9 @@ const Game = defineGame({
       BOOK_PHONE: {
         place: 'call',
         dialogue: () => [boss(`好，${t.want}。請問你的電話幾號？`, `Bien, ${t.want}. ¿Cuál es su número de teléfono?`, `OK, ${t.want}. And your phone number?`), L('我：我的電話是……', 'Mi teléfono es…', 'My number is…')],
-        options: () => rot(t.phones.map(p => p)),
+        options: () => rot(t.phonesZh.slice()),
         next: c => {
-          if (c !== t.phone) {
+          if (c !== t.phoneZh) {
             Game.addMistake(M(`你的電話是 ${t.phone}。怎麼會忘記了呢？`, `Tu número es ${t.phone}. ¿Cómo pudiste olvidarlo?`, `Your number is ${t.phone}. How could you forget?`)); return;
           }
           goodFirst('BOOK_PHONE', '電話號碼對了！', '¡El número es correcto!', 'The phone number is right!');
