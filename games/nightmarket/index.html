@@ -267,7 +267,6 @@ html{color-scheme:light}
   <div class="top-bar">
     <div class="tb-btns">
       <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
-      <button class="btn-pinyin" id="btn-list" aria-pressed="false" onclick="Game.toggleList()" data-es="📝 Ver lista" data-en="📝 Shopping list">📝 Ver lista</button>
       <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
       <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
     </div>
@@ -420,7 +419,7 @@ const Hints = {
     if (!Game.task) return;
     const r = s => Game.ruby(s);
     const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
-    const sit = `<div class="h-sec">${r('我的狀況')}</div>` + Game.listHTML(true).map(x => `<div class="h-item"><div class="h-zh">${r(x.zh)}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`).join('');
+    const sit = `<div class="h-sec">${r('我的狀況')}</div>` + Game.listHTML(true).map(x => `<div class="h-item"><div class="h-zh">${x.k ? (Game.done[x.k] ? '✔ ' : '□ ') : ''}${r(x.zh)}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`).join('');
     let html = `<div class="h-sec">${r('Ami 說的話')}</div>` + Game.amiLines().map(item).join('');
     if (['CALL', 'X_GREET', 'X_PRICE', 'END', 'RESULT'].includes(Game.st0)) {
       html += `<div class="h-sec">${r('Ami 來電')}</div>` + Game.callLines().slice(1).map(item).join('');
