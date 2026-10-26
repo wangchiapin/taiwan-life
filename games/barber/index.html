@@ -558,11 +558,13 @@ const Game = defineGame({
             Game.addMistake(c.startsWith('直接') ? M('Ami 說先預約比較不用等。打電話預約，就可以選自己有空的時間。', 'Ami dijo que reservar evita la espera. Si llamas, puedes elegir el horario en que estás libre.', 'Ami said booking means less waiting. Call, and you can choose a time you are free.')
                                               : M('頭髮太長了啦，現在就預約吧。', 'Tu pelo ya está largo: reserva ahora.', 'Your hair is already too long — book now.')); return;
           }
+          carryGood('BOOK_OPEN', '對！先預約，就不用在店裡等很久。', '¡Correcto! Si reservas antes, no tendrás que esperar mucho en la tienda.', "Right! Book first and you won't wait long at the shop.");
           Game.state = 'BOOK_CALL';
         }
       },
       BOOK_CALL: {
         place: 'call',
+        html: () => Game.carryHTML(),
         dialogue: () => [boss('喂，這裡是理髮店，要預約嗎？', 'Aló, peluquería. ¿Quiere reservar?', 'Hello, hair salon. Would you like to book?')],
         options: () => rot(['對，我要預約', '靠北！我打錯電話了！', '喂，請問你是誰']),
         next: c => {
@@ -570,12 +572,13 @@ const Game = defineGame({
             Game.addMistake(c.startsWith('靠北') ? M('你沒有打錯，這裡就是你要找的理髮店。老闆問你要不要預約，回答「對，我要預約」就可以了。', 'No te equivocaste: esta es la peluquería que buscabas. El dueño pregunta si quieres reservar; responde «對，我要預約».', 'You did not dial wrong — this is the salon you wanted. The owner asks if you want to book; answer 對，我要預約.')
                                             : M('老闆已經說「這裡是理髮店」了，你不用再問他是誰。你是來預約的，直接說「對，我要預約」。', 'El dueño ya dijo «這裡是理髮店»; no hace falta preguntarle quién es. Vienes a reservar: di «對，我要預約».', 'The owner already said this is the hair salon, so there is no need to ask who it is. You are here to book: say 對，我要預約.')); return;
           }
+          carryGood('BOOK_CALL', '很好！打電話給店家，要先說清楚你是來預約的。', '¡Muy bien! Al llamar a una tienda, di claramente que quieres reservar.', 'Good! When you call a shop, say clearly that you want to book.');
           Game.state = 'BOOK_TIME';
         }
       },
       BOOK_TIME: {
         place: 'call',
-        html: () => Game.slotsHTML(),
+        html: () => Game.carryHTML() + Game.slotsHTML(),
         dialogue: () => [boss('這個星期有三個空檔，請看一下。你要哪一個？', 'Esta semana hay tres horarios libres; mira cuál prefieres.', 'We have three open slots this week. Which one would you like?')],
         options: () => rot(t.slots.map(s => '我要' + s)),
         next: c => {
@@ -589,7 +592,7 @@ const Game = defineGame({
       BOOK_PHONE: {
         place: 'call',
         html: () => Game.carryHTML(),
-        dialogue: () => [boss(`好，${t.want}。請問你的電話幾號？`, `Bien, ${t.want}. ¿Cuál es su número de teléfono?`, `OK, ${t.want}. And your phone number?`), L('我：我的電話是……', 'Mi teléfono es…', 'My number is…')],
+        dialogue: () => [boss('好，請問你的電話幾號？', 'Bien. ¿Cuál es su número de teléfono?', 'OK. And your phone number?'), L('我：我的電話是……', 'Mi teléfono es…', 'My number is…')],
         options: () => rot(t.phonesZh.slice()),
         next: c => {
           if (c !== t.phoneZh) {
