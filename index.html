@@ -137,6 +137,7 @@ html{color-scheme:light}
 
 <!-- 玩家代碼、Firebase（進度上傳）：shared/ 共用檔 -->
 <script src="shared/player.js"></script>
+<script src="shared/festival.js"></script>
 <script type="module">
   import { initFB } from "./shared/firebase.js";
   initFB();
@@ -813,6 +814,7 @@ function speakers() {
   PETS.forEach((p, i) => out.push({ key: 'p' + i + p.pose, who: p.kind, line: LINES[p.kind + (p.pose === 'sit' ? 'Sit' : '')], x: p.x, y: p.row, d: dist(p.x, p.row), r: 1.4 }));
   const [ew, el] = EVENT_LINES[EV.type];
   out.push({ key: 'ev', who: ew, line: el, x: EV.x, y: EV.y, d: dist(EV.x, EV.y), r: 3, ev: true });
+  if (window.FEST) out.push(...FEST.speakers(dist));
   VEHICLES.forEach((v, i) => { if (v.wait > 0.5) out.push({ key: 'v' + i, who: 'rider', line: LINES.honk, x: (v.axis === 'h' ? v.pos / T - 0.5 : v.lane), y: (v.axis === 'h' ? v.lane : v.pos / T - 0.5), d: 0, r: 9 }); });
   return out.filter(s => s.d <= s.r).sort((a, b) => a.d - b.d);
 }
@@ -897,6 +899,7 @@ function tick(now) {
   if (current || now - _last < 32) { if (current) _last = now; requestAnimationFrame(tick); return; }
   const dt = Math.min(0.05, ((now - (_last || now)) / 1000)); _last = now;
   updateLife(dt);
+  if (window.FEST) FEST.update(dt);
   if (!P.moving && !P.locked) {
     let d = null;
     if (P.held) d = P.held;
@@ -1110,7 +1113,9 @@ function draw(now) {
   if (P.path.length) { const t = P.path[P.path.length - 1]; g.strokeStyle = '#f2b632'; g.lineWidth = 3; g.strokeRect(t.x * T + 3, t.y * T + 3, T - 6, T - 6); }
   drawLife(now);
   drawPlayer(now);
+  if (window.FEST) FEST.drawBelow(now);
   if (isNight()) drawNight(cy);
+  if (window.FEST) FEST.drawTop(now, isNight());
   g.restore();
 }
 
@@ -1129,7 +1134,7 @@ function drawNight(cy) {   // 呼叫時已經 translate(0, -cy)
   g.save(); g.beginPath(); g.rect(0, cy, W, VH);
   live.forEach(b => { const x = b.x * T, y = b.y * T, w = b.w * T, lw = g.measureText(S.script === 'simp' ? (ZHS[b.sc.id] || b.sc.zh) : b.sc.zh).width + 14; g.rect(x + w / 2 - lw / 2 - 1, y + 39, lw + 2, 19); g.rect(x + w / 2 - 20, y + 4, 40, 38); });
   g.clip('evenodd');
-  g.globalCompositeOperation = 'multiply'; g.fillStyle = '#8593c8'; g.fillRect(0, cy, W, VH);
+  g.globalCompositeOperation = 'multiply'; g.fillStyle = (window.FEST && FEST.tint) || '#8593c8'; g.fillRect(0, cy, W, VH);
   g.globalCompositeOperation = 'source-over'; g.fillStyle = 'rgba(10,14,50,.10)'; g.fillRect(0, cy, W, VH);
   g.restore();
   // 2) 光
