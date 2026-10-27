@@ -69,6 +69,29 @@ html{color-scheme:light}
   .set-opts.two .set-opt { flex: 1 1 40%; }
   .set-opt.on { background: #2B2620; color: #fff; font-weight: 700; }
   .set-done { margin-top: 6px; padding: 10px 26px; border-radius: 999px; border: 0; background: #2B2620; color: #fff; font: inherit; font-size: 15px; cursor: pointer; }
+  /* ── 背景說明視窗（第一次進地圖；之後點 HUD 的 ❓ 再看） ── */
+  #story-ov { position: fixed; inset: 0; z-index: 2500; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(46,36,28,.55); overflow-y: auto; transition: background .35s; }
+  #story-ov.show { display: flex; }
+  #story-ov.closing { background: rgba(46,36,28,0); }
+  .story-card { position: relative; width: 100%; max-width: 430px; margin: auto; background: var(--card); color: var(--ink); border: 3px solid var(--ink); border-radius: 16px; box-shadow: 6px 6px 0 var(--ink); padding: 18px 18px 16px; text-align: left; transition: transform .35s ease-in, opacity .35s ease-in; }
+  .story-card { display: flex; flex-direction: column; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); }
+  .story-card.rep { padding-top: 40px; }
+  .story-body { overflow-y: auto; flex: 1 1 auto; min-height: 0; margin-right: -8px; padding-right: 8px; overscroll-behavior: contain; }
+  #story-ov.closing .story-card { transform: scale(.04); opacity: 0; }
+  .story-zh { font-size: 16px; line-height: 1.7; }
+  .story-py { font-size: 13px; color: #2f5fa7; line-height: 1.45; margin-bottom: 6px; }
+  .story-tr { font-size: 13px; color: var(--muted); line-height: 1.55; margin: 8px 0 14px; border-top: 2px dashed var(--line); padding-top: 8px; }
+  .story-h { font-weight: 700; font-size: 14px; margin: 14px 0 6px; }
+  .story-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+  .story-chip { padding: 3px 10px; border-radius: 999px; border: 2px solid var(--ink); background: #fff; font-size: 14px; line-height: 1.25; text-align: center; }
+  .story-chip small { display: block; font-size: 10.5px; color: var(--muted); }
+  .story-chip.off { background: #ece8d8; border-color: #b9b29a; color: #8a8470; }
+  .story-go { flex: none; margin-top: 12px; width: 100%; background: var(--accent); color: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 10px; font-size: 20px; font-weight: 700; box-shadow: 3px 3px 0 var(--ink); }
+  .story-go small { display: block; font-size: 12px; font-weight: 400; }
+  .story-x { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--ink); background: #fff; color: var(--ink); font-size: 16px; line-height: 1; padding: 0; }
+  #btn-help.ping { animation: ping 1s 2; }
+  @keyframes ping { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.4); background: #f2b632; } }
+  @media (prefers-reduced-motion: reduce) { .story-card, #story-ov { transition: none; } #btn-help.ping { animation: none; } }
   html[data-ui="zh"] .sub { display: none; }
   #card .c-py { font-size: 16px; color: #2f5fa7; }
   #card .c-tr { font-size: 15px; margin-top: 6px; }
@@ -118,12 +141,14 @@ html{color-scheme:light}
 <div id="hud">
   <span class="title" id="hud-title">台灣生存日記</span>
   <button id="who" title="改名字／語言 · Cambiar nombre o idioma"></button>
+  <button id="btn-help" type="button">❓</button>
   <button id="btn-music" onclick="Music.toggle()">🎵</button>
   <button id="btn-reset"></button>
 </div>
 <div id="week"><span id="wk-label"></span><div class="bar"><i id="wk-fill"></i></div><b id="wk-num"></b></div>
 <div id="stage"><canvas id="cv" width="640" height="448" tabindex="0" aria-label="地圖 / Mapa"></canvas><button id="bubble" type="button" hidden></button></div>
 <div id="set-ov"></div>
+<div id="story-ov"></div>
 <div id="card" hidden role="dialog"><div class="c-who"></div><div class="c-zh"></div><div class="c-py"></div><div class="c-tr"></div><div class="c-hint"></div>
   <div class="c-btns"><button class="c-say" type="button">🔊</button><button class="c-close" type="button">✕</button></div></div>
 <div id="help"></div>
@@ -1224,9 +1249,21 @@ document.getElementById('ov-close').onclick = () => { if (current && current.res
 /* ══════════════════════════════════════
    介面
 ══════════════════════════════════════ */
-function toast(msg) {
+function toast(msg, ms = 3600, hint = false) {
   const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 3600);
+  toast._hint = hint;
+  clearTimeout(toast._t); toast._t = setTimeout(() => { t.classList.remove('show'); toast._hint = false; }, ms);
+}
+/* 進地圖後的小提示：玩家一開始走動就提早收掉 */
+function hideHint() {
+  if (!toast._hint) return;
+  clearTimeout(toast._t); toast._hint = false;
+  document.getElementById('toast').classList.remove('show');
+}
+function mapHint() {
+  const simp = S.script === 'simp';
+  toast((simp ? '操控属于你的小人物，进到不同的小房子试试看吧！' : '操控屬於你的小人物，進到不同的小房子試試看吧！') +
+    (S.lang === 'zh' ? '' : '\n' + X('Controla a tu personaje y entra a las casitas para probar.', 'Control your little character and try stepping into the different houses!')), 6000, true);
 }
 /* 維修中／建造中：進不去，顯示「還在準備中，敬請期待」（中文＋玩家選的語言） */
 function comingSoon(b) {
@@ -1252,6 +1289,8 @@ function updateHud() {
   document.getElementById('wk-num').textContent = '⭐ ' + stars + ' / ' + maxStars + ' · ' + (simp ? '总分' : '總分') + ' ' + total;
   document.getElementById('wk-fill').style.width = (stars / maxStars * 100) + '%';
   document.getElementById('btn-reset').textContent = X('↻ Borrar progreso', '↻ Reset progress');
+  const hb = document.getElementById('btn-help');
+  hb.title = hb.ariaLabel = (simp ? '游戏说明' : '遊戲說明') + (S.lang === 'zh' ? '' : ' · ' + X('Cómo empezar', 'About the game'));
   document.getElementById('ov-close').textContent = '✕ ' + X('Salir', 'Exit');
   const touch = matchMedia('(pointer: coarse)').matches;
   document.getElementById('help').textContent = touch ? X('Toca un edificio para ir a su puerta · toca a una persona para ver pinyin y traducción · si ves un ❗, acércate', 'Tap a building to go to its door · tap a person for pinyin and translation · if you see a ❗, walk next to it') : X('Flechas / WASD para caminar · toca un edificio para ir a su puerta · toca a una persona para ver pinyin y traducción · si ves un ❗, acércate para ayudar', 'Arrow keys / WASD to walk · tap a building to go to its door · tap a speech bubble for pinyin and translation · if you see a ❗, walk next to it to help');
@@ -1316,6 +1355,97 @@ const SetUI = {
     if (k === 'rate') say('你好，歡迎光臨');
   }
 };
+/* ══════════════════════════════════════
+   背景說明視窗：每個裝置第一次進地圖跳出（只能按「我要生存下去！」），之後點 HUD 的 ❓ 隨時再看
+   （再看時多一份場景清單，可以按 ✕ 或「回到地圖」）；關掉時縮小到 ❓
+══════════════════════════════════════ */
+const STORY_KEY = 'taiwan_story_seen';
+/* t：繁體（{N} 換成暱稱）　s：簡體　p：拼音（台灣讀音；暱稱沒有拼音） */
+const STORY_T = [
+  { t: '{N}，你已經來台灣學中文學了一陣子了，是不是感覺好像學了很多，但是又不知道要怎麼運用。', s: '{N}，你已经来台湾学中文学了一阵子了，是不是感觉好像学了很多，但是又不知道要怎么运用。',
+    p: 'nǐ yǐ jīng lái Tái wān xué Zhōng wén xué le yí zhèn zi le, shì bú shì gǎn jué hǎo xiàng xué le hěn duō, dàn shì yòu bù zhī dào yào zěn me yùn yòng.' },
+  { t: '老師教的文法、單字，在你的腦袋中沒辦法組織成一個句子。', s: '老师教的文法、单字，在你的脑袋中没办法组织成一个句子。',
+    p: 'lǎo shī jiāo de wén fǎ, dān zì, zài nǐ de nǎo dài zhōng méi bàn fǎ zǔ zhī chéng yí ge jù zi.' },
+  { t: '這樣的你，能夠靠自己在台灣生存下去嗎？', s: '这样的你，能够靠自己在台湾生存下去吗？',
+    p: 'zhè yàng de nǐ, néng gòu kào zì jǐ zài Tái wān shēng cún xià qù ma?' },
+  { t: '在這個遊戲裡，有許多不同生活場景小房子，你有辦法每一個都靠自己過關嗎？', s: '在这个游戏里，有许多不同生活场景小房子，你有办法每一个都靠自己过关吗？',
+    p: 'zài zhè ge yóu xì lǐ, yǒu xǔ duō bù tóng shēng huó chǎng jǐng xiǎo fáng zi, nǐ yǒu bàn fǎ měi yí ge dōu kào zì jǐ guò guān ma?' },
+  { t: '現在，選一個小房子，走進去，來挑戰自己吧！', s: '现在，选一个小房子，走进去，来挑战自己吧！',
+    p: 'xiàn zài, xuǎn yí ge xiǎo fáng zi, zǒu jìn qù, lái tiǎo zhàn zì jǐ ba!' }
+];
+const STORY_ES = n => `${n}, ya llevas un tiempo estudiando chino en Taiwán. ¿Sientes que has aprendido mucho, pero no sabes cómo usarlo? La gramática y el vocabulario que te enseñó tu profesor no logran convertirse en una oración en tu cabeza. Con eso, ¿podrías sobrevivir en Taiwán por tu cuenta? En este juego hay muchas casitas, cada una con una escena distinta de la vida diaria. ¿Podrás superarlas todas por tu cuenta? Ahora elige una casita, entra y ponte a prueba.`;
+const STORY_EN = n => `${n}, you've been studying Chinese in Taiwan for a while now. Do you feel like you've learned a lot, but still don't know how to use it? The grammar and vocabulary your teacher taught you just won't come together into a sentence in your head. Could you survive in Taiwan on your own? In this game there are lots of little houses, each one a different everyday scene. Can you get through every one by yourself? Now pick a little house, walk in, and challenge yourself!`;
+const Story = {
+  on: false, seenMem: false,
+  seen() { try { return localStorage.getItem(STORY_KEY) === '1' || this.seenMem; } catch (e) { return this.seenMem; } },
+  markSeen() { this.seenMem = true; try { localStorage.setItem(STORY_KEY, '1'); } catch (e) {} },
+  el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; },
+  /* 拼音／注音／兩者／關閉，跟玩家的設定一致（標點接在音節後面） */
+  py(p) {
+    if (S.phon === 'off') return '';
+    const zy = p.split(/\s+/).map(t => { const m = t.match(/^([^,.?!]*)([,.?!]*)$/); return ZY.one(m[1]) + m[2]; }).join(' ');
+    return S.phon === 'zhuyin' ? zy : S.phon === 'both' ? p + '　' + zy : p;
+  },
+  sceneName(sc) { return S.script === 'simp' ? (ZHS[sc.id] || (sc.id === 'street' ? '路上突发事件' : sc.zh)) : sc.zh; },
+  render(repeat) {
+    const ov = document.getElementById('story-ov'), simp = S.script === 'simp';
+    const zhT = (a, b) => simp ? b : a;
+    ov.innerHTML = ''; ov.classList.remove('closing');
+    const card = this.el('div', 'story-card' + (repeat ? ' rep' : '')); card.setAttribute('role', 'dialog'); card.setAttribute('aria-modal', 'true');
+    if (repeat) {
+      const x = this.el('button', 'story-x', '✕'); x.type = 'button'; x.setAttribute('aria-label', zhT('關閉', '关闭') + ' · Cerrar');
+      x.onclick = () => this.close(); card.appendChild(x);
+    }
+    const body = this.el('div', 'story-body');   // 文字區自己捲動，按鈕固定在視窗最下面（手機才看得到）
+    STORY_T.forEach(l => {
+      body.appendChild(this.el('div', 'story-zh', (simp ? l.s : l.t).replace('{N}', S.name)));
+      const py = this.py(l.p); if (py) body.appendChild(this.el('div', 'story-py', py));
+    });
+    if (S.lang !== 'zh') body.appendChild(this.el('div', 'story-tr', S.lang === 'en' ? STORY_EN(S.name) : STORY_ES(S.name)));
+    if (repeat) {
+      body.appendChild(this.el('div', 'story-h', zhT('場景', '场景') + (S.lang === 'zh' ? '' : ' · ' + X('Escenas', 'Scenes'))));
+      const chips = this.el('div', 'story-chips');
+      const off = [...SCENES.filter(s => !isLive(s)), ...COMING.filter(c => c.status === 'soon')];
+      [...SCENES.filter(isLive).map(s => [s, false]), ...off.map(s => [s, true])].forEach(([sc, isOff]) => {
+        const c = this.el('span', 'story-chip' + (isOff ? ' off' : ''), this.sceneName(sc) + (isOff ? '・' + zhT('準備中', '准备中') : ''));
+        if (S.lang !== 'zh') c.appendChild(this.el('small', '', X(sc.es, sc.en)));
+        chips.appendChild(c);
+      });
+      body.appendChild(chips);
+    }
+    card.appendChild(body);
+    const go = this.el('button', 'story-go', repeat ? zhT('回到地圖', '回到地图') : '我要生存下去！'); go.type = 'button';
+    if (S.lang !== 'zh') go.appendChild(this.el('small', '', repeat ? X('Volver al mapa', 'Back to the map') : X('¡Quiero sobrevivir!', "I'm going to survive!")));
+    go.onclick = () => {
+      if (repeat) this.close();
+      else { this.markSeen(); this.close(() => { const b = document.getElementById('btn-help'); b.classList.add('ping'); setTimeout(() => b.classList.remove('ping'), 2100); mapHint(); }); }
+    };
+    card.appendChild(go);
+    ov.appendChild(card);
+    ov.onclick = e => { if (repeat && e.target === ov) this.close(); };
+    this.repeat = repeat;
+    return go;
+  },
+  show(repeat) {
+    const go = this.render(repeat);
+    document.getElementById('story-ov').classList.add('show');
+    this.on = true; P.held = null; P.path = [];
+    try { go.focus({ preventScroll: true }); } catch (e) {}
+  },
+  /* 這個裝置還沒按過「我要生存下去！」就跳出第一次的視窗 */
+  maybeFirst() { if (!this.seen()) this.show(false); },
+  close(then) {
+    const ov = document.getElementById('story-ov'), card = ov.firstChild;
+    const done = () => { ov.classList.remove('show', 'closing'); this.on = false; if (then) then(); };
+    if (!card || matchMedia('(prefers-reduced-motion: reduce)').matches) { done(); return; }
+    const c = card.getBoundingClientRect(), b = document.getElementById('btn-help').getBoundingClientRect();
+    card.style.transformOrigin = (b.left + b.width / 2 - c.left) + 'px ' + (b.top + b.height / 2 - c.top) + 'px';
+    ov.classList.add('closing');
+    setTimeout(done, 380);
+  }
+};
+document.getElementById('btn-help').onclick = () => { if (!Story.on) Story.show(true); };
+addEventListener('keydown', e => { if (Story.on && Story.repeat && e.key === 'Escape') Story.close(); });
 document.getElementById('set-open').onclick = () => SetUI.open();
 document.getElementById('set-ov').addEventListener('click', e => { if (e.target.id === 'set-ov') SetUI.close(); });
 window.addEventListener('storage', e => { if (e.key === SETTINGS_KEY && readShared()) { applyLang(); if (document.getElementById('set-ov').classList.contains('show')) SetUI.draw(); } });
@@ -1328,6 +1458,7 @@ function begin() {
   S.name = v; save();
   document.getElementById('intro').style.display = 'none';
   updateHud(); pullProgress();
+  Story.maybeFirst();
 }
 /* 換裝置：輸入代碼 → 讀回名字和地圖進度 */
 document.getElementById('code-go').onclick = async () => {
@@ -1358,14 +1489,15 @@ document.getElementById('btn-reset').onclick = () => {
 /* 鍵盤、方向鍵、點地圖 */
 const KEYMAP = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right', W: 'up', S: 'down', A: 'left', D: 'right' };
 addEventListener('keydown', e => {
-  if (current || document.getElementById('intro').style.display !== 'none' || e.target.tagName === 'INPUT') return;
-  const d = KEYMAP[e.key]; if (d) { P.held = d; P.path = []; e.preventDefault(); }
+  if (current || Story.on || document.getElementById('intro').style.display !== 'none' || e.target.tagName === 'INPUT') return;
+  const d = KEYMAP[e.key]; if (d) { hideHint(); P.held = d; P.path = []; e.preventDefault(); }
   if ((e.key === ' ' || e.key === 'Enter') && bubNow) { e.preventDefault(); openCard(bubNow); }
   if (e.key === 'Escape') card.hidden = true;
 });
 addEventListener('keyup', e => { const d = KEYMAP[e.key]; if (d && P.held === d) P.held = null; });
 cv.addEventListener('pointerdown', e => {
-  if (current) return;
+  if (current || Story.on) return;
+  hideHint();
   const r = cv.getBoundingClientRect();
   goTo(Math.floor((e.clientX - r.left) / r.width * COLS), Math.floor(((e.clientY - r.top) / r.height * VH + camY) / T));
 });
@@ -1390,6 +1522,7 @@ if (S.name) {
   document.getElementById('intro').style.display = 'none';
   if (!S.code) { S.code = TWPlayer.codeFor(S.name); save(); }    // 以前就玩過的人：補一個代碼
   updateHud(); pullProgress();
+  Story.maybeFirst();                                            // 這個裝置還沒看過背景說明的人也跳一次
 }
 document.getElementById('who').onclick = () => { document.getElementById('name').value = S.name; document.getElementById('intro').style.display = 'flex'; };
 /* 地圖開關：讀 Firebase 的 settings/map，打開的新遊戲才能進去（讀不到就維持維修中） */
