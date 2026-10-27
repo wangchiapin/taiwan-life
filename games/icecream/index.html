@@ -405,7 +405,7 @@ const STAGE = (() => {
 
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
-  SCOOPS: '走到櫃台', CONTAINER: '回答店員', FLAVOR: '看冰淇淋', TOPPING: '繼續點', EAT: '繼續點', ORDER_CHECK: '聽店員確認', HANDOVER: '等店員做好', PAY: '付錢', PAY_FIX: '聽店員重算', END: '拿冰淇淋'
+  SCOOPS: '走到櫃台', CONTAINER: '繼續', FLAVOR: '看冰淇淋', TOPPING: '繼續點', EAT: '繼續點', ORDER_CHECK: '聽店員確認', HANDOVER: '等店員做好', PAY: '付錢', PAY_FIX: '聽店員重算', END: '拿冰淇淋'
 };
 
 /* ══════════════════════════════════════
@@ -545,6 +545,12 @@ const Game = defineGame({
     this.chosen = []; this.k = 0; this.vessel = null; this.top = null;
   },
 
+  /* 幾球、杯子甜筒：第二次才答對（沒有綠卡）就不出過場頁，直接進下一關 */
+  maybeTrans(before, extra) {
+    if (['SCOOPS', 'CONTAINER'].includes(before) && !this.feedback.length) this.thought = null;
+    return GameCore.maybeTrans.call(this, before, extra);
+  },
+
   amiLines() {
     const N = this.N, t = this.task, here = t.eat === 'here';
     const ordZh = t.flavors.map((f, i) => `第${CN[i + 1]}球是${f.zh}`).join('，');
@@ -642,7 +648,7 @@ const Game = defineGame({
       SCOOPS: {
         place: 'shop',
         html: () => Game.menuHTML(),
-        dialogue: () => [staff('你好，歡迎光臨！請問要幾球？', '¡Hola, buenas! ¿Cuántas bolas desea?', 'Hello, welcome! How many scoops would you like?')],
+        dialogue: () => [staff('你好，歡迎光臨！請問要幾球冰淇淋？', '¡Hola, buenas! ¿Cuántas bolas de helado desea?', 'Hello, welcome! How many scoops of ice cream would you like?')],
         options: ['一球。', '兩球。', '三球。'],
         next: c => {
           if (c !== `${NZ(t.n)}球。`) {
@@ -650,7 +656,7 @@ const Game = defineGame({
             return;
           }
           goodFirst('SCOOPS', '很好！「球」是冰淇淋的量詞。', '¡Muy bien! «球» es el clasificador de las bolas de helado.', 'Good! "球" is the measure word for scoops of ice cream.');
-          Game.thought = [staff('好的。', 'Muy bien.', 'Okay.')];
+          Game.thought = [staff('好的，沒問題。', 'Muy bien, no hay problema.', 'Okay, no problem.')];
           Game.state = 'CONTAINER';
         }
       },
