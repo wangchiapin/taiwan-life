@@ -411,7 +411,7 @@ const SLOT = (day, per, hr) => `星期${day}${per}${per === '晚上' ? CN[hr] : 
 /* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
 const NEXT_LABEL = {
   BOOK_SEARCH: '拿起手機', BOOK_OPEN: '點進理髮店的網頁', BOOK_TIME: '電話接通了', ARRIVE: '預約的日子到了，走進理髮店',
-  STYLE_LEN: '坐到鏡子前面', STYLE_BANG: '設計師拿起剪刀', WASH: '走去洗頭', MIRROR: '洗好了，回到座位', PAY: '剪好了，去櫃台', CHANGE: '付錢', END: '走出理髮店'
+  STYLE_LEN: '坐到鏡子前面', STYLE_BANG: '設計師拿起剪刀', WASH: '走去洗頭', MIRROR: '繼續', PAY: '剪好了，去櫃台', CHANGE: '付錢', END: '走出理髮店'
 };
 
 const Game = defineGame({
@@ -673,7 +673,7 @@ const Game = defineGame({
                                               : M('不要生氣，禮貌地說就好：「不好意思，水有點燙。」', 'No te enojes; di con cortesía: «不好意思，水有點燙».', "Don't get angry — just say politely: 不好意思，水有點燙。")); return;
           }
           goodFirst('WASH', '很有禮貌！說「不好意思」就不會讓人不舒服。', '¡Muy cortés! Decir «不好意思» evita que la otra persona se sienta incómoda.', 'Very polite! Saying 不好意思 keeps things comfortable for everyone.');
-          Game.thought = [L('助理：好的，這樣可以嗎？', 'Claro, ¿así está bien?', 'Sure — is this OK?'), L('（洗好了，你回到座位，設計師開始剪。）', '(Terminan de lavarte y vuelves a tu asiento; el estilista empieza a cortar.)', '(You are done washing and return to your seat; the stylist begins cutting.)')];
+          Game.thought = [L('助理：好的，這樣可以嗎？', 'Claro, ¿así está bien?', 'Sure — is this OK?'), L('我：這樣可以，謝謝。', 'Así está bien, gracias.', "That's fine, thank you."), L('（洗好了，回到座位，設計師開始幫你剪頭髮。）', '(Terminan de lavarte, vuelves a tu asiento y el estilista empieza a cortarte el cabello.)', '(You are done washing, return to your seat, and the stylist starts cutting your hair.)')];
           Game.state = 'MIRROR';
         }
       },
