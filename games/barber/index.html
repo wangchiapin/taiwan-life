@@ -337,7 +337,7 @@ pinyinPro.customPinyin({
   '點': 'diǎn', '兩點': 'liǎng diǎn', '耳朵': 'ěr duo', '肩膀': 'jiān bǎng', '下巴': 'xià ba', '後面': 'hòu miàn', '鏡子': 'jìng zi', '太短': 'tài duǎn', '短': 'duǎn',
   '燙': 'tàng', '太燙': 'tài tàng', '冷一點': 'lěng yì diǎn', '找錢': 'zhǎo qián', '找': 'zhǎo', '找錯': 'zhǎo cuò', '一共': 'yí gòng', '元': 'yuán', '五百元': 'wǔ bǎi yuán',
   '修一下': 'xiū yí xià', '剪': 'jiǎn', '還': 'hái', '還不': 'hái bù', '還好': 'hái hǎo', '有預約': 'yǒu yù yuē', '排隊': 'pái duì', '長': 'cháng', '太長': 'tài cháng',
-  '好像': 'hǎo xiàng', '應該': 'yīng gāi', '這樣': 'zhè yàng', '可以': 'kě yǐ', '一點': 'yì diǎn', '一下': 'yí xià', '沒': 'méi', '行': 'xíng', '我叫': 'wǒ jiào', '欸': 'ēi'
+  '好像': 'hǎo xiàng', '應該': 'yīng gāi', '這樣': 'zhè yàng', '可以': 'kě yǐ', '一點': 'yì diǎn', '一下': 'yí xià', '沒': 'méi', '行': 'xíng', '我叫': 'wǒ jiào', '欸': 'ēi', '有空': 'yǒu kòng', '空檔': 'kòng dàng', '沒空': 'méi kòng'
 });
 
 /* 角色名稱：翻譯視窗用 [西文, 英文] */
@@ -349,20 +349,20 @@ const SPEAKER_RE = /^(Ami|設計師|老闆|我)：/;
 ══════════════════════════════════════ */
 const VOCAB = {
   START: [['預約', 'hacer una cita / reservar', 'make an appointment'], ['頭髮', 'cabello', 'hair'], ['瀏海', 'flequillo', 'bangs / fringe']],
-  BOOK_SEARCH: [['搜尋', 'buscar', 'search'], ['理髮店', 'peluquería', 'hair salon'], ['假髮店', 'tienda de pelucas', 'wig shop'], ['電話', 'teléfono', 'phone'], ['剪頭髮', 'cortarse el pelo', 'get a haircut']],
-  BOOK_OPEN: [['預約', 'hacer una cita / reservar', 'make an appointment'], ['電話', 'teléfono', 'phone'], ['排隊', 'hacer fila', 'wait in line'], ['理髮店', 'peluquería', 'hair salon']],
-  BOOK_CALL: [['預約', 'hacer una cita / reservar', 'make an appointment'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['打錯', 'marcar mal', 'dial the wrong number']],
-  BOOK_TIME: [['星期', 'día de la semana', 'day of the week'], ['上午', 'por la mañana', 'a.m. / morning'], ['下午', 'por la tarde', 'p.m. / afternoon'], ['晚上', 'por la noche', 'evening'], ['有空', 'estar libre', 'be free / available']],
-  BOOK_CONFIRM: [['提早', 'llegar antes', 'arrive early'], ['分鐘', 'minuto', 'minute'], ['不對', 'no es correcto', 'that is not right'], ['再見', 'adiós', 'goodbye']],
-  BOOK_PHONE: [['電話', 'teléfono', 'phone'], ['我的', 'mi', 'my']],
-  ARRIVE: [['有預約', 'tener cita', 'have an appointment'], ['排隊', 'hacer fila', 'wait in line'], ['坐', 'sentarse', 'sit'], ['設計師', 'estilista', 'stylist'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask']],
+  BOOK_SEARCH: [['搜尋', 'buscar', 'search'], ['理髮店', 'peluquería', 'hair salon'], ['假髮店', 'tienda de pelucas', 'wig shop'], ['電話', 'teléfono', 'phone'], ['剪頭髮', 'cortarse el pelo', 'get a haircut'], ['色情理髮店', 'local para adultos (no es una peluquería normal)', 'adult venue (not a normal barber shop)']],
+  BOOK_OPEN: [['網頁', 'página web', 'web page'], ['歡迎', 'bienvenido', 'welcome'], ['撥打', 'llamar (marcar un número)', 'dial / call'], ['預約', 'hacer una cita / reservar', 'make an appointment'], ['排隊', 'hacer fila', 'wait in line']],
+  BOOK_CALL: [['你好', 'hola', 'hello'], ['預約', 'hacer una cita / reservar', 'make an appointment'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['打錯', 'marcar mal', 'dial the wrong number'], ['靠北', 'grosería: «¡carajo!» (no se dice a desconocidos)', 'vulgar slang: "damn!" (never say it to strangers)']],
+  BOOK_TIME: [['星期', 'día de la semana', 'day of the week'], ['上午', 'por la mañana', 'a.m. / morning'], ['下午', 'por la tarde', 'p.m. / afternoon'], ['晚上', 'por la noche', 'evening'], ['有空', 'estar libre', 'be free / available'], ['空檔', 'horario libre', 'open time slot']],
+  BOOK_CONFIRM: [['提早', 'llegar antes', 'arrive early'], ['分鐘', 'minuto', 'minute'], ['不對', 'no es correcto', 'that is not right'], ['再見', 'adiós', 'goodbye'], ['謝謝', 'gracias', 'thank you']],
+  BOOK_PHONE: [['電話', 'teléfono', 'phone'], ['幾號', 'qué número', 'what number'], ['我的', 'mi', 'my']],
+  ARRIVE: [['歡迎光臨', 'bienvenido', 'welcome (to a shop)'], ['有預約', 'tener cita', 'have an appointment'], ['兩位', 'dos personas', 'two people'], ['排隊', 'hacer fila', 'wait in line'], ['坐', 'sentarse', 'sit'], ['設計師', 'estilista', 'stylist'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask']],
   STYLE_LEN: [['肩膀', 'hombros', 'shoulders'], ['下巴', 'mentón', 'chin'], ['耳朵', 'oreja', 'ear'], ['剪到', 'cortar hasta…', 'cut up to…'], ['多短', 'qué tan corto', 'how short']],
   STYLE_BANG: [['瀏海', 'flequillo', 'bangs / fringe'], ['修一下', 'retocar un poco', 'trim a little'], ['不用剪', 'no hace falta cortar', 'no need to cut']],
   WASH: [['有點', 'un poco', 'a bit'], ['燙', 'muy caliente', 'scalding hot'], ['沒關係', 'no importa', "it's fine"], ['水', 'agua', 'water'], ['不好意思', 'disculpe', 'excuse me']],
   MIRROR: [['鏡子', 'espejo', 'mirror'], ['後面', 'atrás', 'the back'], ['短一點', 'un poco más corto', 'a bit shorter'], ['剪好', 'ya cortado', 'finished cutting']],
   PAY: [['一共', 'en total', 'in total'], ['元', 'dólares taiwaneses', 'NT dollars'], ['付錢', 'pagar', 'pay'], ['五百元', '500 dólares', '500 NT dollars'], ['找錢', 'dar el cambio', 'give change']],
   CHANGE_FIX: [['補', 'completar / dar lo que falta', 'make up the difference'], ['剩下', 'lo que queda / falta', 'the rest'], ['算錯', 'calcular mal', 'miscalculate']],
-  CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give the wrong change'], ['應該', 'debería', 'should']],
+  CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give the wrong change'], ['好像', 'parece que', 'it seems'], ['應該', 'debería', 'should'], ['媽的', 'grosería: «¡mierda!» (no lo digas al dueño)', 'vulgar swearing: "damn!" (never say it to the owner)']],
   END: [['好看', 'bonito', 'good-looking'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
@@ -407,6 +407,9 @@ const BANGS = [['修一下', 'Ami quiere solo un retoque', 'a light trim'], ['�
 const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 /* 數字轉中文：只用到 50 的倍數、最多 500 */
 const HZ = n => { const h = Math.floor(n / 100), t = Math.floor((n % 100) / 10); return (h ? CN[h] + '百' : '') + (t ? CN[t] + '十' : ''); };
+const ES_DAY = { 三: 'miércoles', 四: 'jueves', 五: 'viernes', 六: 'sábado' }, EN_DAY = { 三: 'Wednesday', 四: 'Thursday', 五: 'Friday', 六: 'Saturday' };
+/* 老闆報的時間：西文／英文用自然的說法（下午幾點），不直接塞中文 */
+const Es = (d, h) => `el ${ES_DAY[d]} a las ${h} de la tarde`, En = (d, h) => `on ${EN_DAY[d]} at ${h} p.m.`;
 const SLOT = (day, per, hr) => `星期${day}${per}${per === '晚上' ? CN[hr] : (hr === 2 ? '兩' : CN[hr])}點`;
 
 /* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
@@ -453,11 +456,12 @@ const Game = defineGame({
     const shops = [{ k: 'salon', n: '理髮店', ...shopTel(areas[0]) }, { k: 'wig', n: '假髮店', ...shopTel(areas[1]) }, { k: 'adult', n: '色情理髮店', ...shopTel(areas[2]) }];
     const price = pick([350, 400, 450]), given = (Math.random() < 0.5 || price >= 450) ? 500 - price : 500 - price - 50;   // 450 元時少找 50 會變成 0，所以一定找對
     const bossWrong = Math.random() < 0.5;
-    let said = SLOT(day, '下午', hr);
-    if (bossWrong) { said = Math.random() < 0.5 ? SLOT(day, '下午', pick([2, 3, 4, 5, 6].filter(h => h !== hr))) : SLOT(pick(DAYS.filter(d => d !== day)), '下午', hr); }
+    let sayD = day, sayH = hr;
+    if (bossWrong) { if (Math.random() < 0.5) sayH = pick([2, 3, 4, 5, 6].filter(h => h !== hr)); else sayD = pick(DAYS.filter(d => d !== day)); }
+    const said = SLOT(sayD, '下午', sayH);
     const alt = SLOT(pick(DAYS.filter(d => d !== day)), '下午', pick([2, 3, 4, 5, 6].filter(h => h !== hr)));   // 老闆說對時，「不對」選項用的別的時間
     this.carry = null; this._cs = false;
-    this.task = { day, hr, want: SLOT(day, '下午', hr), said, bossWrong, alt, slots: slots.map(s => SLOT(s[0], s[1], s[2])), shops, shopOrder: shuffle(shops.slice()), phone: fmt(real), phones: ph.map(fmt), phoneZh: zhNum(real), phonesZh: ph.map(zhNum), len, bang, rot: Math.floor(Math.random() * 3), price, given, wrong: given !== 500 - price };
+    this.task = { day, hr, want: SLOT(day, '下午', hr), said, sayD, sayH, bossWrong, alt, slots: slots.map(s => SLOT(s[0], s[1], s[2])), shops, shopOrder: shuffle(shops.slice()), phone: fmt(real), phones: ph.map(fmt), phoneZh: zhNum(real), phonesZh: ph.map(zhNum), len, bang, rot: Math.floor(Math.random() * 3), price, given, wrong: given !== 500 - price };
   },
 
   setPlace(mode) {
@@ -485,7 +489,7 @@ const Game = defineGame({
   listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s);
     const rows = [
-      { zh: `有空：${t.want}`, es: `Estoy libre: ${t.want}`, en: `Free: ${t.want}` },
+      { zh: `有空：${t.want}`, es: `Estoy libre ${Es(t.day, t.hr)}`, en: `Free ${En(t.day, t.hr)}` },
       ...(this.shopSeen ? [{ zh: `理髮店電話：${t.shops[0].show}`, es: `Teléfono de la peluquería: ${t.shops[0].show}`, en: `Salon phone: ${t.shops[0].show}` }] : []),
       { zh: `我的電話：${t.phone}`, es: `Mi teléfono: ${t.phone}`, en: `My phone: ${t.phone}` },
       { zh: `頭髮剪到${t.len[0]}`, es: `Cortar hasta ${t.len[1]}`, en: `Cut to ${t.len[2]}` },
@@ -567,7 +571,7 @@ const Game = defineGame({
       BOOK_CALL: {
         place: 'call',
         html: () => Game.carryHTML(),
-        dialogue: () => [boss('你好，這裡是理髮店，請問要預約嗎？', 'Hola, peluquería. ¿Desea reservar?', 'Hello, this is the hair salon. Would you like to book?')],
+        dialogue: () => [boss('你好，這裡是理髮店，請問要預約嗎？', 'Hola, esta es la peluquería. ¿Desea reservar?', 'Hello, this is the hair salon. Would you like to book?')],
         options: () => rot(['對，我要預約', '靠北！我打錯電話了！', '喂，請問你是誰']),
         next: c => {
           if (c !== '對，我要預約') {
@@ -581,11 +585,11 @@ const Game = defineGame({
       BOOK_TIME: {
         place: 'call',
         html: () => Game.carryHTML() + Game.slotsHTML(),
-        dialogue: () => [boss('這個星期有三個空檔，請看一下。你要哪一個？', 'Esta semana hay tres horarios libres; mira cuál prefieres.', 'We have three open slots this week. Which one would you like?')],
+        dialogue: () => [boss('這個星期有三個空檔，請看一下。你要哪一個？', 'Esta semana hay tres horarios libres. Mire, ¿cuál prefiere?', 'We have three open slots this week. Which one would you like?')],
         options: () => rot(t.slots.map(s => '我要' + s)),
         next: c => {
           if (c !== '我要' + t.want) {
-            Game.addMistake(M(`想清楚一點，你${t.want.slice(0, 3)}下午${t.hr === 2 ? '兩' : CN[t.hr]}點才有空，要選「${t.want}」。`, `Piénsalo bien: solo estás libre el día indicado a las ${t.hr} de la tarde; elige «${t.want}».`, `Think it through: you're only free at ${t.hr} p.m. on that day — pick "${t.want}".`)); return;
+            Game.addMistake(M(`想清楚一點，你${t.want.slice(0, 3)}下午${t.hr === 2 ? '兩' : CN[t.hr]}點才有空，要選「${t.want}」。`, `Piénsalo bien: solo estás libre ${Es(t.day, t.hr)}; elige «${t.want}».`, `Think it through: you're only free ${En(t.day, t.hr)} — pick "${t.want}".`)); return;
           }
           carryGood('BOOK_TIME', '你選對時間了！星期和幾點都要聽清楚。', '¡Elegiste bien! Hay que escuchar con atención el día y la hora.', 'You picked the right time! Listen carefully to both the day and the hour.');
           Game.state = 'BOOK_PHONE';
@@ -607,18 +611,18 @@ const Game = defineGame({
       BOOK_CONFIRM: {
         place: 'call',
         html: () => Game.carryHTML(),
-        dialogue: () => [boss(`好，${t.said}，請提早十分鐘到喔！`, `Bien, ${t.said}. ¡Llegue 10 minutos antes, por favor!`, `OK, ${t.said}. Please arrive 10 minutes early!`)],
+        dialogue: () => [boss(`好，${t.said}，請提早十分鐘到喔！`, `Bien, ${Es(t.sayD, t.sayH)}. ¡Llegue 10 minutos antes, por favor!`, `OK, ${En(t.sayD, t.sayH)}. Please arrive 10 minutes early!`)],
         options: () => rot(['好，謝謝，再見！', `不對，我要的是${t.bossWrong ? t.want : t.alt}。`]),
         next: c => {
           const fix = c.startsWith('不對');
           if (fix !== t.bossWrong) {
             Game.addMistake(t.bossWrong
-              ? M(`老闆說錯時間了！你預約的是${t.want}，不是${t.said}。要馬上告訴他。`, `¡El dueño se equivocó de horario! Tu cita es ${t.want}, no ${t.said}. Díselo enseguida.`, `The owner got the time wrong! Your booking is ${t.want}, not ${t.said}. Tell him right away.`)
-              : M(`老闆說的時間沒有錯，就是${t.want}。不用更正喔。`, `El horario que dijo el dueño es correcto: ${t.want}. No hace falta corregirlo.`, `The owner's time is right: ${t.want}. No need to correct him.`)); return;
+              ? M(`老闆說錯時間了！你預約的是${t.want}，不是${t.said}。要馬上告訴他。`, `¡El dueño se equivocó de horario! Tu cita es ${Es(t.day, t.hr)}, no ${Es(t.sayD, t.sayH)}. Díselo enseguida.`, `The owner got the time wrong! Your booking is ${En(t.day, t.hr)}, not ${En(t.sayD, t.sayH)}. Tell him right away.`)
+              : M(`老闆說的時間沒有錯，就是${t.want}。不用更正喔。`, `El horario que dijo el dueño es correcto: ${Es(t.day, t.hr)}. No hace falta corregirlo.`, `The owner's time is right: ${En(t.day, t.hr)}. No need to correct him.`)); return;
           }
           if (t.bossWrong) {
             goodFirst('BOOK_CONFIRM', '你聽得很清楚！老闆說錯時間，你馬上更正了。', '¡Escuchaste muy bien! El dueño se equivocó de horario y lo corregiste enseguida.', 'Well listened! The owner got the time wrong and you corrected him right away.');
-            Game.thought = [boss(`啊，不好意思，是${t.want}，我改過來了。`, `Ah, disculpe: es ${t.want}. Ya lo corregí.`, `Oh, sorry — it's ${t.want}. I've fixed it.`)];
+            Game.thought = [boss(`啊，不好意思，是${t.want}，我改過來了。`, `Ah, disculpe: es ${Es(t.day, t.hr)}. Ya lo corregí.`, `Oh, sorry — it's ${En(t.day, t.hr)}. I've fixed it.`)];
           } else {
             goodFirst('BOOK_CONFIRM', '你聽得很清楚！老闆說的時間沒有錯。', '¡Escuchaste muy bien! El horario que dijo el dueño era correcto.', 'Well listened! The time the owner said was right.');
           }
@@ -635,7 +639,7 @@ const Game = defineGame({
               : M('你已經預約了，要說「我有預約」，再說名字，設計師才會找到你。', 'Ya reservaste: di «我有預約» y tu nombre para que el estilista te encuentre.', 'You already booked — say 我有預約 and your name so the stylist can find you.')); return;
           }
           goodFirst('ARRIVE', '很好！先說「我有預約」，再說名字。', '¡Muy bien! Primero «我有預約» y luego tu nombre.', 'Good! Say 我有預約 first, then your name.');
-          Game.thought = [sd(`${N}，對，${t.want}，這邊請坐。`, `${N}, sí, ${t.want}. Siéntese aquí, por favor.`, `${N}, yes, ${t.want}. Please sit here.`)];
+          Game.thought = [sd(`${N}，對，${t.want}，這邊請坐。`, `${N}, sí, ${Es(t.day, t.hr)}. Siéntese aquí, por favor.`, `${N}, yes, ${En(t.day, t.hr)}. Please sit here.`)];
           Game.state = 'STYLE_LEN';
         }
       },
