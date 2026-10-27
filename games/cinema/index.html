@@ -717,7 +717,7 @@ const Game = defineGame({
     const wrongSplit = `${nw(1, '全票')}，${nw(t.people - 1, '學生票')}。`;   // 學生票買太多
     const tkFix = () => t.tkKind === 'time' ? `不好意思，場次好像印錯了，我要的是${combo(t.movie, t.tkWrong ? t.time : t.tkAlt)}。`
       : `不好意思，座位好像印錯了，我選的是${seatZh(t.tkWrong ? Game.chosen : Game.shiftSeats(Game.chosen))}。`;
-    const changeFix = `不好意思，好像找錯了，應該找${zhNum(t.change)}元吧？`;
+    const changeFix = `不好意思，好像找錯了，應該找${zhNum(t.shortChange ? t.change : t.change + 50)}元吧？`;   // 找對時，這句的金額是錯的，不能跟售票員說的一樣
     const seatFix = () => `不對，我選的是${seatZh(t.seatWrong ? Game.chosen : Game.shiftSeats(Game.chosen))}。`;
     const hallOpts = [t.hall, ...[2, 3, 4, 5, 6].filter(h => h !== t.hall).slice(0, 2)];
 
