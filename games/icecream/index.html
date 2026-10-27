@@ -575,6 +575,11 @@ const Game = defineGame({
     const ORDER = ['START', 'SCOOPS', 'CONTAINER', 'FLAVOR', 'TOPPING', 'EAT', 'ORDER_CHECK', 'HANDOVER', 'PAY', 'PAY_FIX', 'END', 'RESULT'];
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
+    if (at('PAY')) out.push({ title: '價目表', lines: [
+      L('一球：60元', 'Una bola: ' + esM(PRICE[1]), 'One scoop: ' + enM(PRICE[1])),
+      L('兩球：110元', 'Dos bolas: ' + esM(PRICE[2]), 'Two scoops: ' + enM(PRICE[2])),
+      L('三球：150元', 'Tres bolas: ' + esM(PRICE[3]), 'Three scoops: ' + enM(PRICE[3])),
+      L('配料：每種10元', 'Cada topping: ' + esM(TOP_PRICE), 'Each topping: ' + enM(TOP_PRICE)) ] });
     if (at('END')) out.push({ title: '店員說的話', lines: [this.priceLine(true)] });
     return out;
   },
