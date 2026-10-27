@@ -551,7 +551,7 @@ const Game = defineGame({
 
       BOOK_OPEN: {
         place: 'phone',
-        dialogue: () => [L(`（你點進那家理髮店的頁面，上面寫著：「歡迎預約，電話 ${t.shops[0].show}」。）`, `(Entras a la página de la peluquería. Dice: «歡迎預約»: se aceptan reservas por teléfono, ${t.shops[0].show}.)`, `(You open the salon's page. It says 歡迎預約 — reservations welcome, phone ${t.shops[0].show}.)`), L('我：我要怎麼做呢？', '¿Qué hago?', 'What should I do?')],
+        dialogue: () => [L('（你點進理髮店的網頁，上面寫著：「歡迎撥打預約電話」。）', '(Entras a la página web de la peluquería. Dice: «歡迎撥打預約電話»: llame para reservar.)', '(You open the salon\'s web page. It says 歡迎撥打預約電話 — call to make a reservation.)'), L('我：我要怎麼做呢？', '¿Qué hago?', 'What should I do?')],
         options: () => rot(['打電話預約', '直接去，在門口排隊', '等頭髮更長再說']),
         next: c => {
           if (c !== '打電話預約') {
