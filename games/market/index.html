@@ -369,12 +369,14 @@ const VOCAB = {
   ITEM: [['把', 'clasificador de manojos', 'measure word for bunches'], ['顆', 'clasificador de cosas redondas', 'measure word for round things'], ['條', 'clasificador de cosas largas', 'measure word for long things'], ['盒', 'caja', 'box'], ['塊', 'pedazo', 'piece']],
   BARGAIN: [['算', 'cobrar, contar', 'charge, count'], ['便宜', 'barato', 'cheap'], ['一點', 'un poco', 'a bit'], ['殺價', 'regatear', 'bargain']],
   PAY: [['一共', 'en total', 'in total'], ['夠', 'alcanzar', 'be enough'], ['找錢', 'dar el cambio', 'give change'], ['賒帳', 'comprar a crédito', 'buy on credit']],
+  CHANGE: [['找錢', 'dar cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give the wrong change']],
+  CHECK: [['數量', 'cantidad', 'amount'], ['不是', 'no es', 'is not'], ['換', 'cambiar', 'change, swap']],
   BAG: [['環保袋', 'bolsa reutilizable', 'reusable bag'], ['塑膠袋', 'bolsa de plástico', 'plastic bag']],
   END: [['新鮮', 'fresco', 'fresh'], ['好吃', 'rico / delicioso', 'delicious']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
-const STAGE = { ITEM: ['買菜', 'comprar', 'buying'], BARGAIN: ['殺價', 'regatear', 'bargaining'], PAY: ['付錢', 'pagar', 'paying'], BAG: ['袋子', 'bolsa', 'bag'] };
-const NEXT_LABEL = { ITEM: '走到攤位', BARGAIN: '算錢', PAY: '付錢', BAG: '拿東西', END: '回家' };
+const STAGE = { ITEM: ['買菜', 'comprar', 'buying'], BARGAIN: ['殺價', 'regatear', 'bargaining'], PAY: ['付錢', 'pagar', 'paying'], CHANGE: ['找錢', 'cambio', 'change'], CHECK: ['核對東西', 'revisar las compras', 'checking the goods'], BAG: ['袋子', 'bolsa', 'bag'] };
+const NEXT_LABEL = { ITEM: '走到攤位', BARGAIN: '算錢', PAY: '付錢', CHANGE: '數找的錢', BAG: '拿東西', CHECK: '拿菜', END: '回家' };
 
 const PLACES = {
   phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
@@ -464,13 +466,24 @@ const Game = defineGame({
 
   IMAGES: {
     START: ['images/start.jpg', '🥬'], ITEM: ['images/stall.jpg', '🥬'], BARGAIN: ['images/stall.jpg', '💬'], PAY: ['images/pay.jpg', '💵'],
-    BAG: ['images/stall.jpg', '🛍️'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+    CHANGE: ['images/pay.jpg', '🪙'], BAG: ['images/stall.jpg', '🛍️'], CHECK: ['images/stall.jpg', '🛍️'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
   k: 0,
   setup() {
-    const items = shuffle(ITEMS).slice(0, 3).map(it => ({ ...it, q: it.m === '顆' ? 3 : pick([1, 2]) }));
-    const total = items.reduce((a, it) => a + it.q * it.price, 0), disc = total >= 200 ? 20 : 10;
-    this.task = { items, total, disc, final: total - disc, rot: Math.floor(Math.random() * 3) };
+    let items, total;
+    do {
+      items = shuffle(ITEMS).slice(0, 3).map(it => ({ ...it, q: it.m === '顆' ? 3 : pick([1, 2]) }));
+      total = items.reduce((a, it) => a + it.q * it.price, 0);
+    } while (total > 450);                          // 一張五百元要付得起
+    const disc = total >= 200 ? 20 : 10, refuse = Math.random() < 0.3;   // 老闆有時候不肯算便宜
+    const fin = refuse ? total : total - disc, wi = Math.floor(Math.random() * items.length);
+    this.task = {
+      items, total, disc, refuse, final: fin, rot: Math.floor(Math.random() * 3),
+      shortChange: Math.random() < 0.45,          // 老闆會不會少找錢
+      bagWrong: Math.random() < 0.45, wi, wq: items[wi].q === 1 ? 2 : items[wi].q - 1,   // 裝袋時某樣東西數量放錯
+      fq: items[wi].q === 1 ? 2 : items[wi].q - 1
+    };
+    this.task.given = 500 - fin - (this.task.shortChange ? 50 : 0);
     this.k = 0;
   },
   amiLines() {
@@ -486,7 +499,7 @@ const Game = defineGame({
     return L(`老闆：一共是${zhNum(t.total)}元。`, `Son ${esM(t.total)} en total.`, `That's ${enM(t.total)} in total.`);
   },
   hintSections() {
-    const ORDER = ['START', 'ITEM', 'BARGAIN', 'PAY', 'BAG', 'END', 'RESULT'];
+    const ORDER = ['START', 'ITEM', 'BARGAIN', 'PAY', 'CHANGE', 'BAG', 'CHECK', 'END', 'RESULT'];
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
     if (ORDER.indexOf(this.st0) >= ORDER.indexOf('PAY')) out.push({ title: '老闆說的話', lines: [this.priceLine()] });
     return out;
@@ -513,6 +526,9 @@ const Game = defineGame({
   getConfig() {
     const N = this.N, t = this.task;
     const vend = (zh, es, en) => L(`老闆：${zh}`, es, en);
+    const chFix = `老闆，好像找錯了，應該找${zhNum(t.shortChange ? 500 - t.final : 500 - t.final - 50)}元吧？`;
+    const bagLine = (it, q) => `${it.zh}我要的是${QN(it.q)}${it.m}，不是${QN(q)}${it.m}。`;
+    const bgFix = `老闆，${t.bagWrong ? bagLine(t.items[t.wi], t.wq) : bagLine(t.items[t.wi], t.fq)}`;
     const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
     const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
     return {
@@ -549,12 +565,13 @@ const Game = defineGame({
         next: c => {
           if (c !== '可以算便宜一點嗎？') { Game.addMistake(M('客氣一點問「可以算便宜一點嗎？」，會比較有禮貌喔！', 'Pregunta con más amabilidad: «可以算便宜一點嗎？». ¡Es más cortés!', 'Ask more politely: "可以算便宜一點嗎？" — it sounds more courteous!')); return; }
           goodFirst('BARGAIN', '不錯喔！問得很客氣！', '¡Muy bien! ¡Qué cortés!', 'Nice! Very polite!');
+          Game.thought = t.refuse ? [vend('不行啦，這已經是最便宜的了。', '¡No se puede! Este ya es el precio más bajo.', "Can't do it — that's already the lowest price.")] : null;
           Game.state = 'PAY';
         }
       },
       PAY: {
         place: 'shop',
-        dialogue: () => [vend(`好啦，算你${zhNum(t.final)}元。`, `Está bien, se lo dejo en ${esM(t.final)}.`, `Alright, I'll make it ${enM(t.final)}.`)],
+        dialogue: () => [t.refuse ? vend(`那就${zhNum(t.final)}元。`, `Entonces son ${esM(t.final)}.`, `So that's ${enM(t.final)}.`) : vend(`好啦，算你${zhNum(t.final)}元。`, `Está bien, se lo dejo en ${esM(t.final)}.`, `Alright, I'll make it ${enM(t.final)}.`)],
         options: () => rot(['給你五百元。', '給你兩百元。', '我下次再付，可以嗎？']),
         next: c => {
           if (c !== '給你五百元。') {
@@ -562,7 +579,28 @@ const Game = defineGame({
             return;
           }
           goodFirst('PAY', '沒錯！五百元就夠了。', '¡Exacto! Con quinientos alcanza.', 'Right! 500 is enough.');
-          Game.thought = [vend(`收你五百元，找你${zhNum(500 - t.final)}元。`, `Recibo quinientos; le doy ${esM(500 - t.final)} de cambio.`, `Out of 500 — here's ${enM(500 - t.final)} change.`), vend('要袋子嗎？', '¿Quiere bolsa?', 'Do you want a bag?')];
+          Game.thought = null;
+          Game.state = 'CHANGE';
+        }
+      },
+      /* ═══ 找錢：老闆可能少找 ═══ */
+      CHANGE: {
+        place: 'shop',
+        html: () => `<div class="basket"><b>💵 ${Game.ruby('找的錢')}</b>　<span>${t.given}</span> ${Game.ruby('元')}</div>`,
+        dialogue: () => [vend(`收你五百元，找你${zhNum(t.given)}元。`, `Recibo quinientos; le doy ${esM(t.given)} de cambio.`, `Out of 500 — here's ${enM(t.given)} change.`)],
+        options: () => rot(['好，謝謝。', chFix, '靠北！你找錯錢了吧！']),
+        next: c => {
+          const right = t.shortChange ? chFix : '好，謝謝。', want = 500 - t.final;
+          if (c !== right) {
+            Game.addMistake(c === '好，謝謝。'
+              ? M(`老闆少找了：500 − ${t.final} = ${want}元，他只找了${t.given}元。`, `Se equivocó: 500 − ${t.final} = ${want}; solo le dio ${esM(t.given)}.`, `He short-changed you: 500 − ${t.final} = ${want}, but he gave ${enM(t.given)}.`)
+              : c === chFix
+                ? M(`找的錢是對的：500 − ${t.final} = ${want}元。`, `El cambio está bien: 500 − ${t.final} = ${want}.`, `The change is correct: 500 − ${t.final} = ${want}.`)
+                : M('要有禮貌，說「老闆，好像找錯了」就好。', 'Hay que ser cortés: di «jefe, creo que se equivocó con el cambio».', 'Be polite: just say "boss, I think the change is off".'));
+            return;
+          }
+          goodFirst('CHANGE', t.shortChange ? '你很細心！找的錢不對，要馬上說。' : '你會算！收下找的錢以前，先算一算。', t.shortChange ? '¡Qué atento! Si el cambio está mal, díselo enseguida.' : '¡Sabes calcular! Antes de guardar el cambio, cuéntalo.', t.shortChange ? 'Well spotted! If the change is wrong, speak up right away.' : 'You can count! Check the change before you pocket it.');
+          Game.thought = t.shortChange ? [vend(`啊，不好意思！這裡是${zhNum(500 - t.final)}元。`, `¡Ay, perdón! Aquí tiene ${esM(500 - t.final)}.`, `Oh, sorry! Here's ${enM(500 - t.final)}.`)] : null;
           Game.state = 'BAG';
         }
       },
@@ -573,6 +611,28 @@ const Game = defineGame({
         next: c => {
           if (c !== '不用，我有環保袋。') { Game.addMistake(M('Ami說不要拿塑膠袋，要用環保袋。保護地球！', 'Ami dijo que no tomaras bolsa de plástico y usaras la reutilizable. ¡Cuida el planeta!', 'Ami said no plastic bags — use the reusable one. Protect the planet!')); return; }
           goodFirst('BAG', '很好！「不用，我有……」可以很客氣地拒絕。', '¡Muy bien! «不用，我有…» es una forma muy amable de rechazar.', 'Good! "不用，我有…" is a very polite way to decline.');
+          Game.state = 'CHECK';
+          Game.thought = [vend('好，東西都幫你裝好了。', 'Bien, ya le puse todo en la bolsa.', "OK, everything's in the bag.")];
+        }
+      },
+      /* ═══ 拿到東西：老闆可能裝錯數量 ═══ */
+      CHECK: {
+        place: 'shop',
+        html: () => `<div class="basket" style="flex-direction:column;align-items:flex-start;gap:4px">${t.items.map((it, i) => `<div>${it.icon} ${Game.ruby(it.zh)}　${QN(t.bagWrong && i === t.wi ? t.wq : it.q)}${Game.ruby(it.m)}</div>`).join('')}</div>`,
+        dialogue: () => [vend('這是你的菜，請拿好。', 'Aquí tiene sus compras, tome.', "Here are your groceries — take them.")],
+        options: () => rot(['好，謝謝。', bgFix, '老闆，你是不是故意的啊？']),
+        next: c => {
+          const right = t.bagWrong ? bgFix : '好，謝謝。', it = t.items[t.wi];
+          if (c !== right) {
+            Game.addMistake(c === '好，謝謝。'
+              ? M(`數量不對：Ami要${QN(it.q)}${it.m}${it.zh}，老闆放了${QN(t.wq)}${it.m}。拿東西以前，要先看一看。`, `Cantidad equivocada: Ami quiere ${it.q} de ${it.es} y pusieron ${t.wq}. Revisa antes de llevártelo.`, `Wrong amount: Ami wants ${it.q} of ${it.en} and he put in ${t.wq}. Check before you take it.`)
+              : c === bgFix
+                ? M(`數量是對的：${it.zh}就是${QN(it.q)}${it.m}。`, `La cantidad está bien: ${it.q} de ${it.es}.`, `The amount is right: ${it.q} of ${it.en}.`)
+                : M('要有禮貌，說清楚你要的數量就好。', 'Hay que ser cortés: di claramente la cantidad que querías.', 'Be polite: just state clearly the amount you wanted.'));
+            return;
+          }
+          goodFirst('CHECK', t.bagWrong ? '你很細心！數量放錯了，要馬上說。' : '拿到東西以後，先看一下數量對不對。', t.bagWrong ? '¡Qué atento! Pusieron mal la cantidad; hay que decirlo enseguida.' : 'Al recibir las compras, revisa que las cantidades sean correctas.', t.bagWrong ? 'Well spotted! The amount was wrong — say so right away.' : 'When you get your groceries, check the amounts.');
+          Game.thought = t.bagWrong ? [vend(`啊，我看錯了！我幫你換成${QN(it.q)}${it.m}。`, `¡Ay, me confundí! Se lo cambio a ${it.q}.`, `Oh, my mistake! I'll change it to ${it.q}.`)] : null;
           Game.stopTimer();
           Game.state = 'END';
         }
