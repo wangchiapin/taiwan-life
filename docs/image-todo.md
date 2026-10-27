@@ -8,3 +8,7 @@
 
 ## 冰淇淋店 icecream
 - [ ] HANDOVER（店員遞冰淇淋）：暫用 shop.jpg。可選：店員的手遞出冰淇淋（用 shop.jpg 當底圖，編輯式提示詞）。
+
+## 書店 bookstore
+- [ ] FIND 書賣完時書架少一本：目前用 HTML 書架顯示，不需新圖。
+- [ ] STOCK（問店員有沒有庫存）：暫用 counter.jpg，可選補一張「店員拿著書從倉庫走出來」。
