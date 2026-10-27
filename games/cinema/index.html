@@ -418,12 +418,12 @@ const STAGE = (() => {
 })();
 
 /* 售票員被抓到說錯時用的尷尬表情圖；檔案還沒放進 images/ 時，會自動改用原本的圖 */
-const SORRY_IMG = 'images/counter_sorry.jpg';
+const SORRY_IMGS = { 'images/counter.jpg': 'images/counter_sorry.jpg', 'images/seatmap.jpg': 'images/counter_sorry.jpg', 'images/snack.jpg': 'images/snack_sorry.jpg' };   // 售票員、零食櫃台店員各一張
 
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
   BOARD: '走到售票櫃台', TICKETS: '繼續買票', SEATS: '看座位表', SEAT_CONFIRM: '聽售票員確認座位', PAY: '付錢', CHANGE: '看一下找的錢', TICKET_CHECK: '收下找零，繼續', SNACK: '走到零食櫃台',
-  GATE: '拿爆米花，準備去驗票口', FIND_HALL: '去影廳', SEAT_TAKEN: '走到座位', PHONE: '坐好，電影開始了', END: '離開電影院'
+  SNACK_CHECK: '拿爆米花', GATE: '拿爆米花，準備去驗票口', FIND_HALL: '去影廳', SEAT_TAKEN: '走到座位', PHONE: '坐好，電影開始了', END: '離開電影院'
 };
 
 /* ══════════════════════════════════════
@@ -538,7 +538,7 @@ const Game = defineGame({
     START: ['images/start.jpg', '🎬'],
     BOARD: ['images/counter.jpg', '🗓️'], TICKETS: ['images/counter.jpg', '🎟️'], SEATS: ['images/seatmap.jpg', '💺'],
     PAY: ['images/counter.jpg', '💵'], CHANGE: ['images/counter.jpg', '🪙'], TICKET_CHECK: ['images/counter.jpg', '🎟️'],
-    SNACK: ['images/snack.jpg', '🍿'], GATE: ['images/gate.jpg', '🚪'], FIND_HALL: ['images/halldoor.jpg', '🚪'],
+    SNACK: ['images/snack.jpg', '🍿'], SNACK_CHECK: ['images/snack.jpg', '🍿'], GATE: ['images/gate.jpg', '🚪'], FIND_HALL: ['images/halldoor.jpg', '🚪'],
     SEAT_TAKEN: ['images/hall.jpg', '💺'], PHONE: ['images/result.jpg', '📱'], SEAT_CONFIRM: ['images/seatmap.jpg', '💺'],
     END: ['images/end_good.jpg', '🎉'],
     RESULT: ['images/result.jpg', '📊']
@@ -561,6 +561,7 @@ const Game = defineGame({
       hall: pick([2, 3, 4, 5, 6]), snack: pick(['salty', 'sweet']),
       payWrong: Math.random() < 0.45,             // 售票員報的總價會不會算錯（學生票也算成全票）
       tkWrong: Math.random() < 0.45, tkKind: pick(['time', 'seat']),   // 票印錯的是場次還是座位
+      snackWrong: Math.random() < 0.45,           // 店員會不會給錯口味的爆米花
       seatWrong: Math.random() < 0.45,            // 售票員複誦座位時會不會念錯              // 印出來的票，場次會不會印錯
       badPay: pick(['five', 'bargain']),
       tkAlt: pick(TIMES.filter(x => x !== time)),
@@ -629,7 +630,7 @@ const Game = defineGame({
     return L(`你們的電影在${CN[t.hall]}廳，座位是${seatZh(ks)}。`, `Su película es en la sala ${t.hall}; sus asientos: ${seatEs(ks)}.`, `Your movie is in theater ${t.hall}; your seats: ${seatEn(ks)}.`);
   },
   hintSections() {
-    const ORDER = ['START', 'BOARD', 'TICKETS', 'SEATS', 'SEAT_CONFIRM', 'PAY', 'CHANGE', 'TICKET_CHECK', 'SNACK', 'GATE', 'FIND_HALL', 'SEAT_TAKEN', 'PHONE', 'END', 'RESULT'];
+    const ORDER = ['START', 'BOARD', 'TICKETS', 'SEATS', 'SEAT_CONFIRM', 'PAY', 'CHANGE', 'TICKET_CHECK', 'SNACK', 'SNACK_CHECK', 'GATE', 'FIND_HALL', 'SEAT_TAKEN', 'PHONE', 'END', 'RESULT'];
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s), t = this.task;
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
     if (at('TICKETS')) out.push({ title: '票價', lines: [L(`全票：${t.full}元`, `Entrada completa: ${esM(t.full)}`, `Full price: ${enM(t.full)}`), L(`學生票：${t.stud}元（要出示學生證）`, `Entrada de estudiante: ${esM(t.stud)} (hay que mostrar la credencial)`, `Student ticket: ${enM(t.stud)} (student ID required)`)] });
@@ -697,6 +698,8 @@ const Game = defineGame({
     const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
     const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
     const sn = SNACKS[t.snack], other = SNACKS[t.snack === 'salty' ? 'sweet' : 'salty'];
+    const given = t.snackWrong ? other : sn;   // 店員實際給的口味
+    const snFix = `不好意思，我要的是${sn[0]}的，不是${other[0]}的。`;
     const combo = (m, tm) => `晚上${tm.zh}的《${m.zh}》`;
     const nw = (n, w) => `${NZ(n)}張${w}`;                // 兩張全票
     const payOk = `給你${NZ(t.bills)}張一千元。`;
@@ -904,7 +907,29 @@ const Game = defineGame({
             return;
           }
           goodFirst('SNACK', '你記得Ami說的話，真棒！', '¡Recordaste lo que dijo Ami, genial!', 'You remembered what Ami said — great!');
-          Game.thought = [L('店員：好的，請稍等。', 'Muy bien, un momento, por favor.', 'Sure, one moment please.'), L(`店員：這是你的${sn[0]}爆米花，謝謝。`, `Aquí tiene sus palomitas ${sn[3]}, gracias.`, `Here are your ${sn[2]} popcorn, thank you.`)];
+          Game.thought = [L('店員：好的，請稍等。', 'Muy bien, un momento, por favor.', 'Sure, one moment please.'), L(`店員：這是你的${given[0]}爆米花，謝謝。`, `Aquí tiene sus palomitas ${given[3]}, gracias.`, `Here are your ${given[2]} popcorn, thank you.`)];
+          Game.state = 'SNACK_CHECK';
+        }
+      },
+
+      /* ═══ 拿到爆米花：店員可能給錯口味 ═══ */
+      SNACK_CHECK: {
+        place: 'snack',
+        dialogue: () => [L('（店員把爆米花遞給你。）', '(El empleado te entrega las palomitas.)', '(The clerk hands you the popcorn.)')],
+        options: () => rot(['好，謝謝。', snFix, '你是不是聽不懂中文啊？']),
+        next: c => {
+          const right = t.snackWrong ? snFix : '好，謝謝。';
+          if (c !== right) {
+            Game.addMistake(c === '好，謝謝。'
+              ? M(`店員給錯了：Ami要${sn[0]}爆米花，他給的是${other[0]}的。拿到以前，要聽清楚、看清楚。`, `El empleado se equivocó: Ami quiere palomitas ${sn[3]} y le dio ${other[3]}. Escucha y revisa antes de recibirlas.`, `The clerk got it wrong: Ami wants ${sn[2]} popcorn but he gave ${other[2]}. Listen and check before you take it.`)
+              : c === snFix
+                ? M(`爆米花是對的，就是${sn[0]}的。`, `Las palomitas están bien: son ${sn[3]}.`, `The popcorn is right: it's ${sn[2]}.`)
+                : M('要有禮貌，說「不好意思」，請他換就好。', 'Hay que ser cortés: di «disculpe» y pídele que las cambie.', 'Be polite: say "excuse me" and ask him to swap it.'));
+            return;
+          }
+          goodFirst('SNACK_CHECK', t.snackWrong ? '你很細心！口味給錯了，要馬上說。' : '拿到爆米花，要聽一下口味對不對。', t.snackWrong ? '¡Qué atento! Te dieron el sabor equivocado; hay que decirlo enseguida.' : 'Al recibir las palomitas, escucha si el sabor es el correcto.', t.snackWrong ? 'Well spotted! You got the wrong flavor — say so right away.' : 'When you get the popcorn, check that the flavor is right.');
+          if (t.snackWrong) Game._sorry = true;
+          Game.thought = t.snackWrong ? [L(`店員：啊，不好意思！我換成${sn[0]}的給你。`, `Ay, disculpe! Se las cambio por las ${sn[3]}.`, `Oh, sorry! I'll swap it for the ${sn[2]} one.`)] : null;
           Game.state = 'GATE';
         }
       },
@@ -1103,7 +1128,8 @@ const Game = defineGame({
     const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
     let [src, emoji, alt] = this.IMAGES[this.state] || ['', '🚇'];
     if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
-    if (this._sorry && this._transMode && !this.missing.has(SORRY_IMG)) [src, emoji, alt] = [SORRY_IMG, '😅'];   // 售票員被抓到說錯：尷尬的臉（沒有這張圖就用原本的）
+    const sorryImg = SORRY_IMGS[src];
+    if (this._sorry && this._transMode && sorryImg && !this.missing.has(sorryImg)) [src, emoji, alt] = [sorryImg, '😅'];   // 售票員被抓到說錯：尷尬的臉（沒有這張圖就用原本的）
     this.setImage(src, emoji, alt);
     Vocab.render(this.state);
     if (Hints.open) Hints.render();
@@ -1144,7 +1170,7 @@ const Game = defineGame({
 
 /* 從「重新開始」或地圖回來：直接用原本的名字開新的一局 */
 GameBoot();
-{ const pre = new Image(); pre.onerror = () => Game.missing.add(SORRY_IMG); pre.src = SORRY_IMG; }
+[...new Set(Object.values(SORRY_IMGS))].forEach(f => { const pre = new Image(); pre.onerror = () => Game.missing.add(f); pre.src = f; });
 Music.init({ bpm: 100, tracks: [
   { wave: 'triangle', vol: 0.3, notes: 'E5 . G5 . B5 . G5 E5 | D5 . F5 . A5 . F5 D5 | C5 . E5 . G5 . E5 C5 | B4 - A4 - G4 - . .' },
   { wave: 'triangle', vol: 0.6, notes: 'E3 E3 . E3 B3 . E3 . | D3 D3 . D3 A3 . D3 . | C3 C3 . C3 G3 . C3 . | B2 B2 . B2 F3 . B2 .' },

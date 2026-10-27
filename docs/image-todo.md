@@ -24,3 +24,4 @@
 
 ## 電影院 cinema（2026-10-27 Ben 指定）
 - [ ] counter_sorry.jpg：售票員被抓到說錯（總價、座位、找錢、票印錯）時的尷尬表情。放進 games/cinema/images/ 就會自動使用；沒有這張圖時自動用 counter.jpg。用 counter.jpg 當底圖，編輯式提示詞（只改表情）。
+- [ ] snack_sorry.jpg：零食櫃台店員給錯爆米花口味被抓到時的尷尬表情（用 snack.jpg 當底圖，只改表情）。沒有圖時自動用 snack.jpg。
