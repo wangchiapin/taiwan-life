@@ -454,8 +454,9 @@ const Game = defineGame({
     const bossWrong = Math.random() < 0.5;
     let said = SLOT(day, '下午', hr);
     if (bossWrong) { said = Math.random() < 0.5 ? SLOT(day, '下午', pick([2, 3, 4, 5, 6].filter(h => h !== hr))) : SLOT(pick(DAYS.filter(d => d !== day)), '下午', hr); }
+    const alt = SLOT(pick(DAYS.filter(d => d !== day)), '下午', pick([2, 3, 4, 5, 6].filter(h => h !== hr)));   // 老闆說對時，「不對」選項用的別的時間
     this.carry = null; this._cs = false;
-    this.task = { day, hr, want: SLOT(day, '下午', hr), said, bossWrong, slots: slots.map(s => SLOT(s[0], s[1], s[2])), shops, shopOrder: shuffle(shops.slice()), phone: fmt(real), phones: ph.map(fmt), phoneZh: zhNum(real), phonesZh: ph.map(zhNum), len, bang, rot: Math.floor(Math.random() * 3), price, given, wrong: given !== 500 - price };
+    this.task = { day, hr, want: SLOT(day, '下午', hr), said, bossWrong, alt, slots: slots.map(s => SLOT(s[0], s[1], s[2])), shops, shopOrder: shuffle(shops.slice()), phone: fmt(real), phones: ph.map(fmt), phoneZh: zhNum(real), phonesZh: ph.map(zhNum), len, bang, rot: Math.floor(Math.random() * 3), price, given, wrong: given !== 500 - price };
   },
 
   setPlace(mode) {
@@ -606,7 +607,7 @@ const Game = defineGame({
         place: 'call',
         html: () => Game.carryHTML(),
         dialogue: () => [boss(`好，${t.said}，請提早十分鐘到喔！`, `Bien, ${t.said}. ¡Llegue 10 minutos antes, por favor!`, `OK, ${t.said}. Please arrive 10 minutes early!`)],
-        options: () => rot(['好，謝謝，再見！', `不對，我要的是${t.want}。`]),
+        options: () => rot(['好，謝謝，再見！', `不對，我要的是${t.bossWrong ? t.want : t.alt}。`]),
         next: c => {
           const fix = c.startsWith('不對');
           if (fix !== t.bossWrong) {
