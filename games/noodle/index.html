@@ -623,7 +623,7 @@ const Game = defineGame({
     /* 麵端上來：45% 機率有一項不對（內用外帶不會出現在麵上） */
     t.hoWrong = Math.random() < 0.45; t.hoKind = pick(['noodle', 'size', 'spicy', 'scal', 'sides']); t.hoFlip = flipOf(t, t.hoKind);
     t.hoGot = { ...truth, ...(t.hoWrong ? { [t.hoKind]: t.hoFlip } : {}) };
-    this.k = 0;
+    this.k = 0; this.sideWrong = false;
   },
 
   amiLines() {
@@ -765,12 +765,13 @@ const Game = defineGame({
         options: () => sideOpts(),
         next: c => {
           if (c !== sideCorrect()) {
-            Game.addMistake(needSide()
+            Game.sideWrong = true; Game.addMistake(needSide()
               ? M(`Ami要加${t.sides[Game.k].zh}。`, `Ami quiere ${t.sides[Game.k].es}.`, `Ami wants ${t.sides[Game.k].en}.`)
               : t.sides.length ? M('Ami要的小菜都點完了，不用再加。', 'Ya pediste todas las guarniciones de Ami; no hace falta más.', "You've already ordered all of Ami's side dishes — no more needed.") : M('Ami說小菜不用。', 'Ami dijo que no quería guarniciones.', 'Ami said no side dishes.'));
             return;
           }
-          goodFirst('SIDE' + Game.k, needSide() ? `${t.sides[Game.k].zh}，沒錯！` : '小菜點完了，沒有多加。', needSide() ? `¡${t.sides[Game.k].es}, correcto!` : 'Terminaste con las guarniciones, sin añadir de más.', needSide() ? `${t.sides[Game.k].en} — correct!` : 'Done with the sides, nothing extra added.');
+          if (!Game.sideWrong) Game.good(needSide() ? `${t.sides[Game.k].zh}，沒錯！` : '小菜點完了，沒有多加。', needSide() ? `¡${t.sides[Game.k].es}, correcto!` : 'Terminaste con las guarniciones, sin añadir de más.', needSide() ? `${t.sides[Game.k].en} — correct!` : 'Done with the sides, nothing extra added.');
+          Game.sideWrong = false;
           if (needSide()) { Game.k += 1; Game.thought = [L(`（老闆把${t.sides[Game.k - 1].zh}放進盤子裡。）`, `(El dueño pone ${t.sides[Game.k - 1].es} en el plato.)`, `(The owner puts ${t.sides[Game.k - 1].en} on a plate.)`)]; if (Game.k >= t.sides.length) { /* 還要再問一次「還要別的嗎」 */ } return; }
           Game.thought = null; Game.state = 'EAT';
         }

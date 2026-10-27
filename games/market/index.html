@@ -484,7 +484,7 @@ const Game = defineGame({
       fq: items[wi].q === 1 ? 2 : items[wi].q - 1
     };
     this.task.given = 500 - fin - (this.task.shortChange ? 50 : 0);
-    this.k = 0;
+    this.k = 0; this.itemWrong = false;
   },
   amiLines() {
     const N = this.N, t = this.task;
@@ -550,8 +550,9 @@ const Game = defineGame({
         options: () => { const it = t.items[Game.k]; const ms = [it.m, ...shuffle(MEASURES.filter(x => x !== it.m)).slice(0, 2)]; return rot(ms).map(m => `我要${QN(it.q)}${m}${it.zh}。`); },
         next: c => {
           const it = t.items[Game.k];
-          if (c !== `我要${QN(it.q)}${it.m}${it.zh}。`) { Game.addMistake(M(`記住！${it.zh}的量詞是「${it.m}」。`, `¡Recuerda! El clasificador de ${it.es} es «${it.m}».`, `Remember! The measure word for ${it.en} is "${it.m}".`)); return; }
-          goodFirst('ITEM' + Game.k, `對了！${it.zh}用「${it.m}」。`, `¡Correcto! Para ${it.es} se usa «${it.m}».`, `Right! Use "${it.m}" for ${it.en}.`);
+          if (c !== `我要${QN(it.q)}${it.m}${it.zh}。`) { Game.itemWrong = true; Game.addMistake(M(`記住！${it.zh}的量詞是「${it.m}」。`, `¡Recuerda! El clasificador de ${it.es} es «${it.m}».`, `Remember! The measure word for ${it.en} is "${it.m}".`)); return; }
+          if (!Game.itemWrong) Game.good(`對了！${it.zh}用「${it.m}」。`, `¡Correcto! Para ${it.es} se usa «${it.m}».`, `Right! Use "${it.m}" for ${it.en}.`);
+          Game.itemWrong = false;
           Game.k += 1;
           if (Game.k < t.items.length) { Game.thought = [vend('好，還要什麼？', 'Bien, ¿algo más?', 'OK, anything else?')]; return; }
           Game.thought = [vend('好，我幫你算一下。', 'Bien, le hago la cuenta.', "OK, let me add it up.")];

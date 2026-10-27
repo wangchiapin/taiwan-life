@@ -616,7 +616,7 @@ const Game = defineGame({
     t.hoWrong = Math.random() < 0.45; t.hoKind = pick(KEYS); t.hoFlip = flipOf(t, t.hoKind);
     t.hoIdx = t.hoKind === 'items' ? diffIdx(items, t.hoFlip) : 0;
     t.hoGot = { ...truth, ...(t.hoWrong ? { [t.hoKind]: t.hoFlip } : {}) };
-    this.k = 0;
+    this.k = 0; this.itemWrong = false;
   },
 
   amiLines() {
@@ -710,13 +710,15 @@ const Game = defineGame({
         options: () => itemOpts(),
         next: c => {
           if (c !== itemCorrect()) {
+            Game.itemWrong = true;
             Game.addMistake(need()
               ? (c === done ? M(`Ami還要${qtyZh(t.items[Game.k])}。`, `Ami también quiere ${t.items[Game.k].q} ${t.items[Game.k].it.es}.`, `Ami also wants ${t.items[Game.k].q} ${t.items[Game.k].it.en}.`)
                 : M(`數量不對：Ami要${qtyZh(t.items[Game.k])}。`, `La cantidad no es esa: Ami quiere ${t.items[Game.k].q} ${t.items[Game.k].it.es}.`, `Wrong amount: Ami wants ${t.items[Game.k].q} ${t.items[Game.k].it.en}.`))
               : M('Ami要的都點完了，不用再加。', 'Ya pediste todo lo de Ami; no hace falta añadir más.', "You've ordered everything Ami wanted — nothing more to add."));
             return;
           }
-          goodFirst('ITEM' + Game.k, need() ? `${qtyZh(t.items[Game.k])}，沒錯！` : '點完了，沒有多加。', need() ? `¡${t.items[Game.k].q} ${t.items[Game.k].it.es}, correcto!` : 'Terminaste de pedir, sin añadir de más.', need() ? `${t.items[Game.k].q} ${t.items[Game.k].it.en} — correct!` : 'Done ordering, nothing extra added.');
+          if (!Game.itemWrong) Game.good(need() ? `${qtyZh(t.items[Game.k])}，沒錯！` : '點完了，沒有多加。', need() ? `¡${t.items[Game.k].q} ${t.items[Game.k].it.es}, correcto!` : 'Terminaste de pedir, sin añadir de más.', need() ? `${t.items[Game.k].q} ${t.items[Game.k].it.en} — correct!` : 'Done ordering, nothing extra added.');
+          Game.itemWrong = false;
           if (need()) { Game.k += 1; Game.thought = [L(`（老闆把${t.items[Game.k - 1].it.zh}放進籃子裡。）`, `(El dueño pone ${t.items[Game.k - 1].it.es} en la canasta.)`, `(The owner puts ${t.items[Game.k - 1].it.en} in the basket.)`)]; return; }
           Game.thought = null; Game.state = 'CUT';
         }
