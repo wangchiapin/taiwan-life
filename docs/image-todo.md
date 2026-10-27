@@ -21,3 +21,6 @@
 
 ## 電梯 elevator
 - [ ] EARLY（電梯中途停在別的樓層，門開了，外面有人要上電梯）：暫用 hall.jpg。建議補一張「電梯門開，外面是別層走廊，牆上有樓層數字，有人站在門外」。用 elevator.jpg 當底圖，編輯式提示詞。
+
+## 電影院 cinema（2026-10-27 Ben 指定）
+- [ ] counter_sorry.jpg：售票員被抓到說錯（總價、座位、找錢、票印錯）時的尷尬表情。放進 games/cinema/images/ 就會自動使用；沒有這張圖時自動用 counter.jpg。用 counter.jpg 當底圖，編輯式提示詞（只改表情）。
