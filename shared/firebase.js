@@ -69,6 +69,11 @@ export function initFB({ scoresCol } = {}) {
       try { const s = await getDoc(doc(db, 'settings', 'map')); return s.exists() ? (s.data().open || {}) : {}; }
       catch (e) { console.error("讀取地圖開關失敗", e); return {}; }
     },
+    /* 地圖效果：settings/map 的 night（auto/on/off）、fest（auto/off/節慶id） */
+    async getMapConfig() {
+      try { const s = await getDoc(doc(db, 'settings', 'map')); return s.exists() ? s.data() : {}; }
+      catch (e) { console.error("讀取地圖設定失敗", e); return {}; }
+    },
     /* 有 done（地圖進度）就整筆蓋過去（清除進度才會真的清掉）；只有名字就合併，不動到進度 */
     async saveProgress(code, data) {
       try { await setDoc(doc(db, 'progress', code), { ...data, code, updatedAt: Date.now() }, { merge: !('done' in data) }); return true; }

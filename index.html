@@ -1125,7 +1125,8 @@ function draw(now) {
    網址加 ?night=1 強制夜間、?night=0 強制白天（測試用）
 ══════════════════════════════════════ */
 const NIGHT_FORCE = new URLSearchParams(location.search).get('night');
-const isNight = () => NIGHT_FORCE === '1' || (NIGHT_FORCE !== '0' && (new Date().getHours() >= 18 || new Date().getHours() < 6));
+let NIGHT_MODE = 'auto';   // 後台設定：auto／on／off；網址 ?night= 優先
+const isNight = () => NIGHT_FORCE === '1' || (NIGHT_FORCE !== '0' && (NIGHT_MODE === 'on' || (NIGHT_MODE !== 'off' && (new Date().getHours() >= 18 || new Date().getHours() < 6))));
 let _lamps = null;
 function drawNight(cy) {   // 呼叫時已經 translate(0, -cy)
   if (!_lamps) { _lamps = []; for (let y = 0; y < ROWS; y++) { if (!SIDEWALK_ROWS.includes(y)) continue; for (let x = 1; x < COLS; x += 4) if (!isRoad(x, y)) _lamps.push([x * T + T / 2, y * T + T / 2]); } }
@@ -1393,7 +1394,10 @@ if (S.name) {
 document.getElementById('who').onclick = () => { document.getElementById('name').value = S.name; document.getElementById('intro').style.display = 'flex'; };
 /* 地圖開關：讀 Firebase 的 settings/map，打開的新遊戲才能進去（讀不到就維持維修中） */
 TWFB.when(async fb => {
-  const o = await fb.getMapSettings();
+  const cfg = await fb.getMapConfig();
+  const o = cfg.open || {};
+  if (['on', 'off'].includes(cfg.night)) NIGHT_MODE = cfg.night;
+  if (cfg.fest && cfg.fest !== 'auto' && window.FEST) FEST.setMode(cfg.fest);
   Object.keys(o).forEach(k => { OPEN[k] = o[k] === true; });
   buildings.forEach(b => { b.soon = !!b.sc.status || !isLive(b.sc); });
   updateHud();

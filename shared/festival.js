@@ -26,10 +26,12 @@ const FESTS = [   // 順序＝同樣遠時的優先順序；lo/hi＝往前、往
   { id: 'xmas',      lo: 3, hi: 3, is: d => d.getMonth() === 11 && d.getDate() === 25 },
   { id: 'nye',       lo: 3, hi: 3, is: d => d.getMonth() === 11 && d.getDate() === 31 }
 ];
-function detect() {
+function detect(mode) {   // 順序：網址 ?fest= ＞ 後台設定 mode（off／節慶id／auto）＞ 照日期
   const q = new URLSearchParams(location.search).get('fest');
   if (q === '0') return null;
   if (q && FESTS.some(f => f.id === q)) return q;
+  if (mode === 'off') return null;
+  if (mode && FESTS.some(f => f.id === mode)) return mode;
   const now = new Date(); let best = null, bd = 99;
   FESTS.forEach(f => {
     for (let k = -f.hi; k <= f.lo; k++) {   // k＝今天離節日還有幾天（負的＝節日已過）
@@ -39,8 +41,7 @@ function detect() {
   });
   return best;
 }
-const NAME = detect();
-if (!NAME) return;
+let NAME = detect('auto');
 const TINT = { halloween: '#9b86d0', muertos: '#9b86d0', cny: '#a07a9a', lantern: '#8593c8', dragon: '#8593c8', ghost: '#7a86b8', moon: '#7e8fcf', xmas: '#8593c8', nye: '#7c80c0' };
 
 /* ── 裝飾用的小工具 ── */
@@ -399,6 +400,7 @@ const ghosts = () => {
   const SP = [[2, 10], [7.5, 12.5], [14, 9.4], [17.5, 12.8], [3.5, 3.7], [11, 7.3]];
   BANDS.forEach((b, bi) => SP.forEach(([x, y], i) => E.push({ type: 'ghost', kind: 'ghost', bx: x, by: y + b, i: i + bi * 6, x, y: y + b, li: i % 2, far: true })));
 };
+function build() {
 if (NAME === 'halloween') {
   ghosts(); flier('witch', { vx: 2.4, wait0: 1.5 });
   BANDS.forEach(b => { patrol('zombie', 4 + b, 12, 18, { speed: .45, tall: .8 }); patrol('zombie', 7 + b, 1, 8, { speed: .45, tall: .8 }); });
@@ -413,9 +415,12 @@ else if (NAME === 'xmas') {
   BANDS.forEach(b => { patrol('santa', 7 + b, 11, 18, { speed: .5, tall: .8 }); patrol('reindeer', 12.4 + b, 1, 4, { speed: .35, tall: .9 }); });
   flier('sleigh', { vx: 3, wait0: 3 });
 }
+}
+build();
 
 const NEAR = { ghost: 1.7, witch: 3, zombie: 1.7, nian: 2.2, dragon: 2.6, rabbit: 1.6, santa: 1.7, reindeer: 1.8, sleigh: 4 };
 function update(dt) {
+  if (!NAME) return;
   const pt = typeof playerTile === 'function' ? playerTile() : { x: P.x, y: P.y };
   E.forEach(e => {
     if (e.type === 'patrol') {
@@ -435,6 +440,7 @@ function update(dt) {
 }
 const onScreen = (y, pad = 80) => y * T > camY - pad && y * T < camY + VH + pad;
 function drawBelow(now) {
+  if (!NAME) return;
   g.save();
   if (DECO[NAME]) DECO[NAME](now);
   E.forEach(e => {
@@ -459,6 +465,7 @@ function drawBelow(now) {
 }
 const GH = { halloween: ['255,255,255', '#f4f4ff'], muertos: ['255,160,220', '#ffe3f1'], ghost: ['150,240,200', '#dff7ee'] };
 function drawTop(now, night) {
+  if (!NAME) return;
   g.save();
   if (night && NIGHTFX[NAME]) NIGHTFX[NAME]();
   const gh = GH[NAME];
@@ -470,6 +477,7 @@ function drawTop(now, night) {
   g.restore();
 }
 function speakers(dist) {
+  if (!NAME) return [];
   if (!whoDone) { Object.assign(WHO, WHOS); whoDone = true; }
   const out = [];
   E.forEach((e, i) => {
@@ -488,5 +496,7 @@ function speakers(dist) {
   });
   return out;
 }
-window.FEST = { name: NAME, tint: TINT[NAME], update, drawBelow, drawTop, speakers };
+window.FEST = { name: NAME, tint: TINT[NAME], update, drawBelow, drawTop, speakers,
+  setMode(mode) { NAME = detect(mode); E.length = 0; build(); FEST.name = NAME; FEST.tint = TINT[NAME]; }
+};
 })();

@@ -11,8 +11,8 @@
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Noto Sans TC', 'Segoe UI', sans-serif; font-size: 15px; }
   button, input, select { font: inherit; color: inherit; }
-  select[data-sw] { color: #111; background: #fff; }
-  select[data-sw] option { color: #111; background: #fff; }
+  select[data-sw], select[data-fx] { color: #111; background: #fff; }
+  select[data-sw] option, select[data-fx] option { color: #111; background: #fff; }
   header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 14px 18px; border-bottom: 2px solid var(--line); background: var(--card); position: sticky; top: 0; z-index: 5; }
   header h1 { font-size: 20px; margin: 0 auto 0 0; }
   header .who { color: var(--muted); font-size: 13px; }
@@ -328,8 +328,22 @@ const GATED = [...LEGACY, 'school', 'ubike', 'bus', 'barber', 'cinema', 'parking
 const isOn = id => LEGACY.includes(id) ? OPENMAP[id] !== false : OPENMAP[id] === true;
 const OPENMAP = {};
 const gameUrl = id => new URL('../games/' + id + '/', location.href).href;
+const FX_FEST = [['halloween','🎃 萬聖節'],['muertos','💀 亡靈節'],['cny','🧧 春節'],['lantern','🏮 元宵'],['dragon','🐲 端午'],['ghost','👻 中元'],['moon','🌕 中秋'],['xmas','🎄 聖誕'],['nye','🎆 跨年']];
+function fxPanel() {
+  return `<h2 style="margin-top:0">地圖效果</h2>
+    <p class="muted">玩家的地圖要不要有夜晚、節慶裝飾。按了馬上存，玩家重新整理地圖就會看到。測試用的網址（?night=1、?fest=xmas）還是優先。節慶一次只能顯示一個。</p>
+    <div class="panel"><table><tbody>
+      <tr><td>🌙 日夜</td><td><select data-fx="night" id="fx-night"><option value="auto">跟著手機時間（晚上 6 點到早上 6 點是夜晚）</option><option value="on">一直夜晚</option><option value="off">一直白天</option></select> <span class="muted" id="fxm-night"></span></td></tr>
+      <tr><td>🎉 節慶</td><td><select data-fx="fest" id="fx-fest"><option value="auto">跟著日期（節日前後 3 天自動出現）</option><option value="off">關閉（都不顯示）</option>${FX_FEST.map(([id, n]) => `<option value="${id}">直接開啟：${n}</option>`).join('')}</select> <span class="muted" id="fxm-fest"></span></td></tr>
+    </tbody></table></div>`;
+}
+async function setFx(key, val) {
+  const m = $('fxm-' + key);
+  try { await setDoc(doc(db, 'settings', 'map'), { [key]: val }, { merge: true }); if (m) m.textContent = '已儲存'; status('已儲存：地圖效果'); }
+  catch (e) { status('儲存失敗：' + (e.code || e.message), 8000); }
+}
 function switchShell() {
-  return `<h2 style="margin-top:0">地圖開關・遊戲連結</h2>
+  return fxPanel() + `<h2 style="margin-top:36px"> style="margin-top:0">地圖開關・遊戲連結</h2>
     <p class="muted">「開啟」＝玩家在地圖上可以進去；「維修中」＝房子釘木板、進不去。按了馬上存，玩家重新整理地圖就會看到。每個遊戲都可以設定；前九個舊遊戲一開始是「開啟」，選「維修中」才會關起來。<br>
     「試玩」會直接開那個遊戲，不管地圖是開啟還是維修中，也不會經過地圖。</p>
     <div class="panel"><table><tbody>
@@ -345,6 +359,9 @@ async function loadSwitch() {
   try {
     const s = await getDoc(doc(db, 'settings', 'map'));
     Object.assign(OPENMAP, s.exists() ? (s.data().open || {}) : {});
+    const d = s.exists() ? s.data() : {};
+    if ($('fx-night')) $('fx-night').value = ['on', 'off'].includes(d.night) ? d.night : 'auto';
+    if ($('fx-fest')) $('fx-fest').value = d.fest === 'off' || FX_FEST.some(f => f[0] === d.fest) ? d.fest : 'auto';
   } catch (e) { status('讀取開關失敗：' + (e.code || e.message), 6000); }
   GATED.forEach(id => { const el = $('sw-' + id); if (el) el.value = isOn(id) ? '1' : '0'; });
 }
@@ -430,7 +447,7 @@ $('f-clear').onclick = () => { ['f-from', 'f-to', 'f-scene', 'f-name'].forEach(i
 $('btn-csv').onclick = exportCSV;
 $('btn-reload').onclick = loadAll;
 document.querySelectorAll('nav button').forEach(b => b.onclick = () => { V.tab = b.dataset.tab; V.player = null; V.scene = null; render(); window.scrollTo(0, 0); });
-$('view').addEventListener('change', e => { if (e.target.dataset.sw) { setSwitch(e.target.dataset.sw, e.target.value === '1'); return; } if (e.target.id === 'b-scene') { V.board = e.target.value; render(); } });
+$('view').addEventListener('change', e => { if (e.target.dataset.fx) { setFx(e.target.dataset.fx, e.target.value); return; } if (e.target.dataset.sw) { setSwitch(e.target.dataset.sw, e.target.value === '1'); return; } if (e.target.id === 'b-scene') { V.board = e.target.value; render(); } });
 $('view').addEventListener('click', e => {
   const t = e.target.closest('[data-del],[data-del-player],[data-del-board],[data-back],[data-player],[data-scene],[data-go-scene],[data-toggle]');
   if (!t || e.target.closest('a')) return;
