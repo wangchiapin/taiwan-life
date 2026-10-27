@@ -549,14 +549,15 @@ const Game = defineGame({
     const N = this.N, t = this.task, here = t.eat === 'here';
     const ordZh = t.flavors.map((f, i) => `第${CN[i + 1]}球是${f.zh}`).join('，');
     const ordEs = t.flavors.map((f, i) => `la bola ${i + 1}: ${f.es}`).join('; '), ordEn = t.flavors.map((f, i) => `scoop ${i + 1}: ${f.en}`).join('; ');
-    return [
-      L(`Ami：${N}，我${here ? '已經在冰淇淋店裡面坐好了' : '在公園的長椅這邊等你'}。幫我買冰淇淋，好嗎？`,
+    /* Ami 的話合併成一句（一個泡泡）：把原本四段原文直接接起來，不增減字和標點 */
+    const l1 = L(`${N}，我${here ? '已經在冰淇淋店裡面坐好了' : '在公園的長椅這邊等你'}。幫我買冰淇淋，好嗎？`,
         `${N}, ${here ? 'ya estoy sentada dentro de la heladería' : 'te espero en una banca del parque'}. ¿Me compras un helado?`,
-        `${N}, ${here ? "I'm already sitting inside the ice cream shop" : "I'm waiting on a bench in the park"}. Could you buy me some ice cream?`),
-      L(`Ami：我要${NZ(t.n)}球。${ordZh}。`, `Quiero ${t.n} bolas: ${ordEs}.`, `I want ${t.n} scoops — ${ordEn}.`),
-      L(`Ami：我要${t.vessel.zh}，${t.top ? `還要加${t.top.zh}` : '不要加配料'}。`, `Lo quiero ${t.vessel.es}, ${t.top ? `y con ${t.top.es}` : 'sin topping'}.`, `I want it ${t.vessel.en}, ${t.top ? `with ${t.top.en}` : 'with no toppings'}.`),
-      L(here ? 'Ami：我們在這裡吃。' : 'Ami：我要外帶，帶去公園吃。', here ? 'Lo comemos aquí.' : 'Lo quiero para llevar; lo comeré en el parque.', here ? "We'll eat it here." : "I want it to go — I'll eat it in the park.")
-    ];
+        `${N}, ${here ? "I'm already sitting inside the ice cream shop" : "I'm waiting on a bench in the park"}. Could you buy me some ice cream?`);
+    const l2 = L(`我要${NZ(t.n)}球。${ordZh}。`, `Quiero ${t.n} bolas: ${ordEs}.`, `I want ${t.n} scoops — ${ordEn}.`);
+    const l3 = L(`我要${t.vessel.zh}，${t.top ? `還要加${t.top.zh}` : '不要加配料'}。`, `Lo quiero ${t.vessel.es}, ${t.top ? `y con ${t.top.es}` : 'sin topping'}.`, `I want it ${t.vessel.en}, ${t.top ? `with ${t.top.en}` : 'with no toppings'}.`);
+    const l4 = L(here ? '我們在這裡吃。' : '我要外帶，帶去公園吃。', here ? 'Lo comemos aquí.' : 'Lo quiero para llevar; lo comeré en el parque.', here ? "We'll eat it here." : "I want it to go — I'll eat it in the park.");
+    const ls = [l1, l2, l3, l4];
+    return [L('Ami：' + ls.map(x => x.zh).join(''), ls.map(x => x.es).join(' '), ls.map(x => x.en).join(' '))];
   },
   priceLine(fixed) {
     const t = this.task;
