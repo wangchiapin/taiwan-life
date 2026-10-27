@@ -372,13 +372,14 @@ const VOCAB = {
   WAIT: [['開門', 'abrir la puerta', 'open the door'], ['關門', 'cerrar la puerta', 'close the door'], ['等一下', 'espera un momento', 'wait a moment']],
   FLOOR: [['樓', 'piso', 'floor'], ['按', 'presionar', 'press'], ['住在', 'vivir en', 'live at']],
   HELP: [['麻煩', 'por favor, molestar', 'please / trouble'], ['幫我', 'ayúdame a', 'help me'], ['不好意思', 'disculpa', 'sorry / excuse me']],
+  EARLY: [['樓層', 'piso', 'floor'], ['出去', 'salir', 'go out'], ['這裡不是', 'aquí no es', 'this is not']],
   STOP: [['到了', 'ya llegó', 'arrived'], ['慢走', 'que le vaya bien', 'take care (to someone leaving)'], ['再見', 'adiós', 'goodbye']],
   ARRIVE: [['借過', 'con permiso', 'excuse me (let me pass)'], ['不好意思', 'disculpa', 'excuse me'], ['到了', 'ya llegó', 'arrived']],
   END: [['電鈴', 'timbre', 'doorbell'], ['歡迎', 'bienvenido', 'welcome']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
-const STAGE = { LOBBY: ['大廳', 'vestíbulo', 'lobby'], WAIT: ['等人', 'esperar', 'waiting'], FLOOR: ['按樓層', 'elegir piso', 'choosing a floor'], HELP: ['幫忙', 'ayudar', 'helping'], STOP: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], ARRIVE: ['出電梯', 'salir', 'exiting'] };
-const NEXT_LABEL = { LOBBY: '走到電梯前', WAIT: '電梯來了', FLOOR: '走進電梯', HELP: '電梯往上', STOP: '電梯停了', ARRIVE: '繼續往上', END: '到Ami家' };
+const STAGE = { LOBBY: ['大廳', 'vestíbulo', 'lobby'], WAIT: ['等人', 'esperar', 'waiting'], FLOOR: ['按樓層', 'elegir piso', 'choosing a floor'], HELP: ['幫忙', 'ayudar', 'helping'], EARLY: ['看樓層', 'mirar el piso', 'checking the floor'], STOP: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], ARRIVE: ['出電梯', 'salir', 'exiting'] };
+const NEXT_LABEL = { LOBBY: '走到電梯前', WAIT: '電梯來了', FLOOR: '走進電梯', HELP: '電梯往上', STOP: '電梯停了', EARLY: '電梯又停了', ARRIVE: '繼續往上', END: '到Ami家' };
 
 const PLACES = {
   phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
@@ -460,12 +461,13 @@ const Game = defineGame({
 
   IMAGES: {
     START: ['images/start.jpg', '🏢'], LOBBY: ['images/lobby.jpg', '🏢'], WAIT: ['images/wait.jpg', '🛗'], FLOOR: ['images/panel.jpg', '🛗'],
-    HELP: ['images/elevator.jpg', '🛗'], STOP: ['images/elevator.jpg', '🛗'], ARRIVE: ['images/hall.jpg', '🚪'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+    HELP: ['images/elevator.jpg', '🛗'], STOP: ['images/elevator.jpg', '🛗'], ARRIVE: ['images/hall.jpg', '🚪'], EARLY: ['images/hall.jpg', '🚪'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
   cur: 1,
   setup() {
     const n = pick([6, 7, 8, 9, 10, 12]), m = pick([2, 3, 4].filter(x => x < n));
-    this.task = { n, m, rot: Math.floor(Math.random() * 3) };
+    const x = pick(Array.from({ length: n - m - 1 }, (_, i) => m + 1 + i));   // 中途有人按了的樓層
+    this.task = { n, m, x, lit: Math.random() < 0.35, early: Math.random() < 0.5, rot: Math.floor(Math.random() * 3) };
     this.cur = 1;
   },
   amiLines() {
@@ -500,6 +502,7 @@ const Game = defineGame({
     const N = this.N, t = this.task;
     const nb = (zh, es, en) => L(`鄰居：${zh}`, es, en);
     const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
+    const litOpt = `不用按，${t.m}樓已經亮了喔。`;
     const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
     return {
       START: {
@@ -551,11 +554,19 @@ const Game = defineGame({
       HELP: {
         place: 'shop',
         html: () => Game.displayHTML(),
-        dialogue: () => [nb(`不好意思，我要到${t.m}樓，麻煩你幫我按一下。`, `Disculpe, voy al piso ${t.m}. ¿Me hace el favor de presionarlo?`, `Excuse me, I'm going to floor ${t.m}. Could you press it for me?`)],
-        options: () => rot([`好，我幫你按${t.m}樓。`, `好，我幫你按${t.n}樓。`, '我中文不好。']),
+        dialogue: () => [nb(`不好意思，我要到${t.m}樓，麻煩你幫我按一下。`, `Disculpe, voy al piso ${t.m}. ¿Me hace el favor de presionarlo?`, `Excuse me, I'm going to floor ${t.m}. Could you press it for me?`), ...(t.lit ? [L(`（面板上，${t.m}樓的燈已經亮了。）`, `(En el panel, la luz del piso ${t.m} ya está encendida.)`, `(On the panel, the light for floor ${t.m} is already on.)`)] : [])],
+        options: () => rot([`好，我幫你按${t.m}樓。`, `好，我幫你按${t.n}樓。`, litOpt]),
         next: c => {
-          if (c !== `好，我幫你按${t.m}樓。`) { Game.addMistake(c.includes('不好') ? M('鄰居只是請你幫忙按一個鈕，應該不難吧！', 'El vecino solo te pide presionar un botón; ¡no debería ser difícil!', 'The neighbor only asks you to press a button — it shouldn\'t be hard!') : M(`聽清楚一點，鄰居要到${t.m}樓。`, `Escucha con más atención: el vecino va al piso ${t.m}.`, `Listen more carefully: the neighbor is going to floor ${t.m}.`)); return; }
-          goodFirst('HELP', '很好！你聽懂了他要去幾樓。', '¡Bien! Entendiste a qué piso va.', 'Good! You understood which floor he is going to.');
+          const right = t.lit ? litOpt : `好，我幫你按${t.m}樓。`;
+          if (c !== right) {
+            Game.addMistake(c === litOpt
+              ? M(`${t.m}樓的燈還沒亮，要幫他按。`, `La luz del piso ${t.m} todavía no está encendida: hay que presionarlo por él.`, `The light for floor ${t.m} isn't on yet, so you need to press it for him.`)
+              : c === `好，我幫你按${t.m}樓。`
+                ? M(`${t.m}樓的燈已經亮了，不用再按。再按一次，有的電梯會把它取消！`, `La luz del piso ${t.m} ya está encendida: no hace falta presionar otra vez. ¡En algunos ascensores se cancela!`, `The light for floor ${t.m} is already on — no need to press again. In some elevators that cancels it!`)
+                : M(`鄰居要到${t.m}樓，不是${t.n}樓。`, `El vecino va al piso ${t.m}, no al ${t.n}.`, `The neighbor is going to floor ${t.m}, not ${t.n}.`));
+            return;
+          }
+          goodFirst('HELP', t.lit ? '你很細心！燈已經亮了，不用再按。' : '很好！你聽懂了他要去幾樓。', t.lit ? '¡Qué atento! La luz ya está encendida; no hace falta presionar.' : '¡Bien! Entendiste a qué piso va.', t.lit ? 'Well spotted! The light is already on, so no need to press.' : 'Good! You understood which floor he is going to.');
           Game.cur = t.m;
           Game.thought = [L(`（電梯向上，在${t.m}樓的時候電梯停了下來。）`, `(El ascensor sube y se detiene en el piso ${t.m}.)`, `(The elevator goes up and stops at floor ${t.m}.)`), nb('到了，謝謝你！再見！', 'Ya llegamos, ¡gracias! ¡Adiós!', 'Here we are — thanks! Bye!')];
           Game.state = 'STOP';
@@ -569,8 +580,33 @@ const Game = defineGame({
         next: c => {
           if (c !== '不客氣，慢走！') { Game.addMistake(M('鄰居要出電梯了，可以禮貌地說「慢走」。', 'El vecino va a salir del ascensor: puedes decirle «慢走» con cortesía.', 'The neighbor is getting out — you can politely say "慢走".')); return; }
           goodFirst('STOP', '你學會了！「慢走」是跟離開的人說的客氣話。', '¡Lo aprendiste! «慢走» es una frase cortés para quien se va.', 'You learned it! "慢走" is a polite thing to say to someone leaving.');
+          if (t.early) {
+            Game.cur = t.x;
+            Game.thought = [L(`（電梯繼續往上，在${t.x}樓又停了，門開了。）`, `(El ascensor sigue subiendo y se vuelve a detener en el piso ${t.x}; la puerta se abre.)`, `(The elevator keeps going up and stops again at floor ${t.x}; the door opens.)`)];
+            Game.state = 'EARLY';
+            return;
+          }
           Game.cur = t.n;
           Game.thought = [L(`（電梯繼續往上，到${t.n}樓了。）`, `(El ascensor sigue subiendo y llega al piso ${t.n}.)`, `(The elevator continues up to floor ${t.n}.)`)];
+          Game.state = 'ARRIVE';
+        }
+      },
+      /* ═══ 中途有人按了別的樓層：電梯停了，這不是 Ami 住的樓層 ═══ */
+      EARLY: {
+        place: 'shop',
+        html: () => Game.displayHTML(),
+        dialogue: () => [L(`（門開了，外面有人要上電梯。牆上寫著${t.x}樓。）`, `(La puerta se abre y alguien quiere subir. En la pared dice piso ${t.x}.)`, `(The door opens and someone wants to get on. The wall says floor ${t.x}.)`), L(`我：Ami住在${t.n}樓……`, `Ami vive en el piso ${t.n}…`, `Ami lives on floor ${t.n}…`)],
+        options: () => rot(['走出電梯。', `不出去，這裡不是${t.n}樓。`, '大聲問：「是誰按這一層的？」']),
+        next: c => {
+          if (c !== `不出去，這裡不是${t.n}樓。`) {
+            Game.addMistake(c === '走出電梯。'
+              ? M(`這裡是${t.x}樓，Ami住${t.n}樓。出電梯以前，要先看樓層數字。`, `Aquí es el piso ${t.x}; Ami vive en el ${t.n}. Antes de salir, mira el número del piso.`, `This is floor ${t.x}; Ami lives on ${t.n}. Check the floor number before you step out.`)
+              : M('不用問，有人按了這一層而已，不要大聲說話。', 'No hace falta preguntar: alguien solo presionó este piso. No hables en voz alta.', "No need to ask — someone just pressed this floor. Don't shout."));
+            return;
+          }
+          goodFirst('EARLY', '你很細心！出電梯以前，要先看樓層。', '¡Qué atento! Antes de salir, mira el piso.', 'Well spotted! Check the floor before you get out.');
+          Game.cur = t.n;
+          Game.thought = [L(`（一個人走進電梯，門關上了。電梯繼續往上，到${t.n}樓了。）`, `(Alguien entra, la puerta se cierra y el ascensor sigue subiendo hasta el piso ${t.n}.)`, `(Someone gets in, the door closes and the elevator continues up to floor ${t.n}.)`)];
           Game.state = 'ARRIVE';
         }
       },

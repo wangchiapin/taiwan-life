@@ -12,3 +12,12 @@
 ## 書店 bookstore
 - [ ] FIND 書賣完時書架少一本：目前用 HTML 書架顯示，不需新圖。
 - [ ] STOCK（問店員有沒有庫存）：暫用 counter.jpg，可選補一張「店員拿著書從倉庫走出來」。
+
+## 停車場 parking
+- [ ] PAY_CHECK（繳費機螢幕出現應付金額）：用 machine.jpg + HTML 卡片，不需新圖。
+
+## 菜市場 market
+- [ ] CHANGE（找錢）暫用 pay.jpg、CHECK（拿菜）暫用 stall.jpg：可選補「老闆把找的錢放在手上」「老闆遞出一袋菜」兩張（用 stall.jpg 當底圖，編輯式提示詞）。
+
+## 電梯 elevator
+- [ ] EARLY（電梯中途停在別的樓層，門開了，外面有人要上電梯）：暫用 hall.jpg。建議補一張「電梯門開，外面是別層走廊，牆上有樓層數字，有人站在門外」。用 elevator.jpg 當底圖，編輯式提示詞。
