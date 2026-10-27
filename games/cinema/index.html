@@ -565,7 +565,7 @@ const Game = defineGame({
       payWrong: Math.random() < 0.45,             // 售票員報的總價會不會算錯（學生票也算成全票）
       tkWrong: Math.random() < 0.45, tkKind: pick(['time', 'seat']),   // 票印錯的是場次還是座位
       snackWrong: Math.random() < 0.45,           // 店員會不會給錯口味的爆米花
-      seatWrong: Math.random() < 0.45,            // 售票員複誦座位時會不會念錯              // 印出來的票，場次會不會印錯
+      seatWrong: Math.random() < 0.45,            // 售票員複誦座位時會不會念錯
       badPay: pick(['five', 'bargain']),
       tkAlt: pick(TIMES.filter(x => x !== time)),
       shortChange: Math.random() < 0.5,           // 這局售票員會不會少找錢
@@ -625,9 +625,9 @@ const Game = defineGame({
   shiftSeats(ks) { const { r, cs } = seatParts(ks), up = Math.max(...cs) < 8; return cs.map(c => r + '-' + (up ? c + 1 : c - 1)); },   // 念錯／印錯的座位：每個號碼差一號
   saidSeats() { return this.task.seatWrong ? this.shiftSeats(this.chosen) : this.chosen; },
   tkTimeShown() { const t = this.task; return t.tkWrong ? t.wrongTime : t.time; },
-  totalLine() {
+  totalLine(fixed) {   // fixed：提示用，顯示正確的總價
     const t = this.task;
-    const n = this.said();
+    const n = fixed ? t.total : this.said();
     return L(`售票員：好的，一共是${zhNum(n)}元。`, `Muy bien, son ${esM(n)} en total.`, `All right, that's ${enM(n)} in total.`);
   },
   gateLine() {
@@ -643,7 +643,7 @@ const Game = defineGame({
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
     if (at('TICKETS')) out.push({ title: '票價', lines: [L(`全票：${t.full}元`, `Entrada completa: ${esM(t.full)}`, `Full price: ${enM(t.full)}`), L(`學生票：${t.stud}元（要出示學生證）`, `Entrada de estudiante: ${esM(t.stud)} (hay que mostrar la credencial)`, `Student ticket: ${enM(t.stud)} (student ID required)`)] });
     if (at('SEAT_CONFIRM') && this.chosen.length) out.push({ title: '你選的座位', lines: [L(`你選的是：${seatZh(this.chosen)}`, `Elegiste: ${seatEs(this.chosen)}`, `You chose: ${seatEn(this.chosen)}`)] });
-    if (at('CHANGE')) out.push({ title: '售票員說的話', lines: [this.totalLine(true)] });
+    if (at('CHANGE')) out.push({ title: '付錢', lines: [this.totalLine(true), L(`你給了：${zhNum(t.bills * 1000)}元`, `Diste: ${esM(t.bills * 1000)}`, `You paid: ${enM(t.bills * 1000)}`)] });
     return out;
   },
 
@@ -717,6 +717,7 @@ const Game = defineGame({
     const wrongSplit = `${nw(1, '全票')}，${nw(t.people - 1, '學生票')}。`;   // 學生票買太多
     const tkFix = () => t.tkKind === 'time' ? `不好意思，場次好像印錯了，我要的是${combo(t.movie, t.tkWrong ? t.time : t.tkAlt)}。`
       : `不好意思，座位好像印錯了，我選的是${seatZh(t.tkWrong ? Game.chosen : Game.shiftSeats(Game.chosen))}。`;
+    const changeFix = `不好意思，好像找錯了，應該找${zhNum(t.change)}元吧？`;
     const seatFix = () => `不對，我選的是${seatZh(t.seatWrong ? Game.chosen : Game.shiftSeats(Game.chosen))}。`;
     const hallOpts = [t.hall, ...[2, 3, 4, 5, 6].filter(h => h !== t.hall).slice(0, 2)];
 
@@ -859,13 +860,15 @@ const Game = defineGame({
         place: 'counter',
         html: () => `<div class="board"><div class="bh">💵 ${Game.ruby('找的錢')}</div><div class="brow"><span class="tm">${Game.given}</span><small>${Game.ruby('元')}</small></div></div>`,
         dialogue: () => [staff(`收你${zhNum(t.bills * 1000)}元，找你${zhNum(Game.given)}元。`, `Recibo ${esM(t.bills * 1000)}; le doy ${esM(Game.given)} de cambio.`, `I've got ${enM(t.bills * 1000)} — here's ${enM(Game.given)} change.`)],
-        options: () => rot(['好，謝謝。', '不好意思，你找錯了。']).slice(0, 2),
+        options: () => rot(['好，謝謝。', changeFix, '你是不是不會算數啊？']),
         next: c => {
-          const right = Game.given === t.change, thanks = c === '好，謝謝。', paid = t.bills * 1000;
-          if (thanks !== right) {
-            Game.addMistake(right
+          const right = Game.given === t.change, paid = t.bills * 1000;
+          if (c !== (right ? '好，謝謝。' : changeFix)) {
+            Game.addMistake(c === '好，謝謝。'
+              ? M(`應該找${t.change}元，不是${Game.given}元。${paid} − ${t.total} = ${t.change}。`, `Deberían darte ${esM(t.change)}, no ${esM(Game.given)}. ${paid} − ${t.total} = ${t.change}.`, `You should get ${enM(t.change)}, not ${enM(Game.given)}. ${paid} − ${t.total} = ${t.change}.`)
+              : c === changeFix
               ? M(`找的錢是對的：${paid} − ${t.total} = ${t.change}。`, `El cambio está bien: ${paid} − ${t.total} = ${t.change}.`, `The change is correct: ${paid} − ${t.total} = ${t.change}.`)
-              : M(`應該找${t.change}元，不是${Game.given}元。${paid} − ${t.total} = ${t.change}。`, `Deberían darte ${esM(t.change)}, no ${esM(Game.given)}. ${paid} − ${t.total} = ${t.change}.`, `You should get ${enM(t.change)}, not ${enM(Game.given)}. ${paid} − ${t.total} = ${t.change}.`));
+              : M('要有禮貌，說「不好意思，好像找錯了」就好。', 'Hay que ser cortés: di «disculpe, creo que se equivocó con el cambio».', 'Be polite: say "excuse me, I think the change is wrong".'));
             return;
           }
           goodFirst('CHANGE', right ? '你會算！找的錢收下以前，要先數一數。' : '你很細心！找的錢不對，要馬上說。', right ? '¡Sabes calcular! Antes de guardar el cambio, cuéntalo.' : '¡Qué atento! Si el cambio está mal, díselo enseguida.', right ? 'You can do the math! Count your change before you pocket it.' : 'Sharp eyes! If the change is wrong, say so right away.');
