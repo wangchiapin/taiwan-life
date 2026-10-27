@@ -736,10 +736,10 @@ const Game = defineGame({
 
 /* 從「重新開始」或地圖回來：直接用原本的名字開新的一局 */
 GameBoot();
-Music.init({ bpm: 120, tracks: [
-  { wave: 'square', vol: 0.24, notes: 'G5 . E5 G5 . A5 G5 . | F5 . D5 F5 . G5 F5 . | E5 . C5 E5 . F5 E5 . | D5 - E5 - C5 - . .' },
-  { wave: 'triangle', vol: 0.62, notes: 'C3 C3 . C3 G3 . C3 . | D3 D3 . D3 A3 . D3 . | C3 C3 . C3 G3 . C3 . | G2 G2 . G2 D3 . G2 .' },
-  { vol: 0.42, notes: 'k . h . s . h . k . h k s . h h' }] });
+Music.init({ bpm: 72, tracks: [
+  { wave: 'sine', vol: 0.5, notes: 'A4 - - - C5 - - - | D5 - - - C5 - A4 - | G4 - - - Bb4 - - - | A4 - - - - - . .' },
+  { wave: 'sine', vol: 0.5, notes: 'F2 - - - - - C3 - | Bb2 - - - - - F2 - | C3 - - - - - G2 - | F2 - - - - - . .' },
+  { vol: 0.15, notes: 'h . . . h . . .' }] });
 </script>
 <script>
 /* ===== 版權說明 ===== */
