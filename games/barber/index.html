@@ -716,8 +716,8 @@ const Game = defineGame({
           }
           const claimWrong = c.startsWith('老闆');
           if (claimWrong !== t.wrong) {
-            Game.addMistake(t.wrong ? M(`五百減${t.price}，應該找${change}元，老闆只找了${t.given}元。`, `500 menos ${t.price} son ${change}; el dueño solo te dio ${t.given}.`, `500 minus ${t.price} is ${change}, but the owner gave only ${t.given}.`)
-                                    : M(`五百減${t.price}，剛好是${change}元，沒有找錯。`, `500 menos ${t.price} son exactamente ${change}; el cambio está bien.`, `500 minus ${t.price} is exactly ${change} — the change is right.`)); return;
+            Game.addMistake(t.wrong ? M(`500減${t.price}，應該找${change}元，老闆只找了${t.given}元。`, `500 menos ${t.price} son ${change}; el dueño solo te dio ${t.given}.`, `500 minus ${t.price} is ${change}, but the owner gave only ${t.given}.`)
+                                    : M(`500減${t.price}，剛好是${change}元，沒有找錯。`, `500 menos ${t.price} son exactamente ${change}; el cambio está bien.`, `500 minus ${t.price} is exactly ${change} — the change is right.`)); return;
           }
           if (t.wrong) {
             carryGood('CHANGE', '你有算錢，很棒！', '¡Contaste el dinero, genial!', 'You counted the money — great!');
