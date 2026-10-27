@@ -405,7 +405,7 @@ const STAGE = (() => {
 
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
-  SCOOPS: '走到櫃台', CONTAINER: '繼續', FLAVOR: '看冰淇淋', TOPPING: '繼續點', EAT: '繼續點', ORDER_CHECK: '聽店員確認', HANDOVER: '等店員做好', PAY: '付錢', PAY_FIX: '聽店員重算', END: '拿冰淇淋'
+  SCOOPS: '走到櫃台', CONTAINER: '繼續', FLAVOR: '開始選冰淇淋口味', TOPPING: '繼續', EAT: '繼續', ORDER_CHECK: '聽店員確認', HANDOVER: '等店員做好', PAY: '付錢', PAY_FIX: '聽店員重算', END: '拿冰淇淋'
 };
 
 /* ══════════════════════════════════════
@@ -525,7 +525,7 @@ const Game = defineGame({
     const total = PRICE[n] + (top ? TOP_PRICE : 0);
     this.task = {
       n, flavors, vessel, top, eat, total,
-      decoys: flavors.map(f => shuffle(FLAVORS.filter(x => x !== f)).slice(0, 2)),
+      decoys: flavors.map(f => shuffle(FLAVORS.filter(x => x !== f)).slice(0, 3)),
       otherTop: pick(TOPS.filter(x => x !== top)), otherTop2: pick(TOPS.filter(x => x !== top && x !== null)),
       scoopWrong: Math.random() < 0.45,          // 店員做好的冰淇淋，有一球口味放錯
       payWrong: Math.random() < 0.45,            // 店員報的總價有沒有多算（多算一份配料）
@@ -665,9 +665,9 @@ const Game = defineGame({
       CONTAINER: {
         place: 'shop',
         dialogue: () => [staff('請問要杯子還是甜筒？', '¿Lo quiere en vaso o en cono?', 'Would you like a cup or a cone?')],
-        options: () => pair(['要杯子。', '要甜筒。']),
+        options: () => pair(['杯子。', '甜筒。']),
         next: c => {
-          if (c !== `要${t.vessel.zh}。`) {
+          if (c !== `${t.vessel.zh}。`) {
             Game.addMistake(M(`你記錯了啦！Ami要${t.vessel.zh}。`, `¡Te equivocaste! Ami lo quiere ${t.vessel.es}.`, `You got it wrong! Ami wants it ${t.vessel.en}.`));
             return;
           }

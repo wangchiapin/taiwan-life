@@ -2,7 +2,7 @@
 ORACLE = """() => {
   const t = Game.task, s = Game.state;
   const m = {
-    START: '走進冰淇淋店', SCOOPS: (t.n === 2 ? '兩' : '三') + '球。', CONTAINER: '要' + t.vessel.zh + '。',
+    START: '走進冰淇淋店', SCOOPS: (t.n === 2 ? '兩' : '三') + '球。', CONTAINER: t.vessel.zh + '。',
     FLAVOR: () => t.flavors[Game.k].zh + '。',
     TOPPING: t.top ? '加' + t.top.zh + '。' : '不用加配料，謝謝。',
     EAT: (t.eat === 'here' ? '內用' : '外帶') + '。',
