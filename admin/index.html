@@ -11,6 +11,8 @@
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Noto Sans TC', 'Segoe UI', sans-serif; font-size: 15px; }
   button, input, select { font: inherit; color: inherit; }
+  select[data-sw] { color: #111; background: #fff; }
+  select[data-sw] option { color: #111; background: #fff; }
   header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 14px 18px; border-bottom: 2px solid var(--line); background: var(--card); position: sticky; top: 0; z-index: 5; }
   header h1 { font-size: 20px; margin: 0 auto 0 0; }
   header .who { color: var(--muted); font-size: 13px; }
@@ -321,12 +323,14 @@ async function loadBoard() {
 
 /* ── 地圖開關＋遊戲連結 ──
    新遊戲（GATED）預設「維修中」；這裡選「開啟」，地圖上的房子才能進去。設定存在 Firebase settings/map */
-const GATED = ['school', 'ubike', 'bus', 'barber', 'cinema', 'parking', 'icecream', 'bookstore', 'market', 'elevator'];
+const LEGACY = ['drinks', 'reserva', 'breakfast', 'parcel', 'nightmarket', 'bakery', 'clinic', 'mrt', 'street'];   // 舊遊戲：沒設定過＝開啟
+const GATED = [...LEGACY, 'school', 'ubike', 'bus', 'barber', 'cinema', 'parking', 'icecream', 'bookstore', 'market', 'elevator'];
+const isOn = id => LEGACY.includes(id) ? OPENMAP[id] !== false : OPENMAP[id] === true;
 const OPENMAP = {};
 const gameUrl = id => new URL('../games/' + id + '/', location.href).href;
 function switchShell() {
   return `<h2 style="margin-top:0">地圖開關・遊戲連結</h2>
-    <p class="muted">「開啟」＝玩家在地圖上可以進去；「維修中」＝房子釘木板、進不去。按了馬上存，玩家重新整理地圖就會看到。舊的遊戲一直是開啟，不用設定。<br>
+    <p class="muted">「開啟」＝玩家在地圖上可以進去；「維修中」＝房子釘木板、進不去。按了馬上存，玩家重新整理地圖就會看到。每個遊戲都可以設定；前九個舊遊戲一開始是「開啟」，選「維修中」才會關起來。<br>
     「試玩」會直接開那個遊戲，不管地圖是開啟還是維修中，也不會經過地圖。</p>
     <div class="panel"><table><tbody>
       <tr><td>🗺️ 地圖（所有遊戲的入口）</td><td><span class="muted">玩家看到的地圖</span></td>
@@ -342,7 +346,7 @@ async function loadSwitch() {
     const s = await getDoc(doc(db, 'settings', 'map'));
     Object.assign(OPENMAP, s.exists() ? (s.data().open || {}) : {});
   } catch (e) { status('讀取開關失敗：' + (e.code || e.message), 6000); }
-  GATED.forEach(id => { const el = $('sw-' + id); if (el) el.value = OPENMAP[id] === true ? '1' : '0'; });
+  GATED.forEach(id => { const el = $('sw-' + id); if (el) el.value = isOn(id) ? '1' : '0'; });
 }
 async function setSwitch(id, on) {
   const m = $('swm-' + id);
@@ -350,7 +354,7 @@ async function setSwitch(id, on) {
     await setDoc(doc(db, 'settings', 'map'), { open: { [id]: on } }, { merge: true });
     OPENMAP[id] = on; if (m) m.textContent = '已儲存'; status((on ? '已開啟：' : '已改成維修中：') + scName(id));
   } catch (e) {
-    const el = $('sw-' + id); if (el) el.value = OPENMAP[id] === true ? '1' : '0';
+    const el = $('sw-' + id); if (el) el.value = isOn(id) ? '1' : '0';
     status('儲存失敗：' + (e.code || e.message) + '（規則是不是還沒貼？）', 8000);
   }
 }

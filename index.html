@@ -276,14 +276,14 @@ const Music = {
    新增遊戲：在 SCENES 加一筆，並放在 BUILD_SLOTS 的空位
 ══════════════════════════════════════ */
 const SCENES = [
-  { id: 'drinks',      zh: '飲料店',   es: 'Tienda de bebidas',  en: 'Drink shop',       emoji: '🧋', roof: '#e0689a', wall: '#f7d6e4', slot: 0 },
-  { id: 'breakfast',   zh: '早餐店',   es: 'Desayunería',        en: 'Breakfast shop',   emoji: '🍳', roof: '#e8a53a', wall: '#fbe9c4', slot: 1 },
-  { id: 'bakery',      zh: '麵包店',   es: 'Panadería',          en: 'Bakery',           emoji: '🥐', roof: '#b9763f', wall: '#f1dcc2', slot: 2 },
-  { id: 'clinic',      zh: '診所',     es: 'Clínica',            en: 'Clinic',           emoji: '🏥', roof: '#2a8d9f', wall: '#dff1f2', slot: 3 },
-  { id: 'parcel',      zh: '便利商店', es: 'Tienda 24 h',        en: 'Convenience store',emoji: '📦', roof: '#3f9a5b', wall: '#dff0e2', slot: 4 },
-  { id: 'nightmarket', zh: '夜市',     es: 'Mercado nocturno',   en: 'Night market',     emoji: '🏮', roof: '#c4382f', wall: '#f4d3cf', slot: 5 },
-  { id: 'reserva',     zh: '我家',     es: 'Mi casa (teléfono)', en: 'Home (phone call)',emoji: '📞', roof: '#7a62c4', wall: '#e5defa', slot: 6 },
-  { id: 'mrt',         zh: '捷運站',   es: 'Estación de metro',  en: 'MRT station',      emoji: '🚇', roof: '#2f5fa7', wall: '#dbe5f6', slot: 7 },
+  { id: 'drinks',      zh: '飲料店',   es: 'Tienda de bebidas',  en: 'Drink shop',       emoji: '🧋', roof: '#e0689a', wall: '#f7d6e4', slot: 0, gated: true, openByDefault: true },
+  { id: 'breakfast',   zh: '早餐店',   es: 'Desayunería',        en: 'Breakfast shop',   emoji: '🍳', roof: '#e8a53a', wall: '#fbe9c4', slot: 1, gated: true, openByDefault: true },
+  { id: 'bakery',      zh: '麵包店',   es: 'Panadería',          en: 'Bakery',           emoji: '🥐', roof: '#b9763f', wall: '#f1dcc2', slot: 2, gated: true, openByDefault: true },
+  { id: 'clinic',      zh: '診所',     es: 'Clínica',            en: 'Clinic',           emoji: '🏥', roof: '#2a8d9f', wall: '#dff1f2', slot: 3, gated: true, openByDefault: true },
+  { id: 'parcel',      zh: '便利商店', es: 'Tienda 24 h',        en: 'Convenience store',emoji: '📦', roof: '#3f9a5b', wall: '#dff0e2', slot: 4, gated: true, openByDefault: true },
+  { id: 'nightmarket', zh: '夜市',     es: 'Mercado nocturno',   en: 'Night market',     emoji: '🏮', roof: '#c4382f', wall: '#f4d3cf', slot: 5, gated: true, openByDefault: true },
+  { id: 'reserva',     zh: '我家',     es: 'Mi casa (teléfono)', en: 'Home (phone call)',emoji: '📞', roof: '#7a62c4', wall: '#e5defa', slot: 6, gated: true, openByDefault: true },
+  { id: 'mrt',         zh: '捷運站',   es: 'Estación de metro',  en: 'MRT station',      emoji: '🚇', roof: '#2f5fa7', wall: '#dbe5f6', slot: 7, gated: true, openByDefault: true },
   { id: 'school',  zh: '學校',   es: 'Escuela',    en: 'School',      emoji: '🏫', roof: '#b0a07a', wall: '#ece6d6', slot: 8, gated: true },
   { id: 'bus',     zh: '公車',   es: 'Autobús',    en: 'Bus',         emoji: '🚌', roof: '#e07a2f', wall: '#fbe3cc', slot: 11, gated: true },
   { id: 'ubike',   zh: 'YouBike', es: 'YouBike',   en: 'YouBike',     emoji: '🚲', roof: '#c9b21f', wall: '#f6f0c4', slot: 14, gated: true },
@@ -295,14 +295,15 @@ const SCENES = [
   { id: 'bookstore', zh: '書店',     es: 'Librería',        en: 'Bookstore',      emoji: '📚', roof: '#3b6ea5', wall: '#e3ecf7', slot: 18, gated: true },
   { id: 'elevator',  zh: '搭電梯',   es: 'Ascensor',        en: 'Elevator',       emoji: '🛗', roof: '#6b7a99', wall: '#e4e8f1', slot: 19, gated: true },
   /* 沒有建築的場景：路上會隨機冒出「❗」，走過去就觸發 */
-  { id: 'street',      zh: '路上突發事件', es: 'Imprevistos en la calle', en: 'Street surprises', emoji: '❗', virtual: true }
+  { id: 'street',      zh: '路上突發事件', es: 'Imprevistos en la calle', en: 'Street surprises', emoji: '❗', virtual: true, gated: true, openByDefault: true }
 ];
 /* 還不能玩的地點（不算進星星）
    soon：🚧 維修中（有房子）；build：建造中（工地）。走到門口只會顯示「還在準備中，敬請期待」
    之後要開放：把它搬到 SCENES，slot 不變 */
 /* gated：新遊戲預設「維修中」，管理員頁的「地圖開關」打開後才能進去（設定存在 Firebase settings/map） */
 const OPEN = {};
-const isLive = sc => !sc.gated || !!OPEN[sc.id];
+/* openByDefault：舊遊戲沒設定過時是開啟，只有管理員明確選「維修中」（false）才關起來 */
+const isLive = sc => !sc.gated || (sc.openByDefault ? OPEN[sc.id] !== false : !!OPEN[sc.id]);
 const liveScenes = () => SCENES.filter(isLive);
 const COMING = [
   { id: 'airport', zh: '機場',   es: 'Aeropuerto', en: 'Airport',     emoji: '✈️', roof: '#8697ad', wall: '#e2e8f0', slot: 12, status: 'soon' },
@@ -624,7 +625,7 @@ function updateLife(dt) {
   }
   // 路上會擋車的人（玩家、過馬路的阿嬤）：格子座標
   const people = [pt];
-  if (EV.type === 'elder') people.push({ x: EV.x, y: EV.y, elder: true });
+  if (EV.type === 'elder' && isLive(STREET)) people.push({ x: EV.x, y: EV.y, elder: true });
   // 車 o 是不是在第 k 個路口裡
   const inBox = (o, k) => {
     if (o.idle > 0) return false;
@@ -664,7 +665,7 @@ function updateLife(dt) {
 /* 走到突發事件旁邊（相鄰一格以內）停下來就開始 */
 function checkEvent() {
   // 只有停在旁邊（或點它走過去）才開始；路過不會被打斷
-  if (current || P.moving || P.locked || P.path.length || P.held) return;
+  if (current || P.moving || P.locked || P.path.length || P.held || !isLive(STREET)) return;
   const e = evTile(), d = Math.abs(e.x - P.x) + Math.abs(e.y - P.y);
   if (d <= 1) { P.path = []; P.held = null; openGame({ sc: STREET, out: { x: P.x, y: P.y }, first: EV.type }); }
 }
@@ -796,7 +797,7 @@ function drawLife(now) {
   const items = WALKERS.map(w => ({ y: w.row, f: () => drawPerson(w.x * T, w.row * T, { ...w.look, dir: w.dir, leg: w.pause > 0 ? 0 : Math.floor(w.phase * 4) % 2 }) }));
   PETS.forEach(p => items.push({ y: p.row + .1, f: () => drawPet(p.kind, p.x * T, p.row * T, { ...p.look, dir: p.dir, pose: p.pose, leg: Math.floor(p.phase * 5) % 2 }) }));
   items.push({ y: AMI.y, f: () => drawPerson(AMI.x * T, AMI.y * T, { ...AMI_LOOK, dir: 0 }) });
-  items.push({ y: EV.y, f: () => drawEventScene(now) });
+  if (isLive(STREET)) items.push({ y: EV.y, f: () => drawEventScene(now) });
   items.sort((a, b) => a.y - b.y).forEach(i => i.f());
 }
 
@@ -813,7 +814,7 @@ function speakers() {
   WALKERS.forEach((w, i) => out.push({ key: 'w' + i, who: 'walker', line: LINES[w.line], x: w.x, y: w.row, d: dist(w.x, w.row), r: 1.6 }));
   PETS.forEach((p, i) => out.push({ key: 'p' + i + p.pose, who: p.kind, line: LINES[p.kind + (p.pose === 'sit' ? 'Sit' : '')], x: p.x, y: p.row, d: dist(p.x, p.row), r: 1.4 }));
   const [ew, el] = EVENT_LINES[EV.type];
-  out.push({ key: 'ev', who: ew, line: el, x: EV.x, y: EV.y, d: dist(EV.x, EV.y), r: 3, ev: true });
+  if (isLive(STREET)) out.push({ key: 'ev', who: ew, line: el, x: EV.x, y: EV.y, d: dist(EV.x, EV.y), r: 3, ev: true });
   if (window.FEST) out.push(...FEST.speakers(dist));
   VEHICLES.forEach((v, i) => { if (v.wait > 0.5) out.push({ key: 'v' + i, who: 'rider', line: LINES.honk, x: (v.axis === 'h' ? v.pos / T - 0.5 : v.lane), y: (v.axis === 'h' ? v.lane : v.pos / T - 0.5), d: 0, r: 9 }); });
   return out.filter(s => s.d <= s.r).sort((a, b) => a.d - b.d);
