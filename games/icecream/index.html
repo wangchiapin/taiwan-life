@@ -936,6 +936,7 @@ const Game = defineGame({
     // END 的 dialogue 會決定結局，所以只算一次
     const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
     let [src, emoji, alt] = this.IMAGES[this.state] || ['', '🚇'];
+    if (src === 'images/shop.jpg' && this.feedback.some(f => f.type === 'bad')) src = 'images/shop_oops.jpg';   // 這一次答錯：店員尷尬的臉
     if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
     this.setImage(src, emoji, alt);
     Vocab.render(this.state);
