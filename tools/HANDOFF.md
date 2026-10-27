@@ -179,3 +179,12 @@
 
 ### 手機版地圖鋪滿螢幕（2026-10-19）
 - 刪掉手機方向鍵（沒有用了）；手機靠點地圖走路。地圖一次看到幾列由螢幕高度自動算（`fitView()`，建築大小仍由寬度決定），HUD 和說明文字縮小。電腦版鍵盤不變。
+
+
+## 2026-10-27 新增三個遊戲（麵店、超商購物、鹽酥雞）— 尚未推，等 Ben 說「推」
+- 遊戲檔：`games/noodle|conbini|yansuji/index.html`；詳細流程看 README「新遊戲」那一節。
+- 登記：`index.html`（SCENES slot 20／21／22，原本 site1～3 工地拿掉；ZHS、SUGGEST 也加了）、`shared/firebase.js`、`admin/index.html`（SCENES、GATED）、`tools/firestore.rules`（scoreCols、scenes）、`music.html`、`tools/smoke.py`、`tools/oracles/` 三個正解。
+- 測試：smoke perfect（每個遊戲多次都 100 分）、mixed、embed、trans 都過；地圖開啟後三間房子會出現在第三條街。
+- 推上去之後 Ben 要做：把 `tools/firestore.rules` 貼到 Firebase console 發布；管理員頁「設定檢查」建 3 個新排行榜複合索引（score 降冪＋elapsed 升冪）；「地圖開關」打開三個遊戲。
+- 沒有做圖，也沒有列圖片清單（Ben 指定先不要）。
+

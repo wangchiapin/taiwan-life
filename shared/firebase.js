@@ -32,7 +32,8 @@ export const SCORE_COLS = {
   clinic: 'clinicgame_scores', mrt: 'mrtgame_scores', street: 'streetgame_scores',
   school: 'schoolgame_scores', ubike: 'ubikegame_scores', bus: 'busgame_scores', barber: 'barbergame_scores',
   cinema: 'cinemagame_scores', parking: 'parkinggame_scores', icecream: 'icecreamgame_scores',
-  bookstore: 'bookstoregame_scores', market: 'marketgame_scores', elevator: 'elevatorgame_scores'
+  bookstore: 'bookstoregame_scores', market: 'marketgame_scores', elevator: 'elevatorgame_scores',
+  noodle: 'noodlegame_scores', conbini: 'conbinigame_scores', yansuji: 'yansujigame_scores'
 };
 
 /* 管理員頁要用的 Firestore 函式 */

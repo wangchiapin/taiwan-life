@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>超商買東西 · Compras en la tienda 24 h</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：conbinigame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "conbinigame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+html{color-scheme:light}
+  :root {
+    --ink: #243a32;
+    --red: #2f8f6a;
+    --red-dark: #216b4f;
+    --yolk: #e8b13a;
+    --night: #2b3d36;
+    --kraft: #dcebe3;
+    --wall: #eef6f1;
+    --paper: #ffffff;
+    --line: #d3e6dc;
+    --muted: #667a72;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    margin: 0; min-height: 100vh; color: var(--ink);
+    background: #e6f1ea;
+    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
+    display: flex; justify-content: center; align-items: flex-start;
+    padding: 24px 16px 40px;
+  }
+  body.embed-boot #login-screen.active { display: none; }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  .screen.active { display: flex; }
+  /* ── 登入：店招牌 ── */
+  .storefront { width: 100%; max-width: 360px; border-radius: 10px; overflow: hidden; }
+  .storefront .awning { height: 20px; background: repeating-linear-gradient(90deg, var(--red) 0 28px, #ffffff 28px 56px); }
+  .storefront .name { background: var(--night); color: var(--yolk); text-align: center; font-size: 30px; font-weight: 700; letter-spacing: 6px; padding: 12px 0; }
+  #login-screen .subtitle { margin: 0; color: var(--muted); font-size: 15px; }
+  .input-group input:focus { border-color: var(--red); }
+  .btn-primary {
+    padding: 14px 44px; font-size: 18px; font-weight: 700; font-family: inherit;
+    background: var(--red); color: #fff; border: none; border-radius: 999px; cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--red-dark); }
+  .flavor-text { color: var(--muted); font-size: 14px; line-height: 1.8; text-align: center; max-width: 420px; margin: 0; }
+  /* ── 遊戲 ── */
+  #game-window.active { display: flex; }
+  .chip { font-size: 13px; padding: 5px 10px; border-radius: 999px; background: var(--wall); white-space: nowrap; }
+  .btn-pinyin {
+    font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--paper); color: var(--red); border: 1.5px solid var(--red);
+  }
+  .btn-pinyin[aria-pressed="true"] { background: var(--red); color: #fff; }
+  #place-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px; background: var(--night); color: #fff;
+    border-bottom: 4px solid var(--yolk);
+  }
+  #place-bar.phone { background: var(--ami); }
+  #place-bar .icon { font-size: 22px; line-height: 1; }
+  #place-bar .who { font-weight: 700; font-size: 16px; }
+  #place-bar .status { font-size: 13px; opacity: .85; }
+  #place-bar .clock { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; }
+  #scene-placeholder {
+    width: 100%; max-width: 360px; aspect-ratio: 16 / 7;
+    border-radius: 12px; background: var(--wall);
+    display: none; place-items: center; font-size: 64px;
+  }
+  #npc-dialogue { padding: 14px 22px 4px; font-size: 21px; line-height: 2.1; }
+  #npc-dialogue .speaker { font-weight: 700; color: var(--red-dark); }
+  #npc-dialogue .speaker.ami { color: var(--ami); }
+  #npc-dialogue .speaker.me { color: var(--muted); }
+  #npc-dialogue .thought .line.narr { color: var(--muted); font-size: 18px; }
+  ruby rt { color: var(--red); font-size: .5em; font-weight: 400; }
+  /* 購物清單 */
+  .list {
+    margin: 8px 0 10px; padding: 12px 16px; border-radius: 6px;
+    background: #fbfdf8; border: 1px dashed #b9cdbf; font-size: 18px; line-height: 1.95;
+  }
+  .list .t { font-weight: 700; color: var(--red-dark); font-size: 15px; display: flex; align-items: center; gap: 2px; }
+  .list .t .grow { flex: 1; }
+  .list .done { text-decoration: line-through; color: var(--muted); }
+  .list .rule { color: var(--muted); font-size: 15px; }
+  @media (hover: hover) {
+    .opt:hover { background: var(--ink); color: #fff; }
+    .opt:hover rt { color: #d8efe3; }
+  }
+  .opt.deal { border-color: var(--red); background: var(--red); color: #fff; }
+  .opt.deal rt { color: #d8efe3; }
+  .opt.deal:hover { background: var(--red-dark); }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--yolk); outline-offset: 2px; }
+  /* ── 排行榜 ── */
+  .congrats-banner { background: var(--yolk); color: var(--ink); }
+  .no-rank-banner { background: var(--wall); color: var(--muted); }
+  #lb-table th { background: var(--ink); color: #fff; font-weight: 500; }
+  #lb-table th, #lb-table td { padding: 9px 8px; text-align: center; border-bottom: 1px solid var(--line); }
+  #lb-table tr.highlight-row { background: #e3f1d2; font-weight: 700; }
+  @media (max-width: 600px) {
+    .screen { padding: 26px 18px; }
+    .top-bar { gap: 6px; padding: 10px 12px; }
+    .chip { font-size: 12px; padding: 4px 8px; }
+    .btn-pinyin { font-size: 12px; padding: 5px 10px; }
+    #npc-dialogue { font-size: 19px; padding: 12px 16px 2px; }
+    #options-area { grid-template-columns: 1fr; padding: 14px 14px 20px; }
+    #npc-avatar { max-width: 240px; }
+  }
+  /* ── 句子翻譯 ── */
+  .tr-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; margin-left: 6px; padding: 0; vertical-align: middle;
+    border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper); color: var(--red); cursor: pointer;
+  }
+  .tr-btn:hover { background: #e3f1d2; border-color: var(--red); }
+  /* 加大可點範圍 */
+  @media (max-width: 560px) {
+    .tr-btn { width: 34px; height: 34px; margin-left: 8px; }
+    .tr-btn svg { width: 17px; height: 17px; }
+  }
+  .tr-btn.spk.speaking { background: var(--red); color: #fff; border-color: var(--red); }
+  .v-word .tr-btn { margin-left: 4px; }
+  .tr-pop {
+    position: fixed; width: min(340px, calc(100vw - 16px));
+    background: var(--paper); color: var(--ink); border: 1.5px solid var(--red); border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(60, 40, 30, .18); font-size: 15px; line-height: 1.6;
+  }
+  .tr-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 6px 6px 12px; background: var(--red); color: #fff; border-radius: 10px 10px 0 0;
+    font-size: 13px; cursor: move; touch-action: none; user-select: none;
+  }
+  .tr-lang {
+    flex: none; font-size: 11px; font-weight: 700; color: var(--red);
+    border: 1px solid var(--red); border-radius: 4px; padding: 0 4px; line-height: 1.5;
+  }
+  /* ── 本關單字（右側抽屜） ── */
+  .side-tab {
+    width: 36px; padding: 12px 8px; line-height: 1.25; text-align: center; word-break: break-all; border: none; border-radius: 12px 0 0 12px; cursor: pointer;
+    background: var(--yolk); color: var(--ink); font: inherit; font-weight: 700; font-size: 15px;
+    box-shadow: -2px 2px 10px rgba(60, 40, 30, .15);
+  }
+  .side-tab.hint { background: var(--ink); color: #fff; }
+  .side-tab .v-count { padding: 0 3px !important; min-width: 20px; font-size: 12px !important; white-space: nowrap; letter-spacing: -0.5px; }
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  #vocab-tab .v-count {
+    display: inline-block; margin-top: 6px;
+    background: var(--paper); border-radius: 999px; padding: 0 7px; font-size: 13px;
+  }
+  .drawer {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(320px, 88vw); z-index: 25;
+    background: var(--paper); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(60, 40, 30, .12);
+    transform: translateX(105%); transition: transform .25s ease; display: flex; flex-direction: column;
+  }
+  .drawer.open { transform: none; }
+  @media (prefers-reduced-motion: reduce) { .drawer { transition: none; } }
+  .h-sec { padding: 12px 16px 4px; font-size: 13px; font-weight: 700; color: var(--red); }
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+  .side-tab.log { background: #b5483d; color: #fff; }
+  #log-tab .v-count { display: inline-block; margin-top: 6px; background: var(--paper); color: #b5483d; border-radius: 999px; padding: 0 7px; font-size: 13px; }
+  .v-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 16px; border-bottom: 3px solid var(--yolk); }
+  .v-head b { font-size: 18px; }
+  .v-head small { color: var(--muted); }
+  .v-head button { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink); padding: 2px 6px; }
+  #vocab-list li { padding: 12px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+  .v-py { color: var(--red); font-size: 15px; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; border: 2px solid var(--red); border-radius: 999px; overflow: hidden; }
+  .seg button {
+    font: inherit; font-size: 15px; font-weight: 500; padding: 9px 0; cursor: pointer;
+    background: var(--paper); color: var(--red); border: none;
+  }
+  .seg button + button { border-left: 2px solid var(--red); }
+  .seg button[aria-pressed="true"] { background: var(--red); color: #fff; font-weight: 700; }
+  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
+  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
+  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
+  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
+
+  /* 貨架、結帳螢幕 */
+  .shelf { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0 12px; }
+  .pcard { background: #fff; border: 2px solid #c9dccf; border-radius: 12px; padding: 10px 12px; text-align: center; }
+  .pcard .pn { font-weight: 700; font-size: 18px; }
+  .pcard .pe { font-size: 40px; line-height: 1.2; }
+  .pcard .pp { font-size: 17px; margin-top: 2px; }
+  .pcard .tag { display: inline-block; margin-top: 6px; background: #c0392b; color: #fff; border-radius: 6px; padding: 2px 8px; font-size: 14px; font-weight: 700; }
+  .menu { margin: 8px 0 12px; background: #f6fbf8; border: 2px solid #c9dccf; border-radius: 12px; padding: 10px 14px; }
+  .menu .mh { font-weight: 700; color: var(--red-dark); margin-bottom: 4px; }
+  .menu .mrow { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; font-size: 17px; border-bottom: 1px dashed #c9dccf; }
+  .menu .mrow:last-child { border-bottom: none; }
+  .menu .mrow .am { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .menu .mnote { color: var(--muted); font-size: 15px; padding-top: 4px; }
+  .menu .disc { color: #c0392b; font-weight: 700; }
+  .code { font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: 1px; font-weight: 700; }
+
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">24H</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">超商買東西</h1>
+  <p class="subtitle" data-es="Comprar en una tienda de conveniencia (con cerveza)" data-en="Shopping at a convenience store (including beer)">Comprar en una tienda de conveniencia (con cerveza)</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    Ami 請你去超商買東西：便當、啤酒、泡麵。要比哪個划算、要用載具存發票、還要抽折扣。買酒要滿十八歲，要拿出證件喔！店員有時候會算錯，要自己多注意。<br>
+    <span data-es="Ami te pide que vayas a la tienda de conveniencia: un bento, cerveza y fideos instantáneos. Hay que comparar cuál promoción conviene, guardar la factura en el código de móvil y probar suerte con el botón de descuentos. Para comprar alcohol hay que tener 18 años y mostrar identificación. ¡A veces el cajero se equivoca, así que presta atención!" data-en="Ami asks you to go to the convenience store: a boxed meal, beer and instant noodles. You compare which deal is better, save the receipt to her phone carrier code, and try the discount button. You must be 18 to buy alcohol and show ID. The clerk sometimes makes mistakes, so stay alert!">Ami te pide que vayas a la tienda de conveniencia: un bento, cerveza y fideos instantáneos. Hay que comparar cuál promoción conviene, guardar la factura en el código de móvil y probar suerte con el botón de descuentos. Para comprar alcohol hay que tener 18 años y mostrar identificación. ¡A veces el cajero se equivoca, así que presta atención!</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">📱</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 10 名 · Top 10</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'conbini', track: 'conbini', settingsKey: 'conbini_settings',
+  roles: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '店員': { pitch: 1.05 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+══════════════════════════════════════ */
+/* 讀音以教育部《重編國語辭典修訂本》為準；一、不的變調交給 pinyin-pro（toneSandhi）。
+   新增遊戲文字時，把套件讀錯的詞加在這裡。 */
+pinyinPro.customPinyin({
+  '星期': 'xīng qí', '期': 'qí', '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '還要': 'hái yào',
+  '還好': 'hái hǎo', '還多': 'hái duō', '還少': 'hái shǎo', '還你': 'huán nǐ',
+  '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '覺得': 'jué de',
+  '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan', '時間': 'shí jiān', '時候': 'shí hou',
+  '袋子': 'dài zi', '太太': 'tài tai', '先生': 'xiān sheng', '老闆': 'lǎo bǎn', '老闆娘': 'lǎo bǎn niáng',
+  '單子': 'dān zi', '東西': 'dōng xi', '告訴': 'gào su', '媽媽': 'mā ma', '爸爸': 'bà ba', '奶奶': 'nǎi nai', '弟弟': 'dì di', '妹妹': 'mèi mei',
+  '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '做得': 'zuò de',
+  '著': 'zhe', '只': 'zhǐ', '囉': 'luo', '啦': 'la', '了啦': 'le la', '耶': 'ye',
+  '意思': 'yì si', '關係': 'guān xi', '這個': 'zhè ge', '那個': 'nà ge',
+  '一個': 'yí ge', '兩個': 'liǎng ge', '一共': 'yí gòng',
+  '髮夾': 'fǎ jiá', '要切': 'yào qiē', '切開': 'qiē kāi', '來喔': 'lái ō', '看看': 'kàn kan', '再看看': 'zài kàn kan',
+  '便宜': 'pián yi', '划算': 'huá suàn', '洗手間': 'xǐ shǒu jiān', '廁所': 'cè suǒ', '殺價': 'shā jià', '雞排': 'jī pái',
+  '價錢': 'jià qián', '衣服': 'yī fu', '尺寸': 'chǐ cùn', '喜歡': 'xǐ huān', '漂亮': 'piào liang', '可愛': 'kě ài',
+  '三個': 'sān ge', '每個': 'měi ge', '現炸': 'xiàn zhá', '還剩': 'hái shèng', '欸': 'éi', '訊息': 'xùn xí',
+  '衣服和': 'yī fu hàn', '你和': 'nǐ hàn', '同事': 'tóng shì', '朋友': 'péng yǒu', '清單': 'qīng dān', '會合': 'huì hé', '晚餐': 'wǎn cān', '辛苦': 'xīn kǔ'
+});
+pinyinPro.customPinyin({
+  '便當': 'biàn dāng', '泡麵': 'pào miàn', '載具': 'zǎi jù', '手機載具': 'shǒu jī zǎi jù', '發票': 'fā piào', '條碼': 'tiáo mǎ', '啤酒': 'pí jiǔ', '折扣': 'zhé kòu', '六折': 'liù zhé', '八五折': 'bā wǔ zhé', '九折': 'jiǔ zhé', '八折': 'bā zhé', '85折': 'bā wǔ zhé', '6折': 'liù zhé',
+  '加熱': 'jiā rè', '證件': 'zhèng jiàn', '滿十八歲': 'mǎn shí bā suì', '十八歲': 'shí bā suì', '成年': 'chéng nián', '抽': 'chōu', '按鈕': 'àn niǔ', '特價': 'tè jià', '半價': 'bàn jià', '會員': 'huì yuán', '原價': 'yuán jià',
+  '結帳': 'jié zhàng', '櫃台': 'guì tái', '超商': 'chāo shāng', '鮮奶': 'xiān nǎi', '罐': 'guàn', '瓶': 'píng', '紅燒牛肉麵': 'hóng shāo niú ròu miàn', '雞汁拉麵': 'jī zhī lā miàn', '第二件': 'dì èr jiàn', '兩件': 'liǎng jiàn',
+  '算錯': 'suàn cuò', '找錯': 'zhǎo cuò', '掃': 'sǎo', '多掃': 'duō sǎo', '應該': 'yīng gāi', '一共': 'yí gòng', '零錢': 'líng qián', '微波': 'wēi bō', '登入': 'dēng rù', '輸入': 'shū rù', '螢幕': 'yíng mù', '規定': 'guī dìng', '沒抽中': 'méi chōu zhòng', '抽中': 'chōu zhòng'
+});
+// 台灣讀音修正：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* ══════════════════════════════════════
+   小工具
+══════════════════════════════════════ */
+const money = n => n + '元';
+const esM = n => `${n} dólares`;
+const enM = n => `NT$${n}`;
+
+/* 中文數字：zhNum(850) → 八百五十；zhNum(1000) → 一千；200 → 兩百 */
+const zhNum = n => {
+  n = Math.round(n);
+  if (n === 0) return '零';
+  const D = '零一二三四五六七八九';
+  const th = Math.floor(n / 1000), h = Math.floor(n / 100) % 10, te = Math.floor(n / 10) % 10, u = n % 10;
+  let s = '';
+  if (th) s += (th === 2 ? '兩' : D[th]) + '千';
+  if (h) s += (h === 2 ? '兩' : D[h]) + '百';
+  else if (th && (te || u)) s += '零';
+  if (te) s += (te === 1 && !th && !h ? '' : D[te]) + '十';
+  else if ((th || h) && u) s += '零';
+  if (u) s += D[u];
+  return s;
+};
+
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '店員': ['El cajero de la tienda', 'The store clerk'] };
+const SPEAKER_RE = /^(Ami|店員|我)：/;
+
+/* ══════════════════════════════════════
+   共用小工具：「對方可能出錯」的關卡、付錢三關（報價／付錢／找錢）
+   2026-10-27 新遊戲（麵店、超商、鹽酥雞）共用同一套寫法
+══════════════════════════════════════ */
+const POLITE = M('要有禮貌，說「不好意思」，告訴他正確的就好。', 'Hay que ser cortés: di «disculpe» y dile lo correcto.', 'Be polite: say "excuse me" and tell them the correct one.');
+const billFor = n => n <= 100 ? 100 : n <= 200 ? 200 : n <= 500 ? 500 : 1000;           // 你給的鈔票
+const shortBill = n => n > 500 ? 500 : n > 200 ? 200 : n > 100 ? 100 : n > 50 ? 50 : 20;   // 一定不夠的那張
+const rotOf = (t, o) => o.map((_, i) => o[(i + t.rot) % o.length]);
+const sum = a => a.reduce((x, y) => x + y, 0);
+
+/* 一關：①沒錯／謝謝 ②有禮貌指出問題 ③沒禮貌。對方有沒有出錯由 o.wrong() 決定
+   o: { key, place, html, dialogue, ok, fix(), rude, wrong(), whyWrong(), whyRight(), goodWrong[3], goodOk[3], apology(), go(wrong) } */
+function catchState(G, o) {
+  const t = G.task;
+  return {
+    place: o.place, html: o.html, dialogue: o.dialogue,
+    options: () => rotOf(t, [o.ok, o.fix(), o.rude]),
+    next: c => {
+      const wrong = o.wrong(), fix = o.fix(), right = wrong ? fix : o.ok;
+      if (c !== right) { G.addMistake(c === o.ok ? o.whyWrong() : c === fix ? o.whyRight() : POLITE); return; }
+      if (G.att[o.key] === 1) G.good(...(wrong ? o.goodWrong : o.goodOk));
+      G.thought = wrong && o.apology ? o.apology() : null;
+      o.go(wrong);
+    }
+  };
+}
+
+/* 付錢用的欄位：total 真正的總價；payWrong 老闆／店員報價有沒有多算；changeWrong 找的錢對不對 */
+function initPay(t, total, extras) {
+  t.total = total; t.payWrong = Math.random() < 0.45;
+  t.extra = pick(extras);                                   // 多算的那一項 { zh, es, en, price }
+  t.said = t.payWrong ? total + t.extra.price : total;
+  t.bill = billFor(Math.max(total, t.said)); t.change = t.bill - total;
+  t.changeWrong = t.change > 0 && Math.random() < 0.4;
+  const ds = [-20, -10, 10, 20].filter(d => t.change + d >= 0);
+  t.given = t.changeWrong ? t.change + pick(ds) : t.change;
+}
+
+/* 報價、付錢、找錢三關。o: { who, place, html, key 前綴不用, nextAfter（找完錢之後的關卡，預設 END）, extraWhy(), priceZh(),… } */
+function payStates(G, o) {
+  const t = G.task, who = o.who, st = (zh, es, en) => L(`${who}：${zh}`, es, en);
+  const finish = () => { G.stopTimer(); G.state = 'END'; };
+  const toChange = () => { if (t.change > 0) G.state = 'CHANGE'; else finish(); };
+  const payOk = `給你${zhNum(t.bill)}元。`;
+  const claim = t.payWrong ? t.total : t.total + t.extra.price;   // 沒算錯時，「抓錯」說的是錯的數字
+  const fixTotal = `不好意思，好像算錯了，應該是${zhNum(claim)}元吧？`;
+  const fixChange = `不好意思，好像找錯了，應該找${zhNum(t.changeWrong ? t.change : t.given + 10)}元吧？`;
+  return {
+    PAY: catchState(G, {
+      key: 'PAY', place: o.place, html: o.html,
+      dialogue: () => [st(`好的，一共是${zhNum(t.said)}元。`, `Muy bien, son ${esM(t.said)} en total.`, `All right, that's ${enM(t.said)} in total.`)],
+      ok: payOk, fix: () => fixTotal, rude: o.rudePay || '你是不是想騙我的錢啊？',
+      wrong: () => t.payWrong,
+      whyWrong: () => o.extraWhy(),
+      whyRight: () => M(`${who}算對了：一共是${t.total}元。`, `Lo calculó bien: son ${esM(t.total)}.`, `They were right: ${enM(t.total)} in total.`),
+      goodWrong: ['你很細心！付錢以前，要先對一下價目表和自己點的東西。', '¡Qué atento! Antes de pagar, compara con la lista de precios y con lo que pediste.', 'Well spotted! Before you pay, check the price list against what you ordered.'],
+      goodOk: ['沒錯！付錢以前，要先自己算一下。', '¡Exacto! Antes de pagar, calcula tú también.', 'Right! Do the math yourself before you pay.'],
+      go: wrong => { if (wrong) { G.state = 'PAY_FIX'; return; } toChange(); }
+    }),
+    PAY_FIX: {
+      place: o.place, html: o.html,
+      dialogue: () => [st(`啊，不好意思！是${zhNum(t.total)}元。`, `¡Ay, disculpe! Son ${esM(t.total)}.`, `Oh, sorry! It's ${enM(t.total)}.`)],
+      options: () => rotOf(t, [payOk, `給你${zhNum(shortBill(t.total))}元。`, '我下次再付，可以嗎？']),
+      next: c => {
+        if (c !== payOk) {
+          G.addMistake(c === '我下次再付，可以嗎？'
+            ? M('不能下次再付。買東西要當場付錢。', 'No se puede pagar después: hay que pagar en el momento.', "You can't pay later — you pay on the spot.")
+            : M(`一共是${t.total}元，這樣不夠啦。`, `El total es ${esM(t.total)}: eso no alcanza.`, `The total is ${enM(t.total)} — that isn't enough.`));
+          return;
+        }
+        if (G.att.PAY_FIX === 1) G.good('沒錯！要給夠錢，他會找錢給你。', '¡Exacto! Das lo suficiente y te dan el cambio.', "Right! Hand over enough and you'll get change.");
+        toChange();
+      }
+    },
+    CHANGE: catchState(G, {
+      key: 'CHANGE', place: o.place, html: o.html,
+      dialogue: () => [st(`收你${zhNum(t.bill)}元，找你${zhNum(t.given)}元。`, `Recibo ${esM(t.bill)}; le doy ${esM(t.given)} de cambio.`, `Out of ${enM(t.bill)} — here's ${enM(t.given)} change.`)],
+      ok: '好，謝謝。', fix: () => fixChange, rude: '你是不是故意少找我錢啊？',
+      wrong: () => t.changeWrong,
+      whyWrong: () => M(`找錯了：${t.bill}減${t.total}，應該找${t.change}元，他找了${t.given}元。`, `Se equivocó con el cambio: ${t.bill} − ${t.total} = ${t.change}; le dieron ${t.given}.`, `Wrong change: ${t.bill} − ${t.total} = ${t.change}, but you got ${t.given}.`),
+      whyRight: () => M(`找對了：${t.bill}−${t.total}＝${t.change}元。`, `El cambio está bien: ${t.bill} − ${t.total} = ${t.change}.`, `The change is right: ${t.bill} − ${t.total} = ${t.change}.`),
+      goodWrong: ['你很細心！拿到零錢要馬上數。', '¡Qué atento! Cuenta el cambio en el momento.', 'Well spotted! Count your change right away.'],
+      goodOk: ['找的錢要自己算一下：給的錢減掉總價。', 'Calcula el cambio tú mismo: lo que diste menos el total.', 'Work out the change yourself: what you gave minus the total.'],
+      apology: () => [st(`啊，不好意思！找你${zhNum(t.change)}元。`, `¡Ay, disculpe! Le doy ${esM(t.change)} de cambio.`, `Oh, sorry! Here's ${enM(t.change)} change.`)],
+      go: () => finish()
+    })
+  };
+}
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['超商', 'tienda de conveniencia', 'convenience store'], ['便當', 'bento, comida en caja', 'boxed meal'], ['啤酒', 'cerveza', 'beer'], ['泡麵', 'fideos instantáneos', 'instant noodles'], ['發票', 'factura, recibo', 'receipt (invoice)'], ['手機載具', 'código de móvil para facturas', 'mobile carrier barcode'], ['折扣', 'descuento', 'discount']],
+  PROMO: [['特價', 'oferta', 'special price'], ['第二件', 'el segundo artículo', 'the second item'], ['半價', 'mitad de precio', 'half price'], ['6折', '60 % del precio (40 % de descuento)', '40% off (pay 60%)'], ['85折', '85 % del precio (15 % de descuento)', '15% off (pay 85%)'], ['兩件', 'dos artículos', 'two items'], ['划算', 'conveniente, buen precio', 'a good deal'], ['原價', 'precio original', 'original price']],
+  HEAT: [['加熱', 'calentar', 'heat up'], ['便當', 'bento, comida en caja', 'boxed meal'], ['微波', 'microondas', 'microwave'], ['櫃台', 'mostrador', 'counter']],
+  ALCOHOL: [['酒', 'alcohol', 'alcohol'], ['滿十八歲', 'tener 18 años cumplidos', 'at least 18 years old'], ['證件', 'identificación', 'ID'], ['規定', 'regla', 'rule'], ['成年', 'mayor de edad', 'adult']],
+  CARRIER: [['會員', 'miembro', 'member'], ['載具', 'código para guardar facturas', 'carrier (e-invoice storage)'], ['手機條碼', 'código de barras del móvil', 'phone barcode'], ['發票', 'factura, recibo', 'receipt (invoice)'], ['條碼', 'código de barras', 'barcode']],
+  CARRIER_CHECK: [['條碼', 'código de barras', 'barcode'], ['輸入', 'ingresar, teclear', 'enter, type in'], ['對嗎', '¿es correcto?', 'is that right?'], ['我的條碼是', 'mi código es', 'my barcode is'], ['不好意思', 'disculpe', 'excuse me']],
+  DRAW: [['抽', 'sortear, sacar', 'draw'], ['按鈕', 'botón', 'button'], ['折扣', 'descuento', 'discount'], ['免費', 'gratis', 'free'], ['沒抽中', 'no ganar', "didn't win"], ['抽中', 'ganar (en un sorteo)', 'win (a draw)']],
+  PAY: [['一共', 'en total', 'in total'], ['螢幕', 'pantalla', 'screen'], ['打折', 'hacer descuento', 'give a discount'], ['算錯', 'calcular mal', 'miscalculate'], ['多掃', 'escanear de más', 'scan extra'], ['應該', 'debería', 'should']],
+  PAY_FIX: [['夠', 'alcanzar, ser suficiente', 'be enough'], ['當場', 'en el momento', 'on the spot'], ['下次再付', 'pagar la próxima vez', 'pay next time']],
+  CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give wrong change'], ['應該找', 'debería darme de cambio', 'should give back']],
+  END: [['發票', 'factura, recibo', 'receipt (invoice)'], ['下次', 'la próxima vez', 'next time'], ['謝謝光臨', 'gracias por venir', 'thanks for coming']],
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = {
+  PROMO: ['比價錢', 'comparar precios', 'comparing prices'], HEAT: ['加熱', 'calentar', 'heating up'], ALCOHOL: ['買酒', 'comprar alcohol', 'buying alcohol'],
+  CARRIER: ['載具', 'código de factura', 'e-invoice carrier'], CARRIER_CHECK: ['核對條碼', 'revisar el código', 'checking the barcode'], DRAW: ['抽折扣', 'sorteo de descuento', 'discount draw'],
+  PAY: ['核對金額', 'revisar el total', 'checking the total'], PAY_FIX: ['付錢', 'pagar', 'paying'], CHANGE: ['找錢', 'el cambio', 'the change']
+};
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = {
+  PROMO: '走進超商', HEAT: '走到櫃台', ALCOHOL: '繼續結帳', CARRIER: '繼續結帳', CARRIER_CHECK: '聽店員確認', DRAW: '繼續結帳', PAY: '看螢幕', PAY_FIX: '聽店員重算', CHANGE: '等找錢', END: '拿袋子'
+};
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const PLACES = {
+  phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
+  shop: ['🏪', '超商', 'Tienda 24 h', 'Convenience store', '']
+};
+const NZ = n => n === 2 ? '兩' : CN[n];
+const CODE_CH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const rndCode = () => '/' + Array.from({ length: 7 }, () => pick([...CODE_CH])).join('');
+const mutate = (code, avoid = []) => {      // 換掉其中一個字，看起來很像但不一樣
+  let out;
+  do { const i = 1 + Math.floor(Math.random() * 7), c = pick([...CODE_CH].filter(x => x !== code[i])); out = code.slice(0, i) + c + code.slice(i + 1); } while (out === code || avoid.includes(out));
+  return out;
+};
+/* 泡麵的優惠；p 是單價。tot 是兩份的總價（全部是整數） */
+const OFFER_KINDS = ['s60', 'half', 'd85', 'sp', 'none'];
+const OFFER_OK = { s60: p => p % 5 === 0, half: p => p % 10 === 0, d85: p => p % 10 === 0, sp: () => true, none: () => true };
+const mkOffer = (k, p) => k === 's60' ? { k, zh: '第二件6折', es: 'el 2.º al 60 % del precio', en: '2nd one at 60% of the price', tot: p + p * 6 / 10 }
+  : k === 'half' ? { k, zh: '第二件半價', es: 'el 2.º a mitad de precio', en: '2nd one half price', tot: p + p / 2 }
+  : k === 'd85' ? { k, zh: '兩件85折', es: '2 piezas al 85 % del precio', en: '2 for 85% of the price', tot: p * 170 / 100 }
+  : k === 'sp' ? (() => { const x = 2 * p - pick([6, 8, 10, 12]); return { k, zh: `兩件特價${x}元`, es: `2 por ${x} dólares`, en: `2 for ${enM(x)}`, tot: x }; })()
+  : { k, zh: '沒有優惠', es: 'sin promoción', en: 'no promotion', tot: 2 * p };
+const DRAWS = { 100: ['沒抽中，原價', 'no ganaste; precio normal', "no win — regular price"], 90: ['9折', '90 % del precio', '90% of the price'], 85: ['85折', '85 % del precio', '85% of the price'], 80: ['8折', '80 % del precio', '80% of the price'] };
+const PRODUCTS = [
+  { zh: '紅燒牛肉麵', es: 'fideos instantáneos de res', en: 'beef instant noodles', e: '🍜' },
+  { zh: '雞汁拉麵', es: 'ramen instantáneo de pollo', en: 'chicken instant ramen', e: '🍥' }
+];
+
+/* 店員複誦載具條碼（CARRIER_CHECK）：可能唸錯一個字 */
+
+/* ══════════════════════════════════════
+   任務提示：只列出 NPC 交代過的原話；不扣分，結果頁顯示看了幾次
+   各遊戲的 Game.hintSections() 回傳 [{ title, lines:[L(…)…] }]
+══════════════════════════════════════ */
+const Hints = {
+  open: false,
+  toggle(force) {
+    this.open = force ?? !this.open;
+    if (this.open) { Vocab.toggle(false); Log.toggle(false); Game.hintViews += 1; this.render(); }
+    document.getElementById('hints').classList.toggle('open', this.open);
+    document.getElementById('hint-tab').setAttribute('aria-expanded', this.open);
+  },
+  render() {
+    if (!Game.task) return;
+    const r = s => Game.ruby(s);
+    const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
+    const sit = `<div class="h-sec">${r('我的狀況')}</div>` + Game.listHTML(true).map(x => `<div class="h-item"><div class="h-zh">${r(x.zh)}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`).join('');
+    document.getElementById('hint-body').innerHTML = sit + Game.hintSections().map(sec => `<div class="h-sec">${r(sec.title)}</div>` + sec.lines.map(item).join('')).join('');
+  }
+};
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+
+/* 結果頁（每個遊戲都一樣） */
+const resultCfg = () => ({
+  place: 'phone',
+  dialogue: () => {
+    const w = (zh, es, en) => zh + ' ' + X(es, en);
+    let msg = `【${w('任務成果', 'Resultados', 'Results')}】\n${w('玩家', 'Jugador', 'Player')}：${Game.N}\n${w('最後分數', 'Puntos', 'Score')}：${Game.score} 分\n` +
+      `${w('錯誤次數', 'Errores', 'Mistakes')}：${Game.mistakes} 次\n${w('時間', 'Tiempo', 'Time')}：${Game.elapsedTime} 秒\n` +
+      `${w('看任務提示', 'Pistas consultadas', 'Hints viewed')}：${Game.hintViews} 次\n\n${w('扣分原因', 'Penalizaciones', 'Penalties')}：`;
+    if (!Game.log.length) msg += '\n沒有扣分！' + X('¡Sin errores!', 'No mistakes!') + ' 🎉';
+    else Game.log.forEach((m, i) => { msg += `\n${i + 1}. ${m.zh} ${X(m.es, m.en)}（−10）`; });
+    return msg.split('\n').map(zh => ({ zh }));
+  },
+  options: () => ['查看排行榜 ' + X('Ver clasificación', 'See leaderboard')],
+  next: () => showLeaderboard()
+});
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,
+  hintViews: 0, log: [], feedback: [], visit: 0, att: {},
+  cash: null,
+  onStart() { this.updateCash(); },
+  updateCash() { document.getElementById('cash-badge').textContent = ''; },
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+  IMAGES: {
+    START: ['images/start.jpg', '🏪'], PROMO: ['images/shelf.jpg', '🛒'], HEAT: ['images/counter.jpg', '🏪'], ALCOHOL: ['images/counter.jpg', '🍺'], CARRIER: ['images/counter.jpg', '📱'],
+    CARRIER_CHECK: ['images/counter.jpg', '📱'], DRAW: ['images/draw.jpg', '🎰'], PAY: ['images/pay.jpg', '🧾'], PAY_FIX: ['images/pay.jpg', '💵'], CHANGE: ['images/pay.jpg', '💵'],
+    END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+  },
+
+  setup() {
+    const t = this.task = { rot: Math.floor(Math.random() * 3), beer: Math.random() < 0.6, heat: Math.random() < 0.5 };
+    t.bento = { zh: '便當', es: 'bento', en: 'boxed meal', p: pick([65, 70, 75]) };
+    t.drink = t.beer ? { zh: '啤酒', es: 'cerveza', en: 'beer', p: pick([40, 45, 50]), qty: pick([1, 2]), mw: '罐' } : { zh: '鮮奶', es: 'leche', en: 'milk', p: 35, qty: 1, mw: '瓶' };
+    /* 兩種泡麵，各有不同的優惠；要算哪個兩份比較便宜（差距至少 4 元，不會平手） */
+    let A, B, tries = 0;
+    do {
+      const ks = shuffle(OFFER_KINDS), pa = pick([30, 35, 40, 45, 50].filter(OFFER_OK[ks[0]])), pb = pick([30, 35, 40, 45, 50].filter(OFFER_OK[ks[1]]));
+      A = { ...PRODUCTS[0], p: pa, offer: mkOffer(ks[0], pa) }; B = { ...PRODUCTS[1], p: pb, offer: mkOffer(ks[1], pb) };
+    } while (Math.abs(A.offer.tot - B.offer.tot) < 4 && ++tries < 100);
+    t.shelf = shuffle([A, B]); t.cheap = A.offer.tot < B.offer.tot ? A : B; t.dear = t.cheap === A ? B : A;
+    t.total0 = t.bento.p + t.drink.p * t.drink.qty + t.cheap.offer.tot;
+    t.pc = pick([100, 100, 90, 85, 80].filter(pc => (t.total0 * pc) % 100 === 0));
+    const total = t.total0 * t.pc / 100;
+    const it = pick([{ ...t.bento, item: 'bento' }, { ...t.drink, item: 'drink' }]);
+    initPay(t, total, t.pc < 100 ? [{ kind: 'nodisc', zh: '折扣', es: 'descuento', en: 'discount', price: t.total0 - total }] : [{ kind: 'double', zh: it.zh, es: it.es, en: it.en, price: it.p, item: it.item }]);
+    t.code = rndCode(); t.ccWrong = Math.random() < 0.45; t.ccSaid = t.ccWrong ? mutate(t.code) : t.code; t.ccFlip = mutate(t.code);
+    t.codeDecoy = mutate(t.code, [t.ccFlip]);
+  },
+  drawZh() { return DRAWS[this.task.pc][0]; },
+
+  amiLines() {
+    const N = this.N, t = this.task, d = t.drink, c = t.cheap;
+    return [
+      L(`Ami：${N}，幫我去超商買東西，好嗎？我在家等你。`, `${N}, ¿me haces el favor de ir a la tienda de conveniencia? Te espero en casa.`, `${N}, could you go to the convenience store for me? I'm waiting at home.`),
+      L(`Ami：我要一個便當，${t.heat ? '要加熱' : '不用加熱'}。還要${NZ(d.qty)}${d.mw}${d.zh}。`,
+        `Quiero un bento${t.heat ? ', para calentar' : ', sin calentar'}. Y también ${d.qty} ${d.es}${d.qty > 1 ? 's' : ''}.`, `I want a boxed meal${t.heat ? ', heated up' : ', not heated'}. And ${d.qty} ${d.en}${d.qty > 1 ? 's' : ''} too.`),
+      L('Ami：還要兩份泡麵，要買一樣的。紅燒牛肉麵和雞汁拉麵都可以，哪個兩份比較便宜，就買哪個。', 'También dos fideos instantáneos, los dos iguales. Pueden ser de res o de pollo: compra el que salga más barato por los dos.', 'Also two instant noodles, both the same. Beef or chicken is fine — get whichever is cheaper for two.'),
+      L(`Ami：我的手機載具條碼是${t.code}，發票要存在載具裡。`, `El código de móvil de mi cuenta de facturas es ${t.code}; guarda la factura ahí.`, `My phone carrier barcode is ${t.code}. Save the receipt to it.`),
+      L('Ami：如果店員問你要不要按按鈕抽折扣，就抽抽看，不用錢！', 'Si el cajero te pregunta si quieres pulsar el botón para sortear un descuento, ¡hazlo, es gratis!', 'If the clerk asks whether you want to press the button for a discount draw, go for it — it is free!')
+    ];
+  },
+  hintSections() {
+    const ORDER = ['START', 'PROMO', 'HEAT', 'ALCOHOL', 'CARRIER', 'CARRIER_CHECK', 'DRAW', 'PAY', 'PAY_FIX', 'CHANGE', 'END', 'RESULT'];
+    const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
+    const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
+    if (at('PAY_FIX')) out.push({ title: '店員說的話', lines: [L(`店員：一共是${zhNum(this.task.total)}元。`, `Son ${esM(this.task.total)} en total.`, `${enM(this.task.total)} in total.`)] });
+    return out;
+  },
+
+  /* ── 畫面元件 ── */
+  listHTML(rowsOnly) {
+    const t = this.task, r = s => this.ruby(s), d = t.drink;
+    const rows = [
+      { zh: `便當一個（${t.heat ? '要加熱' : '不用加熱'}）`, es: `Un bento (${t.heat ? 'calentado' : 'sin calentar'})`, en: `One boxed meal (${t.heat ? 'heated' : 'not heated'})` },
+      { zh: `${d.zh}：${NZ(d.qty)}${d.mw}`, es: `${d.es}: ${d.qty}`, en: `${d.en}: ${d.qty}` },
+      { zh: '泡麵：兩份，買一樣的，哪個便宜買哪個', es: 'Fideos instantáneos: 2 iguales, el más barato', en: 'Instant noodles: 2 of the same, the cheaper one' },
+      { zh: `載具條碼：${t.code}`, es: `Código de móvil: ${t.code}`, en: `Carrier barcode: ${t.code}` },
+      { zh: '店員問要不要抽折扣：要抽', es: 'Si preguntan por el sorteo de descuento: sí', en: 'If asked about the discount draw: yes' },
+      { zh: '你身上有：一百元、兩百元、五百元的鈔票，還有零錢和身分證件', es: 'Llevas: billetes de cien, doscientos y quinientos dólares, cambio suelto y tu identificación', en: 'You have: 100-, 200- and 500-dollar bills, small change and your ID' }
+    ];
+    if (rowsOnly) return rows;
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 貨架：兩種泡麵、單價、優惠 */
+  shelfHTML() {
+    const r = s => this.ruby(s);
+    return `<div class="shelf">${this.task.shelf.map(n => `<div class="pcard"><div class="pe">${n.e}</div><div class="pn">${r(n.zh)}</div><div class="pp">${n.p}${r('元')}</div><div class="tag">${r(n.offer.zh)}</div></div>`).join('')}</div>`;
+  },
+  /* 結帳螢幕：一行一行掃進去的東西。店員報的總價可能多算（多掃一次，或沒有打折） */
+  receiptHTML() {
+    const t = this.task, r = s => this.ruby(s), err = this.state === 'PAY' && t.payWrong && t.extra.kind === 'double';
+    const qB = 1 + (err && t.extra.item === 'bento' ? 1 : 0), qD = t.drink.qty + (err && t.extra.item === 'drink' ? 1 : 0), n = t.cheap;
+    const row = (name, q, amt, note) => `<div class="mrow"><span>${r(name)} × ${q}${note ? '　' + r(note) : ''}</span><span class="am">${amt}${r('元')}</span></div>`;
+    return `<div class="menu"><div class="mh">🧾 ${r('螢幕')}</div>` + row('便當', qB, t.bento.p * qB) + row(t.drink.zh, qD, t.drink.p * qD) + row(n.zh, 2, n.offer.tot, n.offer.zh) +
+      `<div class="mnote">${t.pc < 100 ? `<span class="disc">${r('抽中：' + this.drawZh())}</span>` : r('沒抽中，原價')}</div></div>`;
+  },
+
+  /* ── 狀態設定 ── */
+  getConfig() {
+    const N = this.N, t = this.task;
+    const staff = (zh, es, en) => L(`店員：${zh}`, es, en);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const pair = o => t.rot % 2 ? [o[1], o[0]] : o;
+    const pays = payStates(Game, {
+      who: '店員', place: 'shop', html: () => Game.receiptHTML(),
+      extraWhy: () => t.extra.kind === 'double'
+        ? M(`店員多掃了一次${t.extra.zh}，多收了${t.extra.price}元（${t.said}元）。螢幕上的東西，要自己對一下。`, `El cajero escaneó ${t.extra.es} dos veces y cobró ${t.extra.price} de más (${esM(t.said)}). Revisa lo que aparece en la pantalla.`, `The clerk scanned the ${t.extra.en} twice and charged ${t.extra.price} extra (${enM(t.said)}). Check what's on the screen.`)
+        : M(`你抽中${Game.drawZh()}，原價${t.total0}元，打折後是${t.total}元。店員沒有打折，多收了${t.extra.price}元。`, `Ganaste ${DRAWS[t.pc][1]}: el precio original es ${esM(t.total0)} y con descuento ${esM(t.total)}. El cajero no aplicó el descuento y cobró ${t.extra.price} de más.`, `You won ${DRAWS[t.pc][2]}: the original price is ${enM(t.total0)}, which is ${enM(t.total)} after the discount. The clerk didn't apply it and charged ${t.extra.price} extra.`)
+    });
+
+    return {
+      /* ═══ Ami 的 LINE ═══ */
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你走到超商門口。手機響了一聲，是Ami傳來的LINE。）', '(Llegas a la puerta de la tienda. Tu celular suena: es un LINE de Ami.)', '(You reach the convenience store door. Your phone buzzes — a LINE from Ami.)'),
+          ...Game.amiLines(),
+          L('我：好，我現在去買！', '¡Bien, voy a comprarlo ahora!', "OK, I'll go buy it now!")
+        ],
+        options: ['走進超商'],
+        next: () => { Game.startTimer(); Game.state = 'PROMO'; }
+      },
+
+      /* ═══ 泡麵比價：哪個兩份比較便宜 ═══ */
+      PROMO: {
+        place: 'shop',
+        html: () => Game.shelfHTML(),
+        dialogue: () => [L('（泡麵架上，兩種泡麵都在特價。Ami要買兩份一樣的，哪個兩份比較便宜？）', '(En el estante de fideos instantáneos, los dos están en oferta. Ami quiere dos iguales: ¿cuál sale más barato por los dos?)', '(On the instant noodle shelf, both kinds are on sale. Ami wants two of the same — which is cheaper for two?)')],
+        options: () => rotOf(t, [`買${t.cheap.zh}。`, `買${t.dear.zh}。`, '隨便拿一個就好。']),
+        next: c => {
+          if (c !== `買${t.cheap.zh}。`) {
+            Game.addMistake(c === '隨便拿一個就好。'
+              ? M('Ami說要買比較便宜的。先算一算兩份要多少錢。', 'Ami dijo que comprara el más barato. Primero calcula cuánto cuestan dos.', 'Ami said to buy the cheaper one. Work out what two cost first.')
+              : M(`兩份算一算：${t.cheap.zh}是${t.cheap.offer.tot}元，${t.dear.zh}是${t.dear.offer.tot}元，${t.cheap.zh}比較便宜。`, `Haz la cuenta de dos: ${t.cheap.es} cuesta ${t.cheap.offer.tot} y ${t.dear.es} cuesta ${t.dear.offer.tot}; el de ${t.cheap.es} es más barato.`, `Do the math for two: ${t.cheap.en} is ${t.cheap.offer.tot} and ${t.dear.en} is ${t.dear.offer.tot}, so ${t.cheap.en} is cheaper.`));
+            return;
+          }
+          goodFirst('PROMO', `沒錯！${t.cheap.zh}兩份${t.cheap.offer.tot}元，比${t.dear.zh}的${t.dear.offer.tot}元便宜。`, `¡Exacto! Dos de ${t.cheap.es} cuestan ${t.cheap.offer.tot}, menos que los ${t.dear.offer.tot} de ${t.dear.es}.`, `Right! Two ${t.cheap.en} cost ${t.cheap.offer.tot}, less than ${t.dear.offer.tot} for the ${t.dear.en}.`);
+          Game.thought = [L('（你把便當、' + t.drink.zh + '和兩份' + t.cheap.zh + '拿到櫃台。）', `(Llevas el bento, ${t.drink.es} y los dos ${t.cheap.es} al mostrador.)`, `(You take the boxed meal, the ${t.drink.en} and two ${t.cheap.en} to the counter.)`)];
+          Game.state = 'HEAT';
+        }
+      },
+
+      /* ═══ 便當要不要加熱 ═══ */
+      HEAT: {
+        place: 'shop',
+        dialogue: () => [staff('歡迎光臨！便當要加熱嗎？', '¡Bienvenido(a)! ¿Le caliento el bento?', 'Welcome! Would you like the boxed meal heated up?')],
+        options: () => pair(['要加熱。', '不用加熱。']),
+        next: c => {
+          if (c !== (t.heat ? '要加熱。' : '不用加熱。')) { Game.addMistake(M(`Ami說便當${t.heat ? '要加熱' : '不用加熱'}。`, `Ami dijo que el bento ${t.heat ? 'se calienta' : 'no se calienta'}.`, `Ami said the boxed meal should ${t.heat ? 'be heated' : 'not be heated'}.`)); return; }
+          goodFirst('HEAT', '你記得Ami說的話，真棒！', '¡Recordaste lo que dijo Ami, genial!', 'You remembered what Ami said — great!');
+          Game.thought = [staff(t.heat ? '好，我幫你放進微波爐。' : '好，不加熱。', t.heat ? 'Bien, lo pongo en el microondas.' : 'Bien, sin calentar.', t.heat ? "Okay, I'll put it in the microwave." : 'Okay, no heating.')];
+          Game.state = t.beer ? 'ALCOHOL' : 'CARRIER';
+        }
+      },
+
+      /* ═══ 買酒：滿十八歲，要看證件 ═══ */
+      ALCOHOL: {
+        place: 'shop',
+        dialogue: () => [staff('這個是酒喔，要滿十八歲才可以買。請出示證件。', 'Esto es alcohol: hay que tener 18 años cumplidos. Muéstreme su identificación, por favor.', 'This is alcohol — you must be at least 18. Please show your ID.')],
+        options: () => rotOf(t, ['好，這是我的證件。', '我已經成年了，不用看吧？', '那我不買酒了。']),
+        next: c => {
+          if (c !== '好，這是我的證件。') {
+            Game.addMistake(c === '那我不買酒了。'
+              ? M('Ami要買啤酒，你滿十八歲，拿出證件就可以買。', 'Ami quiere cerveza; tú eres mayor de 18, solo muestra tu identificación.', 'Ami wants beer; you are over 18, so just show your ID.')
+              : M('買酒就是要出示證件，這是規定。要有禮貌地拿出來。', 'Para comprar alcohol hay que mostrar identificación; es la regla. Sácala con cortesía.', 'To buy alcohol you must show ID — it is the rule. Hand it over politely.'));
+            return;
+          }
+          goodFirst('ALCOHOL', '沒錯！買酒要滿十八歲，要出示證件給店員看。', '¡Exacto! Para comprar alcohol hay que tener 18 años y mostrar la identificación.', 'Right! To buy alcohol you must be 18 and show your ID.');
+          Game.thought = [staff('好，沒問題，謝謝。證件還你。', 'Bien, todo en orden, gracias. Aquí tiene su identificación.', 'Okay, no problem, thanks. Here is your ID back.')];
+          Game.state = 'CARRIER';
+        }
+      },
+
+      /* ═══ 載具（會員）：發票存在 Ami 的手機 ═══ */
+      CARRIER: {
+        place: 'shop',
+        dialogue: () => [staff('請問有會員或手機載具嗎？', '¿Tiene membresía o código de móvil para la factura?', 'Do you have a membership or a phone carrier barcode?')],
+        options: () => rotOf(t, [`有，手機載具，條碼是${t.code}。`, `有，手機載具，條碼是${t.codeDecoy}。`, '沒有，發票印出來就好。']),
+        next: c => {
+          if (c !== `有，手機載具，條碼是${t.code}。`) {
+            Game.addMistake(c === '沒有，發票印出來就好。'
+              ? M('Ami說發票要存在她的手機載具裡。', 'Ami dijo que la factura se guarda en su código de móvil.', 'Ami said the receipt goes into her phone carrier.')
+              : M(`條碼不對：Ami的條碼是${t.code}。`, `El código no es ese: el de Ami es ${t.code}.`, `Wrong barcode: Ami's is ${t.code}.`));
+            return;
+          }
+          goodFirst('CARRIER', '沒錯！發票存在載具裡，不用拿紙本。', '¡Exacto! La factura se guarda en el código y no hace falta papel.', 'Right! The receipt is saved to the carrier — no paper needed.');
+          Game.state = 'CARRIER_CHECK';
+        }
+      },
+      /* 店員輸入條碼後複誦：可能唸錯一個字 */
+      CARRIER_CHECK: catchState(Game, {
+        key: 'CARRIER_CHECK', place: 'shop',
+        dialogue: () => [L(`店員：好，載具條碼是${t.ccSaid}，對嗎？`, `Bien, el código es ${t.ccSaid}. ¿Es correcto?`, `Okay, the barcode is ${t.ccSaid}. Is that right?`)],
+        ok: '對，沒錯。', fix: () => `不好意思，條碼是${t.ccWrong ? t.code : t.ccFlip}。`, rude: '你到底有沒有在聽啊？',
+        wrong: () => t.ccWrong,
+        whyWrong: () => M(`店員唸錯了：他說${t.ccSaid}，Ami的條碼是${t.code}。發票會存到別人的載具。`, `El cajero se equivocó: dijo ${t.ccSaid}, pero el de Ami es ${t.code}. La factura se guardaría en otra cuenta.`, `The clerk got it wrong: he said ${t.ccSaid}, but Ami's is ${t.code}. The receipt would go to someone else's account.`),
+        whyRight: () => M(`店員唸的是對的：${t.code}。`, `El cajero lo leyó bien: ${t.code}.`, `The clerk read it right: ${t.code}.`),
+        goodWrong: ['你很細心！條碼唸錯了，要馬上說，發票才會進Ami的載具。', '¡Qué atento! El código estaba mal leído; hay que decirlo enseguida para que la factura llegue a Ami.', "Well spotted! The barcode was misread — say so right away so the receipt reaches Ami's account."],
+        goodOk: ['店員唸條碼的時候，要對一下Ami的條碼。', 'Cuando el cajero lea el código, compáralo con el de Ami.', "When the clerk reads out the barcode, compare it with Ami's."],
+        apology: () => [staff(`啊，不好意思！是${t.code}。`, `¡Ay, disculpe! Es ${t.code}.`, `Oh, sorry! It's ${t.code}.`), staff('好，輸入好了。', 'Listo, ya lo ingresé.', 'Okay, entered.')],
+        go: () => { Game.state = 'DRAW'; }
+      }),
+
+      /* ═══ 按鈕抽折扣 ═══ */
+      DRAW: {
+        place: 'shop',
+        dialogue: () => [staff('今天結帳可以按按鈕抽折扣，要抽嗎？', 'Hoy al pagar puede pulsar el botón para sortear un descuento. ¿Quiere probar?', 'Today you can press the button at checkout to draw a discount. Want to try?')],
+        options: () => rotOf(t, ['好，我來抽！', '不用，我趕時間。', '抽什麼抽？快點結帳！']),
+        next: c => {
+          if (c !== '好，我來抽！') {
+            Game.addMistake(c === '不用，我趕時間。'
+              ? M('Ami說要抽抽看，不用錢！', 'Ami dijo que lo probaras, ¡es gratis!', 'Ami said to try it — it is free!')
+              : M('要有禮貌。抽折扣是免費的，Ami也說要抽。', 'Hay que ser cortés. El sorteo es gratis y Ami dijo que lo hicieras.', 'Be polite. The draw is free and Ami said to do it.'));
+            return;
+          }
+          goodFirst('DRAW', '沒錯！抽折扣不用錢，抽中了就可以便宜一點。', '¡Exacto! El sorteo es gratis y si ganas pagas menos.', 'Right! The draw is free, and if you win you pay less.');
+          Game.thought = [L(`（你按下按鈕……螢幕跳出：${Game.drawZh()}！）`, `(Pulsas el botón… la pantalla muestra: ${DRAWS[t.pc][1]}.)`, `(You press the button… the screen shows: ${DRAWS[t.pc][2]}.)`)];
+          Game.state = 'PAY';
+        }
+      },
+
+      /* ═══ 付錢（報價、付錢、找錢） ═══ */
+      PAY: pays.PAY, PAY_FIX: pays.PAY_FIX, CHANGE: pays.CHANGE,
+
+      /* ═══ 結局 ═══ */
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2;
+          track('game_complete', { game: 'conbini', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            staff('謝謝光臨！', '¡Gracias por venir!', 'Thanks for coming!'),
+            Game._endGood
+              ? L(`Ami：哇，東西都買對了！發票也進到我的手機了。謝謝你，${N}！`, `¡Guau, compraste todo bien! La factura ya llegó a mi móvil. ¡Gracias, ${N}!`, `Wow, you got everything right! The receipt is already on my phone. Thanks, ${N}!`)
+              : L('Ami：謝謝你！不過我等了好久……下次要快一點喔！', '¡Gracias! Pero esperé mucho… ¡la próxima vez más rápido!', 'Thanks! But I waited a long time… faster next time!')
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: resultCfg()
+    };
+  },
+
+
+  /* ── 台詞：每一行一個 div，有翻譯的在句尾加朗讀和翻譯小圖示 ── */
+  formatText(content) {
+    const items = Array.isArray(content) ? content : [content];
+    return items.map(item => {
+      const m = item.zh.match(SPEAKER_RE);
+      let head = '', rest = item.zh;
+      if (m) {
+        const who = m[1] === '我' ? this.N : m[1];
+        const cls = m[1] === 'Ami' ? 'speaker ami' : m[1] === '我' ? 'speaker me' : 'speaker';
+        head = `<span class="${cls}">${this.ruby(who)}：</span>`;
+        rest = item.zh.slice(m[0].length);
+      }
+      let btn = '';
+      if (item.es) {
+        this._spk.push({ text: rest, who: m ? m[1] : null });
+        btn += spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+        this._tr.push(item);
+        btn += `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+      }
+      return `<div class="line${/^[（(]/.test(String(item.zh).trim()) ? ' narr' : ''}">${head}${this.ruby(rest)}${btn}</div>`;
+    }).join('');
+  },
+
+  /* alt：第二張圖，和第一張輪流出現（像動畫）；開了「減少動態效果」就不動 */
+  setImage(src, emoji, alt) {
+    const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
+    this.stopAnim(); this._anim0 = src;
+    ph.textContent = emoji;
+    if (!src || this.missing.has(src)) { img.style.display = 'none'; ph.style.display = 'grid'; return; }
+    img.style.display = 'block'; ph.style.display = 'none';
+    if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+    const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (alt && !calm && !this.missing.has(alt)) {
+      const pre = new Image(); pre.onerror = () => this.missing.add(alt); pre.src = alt;   // 先載入，避免閃一下
+      this._anim = { alt }; let on = false;
+      this._animTimer = setInterval(() => {
+        if (this.missing.has(alt)) { this.stopAnim(); img.setAttribute('src', src); return; }
+        on = !on; img.setAttribute('src', on ? alt : src);
+      }, 600);
+    }
+  },
+
+  handleChoice(choice) {
+    if (this.state === '_TRANS') {          // 離開過場，進下一關
+      const t = this._trans; this._trans = null;
+      Tr.closeAll(); Speech.stop();
+      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
+      if (this.updateCash) this.updateCash();
+      if (document.getElementById('game-window').classList.contains('active')) this.render();
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
+    Speech.stop();
+    this.thought = null;
+    this.feedback = [];
+    const before = this.state;
+    this.att[before] = (this.att[before] || 0) + 1;
+    cfg.next(choice);
+    this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
+    if (this.thoughtFirst) this.visit += 1;
+    this.updateCash();
+    this.maybeTrans(before);
+    if (document.getElementById('game-window').classList.contains('active')) this.render();
+  },
+
+  render() {
+    if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果
+      const t = this._trans;
+      this.state = t.from;
+      this._transMode = true;
+      try { this.render(); } finally { this._transMode = false; this.state = '_TRANS'; }
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    if (!cfg) { console.error('狀態錯誤：' + this.state); return; }
+    const val = v => typeof v === 'function' ? v() : v;
+    this.setPlace(val(cfg.place) || 'gate');
+
+    // END 的 dialogue 會決定結局，所以只算一次
+    const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
+    let [src, emoji, alt] = this.IMAGES[this.state] || ['', '🚇'];
+    if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
+    this.setImage(src, emoji, alt);
+    Vocab.render(this.state);
+    if (Hints.open) Hints.render();
+    Log.render();
+
+    this._tr = []; this._spk = [];
+    let html = (this.showList && this.state !== 'START' && !['END', 'RESULT'].includes(this.state)) ? this.listHTML() : '';
+    html += cfg.html ? cfg.html() : '';
+    if (this._transMode) html = '';
+    const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
+    const main = this.formatText(raw);
+    // 過場畫面：先給評語（綠卡），再接旁白，最後才是過場按鈕
+    html += this._transMode ? this.feedbackHTML() + th : (this.thoughtFirst ? th + main : main + th) + this.feedbackHTML();
+    const box = document.getElementById('npc-dialogue');
+    box.innerHTML = html;
+    box.querySelectorAll('[data-tr]').forEach(btn => {
+      btn.onclick = () => Tr.open(this._tr[+btn.dataset.tr], btn);
+    });
+    box.querySelectorAll('[data-spk]').forEach(btn => {
+      btn.onclick = () => { const x = this._spk[+btn.dataset.spk]; Speech.speak(x.text, btn, x.who); };
+    });
+
+    if (cfg.mount && !this._transMode) cfg.mount(box);
+    const area = document.getElementById('options-area');
+    area.className = '';
+    area.innerHTML = '';
+    const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
+    area.classList.toggle('single', cfg.single ?? (opts.length === 1 || opts.some(o => o.length > 12)));
+    opts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt' + (false ? ' deal' : '');
+      btn.innerHTML = this.ruby(opt);
+      btn.onclick = () => this.handleChoice(opt);
+      area.appendChild(btn);
+    });
+  }
+});
+
+
+/* 從「重新開始」或地圖回來：直接用原本的名字開新的一局 */
+GameBoot();
+Music.init({ bpm: 138, tracks: [
+  { wave: 'square', vol: 0.2, notes: 'E5 G5 A5 G5 E5 D5 C5 . | D5 E5 G5 E5 D5 C5 A4 . | C5 E5 G5 C6 G5 E5 D5 . | E5 D5 C5 D5 C5 - . .' },
+  { wave: 'triangle', vol: 0.6, notes: 'C3 . G3 . C3 . G3 . | A2 . E3 . A2 . E3 . | F2 . C3 . F2 . C3 . | G2 . D3 . C3 . . .' },
+  { vol: 0.3, notes: 'k . h h s . h .' }] });
+</script>
+<script>
+/* ===== 版權說明 ===== */
+(function(){
+  if(window.__hgCopy)return; window.__hgCopy=1;
+  function mk(){
+    if(document.getElementById('hgCopy'))return;
+    if(document.documentElement.hasAttribute('data-hg-nocopy'))return;
+    var d=document.createElement('div'); d.id='hgCopy';
+    d.textContent='© 2026 @cadadiaunosminutos_ben_chino ｜ 保留所有權利 / Todos los derechos reservados';
+    d.style.cssText='display:block;flex:none;width:100%;box-sizing:border-box;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));text-align:center;font:10px/1.4 system-ui,-apple-system,"Noto Sans TC",sans-serif;color:rgba(120,120,120,.85);user-select:none;position:static;';
+    var cs=getComputedStyle(document.body);
+    if(cs.display.indexOf('flex')>-1&&cs.flexDirection.indexOf('row')===0){document.body.style.flexWrap='wrap';d.style.flex='0 0 100%';}
+    document.body.appendChild(d);
+  }
+  if(document.body)mk(); else document.addEventListener('DOMContentLoaded',mk);
+})();
+/* ===== /版權說明 ===== */
+</script>
+</body>
+</html>

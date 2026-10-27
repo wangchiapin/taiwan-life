@@ -41,6 +41,9 @@
     <li><button data-k="bookstore"><b>📚 書店</b><small>Librería</small></button></li>
     <li><button data-k="market"><b>🥬 菜市場</b><small>Mercado</small></button></li>
     <li><button data-k="elevator"><b>🛗 搭電梯</b><small>Ascensor</small></button></li>
+    <li><button data-k="noodle"><b>🍜 麵店</b><small>Fonda de fideos</small></button></li>
+    <li><button data-k="conbini"><b>🏪 超商購物</b><small>Tienda 24 h</small></button></li>
+    <li><button data-k="yansuji"><b>🍗 鹽酥雞</b><small>Pollo frito</small></button></li>
   </ul>
 </main>
 <script>
@@ -208,7 +211,19 @@ const SONGS = {
   elevator: { bpm: 76, tracks: [
   { wave: 'sine', vol: 0.5, notes: 'E5 - - - B4 - - - | D5 - - - A4 - - - | C5 - - - G4 - - - | B4 - - - - - . .' },
   { wave: 'triangle', vol: 0.5, notes: 'C3 - - - - - G3 - | D3 - - - - - A3 - | E3 - - - - - B3 - | G2 - - - - - . .' },
-  { wave: 'triangle', vol: 0.22, notes: 'E6 . . . . . . . | D6 . . . . . . . | C6 . . . . . . . | B5 . . . . . . .' }] }
+  { wave: 'triangle', vol: 0.22, notes: 'E6 . . . . . . . | D6 . . . . . . . | C6 . . . . . . . | B5 . . . . . . .' }] },
+  noodle: { bpm: 120, tracks: [
+  { wave: 'triangle', vol: 0.42, notes: 'A4 C5 D5 E5 D5 C5 A4 . | G4 A4 C5 D5 C5 A4 G4 . | A4 C5 E5 G5 E5 D5 C5 . | D5 C5 A4 G4 A4 - . .' },
+  { wave: 'triangle', vol: 0.6, notes: 'A2 . E3 . A2 . E3 . | G2 . D3 . G2 . D3 . | F2 . C3 . F2 . C3 . | G2 . D3 . A2 . . .' },
+  { vol: 0.3, notes: 'k . h . s . h .' }] },
+  conbini: { bpm: 138, tracks: [
+  { wave: 'square', vol: 0.2, notes: 'E5 G5 A5 G5 E5 D5 C5 . | D5 E5 G5 E5 D5 C5 A4 . | C5 E5 G5 C6 G5 E5 D5 . | E5 D5 C5 D5 C5 - . .' },
+  { wave: 'triangle', vol: 0.6, notes: 'C3 . G3 . C3 . G3 . | A2 . E3 . A2 . E3 . | F2 . C3 . F2 . C3 . | G2 . D3 . C3 . . .' },
+  { vol: 0.3, notes: 'k . h h s . h .' }] },
+  yansuji: { bpm: 126, tracks: [
+  { wave: 'triangle', vol: 0.42, notes: 'D5 F5 G5 A5 G5 F5 D5 . | C5 D5 F5 G5 F5 D5 C5 . | D5 F5 A5 C6 A5 G5 F5 . | G5 F5 D5 C5 D5 - . .' },
+  { wave: 'triangle', vol: 0.6, notes: 'D3 . A3 . D3 . A3 . | C3 . G3 . C3 . G3 . | Bb2 . F3 . Bb2 . F3 . | C3 . G2 . D3 . . .' },
+  { vol: 0.3, notes: 'k . h . s . h h' }] }
 };
 Music.paint = () => {};
 let cur = null;

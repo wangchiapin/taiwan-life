@@ -28,11 +28,11 @@ tools/firestore.rules  Firestore 規則（改了要貼到 console 發布）
 ```
 
 ## 場景 ID（資料夾名 = scene = collection 前綴 = GA4 game 參數）
-drinks · reserva · breakfast · thsr · gas · nightmarket · parcel · bakery · clinic · mrt · street · school · ubike · bus · barber · cinema · parking · icecream · bookstore · market · elevator
+drinks · reserva · breakfast · thsr · gas · nightmarket · parcel · bakery · clinic · mrt · street · school · ubike · bus · barber · cinema · parking · icecream · bookstore · market · elevator · noodle · conbini · yansuji
 
 Firestore collection：`<scene>game_scores` 或 `<scene>_scores`（沿用各遊戲現有名稱，不要改，否則舊排行榜會消失）。
 排行榜需要複合索引：score 降冪 + elapsed 升冪。
-管理員頁「設定檢查」會檢查 19 個排行榜索引（school、ubike、bus、barber、cinema、parking、icecream、bookstore、market、elevator 新增的要自己建），缺的會給「建立索引」連結。
+管理員頁「設定檢查」會檢查 22 個排行榜索引（school、ubike、bus、barber、cinema、parking、icecream、bookstore、market、elevator、noodle、conbini、yansuji 新增的要自己建），缺的會給「建立索引」連結。
 
 ## 成績紀錄與玩家代碼
 - 每局結果頁出現時上傳一筆到 `results`（遊戲裡呼叫 `uploadResult()`）：playerId（玩家代碼）、name、scene、score、mistakes、errors（每個扣分原因 zh/es/en＋關卡 stage/stageEs/stageEn）、elapsed、hintViews、script、lang、embed、difficulty（先固定 'normal'）、createdAt。
@@ -86,6 +86,21 @@ parent.postMessage({ type: 'scene-complete', scene: '<scene>', score, mistakes }
 5. **綠卡**：做對才出現，放在下一頁對話上方，不另外多一個過場頁。
 6. **測試要覆蓋兩種情況**：每個遊戲的 `tools/oracles/<遊戲>.py` 要能依照「對方有沒有出錯」給出正解，`smoke.py perfect` 多跑幾次（隨機）都要 100 分。
 7. **新增了要補圖的關卡**，先記在 `docs/image-todo.md`，最後一起做圖。
+
+## 新遊戲：麵店 noodle、超商購物 conbini、鹽酥雞 yansuji（2026-10-27）
+地圖 slot 20、21、22（原本的工地 site1～3），`gated: true`＝預設維修中，管理員頁「地圖開關」打開才能玩。排行榜 `noodlegame_scores`、`conbinigame_scores`、`yansujigame_scores`。
+三個都照上面的「關卡設計原則」做：對方（老闆／店員）會出錯，錯誤是隨機的，玩家要自己核對。
+
+- **麵店**：點麵（乾麵／湯麵／餛飩麵／牛肉麵）→ 大碗小碗 → 辣不辣 → 蔥 → 小菜（滷蛋、豆干、海帶、燙青菜，一樣一樣問）→ 內用外帶 → **老闆複誦（可能說錯一項）** → **麵端上來（可能有一項不對）** → 報價（可能多算）→ 付錢 → 找錢（可能找錯）。
+- **超商購物**：兩種泡麵各有優惠（第二件6折、半價、兩件85折、兩件特價……），要算哪個兩份比較便宜 → 便當加熱 → 買酒要滿十八歲、出示證件（沒買啤酒時沒有這關）→ 手機載具條碼 → **店員複誦條碼（可能唸錯一個字）** → 按按鈕抽折扣 → 報價（可能多掃一次，或抽中折扣卻沒打折）→ 付錢 → 找錢。
+- **鹽酥雞**：一樣一樣點（雞排一定有，其他的數量可能是兩份）→ 雞排切不切 → 辣不辣 → 蔥、蒜、洋蔥各要不要（三選一組合）→ **老闆複誦（數量、切不切、辣度、蔥蒜洋蔥其中一項可能說錯）** → **打開袋子核對（同樣可能有一項不對）** → 報價（可能多算沒點的東西）→ 付錢 → 找錢。
+
+共用寫法（每個遊戲的 index.html 裡各有一份，改的時候三個要一起看）：
+- `catchState()`：一關「①沒錯／謝謝 ②有禮貌指出問題 ③沒禮貌」，由 `wrong()` 決定對方這次有沒有出錯；抓到錯誤之後有道歉／重做的後續。
+- `payStates()`：報價（PAY）、重算後真的付錢（PAY_FIX）、找錢（CHANGE）三關。付的鈔票由 `billFor()` 決定（一百、兩百、五百）。
+- 正解在 `tools/oracles/noodle.py`、`conbini.py`、`yansuji.py`；`tools/smoke.py` 已加入名單。
+- 圖片檔 `games/<遊戲>/images/*.jpg` 還沒有，缺圖時自動顯示 emoji。
+- 台詞和拼音是第一版草稿，需要 Ben 審。
 
 ## 圖片規格
 情境圖：正方形 .jpg，**720×720**、品質約 84（每張約 100–150 KB）。遊戲最大只顯示 360px 寬，720 已足夠高解析螢幕。

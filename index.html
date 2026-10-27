@@ -319,6 +319,9 @@ const SCENES = [
   { id: 'icecream',  zh: '冰淇淋店', es: 'Heladería',       en: 'Ice cream shop', emoji: '🍦', roof: '#d9507f', wall: '#fbe4ec', slot: 17, gated: true },
   { id: 'bookstore', zh: '書店',     es: 'Librería',        en: 'Bookstore',      emoji: '📚', roof: '#3b6ea5', wall: '#e3ecf7', slot: 18, gated: true },
   { id: 'elevator',  zh: '搭電梯',   es: 'Ascensor',        en: 'Elevator',       emoji: '🛗', roof: '#6b7a99', wall: '#e4e8f1', slot: 19, gated: true },
+  { id: 'noodle',    zh: '麵店',     es: 'Fonda de fideos', en: 'Noodle shop',    emoji: '🍜', roof: '#c4452d', wall: '#f6e0d3', slot: 20, gated: true },
+  { id: 'conbini',   zh: '超商購物', es: 'Tienda 24 h',     en: 'Convenience store (shopping)', emoji: '🏪', roof: '#2f8f6a', wall: '#dff0e6', slot: 21, gated: true },
+  { id: 'yansuji',   zh: '鹽酥雞',   es: 'Pollo frito',     en: 'Fried chicken',  emoji: '🍗', roof: '#c9741a', wall: '#f8e6c8', slot: 22, gated: true },
   /* 沒有建築的場景：路上會隨機冒出「❗」，走過去就觸發 */
   { id: 'street',      zh: '路上突發事件', es: 'Imprevistos en la calle', en: 'Street surprises', emoji: '❗', virtual: true, gated: true, openByDefault: true }
 ];
@@ -332,13 +335,10 @@ const isLive = sc => !sc.gated || (sc.openByDefault ? OPEN[sc.id] !== false : !!
 const liveScenes = () => SCENES.filter(isLive);
 const COMING = [
   { id: 'airport', zh: '機場',   es: 'Aeropuerto', en: 'Airport',     emoji: '✈️', roof: '#8697ad', wall: '#e2e8f0', slot: 12, status: 'soon' },
-  { id: 'site1',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 20, status: 'build' },
-  { id: 'site2',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 21, status: 'build' },
-  { id: 'site3',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 22, status: 'build' },
   { id: 'site4',   zh: '工地',   es: 'Obra',       en: 'Construction',emoji: '🏗️', slot: 23, status: 'build' }
 ];
 const ZHT = { '設定': '设置', '字體': '字体', '語言': '语言', '拼音／注音': '拼音／注音', '語速': '语速', '拼音': '拼音', '注音': '注音', '兩者': '两者', '關閉': '关闭', '慢': '慢', '正常': '正常', '快': '快', '完成': '完成', '只有中文': '只有中文' };
-const ZHS = { drinks: '饮料店', bakery: '面包店', clinic: '诊所', mrt: '捷运站', school: '学校', cinema: '电影院', market: '菜市场', airport: '机场', bus: '公车', barber: '理发店', parking: '停车场', icecream: '冰淇淋店', bookstore: '书店', elevator: '搭电梯', site1: '工地', site2: '工地', site3: '工地', site4: '工地' };
+const ZHS = { drinks: '饮料店', bakery: '面包店', clinic: '诊所', mrt: '捷运站', school: '学校', cinema: '电影院', market: '菜市场', airport: '机场', bus: '公车', barber: '理发店', parking: '停车场', icecream: '冰淇淋店', bookstore: '书店', elevator: '搭电梯', noodle: '面店', conbini: '超商购物', yansuji: '盐酥鸡', site4: '工地' };
 /* 建築位置：每條橫向馬路上下各 4 個（3 格寬）。房子的門都在最下面一排，朝向下面的人行道
    0–7：第一條馬路（原本的地圖）；8–15：第二條馬路；16–23：第三條馬路
    機場佔兩個位置（12、13），寬 7 格 */
@@ -519,6 +519,9 @@ const SUGGEST = {
   bookstore:   ['去書店買書', '去书店买书', 'qù shū diàn mǎi shū', 'vas a la librería a comprar un libro', 'go buy a book at the bookstore'],
   market:      ['去菜市場買菜', '去菜市场买菜', 'qù cài shì chǎng mǎi cài', 'vas al mercado a comprar verduras', 'go buy groceries at the market'],
   elevator:    ['去搭電梯', '去搭电梯', 'qù dā diàn tī', 'vas a tomar el ascensor', 'go take the elevator'],
+  noodle:      ['去麵店點麵', '去面店点面', 'qù miàn diàn diǎn miàn', 'vas a la fonda de fideos a pedir comida', 'go order noodles at the noodle shop'],
+  conbini:     ['去超商買東西', '去超商买东西', 'qù chāo shāng mǎi dōng xi', 'vas a la tienda de conveniencia a comprar cosas', 'go shop at the convenience store'],
+  yansuji:     ['去買鹽酥雞', '去买盐酥鸡', 'qù mǎi yán sū jī', 'vas a comprar pollo frito crujiente', 'go buy fried chicken'],
   street:      ['在路上走走，看看有沒有人需要幫忙', '在路上走走，看看有没有人需要帮忙', 'zài lù shàng zǒu zou, kàn kan yǒu méi yǒu rén xū yào bāng máng', 'das una vuelta por la calle y ves si alguien necesita ayuda', 'walk around and see if anyone needs help']
 };
 function amiLine() {
