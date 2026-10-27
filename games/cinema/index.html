@@ -399,11 +399,14 @@ const VOCAB = {
   BOARD: [['螢幕', 'pantalla', 'screen'], ['場次', 'horarios de funciones', 'showtimes'], ['哪一場', '¿cuál función?', 'which showing?'], ['晚上', 'por la noche', 'in the evening'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask']],
   TICKETS: [['全票', 'entrada completa', 'full-price ticket'], ['學生票', 'entrada de estudiante', 'student ticket'], ['張', 'clasificador de entradas', 'measure word for tickets'], ['兩', 'dos (antes de un clasificador)', 'two (before a measure word)'], ['票價', 'precio de la entrada', 'ticket price']],
   SEATS: [['座位', 'asiento', 'seat'], ['排', 'fila', 'row'], ['號', 'número', 'number'], ['第', 'prefijo de número ordinal', 'ordinal prefix'], ['連在一起', 'juntos', 'side by side']],
-  PAY: [['一共', 'en total', 'in total'], ['夠', 'alcanzar, ser suficiente', 'be enough'], ['一千元', 'mil dólares', 'one thousand dollars'], ['便宜一點', 'un poco más barato', 'a little cheaper'], ['固定', 'fijo', 'fixed']],
-  CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give the wrong change'], ['不好意思', 'disculpe', 'excuse me'], ['零錢', 'cambio', 'change (coins)'], ['算一下', 'calcular', 'work it out']],
+  PAY: [['一共', 'en total', 'in total'], ['算錯', 'calcular mal', 'miscalculate'], ['應該', 'debería', 'should'], ['夠', 'alcanzar, ser suficiente', 'be enough'], ['一千元', 'mil dólares', 'one thousand dollars'], ['便宜一點', 'un poco más barato', 'a little cheaper'], ['固定', 'fijo', 'fixed']],
+  SEAT_CONFIRM: [['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['正確', 'correcto', 'correct'], ['沒錯', 'así es, correcto', "that's right"], ['不對', 'incorrecto, no', 'not right'], ['聽錯', 'oír mal', 'mishear']],
+  CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give the wrong change'], ['算錯', 'calcular mal', 'miscalculate'], ['應該', 'debería', 'should'], ['不好意思', 'disculpe', 'excuse me']],
+  TICKET_CHECK: [['印錯', 'imprimir mal', 'misprint'], ['場次', 'función, horario', 'showing'], ['重印', 'volver a imprimir', 'reprint'], ['提前', 'con anticipación', 'ahead of time'], ['收好', 'guardar bien', 'keep safe']],
   SNACK: [['爆米花', 'palomitas', 'popcorn'], ['一份', 'una porción', 'one serving'], ['鹹的', 'salado', 'salty one'], ['甜的', 'dulce', 'sweet one'], ['點', 'pedir', 'order'], ['可樂', 'cola', 'cola']],
+  SNACK_CHECK: [['口味', 'sabor', 'flavor'], ['換', 'cambiar', 'swap, change'], ['遞給', 'entregar', 'hand over'], ['不好意思', 'disculpe', 'excuse me']],
   GATE: [['驗票口', 'control de entradas', 'ticket check'], ['電影票', 'entrada de cine', 'movie ticket'], ['出示', 'mostrar', 'show'], ['補差價', 'pagar la diferencia', 'pay the difference'], ['規定', 'regla', 'rule']],
-  FIND_HALL: [['廳', 'sala', 'theater (hall)'], ['票上', 'en la entrada', 'on the ticket'], ['找到', 'encontrar', 'find'], ['走進', 'entrar caminando', 'walk into'], ['走廊', 'pasillo', 'corridor']],
+  FIND_HALL: [['廳', 'sala', 'theater (hall)'], ['票上', 'en la entrada', 'on the ticket'], ['找到', 'encontrar', 'find'], ['走進', 'entrar caminando', 'walk into'], ['影廳', 'sala de cine', 'cinema hall']],
   SEAT_TAKEN: [['位子', 'asiento', 'seat'], ['對號入座', 'sentarse en el asiento que indica la entrada', 'sit in the seat on your ticket'], ['看錯', 'leer mal', 'misread'], ['不好意思', 'disculpe', 'excuse me'], ['再看一下', 'mirar otra vez', 'take another look']],
   PHONE: [['手機', 'celular', 'phone'], ['靜音', 'silenciar', 'mute'], ['安靜', 'silencio, tranquilo', 'quiet'], ['螢幕', 'pantalla', 'screen'], ['影響', 'molestar, afectar', 'disturb, affect']],
   END: [['好看', 'buena (de ver)', 'good (to watch)'], ['錯過', 'perderse', 'miss'], ['開頭', 'el comienzo', 'the beginning'], ['劇情', 'trama', 'plot'], ['下次', 'la próxima vez', 'next time']],
@@ -414,7 +417,7 @@ const VOCAB = {
 const STAGE = (() => {
   const buy = ['買票', 'comprar entradas', 'buying tickets'], seat = ['選座位', 'elegir asientos', 'choosing seats'], pay = ['付錢', 'pagar', 'paying'],
     snack = ['爆米花', 'palomitas', 'popcorn'], go = ['進場', 'entrar a la sala', 'going in'], watch = ['看電影', 'en la sala', 'in the theater'];
-  return { BOARD: buy, TICKETS: buy, SEATS: seat, PAY: pay, CHANGE: pay, SNACK: snack, GATE: go, FIND_HALL: go, SEAT_TAKEN: watch, PHONE: watch };
+  return { BOARD: buy, TICKETS: buy, SEATS: seat, SEAT_CONFIRM: seat, PAY: pay, CHANGE: pay, TICKET_CHECK: pay, SNACK: snack, SNACK_CHECK: snack, GATE: go, FIND_HALL: go, SEAT_TAKEN: watch, PHONE: watch };
 })();
 
 /* 售票員被抓到說錯時用的尷尬表情圖；檔案還沒放進 images/ 時，會自動改用原本的圖 */
@@ -569,6 +572,11 @@ const Game = defineGame({
       sold: this.makeSold(people, RULES[rule].rows),
       rot: Math.floor(Math.random() * 3)
     };
+    /* 對方出錯的次數：這一局最多 0～2 次（五個地方：總價、座位、找錢、票、爆米花），不然店員太離譜 */
+    const flags = ['payWrong', 'seatWrong', 'shortChange', 'tkWrong', 'snackWrong'], k = pick([0, 1, 1, 2]), tk = this.task;
+    flags.forEach(f => { tk[f] = false; });
+    flags.sort(() => Math.random() - .5).slice(0, k).forEach(f => { tk[f] = true; });
+    if (tk.seatWrong && tk.tkWrong) tk.tkKind = 'time';   // 不要座位念錯又印錯
     this.cash = bills * 1000;
     this.given = this.task.shortChange ? this.task.change - 50 : this.task.change;
   },
@@ -634,6 +642,7 @@ const Game = defineGame({
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s), t = this.task;
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
     if (at('TICKETS')) out.push({ title: '票價', lines: [L(`全票：${t.full}元`, `Entrada completa: ${esM(t.full)}`, `Full price: ${enM(t.full)}`), L(`學生票：${t.stud}元（要出示學生證）`, `Entrada de estudiante: ${esM(t.stud)} (hay que mostrar la credencial)`, `Student ticket: ${enM(t.stud)} (student ID required)`)] });
+    if (at('SEAT_CONFIRM') && this.chosen.length) out.push({ title: '你選的座位', lines: [L(`你選的是：${seatZh(this.chosen)}`, `Elegiste: ${seatEs(this.chosen)}`, `You chose: ${seatEn(this.chosen)}`)] });
     if (at('CHANGE')) out.push({ title: '售票員說的話', lines: [this.totalLine(true)] });
     return out;
   },
@@ -784,7 +793,7 @@ const Game = defineGame({
           });
         },
         single: true,
-        dialogue: () => [staff('這是座位表，灰色的位子已經賣掉了。你看你想坐哪裡。', 'Este es el plano de asientos; los grises ya están vendidos. Mire dónde le gustaría sentarse.', "Here is the seat map; the gray seats are already sold. Take a look at where you'd like to sit."),
+        dialogue: () => [staff('這是座位表，灰色的位子已經賣掉了。', 'Este es el plano de asientos; los grises ya están vendidos.', 'Here is the seat map; the gray seats are already sold.'),
           L('（請點擊螢幕選擇座位。）', '(Toca la pantalla para elegir los asientos.)', '(Tap the screen to choose your seats.)')],
         options: ['我選好了'],
         next: () => {
