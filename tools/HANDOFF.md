@@ -186,5 +186,5 @@
 - 登記：`index.html`（SCENES slot 20／21／22，原本 site1～3 工地拿掉；ZHS、SUGGEST 也加了）、`shared/firebase.js`、`admin/index.html`（SCENES、GATED）、`tools/firestore.rules`（scoreCols、scenes）、`music.html`、`tools/smoke.py`、`tools/oracles/` 三個正解。
 - 測試：smoke perfect（每個遊戲多次都 100 分）、mixed、embed、trans 都過；地圖開啟後三間房子會出現在第三條街。
 - 推上去之後 Ben 要做：把 `tools/firestore.rules` 貼到 Firebase console 發布；管理員頁「設定檢查」建 3 個新排行榜複合索引（score 降冪＋elapsed 升冪）；「地圖開關」打開三個遊戲。
-- 沒有做圖，也沒有列圖片清單（Ben 指定先不要）。
+- 圖片：一開始 Ben 說先不要列；10/27 晚上他改口要做圖，提示詞已寫在 `docs/image-prompts-noodle-conbini-yansuji.md`（23 張），進度看 `docs/image-todo.md`。遊戲已推上去（31009d0），三個都還是維修中。
 

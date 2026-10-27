@@ -22,3 +22,9 @@
 ## 電影院 cinema（2026-10-27 Ben 指定）
 - [x] （已完成 10/27）counter_sorry.jpg：售票員被抓到說錯（總價、座位、找錢、票印錯）時的尷尬表情。放進 games/cinema/images/ 就會自動使用；沒有這張圖時自動用 counter.jpg。用 counter.jpg 當底圖，編輯式提示詞（只改表情）。
 - [x] （已完成 10/27）snack_sorry.jpg：爆米花櫃台店員給錯爆米花口味被抓到時的尷尬表情（用 snack.jpg 當底圖，只改表情）。沒有圖時自動用 snack.jpg。
+
+## 麵店 noodle、超商 conbini、鹽酥雞 yansuji（2026-10-27）
+提示詞全部寫在 `docs/image-prompts-noodle-conbini-yansuji.md`（共 23 張，含順序、底圖、檢查重點）。做完一張勾一張，一次做一張，Ben 確認再下一張。
+- [ ] noodle：shop、side、bowl、pay、start、result、end_good、end_bad
+- [ ] conbini：counter、shelf、draw、pay、start、result、end_good、end_bad
+- [ ] yansuji：stall、bag、pay、start、result、end_good、end_bad
