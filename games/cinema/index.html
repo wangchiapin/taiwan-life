@@ -993,6 +993,7 @@ const Game = defineGame({
         html: () => Game.ticketHTML(),
         dialogue: () => [
           L('（電影快開始了。你們走到座位，可是有一位阿伯坐在你們的位子上。）', '(La película está por empezar. Llegan a sus asientos, pero un señor mayor está sentado en uno de ellos.)', '(The movie is about to start. You reach your seats, but an older gentleman is sitting in one of them.)'),
+          L('我：阿伯，你好像坐到我們的位子了。', 'Señor, creo que está sentado en nuestros asientos.', 'Excuse me, sir — I think you are sitting in our seats.'),
           L('阿伯：欸，這個位子是我的吧？', '¿Eh? Este asiento es mío, ¿no?', 'Huh? This seat is mine, isn\'t it?')
         ],
         options: () => rot([`不好意思，我們的票是${seatZh(Game.chosen)}，請你再看一下票。`, '好吧，你坐，我們去坐別的位子。', '喂！你坐錯了，快起來！']),
