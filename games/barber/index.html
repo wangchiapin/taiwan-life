@@ -361,6 +361,7 @@ const VOCAB = {
   WASH: [['有點', 'un poco', 'a bit'], ['燙', 'muy caliente', 'scalding hot'], ['沒關係', 'no importa', "it's fine"], ['水', 'agua', 'water'], ['不好意思', 'disculpe', 'excuse me']],
   MIRROR: [['鏡子', 'espejo', 'mirror'], ['後面', 'atrás', 'the back'], ['短一點', 'un poco más corto', 'a bit shorter'], ['剪好', 'ya cortado', 'finished cutting']],
   PAY: [['一共', 'en total', 'in total'], ['元', 'dólares taiwaneses', 'NT dollars'], ['付錢', 'pagar', 'pay'], ['五百元', '500 dólares', '500 NT dollars'], ['找錢', 'dar el cambio', 'give change']],
+  CHANGE_FIX: [['補', 'completar / dar lo que falta', 'make up the difference'], ['剩下', 'lo que queda / falta', 'the rest'], ['算錯', 'calcular mal', 'miscalculate']],
   CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give the wrong change'], ['應該', 'debería', 'should']],
   END: [['好看', 'bonito', 'good-looking'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
@@ -396,7 +397,7 @@ const STAGE = (() => {
   const o = {};
   ['BOOK_SEARCH', 'BOOK_OPEN', 'BOOK_CALL', 'BOOK_TIME', 'BOOK_CONFIRM', 'BOOK_PHONE', 'ARRIVE'].forEach(x => o[x] = a);
   ['STYLE_LEN', 'STYLE_BANG', 'WASH', 'MIRROR'].forEach(x => o[x] = b);
-  ['PAY', 'CHANGE'].forEach(x => o[x] = c);
+  ['PAY', 'CHANGE', 'CHANGE_FIX'].forEach(x => o[x] = c);
   return o;
 })();
 
@@ -431,7 +432,7 @@ const Game = defineGame({
     START: ['images/start.jpg', '💇'],
     BOOK_SEARCH: ['images/search.jpg', '🔍'], BOOK_OPEN: ['images/phone.jpg', '📞'], BOOK_CALL: ['images/phone.jpg', '📞'], BOOK_TIME: ['images/phone.jpg', '📞'], BOOK_PHONE: ['images/phone.jpg', '📞'], BOOK_CONFIRM: ['images/phone.jpg', '📞'],
     ARRIVE: ['images/door.jpg', '🚪'], STYLE_LEN: ['images/chair.jpg', '🪑'], STYLE_BANG: ['images/chair.jpg', '✂️'],
-    WASH: ['images/wash.jpg', '🚿'], MIRROR: ['images/mirror.jpg', '🪞'], PAY: ['images/counter.jpg', '💴'], CHANGE: ['images/counter.jpg', '💴'],
+    WASH: ['images/wash.jpg', '🚿'], MIRROR: ['images/mirror.jpg', '🪞'], PAY: ['images/counter.jpg', '💴'], CHANGE: ['images/counter.jpg', '💴'], CHANGE_FIX: ['images/counter.jpg', '💴'],
     END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
 
@@ -450,7 +451,7 @@ const Game = defineGame({
     const areas = shuffle(['02', '03', '04', '06', '07']);
     const shopTel = a => { const d = String(ri(2000, 8999)) + String(ri(1000, 9999)); return { d: a + d, show: `(${a}) ${d.slice(0, 4)}-${d.slice(4)}`, zh: `${[...a].map(c => ZD[c]).join('')}，${[...d.slice(0, 4)].map(c => ZD[c]).join('')}，${[...d.slice(4)].map(c => ZD[c]).join('')}` }; };
     const shops = [{ k: 'salon', n: '理髮店', ...shopTel(areas[0]) }, { k: 'wig', n: '假髮店', ...shopTel(areas[1]) }, { k: 'adult', n: '色情理髮店', ...shopTel(areas[2]) }];
-    const price = pick([350, 400, 450]), given = Math.random() < 0.5 ? 500 - price : 500 - price - 50;
+    const price = pick([350, 400, 450]), given = (Math.random() < 0.5 || price >= 450) ? 500 - price : 500 - price - 50;   // 450 元時少找 50 會變成 0，所以一定找對
     const bossWrong = Math.random() < 0.5;
     let said = SLOT(day, '下午', hr);
     if (bossWrong) { said = Math.random() < 0.5 ? SLOT(day, '下午', pick([2, 3, 4, 5, 6].filter(h => h !== hr))) : SLOT(pick(DAYS.filter(d => d !== day)), '下午', hr); }
@@ -510,9 +511,9 @@ const Game = defineGame({
     const t = this.task, r = s => this.ruby(s);
     return `<div class="bill"><div class="sh">${r('帳單')}</div><div class="bl"><span>${r('剪髮 + 洗頭')}</span><b>${t.price}</b></div></div>`;
   },
-  changeHTML() {
+  changeHTML(fix) {
     const t = this.task, r = s => this.ruby(s);
-    return `<div class="bill"><div class="sh">${r('我給老闆')}</div><div class="bl"><span>${r('五百元')}</span><b>500</b></div><div class="sh">${r('老闆找給我')}</div><div class="bl"><span>${r('找錢')}</span><b>${t.given}</b></div></div>`;
+    return `<div class="bill"><div class="sh">${r('我給老闆')}</div><div class="bl"><span>${r('五百元')}</span><b>500</b></div><div class="sh">${r('老闆找給我')}</div><div class="bl"><span>${r('找錢')}</span><b>${t.given}</b></div>${fix ? `<div class="bl"><span>${r('補給我')}</span><b>${500 - t.price - t.given}</b></div>` : ''}</div>`;
   },
 
   getConfig() {
@@ -718,8 +719,28 @@ const Game = defineGame({
             Game.addMistake(t.wrong ? M(`五百減${t.price}，應該找${change}元，老闆只找了${t.given}元。`, `500 menos ${t.price} son ${change}; el dueño solo te dio ${t.given}.`, `500 minus ${t.price} is ${change}, but the owner gave only ${t.given}.`)
                                     : M(`五百減${t.price}，剛好是${change}元，沒有找錯。`, `500 menos ${t.price} son exactamente ${change}; el cambio está bien.`, `500 minus ${t.price} is exactly ${change} — the change is right.`)); return;
           }
-          goodFirst('CHANGE', t.wrong ? '你有算錢，很棒！' : '你算過了，沒錯。', t.wrong ? '¡Contaste el dinero, genial!' : 'Lo contaste y estaba bien.', t.wrong ? 'You counted the money — great!' : 'You counted and it was right.');
-          Game.thought = [t.wrong ? boss('啊，不好意思，我算錯了。這是剩下的。', 'Ay, perdón, me equivoqué. Aquí está el resto.', 'Oh, sorry, I miscounted. Here is the rest.') : boss('謝謝，下次再來！', '¡Gracias, vuelva pronto!', 'Thank you, come again!')];
+          if (t.wrong) {
+            carryGood('CHANGE', '你有算錢，很棒！', '¡Contaste el dinero, genial!', 'You counted the money — great!');
+            Game.state = 'CHANGE_FIX';
+            return;
+          }
+          goodFirst('CHANGE', '你算過了，沒錯。', 'Lo contaste y estaba bien.', 'You counted and it was right.');
+          Game.thought = [boss('謝謝，下次再來！', '¡Gracias, vuelva pronto!', 'Thank you, come again!')];
+          Game.stopTimer();
+          Game.state = 'END';
+        }
+      },
+      CHANGE_FIX: {
+        place: 'counter',
+        html: () => Game.carryHTML() + Game.changeHTML(true),
+        dialogue: () => [boss(`啊，不好意思，我算錯了。這是剩下的${HZ(change - t.given)}元。`, `Ay, perdón, me equivoqué. Aquí están los ${change - t.given} que faltaban.`, `Oh, sorry, I miscounted. Here is the missing ${change - t.given}.`), L('我：現在對了嗎？', '¿Ahora sí está bien?', 'Is it right now?')],
+        options: () => rot(['這次對了，謝謝', `還是不對，應該再補${HZ(change - t.given + 50)}元`]),
+        next: c => {
+          if (c.startsWith('還是')) {
+            Game.addMistake(M(`${t.given}加${change - t.given}，剛好是${change}元，這次沒有錯了。`, `${t.given} más ${change - t.given} son exactamente ${change}; esta vez está bien.`, `${t.given} plus ${change - t.given} is exactly ${change} — it's right this time.`)); return;
+          }
+          goodFirst('CHANGE_FIX', '再算一次，確定沒有錯，很好！', '¡Volviste a contar para estar seguro, muy bien!', 'You counted again to be sure — good!');
+          Game.thought = [boss('謝謝，下次再來！', '¡Gracias, vuelva pronto!', 'Thank you, come again!')];
           Game.stopTimer();
           Game.state = 'END';
         }
