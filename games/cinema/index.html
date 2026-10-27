@@ -916,7 +916,7 @@ const Game = defineGame({
             return;
           }
           goodFirst('SNACK', '你記得Ami說的話，真棒！', '¡Recordaste lo que dijo Ami, genial!', 'You remembered what Ami said — great!');
-          Game.thought = [L('店員：好的，請稍等。', 'Muy bien, un momento, por favor.', 'Sure, one moment please.'), L(`店員：這是你的${given[0]}爆米花，謝謝。`, `Aquí tiene sus palomitas ${given[3]}, gracias.`, `Here are your ${given[2]} popcorn, thank you.`)];
+          Game.thought = [L('店員：好的，請稍等。', 'Muy bien, un momento, por favor.', 'Sure, one moment please.')];
           Game.state = 'SNACK_CHECK';
         }
       },
@@ -924,7 +924,7 @@ const Game = defineGame({
       /* ═══ 拿到爆米花：店員可能給錯口味 ═══ */
       SNACK_CHECK: {
         place: 'snack',
-        dialogue: () => [L('（店員把爆米花遞給你。）', '(El empleado te entrega las palomitas.)', '(The clerk hands you the popcorn.)')],
+        dialogue: () => [L(`店員：你好，這是你的一份${given[0]}爆米花。`, `Hola, aquí tiene su porción de palomitas ${given[3]}.`, `Hello, here is your ${given[2]} popcorn.`), L('（店員把爆米花遞給你。）', '(El empleado te entrega las palomitas.)', '(The clerk hands you the popcorn.)')],
         options: () => rot(['好，謝謝。', snFix, '你是不是聽不懂中文啊？']),
         next: c => {
           const right = t.snackWrong ? snFix : '好，謝謝。';
