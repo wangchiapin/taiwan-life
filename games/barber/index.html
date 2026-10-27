@@ -708,7 +708,7 @@ const Game = defineGame({
       CHANGE: {
         place: 'counter',
         html: () => Game.changeHTML(),
-        dialogue: () => [L(`（你付了五百元，總共${t.price}元。老闆找給你${t.given}元。）`, `(Pagaste 500; el total es ${t.price}. El dueño te devuelve ${t.given}.)`, `(You paid 500 for a total of ${t.price}. The owner hands you ${t.given} in change.)`), L('我：找的錢對嗎？', '¿Está bien el cambio?', 'Is the change right?')],
+        dialogue: () => [L(`（你付了五百元，總共${t.price}元。老闆找給你${t.given}元。）`, `(Pagaste 500; el total es ${t.price}. El dueño te devuelve ${t.given}.)`, `(You paid 500 for a total of ${t.price}. The owner hands you ${t.given} in change.)`)],
         options: () => rot(['沒錯，謝謝', '媽的！你找錯錢了吧！', `老闆，好像找錯了，應該找${HZ(t.wrong ? change : (change === 50 ? 100 : change - 50))}元吧`]),
         next: c => {
           if (c.startsWith('媽的')) {
