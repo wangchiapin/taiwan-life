@@ -116,13 +116,15 @@ html{color-scheme:light}
     margin: 0; padding: 4px 12px; background: var(--red); color: #fff;
     font-size: 14px; font-weight: 500;
   }
-  .menu .items { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); }
+  .menu .items { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); }
   .mi {
-    font: inherit; font-size: 16px; line-height: 1.8; text-align: left; cursor: pointer;
+    font: inherit; font-size: 16px; line-height: 1.6; text-align: left; cursor: pointer;
     background: var(--paper); color: var(--ink); border: none;
     border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
-    padding: 6px 10px; display: flex; justify-content: space-between; gap: 6px; align-items: baseline;
+    padding: 6px 8px; display: flex; gap: 8px; align-items: center;
   }
+  .mi-img { width: 52px; height: 52px; flex: none; border-radius: 6px; object-fit: cover; background: var(--line); }
+  .mi-t { display: flex; flex-direction: column; min-width: 0; }
   .mi .p { color: var(--red); font-weight: 700; font-variant-numeric: tabular-nums; font-size: 14px; }
   .mi:hover { background: #fff1c7; }
   .slip {
@@ -141,8 +143,10 @@ html{color-scheme:light}
   .slip .price { color: var(--red); font-variant-numeric: tabular-nums; }
   .sub {
     margin-top: 12px; padding: 12px; border-radius: 10px; background: #fff1c7;
-    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    display: flex; gap: 12px; align-items: center;
   }
+  .sub-img { width: 88px; height: 88px; flex: none; border-radius: 8px; object-fit: cover; background: var(--line); }
+  .sub-body { flex: 1 1 auto; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
   .sub .q { font-weight: 700; width: 100%; }
   .sub .opt { flex: 1 1 auto; padding: 6px 14px; }
   .pad-actions { display: flex; gap: 12px; margin-top: 14px; }
@@ -167,6 +171,9 @@ html{color-scheme:light}
     .pad-wrap { grid-template-columns: 1fr; }
     .slip { position: static; min-height: 0; order: -1; }
     .menu .items { grid-template-columns: 1fr 1fr; }
+    .mi { gap: 6px; padding: 6px; }
+    .mi-img { width: 44px; height: 44px; }
+    .mi-t > span:first-child { white-space: nowrap; }
   }
   /* ── 句子翻譯 ── */
   .tr-btn {
@@ -379,6 +386,15 @@ const MENU = [
     { id: '豆漿', size: { 中: 20, 大: 25 }, sugar: true } ] }
 ];
 const ITEMS = MENU.flatMap(s => s.items);
+/* 餐點圖片（images/ 裡的檔名；熱飲和冰飲共用同一張；圖片載入失敗就隱藏，不影響點餐） */
+const ITEM_IMG = {
+  '原味蛋餅': 'danbing_plain', '起司蛋餅': 'danbing_cheese', '玉米蛋餅': 'danbing_corn', '鮪魚蛋餅': 'danbing_tuna',
+  '火腿蛋吐司': 'toast_ham_egg', '豬肉漢堡': 'burger_pork', '雞腿堡': 'burger_chicken',
+  '蘿蔔糕': 'turnipcake', '鐵板麵': 'noodles', '薯餅': 'hashbrown',
+  '奶茶': 'milktea', '紅茶': 'blacktea', '豆漿': 'soymilk'
+};
+const itemImg = (id, cls) => ITEM_IMG[id]
+  ? `<img class="${cls}" src="images/${ITEM_IMG[id]}.jpg" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
 function priceOf(name) {                 // 「大杯冰奶茶」「蘿蔔糕加蛋」→ 價錢
   const d = name.match(/^(中|大)杯(冰|熱)(奶茶|紅茶|豆漿)/);
   if (d) return ITEMS.find(i => i.id === d[3]).size[d[1]];
@@ -700,6 +716,15 @@ const Game = defineGame({
     else if (it.size) this.pad.step = 'size';
     else { this.pad.ticket.push(it.id); this.pad.step = null; }
     this.render();
+    this.padScroll();
+  },
+  /* 手機上菜單很長：要選擇時自動捲到黃色小框；選完或取消，回到剛剛點的品項 */
+  padScroll() {
+    requestAnimationFrame(() => {
+      const it = this.pad.item;
+      if (this.pad.step) { const s = document.querySelector('.sub'); if (s) s.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      else if (it) { const b = [...document.querySelectorAll('.mi')].find(x => x.dataset.id === it.id); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    });
   },
   padSub(v) {
     const p = this.pad, it = p.item;
@@ -711,8 +736,9 @@ const Game = defineGame({
       else { p.ticket.push(`${p.size}杯${p.temp}${it.id}`); p.step = null; }
     } else if (p.step === 'sugar') { p.ticket.push(`${p.size}杯${p.temp}${it.id}${v}`); p.step = null; }
     this.render();
+    this.padScroll();
   },
-  padCancel() { this.pad.step = null; this.render(); },
+  padCancel() { this.pad.step = null; this.render(); this.padScroll(); },
   padRemove(i) { this.pad.ticket.splice(i, 1); this.render(); },
   padClear() { this.pad.ticket = []; this.pad.step = null; this.render(); },
   padSubmit() {
@@ -749,7 +775,7 @@ const Game = defineGame({
     const p = this.pad, r = s => this.ruby(s);
     const menu = MENU.map(sec => `<h4>${r(sec.cat)}</h4><div class="items">` + sec.items.map(it => {
       const price = it.size ? `${it.size['中']}/${it.size['大']}` : it.p;
-      return `<button class="mi" onclick="Game.padPick('${it.id}')"><span>${r(it.id)}</span><span class="p">${price}</span></button>`;
+      return `<button class="mi" data-id="${it.id}" onclick="Game.padPick('${it.id}')">${itemImg(it.id, 'mi-img')}<span class="mi-t"><span>${r(it.id)}</span><span class="p">${price}</span></span></button>`;
     }).join('') + '</div>').join('');
     const slip = `<div class="slip"><div class="head">${r('點單')}</div>` + (p.ticket.length
       ? '<ul>' + p.ticket.map((x, i) => `<li><span>${r(x)}</span><button class="x" aria-label="刪除" onclick="Game.padRemove(${i})">✕</button></li>`).join('') + '</ul>'
@@ -758,9 +784,9 @@ const Game = defineGame({
     if (p.step) {
       const q = { egg: ['要加蛋嗎？', ['加蛋', '不加蛋']], size: ['中杯還是大杯？', ['中', '大']], temp: ['冰的還是熱的？', ['冰', '熱']], sugar: ['有糖還是無糖？', ['有糖', '無糖']] }[p.step];
       const label = v => p.step === 'size' ? v + '杯' : p.step === 'temp' ? v + '的' : v;
-      sub = `<div class="sub"><span class="q">${r(p.item.id)}：${r(q[0])}</span>` +
+      sub = `<div class="sub">${itemImg(p.item.id, 'sub-img')}<div class="sub-body"><span class="q">${r(p.item.id)}：${r(q[0])}</span>` +
         q[1].map(v => `<button class="opt" onclick="Game.padSub('${v}')">${r(label(v))}</button>`).join('') +
-        `<button class="opt" onclick="Game.padCancel()">${r('取消')}</button></div>`;
+        `<button class="opt" onclick="Game.padCancel()">${r('取消')}</button></div></div>`;
     }
     return `<div class="pad-wrap"><div><div class="menu">${menu}</div>${sub}</div>${slip}</div>
       <div class="pad-actions">
