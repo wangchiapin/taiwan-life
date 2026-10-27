@@ -421,11 +421,11 @@ const STAGE = (() => {
 })();
 
 /* 售票員被抓到說錯時用的尷尬表情圖；檔案還沒放進 images/ 時，會自動改用原本的圖 */
-const SORRY_IMGS = { 'images/counter.jpg': 'images/counter_sorry.jpg', 'images/seatmap.jpg': 'images/counter_sorry.jpg', 'images/snack.jpg': 'images/snack_sorry.jpg' };   // 售票員、零食櫃台店員各一張
+const SORRY_IMGS = { 'images/counter.jpg': 'images/counter_sorry.jpg', 'images/seatmap.jpg': 'images/counter_sorry.jpg', 'images/snack.jpg': 'images/snack_sorry.jpg' };   // 售票員、爆米花櫃台店員各一張
 
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
-  BOARD: '走到售票櫃台', TICKETS: '繼續買票', SEATS: '看座位表', SEAT_CONFIRM: '聽售票員確認座位', PAY: '付錢', CHANGE: '看一下找的錢', TICKET_CHECK: '收下找零，繼續', SNACK: '走到零食櫃台',
+  BOARD: '走到售票櫃台', TICKETS: '繼續買票', SEATS: '看座位表', SEAT_CONFIRM: '聽售票員確認座位', PAY: '付錢', CHANGE: '看一下找的錢', TICKET_CHECK: '收下找零，繼續', SNACK: '走到爆米花櫃台',
   SNACK_CHECK: '拿爆米花', GATE: '拿爆米花，準備去驗票口', FIND_HALL: '去影廳', SEAT_TAKEN: '走到座位', PHONE: '坐好，電影開始了', END: '離開電影院'
 };
 
@@ -453,7 +453,7 @@ const PLACES = {
   phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
   board: ['🎬', '電影院大廳', 'Vestíbulo del cine', 'Cinema lobby', ''],
   counter: ['🎟️', '售票櫃台', 'Taquilla', 'Ticket counter', ''],
-  snack: ['🍿', '零食櫃台', 'Puesto de dulces', 'Snack counter', ''],
+  snack: ['🍿', '爆米花櫃台', 'Puesto de palomitas', 'Popcorn counter', ''],
   gate: ['🚪', '驗票口', 'Control de entradas', 'Ticket check', ''],
   hall: ['🎞️', '影廳', 'Sala', 'Theater', '']
 };
