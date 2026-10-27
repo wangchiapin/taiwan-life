@@ -390,6 +390,7 @@ const VOCAB = {
   FLAVOR: [['第一球', 'la primera bola', 'the first scoop'], ['口味', 'sabor', 'flavor'], ['香草', 'vainilla', 'vanilla'], ['巧克力', 'chocolate', 'chocolate'], ['草莓', 'fresa', 'strawberry'], ['芒果', 'mango', 'mango'], ['抹茶', 'matcha', 'matcha'], ['芋頭', 'taro', 'taro']],
   TOPPING: [['配料', 'topping', 'topping'], ['彩色糖粒', 'chispas de colores', 'sprinkles'], ['巧克力醬', 'salsa de chocolate', 'chocolate sauce'], ['草莓醬', 'salsa de fresa', 'strawberry sauce'], ['不用', 'no hace falta', 'no need']],
   EAT: [['內用', 'para comer ahí', 'for here'], ['外帶', 'para llevar', 'to go'], ['公園', 'parque', 'park'], ['店裡', 'dentro de la tienda', 'in the shop']],
+  PICKUP: [['拿冰淇淋', 'tomar el helado', 'pick up the ice cream'], ['櫃台', 'mostrador', 'counter']],
   HANDOVER: [['口味', 'sabor', 'flavor'], ['換', 'cambiar', 'swap, change'], ['不好意思', 'disculpe', 'excuse me']],
   ORDER_CHECK: [['確認', 'confirmar', 'confirm'], ['對嗎', '¿es correcto?', 'is that right?'], ['聽錯', 'oír mal', 'mishear'], ['我要的是', 'lo que quiero es', 'what I want is'], ['不好意思', 'disculpe', 'excuse me']],
   PAY: [['一共', 'en total', 'in total'], ['算錯', 'calcular mal', 'miscalculate'], ['應該', 'debería', 'should'], ['夠', 'alcanzar, ser suficiente', 'be enough'], ['找錢', 'dar el cambio', 'give change']],
@@ -406,7 +407,7 @@ const STAGE = (() => {
 
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
-  SCOOPS: '走到櫃台', CONTAINER: '繼續', FLAVOR: '開始選冰淇淋口味', TOPPING: '繼續', EAT: '繼續', ORDER_CHECK: '聽店員確認', HANDOVER: '等店員做好', PAY: '付錢', PAY_FIX: '聽店員重算', END: '拿冰淇淋'
+  SCOOPS: '走到櫃台', CONTAINER: '繼續', FLAVOR: '開始選冰淇淋口味', TOPPING: '繼續', EAT: '繼續', ORDER_CHECK: '聽店員確認', PICKUP: '繼續', HANDOVER: '等店員做好', PAY: '付錢', PAY_FIX: '聽店員重算', END: '拿冰淇淋'
 };
 
 /* ══════════════════════════════════════
@@ -569,7 +570,7 @@ const Game = defineGame({
 
   IMAGES: {
     START: ['images/start.jpg', '🍦'], SCOOPS: ['images/shop.jpg', '🍦'], CONTAINER: ['images/shop.jpg', '🍦'], FLAVOR: ['images/flavors.jpg', '🍨'],
-    TOPPING: ['images/topping.jpg', '🍬'], EAT: ['images/shop.jpg', '🍦'], ORDER_CHECK: ['images/shop.jpg', '🍦'], PAY_FIX: ['images/pay.jpg', '💵'], PAY: ['images/pay.jpg', '💵'], HANDOVER: ['images/shop.jpg', '🍦'],
+    TOPPING: ['images/topping.jpg', '🍬'], EAT: ['images/shop.jpg', '🍦'], ORDER_CHECK: ['images/shop.jpg', '🍦'], PAY_FIX: ['images/pay.jpg', '💵'], PAY: ['images/pay.jpg', '💵'], PICKUP: ['images/shop.jpg', '🍦'], HANDOVER: ['images/shop.jpg', '🍦'],
     END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
   chosen: [],      // 已經放上去的口味
@@ -628,7 +629,7 @@ const Game = defineGame({
   },
   said() { const t = this.task; return t.payWrong ? t.total + TOP_PRICE : t.total; },
   hintSections() {
-    const ORDER = ['START', 'SCOOPS', 'CONTAINER', 'FLAVOR', 'TOPPING', 'EAT', 'ORDER_CHECK', 'HANDOVER', 'PAY', 'PAY_FIX', 'END', 'RESULT'];
+    const ORDER = ['START', 'SCOOPS', 'CONTAINER', 'FLAVOR', 'TOPPING', 'EAT', 'ORDER_CHECK', 'PICKUP', 'HANDOVER', 'PAY', 'PAY_FIX', 'END', 'RESULT'];
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
     if (at('PAY')) out.push({ title: '價目表', lines: [
@@ -816,15 +817,27 @@ const Game = defineGame({
             ? [staff(`啊，不好意思！是${tz}。`, `¡Ay, disculpe! Es «${te}».`, `Oh, sorry! It's "${tn}".`),
                staff(`好，${OC.full(t.ocTruth, 'zh')}，沒錯了。請稍等。`, `Bien, ${OC.full(t.ocTruth, 'es')}: ahora sí. Un momento, por favor.`, `Okay, ${OC.full(t.ocTruth, 'en')} — got it now. One moment, please.`)]
             : null;
-          Game.state = 'HANDOVER';
+          Game.state = 'PICKUP';
         }
+      },
+
+      /* ═══ 店員把冰淇淋放在櫃台上，玩家拿起來 ═══ */
+      PICKUP: {
+        place: 'shop',
+        html: () => Game.iceHTML(true),
+        dialogue: () => [
+          L('（店員把冰淇淋放在櫃台上。）', '(El empleado pone el helado sobre el mostrador.)', '(The staff sets the ice cream on the counter.)'),
+          staff('好了，這是您的冰淇淋。', 'Listo, aquí tiene su helado.', "Here's your ice cream.")
+        ],
+        options: () => ['拿起來'],
+        next: () => { Game.state = 'HANDOVER'; }
       },
 
       /* ═══ 店員做好了：核對口味（店員可能放錯一球） ═══ */
       HANDOVER: {
         place: 'shop',
         html: () => Game.iceHTML(true),
-        dialogue: () => [staff('好了，這是您的冰淇淋。', 'Listo, aquí tiene su helado.', "Here's your ice cream.")],
+        dialogue: () => [L('（你把冰淇淋拿起來，看一下口味。）', '(Tomas el helado y revisas los sabores.)', '(You pick up the ice cream and check the flavors.)')],
         options: () => rot(['好，謝謝。', hoFix, '你是不是耳朵有問題？我說的不是這個！']),
         next: c => {
           const right = t.scoopWrong ? hoFix : '好，謝謝。', i = t.wIdx;
