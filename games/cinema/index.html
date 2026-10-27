@@ -534,7 +534,7 @@ const Game = defineGame({
   IMAGES: {
     START: ['images/start.jpg', '🎬'],
     BOARD: ['images/board.jpg', '🗓️'], TICKETS: ['images/counter.jpg', '🎟️'], SEATS: ['images/seatmap.jpg', '💺'],
-    PAY: ['images/counter.jpg', '💵'], CHANGE: ['images/counter.jpg', '🪙'],
+    PAY: ['images/counter.jpg', '💵'], CHANGE: ['images/counter.jpg', '🪙'], TICKET_CHECK: ['images/counter.jpg', '🎟️'],
     SNACK: ['images/snack.jpg', '🍿'], GATE: ['images/gate.jpg', '🚪'], FIND_HALL: ['images/halldoor.jpg', '🚪'],
     SEAT_TAKEN: ['images/hall.jpg', '💺'], PHONE: ['images/hall.jpg', '📱'],
     END: ['images/end_good.jpg', '🎉'],
@@ -556,6 +556,10 @@ const Game = defineGame({
     this.task = {
       movie, time, kids, full, stud, people, total, rule, bills, change: bills * 1000 - total, wrongTime, wrongMovie,
       hall: pick([2, 3, 4, 5, 6]), snack: pick(['salty', 'sweet']),
+      payWrong: Math.random() < 0.45,             // 售票員報的總價會不會算錯（學生票也算成全票）
+      tkWrong: Math.random() < 0.45,              // 印出來的票，場次會不會印錯
+      badPay: pick(['five', 'bargain']),
+      tkAlt: pick(TIMES.filter(x => x !== time)),
       shortChange: Math.random() < 0.5,           // 這局售票員會不會少找錢
       sold: this.makeSold(people, RULES[rule].rows),
       rot: Math.floor(Math.random() * 3)
@@ -602,9 +606,12 @@ const Game = defineGame({
       L(`Ami：我要吃${sn[0]}爆米花，不要${other[0]}的喔！`, `Yo quiero palomitas ${sn[3]}, ¡no ${other[3]}!`, `I want ${sn[2]} popcorn, not ${other[2]}!`)
     ];
   },
+  said() { const t = this.task; return t.payWrong ? t.people * t.full : t.total; },   // 售票員報的總價（算錯時＝每個人都算全票）
+  tkTimeShown() { const t = this.task; return t.tkWrong ? t.wrongTime : t.time; },
   totalLine() {
     const t = this.task;
-    return L(`售票員：好的，一共是${zhNum(t.total)}元。`, `Muy bien, son ${esM(t.total)} en total.`, `All right, that's ${enM(t.total)} in total.`);
+    const n = this.said();
+    return L(`售票員：好的，一共是${zhNum(n)}元。`, `Muy bien, son ${esM(n)} en total.`, `All right, that's ${enM(n)} in total.`);
   },
   gateLine() {
     return L('驗票員：請出示電影票。學生票要一起出示學生證喔。', 'Por favor, muestre las entradas. Para las de estudiante también hay que mostrar la credencial.', 'Please show your tickets. For student tickets, please show the student ID too.');
@@ -614,10 +621,10 @@ const Game = defineGame({
     return L(`你們的電影在${CN[t.hall]}廳，座位是${seatZh(ks)}。`, `Su película es en la sala ${t.hall}; sus asientos: ${seatEs(ks)}.`, `Your movie is in theater ${t.hall}; your seats: ${seatEn(ks)}.`);
   },
   hintSections() {
-    const ORDER = ['START', 'BOARD', 'TICKETS', 'SEATS', 'PAY', 'CHANGE', 'SNACK', 'GATE', 'FIND_HALL', 'SEAT_TAKEN', 'PHONE', 'END', 'RESULT'];
+    const ORDER = ['START', 'BOARD', 'TICKETS', 'SEATS', 'PAY', 'CHANGE', 'TICKET_CHECK', 'SNACK', 'GATE', 'FIND_HALL', 'SEAT_TAKEN', 'PHONE', 'END', 'RESULT'];
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
-    if (at('CHANGE')) out.push({ title: '售票員說的話', lines: [this.totalLine()] });
+    if (at('CHANGE')) out.push({ title: '售票員說的話', lines: [this.totalLine(true)] });
     return out;
   },
 
@@ -667,10 +674,10 @@ const Game = defineGame({
     return h;
   },
   seatCountText() { return `已選 ${this.seats.length} 個位子 · ` + X(`Asientos elegidos: ${this.seats.length}`, `Seats chosen: ${this.seats.length}`); },
-  ticketHTML() {
-    const t = this.task, r = s => this.ruby(s), ks = this.chosen, { r: row, cs } = seatParts(ks);
+  ticketHTML(raw) {
+    const t = this.task, r = s => this.ruby(s), ks = this.chosen, { r: row, cs } = seatParts(ks), tm = raw ? Game.tkTimeShown() : t.time;
     return `<div class="ticket"><div class="tk-h">${r('電影票')}　${r('《' + t.movie.zh + '》')}</div>` +
-      `<div>${r('時間')}：${t.time.es}</div><div>${r('廳')}：<b>${t.hall}</b>　${r('排')}：<b>${row}</b>　${r('號')}：<b>${cs.join('、')}</b></div></div>`;
+      `<div>${r('時間')}：${tm.es}</div><div>${r('廳')}：<b>${t.hall}</b>　${r('排')}：<b>${row}</b>　${r('號')}：<b>${cs.join('、')}</b></div></div>`;
   },
 
   /* ── 狀態設定 ── */
@@ -683,7 +690,9 @@ const Game = defineGame({
     const combo = (m, tm) => `晚上${tm.zh}的《${m.zh}》`;
     const nw = (n, w) => `${NZ(n)}張${w}`;                // 兩張全票
     const payOk = `給你${NZ(t.bills)}張一千元。`;
+    const fixTotal = `不好意思，好像算錯了，應該是${zhNum(t.payWrong ? t.total : t.people * t.full)}元吧？`;
     const goodTickets = `${nw(2, '全票')}，${nw(t.kids, '學生票')}。`;
+    const tkFix = `不好意思，場次好像印錯了，我要的是${combo(t.movie, t.tkWrong ? t.time : t.tkAlt)}。`;
     const hallOpts = [t.hall, ...[2, 3, 4, 5, 6].filter(h => h !== t.hall).slice(0, 2)];
 
     return {
@@ -778,16 +787,22 @@ const Game = defineGame({
       PAY: {
         place: 'counter',
         dialogue: () => [Game.totalLine()],
-        options: () => rot([payOk, '給你五百元。', '可以算便宜一點嗎？']),
+        options: () => rot([payOk, fixTotal, t.badPay === 'five' ? '給你五百元。' : '可以算便宜一點嗎？']),
         next: c => {
-          if (c !== payOk) {
-            Game.addMistake(c === '給你五百元。'
-              ? M(`一共是${t.total}元，五百元不夠。`, `El total es ${esM(t.total)}: quinientos no alcanzan.`, `The total is ${enM(t.total)} — 500 isn't enough.`)
-              : M('電影院的票價是固定的，不能殺價。', 'El precio de las entradas de cine es fijo: no se regatea.', "Movie ticket prices are fixed — you can't bargain."));
+          const right = t.payWrong ? fixTotal : payOk;
+          if (c !== right) {
+            Game.addMistake(c === payOk
+              ? M(`售票員算錯了：兩張全票加${t.kids}張學生票，應該是${t.total}元，他把學生票也算成全票。`, `El vendedor se equivocó: dos entradas completas y ${t.kids} de estudiante son ${esM(t.total)}; cobró también las de estudiante como completas.`, `The clerk got it wrong: two full and ${t.kids} student ticket(s) come to ${enM(t.total)}; he charged the student tickets as full price.`)
+              : c === fixTotal
+                ? M(`售票員算對了：${t.total}元。${t.full}×2 + ${t.stud}×${t.kids} = ${t.total}。`, `El vendedor calculó bien: ${esM(t.total)}. ${t.full}×2 + ${t.stud}×${t.kids} = ${t.total}.`, `The clerk was right: ${enM(t.total)}. ${t.full}×2 + ${t.stud}×${t.kids} = ${t.total}.`)
+                : c === '給你五百元。'
+                  ? M(`一共是${Game.said()}元，五百元不夠。`, `El total es ${esM(Game.said())}: quinientos no alcanzan.`, `The total is ${enM(Game.said())} — 500 isn't enough.`)
+                  : M('電影院的票價是固定的，不能殺價。', 'El precio de las entradas de cine es fijo: no se regatea.', "Movie ticket prices are fixed — you can't bargain."));
             return;
           }
-          goodFirst('PAY', '沒錯！你沒有零錢，就付整張的錢，他會找錢給你。', '¡Exacto! Si no tienes cambio, entregas los billetes completos y te darán el cambio.', "Right! You don't have small change, so hand over the whole bills and they'll give you change.");
+          goodFirst('PAY', t.payWrong ? '你很細心！付錢以前，要先算一算對不對。' : '沒錯！你沒有零錢，就付整張的錢，他會找錢給你。', t.payWrong ? '¡Qué atento! Antes de pagar, comprueba la cuenta.' : '¡Exacto! Si no tienes cambio, entregas los billetes completos y te darán el cambio.', t.payWrong ? 'Well spotted! Check the total before you pay.' : "Right! You don't have small change, so hand over the whole bills and they'll give you change.");
           Game.cash = 0; Game.updateCash();
+          if (t.payWrong) Game.thought = [staff(`啊，不好意思！是${zhNum(t.total)}元。`, `¡Ay, disculpe! Son ${esM(t.total)}.`, `Oh, sorry! It's ${enM(t.total)}.`)];
           Game.state = 'CHANGE';
         }
       },
@@ -810,6 +825,28 @@ const Game = defineGame({
           Game.thought = right
             ? null
             : [staff(`啊，不好意思！這裡是${zhNum(t.change)}元。`, `¡Ay, disculpe! Aquí tiene ${esM(t.change)}.`, `Oh, sorry! Here's ${enM(t.change)}.`)];
+          Game.state = 'TICKET_CHECK';
+        }
+      },
+
+      /* ═══ 確認票上的場次 ═══ */
+      TICKET_CHECK: {
+        place: 'counter',
+        html: () => Game.ticketHTML(true),
+        dialogue: () => [staff('這是你們的票，請收好。', 'Estas son sus entradas; guárdelas, por favor.', "Here are your tickets — please keep them.")],
+        options: () => rot(['好，謝謝。', tkFix, '媽的！你們怎麼印成這樣！']),
+        next: c => {
+          const right = t.tkWrong ? tkFix : '好，謝謝。';
+          if (c !== right) {
+            Game.addMistake(c === '好，謝謝。'
+              ? M(`票上的時間印錯了：Ami要看的是${Game.timeZh()}那一場。收到票以前，要先看清楚。`, `La hora está mal impresa: Ami quiere la función de las ${t.time.es}. Revisa la entrada antes de guardarla.`, `The showtime is printed wrong: Ami wants the ${t.time.en} showing. Check the ticket before you take it.`)
+              : c === tkFix
+                ? M(`票上的時間是對的：${Game.timeZh()}。`, `La hora de la entrada está bien: ${t.time.es}.`, `The time on the ticket is right: ${t.time.en}.`)
+                : M('要有禮貌，說「不好意思」，請他重印就好。', 'Hay que ser cortés: di «disculpe» y pídele que la reimprima.', 'Be polite: say "excuse me" and ask him to reprint it.'));
+            return;
+          }
+          goodFirst('TICKET_CHECK', t.tkWrong ? '你很細心！票上的時間印錯了，要馬上說。' : '收到票以後，要先看一下場次和座位。', t.tkWrong ? '¡Qué atento! La hora estaba mal impresa; hay que avisar enseguida.' : 'Al recibir la entrada, mira la función y los asientos.', t.tkWrong ? 'Well spotted! The time was printed wrong — speak up right away.' : 'When you get the ticket, check the showing and the seats.');
+          Game.thought = t.tkWrong ? [staff('啊，對不起！我馬上重印一張。', '¡Ay, perdón! Se la imprimo de nuevo ahora mismo.', 'Oh, sorry! I will reprint it right away.')] : null;
           Game.state = 'SNACK';
         }
       },
