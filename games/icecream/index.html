@@ -682,10 +682,10 @@ const Game = defineGame({
     const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
     const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
     const pair = o => t.rot % 2 ? [o[1], o[0]] : o;
-    const eatOpts = pair([`${EATS.here.zh}。`, `${EATS.togo.zh}。`]);
-    const topCorrect = t.top ? `加${t.top.zh}。` : '不用加配料，謝謝。';
-    const topOpts = t.top ? [topCorrect, `加${t.otherTop && t.otherTop.zh ? t.otherTop.zh : t.otherTop2.zh}。`, '不用加配料，謝謝。']
-                          : [topCorrect, `加${t.otherTop2.zh}。`, `加${TOPS.find(x => x !== t.otherTop2).zh}。`];
+    const eatOpts = pair([EATS.here.zh, EATS.togo.zh]);
+    const topCorrect = t.top ? `加${t.top.zh}` : '不用加配料，謝謝。';
+    const topOpts = t.top ? [topCorrect, `加${t.otherTop && t.otherTop.zh ? t.otherTop.zh : t.otherTop2.zh}`, '不用加配料，謝謝。']
+                          : [topCorrect, `加${t.otherTop2.zh}`, `加${TOPS.find(x => x !== t.otherTop2).zh}`];
     const payOk = '給你兩百元。';
     const fixTotal = `不好意思，好像算錯了，應該是${zhNum(t.payWrong ? t.total : t.total + TOP_PRICE)}元吧？`;
     const hoFix = `不好意思，第${CN[t.fixIdx + 1]}球我要的是${t.flavors[t.fixIdx].zh}。`;
@@ -709,9 +709,9 @@ const Game = defineGame({
         place: 'shop',
         html: () => Game.menuHTML(),
         dialogue: () => [staff('你好，歡迎光臨！請問要幾球冰淇淋？', '¡Hola, buenas! ¿Cuántas bolas de helado desea?', 'Hello, welcome! How many scoops of ice cream would you like?')],
-        options: ['一球。', '兩球。', '三球。'],
+        options: ['一球', '兩球', '三球'],
         next: c => {
-          if (c !== `${NZ(t.n)}球。`) {
+          if (c !== `${NZ(t.n)}球`) {
             Game.addMistake(M(`Ami要${NZ(t.n)}球。`, `Ami quiere ${t.n} bolas.`, `Ami wants ${t.n} scoops.`));
             return;
           }
@@ -725,9 +725,9 @@ const Game = defineGame({
       CONTAINER: {
         place: 'shop',
         dialogue: () => [staff('請問要杯子還是甜筒？', '¿Lo quiere en vaso o en cono?', 'Would you like a cup or a cone?')],
-        options: () => pair(['杯子。', '甜筒。']),
+        options: () => pair(['杯子', '甜筒']),
         next: c => {
-          if (c !== `${t.vessel.zh}。`) {
+          if (c !== t.vessel.zh) {
             Game.addMistake(M(`你記錯了啦！Ami要${t.vessel.zh}。`, `¡Te equivocaste! Ami lo quiere ${t.vessel.es}.`, `You got it wrong! Ami wants it ${t.vessel.en}.`));
             return;
           }
@@ -743,10 +743,10 @@ const Game = defineGame({
         place: 'shop',
         html: () => Game.iceHTML(),
         dialogue: () => [staff(`第${CN[Game.k + 1]}球要什麼口味？`, `¿De qué sabor quiere la bola ${Game.k + 1}?`, `What flavor for scoop ${Game.k + 1}?`)],
-        options: () => rot([t.flavors[Game.k], ...t.decoys[Game.k]]).map(f => `${f.zh}。`),
+        options: () => rot([t.flavors[Game.k], ...t.decoys[Game.k]]).map(f => f.zh),
         next: c => {
           const f = t.flavors[Game.k];
-          if (c !== `${f.zh}。`) {
+          if (c !== f.zh) {
             Game.flavWrong = true;   // 這一球選錯過，就不給綠卡
             Game.addMistake(M(`不對不對！第${CN[Game.k + 1]}球Ami要的是${f.zh}。`, `¡No, no! Para la bola ${Game.k + 1}, Ami pidió ${f.es}.`, `No, no! For scoop ${Game.k + 1}, Ami asked for ${f.en}.`));
             return;
@@ -785,7 +785,7 @@ const Game = defineGame({
         dialogue: () => [staff('請問內用還是外帶？', '¿Es para comer aquí o para llevar?', 'Is it for here or to go?')],
         options: () => eatOpts,
         next: c => {
-          if (c !== `${EATS[t.eat].zh}。`) {
+          if (c !== EATS[t.eat].zh) {
             Game.addMistake(M(`不對喔！Ami${t.eat === 'here' ? '已經在店裡面坐好了，要內用' : '在公園等你，要外帶'}。`, `¡No! Ami ${t.eat === 'here' ? 'ya está sentada en la tienda: es para comer aquí' : 'te espera en el parque: es para llevar'}.`, `No! Ami ${t.eat === 'here' ? "is already seated in the shop — it's for here" : "is waiting in the park — it's to go"}.`));
             return;
           }
