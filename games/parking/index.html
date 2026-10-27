@@ -388,6 +388,7 @@ const VOCAB = {
   FLOOR: [['地下一樓', 'sótano 1', 'basement level 1'], ['空位', 'espacio libre', 'free space'], ['滿了', 'lleno', 'full'], ['指示牌', 'letrero indicador', 'sign'], ['開到', 'conducir hasta', 'drive to']],
   SPOT: [['一般車位', 'espacio normal', 'regular parking space'], ['愛心專用車位', 'espacio reservado', 'priority space'], ['輪椅', 'silla de ruedas', 'wheelchair'], ['車道', 'carril de circulación', 'driving lane'], ['空位', 'espacio libre', 'free space']],
   REMEMBER: [['區', 'zona', 'zone'], ['號', 'número', 'number'], ['地下室', 'sótano', 'basement'], ['停在', 'estacionar en', 'park at'], ['哪裡', 'dónde', 'where']],
+  PAY_CHECK: [['應付金額', 'importe a pagar', 'amount due'], ['對講機', 'interfono', 'intercom'], ['管理員', 'encargado', 'attendant'], ['折抵', 'descontar', 'deduct']],
   PAY: [['繳費機', 'máquina de pago', 'pay station'], ['折抵', 'descontar', 'deduct'], ['掃描', 'escanear', 'scan'], ['發票', 'recibo', 'receipt'], ['每小時', 'por hora', 'per hour'], ['出場', 'salir (del estacionamiento)', 'exit the lot'], ['十五分鐘', 'quince minutos', 'fifteen minutes']],
   FIND_CAR: [['停在哪裡', 'dónde estacionaste', 'where parked'], ['地下二樓', 'sótano 2', 'basement level 2'], ['車', 'auto, coche', 'car'], ['記得', 'recordar', 'remember']],
   EXIT: [['出口', 'salida', 'exit'], ['放進', 'meter, introducir', 'put into'], ['機器', 'máquina', 'machine']],
@@ -398,12 +399,12 @@ const VOCAB = {
 /* 關卡名稱（錯誤紀錄用） */
 const STAGE = (() => {
   const enter = ['進場', 'entrar', 'entering'], park = ['停車', 'estacionar', 'parking'], msg = ['傳位置', 'avisar dónde', 'telling Ami where'], pay = ['繳費', 'pagar', 'paying'], find = ['找車', 'buscar el auto', 'finding the car'], out = ['出場', 'salir', 'leaving'];
-  return { ENTRANCE: enter, FLOOR: park, SPOT: park, REMEMBER: msg, PAY: pay, FIND_CAR: find, EXIT: out };
+  return { ENTRANCE: enter, FLOOR: park, SPOT: park, REMEMBER: msg, PAY: pay, PAY_CHECK: pay, FIND_CAR: find, EXIT: out };
 })();
 
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
-  ENTRANCE: '開到入口', FLOOR: '往地下室開', SPOT: '開進這一層', REMEMBER: '下車', PAY: '逛完街，走到繳費機', FIND_CAR: '走去找車', EXIT: '開到出口', END: '開出去'
+  ENTRANCE: '開到入口', FLOOR: '往地下室開', SPOT: '開進這一層', REMEMBER: '下車', PAY: '逛完街，走到繳費機', PAY_CHECK: '看螢幕上的金額', FIND_CAR: '走去找車', EXIT: '開到出口', END: '開出去'
 };
 
 /* ══════════════════════════════════════
@@ -495,7 +496,7 @@ const Game = defineGame({
 
   IMAGES: {
     START: ['images/start.jpg', '🚗'], ENTRANCE: ['images/entrance.jpg', '🚧'], FLOOR: ['images/sign.jpg', '🅿️'], SPOT: ['images/spot.jpg', '♿'],
-    REMEMBER: ['images/pillar.jpg', '🔢'], PAY: ['images/machine.jpg', '💳'], FIND_CAR: ['images/garage.jpg', '🚗'], EXIT: ['images/exit.jpg', '🚧'],
+    REMEMBER: ['images/pillar.jpg', '🔢'], PAY: ['images/machine.jpg', '💳'], PAY_CHECK: ['images/machine.jpg', '💳'], FIND_CAR: ['images/garage.jpg', '🚗'], EXIT: ['images/exit.jpg', '🚧'],
     END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
   wrongSpot: false,
@@ -509,6 +510,7 @@ const Game = defineGame({
       fee: rate * (h - d), noDisc: rate * h, over: rate * (h - d - 1),
       free: { 1: 0, 2: 0, 3: 0, [floor]: 8 + Math.floor(Math.random() * 18) },
       otherFloor: pick([1, 2, 3].filter(f => f !== floor)), otherZone: pick(['A', 'B', 'C'].filter(z => z !== zone)),
+      machWrong: Math.random() < 0.45,           // 機器有沒有漏掉發票折抵
       rot: Math.floor(Math.random() * 3)
     };
   },
@@ -527,7 +529,7 @@ const Game = defineGame({
     ];
   },
   hintSections() {
-    const ORDER = ['START', 'ENTRANCE', 'FLOOR', 'SPOT', 'REMEMBER', 'PAY', 'FIND_CAR', 'EXIT', 'END', 'RESULT'];
+    const ORDER = ['START', 'ENTRANCE', 'FLOOR', 'SPOT', 'REMEMBER', 'PAY', 'PAY_CHECK', 'FIND_CAR', 'EXIT', 'END', 'RESULT'];
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
     if (at('PAY') && this.sent) out.push({ title: '你傳給 Ami 的訊息', lines: [this.sent] });
@@ -570,12 +572,14 @@ const Game = defineGame({
     const t = this.task;
     return `<div class="pillar"><div class="pl"><span>B${t.floor}</span><i>·</i><span>${t.zone}</span><i>·</i><span>${t.n}</span></div></div>`;
   },
-  machineHTML() {
+  shown() { const t = this.task; return t.machWrong ? t.noDisc : t.fee; },   // 機器螢幕上的應付金額
+  machineHTML(showTotal) {
     const t = this.task, r = s => this.ruby(s);
     return `<div class="sign"><div class="sh">💳 ${r('自動繳費機')}</div>` +
       `<div class="srow2"><b>${r('停車時間')}</b><span class="n">${t.h}</span><small>${r('小時')}</small></div>` +
       `<div class="srow2"><b>${r('每小時')}</b><span class="n">${t.rate}</span><small>${r('元')}</small></div>` +
-      `<div class="srow2"><b>${r('發票')}</b><span class="n">${t.R}</span><small>${r('元')}</small></div></div>`;
+      `<div class="srow2"><b>${r('發票')}</b><span class="n">${t.R}</span><small>${r('元')}</small></div>` +
+      (showTotal ? `<div class="srow2"><b>${r('應付金額')}</b><span class="n">${Game.shown()}</span><small>${r('元')}</small></div>` : '') + '</div>';
   },
 
   /* ── 狀態設定 ── */
@@ -689,16 +693,40 @@ const Game = defineGame({
           L('（你們走到一樓的自動繳費機，把停車票放進去。）', '(Llegan a la máquina de pago de la planta baja y meten el boleto.)', '(You walk to the pay station on the ground floor and insert the ticket.)'),
           ami(`我們今天買了${t.R}元的東西，發票在這裡。`, `Hoy compramos ${esM(t.R)} en cosas; aquí está el recibo.`, `We bought ${enM(t.R)} worth of things today; here's the receipt.`)
         ],
-        options: () => rot([`掃描發票，付${t.fee}元。`, `不掃描發票，付${t.noDisc}元。`, `掃描發票，付${t.over}元。`]),
+        options: () => rot(['掃描發票。', '不掃描發票，直接付款。', '按旁邊的對講機，請管理員過來。']),
         next: c => {
-          if (c !== `掃描發票，付${t.fee}元。`) {
+          if (c !== '掃描發票。') {
             Game.addMistake(c.startsWith('不掃描')
               ? M('有發票可以折抵，要掃描發票，這樣比較便宜。', 'Con el recibo se puede descontar: hay que escanearlo para pagar menos.', 'The receipt gives you a discount — scan it to pay less.')
-              : M(`發票${t.R}元，折抵${t.d}小時：(${t.h} − ${t.d}) × ${t.rate} = ${t.fee}元。`, `Recibo de ${esM(t.R)}: descuenta ${t.d} hora(s): (${t.h} − ${t.d}) × ${t.rate} = ${t.fee}.`, `A ${enM(t.R)} receipt takes off ${t.d} hour(s): (${t.h} − ${t.d}) × ${t.rate} = ${t.fee}.`));
+              : M('還不用叫人，機器自己就可以處理，先掃描發票。', 'Todavía no hace falta llamar a nadie: la máquina puede hacerlo, primero escanea el recibo.', "No need to call anyone yet — the machine can handle it. Scan the receipt first."));
             return;
           }
-          goodFirst('PAY', '你算得很對！發票折抵以後，要付的錢比較少。', '¡Calculaste bien! Con el descuento del recibo se paga menos.', 'You did the math right! With the receipt discount you pay less.');
-          Game.thought = [L(`（你付了${t.fee}元。機器說：「請在十五分鐘內出場。」）`, `(Pagas ${esM(t.fee)}. La máquina dice: «Salga en un plazo de quince minutos».)`, `(You pay ${enM(t.fee)}. The machine says: "Please exit within fifteen minutes.")`)];
+          goodFirst('PAY', '對！有發票的話，先掃描發票再付錢。', '¡Bien! Si tienes recibo, primero escanéalo y luego paga.', 'Right! If you have a receipt, scan it first, then pay.');
+          Game.thought = [L('（機器掃描了發票，螢幕上出現「應付金額」。）', '(La máquina escanea el recibo y en la pantalla aparece el «importe a pagar».)', '(The machine scans the receipt and an "amount due" appears on the screen.)')];
+          Game.state = 'PAY_CHECK';
+        }
+      },
+      /* ═══ 核對機器算的錢：機器可能漏掉發票折抵 ═══ */
+      PAY_CHECK: {
+        place: 'machine',
+        html: () => Game.machineHTML(true),
+        dialogue: () => [ami('欸，這樣對嗎？', '¿Eh, está bien así?', 'Hey, is that right?')],
+        options: () => rot([`好，付${Game.shown()}元。`, '機器好像沒有折抵發票，我按對講機問一下。', '靠北！這什麼爛機器！（用力拍機器）']),
+        next: c => {
+          const right = t.machWrong ? '機器好像沒有折抵發票，我按對講機問一下。' : `好，付${Game.shown()}元。`;
+          if (c !== right) {
+            Game.addMistake(c.startsWith('好，付')
+              ? M(`機器漏掉發票折抵了。發票${t.R}元，折抵${t.d}小時：(${t.h} − ${t.d}) × ${t.rate} = ${t.fee}元，不是${t.noDisc}元。`, `La máquina olvidó el descuento. Recibo de ${esM(t.R)}: descuenta ${t.d} hora(s): (${t.h} − ${t.d}) × ${t.rate} = ${t.fee}, no ${t.noDisc}.`, `The machine missed the discount. A ${enM(t.R)} receipt takes off ${t.d} hour(s): (${t.h} − ${t.d}) × ${t.rate} = ${t.fee}, not ${t.noDisc}.`)
+              : c.startsWith('機器好像')
+                ? M(`機器算對了：發票${t.R}元，折抵${t.d}小時：(${t.h} − ${t.d}) × ${t.rate} = ${t.fee}元。`, `La máquina calculó bien: (${t.h} − ${t.d}) × ${t.rate} = ${t.fee}.`, `The machine was right: (${t.h} − ${t.d}) × ${t.rate} = ${t.fee}.`)
+                : M('機器壞了也不能拍它，按對講機請管理員處理就好。', 'Aunque la máquina falle, no se golpea: se pulsa el interfono y se llama al encargado.', "Even if the machine is wrong, don't hit it — press the intercom and ask the attendant."));
+            return;
+          }
+          goodFirst('PAY_CHECK', t.machWrong ? '你很細心！機器漏掉折抵，要馬上問。' : '你算過了，金額沒錯，可以放心付錢。', t.machWrong ? '¡Qué atento! La máquina olvidó el descuento: hay que preguntar de inmediato.' : 'Lo calculaste: el importe está bien, puedes pagar.', t.machWrong ? 'Well spotted! The machine missed the discount — ask right away.' : 'You checked it and the amount is right, so go ahead and pay.');
+          Game.thought = t.machWrong
+            ? [L(`管理員：啊，系統沒讀到發票，我幫你處理。好了，現在是${t.fee}元。`, `Encargado: Ay, el sistema no leyó el recibo; ya lo arreglo. Listo, ahora son ${esM(t.fee)}.`, `Attendant: Oh, the system didn't read the receipt — I'll fix it. There, it's ${enM(t.fee)} now.`),
+              L(`（你付了${t.fee}元。機器說：「請在十五分鐘內出場。」）`, `(Pagas ${esM(t.fee)}. La máquina dice: «Salga en un plazo de quince minutos».)`, `(You pay ${enM(t.fee)}. The machine says: "Please exit within fifteen minutes.")`)]
+            : [L(`（你付了${t.fee}元。機器說：「請在十五分鐘內出場。」）`, `(Pagas ${esM(t.fee)}. La máquina dice: «Salga en un plazo de quince minutos».)`, `(You pay ${enM(t.fee)}. The machine says: "Please exit within fifteen minutes.")`)];
           Game.state = 'FIND_CAR';
         }
       },
