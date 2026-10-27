@@ -565,7 +565,7 @@ const Game = defineGame({
       BOOK_CALL: {
         place: 'call',
         html: () => Game.carryHTML(),
-        dialogue: () => [boss('喂，這裡是理髮店，要預約嗎？', 'Aló, peluquería. ¿Quiere reservar?', 'Hello, hair salon. Would you like to book?')],
+        dialogue: () => [boss('你好，這裡是理髮店，請問要預約嗎？', 'Hola, peluquería. ¿Desea reservar?', 'Hello, this is the hair salon. Would you like to book?')],
         options: () => rot(['對，我要預約', '靠北！我打錯電話了！', '喂，請問你是誰']),
         next: c => {
           if (c !== '對，我要預約') {
