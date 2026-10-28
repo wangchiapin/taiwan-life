@@ -743,6 +743,7 @@ const Game = defineGame({
   /* ── 狀態設定 ── */
   getConfig() {
     const N = this.N, t = this.task;
+    const pk = i => Game.picked[i] || t.flavors[i];   // 學生實際點的口味
     const staff = (zh, es, en) => L(`店員：${zh}`, es, en);
     const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
     const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
@@ -753,7 +754,7 @@ const Game = defineGame({
                           : [topCorrect, `加${t.otherTop2.zh}`, `加${TOPS.find(x => x !== t.otherTop2).zh}`];
     const payOk = `給你${zhNum(t.payBill)}元。`;
     const fixTotal = `不好意思，好像算錯了，應該是${zhNum(t.payWrong ? t.total : t.total + TOP_PRICE)}元吧？`;
-    const hoFix = `不好意思，第${CN[t.fixIdx + 1]}球我要的是${t.flavors[t.fixIdx].zh}。`;
+    const hoFix = () => `不好意思，第${CN[t.fixIdx + 1]}球我要的是${pk(t.fixIdx).zh}。`;
 
     return {
       /* ═══ Ami 的 LINE ═══ */
@@ -815,6 +816,7 @@ const Game = defineGame({
           Game.picked.push(pf);
           if (c === f.zh) Game.good(`第${CN[Game.k + 1]}球，選對了！`, `¡Bola ${Game.k + 1}, bien elegida!`, `Scoop ${Game.k + 1} — correct!`);
           const bad = t.scoopWrong && Game.k === t.wIdx;   // 這一球店員放錯：畫面上馬上是錯的口味
+          if (bad) t.wf = pick(FLAVORS.filter(x => x !== pf && x !== f));   // 店員拿的是第三種，不會跟學生點的一樣
           Game.chosen.push(bad ? t.wf : pf); Game.k += 1;
           if (Game.k < t.n) {
             Game.thought = bad ? null : [L(`（店員把${pf.zh}的冰淇淋放在${Game.vessel.zh}裡。）`, `(La persona pone el helado de ${pf.es} ${Game.vessel.es}.)`, `(The staff scoops ${pf.en} ice cream ${Game.vessel.en}.)`)];
@@ -836,11 +838,11 @@ const Game = defineGame({
         place: 'shop',
         html: () => Game.iceHTML(),
         dialogue: () => [L('（是不是挖錯冰淇淋了？）', '(¿Será que se equivocó con el helado?)', '(Did they scoop the wrong ice cream?)')],
-        options: () => rot([`不好意思，第${CN[t.wIdx + 1]}球我要的是${t.flavors[t.wIdx].zh}。`, '應該沒有，是我看錯了。']),
+        options: () => rot([`不好意思，第${CN[t.wIdx + 1]}球我要的是${pk(t.wIdx).zh}。`, '應該沒有，是我看錯了。']),
         next: c => {
-          if (c === `不好意思，第${CN[t.wIdx + 1]}球我要的是${t.flavors[t.wIdx].zh}。`) {
+          if (c === `不好意思，第${CN[t.wIdx + 1]}球我要的是${pk(t.wIdx).zh}。`) {
             Game.good('你當下就發現了！', '¡Lo notaste al momento!', 'You caught it right away!');
-            Game.chosen[t.wIdx] = t.flavors[t.wIdx]; t.scoopWrong = false;   // 店員當場重挖，之後不用再核對這一球
+            Game.chosen[t.wIdx] = pk(t.wIdx); t.scoopWrong = false;   // 店員當場重挖，之後不用再核對這一球
             Game.thought = [staff('不好意思！我重新挖一球。', 'Perdón, le pongo otro.', "Sorry! Let me scoop another one.")];
           } else {
             Game.thought = null;   // 沒發現：之後核對冰淇淋時還有機會
@@ -922,26 +924,26 @@ const Game = defineGame({
         place: 'shop',
         html: () => Game.iceHTML(true, true),
         dialogue: () => [L('（你把冰淇淋拿起來，看一下口味。）', '(Tomas el helado y revisas los sabores.)', '(You pick up the ice cream and check the flavors.)')],
-        options: () => rot(['好，謝謝。', hoFix, '你是不是耳朵有問題？我說的不是這個！']),
+        options: () => rot(['好，謝謝。', hoFix(), '你是不是耳朵有問題？我說的不是這個！']),
         next: c => {
-          const right = t.scoopWrong ? hoFix : '好，謝謝。', i = t.wIdx;
+          const right = t.scoopWrong ? hoFix() : '好，謝謝。', i = t.wIdx;
           if (c === '好，謝謝。' && t.scoopWrong) {   // 收下放錯的冰淇淋：記一次錯，照樣往下走，結局 Ami 會生氣
-            Game.addMistake(M(`第${CN[i + 1]}球放錯了：Ami要的是${t.flavors[i].zh}，店員放了${t.wf.zh}。收下以前，要先看清楚。`, `La bola ${i + 1} está mal: Ami pidió ${t.flavors[i].es} y pusieron ${t.wf.es}. Revisa antes de recibirlo.`, `Scoop ${i + 1} is wrong: Ami asked for ${t.flavors[i].en} but got ${t.wf.en}. Check before you take it.`));
+            Game.addMistake(M(`第${CN[i + 1]}球放錯了：你點的是${pk(i).zh}，店員放了${t.wf.zh}。收下以前，要先看清楚。`, `La bola ${i + 1} está mal: pediste ${pk(i).es} y pusieron ${t.wf.es}. Revisa antes de recibirlo.`, `Scoop ${i + 1} is wrong: you ordered ${pk(i).en} but got ${t.wf.en}. Check before you take it.`));
             Game.thought = null;
             Game.state = 'PAY';
             return;
           }
           if (c !== right) {
             Game.addMistake(c === '好，謝謝。'
-              ? M(`第${CN[i + 1]}球放錯了：Ami要的是${t.flavors[i].zh}，店員放了${t.wf.zh}。收下以前，要先看清楚。`, `La bola ${i + 1} está mal: Ami pidió ${t.flavors[i].es} y pusieron ${t.wf.es}. Revisa antes de recibirlo.`, `Scoop ${i + 1} is wrong: Ami asked for ${t.flavors[i].en} but got ${t.wf.en}. Check before you take it.`)
-              : c === hoFix
-                ? M(`口味是對的：第${CN[t.fixIdx + 1]}球就是${t.flavors[t.fixIdx].zh}。`, `Los sabores están bien: la bola ${t.fixIdx + 1} es ${t.flavors[t.fixIdx].es}.`, `The flavors are right: scoop ${t.fixIdx + 1} is ${t.flavors[t.fixIdx].en}.`)
+              ? M(`第${CN[i + 1]}球放錯了：你點的是${pk(i).zh}，店員放了${t.wf.zh}。收下以前，要先看清楚。`, `La bola ${i + 1} está mal: pediste ${pk(i).es} y pusieron ${t.wf.es}. Revisa antes de recibirlo.`, `Scoop ${i + 1} is wrong: you ordered ${pk(i).en} but got ${t.wf.en}. Check before you take it.`)
+              : c === hoFix()
+                ? M(`口味是對的：第${CN[t.fixIdx + 1]}球就是${pk(t.fixIdx).zh}。`, `Los sabores están bien: la bola ${t.fixIdx + 1} es ${pk(t.fixIdx).es}.`, `The flavors are right: scoop ${t.fixIdx + 1} is ${pk(t.fixIdx).en}.`)
                 : M('要有禮貌，說「不好意思」，請他換就好。', 'Hay que ser cortés: di «disculpe» y pídele que lo cambie.', 'Be polite: say "excuse me" and ask him to change it.'));
             return;
           }
           goodFirst('HANDOVER', t.scoopWrong ? '你很細心！口味放錯了，要馬上說。' : '拿到冰淇淋以後，先看一下口味對不對。', t.scoopWrong ? '¡Qué atento! Pusieron un sabor equivocado; hay que decirlo enseguida.' : 'Al recibir el helado, mira si los sabores son correctos.', t.scoopWrong ? 'Well spotted! A scoop was the wrong flavor — say so right away.' : 'When you get your ice cream, check that the flavors are right.');
-          Game.thought = t.scoopWrong ? [staff(`啊，不好意思！我換成${t.flavors[t.wIdx].zh}。`, `¡Ay, disculpe! Se lo cambio por ${t.flavors[t.wIdx].es}.`, `Oh, sorry! I'll swap it for ${t.flavors[t.wIdx].en}.`)] : null;
-          if (t.scoopWrong) { Game.chosen[i] = t.flavors[i]; t.scoopWrong = false; }   // 店員換好了
+          Game.thought = t.scoopWrong ? [staff(`啊，不好意思！我換成${pk(t.wIdx).zh}。`, `¡Ay, disculpe! Se lo cambio por ${pk(t.wIdx).es}.`, `Oh, sorry! I'll swap it for ${pk(t.wIdx).en}.`)] : null;
+          if (t.scoopWrong) { Game.chosen[i] = pk(i); t.scoopWrong = false; }   // 店員換好了
           Game.state = 'PAY';
         }
       },
@@ -1062,7 +1064,6 @@ const Game = defineGame({
     if (!p || t.amiDone) return;
     t.amiDone = true; t.origFlavors = t.flavors.slice();
     t.flavors[1] = p.nf; t.decoys[1] = p.dec;
-    if (t.scoopWrong && t.wIdx === 1) t.wf = pick(FLAVORS.filter(x => !t.flavors.includes(x)));   // 放錯的那球也要避開新口味
   },
 
   showAmiPopup() {
