@@ -403,19 +403,19 @@ const SPEAKER_RE = /^(Ami|店員|我)：/;
    每一關的單字（中文、西文、英文；拼音自動產生）
 ══════════════════════════════════════ */
 const VOCAB = {
-  START: [['冰淇淋', 'helado', 'ice cream'], ['口味', 'sabor', 'flavor'], ['杯子', 'vaso', 'cup'], ['甜筒', 'cono', 'cone'], ['內用', 'para comer ahí', 'for here (dine in)'], ['外帶', 'para llevar', 'to go']],
+  START: [['冰淇淋', 'helado', 'ice cream'], ['口味', 'sabor', 'flavor'], ['杯子', 'vaso', 'cup'], ['甜筒', 'cono', 'cone'], ['內用', 'para comer ahí', 'for here (dine in)'], ['外帶', 'para llevar', 'to go'], ['公園', 'parque', 'park'], ['店裡', 'dentro de la tienda', 'in the shop']],
   SCOOPS: [['球', 'bola (de helado)', 'scoop'], ['歡迎光臨', 'bienvenido(a)', 'welcome'], ['價目表', 'lista de precios', 'price list'], ['幾球', '¿cuántas bolas?', 'how many scoops?'], ['一球', 'una bola', 'one scoop']],
   CONTAINER: [['杯子', 'vaso', 'cup'], ['甜筒', 'cono', 'cone'], ['還是', 'o (en preguntas)', 'or (in questions)'], ['要', 'querer', 'want'], ['請問', 'disculpe, una pregunta', 'excuse me, may I ask']],
   FLAVOR: [['第一球', 'la primera bola', 'the first scoop'], ['口味', 'sabor', 'flavor'], ['香草', 'vainilla', 'vanilla'], ['巧克力', 'chocolate', 'chocolate'], ['草莓', 'fresa', 'strawberry'], ['芒果', 'mango', 'mango'], ['抹茶', 'matcha', 'matcha'], ['芋頭', 'taro', 'taro']],
   TOPPING: [['配料', 'topping', 'topping'], ['彩色糖粒', 'chispas de colores', 'sprinkles'], ['巧克力醬', 'salsa de chocolate', 'chocolate sauce'], ['草莓醬', 'salsa de fresa', 'strawberry sauce'], ['不用', 'no hace falta', 'no need']],
-  EAT: [['內用', 'para comer ahí', 'for here'], ['外帶', 'para llevar', 'to go'], ['公園', 'parque', 'park'], ['店裡', 'dentro de la tienda', 'in the shop']],
-  PICKUP: [['拿冰淇淋', 'tomar el helado', 'pick up the ice cream'], ['櫃台', 'mostrador', 'counter']],
+  EAT: [['內用', 'para comer ahí', 'for here'], ['外帶', 'para llevar', 'to go']],
+  PICKUP: [['拿起來', 'tomar', 'pick up'], ['櫃台', 'mostrador', 'counter']],
   SCOOP_CHECK: [['挖錯', 'equivocarse', 'scoop the wrong one'], ['看錯', 'confundirse', 'misread']],
   HANDOVER: [['口味', 'sabor', 'flavor'], ['換', 'cambiar', 'swap, change'], ['不好意思', 'disculpe', 'excuse me']],
-  ORDER_CHECK: [['確認', 'confirmar', 'confirm'], ['對嗎', '¿es correcto?', 'is that right?'], ['聽錯', 'oír mal', 'mishear'], ['我要的是', 'lo que quiero es', 'what I want is'], ['不好意思', 'disculpe', 'excuse me']],
+  ORDER_CHECK: [['確認', 'confirmar', 'confirm'], ['對嗎', '¿es correcto?', 'is that right?'], ['在聽', 'estar escuchando', 'be listening'], ['我要的是', 'lo que quiero es', 'what I want is'], ['不好意思', 'disculpe', 'excuse me']],
   PAY: [['一共', 'en total', 'in total'], ['算錯', 'calcular mal', 'miscalculate'], ['應該', 'debería', 'should'], ['夠', 'alcanzar, ser suficiente', 'be enough'], ['找錢', 'dar el cambio', 'give change']],
   PAY_FIX: [['夠', 'alcanzar, ser suficiente', 'be enough'], ['找錢', 'dar el cambio', 'give change'], ['下次再付', 'pagar la próxima vez', 'pay next time'], ['當場', 'en el momento', 'on the spot']],
-  END: [['融化', 'derretirse', 'melt'], ['下次', 'la próxima vez', 'next time'], ['快一點', 'más rápido', 'a bit faster'], ['請慢用', 'buen provecho', 'enjoy']],
+  END: [['融化', 'derretirse', 'melt'], ['等了好久', 'esperar mucho', 'wait a long time'], ['下次', 'la próxima vez', 'next time'], ['快一點', 'más rápido', 'a bit faster'], ['請慢用', 'buen provecho', 'enjoy']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 
