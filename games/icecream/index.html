@@ -127,15 +127,6 @@ html{color-scheme:light}
     #npc-dialogue { font-size: 19px; padding: 12px 16px 2px; }
     #options-area { grid-template-columns: 1fr; padding: 14px 14px 20px; }
     #npc-avatar { max-width: 240px; }
-    /* 展示櫃：把圖上的冰淇淋缸做成可以點的區塊 */
-    #scene { position: relative; }
-    #tub-layer { position: absolute; pointer-events: none; }
-    .tub { position: absolute; pointer-events: auto; background: transparent; border: 0; padding: 0; cursor: pointer; border-radius: 50%; display: flex; align-items: flex-start; justify-content: center; padding-top: 2px; }
-    .tub:hover, .tub:focus-visible { background: rgba(255,255,255,.28); outline: 3px solid var(--red); outline-offset: -3px; }
-    .tub .chip { background: #fff; border: 2px solid var(--ink); border-radius: 8px; padding: 1px 5px; font-size: 12px; line-height: 1.2; color: var(--ink); white-space: nowrap; box-shadow: 0 2px 0 rgba(0,0,0,.15); text-align: center; }
-    .tub .chip small { display: block; font-size: 9px; color: var(--muted); }
-    #counter-ice { position: absolute; pointer-events: none; }
-    #counter-ice svg { width: 100%; height: auto; display: block; image-rendering: pixelated; }
   }
   /* ── 句子翻譯 ── */
   .tr-btn {
@@ -223,6 +214,17 @@ html{color-scheme:light}
   .ice .pixice { display: block; margin: 0 auto; image-rendering: pixelated; }
   .ice .icap { margin-top: 6px; font-size: 15px; color: var(--muted); text-align: center; min-height: 22px; }
 
+    #scene { position: relative; }
+    #counter-ice { position: absolute; pointer-events: none; }
+    /* 口味卡片：六種口味全部放在下方 */
+    #options-area.flavors { grid-template-columns: repeat(2, 1fr); }
+    @media (min-width: 640px) { #options-area.flavors { grid-template-columns: repeat(3, 1fr); } }
+    .opt.flavor-card { display: flex; align-items: center; gap: 10px; text-align: left; padding: 10px 12px; }
+    .flavor-card .sw { display: block; flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--ink); }
+    .flavor-card .ftx { min-width: 0; display: flex; flex-direction: column; }
+    .flavor-card .fzh { font-size: 18px; font-weight: 700; line-height: 1.2; }
+    .flavor-card .fes, .flavor-card .fen { font-size: 12px; color: var(--muted); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #counter-ice svg { width: 100%; height: auto; display: block; image-rendering: pixelated; }
 </style></head>
 <body>
 
@@ -597,6 +599,7 @@ const Game = defineGame({
       scoopWrong: Math.random() < 0.45,          // 店員做好的冰淇淋，有一球口味放錯
       payWrong: Math.random() < 0.45,            // 店員報的總價有沒有多算（多算一份配料）
       rot: Math.floor(Math.random() * 3),
+      flavorOrder: shuffle(FLAVORS.map(f => f.zh)),   // 六種口味的卡片順序
       payBill: pick([200, 500]),                 // 錢包：一張一百元，另一張隨機 200 或 500（一百元一定不夠）
       amiChange: Math.random() < 0.5             // 選第二球的時候，Ami 中途傳新訊息改口味
     };
@@ -759,7 +762,7 @@ const Game = defineGame({
         place: 'shop',
         html: () => Game.iceHTML(),
         dialogue: () => [staff(`第${CN[Game.k + 1]}球要什麼口味？`, `¿De qué sabor quiere la bola ${Game.k + 1}?`, `What flavor for scoop ${Game.k + 1}?`)],
-        options: () => rot([t.flavors[Game.k], ...t.decoys[Game.k]]).map(f => f.zh),
+        options: () => rot(t.flavorOrder),   // 六種口味全部放在選項裡
         next: c => {
           const f = t.flavors[Game.k];
           if (c !== f.zh) {
@@ -971,31 +974,6 @@ const Game = defineGame({
   },
 
   /* alt：第二張圖，和第一張輪流出現（像動畫）；開了「減少動態效果」就不動 */
-  /* 展示櫃的六個缸（720×720 圖上的座標 [x1, y1, x2, y2]） */
-  tubLayer(opts) {
-    document.getElementById('tub-layer')?.remove();
-    const img = document.getElementById('npc-avatar'), scene = document.getElementById('scene');
-    if (this.state !== 'FLAVOR' || !img || img.style.display === 'none' || !img.offsetWidth) return;
-    const TUB = { '香草': [145, 215, 285, 340], '巧克力': [290, 215, 430, 345], '草莓': [435, 215, 580, 340],
-                  '芒果': [110, 360, 270, 490], '抹茶': [280, 365, 440, 495], '芋頭': [450, 355, 610, 490] };
-    const layer = document.createElement('div');
-    layer.id = 'tub-layer';
-    Object.assign(layer.style, { left: img.offsetLeft + 'px', top: img.offsetTop + 'px', width: img.offsetWidth + 'px', height: img.offsetHeight + 'px' });
-    opts.forEach(zh => {
-      const f = FLAVORS.find(x => x.zh === zh), r = TUB[zh];
-      if (!f || !r) return;
-      const k = img.offsetWidth / 720, [x1, y1, x2, y2] = r;
-      const b = document.createElement('button');
-      b.className = 'tub';
-      b.setAttribute('aria-label', `${zh} ${f.es} ${f.en}`);
-      Object.assign(b.style, { left: x1 * k + 'px', top: y1 * k + 'px', width: (x2 - x1) * k + 'px', height: (y2 - y1) * k + 'px' });
-      b.innerHTML = `<span class="chip">${this.ruby(zh)}<small>${f.es}</small><small>${f.en}</small></span>`;
-      b.onclick = () => this.handleChoice(zh);
-      layer.appendChild(b);
-    });
-    scene.appendChild(layer);
-  },
-
   /* 櫃台上的冰淇淋：疊在 shop.jpg 的櫃台中間（圖上 y 約 62% 的位置），依實際訂單畫 */
   counterIce() {
     document.getElementById('counter-ice')?.remove();
@@ -1099,20 +1077,27 @@ const Game = defineGame({
     area.innerHTML = '';
     const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
     area.classList.toggle('single', cfg.single ?? (opts.length === 1 || opts.some(o => o.length > 12)));
+    const isFlavor = this.state === 'FLAVOR' && !this._transMode;
+    area.classList.toggle('flavors', isFlavor);
     opts.forEach(opt => {
       const btn = document.createElement('button');
-      btn.className = 'opt' + (false ? ' deal' : '');
-      btn.innerHTML = this.ruby(opt);
+      if (isFlavor) {
+        const f = FLAVORS.find(x => x.zh === opt);
+        btn.className = 'opt flavor-card';
+        btn.dataset.raw = opt;   // 給測試用的純文字
+        btn.innerHTML = `<span class="sw" style="background:${f.c}"></span><span class="ftx"><span class="fzh">${this.ruby(opt)}</span><span class="fes">${f.es}</span><span class="fen">${f.en}</span></span>`;
+      } else {
+        btn.className = 'opt' + (false ? ' deal' : '');
+        btn.innerHTML = this.ruby(opt);
+      }
       btn.onclick = () => this.handleChoice(opt);
       area.appendChild(btn);
     });
-    this._tubOpts = opts;
-    this.tubLayer(opts);
     this.counterIce();
   }
 });
 
-window.addEventListener('resize', () => { if (window.Game && Game._tubOpts) Game.tubLayer(Game._tubOpts); if (window.Game) Game.counterIce(); });
+window.addEventListener('resize', () => { if (window.Game) Game.counterIce(); });
 
 /* 從「重新開始」或地圖回來：直接用原本的名字開新的一局 */
 GameBoot();
