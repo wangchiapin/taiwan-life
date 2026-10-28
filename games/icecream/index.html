@@ -546,6 +546,12 @@ function pixIce(vk, colors, top) {
         }
       } else if (inP(px, py, drip)) return top.c;
     }
+    if (vk !== 'cone' && inP(px, py, CUP)) {   // 杯子在球的前面：球的下半部沉進杯子裡
+      if (Math.floor(py) === 32) return '#b89a8c';   // 杯口一圈
+      let c = py >= 36 && py <= 38 ? '#f29ab5' : '#fffaf0';
+      if (px > 30) c = mix(c, -0.08);
+      return c;
+    }
     let owner = -1;   // 後畫的球蓋住先畫的
     for (let i = colors.length - 1; i >= 0; i--) { const [cx, cy, r] = pos[i]; if (inC(px, py, cx, cy, r)) { owner = i; break; } }
     if (owner >= 0) {
@@ -562,10 +568,6 @@ function pixIce(vk, colors, top) {
         if (px < 19) c = mix(c, 0.12); else if (px > 29) c = mix(c, -0.14);
         return c;
       }
-    } else if (inP(px, py, CUP)) {
-      let c = py >= 36 && py <= 38 ? '#f29ab5' : '#fffaf0';
-      if (px > 30) c = mix(c, -0.08);
-      return c;
     }
     return null;
   };
