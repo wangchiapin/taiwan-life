@@ -514,14 +514,6 @@ const Game = defineGame({
     document.getElementById('place-status').textContent = st;
   },
 
-  setImage(src, emoji) {
-    const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
-    ph.textContent = emoji;
-    if (!src || this.missing.has(src)) { img.style.display = 'none'; ph.style.display = 'grid'; return; }
-    img.style.display = 'block'; ph.style.display = 'none';
-    if (img.getAttribute('src') !== src) img.setAttribute('src', src);
-  },
-
   /* ── Ami 交代的話（任務提示也會用到） ── */
   amiLines() {
     const N = this.N;

@@ -1021,7 +1021,6 @@ const Game = defineGame({
   },
 
 
-  /* alt：第二張圖，和第一張輪流出現（像動畫）；開了「減少動態效果」就不動 */
   /* Ami 的新訊息：懸浮視窗。先問「打開來看／不要理她」；打開來看後要按「回覆：知道了」才繼續 */
   applyAmiChange() {   // Ami 改口味：只有「打開來看」才生效；「不要理她」就維持原本的訂單
     const t = this.task, p = t.pendingAmi;
@@ -1066,24 +1065,6 @@ const Game = defineGame({
     Object.assign(layer.style, { left: (img.offsetLeft + W / 2 - w / 2) + 'px', top: (img.offsetTop + H * 0.62 - h) + 'px', width: w + 'px' });
     layer.innerHTML = pixIce(v.k, shownList.map(f => f.c), this.top);
     scene.appendChild(layer);
-  },
-
-  setImage(src, emoji, alt) {
-    const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
-    this.stopAnim(); this._anim0 = src;
-    ph.textContent = emoji;
-    if (!src || this.missing.has(src)) { img.style.display = 'none'; ph.style.display = 'grid'; return; }
-    img.style.display = 'block'; ph.style.display = 'none';
-    if (img.getAttribute('src') !== src) img.setAttribute('src', src);
-    const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (alt && !calm && !this.missing.has(alt)) {
-      const pre = new Image(); pre.onerror = () => this.missing.add(alt); pre.src = alt;   // 先載入，避免閃一下
-      this._anim = { alt }; let on = false;
-      this._animTimer = setInterval(() => {
-        if (this.missing.has(alt)) { this.stopAnim(); img.setAttribute('src', src); return; }
-        on = !on; img.setAttribute('src', on ? alt : src);
-      }, 600);
-    }
   },
 
   handleChoice(choice) {

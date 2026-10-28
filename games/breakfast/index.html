@@ -680,14 +680,6 @@ const Game = defineGame({
     if (clock) document.getElementById('shop-clock').textContent = clock;
   },
 
-  setImage(src, emoji) {
-    const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
-    ph.textContent = emoji;
-    if (!src || this.missing.has(src)) { img.style.display = 'none'; ph.style.display = 'grid'; return; }
-    img.style.display = 'block'; ph.style.display = 'none';
-    if (img.getAttribute('src') !== src) img.setAttribute('src', src);
-  },
-
   /* ── 電話訂餐單 ── */
   noteHTML() {
     const c = this.customers[3], r = s => this.ruby(s);

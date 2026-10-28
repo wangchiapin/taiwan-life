@@ -876,6 +876,25 @@ const GameCore = {
     img.style.display = 'none'; ph.style.display = 'grid';
   },
   stopAnim() { clearInterval(this._animTimer); this._anim = null; },
+  /* ── 角色圖：setImage(圖, 備用表情, 第二張圖) ──
+     第二張圖可省略；有給的話，兩張每 0.6 秒輪流顯示（開了「減少動態」就不閃） */
+  setImage(src, emoji, alt) {
+    const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
+    this.stopAnim(); this._anim0 = src;
+    ph.textContent = emoji;
+    if (!src || this.missing.has(src)) { img.style.display = 'none'; ph.style.display = 'grid'; return; }
+    img.style.display = 'block'; ph.style.display = 'none';
+    if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+    const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (alt && !calm && !this.missing.has(alt)) {
+      const pre = new Image(); pre.onerror = () => this.missing.add(alt); pre.src = alt;   // 先載入，避免閃一下
+      this._anim = { alt }; let on = false;
+      this._animTimer = setInterval(() => {
+        if (this.missing.has(alt)) { this.stopAnim(); img.setAttribute('src', src); return; }
+        on = !on; img.setAttribute('src', on ? alt : src);
+      }, 600);
+    }
+  },
   closePanels() {
     for (const k of ['showList', 'showPhone']) if (this[k]) { this[k] = false; const b = document.getElementById(k === 'showList' ? 'btn-list' : 'btn-phone'); if (b) b.setAttribute('aria-pressed', 'false'); }
     Hints.toggle(false); Vocab.toggle(false); Log.toggle(false);
