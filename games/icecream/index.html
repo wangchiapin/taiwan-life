@@ -134,6 +134,8 @@ html{color-scheme:light}
     .tub:hover, .tub:focus-visible { background: rgba(255,255,255,.28); outline: 3px solid var(--red); outline-offset: -3px; }
     .tub .chip { background: #fff; border: 2px solid var(--ink); border-radius: 8px; padding: 1px 5px; font-size: 12px; line-height: 1.2; color: var(--ink); white-space: nowrap; box-shadow: 0 2px 0 rgba(0,0,0,.15); text-align: center; }
     .tub .chip small { display: block; font-size: 9px; color: var(--muted); }
+    #counter-ice { position: absolute; pointer-events: none; }
+    #counter-ice svg { width: 100%; height: auto; display: block; image-rendering: pixelated; }
   }
   /* ── 句子翻譯 ── */
   .tr-btn {
@@ -681,10 +683,10 @@ const Game = defineGame({
       `<div class="mflav">${FLAVORS.map(f => `<span><i style="background:${f.c}"></i>${r(f.zh)}</span>`).join('')}</div></div>`;
   },
   /* 招牌元素：冰淇淋球一顆一顆疊起來 */
-  iceHTML(handover) {
+  iceHTML(handover, overlay) {
     const r = s => this.ruby(s), v = this.vessel || this.task.vessel, tk = this.task;
     const shownList = this.chosen.map((f, i) => handover && tk.scoopWrong && i === tk.wIdx ? tk.wf : f);   // 由下往上
-    const pix = pixIce(v.k, shownList.map(f => f.c), this.top);
+    const pix = overlay ? '' : pixIce(v.k, shownList.map(f => f.c), this.top);   // overlay：冰淇淋改畫在圖上的櫃台
     return `<div class="ice">${pix}` +
       `<div class="icap">${this.chosen.length ? shownList.map((f, i) => `${r('第' + CN[i + 1] + '球')}：${r(f.zh)}`).join('　') : ''}</div></div>`;
   },
@@ -847,7 +849,7 @@ const Game = defineGame({
       /* ═══ 店員把冰淇淋放在櫃台上，玩家拿起來 ═══ */
       PICKUP: {
         place: 'shop',
-        html: () => Game.iceHTML(true),
+        html: () => Game.iceHTML(true, true),
         dialogue: () => [
           L('（店員把冰淇淋放在櫃台上。）', '(El empleado pone el helado sobre el mostrador.)', '(The staff sets the ice cream on the counter.)'),
           staff('好了，這是您的冰淇淋。', 'Listo, aquí tiene su helado.', "Here's your ice cream.")
@@ -859,7 +861,7 @@ const Game = defineGame({
       /* ═══ 店員做好了：核對口味（店員可能放錯一球） ═══ */
       HANDOVER: {
         place: 'shop',
-        html: () => Game.iceHTML(true),
+        html: () => Game.iceHTML(true, true),
         dialogue: () => [L('（你把冰淇淋拿起來，看一下口味。）', '(Tomas el helado y revisas los sabores.)', '(You pick up the ice cream and check the flavors.)')],
         options: () => rot(['好，謝謝。', hoFix, '你是不是耳朵有問題？我說的不是這個！']),
         next: c => {
@@ -994,6 +996,21 @@ const Game = defineGame({
     scene.appendChild(layer);
   },
 
+  /* 櫃台上的冰淇淋：疊在 shop.jpg 的櫃台中間（圖上 y 約 62% 的位置），依實際訂單畫 */
+  counterIce() {
+    document.getElementById('counter-ice')?.remove();
+    const img = document.getElementById('npc-avatar'), scene = document.getElementById('scene');
+    if (!['PICKUP', 'HANDOVER'].includes(this.state) || !img || img.style.display === 'none' || !img.offsetWidth) return;
+    const tk = this.task, v = this.vessel || tk.vessel, handover = this.state === 'HANDOVER';
+    const shownList = this.chosen.map((f, i) => handover && tk.scoopWrong && i === tk.wIdx ? tk.wf : f);
+    const W = img.offsetWidth, H = img.offsetHeight, w = W * 0.2, h = w * 56 / 48;
+    const layer = document.createElement('div');
+    layer.id = 'counter-ice';
+    Object.assign(layer.style, { left: (img.offsetLeft + W / 2 - w / 2) + 'px', top: (img.offsetTop + H * 0.62 - h) + 'px', width: w + 'px' });
+    layer.innerHTML = pixIce(v.k, shownList.map(f => f.c), this.top);
+    scene.appendChild(layer);
+  },
+
   setImage(src, emoji, alt) {
     const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
     this.stopAnim(); this._anim0 = src;
@@ -1091,10 +1108,11 @@ const Game = defineGame({
     });
     this._tubOpts = opts;
     this.tubLayer(opts);
+    this.counterIce();
   }
 });
 
-window.addEventListener('resize', () => { if (window.Game && Game._tubOpts) Game.tubLayer(Game._tubOpts); });
+window.addEventListener('resize', () => { if (window.Game && Game._tubOpts) Game.tubLayer(Game._tubOpts); if (window.Game) Game.counterIce(); });
 
 /* 從「重新開始」或地圖回來：直接用原本的名字開新的一局 */
 GameBoot();
