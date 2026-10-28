@@ -127,6 +127,13 @@ html{color-scheme:light}
     #npc-dialogue { font-size: 19px; padding: 12px 16px 2px; }
     #options-area { grid-template-columns: 1fr; padding: 14px 14px 20px; }
     #npc-avatar { max-width: 240px; }
+    /* 展示櫃：把圖上的冰淇淋缸做成可以點的區塊 */
+    #scene { position: relative; }
+    #tub-layer { position: absolute; pointer-events: none; }
+    .tub { position: absolute; pointer-events: auto; background: transparent; border: 0; padding: 0; cursor: pointer; border-radius: 50%; display: flex; align-items: flex-start; justify-content: center; padding-top: 2px; }
+    .tub:hover, .tub:focus-visible { background: rgba(255,255,255,.28); outline: 3px solid var(--red); outline-offset: -3px; }
+    .tub .chip { background: #fff; border: 2px solid var(--ink); border-radius: 8px; padding: 1px 5px; font-size: 12px; line-height: 1.2; color: var(--ink); white-space: nowrap; box-shadow: 0 2px 0 rgba(0,0,0,.15); text-align: center; }
+    .tub .chip small { display: block; font-size: 9px; color: var(--muted); }
   }
   /* ── 句子翻譯 ── */
   .tr-btn {
@@ -947,6 +954,31 @@ const Game = defineGame({
   },
 
   /* alt：第二張圖，和第一張輪流出現（像動畫）；開了「減少動態效果」就不動 */
+  /* 展示櫃的六個缸（720×720 圖上的座標 [x1, y1, x2, y2]） */
+  tubLayer(opts) {
+    document.getElementById('tub-layer')?.remove();
+    const img = document.getElementById('npc-avatar'), scene = document.getElementById('scene');
+    if (this.state !== 'FLAVOR' || !img || img.style.display === 'none' || !img.offsetWidth) return;
+    const TUB = { '香草': [145, 215, 285, 340], '巧克力': [290, 215, 430, 345], '草莓': [435, 215, 580, 340],
+                  '芒果': [110, 360, 270, 490], '抹茶': [280, 365, 440, 495], '芋頭': [450, 355, 610, 490] };
+    const layer = document.createElement('div');
+    layer.id = 'tub-layer';
+    Object.assign(layer.style, { left: img.offsetLeft + 'px', top: img.offsetTop + 'px', width: img.offsetWidth + 'px', height: img.offsetHeight + 'px' });
+    opts.forEach(zh => {
+      const f = FLAVORS.find(x => x.zh === zh), r = TUB[zh];
+      if (!f || !r) return;
+      const k = img.offsetWidth / 720, [x1, y1, x2, y2] = r;
+      const b = document.createElement('button');
+      b.className = 'tub';
+      b.setAttribute('aria-label', `${zh} ${f.es} ${f.en}`);
+      Object.assign(b.style, { left: x1 * k + 'px', top: y1 * k + 'px', width: (x2 - x1) * k + 'px', height: (y2 - y1) * k + 'px' });
+      b.innerHTML = `<span class="chip">${this.ruby(zh)}<small>${f.es}</small><small>${f.en}</small></span>`;
+      b.onclick = () => this.handleChoice(zh);
+      layer.appendChild(b);
+    });
+    scene.appendChild(layer);
+  },
+
   setImage(src, emoji, alt) {
     const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
     this.stopAnim(); this._anim0 = src;
@@ -1042,8 +1074,12 @@ const Game = defineGame({
       btn.onclick = () => this.handleChoice(opt);
       area.appendChild(btn);
     });
+    this._tubOpts = opts;
+    this.tubLayer(opts);
   }
 });
+
+window.addEventListener('resize', () => { if (window.Game && Game._tubOpts) Game.tubLayer(Game._tubOpts); });
 
 /* 從「重新開始」或地圖回來：直接用原本的名字開新的一局 */
 GameBoot();
