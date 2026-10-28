@@ -216,6 +216,7 @@ html{color-scheme:light}
 
     #scene { position: relative; }
     #counter-ice { position: absolute; pointer-events: none; }
+    #counter-cap { position: absolute; transform: translate(-50%, -100%); background: rgba(255,255,255,.92); border: 1px solid #e3d3c3; border-radius: 10px; padding: 3px 10px; font-size: 14px; white-space: nowrap; pointer-events: none; color: #4a3440; }
     /* Ami 的懸浮視窗 */
     #ami-pop { position: fixed; inset: 0; background: rgba(58,34,48,.45); display: flex; align-items: center; justify-content: center; z-index: 80; padding: 16px; }
     .ami-card { background: #fff; border: 2px solid var(--ink); border-radius: 16px; max-width: 340px; width: 100%; padding: 16px 18px; box-shadow: 0 6px 0 rgba(0,0,0,.18); }
@@ -651,6 +652,7 @@ const Game = defineGame({
     t0.ocSaid = { ...truth, ...(t0.ocWrong ? { [t0.ocKind]: flip[t0.ocKind] } : {}) };
     t0.ocFix = OC.fix(t0.ocKind, t0.ocWrong ? truth[t0.ocKind] : flip[t0.ocKind]);
     this.chosen = []; this.k = 0; this.vessel = null; this.top = null; this.flavWrong = false;
+    this.picked = []; this.topPick = null; this.staffOops = false;   // 學生實際點的口味／配料（END 才核對）；店員複誦錯被抓到時換尷尬圖
   },
 
   /* 幾球、杯子甜筒：第二次才答對（沒有綠卡）就不出過場頁，直接進下一關 */
@@ -665,9 +667,9 @@ const Game = defineGame({
     const ordZh = fl.map((f, i) => `第${CN[i + 1]}球是${f.zh}`).join('，');
     const ordEs = fl.map((f, i) => `la bola ${i + 1}: ${f.es}`).join('; '), ordEn = fl.map((f, i) => `scoop ${i + 1}: ${f.en}`).join('; ');
     /* Ami 的話合併成一句（一個泡泡）：把原本四段原文直接接起來，不增減字和標點 */
-    const l1 = L(`${N}，我${here ? '已經在冰淇淋店裡面坐好了' : '在公園的長椅這邊等你'}。幫我買冰淇淋，好嗎？`,
-        `${N}, ${here ? 'ya estoy sentada dentro de la heladería' : 'te espero en una banca del parque'}. ¿Me compras un helado?`,
-        `${N}, ${here ? "I'm already sitting inside the ice cream shop" : "I'm waiting on a bench in the park"}. Could you buy me some ice cream?`);
+    const l1 = L(`${N}，我${here ? '已經在冰淇淋店裡面找到座位了' : '在公園的長椅這邊等你'}。幫我買冰淇淋，好嗎？`,
+        `${N}, ${here ? 'ya encontré un asiento dentro de la heladería' : 'te espero en una banca del parque'}. ¿Me compras un helado?`,
+        `${N}, ${here ? "I've already found a seat inside the ice cream shop" : "I'm waiting on a bench in the park"}. Could you buy me some ice cream?`);
     const l2 = L(`我要${NZ(t.n)}球。${ordZh}。`, `Quiero ${t.n} bolas: ${ordEs}.`, `I want ${t.n} scoops — ${ordEn}.`);
     const l3 = L(`我要${t.vessel.zh}，${t.top ? `還要加${t.top.zh}` : '不要加配料'}。`, `Lo quiero ${t.vessel.es}, ${t.top ? `y con ${t.top.es}` : 'sin topping'}.`, `I want it ${t.vessel.en}, ${t.top ? `with ${t.top.en}` : 'with no toppings'}.`);
     const l4 = L(here ? '我們在這裡吃。' : '我要外帶，帶去公園吃。', here ? 'Lo comemos aquí.' : 'Lo quiero para llevar; lo comeré en el parque.', here ? "We'll eat it here." : "I want it to go — I'll eat it in the park.");
@@ -729,6 +731,7 @@ const Game = defineGame({
   /* 招牌元素：冰淇淋球一顆一顆疊起來 */
   iceHTML(handover, overlay) {
     const r = s => this.ruby(s), v = this.vessel || this.task.vessel, tk = this.task;
+    if (overlay) return '';   // 櫃台上的冰淇淋改畫在圖上，標籤在 counterIce 貼在冰淇淋上方
     const shownList = this.chosen.map((f, i) => handover && tk.scoopWrong && i === tk.wIdx ? tk.wf : f);   // 由下往上
     const pix = overlay ? '' : pixIce(v.k, shownList.map(f => f.c), this.top);   // overlay：冰淇淋改畫在圖上的櫃台
     return `<div class="ice">${pix}` +
@@ -806,23 +809,17 @@ const Game = defineGame({
         options: () => rot(t.flavorOrder),   // 六種口味全部放在選項裡
         next: c => {
           const f = t.flavors[Game.k];
-          if (c !== f.zh) {
-            Game.flavWrong = true;   // 這一球選錯過，就不給綠卡
-            Game.addMistake(M(`不對不對！第${CN[Game.k + 1]}球Ami要的是${f.zh}。`, `¡No, no! Para la bola ${Game.k + 1}, Ami pidió ${f.es}.`, `No, no! For scoop ${Game.k + 1}, Ami asked for ${f.en}.`));
-            return;
-          }
-          if (!Game.flavWrong) Game.good(`第${CN[Game.k + 1]}球，選對了！`, `¡Bola ${Game.k + 1}, bien elegida!`, `Scoop ${Game.k + 1} — correct!`);   // 每一球第一次就對才有綠卡
-          Game.flavWrong = false;
+          const pf = FLAVORS.find(x => x.zh === c) || f;   // 學生實際選的口味：選錯也照樣放上去，最後 END 才說
+          Game.picked.push(pf);
+          if (c === f.zh) Game.good(`第${CN[Game.k + 1]}球，選對了！`, `¡Bola ${Game.k + 1}, bien elegida!`, `Scoop ${Game.k + 1} — correct!`);
           const bad = t.scoopWrong && Game.k === t.wIdx;   // 這一球店員放錯：畫面上馬上是錯的口味
-          Game.chosen.push(bad ? t.wf : f); Game.k += 1;
+          Game.chosen.push(bad ? t.wf : pf); Game.k += 1;
           if (Game.k < t.n) {
-            Game.thought = bad ? null : [L(`（店員把${f.zh}的冰淇淋放在${Game.vessel.zh}裡。）`, `(La persona pone el helado de ${f.es} ${Game.vessel.es}.)`, `(The staff scoops ${f.en} ice cream ${Game.vessel.en}.)`)];
-            if (t.amiChange && !t.amiDone && Game.k === 1) {   // 第一球放好後，Ami 傳新訊息：第二球改口味
-              t.amiDone = true; t.origFlavors = t.flavors.slice();
+            Game.thought = bad ? null : [L(`（店員把${pf.zh}的冰淇淋放在${Game.vessel.zh}裡。）`, `(La persona pone el helado de ${pf.es} ${Game.vessel.es}.)`, `(The staff scoops ${pf.en} ice cream ${Game.vessel.en}.)`)];
+            if (t.amiChange && !t.amiDone && Game.k === 1) {   // 第一球放好後，Ami 傳新訊息：第二球改口味（要打開來看才會生效）
               const nf = pick(FLAVORS.filter(x => !t.flavors.includes(x)));
-              t.flavors[1] = nf; t.decoys[1] = shuffle(FLAVORS.filter(x => x !== nf)).slice(0, 3);
-              if (t.scoopWrong && t.wIdx === 1) t.wf = pick(FLAVORS.filter(x => !t.flavors.includes(x)));   // 放錯的那球也要避開新口味
-              Game._popup = { ...L(`第二球改成${nf.zh}了，不好意思！`, `Cambié la bola 2 a ${nf.es}, ¡perdón!`, `I changed scoop 2 to ${nf.en}, sorry!`), stage: 'ask' };   // Ami 的新訊息：懸浮視窗
+              t.pendingAmi = { nf, dec: shuffle(FLAVORS.filter(x => x !== nf)).slice(0, 3) };
+              Game._popup = { ...L(`第二球改成${nf.zh}了，不好意思！`, `Cambié la bola 2 a ${nf.es}, ¡perdón!`, `I changed scoop 2 to ${nf.en}, sorry!`), stage: 'ask', onOpen: () => Game.applyAmiChange() };
             }
             if (bad) Game.state = 'SCOOP_CHECK';
             return;
@@ -857,18 +854,13 @@ const Game = defineGame({
         dialogue: () => [staff('要加配料嗎？配料每種十元。', '¿Quiere agregar algún topping? Cada uno cuesta diez dólares.', 'Would you like a topping? Each one is ten dollars.')],
         options: () => rot(topOpts),
         next: c => {
-          if (c !== topCorrect) {
-            Game.addMistake(t.top ? M(`拜託～Ami要加的是${t.top.zh}。`, `¡Por favor! Ami quiere ${t.top.es}.`, `Come on! Ami wants ${t.top.en}.`) : M('你完蛋了！Ami說不要加配料。', '¡Estás frito! Ami dijo que no quería topping.', "You're doomed! Ami said no toppings."));
-            return;
-          }
-          goodFirst('TOPPING', '很好！你沒有多加配料，也沒有漏掉。', '¡Muy bien! No agregaste de más ni olvidaste nada.', 'Good! You did not add extras or forget anything.');
-          Game.top = t.top;
+          Game.topPick = c === '不用加配料，謝謝。' ? null : (TOPS.find(x => `加${x.zh}` === c) || null);   // 配料先記下來，對不對最後 END 才說
+          Game.top = Game.topPick;
           Game.thought = null;
           Game.state = 'EAT';
         }
       },
 
-      /* ═══ 內用還是外帶 ═══ */
       EAT: {
         place: 'shop',
         html: () => Game.iceHTML(),
@@ -902,6 +894,7 @@ const Game = defineGame({
             return;
           }
           goodFirst('ORDER_CHECK', t.ocWrong ? '你很細心！店員複誦錯了，要馬上說。' : '店員複誦的時候，要對一下Ami說的話。', t.ocWrong ? '¡Qué atento! El empleado repitió mal el pedido; hay que decirlo enseguida.' : 'Cuando el empleado repita el pedido, compáralo con lo que dijo Ami.', t.ocWrong ? 'Well spotted! The clerk repeated the order wrong — speak up right away.' : 'When the clerk repeats the order, compare it with what Ami said.');
+          Game.staffOops = !!t.ocWrong;   // 店員複誦錯被抓到：拿冰淇淋時店員露出尷尬表情
           Game.thought = t.ocWrong
             ? [staff(`啊，不好意思！是${tz}。`, `¡Ay, disculpe! Es «${te}».`, `Oh, sorry! It's "${tn}".`),
                staff(`好，${OC.full(t.ocTruth, 'zh')}，沒錯了。請稍等。`, `Bien, ${OC.full(t.ocTruth, 'es')}: ahora sí. Un momento, por favor.`, `Okay, ${OC.full(t.ocTruth, 'en')} — got it now. One moment, please.`)]
@@ -919,7 +912,7 @@ const Game = defineGame({
           staff('好了，這是您的冰淇淋。', 'Listo, aquí tiene su helado.', "Here's your ice cream.")
         ],
         options: () => ['拿起來'],
-        next: () => { Game.state = 'HANDOVER'; }
+        next: () => { Game.staffOops = false; Game.state = 'HANDOVER'; }
       },
 
       /* ═══ 店員做好了：核對口味（店員可能放錯一球） ═══ */
@@ -1000,12 +993,28 @@ const Game = defineGame({
         place: 'phone',
         html: () => Game.iceHTML(),
         dialogue: () => {
+          if (!t.endChecked) {   // 只核對一次（END 的台詞可能重新畫面）
+            t.endChecked = true;
+            const pf = Game.picked, tp = Game.topPick || null, msgs = [];
+            const wi = t.flavors.findIndex((f, i) => pf[i] && pf[i] !== f);
+            const cz = (f, top) => f.zh + (top ? '加' + top.zh : ''), ce = (f, top) => f.es + (top ? ' con ' + top.es : ''), cn = (f, top) => f.en + (top ? ' with ' + top.en : '');
+            if (wi >= 0) {
+              Game.addMistake(M(`第${CN[wi + 1]}球買錯了：Ami要${t.flavors[wi].zh}，你點了${pf[wi].zh}。`, `La bola ${wi + 1} no era la que pidió Ami: quería ${t.flavors[wi].es}, y pediste ${pf[wi].es}.`, `Scoop ${wi + 1} was wrong: Ami wanted ${t.flavors[wi].en}, but you picked ${pf[wi].en}.`));
+              msgs.push(L(`Ami：咦？我第${CN[wi + 1]}球要點的是${cz(t.flavors[wi], t.top)}，但是你點${cz(pf[wi], tp)}！`, `¿Eh? Para la bola ${wi + 1} yo pedí ${ce(t.flavors[wi], t.top)}, ¡pero tú pediste ${ce(pf[wi], tp)}!`, `Huh? For scoop ${wi + 1} I ordered ${cn(t.flavors[wi], t.top)}, but you got ${cn(pf[wi], tp)}!`));
+            }
+            if (tp !== t.top) {
+              Game.addMistake(M(`配料買錯了：Ami要${t.top ? '加' + t.top.zh : '不加配料'}。`, `Topping equivocado: Ami quería ${t.top ? 'con ' + t.top.es : 'sin topping'}.`, `Wrong topping: Ami wanted ${t.top ? 'with ' + t.top.en : 'no topping'}.`));
+              if (wi < 0) msgs.push(L(`Ami：拜託～我要的是${t.top ? '加' + t.top.zh : '不加配料'}，你給我的是${tp ? '加' + tp.zh : '不加配料'}！`, `¡Por favor! Yo quería ${t.top ? 'con ' + t.top.es : 'sin topping'}, y tú me diste ${tp ? 'con ' + tp.es : 'sin topping'}.`, `Come on! I wanted ${t.top ? 'with ' + t.top.en : 'no topping'}, and you gave me ${tp ? 'with ' + tp.en : 'no topping'}.`));
+            }
+            t.endMsgs = msgs;
+          }
           Game._endGood = Game.mistakes <= 2;
           track('game_complete', { game: 'icecream', score: Game.score, elapsed: Game.elapsedTime });
           const here = t.eat === 'here';
           return [
             staff('謝謝，請慢用！', 'Gracias, ¡buen provecho!', 'Thank you — enjoy!'),
             ...(t.scoopWrong ? [L('Ami：這不是我要的口味！', '¡Esto no es lo que pedí!', "This isn't what I ordered!")] : []),
+            ...(t.endMsgs || []),
             Game._endGood
               ? L(`Ami：哇，${NZ(t.n)}球都是我要的口味！謝謝你，${N}！`, `¡Guau, las ${t.n} bolas son justo los sabores que quería! ¡Gracias, ${N}!`, `Wow, all ${t.n} scoops are exactly the flavors I wanted! Thanks, ${N}!`)
               : L(here ? 'Ami：謝謝你！不過我等了好久……下次要快一點喔！' : 'Ami：謝謝你！不過冰淇淋有一點融化了……下次要快一點喔！', here ? '¡Gracias! Pero esperé mucho… ¡la próxima vez más rápido!' : '¡Gracias! Pero el helado se derritió un poco… ¡la próxima vez más rápido!', here ? 'Thanks! But I waited a long time… faster next time!' : 'Thanks! But the ice cream melted a little… faster next time!')
@@ -1044,6 +1053,14 @@ const Game = defineGame({
 
   /* alt：第二張圖，和第一張輪流出現（像動畫）；開了「減少動態效果」就不動 */
   /* Ami 的新訊息：懸浮視窗。先問「打開來看／不要理她」；打開來看後要按「回覆：知道了」才繼續 */
+  applyAmiChange() {   // Ami 改口味：只有「打開來看」才生效；「不要理她」就維持原本的訂單
+    const t = this.task, p = t.pendingAmi;
+    if (!p || t.amiDone) return;
+    t.amiDone = true; t.origFlavors = t.flavors.slice();
+    t.flavors[1] = p.nf; t.decoys[1] = p.dec;
+    if (t.scoopWrong && t.wIdx === 1) t.wf = pick(FLAVORS.filter(x => !t.flavors.includes(x)));   // 放錯的那球也要避開新口味
+  },
+
   showAmiPopup() {
     document.getElementById('ami-pop')?.remove();
     const m = this._popup;
@@ -1055,7 +1072,7 @@ const Game = defineGame({
       d.innerHTML = `<div class="ami-card" role="dialog" aria-modal="true" aria-label="來自 Ami 的訊息">` +
         `<div class="ami-head">💬 來自 Ami 的訊息</div>` +
         `<div class="ami-btns"><button class="opt" data-act="open">打開來看</button><button class="opt" data-act="ignore">不要理她</button></div></div>`;
-      d.querySelector('[data-act="open"]').onclick = () => { m.stage = 'read'; this.showAmiPopup(); };
+      d.querySelector('[data-act="open"]').onclick = () => { m.stage = 'read'; if (m.onOpen) { m.onOpen(); m.onOpen = null; } this.showAmiPopup(); };
       d.querySelector('[data-act="ignore"]').onclick = close;
     } else {
       d.innerHTML = `<div class="ami-card" role="dialog" aria-modal="true" aria-label="Ami 的訊息">` +
@@ -1070,6 +1087,7 @@ const Game = defineGame({
   /* 櫃台上的冰淇淋：疊在 shop.jpg 的櫃台中間（圖上 y 約 62% 的位置），依實際訂單畫 */
   counterIce() {
     document.getElementById('counter-ice')?.remove();
+    document.getElementById('counter-cap')?.remove();
     const img = document.getElementById('npc-avatar'), scene = document.getElementById('scene');
     if (!['PICKUP', 'HANDOVER'].includes(this.state) || !img || img.style.display === 'none' || !img.offsetWidth) return;
     const tk = this.task, v = this.vessel || tk.vessel, handover = this.state === 'HANDOVER';
@@ -1080,6 +1098,11 @@ const Game = defineGame({
     Object.assign(layer.style, { left: (img.offsetLeft + W / 2 - w / 2) + 'px', top: (img.offsetTop + H * 0.62 - h) + 'px', width: w + 'px' });
     layer.innerHTML = pixIce(v.k, shownList.map(f => f.c), this.top);
     scene.appendChild(layer);
+    const cap = document.createElement('div');
+    cap.id = 'counter-cap';
+    cap.innerHTML = this.chosen.length ? shownList.map((f, i) => `${this.ruby('第' + CN[i + 1] + '球')}：${this.ruby(f.zh)}`).join('　') : '';
+    Object.assign(cap.style, { left: (img.offsetLeft + W / 2) + 'px', top: (img.offsetTop + H * 0.62 - h - 8) + 'px' });
+    scene.appendChild(cap);
   },
 
   setImage(src, emoji, alt) {
@@ -1141,6 +1164,7 @@ const Game = defineGame({
     const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
     let [src, emoji, alt] = this.IMAGES[this.state] || ['', '🚇'];
     if (src === 'images/shop.jpg' && this.feedback.some(f => f.type === 'bad')) src = 'images/shop_oops.jpg';   // 這一次答錯：店員尷尬的臉
+    if (this.staffOops && this.state === 'PICKUP') src = 'images/shop_oops.jpg';   // 店員複誦錯被抓到：尷尬的臉
     if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
     this.setImage(src, emoji, alt);
     Vocab.render(this.state);
