@@ -58,8 +58,8 @@ def play(page,g,mode,log):
             if page.evaluate('EMBED'):   # 地圖模式：看完排行榜按「回到地圖」
                 page.wait_for_timeout(300); page.click('#leaderboard-screen .btn-restart'); return 'embed-done',trans
             return 'leaderboard',trans
-        if page.locator('#ami-pop-ok').count():   # Ami 的懸浮視窗：按「知道了」
-            page.click('#ami-pop-ok'); continue
+        if page.locator('#ami-pop').count():   # Ami 的懸浮視窗：打開來看，再按「回覆：知道了」
+            page.click('#ami-pop [data-act="open"]' if page.locator('#ami-pop [data-act="open"]').count() else '#ami-pop [data-act="reply"]'); continue
         st=page.evaluate('Game.state')
         if page.evaluate('Game.mistakes')>=8: page.evaluate('Game.mistakes=0')
         if st=='_TRANS':

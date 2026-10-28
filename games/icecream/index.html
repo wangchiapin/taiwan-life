@@ -222,7 +222,8 @@ html{color-scheme:light}
     .ami-head { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
     .ami-body { font-size: 19px; line-height: 1.5; }
     .ami-es, .ami-en { font-size: 13px; color: var(--muted); margin-top: 4px; }
-    #ami-pop-ok { margin-top: 14px; width: 100%; }
+    .ami-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+    .ami-btns .opt { width: 100%; }
     /* 口味卡片：六種口味全部放在下方 */
     #options-area.flavors { grid-template-columns: repeat(2, 1fr); }
     @media (min-width: 640px) { #options-area.flavors { grid-template-columns: repeat(3, 1fr); } }
@@ -789,7 +790,7 @@ const Game = defineGame({
               const nf = pick(FLAVORS.filter(x => !t.flavors.includes(x)));
               t.flavors[1] = nf; t.decoys[1] = shuffle(FLAVORS.filter(x => x !== nf)).slice(0, 3);
               if (t.scoopWrong && t.wIdx === 1) t.wf = pick(FLAVORS.filter(x => !t.flavors.includes(x)));   // 放錯的那球也要避開新口味
-              Game._popup = L(`第二球改成${nf.zh}了，不好意思！`, `Cambié la bola 2 a ${nf.es}, ¡perdón!`, `I changed scoop 2 to ${nf.en}, sorry!`);   // Ami 的新訊息：懸浮視窗
+              Game._popup = { ...L(`第二球改成${nf.zh}了，不好意思！`, `Cambié la bola 2 a ${nf.es}, ¡perdón!`, `I changed scoop 2 to ${nf.en}, sorry!`), stage: 'ask' };   // Ami 的新訊息：懸浮視窗
             }
             if (bad) Game.state = 'SCOOP_CHECK';
             return;
@@ -1004,18 +1005,27 @@ const Game = defineGame({
   },
 
   /* alt：第二張圖，和第一張輪流出現（像動畫）；開了「減少動態效果」就不動 */
-  /* Ami 的新訊息：LINE 風格的懸浮視窗，按「知道了」才會繼續 */
+  /* Ami 的新訊息：懸浮視窗。先問「打開來看／不要理她」；打開來看後要按「回覆：知道了」才繼續 */
   showAmiPopup() {
     document.getElementById('ami-pop')?.remove();
     const m = this._popup;
     if (!m) return;
     const d = document.createElement('div');
     d.id = 'ami-pop';
-    d.innerHTML = `<div class="ami-card" role="dialog" aria-modal="true" aria-label="Ami 的新訊息">` +
-      `<div class="ami-head">💬 LINE · Ami（新訊息）</div>` +
-      `<div class="ami-body">${this.ruby(m.zh)}</div><div class="ami-es">${m.es}</div><div class="ami-en">${m.en}</div>` +
-      `<button id="ami-pop-ok" class="opt">知道了</button></div>`;
-    d.querySelector('#ami-pop-ok').onclick = () => { this._popup = null; d.remove(); };
+    const close = () => { this._popup = null; d.remove(); };
+    if (m.stage !== 'read') {
+      d.innerHTML = `<div class="ami-card" role="dialog" aria-modal="true" aria-label="來自 Ami 的訊息">` +
+        `<div class="ami-head">💬 來自 Ami 的訊息</div>` +
+        `<div class="ami-btns"><button class="opt" data-act="open">打開來看</button><button class="opt" data-act="ignore">不要理她</button></div></div>`;
+      d.querySelector('[data-act="open"]').onclick = () => { m.stage = 'read'; this.showAmiPopup(); };
+      d.querySelector('[data-act="ignore"]').onclick = close;
+    } else {
+      d.innerHTML = `<div class="ami-card" role="dialog" aria-modal="true" aria-label="Ami 的訊息">` +
+        `<div class="ami-head">💬 Ami</div>` +
+        `<div class="ami-body">${this.ruby(m.zh)}</div><div class="ami-es">${m.es}</div><div class="ami-en">${m.en}</div>` +
+        `<div class="ami-btns"><button class="opt" data-act="reply">${this.ruby('回覆：知道了')}</button></div></div>`;
+      d.querySelector('[data-act="reply"]').onclick = close;
+    }
     document.body.appendChild(d);
   },
 
