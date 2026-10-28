@@ -115,3 +115,18 @@ html:not([data-ui="zh"]) .tab-l2 { display: block; font-size: 9px; font-weight: 
 }
 .side-tab.hint.pulse { animation: hintPulse 1.5s ease-in-out 4; }
 @media (prefers-reduced-motion: reduce) { .side-tab.hint.pulse { animation: none; outline: 3px solid rgba(255, 190, 40, .95); } }
+
+/* 各遊戲共同的外框樣式（2026-10-28 整理第 2 步，從各遊戲搬來；個別遊戲有自己的版本會留在原處）*/
+html { color-scheme: light; }
+body.embed-boot #login-screen.active { display: none; }
+.screen.active { display: flex; }
+#login-screen .subtitle { margin: 0; color: var(--muted); font-size: 15px; }
+#game-window.active { display: flex; }
+#npc-dialogue .thought .line.narr { color: var(--muted); font-size: 18px; }
+#lb-table th { background: var(--ink); color: #fff; font-weight: 500; }
+#lb-table th, #lb-table td { padding: 9px 8px; text-align: center; border-bottom: 1px solid var(--line); }
+@media (max-width: 560px) { .tr-btn svg { width: 17px; height: 17px; } }
+.v-word .tr-btn { margin-left: 4px; }
+.drawer.open { transform: none; }
+.v-head b { font-size: 18px; }
+.v-head small { color: var(--muted); }

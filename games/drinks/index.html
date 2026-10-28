@@ -28,7 +28,6 @@
 
 <link rel="stylesheet" href="../../shared/game.css">
 <style>
-html{color-scheme:light}
   :root {
     --ink: #2c2a33;        /* 主文字 */
     --main: #d9772b;       /* 珍奶橘：主色 */
@@ -50,13 +49,10 @@ html{color-scheme:light}
     display: flex; justify-content: center; align-items: flex-start;
     padding: 24px 16px 40px;
   }
-  .screen.active { display: flex; }
   /* ── 登入 ── */
   .game-logo { font-size: 56px; line-height: 1; }
-  body.embed-boot #login-screen.active { display: none; }
   /* 嵌入模式：不要閃一下開始畫面 */
   #login-screen h1 { margin: 0; font-size: 30px; font-weight: 700; letter-spacing: 2px; }
-  #login-screen .subtitle { margin: 0; color: var(--muted); font-size: 15px; }
   .input-group input:focus { border-color: var(--main); }
   .btn-primary {
     padding: 14px 44px; font-size: 18px; font-weight: 700; font-family: inherit;
@@ -65,7 +61,6 @@ html{color-scheme:light}
   .btn-primary:hover { background: var(--main-dark); }
   .flavor-text { color: var(--muted); font-size: 14px; line-height: 1.8; text-align: center; max-width: 400px; margin: 0; }
   /* ── 遊戲 ── */
-  #game-window.active { display: flex; }
   .chip { font-size: 13px; padding: 5px 10px; border-radius: 999px; background: var(--wall); white-space: nowrap; }
   .btn-pinyin {
     font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
@@ -92,7 +87,6 @@ html{color-scheme:light}
   #npc-dialogue .speaker { font-weight: 700; color: var(--main-dark); }
   #npc-dialogue .speaker.ami { color: #7a5ea8; }
   #npc-dialogue .speaker.me { color: var(--muted); }
-  #npc-dialogue .thought .line.narr { color: var(--muted); font-size: 18px; }
   ruby rt { color: var(--main); font-size: .5em; font-weight: 400; }
   /* 價目表 */
   .menu-board {
@@ -116,7 +110,6 @@ html{color-scheme:light}
   .congrats-banner { background: var(--accent); color: var(--ink); }
   .no-rank-banner { background: var(--wall); color: var(--muted); }
   #lb-table th { background: var(--ink); color: #fff; font-weight: 500; }
-  #lb-table th, #lb-table td { padding: 9px 8px; text-align: center; border-bottom: 1px solid var(--line); }
   #lb-table tr.highlight-row { background: var(--soft); font-weight: 700; }
   @media (max-width: 600px) {
     .screen { padding: 26px 18px; }
@@ -141,7 +134,6 @@ html{color-scheme:light}
     .tr-btn svg { width: 17px; height: 17px; }
   }
   .tr-btn.spk.speaking { background: var(--main); color: #fff; border-color: var(--main); }
-  .v-word .tr-btn { margin-left: 4px; }
   .tr-pop {
     position: fixed; width: min(340px, calc(100vw - 16px));
     background: var(--paper); color: var(--ink); border: 1.5px solid var(--main); border-radius: 12px;
@@ -174,7 +166,6 @@ html{color-scheme:light}
     background: var(--paper); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(60, 40, 30, .12);
     transform: translateX(105%); transition: transform .25s ease; display: flex; flex-direction: column;
   }
-  .drawer.open { transform: none; }
   @media (prefers-reduced-motion: reduce) { .drawer { transition: none; } }
   .h-sec { padding: 12px 16px 4px; font-size: 13px; font-weight: 700; color: var(--main); }
   /* ── 即時回饋卡（停留到下一次選擇） ── */
