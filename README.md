@@ -28,7 +28,8 @@ tools/firestore.rules  Firestore 規則（改了要貼到 console 發布）
 ```
 
 ## 場景 ID（資料夾名 = scene = collection 前綴 = GA4 game 參數）
-drinks · reserva · breakfast · thsr · gas · nightmarket · parcel · bakery · clinic · mrt · street · school · ubike · bus · barber · cinema · parking · icecream · bookstore · market · elevator · noodle · conbini · yansuji
+drinks · reserva · breakfast · nightmarket · parcel · bakery · clinic · mrt · street · school · ubike · bus · barber · cinema · parking · icecream · bookstore · market · elevator · noodle · conbini · yansuji
+（共 22 個，與首頁 `SCENES` 一致。`airport`、`site4` 還在 `COMING`（維修中／建造中），沒有資料夾。）
 
 Firestore collection：`<scene>game_scores` 或 `<scene>_scores`（沿用各遊戲現有名稱，不要改，否則舊排行榜會消失）。
 排行榜需要複合索引：score 降冪 + elapsed 升冪。
@@ -101,6 +102,16 @@ parent.postMessage({ type: 'scene-complete', scene: '<scene>', score, mistakes }
 - 正解在 `tools/oracles/noodle.py`、`conbini.py`、`yansuji.py`；`tools/smoke.py` 已加入名單。
 - 圖片檔 `games/<遊戲>/images/*.jpg` 還沒有，缺圖時自動顯示 emoji。
 - 台詞和拼音是第一版草稿，需要 Ben 審。
+
+## 冰淇淋店 icecream（2026-10-28 更新）
+流程（程式裡的 `ORDER`）：START → SCOOPS（幾球）→ CONTAINER（杯子或甜筒）→ FLAVOR（每球口味）→ SCOOP_CHECK（店員做好，核對口味）→ TOPPING（配料）→ EAT（內用外帶）→ ORDER_CHECK（店員複誦，一次只會說錯一項）→ PICKUP → HANDOVER → PAY（報價）→ PAY_FIX（算錯時重算）→ END → RESULT。
+價目：一球 60、兩球 110、三球 150 元；配料每種 10 元。
+
+照「關卡設計原則」，店員會隨機出錯，玩家要自己核對：
+- **口味放錯**：店員做好的冰淇淋有約 45% 機率某一球口味放錯，放錯的口味不會和玩家點的一樣；是否算錯，以玩家**實際點的口味**為準。玩家可以指出「第 N 球我要的是…」，也可以收下（Ami 的台詞會加上「我要的是…」）。
+- **價錢**：以實際做出來的配料計算（含玩家真的點的配料），不是以任務原本寫的配料。店員報價可能多算一份配料，玩家要算對再重付。
+- **結局好壞**：看最後拿到的口味與配料，是不是真的符合 Ami 的訂單，不是看過程中選了什麼。
+- 杯裝的冰淇淋球會沉進杯子裡（杯口畫在球的前面）。
 
 ## 圖片規格
 情境圖：正方形 .jpg，**720×720**、品質約 84（每張約 100–150 KB）。遊戲最大只顯示 360px 寬，720 已足夠高解析螢幕。
