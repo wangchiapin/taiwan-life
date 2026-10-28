@@ -671,9 +671,13 @@ const Game = defineGame({
   /* ── 畫面元件 ── */
   listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s);
+    const changed = i => !!(t.amiDone && t.origFlavors && t.origFlavors[i] !== t.flavors[i]);
     const rows = [
       { zh: `數量：${NZ(t.n)}球`, es: `Cantidad: ${t.n} bolas`, en: `Amount: ${t.n} scoops` },
-      { zh: '口味：' + t.flavors.map((f, i) => `第${CN[i + 1]}球${f.zh}`).join('、'), es: 'Sabores: ' + t.flavors.map((f, i) => `${i + 1}.ª ${f.es}`).join(', '), en: 'Flavors: ' + t.flavors.map((f, i) => `#${i + 1} ${f.en}`).join(', ') },
+      /* Ami 中途改過口味的那一球，標出「（Ami改成…）」，免得把新口味誤認成原本的訂單 */
+      { zh: '口味：' + t.flavors.map((f, i) => `第${CN[i + 1]}球${f.zh}${changed(i) ? `（Ami改成${f.zh}）` : ''}`).join('、'),
+        es: 'Sabores: ' + t.flavors.map((f, i) => `${i + 1}.ª ${f.es}${changed(i) ? ` (Ami cambió a ${f.es})` : ''}`).join(', '),
+        en: 'Flavors: ' + t.flavors.map((f, i) => `#${i + 1} ${f.en}${changed(i) ? ` (Ami changed to ${f.en})` : ''}`).join(', ') },
       { zh: `要：${t.vessel.zh}；${t.top ? '加' + t.top.zh : '不加配料'}`, es: `Quiere: ${t.vessel.es}; ${t.top ? t.top.es : 'sin topping'}`, en: `She wants: ${t.vessel.en}; ${t.top ? t.top.en : 'no toppings'}` },
       { zh: `${EATS[t.eat].zh}`, es: `${EATS[t.eat].es}`, en: `${EATS[t.eat].en}` },
       { zh: `你身上有：一張一百元、一張${zhNum(t.payBill)}元`, es: `Llevas: un billete de cien y uno de ${t.payBill} dólares`, en: `You have: a 100-dollar bill and a ${t.payBill}-dollar bill` }
