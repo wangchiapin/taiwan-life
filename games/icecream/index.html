@@ -1022,7 +1022,7 @@ const Game = defineGame({
           const here = t.eat === 'here';
           return [
             staff('謝謝，請慢用！', 'Gracias, ¡buen provecho!', 'Thank you — enjoy!'),
-            ...(t.scoopWrong ? [L('Ami：這不是我要的口味！', '¡Esto no es lo que pedí!', "This isn't what I ordered!")] : []),
+            ...(t.scoopWrong ? [L(`Ami：這不是我要的口味！我要的是${t.flavors[t.wIdx].zh}！`, `¡Esto no es lo que pedí! ¡Yo quería ${t.flavors[t.wIdx].es}!`, `This isn't what I ordered! I wanted ${t.flavors[t.wIdx].en}!`)] : []),
             ...(t.endMsgs || []),
             Game._endGood
               ? L(`Ami：哇，${NZ(t.n)}球都是我要的口味！謝謝你，${N}！`, `¡Guau, las ${t.n} bolas son justo los sabores que quería! ¡Gracias, ${N}!`, `Wow, all ${t.n} scoops are exactly the flavors I wanted! Thanks, ${N}!`)
