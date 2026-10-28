@@ -841,6 +841,31 @@ const GameCore = {
       }).join('');
     }).join('');
   },
+  /* ── 台詞：每一行一個 div，有翻譯的在句尾加朗讀和翻譯小圖示 ──
+     content 可以是清單 [{zh, es, en}…]、單一物件，或整段文字（用換行分行，沒有翻譯） */
+  formatText(content) {
+    const items = typeof content === 'string'
+      ? content.split('\n').map(zh => ({ zh }))
+      : (Array.isArray(content) ? content : [content]);
+    return items.map(item => {
+      const m = item.zh.match(SPEAKER_RE);
+      let head = '', rest = item.zh;
+      if (m) {
+        const who = m[1] === '我' ? this.N : m[1];
+        const cls = m[1] === 'Ami' ? 'speaker ami' : m[1] === '我' ? 'speaker me' : 'speaker';
+        head = `<span class="${cls}">${this.ruby(who)}：</span>`;
+        rest = item.zh.slice(m[0].length);
+      }
+      let btn = '';
+      if (item.es) {
+        this._spk.push({ text: rest, who: m ? m[1] : null });
+        btn += spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+        this._tr.push(item);
+        btn += `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+      }
+      return `<div class="line${/^[（(]/.test(String(item.zh).trim()) ? ' narr' : ''}">${head}${this.ruby(rest)}${btn}</div>`;
+    }).join('');
+  },
   missing: new Set(),
   imageMissing() {
     const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
