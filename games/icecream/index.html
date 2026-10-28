@@ -681,10 +681,11 @@ const Game = defineGame({
   },
   priceLine(fixed) {
     const t = this.task;
-    const n = fixed ? t.total : this.said();
+    const n = fixed ? this.realTotal() : this.said();
     return L(`店員：好的，一共是${zhNum(n)}元。`, `Muy bien, son ${esM(n)} en total.`, `All right, that's ${enM(n)} in total.`);
   },
-  said() { const t = this.task; return t.payWrong ? t.total + TOP_PRICE : t.total; },
+  realTotal() { return PRICE[this.task.n] + (this.top ? TOP_PRICE : 0); },   // 實際做出來的價錢（含學生真的點的配料）
+  said() { const r = this.realTotal(); return this.task.payWrong ? r + TOP_PRICE : r; },
   hintSections() {
     const ORDER = ['START', 'SCOOPS', 'CONTAINER', 'FLAVOR', 'SCOOP_CHECK', 'TOPPING', 'EAT', 'ORDER_CHECK', 'PICKUP', 'HANDOVER', 'PAY', 'PAY_FIX', 'END', 'RESULT'];
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
@@ -744,6 +745,7 @@ const Game = defineGame({
   getConfig() {
     const N = this.N, t = this.task;
     const pk = i => Game.picked[i] || t.flavors[i];   // 學生實際點的口味
+    const real = () => Game.realTotal();   // 實際價錢
     const staff = (zh, es, en) => L(`店員：${zh}`, es, en);
     const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
     const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
@@ -753,7 +755,7 @@ const Game = defineGame({
     const topOpts = t.top ? [topCorrect, `加${t.otherTop && t.otherTop.zh ? t.otherTop.zh : t.otherTop2.zh}`, '不用加配料，謝謝。']
                           : [topCorrect, `加${t.otherTop2.zh}`, `加${TOPS.find(x => x !== t.otherTop2).zh}`];
     const payOk = `給你${zhNum(t.payBill)}元。`;
-    const fixTotal = `不好意思，好像算錯了，應該是${zhNum(t.payWrong ? t.total : t.total + TOP_PRICE)}元吧？`;
+    const fixTotal = `不好意思，好像算錯了，應該是${zhNum(t.payWrong ? real() : real() + TOP_PRICE)}元吧？`;
     const hoFix = () => `不好意思，第${CN[t.fixIdx + 1]}球我要的是${pk(t.fixIdx).zh}。`;
 
     return {
@@ -958,15 +960,15 @@ const Game = defineGame({
           const right = t.payWrong ? fixTotal : payOk, said = Game.said();
           if (c !== right) {
             Game.addMistake(c === payOk
-              ? M(`店員算錯了：${t.n}球${t.top ? '加一份配料' : '不加配料'}是${t.total}元，他多收了${TOP_PRICE}元（${said}元）。`, `El empleado se equivocó: ${t.n} bolas ${t.top ? 'con un topping' : 'sin topping'} son ${esM(t.total)}; cobró ${TOP_PRICE} de más (${esM(said)}).`, `The clerk got it wrong: ${t.n} scoops ${t.top ? 'with one topping' : 'with no topping'} come to ${enM(t.total)}; he charged ${TOP_PRICE} extra (${enM(said)}).`)
+              ? M(`店員算錯了：${t.n}球${Game.top ? '加一份配料' : '不加配料'}是${real()}元，他多收了${TOP_PRICE}元（${said}元）。`, `El empleado se equivocó: ${t.n} bolas ${Game.top ? 'con un topping' : 'sin topping'} son ${esM(real())}; cobró ${TOP_PRICE} de más (${esM(said)}).`, `The clerk got it wrong: ${t.n} scoops ${Game.top ? 'with one topping' : 'with no topping'} come to ${enM(real())}; he charged ${TOP_PRICE} extra (${enM(said)}).`)
               : c === fixTotal
-                ? M(`店員算對了：${t.total}元（${PRICE[t.n]}${t.top ? ' + ' + TOP_PRICE : ''}）。`, `El empleado calculó bien: ${esM(t.total)} (${PRICE[t.n]}${t.top ? ' + ' + TOP_PRICE : ''}).`, `The clerk was right: ${enM(t.total)} (${PRICE[t.n]}${t.top ? ' + ' + TOP_PRICE : ''}).`)
+                ? M(`店員算對了：${real()}元（${PRICE[t.n]}${Game.top ? ' + ' + TOP_PRICE : ''}）。`, `El empleado calculó bien: ${esM(real())} (${PRICE[t.n]}${Game.top ? ' + ' + TOP_PRICE : ''}).`, `The clerk was right: ${enM(real())} (${PRICE[t.n]}${Game.top ? ' + ' + TOP_PRICE : ''}).`)
                 : M('要有禮貌，說「不好意思，好像算錯了」就好。', 'Hay que ser cortés: di «disculpe, creo que se equivocó con la cuenta».', 'Be polite: say "excuse me, I think the total is wrong".'));
             return;
           }
           goodFirst('PAY', t.payWrong ? '你很細心！付錢以前，要先對一下價目表。' : `沒錯！一百元不夠，要給${zhNum(t.payBill)}元，他會找錢給你。`, t.payWrong ? '¡Qué atento! Antes de pagar, compara con la lista de precios.' : `¡Exacto! Cien no alcanza: das ${t.payBill} dólares y te dan el cambio.`, t.payWrong ? 'Well spotted! Check the price list before you pay.' : `Right! 100 isn't enough, so hand over ${t.payBill} and you'll get change.`);
           if (t.payWrong) { Game.state = 'PAY_FIX'; return; }   // 抓到多收錢：下一關要真的把錢給出去
-          Game.thought = [staff(`收你${zhNum(t.payBill)}元，找你${zhNum(t.payBill - t.total)}元。`, `Recibo ${esM(t.payBill)}; le doy ${esM(t.payBill - t.total)} de cambio.`, `Out of ${t.payBill} — here's ${enM(t.payBill - t.total)} change.`)];
+          Game.thought = [staff(`收你${zhNum(t.payBill)}元，找你${zhNum(t.payBill - real())}元。`, `Recibo ${esM(t.payBill)}; le doy ${esM(t.payBill - real())} de cambio.`, `Out of ${t.payBill} — here's ${enM(t.payBill - real())} change.`)];
           Game.stopTimer();
           Game.state = 'END';
         }
@@ -976,17 +978,17 @@ const Game = defineGame({
       PAY_FIX: {
         place: 'shop',
         html: () => Game.iceHTML(),
-        dialogue: () => [staff(`啊，不好意思！是${zhNum(t.total)}元。`, `¡Ay, disculpe! Son ${esM(t.total)}.`, `Oh, sorry! It's ${enM(t.total)}.`)],
+        dialogue: () => [staff(`啊，不好意思！是${zhNum(real())}元。`, `¡Ay, disculpe! Son ${esM(real())}.`, `Oh, sorry! It's ${enM(real())}.`)],
         options: () => rot([payOk, '給你一百元。', '我下次再付，可以嗎？']),
         next: c => {
           if (c !== payOk) {
             Game.addMistake(c === '給你一百元。'
-              ? M(`一共是${t.total}元，一百元不夠啦。`, `El total es ${esM(t.total)}: cien no alcanzan.`, `The total is ${enM(t.total)} — 100 isn't enough.`)
+              ? M(`一共是${real()}元，一百元不夠啦。`, `El total es ${esM(real())}: cien no alcanzan.`, `The total is ${enM(real())} — 100 isn't enough.`)
               : M('不能下次再付。買東西要當場付錢。', 'No se puede pagar después: hay que pagar en el momento.', "You can't pay later — you pay on the spot."));
             return;
           }
           goodFirst('PAY_FIX', `沒錯！一百元不夠，要給${zhNum(t.payBill)}元，他會找錢給你。`, `¡Exacto! Cien no alcanza: das ${t.payBill} dólares y te dan el cambio.`, `Right! 100 isn't enough, so hand over ${t.payBill} and you'll get change.`);
-          Game.thought = [staff(`收你${zhNum(t.payBill)}元，找你${zhNum(t.payBill - t.total)}元。`, `Recibo ${esM(t.payBill)}; le doy ${esM(t.payBill - t.total)} de cambio.`, `Out of ${t.payBill} — here's ${enM(t.payBill - t.total)} change.`)];
+          Game.thought = [staff(`收你${zhNum(t.payBill)}元，找你${zhNum(t.payBill - real())}元。`, `Recibo ${esM(t.payBill)}; le doy ${esM(t.payBill - real())} de cambio.`, `Out of ${t.payBill} — here's ${enM(t.payBill - real())} change.`)];
           Game.stopTimer();
           Game.state = 'END';
         }
@@ -1013,8 +1015,9 @@ const Game = defineGame({
               if (wi < 0) msgs.push(L(`Ami：拜託～我要的是${t.top ? '加' + t.top.zh : '不加配料'}，你給我的是${tp ? '加' + tp.zh : '不加配料'}！`, `¡Por favor! Yo quería ${t.top ? 'con ' + t.top.es : 'sin topping'}, y tú me diste ${tp ? 'con ' + tp.es : 'sin topping'}.`, `Come on! I wanted ${t.top ? 'with ' + t.top.en : 'no topping'}, and you gave me ${tp ? 'with ' + tp.en : 'no topping'}.`));
             }
             t.endMsgs = msgs;
+            t.endBad = wi >= 0 || tp !== t.top;   // 口味或配料跟 Ami 要的不一樣：Ami 不會開心
           }
-          Game._endGood = Game.mistakes <= 2;
+          Game._endGood = Game.mistakes <= 2 && !t.endBad && !t.scoopWrong;   // 兩個都要對，Ami 才會說「都是我要的」
           track('game_complete', { game: 'icecream', score: Game.score, elapsed: Game.elapsedTime });
           const here = t.eat === 'here';
           return [
