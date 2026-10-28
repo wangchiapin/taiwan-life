@@ -354,9 +354,6 @@ const MON_P = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'O
 const md = off => { const d = dayOff(off); return `${d.getMonth() + 1}月${d.getDate()}日`; };
 const mdEs = off => { const d = dayOff(off); return `${d.getDate()} de ${MES_P[d.getMonth()]}`; };
 const mdEn = off => { const d = dayOff(off); return `${MON_P[d.getMonth()]} ${d.getDate()}`; };
-const money = n => n + '元';
-const esM = n => `${n} dólares`;
-const enM = n => `NT$${n}`;
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 function rom(name) {                      // 人名 → 無聲調拼音（翻譯用）
   const py = pinyinPro.pinyin(name, { toneType: 'none', type: 'array' });

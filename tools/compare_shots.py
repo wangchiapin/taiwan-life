@@ -15,7 +15,7 @@ tmp = GDIR / '_before.html'; shutil.copy(old, tmp)
 INIT = """(() => { let s = 12345; Math.random = () => { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; };
   const T0 = 1760500000000; Date.now = () => T0; localStorage.clear();
   document.addEventListener('DOMContentLoaded', () => { const st = document.createElement('style');
-    st.textContent = '*,*::before,*::after{transition:none!important;caret-color:transparent!important}'; document.head.appendChild(st); }); })();"""
+    st.textContent = '*,*::before,*::after{transition:none!important;animation:none!important;caret-color:transparent!important}'; document.head.appendChild(st); }); })();"""
 
 def shot(page):
     page.mouse.move(0, 0); page.wait_for_timeout(60)
@@ -78,7 +78,7 @@ with sync_playwright() as p:
     res = {}
     for which, fname in [('old', '_before.html'), ('new', 'index.html')]:
         for name, vp, mode, extra in SCEN:
-            ctx = b.new_context(viewport=vp or {'width': 1000, 'height': 900}); ctx.route('**/*', smoke.route); ctx.add_init_script(INIT)
+            ctx = b.new_context(viewport=vp or {'width': 1000, 'height': 900}, reduced_motion='reduce'); ctx.route('**/*', smoke.route); ctx.add_init_script(INIT)
             page = ctx.new_page(); errs = []
             page.on('pageerror', lambda e: errs.append(str(e))); page.on('dialog', lambda d: d.accept())
             q = '?embed=1&name=Ana' if mode == 'embed' else ''
@@ -86,10 +86,10 @@ with sync_playwright() as p:
             shots = [('login', shot(page))]
             if mode != 'embed':
                 if mode == 'simp_en':
-                    page.click('[data-script=simp]'); page.click('[data-lang=en]'); page.wait_for_timeout(400)
+                    page.click('#set-open'); page.click('[data-k=script][data-v=simp]'); page.wait_for_timeout(400); page.click('[data-k=lang][data-v=en]'); page.click('#set-done'); page.wait_for_timeout(400)   # 設定畫面改版後的按鈕
                     shots.append(('login2', shot(page)))
                 page.fill('#player-name-input', 'María'); page.click('.btn-primary'); page.wait_for_timeout(300)
-                if extra == 'pinyin': page.click('#btn-pinyin'); page.wait_for_timeout(200)
+                if extra == 'pinyin': page.click('#btn-pinyin'); page.click('[data-k=phon][data-v=pinyin]'); page.click('#set-done'); page.wait_for_timeout(200)
             shots += play(page, extra)
             res[(which, name)] = (shots, errs)
             ctx.close()

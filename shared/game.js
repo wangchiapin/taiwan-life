@@ -239,6 +239,10 @@ function toPinyin(seg, asArray) {
 const CN = ['零','一','二','三','四','五','六','七','八','九','十'];
 const L = (zh, es, en) => ({ zh, es, en });                 // 一行台詞＋翻譯
 const M = (zh, es, en) => ({ zh, es, en });                 // 扣分原因
+/* 價錢的文字：50 → 50元／50 dólares／NT$50（每個有價錢的遊戲都用） */
+const money = n => n + '元';
+const esM = n => `${n} dólares`;
+const enM = n => `NT$${n}`;
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const shuffle = arr => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
