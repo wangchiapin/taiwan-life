@@ -216,6 +216,13 @@ html{color-scheme:light}
 
     #scene { position: relative; }
     #counter-ice { position: absolute; pointer-events: none; }
+    /* Ami 的懸浮視窗 */
+    #ami-pop { position: fixed; inset: 0; background: rgba(58,34,48,.45); display: flex; align-items: center; justify-content: center; z-index: 80; padding: 16px; }
+    .ami-card { background: #fff; border: 2px solid var(--ink); border-radius: 16px; max-width: 340px; width: 100%; padding: 16px 18px; box-shadow: 0 6px 0 rgba(0,0,0,.18); }
+    .ami-head { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .ami-body { font-size: 19px; line-height: 1.5; }
+    .ami-es, .ami-en { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    #ami-pop-ok { margin-top: 14px; width: 100%; }
     /* 口味卡片：六種口味全部放在下方 */
     #options-area.flavors { grid-template-columns: repeat(2, 1fr); }
     @media (min-width: 640px) { #options-area.flavors { grid-template-columns: repeat(3, 1fr); } }
@@ -782,7 +789,7 @@ const Game = defineGame({
               const nf = pick(FLAVORS.filter(x => !t.flavors.includes(x)));
               t.flavors[1] = nf; t.decoys[1] = shuffle(FLAVORS.filter(x => x !== nf)).slice(0, 3);
               if (t.scoopWrong && t.wIdx === 1) t.wf = pick(FLAVORS.filter(x => !t.flavors.includes(x)));   // 放錯的那球也要避開新口味
-              Game.thought = [...(Game.thought ?? []), L(`Ami（新訊息）：第二球改成${nf.zh}了，不好意思！`, `Ami (mensaje nuevo): cambié la bola 2 a ${nf.es}, ¡perdón!`, `Ami (new message): I changed scoop 2 to ${nf.en}, sorry!`)];
+              Game._popup = L(`第二球改成${nf.zh}了，不好意思！`, `Cambié la bola 2 a ${nf.es}, ¡perdón!`, `I changed scoop 2 to ${nf.en}, sorry!`);   // Ami 的新訊息：懸浮視窗
             }
             if (bad) Game.state = 'SCOOP_CHECK';
             return;
@@ -796,7 +803,7 @@ const Game = defineGame({
       SCOOP_CHECK: {
         place: 'shop',
         html: () => Game.iceHTML(),
-        dialogue: () => [L('（好像挖錯冰淇淋了……）', '(Creo que se equivocó con el helado…)', '(Looks like the scoop is wrong…)')],
+        dialogue: () => [L('（是不是挖錯冰淇淋了？）', '(¿Será que se equivocó con el helado?)', '(Did they scoop the wrong ice cream?)')],
         options: () => rot([`不好意思，第${CN[t.wIdx + 1]}球我要的是${t.flavors[t.wIdx].zh}。`, '應該沒有，是我看錯了。']),
         next: c => {
           if (c === `不好意思，第${CN[t.wIdx + 1]}球我要的是${t.flavors[t.wIdx].zh}。`) {
@@ -997,6 +1004,21 @@ const Game = defineGame({
   },
 
   /* alt：第二張圖，和第一張輪流出現（像動畫）；開了「減少動態效果」就不動 */
+  /* Ami 的新訊息：LINE 風格的懸浮視窗，按「知道了」才會繼續 */
+  showAmiPopup() {
+    document.getElementById('ami-pop')?.remove();
+    const m = this._popup;
+    if (!m) return;
+    const d = document.createElement('div');
+    d.id = 'ami-pop';
+    d.innerHTML = `<div class="ami-card" role="dialog" aria-modal="true" aria-label="Ami 的新訊息">` +
+      `<div class="ami-head">💬 LINE · Ami（新訊息）</div>` +
+      `<div class="ami-body">${this.ruby(m.zh)}</div><div class="ami-es">${m.es}</div><div class="ami-en">${m.en}</div>` +
+      `<button id="ami-pop-ok" class="opt">知道了</button></div>`;
+    d.querySelector('#ami-pop-ok').onclick = () => { this._popup = null; d.remove(); };
+    document.body.appendChild(d);
+  },
+
   /* 櫃台上的冰淇淋：疊在 shop.jpg 的櫃台中間（圖上 y 約 62% 的位置），依實際訂單畫 */
   counterIce() {
     document.getElementById('counter-ice')?.remove();
@@ -1117,6 +1139,7 @@ const Game = defineGame({
       area.appendChild(btn);
     });
     this.counterIce();
+    this.showAmiPopup();
   }
 });
 
