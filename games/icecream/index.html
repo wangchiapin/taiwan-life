@@ -216,7 +216,6 @@ html{color-scheme:light}
 
     #scene { position: relative; }
     #counter-ice { position: absolute; pointer-events: none; }
-    #counter-cap { position: absolute; transform: translate(-50%, -100%); background: rgba(255,255,255,.92); border: 1px solid #e3d3c3; border-radius: 10px; padding: 3px 10px; font-size: 14px; white-space: nowrap; pointer-events: none; color: #4a3440; }
     /* Ami 的懸浮視窗 */
     #ami-pop { position: fixed; inset: 0; background: rgba(58,34,48,.45); display: flex; align-items: center; justify-content: center; z-index: 80; padding: 16px; }
     .ami-card { background: #fff; border: 2px solid var(--ink); border-radius: 16px; max-width: 340px; width: 100%; padding: 16px 18px; box-shadow: 0 6px 0 rgba(0,0,0,.18); }
@@ -731,11 +730,12 @@ const Game = defineGame({
   /* 招牌元素：冰淇淋球一顆一顆疊起來 */
   iceHTML(handover, overlay) {
     const r = s => this.ruby(s), v = this.vessel || this.task.vessel, tk = this.task;
-    if (overlay) return '';   // 櫃台上的冰淇淋改畫在圖上，標籤在 counterIce 貼在冰淇淋上方
     const shownList = this.chosen.map((f, i) => handover && tk.scoopWrong && i === tk.wIdx ? tk.wf : f);   // 由下往上
-    const pix = overlay ? '' : pixIce(v.k, shownList.map(f => f.c), this.top);   // overlay：冰淇淋改畫在圖上的櫃台
-    return `<div class="ice">${pix}` +
-      `<div class="icap">${this.chosen.length ? shownList.map((f, i) => `${r('第' + CN[i + 1] + '球')}：${r(f.zh)}`).join('　') : ''}</div></div>`;
+    const cap = this.chosen.length ? shownList.map((f, i) => `${r('第' + CN[i + 1] + '球')}：${r(f.zh)}`).join('　') : '';
+    // overlay：冰淇淋改畫在櫃台圖上，標籤只留在圖片下方（不擠進圖裡）
+    if (overlay) return `<div class="icap">${cap}</div>`;
+    const pix = pixIce(v.k, shownList.map(f => f.c), this.top);
+    return `<div class="ice">${pix}<div class="icap">${cap}</div></div>`;
   },
 
   /* ── 狀態設定 ── */
@@ -997,10 +997,12 @@ const Game = defineGame({
             t.endChecked = true;
             const pf = Game.picked, tp = Game.topPick || null, msgs = [];
             const wi = t.flavors.findIndex((f, i) => pf[i] && pf[i] !== f);
-            const cz = (f, top) => f.zh + (top ? '加' + top.zh : ''), ce = (f, top) => f.es + (top ? ' con ' + top.es : ''), cn = (f, top) => f.en + (top ? ' with ' + top.en : '');
             if (wi >= 0) {
               Game.addMistake(M(`第${CN[wi + 1]}球買錯了：Ami要${t.flavors[wi].zh}，你點了${pf[wi].zh}。`, `La bola ${wi + 1} no era la que pidió Ami: quería ${t.flavors[wi].es}, y pediste ${pf[wi].es}.`, `Scoop ${wi + 1} was wrong: Ami wanted ${t.flavors[wi].en}, but you picked ${pf[wi].en}.`));
-              msgs.push(L(`Ami：咦？我第${CN[wi + 1]}球要點的是${cz(t.flavors[wi], t.top)}，但是你點${cz(pf[wi], tp)}！`, `¿Eh? Para la bola ${wi + 1} yo pedí ${ce(t.flavors[wi], t.top)}, ¡pero tú pediste ${ce(pf[wi], tp)}!`, `Huh? For scoop ${wi + 1} I ordered ${cn(t.flavors[wi], t.top)}, but you got ${cn(pf[wi], tp)}!`));
+              const of = t.flavors[wi], n = wi + 1;
+              msgs.push(L(`Ami：我第${CN[n]}球是要${of.zh}，配料要${t.top ? '加' + t.top.zh : '不加'}，你怎麼點成${pf[wi].zh}，配料${tp ? '加成' + tp.zh : '不加'}？`,
+                `¿Eh? En la bola ${n} yo quería ${of.es}, con ${t.top ? t.top.es : 'sin topping'}. ¿Por qué pediste ${pf[wi].es}, con ${tp ? tp.es : 'sin topping'}?`,
+                `Huh? For scoop ${n} I wanted ${of.en}, with ${t.top ? t.top.en : 'no topping'}. Why did you order ${pf[wi].en}, with ${tp ? tp.en : 'no topping'}?`));
             }
             if (tp !== t.top) {
               Game.addMistake(M(`配料買錯了：Ami要${t.top ? '加' + t.top.zh : '不加配料'}。`, `Topping equivocado: Ami quería ${t.top ? 'con ' + t.top.es : 'sin topping'}.`, `Wrong topping: Ami wanted ${t.top ? 'with ' + t.top.en : 'no topping'}.`));
@@ -1087,7 +1089,6 @@ const Game = defineGame({
   /* 櫃台上的冰淇淋：疊在 shop.jpg 的櫃台中間（圖上 y 約 62% 的位置），依實際訂單畫 */
   counterIce() {
     document.getElementById('counter-ice')?.remove();
-    document.getElementById('counter-cap')?.remove();
     const img = document.getElementById('npc-avatar'), scene = document.getElementById('scene');
     if (!['PICKUP', 'HANDOVER'].includes(this.state) || !img || img.style.display === 'none' || !img.offsetWidth) return;
     const tk = this.task, v = this.vessel || tk.vessel, handover = this.state === 'HANDOVER';
@@ -1098,11 +1099,6 @@ const Game = defineGame({
     Object.assign(layer.style, { left: (img.offsetLeft + W / 2 - w / 2) + 'px', top: (img.offsetTop + H * 0.62 - h) + 'px', width: w + 'px' });
     layer.innerHTML = pixIce(v.k, shownList.map(f => f.c), this.top);
     scene.appendChild(layer);
-    const cap = document.createElement('div');
-    cap.id = 'counter-cap';
-    cap.innerHTML = this.chosen.length ? shownList.map((f, i) => `${this.ruby('第' + CN[i + 1] + '球')}：${this.ruby(f.zh)}`).join('　') : '';
-    Object.assign(cap.style, { left: (img.offsetLeft + W / 2) + 'px', top: (img.offsetTop + H * 0.62 - h - 8) + 'px' });
-    scene.appendChild(cap);
   },
 
   setImage(src, emoji, alt) {
