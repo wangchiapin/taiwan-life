@@ -898,6 +898,12 @@ const Game = defineGame({
         options: () => rot(['好，謝謝。', hoFix, '你是不是耳朵有問題？我說的不是這個！']),
         next: c => {
           const right = t.scoopWrong ? hoFix : '好，謝謝。', i = t.wIdx;
+          if (c === '好，謝謝。' && t.scoopWrong) {   // 收下放錯的冰淇淋：記一次錯，照樣往下走，結局 Ami 會生氣
+            Game.addMistake(M(`第${CN[i + 1]}球放錯了：Ami要的是${t.flavors[i].zh}，店員放了${t.wf.zh}。收下以前，要先看清楚。`, `La bola ${i + 1} está mal: Ami pidió ${t.flavors[i].es} y pusieron ${t.wf.es}. Revisa antes de recibirlo.`, `Scoop ${i + 1} is wrong: Ami asked for ${t.flavors[i].en} but got ${t.wf.en}. Check before you take it.`));
+            Game.thought = null;
+            Game.state = 'PAY';
+            return;
+          }
           if (c !== right) {
             Game.addMistake(c === '好，謝謝。'
               ? M(`第${CN[i + 1]}球放錯了：Ami要的是${t.flavors[i].zh}，店員放了${t.wf.zh}。收下以前，要先看清楚。`, `La bola ${i + 1} está mal: Ami pidió ${t.flavors[i].es} y pusieron ${t.wf.es}. Revisa antes de recibirlo.`, `Scoop ${i + 1} is wrong: Ami asked for ${t.flavors[i].en} but got ${t.wf.en}. Check before you take it.`)
@@ -929,7 +935,7 @@ const Game = defineGame({
                 : M('要有禮貌，說「不好意思，好像算錯了」就好。', 'Hay que ser cortés: di «disculpe, creo que se equivocó con la cuenta».', 'Be polite: say "excuse me, I think the total is wrong".'));
             return;
           }
-          goodFirst('PAY', t.payWrong ? '你很細心！付錢以前，要先對一下價目表。' : '沒錯！一百元不夠，要給兩百元，他會找錢給你。', t.payWrong ? '¡Qué atento! Antes de pagar, compara con la lista de precios.' : '¡Exacto! Cien no alcanza: das doscientos y te dan el cambio.', t.payWrong ? 'Well spotted! Check the price list before you pay.' : "Right! 100 isn't enough, so hand over 200 and you'll get change.");
+          goodFirst('PAY', t.payWrong ? '你很細心！付錢以前，要先對一下價目表。' : `沒錯！一百元不夠，要給${zhNum(t.payBill)}元，他會找錢給你。`, t.payWrong ? '¡Qué atento! Antes de pagar, compara con la lista de precios.' : `¡Exacto! Cien no alcanza: das ${t.payBill} dólares y te dan el cambio.`, t.payWrong ? 'Well spotted! Check the price list before you pay.' : `Right! 100 isn't enough, so hand over ${t.payBill} and you'll get change.`);
           if (t.payWrong) { Game.state = 'PAY_FIX'; return; }   // 抓到多收錢：下一關要真的把錢給出去
           Game.thought = [staff(`收你${zhNum(t.payBill)}元，找你${zhNum(t.payBill - t.total)}元。`, `Recibo ${esM(t.payBill)}; le doy ${esM(t.payBill - t.total)} de cambio.`, `Out of ${t.payBill} — here's ${enM(t.payBill - t.total)} change.`)];
           Game.stopTimer();
