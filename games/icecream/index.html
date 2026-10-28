@@ -402,6 +402,7 @@ const VOCAB = {
   TOPPING: [['配料', 'topping', 'topping'], ['彩色糖粒', 'chispas de colores', 'sprinkles'], ['巧克力醬', 'salsa de chocolate', 'chocolate sauce'], ['草莓醬', 'salsa de fresa', 'strawberry sauce'], ['不用', 'no hace falta', 'no need']],
   EAT: [['內用', 'para comer ahí', 'for here'], ['外帶', 'para llevar', 'to go'], ['公園', 'parque', 'park'], ['店裡', 'dentro de la tienda', 'in the shop']],
   PICKUP: [['拿冰淇淋', 'tomar el helado', 'pick up the ice cream'], ['櫃台', 'mostrador', 'counter']],
+  SCOOP_CHECK: [['挖錯', 'equivocarse', 'scoop the wrong one'], ['看錯', 'confundirse', 'misread']],
   HANDOVER: [['口味', 'sabor', 'flavor'], ['換', 'cambiar', 'swap, change'], ['不好意思', 'disculpe', 'excuse me']],
   ORDER_CHECK: [['確認', 'confirmar', 'confirm'], ['對嗎', '¿es correcto?', 'is that right?'], ['聽錯', 'oír mal', 'mishear'], ['我要的是', 'lo que quiero es', 'what I want is'], ['不好意思', 'disculpe', 'excuse me']],
   PAY: [['一共', 'en total', 'in total'], ['算錯', 'calcular mal', 'miscalculate'], ['應該', 'debería', 'should'], ['夠', 'alcanzar, ser suficiente', 'be enough'], ['找錢', 'dar el cambio', 'give change']],
@@ -581,7 +582,7 @@ const Game = defineGame({
 
 
   IMAGES: {
-    START: ['images/start.jpg', '🍦'], SCOOPS: ['images/shop.jpg', '🍦'], CONTAINER: ['images/shop.jpg', '🍦'], FLAVOR: ['images/flavors.jpg', '🍨'],
+    START: ['images/start.jpg', '🍦'], SCOOPS: ['images/shop.jpg', '🍦'], CONTAINER: ['images/shop.jpg', '🍦'], FLAVOR: ['images/flavors.jpg', '🍨'], SCOOP_CHECK: ['images/flavors.jpg', '🍨'],
     TOPPING: ['images/topping.jpg', '🍬'], EAT: ['images/shop.jpg', '🍦'], ORDER_CHECK: ['images/shop.jpg', '🍦'], PAY_FIX: ['images/pay.jpg', '💵'], PAY: ['images/pay.jpg', '💵'], PICKUP: ['images/shop_pickup.jpg', '🍦'], HANDOVER: ['images/shop.jpg', '🍦'],
     END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
@@ -647,7 +648,7 @@ const Game = defineGame({
   },
   said() { const t = this.task; return t.payWrong ? t.total + TOP_PRICE : t.total; },
   hintSections() {
-    const ORDER = ['START', 'SCOOPS', 'CONTAINER', 'FLAVOR', 'TOPPING', 'EAT', 'ORDER_CHECK', 'PICKUP', 'HANDOVER', 'PAY', 'PAY_FIX', 'END', 'RESULT'];
+    const ORDER = ['START', 'SCOOPS', 'CONTAINER', 'FLAVOR', 'SCOOP_CHECK', 'TOPPING', 'EAT', 'ORDER_CHECK', 'PICKUP', 'HANDOVER', 'PAY', 'PAY_FIX', 'END', 'RESULT'];
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
     if (at('PAY')) out.push({ title: '價目表', lines: [
@@ -772,20 +773,40 @@ const Game = defineGame({
           }
           if (!Game.flavWrong) Game.good(`第${CN[Game.k + 1]}球，選對了！`, `¡Bola ${Game.k + 1}, bien elegida!`, `Scoop ${Game.k + 1} — correct!`);   // 每一球第一次就對才有綠卡
           Game.flavWrong = false;
-          Game.chosen.push(f); Game.k += 1;
+          const bad = t.scoopWrong && Game.k === t.wIdx;   // 這一球店員放錯：畫面上馬上是錯的口味
+          Game.chosen.push(bad ? t.wf : f); Game.k += 1;
           if (Game.k < t.n) {
-            Game.thought = [L(`（店員把${f.zh}的冰淇淋放在${Game.vessel.zh}裡。）`, `(La persona pone el helado de ${f.es} ${Game.vessel.es}.)`, `(The staff scoops ${f.en} ice cream ${Game.vessel.en}.)`)];
+            Game.thought = bad ? null : [L(`（店員把${f.zh}的冰淇淋放在${Game.vessel.zh}裡。）`, `(La persona pone el helado de ${f.es} ${Game.vessel.es}.)`, `(The staff scoops ${f.en} ice cream ${Game.vessel.en}.)`)];
             if (t.amiChange && !t.amiDone && Game.k === 1) {   // 第一球放好後，Ami 傳新訊息：第二球改口味
               t.amiDone = true; t.origFlavors = t.flavors.slice();
               const nf = pick(FLAVORS.filter(x => !t.flavors.includes(x)));
               t.flavors[1] = nf; t.decoys[1] = shuffle(FLAVORS.filter(x => x !== nf)).slice(0, 3);
               if (t.scoopWrong && t.wIdx === 1) t.wf = pick(FLAVORS.filter(x => !t.flavors.includes(x)));   // 放錯的那球也要避開新口味
-              Game.thought.push(L(`Ami（新訊息）：第二球改成${nf.zh}了，不好意思！`, `Ami (mensaje nuevo): cambié la bola 2 a ${nf.es}, ¡perdón!`, `Ami (new message): I changed scoop 2 to ${nf.en}, sorry!`));
+              Game.thought = [...(Game.thought ?? []), L(`Ami（新訊息）：第二球改成${nf.zh}了，不好意思！`, `Ami (mensaje nuevo): cambié la bola 2 a ${nf.es}, ¡perdón!`, `Ami (new message): I changed scoop 2 to ${nf.en}, sorry!`)];
             }
+            if (bad) Game.state = 'SCOOP_CHECK';
             return;
           }
           Game.thought = null;
-          Game.state = 'TOPPING';
+          Game.state = bad ? 'SCOOP_CHECK' : 'TOPPING';
+        }
+      },
+
+      /* ═══ 店員剛放錯一球：學生當下有沒有發現 ═══ */
+      SCOOP_CHECK: {
+        place: 'shop',
+        html: () => Game.iceHTML(),
+        dialogue: () => [L('（好像挖錯冰淇淋了……）', '(Creo que se equivocó con el helado…)', '(Looks like the scoop is wrong…)')],
+        options: () => rot([`不好意思，第${CN[t.wIdx + 1]}球我要的是${t.flavors[t.wIdx].zh}。`, '應該沒有，是我看錯了。']),
+        next: c => {
+          if (c === `不好意思，第${CN[t.wIdx + 1]}球我要的是${t.flavors[t.wIdx].zh}。`) {
+            Game.good('你當下就發現了！', '¡Lo notaste al momento!', 'You caught it right away!');
+            Game.chosen[t.wIdx] = t.flavors[t.wIdx]; t.scoopWrong = false;   // 店員當場重挖，之後不用再核對這一球
+            Game.thought = [staff('不好意思！我重新挖一球。', 'Perdón, le pongo otro.', "Sorry! Let me scoop another one.")];
+          } else {
+            Game.thought = null;   // 沒發現：之後核對冰淇淋時還有機會
+          }
+          Game.state = Game.k < t.n ? 'FLAVOR' : 'TOPPING';
         }
       },
 
@@ -879,6 +900,7 @@ const Game = defineGame({
           }
           goodFirst('HANDOVER', t.scoopWrong ? '你很細心！口味放錯了，要馬上說。' : '拿到冰淇淋以後，先看一下口味對不對。', t.scoopWrong ? '¡Qué atento! Pusieron un sabor equivocado; hay que decirlo enseguida.' : 'Al recibir el helado, mira si los sabores son correctos.', t.scoopWrong ? 'Well spotted! A scoop was the wrong flavor — say so right away.' : 'When you get your ice cream, check that the flavors are right.');
           Game.thought = t.scoopWrong ? [staff(`啊，不好意思！我換成${t.flavors[t.wIdx].zh}。`, `¡Ay, disculpe! Se lo cambio por ${t.flavors[t.wIdx].es}.`, `Oh, sorry! I'll swap it for ${t.flavors[t.wIdx].en}.`)] : null;
+          if (t.scoopWrong) { Game.chosen[i] = t.flavors[i]; t.scoopWrong = false; }   // 店員換好了
           Game.state = 'PAY';
         }
       },
@@ -937,6 +959,7 @@ const Game = defineGame({
           const here = t.eat === 'here';
           return [
             staff('謝謝，請慢用！', 'Gracias, ¡buen provecho!', 'Thank you — enjoy!'),
+            ...(t.scoopWrong ? [L('Ami：這不是我要的口味！', '¡Esto no es lo que pedí!', "This isn't what I ordered!")] : []),
             Game._endGood
               ? L(`Ami：哇，${NZ(t.n)}球都是我要的口味！謝謝你，${N}！`, `¡Guau, las ${t.n} bolas son justo los sabores que quería! ¡Gracias, ${N}!`, `Wow, all ${t.n} scoops are exactly the flavors I wanted! Thanks, ${N}!`)
               : L(here ? 'Ami：謝謝你！不過我等了好久……下次要快一點喔！' : 'Ami：謝謝你！不過冰淇淋有一點融化了……下次要快一點喔！', here ? '¡Gracias! Pero esperé mucho… ¡la próxima vez más rápido!' : '¡Gracias! Pero el helado se derritió un poco… ¡la próxima vez más rápido!', here ? 'Thanks! But I waited a long time… faster next time!' : 'Thanks! But the ice cream melted a little… faster next time!')

@@ -7,6 +7,7 @@ ORACLE = """() => {
     TOPPING: t.top ? '加' + t.top.zh : '不用加配料，謝謝。',
     EAT: t.eat === 'here' ? '內用' : '外帶',
     ORDER_CHECK: t.ocWrong ? t.ocFix : '對，沒錯。',
+    SCOOP_CHECK: '不好意思，第' + CN[t.wIdx + 1] + '球我要的是' + t.flavors[t.wIdx].zh + '。',
     PICKUP: '拿起來',
     HANDOVER: t.scoopWrong ? '不好意思，第' + CN[t.wIdx + 1] + '球我要的是' + t.flavors[t.wIdx].zh + '。' : '好，謝謝。',
     PAY: t.payWrong ? '不好意思，好像算錯了，應該是' + zhNum(t.total) + '元吧？' : '給你' + zhNum(t.payBill) + '元。',
