@@ -16,11 +16,11 @@ service cloud.firestore {
               'nightmarket_scores', 'bakerygame_scores', 'clinicgame_scores', 'mrtgame_scores', 'streetgame_scores',
               'schoolgame_scores', 'ubikegame_scores', 'busgame_scores', 'barbergame_scores',
               'cinemagame_scores', 'parkinggame_scores', 'icecreamgame_scores', 'bookstoregame_scores', 'marketgame_scores', 'elevatorgame_scores',
-              'noodlegame_scores', 'conbinigame_scores', 'yansujigame_scores'];
+              'noodlegame_scores', 'conbinigame_scores', 'yansujigame_scores', 'guandigame_scores'];
     }
     function scenes() {
       return ['drinks', 'reserva', 'breakfast', 'parcel', 'nightmarket', 'bakery', 'clinic', 'mrt', 'street', 'school', 'ubike', 'bus', 'barber',
-              'cinema', 'parking', 'icecream', 'bookstore', 'market', 'elevator', 'noodle', 'conbini', 'yansuji'];
+              'cinema', 'parking', 'icecream', 'bookstore', 'market', 'elevator', 'noodle', 'conbini', 'yansuji', 'guandi'];
     }
     function okName(n) { return n is string && n.size() > 0 && n.size() <= 30; }
 

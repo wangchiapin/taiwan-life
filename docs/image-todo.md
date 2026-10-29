@@ -28,3 +28,7 @@
 - [ ] noodle：shop、side、bowl、pay、start、result、end_good、end_bad
 - [ ] conbini：counter、shelf、draw、pay、start、result、end_good、end_bad
 - [ ] yansuji：stall、bag、pay、start、result、end_good、end_bad
+
+## 關帝廟 guandi（2026-10-29）
+提示詞全部寫在 `docs/image-prompts-guandi.md`（共 16 張，含順序、底圖、檢查重點）。做完一張勾一張，一次做一張，Ben 確認再下一張。
+- [ ] guandi：gate、exit、start、fire、heaven、main、throw、draw、cabinet、read、desk、amulet、guolu、result、end_good、end_bad

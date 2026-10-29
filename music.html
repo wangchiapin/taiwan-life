@@ -44,6 +44,7 @@
     <li><button data-k="noodle"><b>🍜 麵店</b><small>Fonda de fideos</small></button></li>
     <li><button data-k="conbini"><b>🏪 超商購物</b><small>Tienda 24 h</small></button></li>
     <li><button data-k="yansuji"><b>🍗 鹽酥雞</b><small>Pollo frito</small></button></li>
+    <li><button data-k="guandi"><b>🏯 關帝廟</b><small>Templo de Guan Di</small></button></li>
   </ul>
 </main>
 <script>
@@ -223,7 +224,11 @@ const SONGS = {
   yansuji: { bpm: 126, tracks: [
   { wave: 'triangle', vol: 0.42, notes: 'D5 F5 G5 A5 G5 F5 D5 . | C5 D5 F5 G5 F5 D5 C5 . | D5 F5 A5 C6 A5 G5 F5 . | G5 F5 D5 C5 D5 - . .' },
   { wave: 'triangle', vol: 0.6, notes: 'D3 . A3 . D3 . A3 . | C3 . G3 . C3 . G3 . | Bb2 . F3 . Bb2 . F3 . | C3 . G2 . D3 . . .' },
-  { vol: 0.3, notes: 'k . h . s . h h' }] }
+  { vol: 0.3, notes: 'k . h . s . h h' }] },
+  guandi: { bpm: 84, tracks: [
+  { wave: 'triangle', vol: 0.42, notes: 'D5 - F5 - A5 - G5 - | F5 - D5 - C5 - D5 - | F5 - G5 - A5 - F5 - | D5 - C5 - D5 - - . .' },
+  { wave: 'sine', vol: 0.55, notes: 'D3 - - - A2 - - - | Bb2 - - - F3 - - - | G2 - - - D3 - - - | A2 - - - D3 - - .' },
+  { vol: 0.28, notes: 'k . . . . . h . | . . . . s . . .' }] }
 };
 Music.paint = () => {};
 let cur = null;

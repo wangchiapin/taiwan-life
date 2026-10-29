@@ -28,12 +28,12 @@ tools/firestore.rules  Firestore 規則（改了要貼到 console 發布）
 ```
 
 ## 場景 ID（資料夾名 = scene = collection 前綴 = GA4 game 參數）
-drinks · reserva · breakfast · nightmarket · parcel · bakery · clinic · mrt · street · school · ubike · bus · barber · cinema · parking · icecream · bookstore · market · elevator · noodle · conbini · yansuji
-（共 22 個，與首頁 `SCENES` 一致。`airport`、`site4` 還在 `COMING`（維修中／建造中），沒有資料夾。）
+drinks · reserva · breakfast · nightmarket · parcel · bakery · clinic · mrt · street · school · ubike · bus · barber · cinema · parking · icecream · bookstore · market · elevator · noodle · conbini · yansuji · guandi
+（共 23 個，與首頁 `SCENES` 一致。`airport` 還在 `COMING`（維修中），沒有資料夾。地圖 24 個位置已經全部用完，下次新增遊戲前要先擴充地圖，見下面「新遊戲：關帝廟」。）
 
 Firestore collection：`<scene>game_scores` 或 `<scene>_scores`（沿用各遊戲現有名稱，不要改，否則舊排行榜會消失）。
 排行榜需要複合索引：score 降冪 + elapsed 升冪。
-管理員頁「設定檢查」會檢查 22 個排行榜索引（school、ubike、bus、barber、cinema、parking、icecream、bookstore、market、elevator、noodle、conbini、yansuji 新增的要自己建），缺的會給「建立索引」連結。
+管理員頁「設定檢查」會檢查 23 個排行榜索引（school、ubike、bus、barber、cinema、parking、icecream、bookstore、market、elevator、noodle、conbini、yansuji、guandi 新增的要自己建），缺的會給「建立索引」連結。
 
 ## 成績紀錄與玩家代碼
 - 每局結果頁出現時上傳一筆到 `results`（遊戲裡呼叫 `uploadResult()`）：playerId（玩家代碼）、name、scene、score、mistakes、errors（每個扣分原因 zh/es/en＋關卡 stage/stageEs/stageEn）、elapsed、hintViews、script、lang、embed、difficulty（先固定 'normal'）、createdAt。
@@ -102,6 +102,20 @@ parent.postMessage({ type: 'scene-complete', scene: '<scene>', score, mistakes }
 - 正解在 `tools/oracles/noodle.py`、`conbini.py`、`yansuji.py`；`tools/smoke.py` 已加入名單。
 - 圖片檔 `games/<遊戲>/images/*.jpg` 還沒有，缺圖時自動顯示 emoji。
 - 台詞和拼音是第一版草稿，需要 Ben 審。
+
+## 新遊戲：關帝廟 guandi（2026-10-29）
+地圖 slot 23（原本的工地 site4，已拿掉），`gated: true`＝預設維修中，管理員頁「地圖開關」打開才能玩。排行榜 `guandigame_scores`。
+劇情：主角最近不太順利，Ami 帶他去關帝廟求關公保佑。Ami 全程陪伴但不幫忙（只有解籤那一句白話）。登記光明燈用玩家輸入的暱稱。
+
+流程：龍進虎出（面對廟，右邊龍邊進）→ 點香、熄香（輕輕晃動或手搧，不能用嘴吹；兩種正解每局隨機出一種）→ 先拜天公 → 拜關公（先說姓名住址再說心願）→ 擲筊（隨機結果，連續三個聖筊才能求籤）→ 抽籤（20 支）→ **籤櫃：廟公可能拿錯籤號** → 看籤詩（Ami 一句白話）→ **登記光明燈：廟公複誦登記單，可能說錯名字或期限** → 報價 500 元（**可能多算**）→ 用一千元付、找 500（**可能找錯**）→ 平安符（放旁邊自己拿，和光明燈分開）→ 過爐（順時針三圈）→ 虎邊出去。
+
+- **籤詩**：從「關聖帝君一百籤」上上、上吉、中吉、中平、下下五種等級各取 4 支，共 20 支（第 1、2、3、5、7、10、14、15、23、28、31、35、40、55、60、65、70、75、85、100 籤），原文在 `index.html` 的 `SLIPS`，白話一句是自己寫的。等級標示依「流年知否」網站；**各廟、各網站的等級標示不一定一樣**。
+- **擲筊規則**：一平一圓＝聖筊（同意）；兩個平面＝笑筊（還沒決定／問題不清楚）；兩個圓面＝陰筊（不同意）。連續三個聖筊才求籤。
+- 付錢不用 `billFor`：光明燈固定 500 元、身上只有一張一千元，所以 `PAY`／`PAY_FIX`／`CHANGE` 寫在這個遊戲自己的 `getConfig()` 裡（用 `catchState`），找完錢接到平安符。
+- 正解在 `tools/oracles/guandi.py`；`tools/smoke.py` 已加入名單。
+- 圖片提示詞在 `docs/image-prompts-guandi.md`（16 張），圖片檔還沒有，缺圖時自動顯示 emoji。
+- **地圖已滿**：24 個位置全部用完。專案原則是保留 3 個空位、往下擴充地圖（`BUILD_SLOTS`、`ROWS`、馬路列），下次新增遊戲前要先做。
+- 台詞和拼音是第一版草稿，需要 Ben 審。籤詩的多音字（例如「長」「行」）拼音沒有逐一核對。
 
 ## 冰淇淋店 icecream（2026-10-28 更新）
 流程（程式裡的 `ORDER`）：START → SCOOPS（幾球）→ CONTAINER（杯子或甜筒）→ FLAVOR（每球口味）→ SCOOP_CHECK（店員做好，核對口味）→ TOPPING（配料）→ EAT（內用外帶）→ ORDER_CHECK（店員複誦，一次只會說錯一項）→ PICKUP → HANDOVER → PAY（報價）→ PAY_FIX（算錯時重算）→ END → RESULT。

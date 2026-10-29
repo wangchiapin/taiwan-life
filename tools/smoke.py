@@ -30,7 +30,7 @@ def oracle_from(path):
     try: s=open(path,encoding='utf8').read()
     except Exception: return None
     m=re.search(r'ORACLE = """(.*?)"""',s,re.S); return m.group(1) if m else None
-ORACLES={g:oracle_from(os.path.join(HERE,'oracles',g+'.py')) for g in ['bakery','clinic','mrt','street','parcel','nightmarket','school','ubike','bus','barber','cinema','parking','icecream','bookstore','market','elevator','breakfast','reserva','noodle','conbini','yansuji']}
+ORACLES={g:oracle_from(os.path.join(HERE,'oracles',g+'.py')) for g in ['bakery','clinic','mrt','street','parcel','nightmarket','school','ubike','bus','barber','cinema','parking','icecream','bookstore','market','elevator','breakfast','reserva','noodle','conbini','yansuji','guandi']}
 EXTRA={'drinks': '''() => {
   const s = Game.state, t = Game.target, me = Game.mine;
   window.__first ??= Math.random() < .5 ? 'ami' : 'me';
