@@ -119,9 +119,9 @@ def play_cov(page, g, stats, tried):
         smoke.click_i(page, idx)
     return 'timeout'
 
-def run_game(g, max_runs, min_runs, out):
+def run_game(g, max_runs, min_runs, out, time_limit=900):
     cov = set(); sites = {}; stats = {'visited': set(), 'seen': {}, 'right': {}, 'wrong': {}, 'no_oracle': set()}
-    tried = {}; problems = []; all_states = set(); stale = 0; runs = 0; t0 = time.time(); ends = []
+    tried = {}; problems = []; bad_runs = set(); all_states = set(); stale = 0; runs = 0; t0 = time.time(); ends = []
     with sync_playwright() as p:
         b = p.chromium.launch()
         while runs < max_runs:
@@ -141,13 +141,13 @@ def run_game(g, max_runs, min_runs, out):
                 before_w = sum(len(v) for v in stats['wrong'].values()); before_s = len(stats['visited'])
                 end = play_cov(page, g, stats, tried); page.wait_for_timeout(200)
                 ends.append(end)
-                if end != 'leaderboard': problems.append(f'第{runs}場：{end}（狀態 {page.evaluate("Game.state")}）')
-                if errs: problems.append(f'第{runs}場：網頁錯誤 {errs[0][:120]}')
+                if end != 'leaderboard': problems.append(f'第{runs}場：{end}（狀態 {page.evaluate("Game.state")}）'); bad_runs.add(runs)
+                if errs: problems.append(f'第{runs}場：網頁錯誤 {errs[0][:120]}'); bad_runs.add(runs)
                 if end == 'leaderboard':
                     fb = smoke.fbcheck(page, g, False)
-                    if not fb.startswith('FB✓'): problems.append(f'第{runs}場：上傳 {fb}')
+                    if not fb.startswith('FB✓'): problems.append(f'第{runs}場：上傳 {fb}'); bad_runs.add(runs)
             except Exception as e:
-                problems.append(f'第{runs}場：測試程式例外 {str(e)[:150]}'); log = []; before_w = before_s = 0
+                problems.append(f'第{runs}場：測試程式例外 {str(e)[:150]}'); bad_runs.add(runs); log = []; before_w = before_s = 0
             ctx.close()
             new = 0
             for e in log:
@@ -161,6 +161,7 @@ def run_game(g, max_runs, min_runs, out):
             stale = 0 if new else stale + 1
             print(f'  [{g}] 第 {runs} 場 新增 {new}  ({int(time.time() - t0)} 秒)', flush=True)
             if runs >= min_runs and stale >= 4: break
+            if time.time() - t0 > time_limit: problems.append(f'超過時間上限 {time_limit} 秒，只跑了 {runs} 場'); break
         b.close()
     ks = sorted(sites); total_pairs = sum(sites[a] * sites[b2] for i, a in enumerate(ks) for b2 in ks[i + 1:])
     got_pairs = sum(1 for c in cov if '|' in c); got_single = sum(1 for c in cov if c.startswith('s')); total_single = sum(sites.values())
@@ -178,7 +179,9 @@ def run_game(g, max_runs, min_runs, out):
     rep.append('- 問題：' + ('；'.join(problems) if problems else '無'))
     text = '\n'.join(rep); print(text, flush=True)
     os.makedirs(out, exist_ok=True); open(os.path.join(out, f'{g}.md'), 'w', encoding='utf8').write(text + '\n')
-    return text
+    return {'game': g, 'text': text, 'runs': runs, 'seconds': int(time.time() - t0), 'bad_runs': len(bad_runs), 'problems': problems, 'ends': ends,
+            'got_pairs': got_pairs, 'total_pairs': total_pairs, 'got_single': got_single, 'total_single': total_single,
+            'states': len(all_states), 'visited': len(stats['visited'] & all_states), 'unvisited': sorted(all_states - stats['visited'])}
 
 if __name__ == '__main__':
     a = sys.argv[1:]
