@@ -24,7 +24,7 @@ service cloud.firestore {
     }
     function okName(n) { return n is string && n.size() > 0 && n.size() <= 30; }
 
-    // ── 22 個排行榜：任何人可以看、可以新增；不能修改；只有管理員能刪 ──
+    // ── 23 個排行榜：任何人可以看、可以新增；不能修改；只有管理員能刪 ──
     match /{col}/{id} {
       allow read: if col in scoreCols();
       allow create: if col in scoreCols()
