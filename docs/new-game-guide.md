@@ -136,6 +136,8 @@ game-kit 是 Ben 所有遊戲共用的標準庫（私人 repo，要用 `add_repo
    - 聲調偵探是刻意用本調的例外，不是錯誤。
 2. **分享連結預覽（檢查表第 13 項）**：每個遊戲 `<head>` 要有 `og:type`、`og:site_name`、`og:title`、`og:description`、`og:url`、`og:image`（含寬高）。**把遊戲連結交給 Ben 之前，先確認並告訴他：遊戲名稱（og:title）、縮圖（og.jpg）是什麼、存不存在、網址對不對。** 範例看 game-kit 檢查表提到的吃字小籠包。taiwan-life 目前只有首頁有，各遊戲頁還沒加（縮圖由 Ben 另一個對話框處理）。
 3. **字詞一致性**：`game-kit/tests/word_consistency_check.js` 檢查跨遊戲同一個詞的寫法／讀音是否一致，但**目前不涵蓋台灣生存日記**。
+   - **待辦（2026-10-29 Ben 決定先不做，先記著）**：要納入的是各遊戲的單字抽屜 `VOCAB`（劇本台詞不納入）。試算結果：1,333 筆、885 個詞，135 個詞出現在兩個以上遊戲，其中 106 處西文／英文寫法不同（例如內用 para comer aquí／ahí、吐司 pan de molde／pan tostado、不好意思 disculpe／disculpa；也有本來就該不同的，如「點」pedir／hora）。nightmarket、parcel、school 的 VOCAB 是動態產生，檢查程式要先改才讀得到。
+   - 做法（建議，Ben 還沒確認）：先把 106 處分成「該統一／兩個意思／補充長短不同」三類，只讓 Ben 看第一類；統一以 game-kit 其他 6 個遊戲的寫法為標準；統一後再改 game-kit 的檢查程式，第二類寫進例外清單。
 4. **共用零件有更新時**（`game-kit/parts/` 的 settings、voicehint、mute、copyright、plays）：taiwan-life 是把這些內嵌在 `shared/game.js` 裡（plays 可改寫 `HGPlays.gameFn`），game-kit 改了要回頭看這邊要不要跟著改。靜音那段目前文字和 game-kit 不完全一樣，尚未逐行確認。
 5. **Firebase 規則**：taiwan-life 用 `tiendadebebidas-d75ac`，規則檔留在本 repo 的 `tools/tiendadebebidas-d75ac.rules.txt`，不要搬去 game-kit（見 `game-kit/firebase-rules/README.md`）。
 6. **省額度方法**：`game-kit/省額度下指令方法.md`。
