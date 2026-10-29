@@ -24,7 +24,7 @@ games/<scene>/      每個遊戲：index.html + images/（檔名小寫 .jpg）
 shared/firebase.js  Firebase 設定（只放這裡）＋ window._FB（排行榜、成績紀錄、地圖進度）
 shared/player.js    玩家代碼（TWPlayer）＋每局成績上傳（TWResults）
 admin/index.html    管理員成績頁（Google 登入，只有 a2224907@gmail.com 看得到；不放連結）
-tools/firestore.rules  Firestore 規則（改了要貼到 console 發布）
+tools/tiendadebebidas-d75ac.rules.txt  Firestore 規則（改了要貼到 console 發布）
 ```
 
 ## 場景 ID（資料夾名 = scene = collection 前綴 = GA4 game 參數）

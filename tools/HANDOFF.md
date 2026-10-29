@@ -36,7 +36,7 @@
    - 新加 4 個地點，先標「🚧 維修中」：學校、機場（**佔兩格寬**）、電影院、菜市場。
    - 另外加 5 個左右的空位，標「建造中」（圍欄、工地），代表之後要擴充的地點。
    - 維修中、建造中都不能進去，走到門口顯示「還在準備中，敬請期待」（中、西、英）。
-2. **Firebase 修正 + 每局上傳完整紀錄 + 管理員成績頁** ✅ 2026-10-15 程式完成（`shared/`、`admin/`、`tools/firestore.rules`、`tools/apply_firebase_results.py`）。
+2. **Firebase 修正 + 每局上傳完整紀錄 + 管理員成績頁** ✅ 2026-10-15 程式完成（`shared/`、`admin/`、`tools/tiendadebebidas-d75ac.rules.txt`、`tools/apply_firebase_results.py`）。
    2026-10-15 Ben 已在 console 全部設定好並測試通過：規則、Google 登入、9 個排行榜索引。注意：API 金鑰（Browser key，6/23 建的那把）有限制網站，要允許 `https://tiendadebebidas-d75ac.firebaseapp.com/*`，Google 登入才不會被擋（API_KEY_HTTP_REFERRER_BLOCKED）。
    原本的規則只開放 drinkgame_scores，其他 8 個排行榜一直寫不進去；新規則一起修好。Ben 要在 console：貼規則、開 Google 登入＋授權網域 wangchiapin.github.io、用管理員頁「設定檢查」建 9 個排行榜索引。
    smoke.py 的假 Firebase 改成會記錄寫入，每局檢查「剛好一筆 results、內容和遊戲一致、單機版有寫排行榜」（結果最後一欄 FB✓）。bakery 隨機玩偶爾 timeout 是舊問題（舊版本也會），不是上傳造成的。
@@ -152,8 +152,8 @@
 ## 2026-10-19 四個新遊戲（學校請假、YouBike、公車、理髮店）
 - 分支 `four-games`（接在 `more-games-map` 後面），**尚未推上去**；Ben 說「推」才推。
 - 遊戲檔：`games/school|ubike|bus|barber/index.html`，排行榜 `schoolgame_scores`、`ubikegame_scores`、`busgame_scores`、`barbergame_scores`；正解在 `tools/oracles/`；smoke perfect／mixed／embed／trans 都過。
-- 最後一個 commit「登記」把四個地點從 COMING 搬到 SCENES（slot 不變：school 8、bus 11、ubike 14、barber 15），並更新 `firestore.rules`、`shared/firebase.js`、`admin/index.html`、`music.html`。只推地圖（維修中）時，不要含這個 commit。
-- 推上去之後 Ben 要做：把 `tools/firestore.rules` 貼到 Firebase console 發布；管理員頁「設定檢查」建 4 個新排行榜的複合索引（score 降冪＋elapsed 升冪）。
+- 最後一個 commit「登記」把四個地點從 COMING 搬到 SCENES（slot 不變：school 8、bus 11、ubike 14、barber 15），並更新 `tools/tiendadebebidas-d75ac.rules.txt`、`shared/firebase.js`、`admin/index.html`、`music.html`。只推地圖（維修中）時，不要含這個 commit。
+- 推上去之後 Ben 要做：把 `tools/tiendadebebidas-d75ac.rules.txt` 貼到 Firebase console 發布；管理員頁「設定檢查」建 4 個新排行榜的複合索引（score 降冪＋elapsed 升冪）。
 - 圖片檔名：school: start/chat/classroom/form/office/end_good/result；ubike: start/app/station/seat/road/light/end_good/result（另有 tap/pull/dock 等，缺圖時顯示 emoji）；bus: start/stop/board/hail/reader/driver/inside/end_good/result；barber: start/phone/door/chair/wash/mirror/counter/end_good/result。
 - 台詞和拼音是第一版，需要 Ben 審。
 
@@ -161,14 +161,14 @@
 - 新遊戲在地圖上預設「維修中」（`index.html` 的 SCENES 裡有 `gated: true`）。管理員頁新分頁「地圖開關・連結」可以逐個改成「開啟」，設定存在 Firestore `settings/map` = { open: { school: true, … } }；讀不到就維持維修中。
 - 同一分頁每個遊戲有「試玩」連結（直接開 games/<id>/）。
 - 要把別的遊戲也納入開關：在 index.html 的 SCENES 該筆加 `gated: true`，並把 id 加進 admin/index.html 的 `GATED`。
-- Ben 要在 Firebase console 貼 `tools/firestore.rules`（新增 settings 規則），否則開關存不進去。
+- Ben 要在 Firebase console 貼 `tools/tiendadebebidas-d75ac.rules.txt`（新增 settings 規則），否則開關存不進去。
 
 
 ## 2026-10-19 新增六個遊戲（尚未推上 GitHub，等 Ben 說「推」）
 - 新遊戲：cinema 電影院、parking 停車場、icecream 冰淇淋店、bookstore 書店、market 菜市場、elevator 搭電梯。排行榜集合 `<scene>game_scores`。台詞是第一版草稿，Ben 之後會自己玩、審稿。圖片 `images/*.jpg` 還沒有，缺圖時會顯示 emoji 預留圖。
 - 電影院：可點座位表（6×8）、全票、虛構片名、走錯廳／坐錯位的壞結局。外國學生能否拿到／使用學生證沒有官方說法（UpToGo 部落格說威秀通常接受有效的外國學校學生證，但各影城不同），所以遊戲不靠玩家自己的學生證。
 - 地圖：地圖第三條街已在 main（ROWS 42）；六個新遊戲用 main 預留的 slot：電影院 9、菜市場 10、停車場 16、冰淇淋 17、書店 18、搭電梯 19，全部 `gated: true`（預設維修中，管理員頁「地圖開關」打開才能玩）。
-- Firestore：`tools/firestore.rules` 的 scoreCols／scenes 已加 6 個，**Ben 要重新貼規則**，並在管理員頁「設定檢查」建 6 個新排行榜複合索引（score desc、elapsed asc）。
+- Firestore：`tools/tiendadebebidas-d75ac.rules.txt` 的 scoreCols／scenes 已加 6 個，**Ben 要重新貼規則**，並在管理員頁「設定檢查」建 6 個新排行榜複合索引（score desc、elapsed asc）。
 - 測試：`tools/smoke.py` 加了 `Game.testPrep`（座位表用）和新遊戲名單；`tools/oracles/` 有 6 個新正解。
 
 ### 十個新遊戲的台詞修改表（2026-10-19）
@@ -183,8 +183,8 @@
 
 ## 2026-10-27 新增三個遊戲（麵店、超商購物、鹽酥雞）— 尚未推，等 Ben 說「推」
 - 遊戲檔：`games/noodle|conbini|yansuji/index.html`；詳細流程看 README「新遊戲」那一節。
-- 登記：`index.html`（SCENES slot 20／21／22，原本 site1～3 工地拿掉；ZHS、SUGGEST 也加了）、`shared/firebase.js`、`admin/index.html`（SCENES、GATED）、`tools/firestore.rules`（scoreCols、scenes）、`music.html`、`tools/smoke.py`、`tools/oracles/` 三個正解。
+- 登記：`index.html`（SCENES slot 20／21／22，原本 site1～3 工地拿掉；ZHS、SUGGEST 也加了）、`shared/firebase.js`、`admin/index.html`（SCENES、GATED）、`tools/tiendadebebidas-d75ac.rules.txt`（scoreCols、scenes）、`music.html`、`tools/smoke.py`、`tools/oracles/` 三個正解。
 - 測試：smoke perfect（每個遊戲多次都 100 分）、mixed、embed、trans 都過；地圖開啟後三間房子會出現在第三條街。
-- 推上去之後 Ben 要做：把 `tools/firestore.rules` 貼到 Firebase console 發布；管理員頁「設定檢查」建 3 個新排行榜複合索引（score 降冪＋elapsed 升冪）；「地圖開關」打開三個遊戲。
+- 推上去之後 Ben 要做：把 `tools/tiendadebebidas-d75ac.rules.txt` 貼到 Firebase console 發布；管理員頁「設定檢查」建 3 個新排行榜複合索引（score 降冪＋elapsed 升冪）；「地圖開關」打開三個遊戲。
 - 圖片：一開始 Ben 說先不要列；10/27 晚上他改口要做圖，提示詞已寫在 `docs/image-prompts-noodle-conbini-yansuji.md`（23 張），進度看 `docs/image-todo.md`。遊戲已推上去（31009d0），三個都還是維修中。
 

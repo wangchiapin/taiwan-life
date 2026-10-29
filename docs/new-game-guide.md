@@ -74,8 +74,8 @@
 
 1. `index.html`：`SCENES` 加一筆（`gated: true`＝預設維修中、`slot`＝地圖位置），並補 `ZHS`（簡體名稱）、`SUGGEST`。
 2. `shared/firebase.js`、`admin/index.html`（`SCENES`、`GATED`）、`music.html`、`tools/smoke.py`（遊戲名單）。
-3. `tools/firestore.rules`（`scoreCols`、`scenes`）。
-4. 推上去之後 Ben 要做：把 `tools/firestore.rules` 貼到 Firebase console 發布；管理員頁「設定檢查」建新排行榜的複合索引（score 降冪＋elapsed 升冪）；「地圖開關」打開遊戲。
+3. `tools/tiendadebebidas-d75ac.rules.txt`（`scoreCols`、`scenes`）。
+4. 推上去之後 Ben 要做：把 `tools/tiendadebebidas-d75ac.rules.txt` 貼到 Firebase console 發布；管理員頁「設定檢查」建新排行榜的複合索引（score 降冪＋elapsed 升冪）；「地圖開關」打開遊戲。
 5. 最後更新 README.md 的場景 ID 清單。
 
 ## 9. 推上去之前

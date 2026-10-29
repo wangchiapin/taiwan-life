@@ -5,7 +5,7 @@
    results                                   每局一筆完整紀錄（只有管理員能讀）
    settings/map                              地圖開關（誰開放、誰維修中；任何人可讀，只有管理員能改）
    progress/<玩家代碼>                        玩家名字＋地圖進度（換裝置時用代碼讀回）
-   規則在 tools/firestore.rules
+   規則在 tools/tiendadebebidas-d75ac.rules.txt
 ══════════════════════════════════════ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
