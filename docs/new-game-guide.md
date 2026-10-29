@@ -8,6 +8,7 @@
 | 檔案 | 放什麼 |
 |---|---|
 | **docs/new-game-guide.md（這份）** | 做新遊戲一定要照的規則：共用檔有什麼、自己要寫什麼、關卡設計、畫面、圖片、測試、登記、推之前 |
+| **game-kit repo（wangchiapin/game-kit）** | 所有遊戲共同的標準：13 項新遊戲檢查表、讀音標準（GoodTeacher）、總字庫、共用零件原稿、Firebase 規則說明。**這裡沒有的內容在 game-kit，見第 12 節** |
 | README.md | 專案結構、場景 ID 清單、成績與玩家代碼、嵌入模式、地圖開關、圖片規格、音樂、手機瀏覽器備註，以及每個遊戲各自的流程說明 |
 | docs/icecream-logic-notes.md | 冰淇淋店的完整邏輯範例（多分支結局、店員放錯球、配料）；要做類似的複雜遊戲時參考 |
 | docs/image-todo.md、docs/image-prompts-*.md | 要補的圖與做圖提示詞 |
@@ -21,7 +22,8 @@
 1. 複製一個最新的遊戲當範本：`games/noodle`（有「對方出錯」和付錢找錢）；簡單一點的流程可以看 `games/mrt`、`games/street`。
 2. 複製後**只改遊戲自己的部分**（見第 3 節）。共用檔已經有的功能（見第 2 節）不要留一份在遊戲裡；如果範本裡看到跟共用檔同名或同功能的東西，用共用的，把副本刪掉。
    - 重複定義會直接出錯：共用檔已經宣告的名字（例如 `zhNum`、`NZ`、`esM`），遊戲不能再用 `const` 宣告一次，整個遊戲會打不開。
-3. 先把劇情流程寫給 Ben 看，確認後才寫程式。台詞和拼音第一版是草稿，Ben 會審。
+3. 做新遊戲前，先看第 12 節「要對照 game-kit 的項目」。
+4. 先把劇情流程寫給 Ben 看，確認後才寫程式。台詞和拼音第一版是草稿，Ben 會審。
 
 ## 2. 共用檔已經有的（不要自己寫）
 
@@ -49,7 +51,7 @@
 
 - 場景 ID：資料夾名 = `scene` = 排行榜前綴。排行榜 collection 叫 `<scene>game_scores`，**不能改名**。
 - 三種語言：台詞一律用 `L(中文, 西文, 英文)`。繁體／簡體、西文／英文由玩家設定決定。
-- 拼音用台灣讀音。讀錯的字加進該遊戲的 `customPinyin`。統一：「和」念 hàn、「嗯」念 ēn。
+- 拼音用台灣讀音，多音字照 GoodTeacher（共用檔已內建，見第 12 節）。GoodTeacher 沒有規則、又讀錯的詞，才加進該遊戲的 `customPinyin`。統一：「和」念 hàn、「嗯」念 ēn。
 - 分數：100 分起，每個錯誤 −10。`Game.addMistake()` 扣分、`Game.good()` 出綠卡。
 - 結局：錯誤 ≤ 2 次是好結局，否則壞結局（冰淇淋店另有更多條件）。結局後進結果頁，呼叫 `uploadResult()` 上傳成績。
 - **好壞結局看「最後實際拿到的東西」是否符合 Ami 的訂單**，不是看過程中選了什麼。
@@ -121,3 +123,19 @@
 - 推之前確認沒有遊戲重複宣告共用檔的名字（例如 `grep -rn "const zhNum\|const NZ" games`）。
 - 改到 Firestore 的資料結構（collection、欄位、儲存方式）時，要提醒 Ben 更新 Apps Script 同步腳本。
 - Ben 說「推」才推。
+
+## 12. 要對照 game-kit 的項目
+
+game-kit 是 Ben 所有遊戲共用的標準庫（私人 repo，要用 `add_repo` 加進來才讀得到）。taiwan-life 的共用檔已經內建設定、語音提示、靜音、版權說明、遊玩紀錄、排行榜前 10 名，這些**不用另外做**。下面幾項要**主動對照**：
+
+1. **讀音**：標準是教育部國語辭典，**多音字以 GoodTeacher 規則為準**（`game-kit/bank/gt/` 的 readings.txt、rules.csv、classes.txt；比對工具 `bank/gt_compare.js`）。輕聲不標，「和」念 hàn。待處理的字詞清單在 `讀音與字詞待處理.md`。
+   - **已經內建（2026-10-29，Ben 決定全部照 GoodTeacher）**：`shared/game.js` 的 `toPinyin` 會先用 pinyin-pro 算，再套 GoodTeacher「要改」的規則（多音字、一／不、輕聲、個…）。規則資料在 `GT-RULES-BEGIN／END` 之間，由 `tools/build_gt_rules.js` 產生，**不要手改**。
+   - **GoodTeacher 更新規則之後**：把 game-kit 更新到最新，在 taiwan-life 跑 `node tools/build_gt_rules.js`，所有遊戲一起更新；再跑 smoke 四種模式，並把改前改後的拼音差異列給 Ben 看。
+   - **新遊戲**：不用再為 GoodTeacher 已有規則的字補 `customPinyin`（例如排行榜、音樂、名字、對不起、算一算）。GoodTeacher 沒有規則、pinyin-pro 又讀錯的詞，才加進該遊戲的 `customPinyin`，並告訴 Ben。
+   - 已知和日常口語不太一樣的地方（照 GoodTeacher 的結果）：「接個電話」念 gè（口語常是 ge）、「對不起、能不能」的「不」念 bù（口語常是輕聲）。如果 Ben 想例外，再加。
+   - 聲調偵探是刻意用本調的例外，不是錯誤。
+2. **分享連結預覽（檢查表第 13 項）**：每個遊戲 `<head>` 要有 `og:type`、`og:site_name`、`og:title`、`og:description`、`og:url`、`og:image`（含寬高）。**把遊戲連結交給 Ben 之前，先確認並告訴他：遊戲名稱（og:title）、縮圖（og.jpg）是什麼、存不存在、網址對不對。** 範例看 game-kit 檢查表提到的吃字小籠包。taiwan-life 目前只有首頁有，各遊戲頁還沒加（縮圖由 Ben 另一個對話框處理）。
+3. **字詞一致性**：`game-kit/tests/word_consistency_check.js` 檢查跨遊戲同一個詞的寫法／讀音是否一致，但**目前不涵蓋台灣生存日記**。
+4. **共用零件有更新時**（`game-kit/parts/` 的 settings、voicehint、mute、copyright、plays）：taiwan-life 是把這些內嵌在 `shared/game.js` 裡（plays 可改寫 `HGPlays.gameFn`），game-kit 改了要回頭看這邊要不要跟著改。靜音那段目前文字和 game-kit 不完全一樣，尚未逐行確認。
+5. **Firebase 規則**：taiwan-life 用 `tiendadebebidas-d75ac`，規則檔留在本 repo 的 `tools/tiendadebebidas-d75ac.rules.txt`，不要搬去 game-kit（見 `game-kit/firebase-rules/README.md`）。
+6. **省額度方法**：`game-kit/省額度下指令方法.md`。
