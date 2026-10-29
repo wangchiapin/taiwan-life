@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>服飾店 · Tienda de ropa</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：clothesgame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "clothesgame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #2b3440;
+    --red: #4f6f94;
+    --red-dark: #3a5575;
+    --yolk: #d9b36a;
+    --night: #2f3b4c;
+    --kraft: #e1e7ee;
+    --wall: #eef2f6;
+    --paper: #ffffff;
+    --line: #d6dde6;
+    --muted: #6b7684;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    margin: 0; min-height: 100vh; color: var(--ink);
+    background: #e8edf3;
+    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
+    display: flex; justify-content: center; align-items: flex-start;
+    padding: 24px 16px 40px;
+  }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  /* ── 登入：店招牌 ── */
+  .storefront { width: 100%; max-width: 360px; border-radius: 10px; overflow: hidden; }
+  .storefront .awning { height: 20px; background: repeating-linear-gradient(90deg, var(--red) 0 28px, #ffffff 28px 56px); }
+  .storefront .name { background: var(--night); color: var(--yolk); text-align: center; font-size: 30px; font-weight: 700; letter-spacing: 6px; padding: 12px 0; }
+  .input-group input:focus { border-color: var(--red); }
+  .btn-primary {
+    padding: 14px 44px; font-size: 18px; font-weight: 700; font-family: inherit;
+    background: var(--red); color: #fff; border: none; border-radius: 999px; cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--red-dark); }
+  .flavor-text { color: var(--muted); font-size: 14px; line-height: 1.8; text-align: center; max-width: 420px; margin: 0; }
+  /* ── 遊戲 ── */
+  .chip { font-size: 13px; padding: 5px 10px; border-radius: 999px; background: var(--wall); white-space: nowrap; }
+  .btn-pinyin {
+    font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--paper); color: var(--red); border: 1.5px solid var(--red);
+  }
+  .btn-pinyin[aria-pressed="true"] { background: var(--red); color: #fff; }
+  #place-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px; background: var(--night); color: #fff;
+    border-bottom: 4px solid var(--yolk);
+  }
+  #place-bar.phone { background: var(--ami); }
+  #place-bar .icon { font-size: 22px; line-height: 1; }
+  #place-bar .who { font-weight: 700; font-size: 16px; }
+  #place-bar .status { font-size: 13px; opacity: .85; }
+  #place-bar .clock { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; }
+  #scene-placeholder {
+    width: 100%; max-width: 360px; aspect-ratio: 16 / 7;
+    border-radius: 12px; background: var(--wall);
+    display: none; place-items: center; font-size: 64px;
+  }
+  #npc-dialogue { padding: 14px 22px 4px; font-size: 21px; line-height: 2.1; }
+  #npc-dialogue .speaker { font-weight: 700; color: var(--red-dark); }
+  #npc-dialogue .speaker.ami { color: var(--ami); }
+  #npc-dialogue .speaker.me { color: var(--muted); }
+  ruby rt { color: var(--red); font-size: .5em; font-weight: 400; }
+  /* 購物清單 */
+  .list {
+    margin: 8px 0 10px; padding: 12px 16px; border-radius: 6px;
+    background: #fafcfe; border: 1px dashed #b7c5d6; font-size: 18px; line-height: 1.95;
+  }
+  .list .t { font-weight: 700; color: var(--red-dark); font-size: 15px; display: flex; align-items: center; gap: 2px; }
+  .list .t .grow { flex: 1; }
+  .list .done { text-decoration: line-through; color: var(--muted); }
+  .list .rule { color: var(--muted); font-size: 15px; }
+  @media (hover: hover) {
+    .opt:hover { background: var(--ink); color: #fff; }
+    .opt:hover rt { color: #dce6f2; }
+  }
+  .opt.deal { border-color: var(--red); background: var(--red); color: #fff; }
+  .opt.deal rt { color: #dce6f2; }
+  .opt.deal:hover { background: var(--red-dark); }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--yolk); outline-offset: 2px; }
+  /* ── 排行榜 ── */
+  .congrats-banner { background: var(--yolk); color: var(--ink); }
+  .no-rank-banner { background: var(--wall); color: var(--muted); }
+  #lb-table tr.highlight-row { background: #e3ebf5; font-weight: 700; }
+  @media (max-width: 600px) {
+    .screen { padding: 26px 18px; }
+    .top-bar { gap: 6px; padding: 10px 12px; }
+    .chip { font-size: 12px; padding: 4px 8px; }
+    .btn-pinyin { font-size: 12px; padding: 5px 10px; }
+    #npc-dialogue { font-size: 19px; padding: 12px 16px 2px; }
+    #options-area { grid-template-columns: 1fr; padding: 14px 14px 20px; }
+    #npc-avatar { max-width: 240px; }
+  }
+  /* ── 句子翻譯 ── */
+  .tr-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; margin-left: 6px; padding: 0; vertical-align: middle;
+    border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper); color: var(--red); cursor: pointer;
+  }
+  .tr-btn:hover { background: #e3ebf5; border-color: var(--red); }
+  /* 加大可點範圍 */
+  @media (max-width: 560px) {
+    .tr-btn { width: 34px; height: 34px; margin-left: 8px; }
+  }
+  .tr-btn.spk.speaking { background: var(--red); color: #fff; border-color: var(--red); }
+  .tr-pop {
+    position: fixed; width: min(340px, calc(100vw - 16px));
+    background: var(--paper); color: var(--ink); border: 1.5px solid var(--red); border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(60, 40, 30, .18); font-size: 15px; line-height: 1.6;
+  }
+  .tr-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 6px 6px 12px; background: var(--red); color: #fff; border-radius: 10px 10px 0 0;
+    font-size: 13px; cursor: move; touch-action: none; user-select: none;
+  }
+  .tr-lang {
+    flex: none; font-size: 11px; font-weight: 700; color: var(--red);
+    border: 1px solid var(--red); border-radius: 4px; padding: 0 4px; line-height: 1.5;
+  }
+  /* ── 本關單字（右側抽屜） ── */
+  .side-tab {
+    width: 36px; padding: 12px 8px; line-height: 1.25; text-align: center; word-break: break-all; border: none; border-radius: 12px 0 0 12px; cursor: pointer;
+    background: var(--yolk); color: var(--ink); font: inherit; font-weight: 700; font-size: 15px;
+    box-shadow: -2px 2px 10px rgba(60, 40, 30, .15);
+  }
+  .side-tab.hint { background: var(--ink); color: #fff; }
+  .side-tab .v-count { padding: 0 3px !important; min-width: 20px; font-size: 12px !important; white-space: nowrap; letter-spacing: -0.5px; }
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  #vocab-tab .v-count {
+    display: inline-block; margin-top: 6px;
+    background: var(--paper); border-radius: 999px; padding: 0 7px; font-size: 13px;
+  }
+  .drawer {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(320px, 88vw); z-index: 25;
+    background: var(--paper); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(60, 40, 30, .12);
+    transform: translateX(105%); transition: transform .25s ease; display: flex; flex-direction: column;
+  }
+  @media (prefers-reduced-motion: reduce) { .drawer { transition: none; } }
+  .h-sec { padding: 12px 16px 4px; font-size: 13px; font-weight: 700; color: var(--red); }
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+  .side-tab.log { background: #b5483d; color: #fff; }
+  #log-tab .v-count { display: inline-block; margin-top: 6px; background: var(--paper); color: #b5483d; border-radius: 999px; padding: 0 7px; font-size: 13px; }
+  .v-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 16px; border-bottom: 3px solid var(--yolk); }
+  .v-head button { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink); padding: 2px 6px; }
+  #vocab-list li { padding: 12px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+  .v-py { color: var(--red); font-size: 15px; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; border: 2px solid var(--red); border-radius: 999px; overflow: hidden; }
+  .seg button {
+    font: inherit; font-size: 15px; font-weight: 500; padding: 9px 0; cursor: pointer;
+    background: var(--paper); color: var(--red); border: none;
+  }
+  .seg button + button { border-left: 2px solid var(--red); }
+  .seg button[aria-pressed="true"] { background: var(--red); color: #fff; font-weight: 700; }
+  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
+  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
+  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
+  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
+
+  /* 貨架、結帳螢幕 */
+  .shelf { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0 12px; }
+  .pcard { background: #fff; border: 2px solid #c8d3e0; border-radius: 12px; padding: 10px 12px; text-align: center; }
+  .pcard .pn { font-weight: 700; font-size: 18px; }
+  .pcard .pe { font-size: 40px; line-height: 1.2; }
+  .pcard .pp { font-size: 17px; margin-top: 2px; }
+  .pcard .tag { display: inline-block; margin-top: 6px; background: #c0392b; color: #fff; border-radius: 6px; padding: 2px 8px; font-size: 14px; font-weight: 700; }
+  .menu { margin: 8px 0 12px; background: #f4f7fb; border: 2px solid #c8d3e0; border-radius: 12px; padding: 10px 14px; }
+  .menu .mh { font-weight: 700; color: var(--red-dark); margin-bottom: 4px; }
+  .menu .mrow { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; font-size: 17px; border-bottom: 1px dashed #c8d3e0; }
+  .menu .mrow:last-child { border-bottom: none; }
+  .menu .mrow .am { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .menu .mnote { color: var(--muted); font-size: 15px; padding-top: 4px; }
+  .menu .disc { color: #c0392b; font-weight: 700; }
+  .code { font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: 1px; font-weight: 700; }
+
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">服飾</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">服飾店</h1>
+  <p class="subtitle" data-es="Comprar ropa en una tienda" data-en="Buying clothes at a store">Comprar ropa en una tienda</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    你想買一件新襯衫和一條新長褲。要挑尺寸、去試衣間試穿、褲子太長還要改褲管。店員有時候會拿錯、算錯，要自己多注意。<br>
+    <span data-es="Quieres comprar una camisa y un pantalón nuevos. Tendrás que elegir la talla, probártelos en el probador y, si el pantalón es muy largo, pedir que lo arreglen. A veces el empleado se equivoca al traer la prenda o al cobrar, así que presta atención." data-en="You want to buy a new shirt and a new pair of trousers. You will pick a size, try them on in the fitting room and, if the trousers are too long, have them hemmed. The clerk sometimes brings the wrong item or miscalculates, so pay attention.">Quieres comprar una camisa y un pantalón nuevos. Tendrás que elegir la talla, probártelos en el probador y, si el pantalón es muy largo, pedir que lo arreglen. A veces el empleado se equivoca al traer la prenda o al cobrar, así que presta atención.</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">👕</span>
+    <div>
+      <div class="who" id="place-who">服飾店</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 10 名 · Top 10</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'clothes', track: 'clothes', settingsKey: 'clothes_settings',
+  roles: {
+    '我': { pitch: 0.9 }, '店員': { pitch: 1.05 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+══════════════════════════════════════ */
+/* 讀音以教育部《重編國語辭典修訂本》為準；一、不的變調交給 pinyin-pro（toneSandhi）。
+   新增遊戲文字時，把套件讀錯的詞加在這裡。 */
+pinyinPro.customPinyin({
+  '星期': 'xīng qí', '期': 'qí', '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '還要': 'hái yào',
+  '還好': 'hái hǎo', '還多': 'hái duō', '還少': 'hái shǎo', '還你': 'huán nǐ',
+  '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '覺得': 'jué de',
+  '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan', '時間': 'shí jiān', '時候': 'shí hou',
+  '袋子': 'dài zi', '太太': 'tài tai', '先生': 'xiān sheng', '老闆': 'lǎo bǎn', '老闆娘': 'lǎo bǎn niáng',
+  '單子': 'dān zi', '東西': 'dōng xi', '告訴': 'gào su', '媽媽': 'mā ma', '爸爸': 'bà ba', '奶奶': 'nǎi nai', '弟弟': 'dì di', '妹妹': 'mèi mei',
+  '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '做得': 'zuò de',
+  '著': 'zhe', '只': 'zhǐ', '囉': 'luo', '啦': 'la', '了啦': 'le la', '耶': 'ye',
+  '意思': 'yì si', '關係': 'guān xi', '這個': 'zhè ge', '那個': 'nà ge',
+  '一個': 'yí ge', '兩個': 'liǎng ge', '一共': 'yí gòng',
+  '髮夾': 'fǎ jiá', '要切': 'yào qiē', '切開': 'qiē kāi', '來喔': 'lái ō', '看看': 'kàn kan', '再看看': 'zài kàn kan',
+  '便宜': 'pián yi', '划算': 'huá suàn', '洗手間': 'xǐ shǒu jiān', '廁所': 'cè suǒ', '殺價': 'shā jià', '雞排': 'jī pái',
+  '價錢': 'jià qián', '衣服': 'yī fu', '尺寸': 'chǐ cùn', '喜歡': 'xǐ huān', '漂亮': 'piào liang', '可愛': 'kě ài',
+  '三個': 'sān ge', '每個': 'měi ge', '現炸': 'xiàn zhá', '還剩': 'hái shèng', '欸': 'éi', '訊息': 'xùn xí',
+  '衣服和': 'yī fu hàn', '你和': 'nǐ hàn', '同事': 'tóng shì', '朋友': 'péng yǒu', '清單': 'qīng dān', '會合': 'huì hé', '晚餐': 'wǎn cān', '辛苦': 'xīn kǔ'
+});
+pinyinPro.customPinyin({
+  '便當': 'biàn dāng', '泡麵': 'pào miàn', '載具': 'zǎi jù', '手機載具': 'shǒu jī zǎi jù', '發票': 'fā piào', '條碼': 'tiáo mǎ', '啤酒': 'pí jiǔ', '折扣': 'zhé kòu', '六折': 'liù zhé', '八五折': 'bā wǔ zhé', '九折': 'jiǔ zhé', '八折': 'bā zhé', '85折': 'bā wǔ zhé', '6折': 'liù zhé',
+  '加熱': 'jiā rè', '證件': 'zhèng jiàn', '滿十八歲': 'mǎn shí bā suì', '十八歲': 'shí bā suì', '成年': 'chéng nián', '抽': 'chōu', '按鈕': 'àn niǔ', '特價': 'tè jià', '半價': 'bàn jià', '會員': 'huì yuán', '原價': 'yuán jià',
+  '結帳': 'jié zhàng', '櫃台': 'guì tái', '超商': 'chāo shāng', '鮮奶': 'xiān nǎi', '罐': 'guàn', '瓶': 'píng', '紅燒牛肉麵': 'hóng shāo niú ròu miàn', '雞汁拉麵': 'jī zhī lā miàn', '第二件': 'dì èr jiàn', '兩件': 'liǎng jiàn',
+  '算錯': 'suàn cuò', '找錯': 'zhǎo cuò', '掃': 'sǎo', '多掃': 'duō sǎo', '應該': 'yīng gāi', '一共': 'yí gòng', '零錢': 'líng qián', '微波': 'wēi bō', '登入': 'dēng rù', '輸入': 'shū rù', '螢幕': 'yíng mù', '規定': 'guī dìng', '沒抽中': 'méi chōu zhòng', '抽中': 'chōu zhòng'
+});
+// 台灣讀音修正：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* ══════════════════════════════════════
+   小工具
+══════════════════════════════════════ */
+
+/* 中文數字：zhNum(850) → 八百五十；zhNum(1000) → 一千；200 → 兩百 */
+const zhNum = n => {
+  n = Math.round(n);
+  if (n === 0) return '零';
+  const D = '零一二三四五六七八九';
+  const th = Math.floor(n / 1000), h = Math.floor(n / 100) % 10, te = Math.floor(n / 10) % 10, u = n % 10;
+  let s = '';
+  if (th) s += (th === 2 ? '兩' : D[th]) + '千';
+  if (h) s += (h === 2 ? '兩' : D[h]) + '百';
+  else if (th && (te || u)) s += '零';
+  if (te) s += (te === 1 && !th && !h ? '' : D[te]) + '十';
+  else if ((th || h) && u) s += '零';
+  if (u) s += D[u];
+  return s;
+};
+
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { '店員': ['El empleado de la tienda', 'The store clerk'] };
+const SPEAKER_RE = /^(店員|我)：/;
+
+
+/* 服飾店用詞（台灣讀音） */
+pinyinPro.customPinyin({
+  '試衣間': 'shì yī jiān', '號碼牌': 'hào mǎ pái', '襯衫': 'chèn shān', '長褲': 'cháng kù', '褲子': 'kù zi', '褲腳': 'kù jiǎo', '褲管': 'kù guǎn', '褲長': 'kù cháng', '改褲管': 'gǎi kù guǎn',
+  '腰圍': 'yāo wéi', '三十腰': 'sān shí yāo', '三十二腰': 'sān shí èr yāo', '吊牌': 'diào pái', '試穿': 'shì chuān', '鞋面': 'xié miàn', '別針': 'bié zhēn', '腳踝': 'jiǎo huái',
+  '袖子': 'xiù zi', '肩膀': 'jiān bǎng', '釦子': 'kòu zi', '大小': 'dà xiǎo', '太長': 'tài cháng', '有點長': 'yǒu diǎn cháng', '放長': 'fàng cháng', '蓋到': 'gài dào', '蓋住': 'gài zhù',
+  '拿錯': 'ná cuò', '拿來': 'ná lái', '改好': 'gǎi hǎo', '換貨': 'huàn huò', '不能換': 'bù néng huàn', '服飾店': 'fú shì diàn', '5折': 'wǔ zhé', '五折': 'wǔ zhé', '做壞': 'zuò huài',
+  '折得': 'zhé de', '改得': 'gǎi de', '不會數': 'bú huì shǔ', '數錯': 'shǔ cuò', '數對': 'shǔ duì', '數嗎': 'shǔ ma', '站好': 'zhàn hǎo', '拉著': 'lā zhe', '踩到': 'cǎi dào', '折好': 'zhé hǎo', '重新折': 'chóng xīn zhé', '七天': 'qī tiān', '優惠': 'yōu huì', '掉': 'diào', '一條': 'yì tiáo', '一件': 'yí jiàn', '兩件': 'liǎng jiàn'
+});
+
+/* ══════════════════════════════════════
+   共用小工具：「對方可能出錯」的關卡、付錢三關（報價／付錢／找錢）
+   2026-10-27 新遊戲（麵店、超商、鹽酥雞）共用同一套寫法
+══════════════════════════════════════ */
+const POLITE = M('要有禮貌，說「不好意思」，告訴他正確的就好。', 'Hay que ser cortés: di «disculpe» y dile lo correcto.', 'Be polite: say "excuse me" and tell them the correct one.');
+const billFor = n => n <= 1000 ? 1000 : 2000;           // 你給的鈔票
+const shortBill = n => n > 1000 ? 1000 : 500;   // 一定不夠的那張
+const rotOf = (t, o) => o.map((_, i) => o[(i + t.rot) % o.length]);
+const sum = a => a.reduce((x, y) => x + y, 0);
+
+/* 一關：①沒錯／謝謝 ②有禮貌指出問題 ③沒禮貌。對方有沒有出錯由 o.wrong() 決定
+   o: { key, place, html, dialogue, ok, fix(), rude, wrong(), whyWrong(), whyRight(), goodWrong[3], goodOk[3], apology(), go(wrong) } */
+function catchState(G, o) {
+  const t = G.task;
+  return {
+    place: o.place, html: o.html, dialogue: o.dialogue,
+    options: () => rotOf(t, [o.ok, o.fix(), o.rude]),
+    next: c => {
+      const wrong = o.wrong(), fix = o.fix(), right = wrong ? fix : o.ok;
+      if (c !== right) { G.addMistake(c === o.ok ? o.whyWrong() : c === fix ? o.whyRight() : POLITE); return; }
+      if (G.att[o.key] === 1) G.good(...(wrong ? o.goodWrong : o.goodOk));
+      G.thought = wrong && o.apology ? o.apology() : null;
+      o.go(wrong);
+    }
+  };
+}
+
+/* 付錢用的欄位：total 真正的總價；payWrong 老闆／店員報價有沒有多算；changeWrong 找的錢對不對 */
+function initPay(t, total, extras) {
+  t.total = total; t.payWrong = Math.random() < 0.45;
+  t.extra = pick(extras);                                   // 多算的那一項 { zh, es, en, price }
+  t.said = t.payWrong ? total + t.extra.price : total;
+  t.bill = billFor(Math.max(total, t.said)); t.change = t.bill - total;
+  t.changeWrong = t.change > 0 && Math.random() < 0.4;
+  const ds = [-20, -10, 10, 20].filter(d => t.change + d >= 0);
+  t.given = t.changeWrong ? t.change + pick(ds) : t.change;
+}
+
+/* 報價、付錢、找錢三關。o: { who, place, html, key 前綴不用, nextAfter（找完錢之後的關卡，預設 END）, extraWhy(), priceZh(),… } */
+function payStates(G, o) {
+  const t = G.task, who = o.who, st = (zh, es, en) => L(`${who}：${zh}`, es, en);
+  const finish = () => {
+    if (t.hemNeed) {      // 有改褲管：先等三十分鐘，再拿改好的褲子
+      G.thought = (G.thought || []).concat([L('（你在店裡逛了三十分鐘，店員叫你去拿褲子。）', '(Das una vuelta por la tienda durante treinta minutos y el empleado te llama para recoger el pantalón.)', '(You browse the store for thirty minutes, then the clerk calls you to pick up the trousers.)')]);
+      G.state = 'PICKUP';
+    } else { G.stopTimer(); G.state = 'END'; }
+  };
+  const toChange = () => { if (t.change > 0) G.state = 'CHANGE'; else finish(); };
+  const payOk = `給你${zhNum(t.bill)}元。`;
+  const claim = t.payWrong ? t.total : t.total + t.extra.price;   // 沒算錯時，「抓錯」說的是錯的數字
+  const fixTotal = `不好意思，好像算錯了，應該是${zhNum(claim)}元吧？`;
+  const fixChange = `不好意思，好像找錯了，應該找${zhNum(t.changeWrong ? t.change : t.given + 10)}元吧？`;
+  return {
+    PAY: catchState(G, {
+      key: 'PAY', place: o.place, html: o.html,
+      dialogue: () => [st(`好的，一共是${zhNum(t.said)}元。`, `Muy bien, son ${esM(t.said)} en total.`, `All right, that's ${enM(t.said)} in total.`)],
+      ok: payOk, fix: () => fixTotal, rude: o.rudePay || '你是不是想騙我的錢啊？',
+      wrong: () => t.payWrong,
+      whyWrong: () => o.extraWhy(),
+      whyRight: () => M(`${who}算對了：一共是${t.total}元。`, `Lo calculó bien: son ${esM(t.total)}.`, `They were right: ${enM(t.total)} in total.`),
+      goodWrong: ['你很細心！付錢以前，要先對一下價目表和自己點的東西。', '¡Qué atento! Antes de pagar, compara con la lista de precios y con lo que pediste.', 'Well spotted! Before you pay, check the price list against what you ordered.'],
+      goodOk: ['沒錯！付錢以前，要先自己算一下。', '¡Exacto! Antes de pagar, calcula tú también.', 'Right! Do the math yourself before you pay.'],
+      go: wrong => { if (wrong) { G.state = 'PAY_FIX'; return; } toChange(); }
+    }),
+    PAY_FIX: {
+      place: o.place, html: o.html,
+      dialogue: () => [st(`啊，不好意思！是${zhNum(t.total)}元。`, `¡Ay, disculpe! Son ${esM(t.total)}.`, `Oh, sorry! It's ${enM(t.total)}.`)],
+      options: () => rotOf(t, [payOk, `給你${zhNum(shortBill(t.total))}元。`, '我下次再付，可以嗎？']),
+      next: c => {
+        if (c !== payOk) {
+          G.addMistake(c === '我下次再付，可以嗎？'
+            ? M('不能下次再付。買東西要當場付錢。', 'No se puede pagar después: hay que pagar en el momento.', "You can't pay later — you pay on the spot.")
+            : M(`一共是${t.total}元，這樣不夠啦。`, `El total es ${esM(t.total)}: eso no alcanza.`, `The total is ${enM(t.total)} — that isn't enough.`));
+          return;
+        }
+        if (G.att.PAY_FIX === 1) G.good('沒錯！要給夠錢，他會找錢給你。', '¡Exacto! Das lo suficiente y te dan el cambio.', "Right! Hand over enough and you'll get change.");
+        toChange();
+      }
+    },
+    CHANGE: catchState(G, {
+      key: 'CHANGE', place: o.place, html: o.html,
+      dialogue: () => [st(`收你${zhNum(t.bill)}元，找你${zhNum(t.given)}元。`, `Recibo ${esM(t.bill)}; le doy ${esM(t.given)} de cambio.`, `Out of ${enM(t.bill)} — here's ${enM(t.given)} change.`)],
+      ok: '好，謝謝。', fix: () => fixChange, rude: '你是不是故意少找我錢啊？',
+      wrong: () => t.changeWrong,
+      whyWrong: () => M(`找錯了：${t.bill}減${t.total}，應該找${t.change}元，他找了${t.given}元。`, `Se equivocó con el cambio: ${t.bill} − ${t.total} = ${t.change}; le dieron ${t.given}.`, `Wrong change: ${t.bill} − ${t.total} = ${t.change}, but you got ${t.given}.`),
+      whyRight: () => M(`找對了：${t.bill}−${t.total}＝${t.change}元。`, `El cambio está bien: ${t.bill} − ${t.total} = ${t.change}.`, `The change is right: ${t.bill} − ${t.total} = ${t.change}.`),
+      goodWrong: ['你很細心！拿到零錢要馬上數。', '¡Qué atento! Cuenta el cambio en el momento.', 'Well spotted! Count your change right away.'],
+      goodOk: ['找的錢要自己算一下：給的錢減掉總價。', 'Calcula el cambio tú mismo: lo que diste menos el total.', 'Work out the change yourself: what you gave minus the total.'],
+      apology: () => [st(`啊，不好意思！找你${zhNum(t.change)}元。`, `¡Ay, disculpe! Le doy ${esM(t.change)} de cambio.`, `Oh, sorry! Here's ${enM(t.change)} change.`)],
+      go: () => finish()
+    })
+  };
+}
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['襯衫', 'camisa', 'shirt'], ['長褲', 'pantalón largo', 'trousers'], ['三十腰', 'cintura de 30 pulgadas', 'waist size 30 (inches)'], ['褲長', 'largo del pantalón', 'trouser length'], ['蓋到', 'llegar hasta, cubrir', 'reach down to'], ['鞋面', 'empeine (parte de arriba del zapato)', 'top of the shoe'], ['鈔票', 'billete', 'banknote']],
+  SIZE: [['慢慢看', 'mirar con calma', 'take your time'], ['吊牌', 'etiqueta colgante (talla y precio)', 'hang tag'], ['尺寸', 'talla, medida', 'size'], ['M號', 'talla M', 'size M'], ['三十腰', 'cintura de 30 pulgadas', 'waist size 30 (inches)']],
+  ROOM_TAG: [['試衣間', 'probador', 'fitting room'], ['號碼牌', 'ficha numerada', 'number tag'], ['件', 'prenda, pieza (contador)', 'item (counter)'], ['數', 'contar', 'count']],
+  FIT_SHIRT: [['試穿', 'probarse', 'try on'], ['大小', 'tamaño, talla', 'size, fit'], ['緊', 'ajustado, apretado', 'tight'], ['袖子', 'manga', 'sleeve'], ['肩膀', 'hombro', 'shoulder'], ['釦子', 'botón (de la camisa)', 'button'], ['做壞', 'estar mal hecho', 'badly made']],
+  SHIRT_SWAP: [['吊牌', 'etiqueta colgante (talla y precio)', 'hang tag'], ['號', 'talla (letra o número)', 'size (letter or number)'], ['看一下', 'mirar un momento', 'take a look']],
+  FIT_WAIST: [['腰', 'cintura', 'waist'], ['鬆', 'flojo, suelto', 'loose'], ['拉著', 'sujetar tirando', 'hold up with a hand'], ['三十腰', 'cintura de 30 pulgadas', 'waist size 30 (inches)']],
+  FIT_LENGTH: [['褲腳', 'bajo del pantalón', 'trouser cuff'], ['太長', 'demasiado largo', 'too long'], ['踩到', 'pisar', 'step on'], ['改褲管', 'arreglar el largo del pantalón', 'hem the trousers'], ['蓋到', 'llegar hasta, cubrir', 'reach down to']],
+  HEM: [['量', 'medir', 'measure'], ['別針', 'alfiler', 'pin'], ['折', 'doblar', 'fold'], ['鞋面', 'empeine (parte de arriba del zapato)', 'top of the shoe'], ['放長', 'alargar', 'let down (make longer)'], ['站好', 'ponerse derecho', 'stand properly']],
+  PAY: [['一共', 'en total', 'in total'], ['螢幕', 'pantalla', 'screen'], ['優惠', 'oferta', 'promotion'], ['算錯', 'calcular mal', 'miscalculate'], ['應該', 'debería', 'should']],
+  PAY_FIX: [['不好意思', 'disculpe', 'excuse me'], ['下次再付', 'pagar la próxima vez', 'pay next time']],
+  CHANGE: [['找', 'dar de cambio', 'give back as change'], ['找錯', 'dar mal el cambio', 'give wrong change'], ['應該找', 'debería darme de cambio', 'should give back']],
+  PICKUP: [['改好', 'ya arreglado', 'finished altering'], ['袋子', 'bolsa', 'bag'], ['打開', 'abrir', 'open'], ['睡著', 'quedarse dormido', 'fall asleep']],
+  END: [['謝謝光臨', 'gracias por venir', 'thanks for coming'], ['吊牌', 'etiqueta colgante (talla y precio)', 'hang tag'], ['七天', 'siete días', 'seven days'], ['發票', 'factura, recibo', 'receipt (invoice)'], ['換貨', 'cambiar el producto', 'exchange the item'], ['不能換', 'no se puede cambiar', 'cannot be exchanged']],
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = {
+  ROOM_TAG: ['試衣間號碼牌', 'ficha del probador', 'fitting-room tag'], FIT_SHIRT: ['試穿襯衫', 'probarse la camisa', 'trying on the shirt'], SHIRT_SWAP: ['換尺寸', 'cambiar de talla', 'changing size'],
+  FIT_WAIST: ['試穿長褲（腰）', 'probarse el pantalón (cintura)', 'trying on the trousers (waist)'], FIT_LENGTH: ['試穿長褲（褲長）', 'probarse el pantalón (largo)', 'trying on the trousers (length)'], HEM: ['改褲管', 'arreglar el largo', 'hemming'],
+  PAY: ['核對金額', 'revisar el total', 'checking the total'], PAY_FIX: ['付錢', 'pagar', 'paying'], CHANGE: ['找錢', 'el cambio', 'the change'], PICKUP: ['拿改好的褲子', 'recoger el pantalón', 'picking up the trousers']
+};
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = {
+  SIZE: '去找尺寸', ROOM_TAG: '去試衣間', FIT_SHIRT: '進去試穿', SHIRT_SWAP: '等店員拿衣服', FIT_WAIST: '試穿長褲', FIT_LENGTH: '照鏡子',
+  HEM: '站好給店員量', PAY: '去櫃台結帳', PAY_FIX: '聽店員重算', CHANGE: '等找錢', PICKUP: '去拿改好的褲子', END: '拿袋子'
+};
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const PLACES = {
+  shop: ['👕', '服飾店', 'Tienda de ropa', 'Clothing store', '']
+};
+const NZ = n => n === 2 ? '兩' : CN[n];
+const SZ = ['S', 'M', 'L', 'XL'];
+const SHIRT_COLORS = [
+  { zh: '白色', es: 'blanca', en: 'white' }, { zh: '藍色', es: 'azul', en: 'blue' }, { zh: '淺灰色', es: 'gris claro', en: 'light gray' }
+];
+const PANTS_COLORS = [
+  { zh: '深灰色', es: 'gris oscuro', en: 'dark gray' }, { zh: '卡其色', es: 'caqui', en: 'khaki' }, { zh: '黑色', es: 'negro', en: 'black' }
+];
+const PROMO = {
+  d85: { zh: '兩件85折', es: '2 prendas al 85 % del precio', en: '2 items for 85% of the price' },
+  half: { zh: '第二件5折', es: 'la 2.ª prenda a mitad de precio (se descuenta la más barata)', en: '2nd item half price (applied to the cheaper one)' }
+};
+const staffL = (zh, es, en) => L(`店員：${zh}`, es, en);
+
+/* ══════════════════════════════════════
+   任務提示：只列出 NPC 交代過的原話；不扣分，結果頁顯示看了幾次
+   各遊戲的 Game.hintSections() 回傳 [{ title, lines:[L(…)…] }]
+══════════════════════════════════════ */
+const Hints = {
+  open: false,
+  toggle(force) {
+    this.open = force ?? !this.open;
+    if (this.open) { Vocab.toggle(false); Log.toggle(false); Game.hintViews += 1; this.render(); }
+    document.getElementById('hints').classList.toggle('open', this.open);
+    document.getElementById('hint-tab').setAttribute('aria-expanded', this.open);
+  },
+  render() {
+    if (!Game.task) return;
+    const r = s => Game.ruby(s);
+    const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
+    const sit = `<div class="h-sec">${r('我的狀況')}</div>` + Game.listHTML(true).map(x => `<div class="h-item"><div class="h-zh">${r(x.zh)}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`).join('');
+    document.getElementById('hint-body').innerHTML = sit + Game.hintSections().map(sec => `<div class="h-sec">${r(sec.title)}</div>` + sec.lines.map(item).join('')).join('');
+  }
+};
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+
+/* 結果頁（每個遊戲都一樣） */
+const resultCfg = () => ({
+  place: 'shop',
+  dialogue: () => {
+    const w = (zh, es, en) => zh + ' ' + X(es, en);
+    let msg = `【${w('任務成果', 'Resultados', 'Results')}】\n${w('玩家', 'Jugador', 'Player')}：${Game.N}\n${w('最後分數', 'Puntos', 'Score')}：${Game.score} 分\n` +
+      `${w('錯誤次數', 'Errores', 'Mistakes')}：${Game.mistakes} 次\n${w('時間', 'Tiempo', 'Time')}：${Game.elapsedTime} 秒\n` +
+      `${w('看任務提示', 'Pistas consultadas', 'Hints viewed')}：${Game.hintViews} 次\n\n${w('扣分原因', 'Penalizaciones', 'Penalties')}：`;
+    if (!Game.log.length) msg += '\n沒有扣分！' + X('¡Sin errores!', 'No mistakes!') + ' 🎉';
+    else Game.log.forEach((m, i) => { msg += `\n${i + 1}. ${m.zh} ${X(m.es, m.en)}（−10）`; });
+    return msg.split('\n').map(zh => ({ zh }));
+  },
+  options: () => ['查看排行榜 ' + X('Ver clasificación', 'See leaderboard')],
+  next: () => showLeaderboard()
+});
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,
+  hintViews: 0, log: [], feedback: [], visit: 0, att: {},
+  cash: null,
+  onStart() { this.updateCash(); },
+  updateCash() { document.getElementById('cash-badge').textContent = ''; },
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+  IMAGES: {
+    START: ['images/start.jpg', '👕'], SIZE: ['images/rack.jpg', '👔'], ROOM_TAG: ['images/fittingroom.jpg', '🚪'], FIT_SHIRT: ['images/mirror.jpg', '🪞'],
+    SHIRT_SWAP: ['images/tag.jpg', '🏷️'], FIT_WAIST: ['images/mirror.jpg', '👖'], FIT_LENGTH: ['images/mirror_pants.jpg', '👖'], HEM: ['images/hem.jpg', '📏'],
+    PAY: ['images/counter.jpg', '🧾'], PAY_FIX: ['images/counter.jpg', '💵'], CHANGE: ['images/counter.jpg', '💵'], PICKUP: ['images/bag.jpg', '🛍️'],
+    END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+  },
+
+  setup() {
+    const t = this.task = { rot: Math.floor(Math.random() * 3) };
+    t.sc = pick(SHIRT_COLORS); t.pc = pick(PANTS_COLORS);
+    t.sp = pick([590, 690, 790]); t.pp = pick([890, 990, 1090]);
+    t.promo = pick(['d85', 'half']);
+    t.total0 = t.sp + t.pp;                                          // 沒打折的價錢
+    t.disc = t.promo === 'd85' ? t.total0 * 85 / 100 : t.total0 - t.sp / 2;   // 打折後（第二件5折折在比較便宜的襯衫）
+    t.hemNeed = Math.random() < 0.6; t.hem = t.hemNeed ? 100 : 0;      // 褲腳太長，要改褲管（一百元）
+    /* 店員報價可能多算：沒打折，或沒改褲管卻收了改褲管費 */
+    initPay(t, t.disc + t.hem, [{ kind: 'nodisc', zh: '折扣', es: 'descuento', en: 'discount', price: t.total0 - t.disc }]
+      .concat(t.hemNeed ? [] : [{ kind: 'hem', zh: '改褲管', es: 'el dobladillo', en: 'the hemming', price: 100 }]));
+    /* 這個牌子偏小（-1）、剛好（0）、偏大（+1）：真正合身的尺寸是 tgt（0=S 1=M 2=L 3=XL） */
+    t.bias = pick([-1, -1, 0, 0, 0, 1]); t.tgt = 1 - t.bias;
+    t.sizeIdx = 1; t.waist = 30;                                      // 玩家挑的尺寸（SIZE 那關決定）
+    t.tagWrong = Math.random() < 0.45; t.wrongSize = pick([0, 1, 2, 3].filter(i => i !== t.tgt && Math.abs(i - t.tgt) === 1));
+    t.countWrong = Math.random() < 0.45; t.countSaid = t.countWrong ? pick([1, 3]) : 2; t.countFix = t.countWrong ? 2 : pick([1, 3]);
+    t.hemWrong = Math.random() < 0.45; t.pickupWrong = Math.random() < 0.45;
+  },
+  shirtName() { const c = this.task.sc; return { zh: `${c.zh}襯衫`, es: `camisa ${c.es}`, en: `${c.en} shirt` }; },
+  pantsName() { const c = this.task.pc; return { zh: `${c.zh}長褲`, es: `pantalón ${c.es}`, en: `${c.en} trousers` }; },
+  shirtFit() { return this.task.sizeIdx - this.task.tgt; },            // <0 太緊、>0 太大、0 剛好
+  fixShirtText() {
+    const t = this.task, f = this.shirtFit();
+    if (f < 0) return `不好意思，有點緊，請問有${SZ[t.tgt]}號嗎？`;
+    if (f > 0) return `不好意思，有點大，請問有${SZ[t.tgt]}號嗎？`;
+    return `不好意思，有點緊，請問有${SZ[Math.min(3, t.sizeIdx + 1)]}號嗎？`;    // 其實剛好，這是錯的說法
+  },
+  afterShirt() { this.state = this.task.waist !== 30 ? 'FIT_WAIST' : 'FIT_LENGTH'; },
+
+  hintSections() {
+    const ORDER = ['START', 'SIZE', 'ROOM_TAG', 'FIT_SHIRT', 'SHIRT_SWAP', 'FIT_WAIST', 'FIT_LENGTH', 'HEM', 'PAY', 'PAY_FIX', 'CHANGE', 'PICKUP', 'END', 'RESULT'];
+    const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s), t = this.task, lines = [];
+    if (at('PAY') && t.hemNeed) lines.push(staffL('改褲管一百元，要等三十分鐘。', 'Arreglar el largo cuesta cien dólares y hay que esperar treinta minutos.', 'Hemming costs 100 dollars and takes thirty minutes.'));
+    if (at('PAY_FIX')) lines.push(staffL(`一共是${zhNum(t.total)}元。`, `Son ${esM(t.total)} en total.`, `${enM(t.total)} in total.`));
+    return lines.length ? [{ title: '店員說的話', lines }] : [];
+  },
+
+  /* ── 畫面元件 ── */
+  listHTML(rowsOnly) {
+    const r = s => this.ruby(s);
+    const rows = [
+      { zh: '想買：一件襯衫、一條長褲，自己穿', es: 'Quieres comprar: una camisa y un pantalón largo, para ti', en: 'You want to buy: one shirt and one pair of trousers, for yourself' },
+      { zh: '你平常穿：上衣M號、褲子三十腰（腰圍三十吋）', es: 'Normalmente usas: camisa talla M y pantalón de cintura 30 (30 pulgadas)', en: 'You usually wear: shirt size M and trousers with a 30-inch waist' },
+      { zh: '褲長：剛好蓋到鞋面就好', es: 'Largo del pantalón: que justo llegue hasta el empeine', en: 'Trouser length: just long enough to reach the top of your shoes' },
+      { zh: '你身上有：一千元和兩千元的鈔票', es: 'Llevas: billetes de mil y de dos mil dólares', en: 'You have: 1,000- and 2,000-dollar bills' }
+    ];
+    if (rowsOnly) return rows;
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 架上看到的襯衫和長褲（顏色、價錢、優惠） */
+  shelfHTML() {
+    const t = this.task, r = s => this.ruby(s), p = PROMO[t.promo];
+    const card = (e, name, price) => `<div class="pcard"><div class="pe">${e}</div><div class="pn">${r(name)}</div><div class="pp">${price}${r('元')}</div></div>`;
+    return `<div class="shelf">${card('👕', this.shirtName().zh, t.sp)}${card('👖', this.pantsName().zh, t.pp)}</div><div class="menu"><div class="mnote"><span class="disc">${r('優惠：' + p.zh)}</span></div></div>`;
+  },
+  /* 結帳螢幕：店員報的總價可能多算（沒打折，或多收改褲管費） */
+  receiptHTML() {
+    const t = this.task, r = s => this.ruby(s), err = this.state === 'PAY' && t.payWrong;
+    const noDisc = err && t.extra.kind === 'nodisc', extraHem = err && t.extra.kind === 'hem';
+    const row = (name, amt, note) => `<div class="mrow"><span>${r(name)}${note ? '　' + r(note) : ''}</span><span class="am">${amt}${r('元')}</span></div>`;
+    let h = `<div class="menu"><div class="mh">🧾 ${r('螢幕')}</div>` + row(this.shirtName().zh, t.sp) + row(this.pantsName().zh, t.pp);
+    if (!noDisc) h += `<div class="mrow"><span class="disc">${r('優惠：' + PROMO[t.promo].zh)}</span><span class="am disc">−${t.total0 - t.disc}${r('元')}</span></div>`;
+    if (t.hemNeed || extraHem) h += row('改褲管', 100);
+    return h + `<div class="mnote">${r('一共')}：${err ? t.said : t.total}${r('元')}</div></div>`;
+  },
+
+  /* ── 狀態設定 ── */
+  getConfig() {
+    const t = this.task, N = this.N;
+    const staff = staffL;
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const pays = payStates(Game, {
+      who: '店員', place: 'shop', html: () => Game.receiptHTML(),
+      extraWhy: () => t.extra.kind === 'nodisc'
+        ? M(`你的優惠是「${PROMO[t.promo].zh}」，店員沒有打折，多收了${t.extra.price}元（${t.said}元）。螢幕上的數字，要自己對一下。`, `Tu oferta era «${PROMO[t.promo].es}», pero el cajero no la aplicó y cobró ${t.extra.price} de más (${esM(t.said)}). Revisa los números de la pantalla.`, `Your promotion was "${PROMO[t.promo].en}", but the clerk didn't apply it and charged ${t.extra.price} too much (${enM(t.said)}). Check the numbers on the screen.`)
+        : M(`你的褲子不用改褲管，店員卻多收了改褲管費${t.extra.price}元（${t.said}元）。`, `Tu pantalón no necesitaba arreglo, pero el cajero cobró ${t.extra.price} de más por arreglarlo (${esM(t.said)}).`, `Your trousers didn't need hemming, but the clerk charged ${t.extra.price} extra for it (${enM(t.said)}).`)
+    });
+
+    return {
+      /* ═══ 走到店門口 ═══ */
+      START: {
+        place: 'shop',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你想買新衣服，走到一家服飾店門口。）', '(Quieres comprar ropa nueva y llegas a la puerta de una tienda de ropa.)', '(You want some new clothes and arrive at the door of a clothing store.)')
+        ],
+        options: ['走進服飾店'],
+        next: () => { Game.startTimer(); Game.state = 'SIZE'; }
+      },
+
+      /* ═══ 挑尺寸（先記下來，不當場判對錯；合不合身要試穿才知道） ═══ */
+      SIZE: {
+        place: 'shop',
+        html: () => Game.shelfHTML(),
+        dialogue: () => [
+          staff('歡迎光臨！慢慢看喔，需要幫忙可以叫我。', '¡Hola, buenas! Mire con calma; si necesita ayuda, avíseme.', 'Welcome! Take your time — call me if you need help.'),
+          L(`（架上有一件${Game.shirtName().zh}和一條${Game.pantsName().zh}，你很喜歡。衣服上都掛著吊牌，寫著尺寸和價錢。）`,
+            `(En el estante hay una ${Game.shirtName().es} y un ${Game.pantsName().es} que te gustan mucho. Cada prenda tiene una etiqueta colgante con la talla y el precio.)`,
+            `(On the rack there's a ${Game.shirtName().en} and a pair of ${Game.pantsName().en} that you really like. Each has a hang tag with the size and price.)`)
+        ],
+        options: () => rotOf(t, ['我拿M號的襯衫和三十腰的長褲。', '我拿L號的襯衫和三十腰的長褲。', '我拿M號的襯衫和三十二腰的長褲。']),
+        next: c => {
+          t.sizeIdx = c.includes('L號') ? 2 : 1;
+          t.waist = c.includes('三十二') ? 32 : 30;
+          Game.thought = [L('（你各拿一件，走到試衣間門口。）', '(Tomas una de cada una y vas hacia el probador.)', '(You take one of each and walk to the fitting room.)')];
+          Game.state = 'ROOM_TAG';
+        }
+      },
+
+      /* ═══ 試衣間號碼牌：店員數件數，可能數錯 ═══ */
+      ROOM_TAG: catchState(Game, {
+        key: 'ROOM_TAG', place: 'shop',
+        dialogue: () => [staff(`這是你的號碼牌，一共${NZ(t.countSaid)}件喔。試衣間在那邊。`, `Esta es su ficha: ${t.countSaid} ${t.countSaid === 1 ? 'prenda' : 'prendas'}. El probador está por ahí.`, `Here's your number tag — ${t.countSaid} ${t.countSaid === 1 ? 'item' : 'items'}. The fitting room is over there.`)],
+        ok: '好，謝謝。', fix: () => `不好意思，我只有${NZ(t.countFix)}件。`, rude: '你不會數嗎？',
+        wrong: () => t.countWrong,
+        whyWrong: () => M('店員數錯了：你只拿了兩件（一件襯衫、一條長褲）。', 'El empleado contó mal: llevas solo dos prendas (una camisa y un pantalón).', 'The clerk miscounted: you only have two items (one shirt, one pair of trousers).'),
+        whyRight: () => M('店員數對了：你拿了兩件。', 'El empleado contó bien: son dos prendas.', 'The clerk was right: you have two items.'),
+        goodWrong: ['你很細心！進試衣間以前，件數要對，出來的時候店員會再數一次。', '¡Qué atento! Antes de entrar al probador la cantidad debe estar bien: al salir, el empleado vuelve a contar.', "Well spotted! The count must be right before you go in — the clerk counts again when you come out."],
+        goodOk: ['進試衣間以前，要先對一下號碼牌上的件數。', 'Antes de entrar al probador, compara la cantidad de la ficha con tus prendas.', 'Before you go in, check the number on the tag against your clothes.'],
+        apology: () => [staff('啊，不好意思！是兩件。', '¡Ay, disculpe! Son dos.', 'Oh, sorry! It\'s two.')],
+        go: () => { Game.state = 'FIT_SHIRT'; }
+      }),
+
+      /* ═══ 試穿襯衫：店員在簾子外面問，大小不一定剛好 ═══ */
+      FIT_SHIRT: catchState(Game, {
+        key: 'FIT_SHIRT', place: 'shop',
+        dialogue: () => {
+          const f = Game.shirtFit();
+          return [
+            L('（你進試衣間，換上襯衫試穿。）', '(Entras al probador y te pruebas la camisa.)', '(You go into the fitting room and try on the shirt.)'),
+            f < 0 ? L('（袖子和肩膀都很緊，釦子扣起來有點辛苦。）', '(Las mangas y los hombros te aprietan; cuesta abrochar los botones.)', '(The sleeves and shoulders are tight and the buttons are hard to fasten.)')
+              : f > 0 ? L('（襯衫太大了，肩膀往下掉，袖子蓋住了手，釦子扣起來鬆鬆的。）', '(La camisa te queda grande: los hombros caen, las mangas te tapan las manos y los botones quedan flojos.)', '(The shirt is too big: the shoulders droop, the sleeves cover your hands and the buttons feel loose.)')
+                : L('（肩膀和袖子剛剛好，釦子也很好扣，穿起來很舒服。）', '(Los hombros y las mangas te quedan perfectos, los botones se abrochan bien y es muy cómoda.)', '(The shoulders and sleeves fit just right, the buttons close easily and it feels comfortable.)'),
+            staff('大小可以嗎？', '¿Cómo le queda la talla?', 'How does the size feel?')
+          ];
+        },
+        ok: '剛好，我要這件。', fix: () => Game.fixShirtText(), rude: '你們的衣服是不是做壞了？',
+        wrong: () => Game.shirtFit() !== 0,
+        whyWrong: () => M(`襯衫${Game.shirtFit() < 0 ? '有點緊' : '太大'}，不合身。要請店員換${SZ[t.tgt]}號。`, `La camisa te queda ${Game.shirtFit() < 0 ? 'ajustada' : 'grande'}. Hay que pedir la talla ${SZ[t.tgt]}.`, `The shirt is too ${Game.shirtFit() < 0 ? 'tight' : 'big'}. Ask for size ${SZ[t.tgt]}.`),
+        whyRight: () => M('襯衫大小剛好，不用換。', 'La camisa te queda bien; no hace falta cambiarla.', 'The shirt fits; there is no need to change it.'),
+        goodWrong: ['你很細心！衣服不合身，要馬上說，請店員換尺寸。', '¡Qué atento! Si la prenda no te queda bien, dilo enseguida y pide otra talla.', "Well spotted! If it doesn't fit, say so right away and ask for another size."],
+        goodOk: ['試穿的時候，要注意肩膀、袖子和腰，大小剛好才買。', 'Al probarte la ropa, fíjate en hombros, mangas y cintura: cómprala solo si te queda bien.', 'When you try clothes on, check the shoulders, sleeves and waist — only buy it if it fits.'],
+        go: wrong => {
+          if (wrong) {
+            Game.thought = [staff(`好，我去拿${SZ[t.tgt]}號的給你。`, `Bien, le traigo la talla ${SZ[t.tgt]}.`, `Okay, I'll bring you size ${SZ[t.tgt]}.`)];
+            Game.state = 'SHIRT_SWAP';
+          } else Game.afterShirt();
+        }
+      }),
+
+      /* ═══ 換尺寸：店員拿來的襯衫，吊牌上的尺寸可能不對 ═══ */
+      SHIRT_SWAP: catchState(Game, {
+        key: 'SHIRT_SWAP', place: 'shop',
+        dialogue: () => {
+          const w = t.tagWrong ? t.wrongSize : t.tgt;
+          return [
+            staff('來，這件給你。', 'Tenga, esta es para usted.', 'Here you go, this one.'),
+            L(`（你看一下吊牌，上面寫著${SZ[w]}號。）`, `(Miras la etiqueta: dice talla ${SZ[w]}.)`, `(You check the tag: it says size ${SZ[w]}.)`)
+          ];
+        },
+        ok: '好，謝謝。', fix: () => `不好意思，這是${SZ[t.tagWrong ? t.wrongSize : (t.tgt === 3 ? 2 : t.tgt + 1)]}號，我要${SZ[t.tgt]}號。`, rude: '你到底有沒有在聽啊？',
+        wrong: () => t.tagWrong,
+        whyWrong: () => M(`吊牌上寫${SZ[t.wrongSize]}號，不是你要的${SZ[t.tgt]}號。拿到衣服要先看吊牌。`, `La etiqueta dice talla ${SZ[t.wrongSize]}, no la ${SZ[t.tgt]} que pediste. Mira siempre la etiqueta.`, `The tag says size ${SZ[t.wrongSize]}, not the ${SZ[t.tgt]} you asked for. Always check the tag.`),
+        whyRight: () => M(`吊牌上寫的是${SZ[t.tgt]}號，沒有拿錯。`, `La etiqueta dice talla ${SZ[t.tgt]}: no se equivocó.`, `The tag says size ${SZ[t.tgt]} — no mistake.`),
+        goodWrong: ['你很細心！店員拿來的衣服，要先看一下吊牌上的尺寸。', '¡Qué atento! Cuando te traen una prenda, mira primero la talla de la etiqueta.', 'Well spotted! When the clerk brings a garment, check the size on the tag first.'],
+        goodOk: ['拿到新尺寸，先看吊牌，再進去試穿。', 'Al recibir otra talla, mira la etiqueta antes de probártela.', 'When you get a new size, check the tag before trying it on.'],
+        apology: () => [staff(`啊，不好意思！拿錯了。這件才是${SZ[t.tgt]}號。`, `¡Ay, disculpe! Me equivoqué. Esta sí es la talla ${SZ[t.tgt]}.`, `Oh, sorry! Wrong one. This is size ${SZ[t.tgt]}.`)],
+        go: wrong => {
+          t.sizeIdx = t.tgt;
+          Game.thought = (wrong ? [staff(`啊，不好意思！拿錯了。這件才是${SZ[t.tgt]}號。`, `¡Ay, disculpe! Me equivoqué. Esta sí es la talla ${SZ[t.tgt]}.`, `Oh, sorry! Wrong one. This is size ${SZ[t.tgt]}.`)] : [])
+            .concat([L(`（你換上${SZ[t.tgt]}號的襯衫，大小剛剛好。）`, `(Te pones la talla ${SZ[t.tgt]}: te queda perfecta.)`, `(You put on size ${SZ[t.tgt]}: it fits perfectly.)`)]);
+          Game.afterShirt();
+        }
+      }),
+
+      /* ═══ 試穿長褲（腰）：只有挑了三十二腰才會出現 ═══ */
+      FIT_WAIST: catchState(Game, {
+        key: 'FIT_WAIST', place: 'shop',
+        dialogue: () => [
+          L('（你換上長褲試穿。腰太鬆了，要用手拉著才不會掉。）', '(Te pruebas el pantalón. La cintura te queda floja: tienes que sujetarlo con la mano para que no se caiga.)', '(You try on the trousers. The waist is loose — you have to hold them up with a hand.)'),
+          staff('腰可以嗎？', '¿Cómo le queda la cintura?', 'How is the waist?')
+        ],
+        ok: '剛好，我要這件。', fix: () => '不好意思，腰有點鬆，請問有三十腰的嗎？', rude: '你們的褲子怎麼這麼大？',
+        wrong: () => true,
+        whyWrong: () => M('腰太鬆了：你平常穿三十腰，這條是三十二腰。要請店員換。', 'La cintura te queda floja: usas cintura 30 y este es 32. Pide el cambio.', 'The waist is loose: you wear a 30 and this is a 32. Ask for a swap.'),
+        whyRight: () => M('', '', ''),
+        goodWrong: ['你很細心！腰太鬆，要馬上說，請店員換三十腰的。', '¡Qué atento! Si la cintura queda floja, dilo y pide la de 30.', "Well spotted! If the waist is loose, say so and ask for the 30."],
+        goodOk: ['', '', ''],
+        go: () => {
+          t.waist = 30;
+          Game.thought = [staff('好，我去拿三十腰的給你。', 'Bien, le traigo la de cintura 30.', 'Okay, I\'ll bring you the 30 waist.'),
+            L('（你換上三十腰的長褲，腰剛剛好。）', '(Te pones el de cintura 30: la cintura te queda perfecta.)', '(You put on the 30-waist trousers: the waist fits just right.)')];
+          Game.state = 'FIT_LENGTH';
+        }
+      }),
+
+      /* ═══ 試穿長褲（褲長）：褲腳可能太長，要改褲管 ═══ */
+      FIT_LENGTH: catchState(Game, {
+        key: 'FIT_LENGTH', place: 'shop',
+        dialogue: () => [
+          L('（你換上長褲，腰圍剛剛好。）', '(Te pones el pantalón: la cintura te queda perfecta.)', '(You put on the trousers: the waist fits just right.)'),
+          t.hemNeed ? L('（可是褲腳太長了，會踩到。）', '(Pero el bajo es demasiado largo y lo pisas.)', '(But the cuffs are too long and you step on them.)')
+            : L('（褲腳剛好蓋到鞋面。）', '(El bajo llega justo hasta el empeine.)', '(The cuffs reach just the top of your shoes.)'),
+          staff('褲子可以嗎？', '¿Cómo le queda el pantalón?', 'How do the trousers feel?')
+        ],
+        ok: '剛好，我要這件。', fix: () => '不好意思，褲子有點長，可以幫我改褲管嗎？', rude: '你們的褲子怎麼這麼長？',
+        wrong: () => t.hemNeed,
+        whyWrong: () => M('褲腳太長，會踩到。要請店員改褲管，改到剛好蓋到鞋面。', 'El bajo es demasiado largo y lo pisas. Pide que lo arreglen hasta que llegue justo al empeine.', 'The cuffs are too long and you step on them. Ask to have them hemmed so they just reach the top of your shoes.'),
+        whyRight: () => M('褲長剛剛好，蓋到鞋面，不用改褲管。', 'El largo está bien: llega al empeine y no hay que arreglarlo.', 'The length is right — it reaches the top of your shoes, no hemming needed.'),
+        goodWrong: ['你很細心！褲腳太長，要請店員改褲管。', '¡Qué atento! Si el bajo es muy largo, pide que lo arreglen.', 'Well spotted! If the cuffs are too long, ask to have them hemmed.'],
+        goodOk: ['褲長剛好蓋到鞋面，就不用改。', 'Si el largo llega justo al empeine, no hace falta arreglarlo.', 'If the length reaches just the top of your shoes, no hemming is needed.'],
+        go: wrong => { if (wrong) Game.state = 'HEM'; else Game.state = 'PAY'; }
+      }),
+
+      /* ═══ 改褲管：店員用別針折褲腳，可能折得太短 ═══ */
+      HEM: catchState(Game, {
+        key: 'HEM', place: 'shop',
+        dialogue: () => [
+          staff('好，我幫你量一下，請站好。', 'Bien, le tomo la medida; póngase derecho, por favor.', 'Okay, let me measure — please stand up straight.'),
+          t.hemWrong ? L('（店員用別針折好褲腳。你低頭一看，折得太短了，腳踝都露出來了。）', '(El empleado dobla el bajo con alfileres. Miras hacia abajo: quedó demasiado corto y se ve el tobillo.)', '(The clerk pins up the cuffs. You look down: it\'s too short — your ankles are showing.)')
+            : L('（店員用別針折好褲腳。你低頭一看，褲腳剛好蓋到鞋面。）', '(El empleado dobla el bajo con alfileres. Miras hacia abajo: llega justo hasta el empeine.)', '(The clerk pins up the cuffs. You look down: they reach just the top of your shoes.)')
+        ],
+        ok: '好，這樣可以。', fix: () => '不好意思，有點短，請再放長一點，剛好蓋到鞋面就好。', rude: '你到底會不會量啊？',
+        wrong: () => t.hemWrong,
+        whyWrong: () => M('折得太短了，腳踝都露出來。你要的是剛好蓋到鞋面。改好就不能再放長了，所以要現在說。', 'Quedó demasiado corto y se ve el tobillo. Tú querías que llegara justo al empeine. Después ya no se puede alargar, así que dilo ahora.', 'It is too short and your ankles show. You wanted it to reach just the top of your shoes. Once altered it can\'t be made longer, so say so now.'),
+        whyRight: () => M('店員折得剛好，蓋到鞋面。', 'El empleado lo dobló bien: llega al empeine.', 'The clerk pinned it right — it reaches the top of your shoes.'),
+        goodWrong: ['你很細心！褲子改短以後就不能再放長，所以折的時候要先看清楚。', '¡Qué atento! Una vez cortado el pantalón no se puede alargar, así que hay que mirar bien al doblarlo.', "Well spotted! Once trousers are shortened they can't be made longer, so look carefully while it's pinned."],
+        goodOk: ['改褲管以前，要先看一下折的長度。', 'Antes de arreglar el largo, mira cómo quedó doblado.', 'Before the hemming is done, look at how long it is pinned.'],
+        apology: () => [staff('啊，不好意思！我重新折。', '¡Ay, disculpe! Lo vuelvo a doblar.', 'Oh, sorry! Let me pin it again.')],
+        go: wrong => {
+          Game.thought = (wrong ? [staff('啊，不好意思！我重新折。', '¡Ay, disculpe! Lo vuelvo a doblar.', 'Oh, sorry! Let me pin it again.')] : [])
+            .concat([staff('好，改褲管一百元，要等三十分鐘。你先去櫃台結帳。', 'Bien: arreglar el largo cuesta cien dólares y hay que esperar treinta minutos. Pase primero a pagar a la caja.', 'Okay, hemming is 100 dollars and takes thirty minutes. Please pay at the counter first.')]);
+          Game.state = 'PAY';
+        }
+      }),
+
+      /* ═══ 付錢（報價、付錢、找錢） ═══ */
+      PAY: pays.PAY, PAY_FIX: pays.PAY_FIX, CHANGE: pays.CHANGE,
+
+      /* ═══ 拿改好的褲子：店員可能拿成沒改過的 ═══ */
+      PICKUP: catchState(Game, {
+        key: 'PICKUP', place: 'shop',
+        dialogue: () => [
+          staff('你的褲子改好了，請看一下。', 'Su pantalón ya está arreglado; échele un vistazo.', 'Your trousers are done — please take a look.'),
+          t.pickupWrong ? L('（你打開袋子，褲子還是很長，好像沒有改過。）', '(Abres la bolsa: el pantalón sigue muy largo, parece que no lo arreglaron.)', '(You open the bag: the trousers are still very long — it looks like they weren\'t altered.)')
+            : L('（你打開袋子，褲腳剛好蓋到鞋面。）', '(Abres la bolsa: el bajo llega justo hasta el empeine.)', '(You open the bag: the cuffs reach just the top of your shoes.)')
+        ],
+        ok: '好，謝謝。', fix: () => t.pickupWrong ? '不好意思，這條褲子還沒有改，還是很長。' : '不好意思，這條褲子改得太短了。', rude: '你們是不是睡著了？',
+        wrong: () => t.pickupWrong,
+        whyWrong: () => M('這條褲子還是很長，店員拿錯了，沒有改過。拿到改好的衣服，要打開來看一下。', 'Este pantalón sigue muy largo: el empleado se equivocó y no es el arreglado. Abre la bolsa y revisa.', 'These trousers are still too long — the clerk gave you the wrong pair. Open the bag and check.'),
+        whyRight: () => M('褲子已經改好了，剛好蓋到鞋面。', 'El pantalón ya está arreglado y llega justo al empeine.', 'The trousers are done and reach just the top of your shoes.'),
+        goodWrong: ['你很細心！改好的褲子，離開以前要打開來看，改過的衣服不能換。', '¡Qué atento! Revisa el pantalón arreglado antes de irte: las prendas arregladas no se cambian.', 'Well spotted! Check the altered trousers before you leave — altered items can\'t be exchanged.'],
+        goodOk: ['改好的褲子，離開以前要打開來看一下。', 'Antes de irte, abre la bolsa y revisa el pantalón arreglado.', 'Before you leave, open the bag and check the altered trousers.'],
+        apology: () => [staff('啊，不好意思！拿錯了，我馬上去拿你的。', '¡Ay, disculpe! Me equivoqué; ahora mismo le traigo el suyo.', 'Oh, sorry! Wrong pair — I\'ll go get yours right now.'),
+          L('（店員拿來你的褲子，褲腳剛好蓋到鞋面。）', '(El empleado trae tu pantalón: el bajo llega justo al empeine.)', '(The clerk brings your trousers: the cuffs reach just the top of your shoes.)')],
+        go: () => { Game.stopTimer(); Game.state = 'END'; }
+      }),
+
+      /* ═══ 結局 ═══ */
+      END: {
+        place: 'shop',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2;
+          track('game_complete', { game: 'clothes', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            staff('謝謝光臨！', '¡Gracias por venir!', 'Thanks for coming!'),
+            staff(t.hemNeed ? '吊牌先不要剪掉，七天內帶發票來可以換貨。改過褲管的褲子不能換喔。' : '吊牌先不要剪掉，七天內帶發票來可以換貨。',
+              t.hemNeed ? 'No corte todavía las etiquetas: dentro de siete días, con la factura, se puede cambiar. Los pantalones arreglados no se cambian.' : 'No corte todavía las etiquetas: dentro de siete días, con la factura, se puede cambiar.',
+              t.hemNeed ? "Don't cut the tags off yet: within seven days you can exchange with the receipt. Trousers that have been hemmed can't be exchanged." : "Don't cut the tags off yet: within seven days you can exchange with the receipt."),
+            Game._endGood
+              ? L('（你穿上新衣服，大小剛剛好，褲長也剛好。你很滿意！）', '(Te pones la ropa nueva: la talla y el largo son perfectos. ¡Tu compra te hace muy feliz!)', '(You put on your new clothes: the size and the length are perfect. You\'re very happy!)')
+              : L('（新衣服買好了，不過試了好久，你有點累。）', '(Ya tienes la ropa nueva, pero tardaste mucho en probártela y te sientes un poco agotado.)', '(You have your new clothes, but trying them on took a long time and you\'re a bit worn out.)')
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: resultCfg()
+    };
+  },
+
+
+
+  handleChoice(choice) {
+    if (this.state === '_TRANS') {          // 離開過場，進下一關
+      const t = this._trans; this._trans = null;
+      Tr.closeAll(); Speech.stop();
+      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
+      if (this.updateCash) this.updateCash();
+      if (document.getElementById('game-window').classList.contains('active')) this.render();
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
+    Speech.stop();
+    this.thought = null;
+    this.feedback = [];
+    const before = this.state;
+    this.att[before] = (this.att[before] || 0) + 1;
+    cfg.next(choice);
+    this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
+    if (this.thoughtFirst) this.visit += 1;
+    this.updateCash();
+    this.maybeTrans(before);
+    if (document.getElementById('game-window').classList.contains('active')) this.render();
+  },
+
+  render() {
+    if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果
+      const t = this._trans;
+      this.state = t.from;
+      this._transMode = true;
+      try { this.render(); } finally { this._transMode = false; this.state = '_TRANS'; }
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    if (!cfg) { console.error('狀態錯誤：' + this.state); return; }
+    const val = v => typeof v === 'function' ? v() : v;
+    this.setPlace(val(cfg.place) || 'gate');
+
+    // END 的 dialogue 會決定結局，所以只算一次
+    const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
+    let [src, emoji, alt] = this.IMAGES[this.state] || ['', '🚇'];
+    if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
+    this.setImage(src, emoji, alt);
+    Vocab.render(this.state);
+    if (Hints.open) Hints.render();
+    Log.render();
+
+    this._tr = []; this._spk = [];
+    let html = (this.showList && this.state !== 'START' && !['END', 'RESULT'].includes(this.state)) ? this.listHTML() : '';
+    html += cfg.html ? cfg.html() : '';
+    if (this._transMode) html = '';
+    const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
+    const main = this.formatText(raw);
+    // 過場畫面：先給評語（綠卡），再接旁白，最後才是過場按鈕
+    html += this._transMode ? this.feedbackHTML() + th : (this.thoughtFirst ? th + main : main + th) + this.feedbackHTML();
+    const box = document.getElementById('npc-dialogue');
+    box.innerHTML = html;
+    box.querySelectorAll('[data-tr]').forEach(btn => {
+      btn.onclick = () => Tr.open(this._tr[+btn.dataset.tr], btn);
+    });
+    box.querySelectorAll('[data-spk]').forEach(btn => {
+      btn.onclick = () => { const x = this._spk[+btn.dataset.spk]; Speech.speak(x.text, btn, x.who); };
+    });
+
+    if (cfg.mount && !this._transMode) cfg.mount(box);
+    const area = document.getElementById('options-area');
+    area.className = '';
+    area.innerHTML = '';
+    const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
+    area.classList.toggle('single', cfg.single ?? (opts.length === 1 || opts.some(o => o.length > 12)));
+    opts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt' + (false ? ' deal' : '');
+      btn.innerHTML = this.ruby(opt);
+      btn.onclick = () => this.handleChoice(opt);
+      area.appendChild(btn);
+    });
+  }
+});
+
+
+/* 從「重新開始」或地圖回來：直接用原本的名字開新的一局 */
+GameBoot();
+Music.init({ bpm: 112, tracks: [
+  { wave: 'square', vol: 0.2, notes: 'C5 E5 G5 E5 C5 E5 G5 . | A4 C5 E5 C5 A4 C5 E5 . | F4 A4 C5 A4 F4 A4 C5 . | G4 B4 D5 B4 G4 D5 G5 -' },
+  { wave: 'triangle', vol: 0.6, notes: 'C3 . . G3 . . C3 . | A2 . . E3 . . A2 . | F2 . . C3 . . F2 . | G2 . . D3 . . G2 .' },
+  { vol: 0.3, notes: 'k . h . s . h .' }] });
+
+</script>
+<script>
+/* ===== 版權說明 ===== */
+(function(){
+  if(window.__hgCopy)return; window.__hgCopy=1;
+  function mk(){
+    if(document.getElementById('hgCopy'))return;
+    if(document.documentElement.hasAttribute('data-hg-nocopy'))return;
+    var d=document.createElement('div'); d.id='hgCopy';
+    d.textContent='© 2026 @cadadiaunosminutos_ben_chino ｜ 保留所有權利 / Todos los derechos reservados';
+    d.style.cssText='display:block;flex:none;width:100%;box-sizing:border-box;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));text-align:center;font:10px/1.4 system-ui,-apple-system,"Noto Sans TC",sans-serif;color:rgba(120,120,120,.85);user-select:none;position:static;';
+    var cs=getComputedStyle(document.body);
+    if(cs.display.indexOf('flex')>-1&&cs.flexDirection.indexOf('row')===0){document.body.style.flexWrap='wrap';d.style.flex='0 0 100%';}
+    document.body.appendChild(d);
+  }
+  if(document.body)mk(); else document.addEventListener('DOMContentLoaded',mk);
+})();
+/* ===== /版權說明 ===== */
+</script>
+</body>
+</html>

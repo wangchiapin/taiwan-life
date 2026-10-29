@@ -32,3 +32,7 @@
 ## 關帝廟 guandi（2026-10-29）
 提示詞全部寫在 `docs/image-prompts-guandi.md`（共 16 張，含順序、底圖、檢查重點）。做完一張勾一張，一次做一張，Ben 確認再下一張。
 - [ ] guandi：gate、exit、start、fire、heaven、main、throw、draw、cabinet、read、desk、amulet、guolu、result、end_good、end_bad
+
+## 服飾店 clothes（2026-10-29）
+提示詞還沒寫（Ben 說之後再列）。圖片檔名：start、rack、fittingroom、mirror、mirror_pants、tag、hem、counter、bag、result、end_good、end_bad（共 12 張，720×720）。主角看不到臉、看不出性別（只拍手和鞋子）；沒有 Ami。
+- [ ] clothes：start、rack、fittingroom、mirror、mirror_pants、tag、hem、counter、bag、result、end_good、end_bad
