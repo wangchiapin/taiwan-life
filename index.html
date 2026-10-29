@@ -1026,6 +1026,18 @@ function pill(text, cx, cy, bg, fg) {
   g.fillStyle = fg; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, cx, cy + 1);
 }
 
+/* 招牌小字：地圖上中文名下面加一行西文／英文（設定選「只有中文」就不加）；括號裡的補充不顯示，太長就縮小字 */
+const subName = sc => { const n = S.lang === 'en' ? sc.en : S.lang === 'es' ? sc.es : ''; const t = n ? n.replace(/\s*\(.*?\)\s*/g, '').trim() : ''; return t === sc.zh ? '' : t; };
+function signInfo(b) {
+  const sc = b.sc, x = b.x * T, y = b.y * T, w = b.w * T, zh = S.script === 'simp' ? (ZHS[sc.id] || sc.zh) : sc.zh, sub = subName(sc);
+  g.font = 'bold 14px "Noto Sans TC", sans-serif';
+  const zw = g.measureText(zh).width + 14;
+  if (!sub) return { zh, sub: '', bw: zw, bx: x + w / 2 - zw / 2, by: y + 40, bh: 17, zy: y + 49, ey: y + 22 };
+  let fs = 11, sw = 0;
+  for (; fs >= 8; fs -= .5) { g.font = `bold ${fs}px "Noto Sans TC", sans-serif`; sw = g.measureText(sub).width + 10; if (sw <= w - 4) break; }
+  const bw = Math.max(zw, sw);
+  return { zh, sub, fs, bw, bx: x + w / 2 - bw / 2, by: y + 32, bh: 30, zy: y + 41, sy: y + 54, ey: y + 15 };
+}
 function drawBuilding(b) {
   if (b.sc.status === 'build') return drawSite(b);
   const sc = b.sc, x = b.x * T, y = b.y * T, w = b.w * T, h = b.h * T;
@@ -1055,24 +1067,24 @@ function drawBuilding(b) {
     g.fillStyle = '#c99a5b'; g.fillRect(dx + 2, dy + 8, 28, 5); g.fillRect(dx + 2, dy + 19, 28, 5);
     g.fillStyle = '#8a6434'; g.fillRect(dx + 5, dy + 9, 2, 2); g.fillRect(dx + 25, dy + 9, 2, 2); g.fillRect(dx + 5, dy + 20, 2, 2); g.fillRect(dx + 25, dy + 20, 2, 2);
   }
-  // 招牌：emoji + 名稱
+  // 招牌：emoji + 中文名（+ 下面一行西文／英文小字）
+  const si = signInfo(b);
   g.textAlign = 'center'; g.textBaseline = 'middle';
   g.font = '28px "Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.fillStyle = '#000';
-  g.fillText(sc.emoji, x + w / 2, roofY + 22);
-  g.font = 'bold 14px "Noto Sans TC", sans-serif';
-  const label = S.script === 'simp' ? (ZHS[sc.id] || sc.zh) : sc.zh, lw = g.measureText(label).width + 14;
-  g.fillStyle = '#fffdf6'; g.fillRect(x + w / 2 - lw / 2, roofY + 40, lw, 17);
-  g.strokeStyle = '#1b1a22'; g.lineWidth = 2; g.strokeRect(x + w / 2 - lw / 2, roofY + 40, lw, 17);
-  g.fillStyle = '#1b1a22'; g.fillText(label, x + w / 2, roofY + 49);
-  if (b.soon) { hazardSign(S.script === 'simp' ? '🚧 维修中' : '🚧 維修中', x + w / 2, roofY - 2); return; }   // 牌子掛在屋頂上緣，不擋到 emoji
+  g.fillText(sc.emoji, x + w / 2, si.ey);
+  g.fillStyle = '#fffdf6'; g.fillRect(si.bx, si.by, si.bw, si.bh);
+  g.strokeStyle = '#1b1a22'; g.lineWidth = 2; g.strokeRect(si.bx, si.by, si.bw, si.bh);
+  g.fillStyle = '#1b1a22'; g.font = 'bold 14px "Noto Sans TC", sans-serif'; g.fillText(si.zh, x + w / 2, si.zy);
+  if (si.sub) { g.fillStyle = '#4a4655'; g.font = `bold ${si.fs}px "Noto Sans TC", sans-serif`; g.fillText(si.sub, x + w / 2, si.sy); }
+  if (b.soon) { hazardSign((S.script === 'simp' ? '🚧 维修中' : '🚧 維修中') + (S.lang === 'es' ? ' · En obras' : S.lang === 'en' ? ' · Under repair' : ''), x + w / 2, roofY - 2, S.lang === 'zh' ? 12 : 10.5); return; }   // 牌子掛在屋頂上緣，不擋到 emoji
   // 完成標記
   const r = S.done[sc.id];
   if (r) pill(starText(starsOf(r)), x + w / 2, roofY - 2, '#1b1a22', '#ffd66b');   // 掛在屋頂上緣，不擋到 emoji
 }
 
 /* 黃黑斜紋的告示牌 */
-function hazardSign(text, cx, cy) {
-  g.font = 'bold 12px "Noto Sans TC", sans-serif';
+function hazardSign(text, cx, cy, fs = 12) {
+  g.font = `bold ${fs}px "Noto Sans TC", sans-serif`;
   const w = g.measureText(text).width + 16, h = 18, x = cx - w / 2, y = cy - h / 2;
   g.save();
   g.beginPath(); g.rect(x, y, w, h); g.clip();
@@ -1182,9 +1194,8 @@ function drawNight(cy) {   // 呼叫時已經 translate(0, -cy)
   if (!_lamps) { _lamps = []; for (let y = 0; y < ROWS; y++) { if (!SIDEWALK_ROWS.includes(y)) continue; for (let x = 1; x < COLS; x += 4) if (!isRoad(x, y)) _lamps.push([x * T + T / 2, y * T + T / 2]); } }
   const live = buildings.filter(b => b.sc.status !== 'build');
   // 1) 整體變暗偏藍（招牌的名稱牌和圖示不變暗，像亮著的燈箱）
-  g.font = 'bold 14px "Noto Sans TC", sans-serif';
   g.save(); g.beginPath(); g.rect(0, cy, W, VH);
-  live.forEach(b => { const x = b.x * T, y = b.y * T, w = b.w * T, lw = g.measureText(S.script === 'simp' ? (ZHS[b.sc.id] || b.sc.zh) : b.sc.zh).width + 14; g.rect(x + w / 2 - lw / 2 - 1, y + 39, lw + 2, 19); g.rect(x + w / 2 - 20, y + 4, 40, 38); });
+  live.forEach(b => { const x = b.x * T, y = b.y * T, w = b.w * T, i = signInfo(b); g.rect(i.bx - 1, i.by - 1, i.bw + 2, i.bh + 2); g.rect(x + w / 2 - 20, i.sub ? y + 1 : y + 4, 40, i.sub ? 30 : 35); });
   g.clip('evenodd');
   g.globalCompositeOperation = 'multiply'; g.fillStyle = (window.FEST && FEST.tint) || '#8593c8'; g.fillRect(0, cy, W, VH);
   g.globalCompositeOperation = 'source-over'; g.fillStyle = 'rgba(10,14,50,.10)'; g.fillRect(0, cy, W, VH);
