@@ -446,11 +446,10 @@ const Game = defineGame({
     [d1[4], d1[5]] = [d1[5], d1[4]]; [d2[7], d2[8]] = [d2[8], d2[7]];
     let ph = [real, d1.join(''), d2.join('')]; if (ph[1] === real || ph[2] === real) ph = [real, '09' + ri(10000000, 99999999), '09' + ri(10000000, 99999999)];
     const fmt = p => p.slice(0, 4) + '-' + p.slice(4, 7) + '-' + p.slice(7);
-    const zhNum = p => [p.slice(0, 4), p.slice(4, 7), p.slice(7)].map(g => [...g].map(c => ZD[c]).join('')).join('，');
+    const zhPh = p => [p.slice(0, 4), p.slice(4, 7), p.slice(7)].map(zhDigits).join('，');
     /* 搜尋結果：理髮店、假髮店、色情理髮店各一支市話（區碼＋8 碼），選項用中文數字念法 */
-    const ZD = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
     const areas = shuffle(['02', '03', '04', '06', '07']);
-    const shopTel = a => { const d = String(ri(2000, 8999)) + String(ri(1000, 9999)); return { d: a + d, show: `(${a}) ${d.slice(0, 4)}-${d.slice(4)}`, zh: `${[...a].map(c => ZD[c]).join('')}，${[...d.slice(0, 4)].map(c => ZD[c]).join('')}，${[...d.slice(4)].map(c => ZD[c]).join('')}` }; };
+    const shopTel = a => { const d = String(ri(2000, 8999)) + String(ri(1000, 9999)); return { d: a + d, show: `(${a}) ${d.slice(0, 4)}-${d.slice(4)}`, zh: `${zhDigits(a)}，${zhDigits(d.slice(0, 4))}，${zhDigits(d.slice(4))}` }; };
     const shops = [{ k: 'salon', n: '理髮店', ...shopTel(areas[0]) }, { k: 'wig', n: '假髮店', ...shopTel(areas[1]) }, { k: 'adult', n: '色情理髮店', ...shopTel(areas[2]) }];
     const price = pick([350, 400, 450]), given = (Math.random() < 0.5 || price >= 450) ? 500 - price : 500 - price - 50;   // 450 元時少找 50 會變成 0，所以一定找對
     const bossWrong = Math.random() < 0.5;
@@ -459,7 +458,7 @@ const Game = defineGame({
     const said = SLOT(sayD, '下午', sayH);
     const alt = SLOT(pick(DAYS.filter(d => d !== day)), '下午', pick([2, 3, 4, 5, 6].filter(h => h !== hr)));   // 老闆說對時，「不對」選項用的別的時間
     this.carry = null; this._cs = false;
-    this.task = { day, hr, want: SLOT(day, '下午', hr), said, sayD, sayH, bossWrong, alt, slots: slots.map(s => SLOT(s[0], s[1], s[2])), shops, shopOrder: shuffle(shops.slice()), phone: fmt(real), phones: ph.map(fmt), phoneZh: zhNum(real), phonesZh: ph.map(zhNum), len, bang, rot: Math.floor(Math.random() * 3), price, given, wrong: given !== 500 - price };
+    this.task = { day, hr, want: SLOT(day, '下午', hr), said, sayD, sayH, bossWrong, alt, slots: slots.map(s => SLOT(s[0], s[1], s[2])), shops, shopOrder: shuffle(shops.slice()), phone: fmt(real), phones: ph.map(fmt), phoneZh: zhPh(real), phonesZh: ph.map(zhPh), len, bang, rot: Math.floor(Math.random() * 3), price, given, wrong: given !== 500 - price };
   },
 
   setPlace(mode) {

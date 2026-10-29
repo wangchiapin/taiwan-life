@@ -299,7 +299,10 @@ const zhNum = n => {
   return out;
 };
 const NZ = n => n === 2 ? '兩' : zhNum(n);
-const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+/* 逐位念（電話、號碼、西元年）：每個數字單獨念，其他字（- ， 空格）原樣保留
+   zhDigits('02-4967-2308') → 零二-四九六七-二三零八；zhDigits(2026) → 二零二六；0 念「零」、1 念「一」 */
+const zhDigits = s => String(s).replace(/\d/g, d => CN[+d]);
+const pick =arr => arr[Math.floor(Math.random() * arr.length)];
 const shuffle = arr => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function track(name, params) { try { gtag('event', name, params || {}); } catch (e) {} }

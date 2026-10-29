@@ -342,7 +342,6 @@ function randDigits(n) { let s = ''; for (let i = 0; i < n; i++) s += Math.floor
 function tail3() { let t; do { t = randDigits(3); } while (new Set(t).size < 3); return t; }  // 三個數字都不一樣，方便做干擾選項
 const rev = s => s.split('').reverse().join('');
 const rot = s => s.slice(1) + s[0];
-const digitsCN = s => String(s).replace(/\d/g, d => CN[+d]);
 const sp = s => String(s).split('').join(' ');
 /* 日期用真實的今天：md(0) 是今天，md(2) 是兩天後。中文寫「10月25日」（不要寫 10/25：朗讀會唸成「25分之10」），西文「25 de octubre」，英文「Oct 25」 */
 const dayOff = off => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + off); return d; };
@@ -642,7 +641,7 @@ const Game = defineGame({
       L(`房東太太：${N}，拿到了嗎？啊，我忘了說，房東先生也有一個包裹在同一家！`,
         `${N}, ¿ya lo recogiste? Ah, olvidé decirte: ¡el casero también tiene un paquete en la misma tienda!`,
         `${N}, did you get it? Oh, I forgot to say: the landlord has a parcel at the same store too!`),
-      L(`房東太太：取件人寫房東先生的名字，${t.dadName}，末三碼是${digitsCN(t.dadTail)}。那個已經付過錢了。拜託你囉！`,
+      L(`房東太太：取件人寫房東先生的名字，${t.dadName}，末三碼是${zhDigits(t.dadTail)}。那個已經付過錢了。拜託你囉！`,
         `El destinatario es el nombre del casero, ${rom(t.dadName)}, y los últimos tres dígitos son ${sp(t.dadTail)}. Ese ya está pagado. ¡Cuento contigo!`,
         `The recipient is the landlord's name, ${rom(t.dadName)}, and the last three digits are ${sp(t.dadTail)}. That one is already paid for. I'm counting on you!`)
     ];

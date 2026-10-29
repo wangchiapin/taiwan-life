@@ -446,8 +446,6 @@ const SYM_IDS = Object.keys(SYM);
 /* 數字念法：叫號用（十二號、十四號…） */
 /* 掛號時拿錯的卡：[西文, 英文] */
 const OTHER_CARDS = { '悠遊卡': ['la EasyCard (tarjeta de transporte)', 'your EasyCard'], '信用卡': ['la tarjeta de crédito', 'your credit card'], '會員卡': ['una tarjeta de socio', 'a membership card'], '金融卡': ['la tarjeta de débito', 'your debit card'] };
-const NUMZH = n => n <= 10 ? CN[n] : n < 20 ? '十' + CN[n - 10] : CN[Math.floor(n / 10)] + '十' + (n % 10 ? CN[n % 10] : '');
-const DAYZH = n => ({ 2: '兩', 3: '三', 5: '五', 7: '七' })[n];
 const pad2 = n => String(n).padStart(2, '0');
 
 /* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */
@@ -529,7 +527,7 @@ const Game = defineGame({
   symList() { return this.task.sym.map(id => SYM[id]); },
   sentence(ids, days) {          // 玩家描述症狀的句子 [中文, 西文, 英文]
     const a = SYM[ids[0]], b = SYM[ids[1]];
-    return [`我${a.zh}、${b.zh}，已經${DAYZH(days)}天了。`, `Tengo ${a.es} y ${b.es} desde hace ${days} días.`, `I have ${a.en} and ${b.en}, and it's been ${days} days.`];
+    return [`我${a.zh}、${b.zh}，已經${NZ(days)}天了。`, `Tengo ${a.es} y ${b.es} desde hace ${days} días.`, `I have ${a.en} and ${b.en}, and it's been ${days} days.`];
   },
   amiLines() {
     const N = this.N;
@@ -543,7 +541,7 @@ const Game = defineGame({
     ];
   },
   docLines() {
-    const t = this.task, rx = DAYZH(t.rx);
+    const t = this.task, rx = NZ(t.rx);
     const out = [L('醫生：我看一下喉嚨……有一點紅，是感冒喔。', 'Déjame ver la garganta… está un poco roja. Es un resfriado.', "Let me look at your throat… it's a little red. It's a cold.")];
     if (t.fever) out.push(L('醫生：你有一點發燒，要多休息。', 'Tienes un poco de fiebre; hay que descansar más.', "You have a slight fever, so you need more rest."));
     if (t.allergy) out.push(L('醫生：你說你對止痛藥過敏，我會開別的藥給你。', 'Dices que tienes alergia a los analgésicos; te recetaré otros medicamentos.', "You said you're allergic to painkillers, so I'll prescribe something else."));
@@ -553,7 +551,7 @@ const Game = defineGame({
     return out;
   },
   pharmLines() {
-    const rx = DAYZH(this.task.rx);
+    const rx = NZ(this.task.rx);
     return [
       L('藥師：這是你的藥。感冒藥一天三次，三餐飯後吃；止咳藥睡前吃。', 'Aquí está su medicina. El de resfriado, tres veces al día después de las comidas; el de la tos, antes de dormir.', 'Here is your medicine. Take the cold medicine three times a day after meals, and the cough medicine before bed.'),
       L(`藥師：藥一共${rx}天，吃完再看看。`, `Son ${this.task.rx} días de medicina en total; cuando la termines, vemos cómo sigues.`, `That's ${this.task.rx} days of medicine in total; see how you feel when you finish.`)
@@ -566,7 +564,7 @@ const Game = defineGame({
     const t = this.task, r = s => this.ruby(s), sy = this.symList();
     const rows = [
       { zh: `症狀：${sy[0].zh}、${sy[1].zh}`, es: `Síntomas: ${sy[0].es}, ${sy[1].es}`, en: `Symptoms: ${sy[0].en}, ${sy[1].en}` },
-      { zh: `已經${DAYZH(t.days)}天了`, es: `Desde hace ${t.days} días`, en: `For ${t.days} days` },
+      { zh: `已經${NZ(t.days)}天了`, es: `Desde hace ${t.days} días`, en: `For ${t.days} days` },
       { zh: t.fever ? '有一點發燒（三十七度八）' : '沒有發燒（三十六度五）', es: t.fever ? 'Un poco de fiebre (37,8 °C)' : 'Sin fiebre (36,5 °C)', en: t.fever ? 'A slight fever (37.8 °C)' : 'No fever (36.5 °C)' },
       { zh: t.allergy ? '對止痛藥過敏' : '沒有藥物過敏', es: t.allergy ? 'Alergia a los analgésicos' : 'Sin alergia a medicamentos', en: t.allergy ? 'Allergic to painkillers' : 'No drug allergies' },
       { zh: '有健保卡，是第一次來這家診所', es: 'Tienes tu tarjeta del seguro de salud y es tu primera vez en esta clínica', en: "You have your NHI card, and it's your first time at this clinic" }
@@ -592,7 +590,7 @@ const Game = defineGame({
       <tr><th></th><th>${r('早')}</th><th>${r('中')}</th><th>${r('晚')}</th><th>${r('睡前')}</th></tr>
       <tr><td>${r('感冒藥')}</td><td>${ok(1)}</td><td>${ok(1)}</td><td>${ok(1)}</td><td>${ok(0)}</td></tr>
       <tr><td>${r('止咳藥')}</td><td>${ok(0)}</td><td>${ok(0)}</td><td>${ok(0)}</td><td>${ok(1)}</td></tr></table>
-      <div class="bn">${r('飯後')} · ${r('吃' + DAYZH(this.task.rx) + '天')}</div></div>`;
+      <div class="bn">${r('飯後')} · ${r('吃' + NZ(this.task.rx) + '天')}</div></div>`;
   },
 
   /* ── 狀態設定 ── */
@@ -667,7 +665,7 @@ const Game = defineGame({
       R_TICKET: {
         place: 'reception',
         html: () => Game.boardHTML(),
-        dialogue: () => [desk(`好，這是你的號碼牌，${NUMZH(t.myNo)}號。前面還有三位，請先坐著等一下。`,
+        dialogue: () => [desk(`好，這是你的號碼牌，${zhNum(t.myNo)}號。前面還有三位，請先坐著等一下。`,
           `Bien, este es su número: el ${t.myNo}. Hay tres personas antes que usted; tome asiento y espere, por favor.`,
           `OK, here's your number: ${t.myNo}. There are three people ahead of you; please have a seat.`)],
         options: ['好，謝謝。'],
@@ -686,18 +684,18 @@ const Game = defineGame({
           const mine = Game.cur === t.myNo;
           if (c === '進診間') {
             if (!mine) {
-              Game.addMistake(M(`還沒輪到你。現在是${NUMZH(Game.cur)}號，你是${NUMZH(t.myNo)}號。`, `Todavía no es tu turno: van por el ${Game.cur} y tú tienes el ${t.myNo}.`, `It's not your turn yet: they're at ${Game.cur} and you're ${t.myNo}.`),
-                [desk(`${NUMZH(Game.cur)}號還在看診，請再等一下。`, `El ${Game.cur} todavía está en consulta; espere un poco más, por favor.`, `Number ${Game.cur} is still being seen. Please wait a bit longer.`)]); return;
+              Game.addMistake(M(`還沒輪到你。現在是${zhNum(Game.cur)}號，你是${zhNum(t.myNo)}號。`, `Todavía no es tu turno: van por el ${Game.cur} y tú tienes el ${t.myNo}.`, `It's not your turn yet: they're at ${Game.cur} and you're ${t.myNo}.`),
+                [desk(`${zhNum(Game.cur)}號還在看診，請再等一下。`, `El ${Game.cur} todavía está en consulta; espere un poco más, por favor.`, `Number ${Game.cur} is still being seen. Please wait a bit longer.`)]); return;
             }
             if (Game.att.W_WAIT <= 4) Game.good('很好！你聽到叫號，輪到自己才進去。', '¡Muy bien! Escuchaste el llamado y entraste cuando fue tu turno.', 'Very good! You listened for the call and went in when it was your turn.');
             Game.state = 'D_SYMPTOM'; return;
           }
           if (mine) {
             Game.addMistake(M('輪到你了，要馬上進診間，不然會過號。', 'Ya es tu turno: hay que entrar enseguida o se pasarán a otro número.', "It's your turn — go in right away, or they'll skip your number."),
-              [desk(`${NUMZH(t.myNo)}號，${NUMZH(t.myNo)}號，請進診間！`, `¡Número ${t.myNo}, número ${t.myNo}, pase al consultorio!`, `Number ${t.myNo}, number ${t.myNo}, please come in!`)]); return;
+              [desk(`${zhNum(t.myNo)}號，${zhNum(t.myNo)}號，請進診間！`, `¡Número ${t.myNo}, número ${t.myNo}, pase al consultorio!`, `Number ${t.myNo}, number ${t.myNo}, please come in!`)]); return;
           }
           Game.cur += 1;
-          Game.thought = [desk(`${NUMZH(Game.cur)}號的病人，請進診間。`, `Paciente número ${Game.cur}, pase al consultorio.`, `Patient number ${Game.cur}, please come in.`)];
+          Game.thought = [desk(`${zhNum(Game.cur)}號的病人，請進診間。`, `Paciente número ${Game.cur}, pase al consultorio.`, `Patient number ${Game.cur}, please come in.`)];
           if (Game.cur === t.myNo) Game.thought.push(L('（啊，是你的號碼！）', '(¡Es tu número!)', "(That's your number!)"));
         }
       },
@@ -712,7 +710,7 @@ const Game = defineGame({
           const o = [sentence,
             Game.sentence(t.sym, otherDays(t.days)[0]),
             Game.sentence([a, wrongSym], t.days),
-            [`我${SYM[a].zh}，已經${DAYZH(t.days)}天了。`]];
+            [`我${SYM[a].zh}，已經${NZ(t.days)}天了。`]];
           return rotate(o.map(x => x[0]));
         },
         next: c => {
@@ -721,7 +719,7 @@ const Game = defineGame({
             Game.state = 'D_FEVER'; return;
           }
           const sy = Game.symList();
-          Game.addMistake(M(`你的狀況是：${sy[0].zh}、${sy[1].zh}，已經${DAYZH(t.days)}天了。`, `Tu situación: ${sy[0].es}, ${sy[1].es}, desde hace ${t.days} días.`, `Your situation: ${sy[0].en}, ${sy[1].en}, for ${t.days} days.`));
+          Game.addMistake(M(`你的狀況是：${sy[0].zh}、${sy[1].zh}，已經${NZ(t.days)}天了。`, `Tu situación: ${sy[0].es}, ${sy[1].es}, desde hace ${t.days} días.`, `Your situation: ${sy[0].en}, ${sy[1].en}, for ${t.days} days.`));
         }
       },
       D_FEVER: {
@@ -807,14 +805,14 @@ const Game = defineGame({
         place: 'phone',
         dialogue: () => [L('Ami：怎麼樣？醫生怎麼說？他給你幾天的藥？', '¿Cómo te fue? ¿Qué dijo el doctor? ¿Para cuántos días te dio medicina?', 'How did it go? What did the doctor say? How many days of medicine did he give you?')],
         options: () => rotate([
-          `醫生說是感冒，藥吃${DAYZH(t.rx)}天，要多喝水、多休息。`,
-          `醫生說是感冒，藥吃${DAYZH(t.rx === 3 ? 5 : 3)}天，要多喝水、多休息。`,
+          `醫生說是感冒，藥吃${NZ(t.rx)}天，要多喝水、多休息。`,
+          `醫生說是感冒，藥吃${NZ(t.rx === 3 ? 5 : 3)}天，要多喝水、多休息。`,
           '醫生說不用吃藥，多喝水就好。',
-          `醫生說是感冒，藥吃${DAYZH(t.rx)}天，吃完一定要再回去看。`
+          `醫生說是感冒，藥吃${NZ(t.rx)}天，吃完一定要再回去看。`
         ]),
         next: c => {
-          if (c !== `醫生說是感冒，藥吃${DAYZH(t.rx)}天，要多喝水、多休息。`) {
-            Game.addMistake(M(`醫生說藥吃${DAYZH(t.rx)}天，要多喝水、多休息；${DAYZH(t.rx)}天後還沒好才再回診。`, `El doctor dijo ${t.rx} días de medicina, beber agua y descansar; solo volver si en ${t.rx} días no mejoras.`, `The doctor said ${t.rx} days of medicine, drink water and rest; only come back if you're not better after ${t.rx} days.`)); return;
+          if (c !== `醫生說是感冒，藥吃${NZ(t.rx)}天，要多喝水、多休息。`) {
+            Game.addMistake(M(`醫生說藥吃${NZ(t.rx)}天，要多喝水、多休息；${NZ(t.rx)}天後還沒好才再回診。`, `El doctor dijo ${t.rx} días de medicina, beber agua y descansar; solo volver si en ${t.rx} días no mejoras.`, `The doctor said ${t.rx} days of medicine, drink water and rest; only come back if you're not better after ${t.rx} days.`)); return;
           }
           if (Game.att.E_ASK === 1) Game.good('中文不錯喔！你聽得懂醫生說的話，也能清楚告訴朋友。', '¡Tu chino va muy bien! Entendiste al doctor y pudiste contárselo claramente a tu amiga.', 'Your Chinese is pretty good! You understood the doctor and could tell your friend clearly.');
           Game.stopTimer();

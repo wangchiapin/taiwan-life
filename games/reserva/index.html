@@ -330,20 +330,13 @@ pinyinPro.customPinyin({ '日期': 'rì qí', '認識': 'rèn shì', '為什麼'
 /* ══════════════════════════════════════
    小工具
 ══════════════════════════════════════ */
-function cn(n) {                       // 1–31 → 中文數字
-  if (n <= 10) return CN[n];
-  if (n < 20) return '十' + CN[n - 10];
-  return CN[Math.floor(n / 10)] + '十' + (n % 10 ? CN[n % 10] : '');
-}
-function cnCount(n) { return n === 2 ? '兩' : cn(n); }   // 量詞前：兩張、兩位
-function timeStr(t) { return cn(Math.floor(t)) + '點' + (t % 1 ? '半' : ''); }
+function timeStr(t) { return zhNum(Math.floor(t)) + '點' + (t % 1 ? '半' : ''); }
 /* 日期：用「離今天幾天」來記（0 = 今天），顯示時換成真實的月、日 */
 const TODAY0 = (() => { const d = new Date(); d.setHours(12, 0, 0, 0); return d; })();
 const dayAt = off => { const d = new Date(TODAY0); d.setDate(d.getDate() + off); return d; };
-function dateStr(off) { const d = dayAt(off); return `${cn(d.getMonth() + 1)}月${cn(d.getDate())}號`; }
+function dateStr(off) { const d = dayAt(off); return `${zhNum(d.getMonth() + 1)}月${zhNum(d.getDate())}號`; }
 const MES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const phoneCN = s => s.replace(/\d/g, d => CN[+d]);       // 02-4967-2308 → 零二-四九六七-二三零八
 
 // 西文、英文翻譯用
 const DAY_ES = { '今天': 'hoy', '星期五': 'viernes', '星期六': 'sábado', '星期日': 'domingo' };
@@ -458,7 +451,7 @@ const Hints = {
     const enKids = n => `${n} kid${n > 1 ? 's' : ''}`;
     let html = `<div class="h-sec">${r('Ami 一開始說的')}</div>` +
       item(`${t.day}（${dateStr(t.date)}），去好味道餐廳聚餐。`, `El ${DAY_ES[t.day]} (${esDate(t.date)}), cena en el restaurante Hao Weidao.`, `${DAY_EN[t.day]} (${enDate(t.date)}), dinner at Hao Weidao restaurant.`) +
-      item(`${cn(t.adults)}個大人，${cnCount(t.kids)}個小孩，小孩要坐兒童椅。`, `${t.adults} adultos y ${esN(t.kids, 'niño', 'niños')}; los niños necesitan silla para niños.`, `${t.adults} adults and ${enKids(t.kids)}; the kids need high chairs.`) +
+      item(`${zhNum(t.adults)}個大人，${NZ(t.kids)}個小孩，小孩要坐兒童椅。`, `${t.adults} adultos y ${esN(t.kids, 'niño', 'niños')}; los niños necesitan silla para niños.`, `${t.adults} adults and ${enKids(t.kids)}; the kids need high chairs.`) +
       item(`時間是晚上${timeStr(t.T)}。Ami ${timeStr(t.offWork)}才下班，不能比${timeStr(t.T)}早。`, `A ${esTime(t.T)} de la noche. Ami sale del trabajo a ${esTime(t.offWork)}: no puede ser antes de ${esTime(t.T)}.`, `At ${enTime(t.T)}. Ami gets off work at ${enTime(t.offWork)}, so not earlier than ${enTime(t.T)}`) +
       item('朋友小美吃素。', 'Su amiga Xiaomei es vegetariana.', 'Her friend Xiaomei is vegetarian.') +
       item('不要太貴的位子。', 'No quiere una mesa muy cara.', "She doesn't want an expensive table.");
@@ -724,15 +717,15 @@ const Game = defineGame({
       '分兩桌': ['分兩桌坐', 'en dos mesas separadas', 'at two separate tables']
     }[b.seat] || ['一般座位', 'mesa normal', 'regular table'];
     const ex = [[], [], []];
-    if (b.chairs) { ex[0].push(`${cnCount(b.chairs)}張兒童椅`); ex[1].push(esN(b.chairs, 'silla para niños', 'sillas para niños')); ex[2].push(`${b.chairs} high chair${b.chairs > 1 ? 's' : ''}`); }
+    if (b.chairs) { ex[0].push(`${NZ(b.chairs)}張兒童椅`); ex[1].push(esN(b.chairs, 'silla para niños', 'sillas para niños')); ex[2].push(`${b.chairs} high chair${b.chairs > 1 ? 's' : ''}`); }
     if (b.veg) { ex[0].push('有素食'); ex[1].push('comida vegetariana'); ex[2].push('vegetarian food'); }
     const j = (arr, sep) => arr.length ? sep + arr.join(sep) : '';
     this.repeat = { wrongField, v, lines: [
       L('店員：跟您確認一下：', 'Le confirmo:', 'Let me confirm:'),
-      L(`${dateStr(v.date)}${b.day}，晚上${timeStr(v.time)}，${cn(v.people)}位，${seat[0]}${j(ex[0], '，')}。`,
+      L(`${dateStr(v.date)}${b.day}，晚上${timeStr(v.time)}，${zhNum(v.people)}位，${seat[0]}${j(ex[0], '，')}。`,
         `${DAY_ES[b.day]} ${esDate(v.date)}, a ${esTime(v.time)} de la noche, ${v.people} personas, ${seat[1]}${j(ex[1], ', ')}.`,
         `${DAY_EN[b.day]}, ${enDate(v.date)}, at ${enTime(v.time)}, ${v.people} people, ${seat[2]}${j(ex[2], ', ')}.`),
-      L(`訂位人${b.name}，電話${phoneCN(v.phone)}。`, `A nombre de ${b.name}, teléfono ${v.phone}.`, `Under the name ${b.name}, phone ${v.phone}.`),
+      L(`訂位人${b.name}，電話${zhDigits(v.phone)}。`, `A nombre de ${b.name}, teléfono ${v.phone}.`, `Under the name ${b.name}, phone ${v.phone}.`),
       L('這樣對嗎？', '¿Es correcto?', 'Is that correct?')
     ] };
   },
@@ -751,7 +744,7 @@ const Game = defineGame({
           L(`Ami：${N}，我們${dateStr(t.date)}${t.day}要去好味道餐廳聚餐，你可以幫我打電話訂位嗎？順便練習你的中文！`,
             `${N}, el ${DAY_ES[t.day]} ${esDate(t.date)} vamos a comer al restaurante Hao Weidao. ¿Puedes llamar para reservar una mesa? ¡Así practicas chino!`,
             `${N}, on ${DAY_EN[t.day]}, ${enDate(t.date)}, we're having dinner at Hao Weidao. Can you call and book a table? Good Chinese practice for you!`),
-          L(`Ami：我們有${cn(t.adults)}個大人，還有${cnCount(t.kids)}個小朋友，小朋友要坐兒童椅。`,
+          L(`Ami：我們有${zhNum(t.adults)}個大人，還有${NZ(t.kids)}個小朋友，小朋友要坐兒童椅。`,
             `Somos ${t.adults} adultos y ${esN(t.kids, 'niño', 'niños')}; los niños necesitan silla para niños.`,
             `There are ${t.adults} adults and ${t.kids} kid${t.kids > 1 ? 's' : ''}; the kids need high chairs.`),
           L(`Ami：時間是晚上${timeStr(t.T)}。我${timeStr(t.offWork)}才下班，所以不能比${timeStr(t.T)}早喔！`,
@@ -775,12 +768,12 @@ const Game = defineGame({
           '(Hay un folleto del restaurante en el refrigerador. ¿A qué número llamas?)',
           "(There's a restaurant flyer on the fridge. Which number do you call?)")],
         options: () => {
-          if (!Game._dialOpts) Game._dialOpts = shuffle(distinct(Game.bookingLine, [swapDigits, tweakNumber], [Game.deliveryLine])).map(phoneCN);
+          if (!Game._dialOpts) Game._dialOpts = shuffle(distinct(Game.bookingLine, [swapDigits, tweakNumber], [Game.deliveryLine])).map(zhDigits);
           return Game._dialOpts;
         },
         next: c => {
-          if (c === phoneCN(Game.bookingLine)) { Game.state = 'C1_GREET'; }
-          else if (c === phoneCN(Game.deliveryLine)) {
+          if (c === zhDigits(Game.bookingLine)) { Game.state = 'C1_GREET'; }
+          else if (c === zhDigits(Game.deliveryLine)) {
             Game.addMistake('打到外送專線，不是訂位專線。Llamaste a la línea de delivery, no a la de reservas.');
             Game.state = 'DELIVERY_LINE';
           } else {
@@ -900,22 +893,22 @@ const Game = defineGame({
         call: 'shop',
         dialogue: () => [L('店員：好的。請問幾位呢？', 'Bien. ¿Para cuántas personas?', 'OK. For how many people?')],
         options: () => {
-          if (!Game._p1Opts) Game._p1Opts = shuffle([...new Set([t.adults, t.people, t.people + 1, t.people - 1])]).map(n => cn(n) + '位');
+          if (!Game._p1Opts) Game._p1Opts = shuffle([...new Set([t.adults, t.people, t.people + 1, t.people - 1])]).map(n => zhNum(n) + '位');
           return Game._p1Opts;
         },
         next: c => {
-          b.people = [t.adults, t.people, t.people + 1, t.people - 1].find(n => cn(n) + '位' === c);
+          b.people = [t.adults, t.people, t.people + 1, t.people - 1].find(n => zhNum(n) + '位' === c);
           if (b.people === t.people) Game.good('很棒欸！人數正確，有把小朋友算進去。', '¡Muy bien! Número correcto: contaste también a los niños.', 'Correct number: you counted the kids too.');
           if (b.people === t.adults) Game.addMistake('忘記把小朋友也算進去。Olvidaste contar a los niños.');
-          else if (b.people !== t.people) Game.addMistake(`人數不對，應該是${cn(t.people)}位。El número de personas no es correcto.`);
-          if (b.people !== t.people) Game.thought = [L(`我：啊，不好意思，我說錯了，是${cn(t.people)}位。`, `Ah, perdón, me equivoqué: somos ${t.people}.`, `Oh, sorry, my mistake: ${t.people} people.`)];
+          else if (b.people !== t.people) Game.addMistake(`人數不對，應該是${zhNum(t.people)}位。El número de personas no es correcto.`);
+          if (b.people !== t.people) Game.thought = [L(`我：啊，不好意思，我說錯了，是${zhNum(t.people)}位。`, `Ah, perdón, me equivoqué: somos ${t.people}.`, `Oh, sorry, my mistake: ${t.people} people.`)];
           b.people = t.people;   // 玩家馬上更正，避免後面連環扣分
           Game.state = 'C1_ROOM';
         }
       },
       C1_ROOM: {
         call: 'shop',
-        dialogue: () => [L(`店員：${cn(t.people)}位的話，我們有包廂，可是包廂每個人低消五百元。要坐包廂嗎？`,
+        dialogue: () => [L(`店員：${zhNum(t.people)}位的話，我們有包廂，可是包廂每個人低消五百元。要坐包廂嗎？`,
           `Para ${t.people} personas tenemos salón privado, pero el consumo mínimo es de 500 dólares por persona. ¿Quiere el salón privado?`,
           `For ${t.people} people we have a private room, but there's a minimum charge of NT$500 per person. Would you like it?`)],
         options: ['好，坐包廂。', '不用，一般座位就好。', '等一下喔……我確認一下。'],
@@ -984,11 +977,11 @@ const Game = defineGame({
         call: 'shop',
         dialogue: () => [L('店員：請問您的手機號碼是？', '¿Cuál es su número de celular?', "What's your cell phone number?")],
         options: () => {
-          if (!Game._phoneOpts) Game._phoneOpts = shuffle(distinct(Game.myPhone, [tweakNumber, swapDigits])).map(phoneCN);
+          if (!Game._phoneOpts) Game._phoneOpts = shuffle(distinct(Game.myPhone, [tweakNumber, swapDigits])).map(zhDigits);
           return Game._phoneOpts;
         },
         next: c => {
-          if (c !== phoneCN(Game.myPhone)) {
+          if (c !== zhDigits(Game.myPhone)) {
             Game.addMistake('電話號碼說錯了。Diste mal tu número de teléfono.',
               [L('（等一下，這不是我的號碼……看一下上面！）', '(Espera, ese no es mi número… ¡míralo arriba!)', "(Wait, that's not my number… check at the top!)")]);
             return;
@@ -1039,8 +1032,8 @@ const Game = defineGame({
           const fix = {
             date: [dateStr(b.date), `el ${esDate(b.date)}`, enDate(b.date)],
             time: [timeStr(b.time), `a ${esTime(b.time)}`, enTime(b.time)],
-            people: [cn(b.people) + '位', `${b.people} personas`, `${b.people} people`],
-            phone: [phoneCN(b.phone), b.phone, b.phone]
+            people: [zhNum(b.people) + '位', `${b.people} personas`, `${b.people} people`],
+            phone: [zhDigits(b.phone), b.phone, b.phone]
           }[k];
           Game.thought = [
             L(`我：是${fix[0]}才對。`, `Es ${fix[1]}.`, `It's ${fix[2]}.`),
@@ -1092,28 +1085,28 @@ const Game = defineGame({
         call: 'shop',
         dialogue: () => [L('店員：好的，請問是用什麼名字、哪支電話訂的？', 'Bien, ¿a qué nombre y con qué teléfono hizo la reserva?', 'OK, what name and phone number was it booked under?')],
         options: () => {
-          if (!Game._lookupOpts) Game._lookupOpts = shuffle([`${N}，${phoneCN(Game.myPhone)}`, `Ami，${phoneCN(Game.myPhone)}`, `${N}，${phoneCN(swapDigits(Game.myPhone))}`]);
+          if (!Game._lookupOpts) Game._lookupOpts = shuffle([`${N}，${zhDigits(Game.myPhone)}`, `Ami，${zhDigits(Game.myPhone)}`, `${N}，${zhDigits(swapDigits(Game.myPhone))}`]);
           return Game._lookupOpts;
         },
         next: c => {
-          if (c === `${N}，${phoneCN(Game.myPhone)}`) { Game.state = 'C2_PEOPLE'; return; }
+          if (c === `${N}，${zhDigits(Game.myPhone)}`) { Game.state = 'C2_PEOPLE'; return; }
           Game.addMistake('訂位資料說錯了，店員查不到。Diste datos que no coinciden con la reserva.',
             [L('店員：嗯……我查不到這筆訂位耶，可以再說一次嗎？', 'Mmm… no encuentro esa reserva, ¿me lo repite?', "Hmm… I can't find that booking, could you say it again?")]);
         }
       },
       C2_PEOPLE: {
         call: 'shop',
-        dialogue: () => [L(`店員：找到了，${dateStr(b.date)}${b.day}晚上${timeStr(b.time)}，${cn(b.people)}位。請問要改成幾位？`,
+        dialogue: () => [L(`店員：找到了，${dateStr(b.date)}${b.day}晚上${timeStr(b.time)}，${zhNum(b.people)}位。請問要改成幾位？`,
           `La encontré: ${DAY_ES[b.day]} ${esDate(b.date)}, a ${esTime(b.time)} de la noche, ${b.people} personas. ¿A cuántas personas la cambio?`,
           `Found it: ${DAY_EN[b.day]}, ${enDate(b.date)}, at ${enTime(b.time)}, ${b.people} people. How many people should I change it to?`)],
         options: () => {
-          if (!Game._p2Opts) Game._p2Opts = shuffle([...new Set([t.finalPeople, t.finalPeople + 1, t.finalPeople - 1, t.adults + 1])]).map(n => cn(n) + '位');
+          if (!Game._p2Opts) Game._p2Opts = shuffle([...new Set([t.finalPeople, t.finalPeople + 1, t.finalPeople - 1, t.adults + 1])]).map(n => zhNum(n) + '位');
           return Game._p2Opts;
         },
         next: c => {
-          const n = [t.finalPeople, t.finalPeople + 1, t.finalPeople - 1, t.adults + 1].find(v => cn(v) + '位' === c);
+          const n = [t.finalPeople, t.finalPeople + 1, t.finalPeople - 1, t.adults + 1].find(v => zhNum(v) + '位' === c);
           if (n !== t.finalPeople) {
-            Game.addMistake(`人數改錯了，多一個人應該是${cn(t.finalPeople)}位。Era una persona más.`,
+            Game.addMistake(`人數改錯了，多一個人應該是${zhNum(t.finalPeople)}位。Era una persona más.`,
               [L('（等等，只多一個人……）', '(Espera, es solo una persona más…)', "(Wait, it's just one more person…)")]);
             return;
           }
@@ -1124,10 +1117,10 @@ const Game = defineGame({
       C2_TABLE: {
         call: 'shop',
         dialogue: () => b.seat === '包廂'
-          ? [L(`店員：${cn(b.people)}位的話，包廂還坐得下，一樣每個人低消五百元。或是改成兩張桌子併在一起，也可以分開坐兩桌。`,
+          ? [L(`店員：${zhNum(b.people)}位的話，包廂還坐得下，一樣每個人低消五百元。或是改成兩張桌子併在一起，也可以分開坐兩桌。`,
               `Para ${b.people} personas todavía caben en el salón privado, con el mismo consumo mínimo de 500 por persona. También puedo juntar dos mesas, o pueden sentarse en dos mesas separadas.`,
               `For ${b.people} people the private room still fits, with the same NT$500 minimum per person. Or we can push two tables together, or you can sit at two separate tables.`)]
-          : [L(`店員：${cn(b.people)}位的話，一張桌子坐不下。可以幫您把兩張桌子併在一起，或是分開坐兩桌，您覺得呢？`,
+          : [L(`店員：${zhNum(b.people)}位的話，一張桌子坐不下。可以幫您把兩張桌子併在一起，或是分開坐兩桌，您覺得呢？`,
               `Para ${b.people} personas no caben en una mesa. Puedo juntar dos mesas, o pueden sentarse en dos mesas separadas. ¿Qué prefiere?`,
               `For ${b.people} people one table isn't enough. I can push two tables together, or you can sit at two separate tables. What do you think?`)],
         options: () => b.seat === '包廂'
@@ -1163,7 +1156,7 @@ const Game = defineGame({
       },
       C2_FULL: {
         call: 'shop',
-        dialogue: () => [L(`店員：${timeStr(t.ask2)}${cn(b.people)}位的位子沒有了。可以維持原本的${timeStr(t.t1)}，或是改到${timeStr(t.alt2)}。`,
+        dialogue: () => [L(`店員：${timeStr(t.ask2)}${zhNum(b.people)}位的位子沒有了。可以維持原本的${timeStr(t.t1)}，或是改到${timeStr(t.alt2)}。`,
           `A ${esTime(t.ask2)} ya no hay mesa para ${b.people} personas. Puede mantener la hora original, ${esTime(t.t1)}, o cambiar a ${esTime(t.alt2)}.`,
           `There's no table for ${b.people} at ${enTime(t.ask2)}. You can keep the original ${enTime(t.t1)} or move to ${enTime(t.alt2)}`)],
         options: () => [`維持${timeStr(t.t1)}。`, `改到${timeStr(t.alt2)}。`, '等一下喔……我確認一下。'],
@@ -1176,7 +1169,7 @@ const Game = defineGame({
       C2_CHAIRS: {
         call: 'shop',
         dialogue: () => b.chairs
-          ? [L(`店員：兒童椅一樣是${cnCount(b.chairs)}張嗎？`, `¿Siguen siendo ${esN(b.chairs, 'silla para niños', 'sillas para niños')}?`, `Still ${b.chairs} high chair${b.chairs > 1 ? 's' : ''}?`)]
+          ? [L(`店員：兒童椅一樣是${NZ(b.chairs)}張嗎？`, `¿Siguen siendo ${esN(b.chairs, 'silla para niños', 'sillas para niños')}?`, `Still ${b.chairs} high chair${b.chairs > 1 ? 's' : ''}?`)]
           : [L('店員：好的。其他的都一樣嗎？', 'Bien. ¿Todo lo demás igual?', 'OK. Everything else the same?')],
         options: () => b.chairs ? ['對，一樣。', '要多一張。'] : ['對，都一樣。', '啊，我們還需要兒童椅！'],
         next: c => {
@@ -1257,17 +1250,17 @@ const Game = defineGame({
           const probs = [];   // [中文, 西文, 英文]
           if (b.date !== t.date) probs.push([`你怎麼訂到${dateStr(b.date)}，是${dateStr(t.date)}才對！`, `¿Por qué reservaste para el ${esDate(b.date)}? ¡Era el ${esDate(t.date)}!`, `Why did you book ${enDate(b.date)}? It should be ${enDate(t.date)}!`]);
           if (b.time !== t.finalTime) probs.push([`${timeStr(b.time)}？我跟你說${timeStr(t.finalTime)}欸！`, `¿A ${esTime(b.time)}? ¡Te dije a ${esTime(t.finalTime)}!`, `${enTime(b.time)}? I told you ${enTime(t.finalTime)}!`]);
-          if (b.people !== t.finalPeople) probs.push([`你只有訂${cn(b.people)}個人，我們有${cn(t.finalPeople)}個人耶！`, `¡Solo reservaste para ${b.people}, pero somos ${t.finalPeople}!`, `You only booked for ${b.people}, but there are ${t.finalPeople} of us!`]);
+          if (b.people !== t.finalPeople) probs.push([`你只有訂${zhNum(b.people)}個人，我們有${zhNum(t.finalPeople)}個人耶！`, `¡Solo reservaste para ${b.people}, pero somos ${t.finalPeople}!`, `You only booked for ${b.people}, but there are ${t.finalPeople} of us!`]);
           if (b.seat === '包廂') probs.push(['包廂每個人低消五百元，太貴了啦！', '¡El salón privado tiene consumo mínimo de 500 por persona, es muy caro!', 'The private room has a NT$500 minimum per person, too expensive!']);
           if (b.seat === '分兩桌') probs.push(['為什麼要分兩桌？我說大家要坐在一起耶！', '¿Por qué en dos mesas? ¡Dije que todos juntos!', 'Why two tables? I said we all sit together!']);
-          if (b.chairs !== t.kids) probs.push([`應該是${cnCount(t.kids)}張兒童椅吧？你怎麼訂了${b.chairs ? cnCount(b.chairs) + '張' : '零張'}？`, `¿No eran ${esN(t.kids, 'silla para niños', 'sillas para niños')}? ¿Por qué reservaste ${b.chairs}?`, `Shouldn't it be ${t.kids} high chair${t.kids > 1 ? 's' : ''}? Why did you book ${b.chairs}?`]);
+          if (b.chairs !== t.kids) probs.push([`應該是${NZ(t.kids)}張兒童椅吧？你怎麼訂了${NZ(b.chairs || 0) + '張'}？`, `¿No eran ${esN(t.kids, 'silla para niños', 'sillas para niños')}? ¿Por qué reservaste ${b.chairs}?`, `Shouldn't it be ${t.kids} high chair${t.kids > 1 ? 's' : ''}? Why did you book ${b.chairs}?`]);
           if (!b.veg) probs.push(['你沒問素食，那小美要吃什麼？', 'No preguntaste por comida vegetariana, ¿y entonces qué va a comer Xiaomei?', "You didn't ask about vegetarian food, so what will Xiaomei eat?"]);
           if (b.phone !== Game.myPhone) probs.push(['餐廳記的電話是錯的，有事都聯絡不到你！', '¡El restaurante anotó mal tu teléfono, no podrán contactarte!', "The restaurant has the wrong phone number, they can't reach you!"]);
           probs.forEach(p => Game.addMistake({ zh: p[0], es: p[1], en: p[2] }));
           Game._endGood = probs.length === 0;
           track('game_complete', { game: 'reserva', score: Game.score, elapsed: Game.elapsedTime });
 
-          const sum = [`${dateStr(b.date)}${b.day}晚上${timeStr(b.time)}，${cn(b.people)}位`,
+          const sum = [`${dateStr(b.date)}${b.day}晚上${timeStr(b.time)}，${zhNum(b.people)}位`,
                        `${DAY_ES[b.day]} ${esDate(b.date)}, a ${esTime(b.time)} de la noche, ${b.people} personas`,
                        `${DAY_EN[b.day]}, ${enDate(b.date)}, at ${enTime(b.time)}, ${b.people} people`];
           if (!probs.length) return [
