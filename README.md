@@ -29,7 +29,7 @@ tools/firestore.rules  Firestore 規則（改了要貼到 console 發布）
 
 ## 場景 ID（資料夾名 = scene = collection 前綴 = GA4 game 參數）
 drinks · reserva · breakfast · nightmarket · parcel · bakery · clinic · mrt · street · school · ubike · bus · barber · cinema · parking · icecream · bookstore · market · elevator · noodle · conbini · yansuji · guandi
-（共 23 個，與首頁 `SCENES` 一致。`airport` 還在 `COMING`（維修中），沒有資料夾。地圖 24 個位置已經全部用完，下次新增遊戲前要先擴充地圖，見下面「新遊戲：關帝廟」。）
+（共 23 個，與首頁 `SCENES` 一致。`airport` 還在 `COMING`（維修中），沒有資料夾。地圖還有 8 個空位，見下面「新遊戲：關帝廟」。）
 
 Firestore collection：`<scene>game_scores` 或 `<scene>_scores`（沿用各遊戲現有名稱，不要改，否則舊排行榜會消失）。
 排行榜需要複合索引：score 降冪 + elapsed 升冪。
@@ -114,7 +114,7 @@ parent.postMessage({ type: 'scene-complete', scene: '<scene>', score, mistakes }
 - 付錢不用 `billFor`：光明燈固定 500 元、身上只有一張一千元，所以 `PAY`／`PAY_FIX`／`CHANGE` 寫在這個遊戲自己的 `getConfig()` 裡（用 `catchState`），找完錢接到平安符。
 - 正解在 `tools/oracles/guandi.py`；`tools/smoke.py` 已加入名單。
 - 圖片提示詞在 `docs/image-prompts-guandi.md`（16 張），圖片檔還沒有，缺圖時自動顯示 emoji。
-- **地圖已滿**：24 個位置全部用完。專案原則是保留 3 個空位、往下擴充地圖（`BUILD_SLOTS`、`ROWS`、馬路列），下次新增遊戲前要先做。
+- **地圖已往下加一條馬路（2026-10-29）**：`ROWS` 42→56，第四條橫向馬路在第 47、48 列，新增 `BUILD_SLOTS` 24–31（現在是 8 個空位，新遊戲用 slot 24 開始）。人行道、樹、行人、貓、車、路口、阿嬤斑馬線事件都跟著加了。
 - 台詞和拼音是第一版草稿，需要 Ben 審。籤詩的多音字（例如「長」「行」）拼音沒有逐一核對。
 
 ## 冰淇淋店 icecream（2026-10-28 更新）
