@@ -1,5 +1,7 @@
 // ===== Firebase 專案 tiendadebebidas-d75ac 的 Firestore 規則（整份貼上取代）=====
-// 連接的 repo：taiwan-life（台灣生存日記系列）；cadadiaunosminutos-share-zone 也會讀。整理日期：2026-10-29
+// 連接的 repo：taiwan-life（台灣生存日記系列）；cadadiaunosminutos-share-zone 也會讀。最後更新：2026-10-29 15:25（以下為這次整理：規則內容沒改，只加註解）
+// 變更紀錄（只留最新 3 筆，新的放最上面；每次改規則都要寫日期＋時間）：
+//   - 2026-10-29 15:25 加最上方註解、規則檔改名（規則內容沒改）
 rules_version = '2';
 // 台灣情境對話遊戲系列（tiendadebebidas-d75ac）的 Firestore 規則
 // 貼到 Firebase console → Firestore Database → 規則 → 發布
