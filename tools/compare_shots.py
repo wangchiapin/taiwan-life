@@ -1,26 +1,76 @@
-"""改之前／改之後逐畫面比對：python3 tools/compare_shots.py <game> <舊檔.html> [輸出資料夾]
+r"""改之前／改之後逐畫面比對：python3 tools/compare_shots.py [--keep-pulse] [--real-tabs] <遊戲> <舊檔.html> [輸出資料夾]
 兩邊用同一個隨機種子、固定時間，照正解（沒有正解就固定選第一個）玩一遍，
-每一步都截圖比對；也比對繁簡、西英、拼音、手機尺寸、嵌入模式、排行榜畫面。"""
-import sys, os, re, json, shutil, pathlib
+每一步都截圖比對；也比對繁簡、西英、拼音、手機尺寸、嵌入模式、排行榜畫面。
+另外每張截圖都記下右邊三顆分頁按鈕（任務提示、本關單字、錯誤紀錄）的座標、樣式、文字，兩邊也要一樣。
+
+【乾淨模式（預設）】右邊那排按鈕在截圖裡有兩種和程式無關的雜訊，所以預設先處理掉：
+  1. 「任務提示」登入後約 1 秒開始閃、閃 6.5 秒（減少動態時變成黃色外框），拍到與否看時間
+     → 預設設成「已看過提示」，不閃。加 --keep-pulse 可保留。
+  2. 分頁條用 top:50% ＋ translateY(-50%) 置中，位置是小數（約 240.305），瀏覽器畫的時候有時進位有時捨去，
+     差 1 像素（同一份檔案自己比自己也會）→ 預設把分頁條固定在整數位置。加 --real-tabs 可保留
+     （畫面會有 1 像素雜訊；座標數字仍然會比）。
+  所以「閃動的瞬間」和「置中的像素畫面」這個工具比不到，要用手機看。
+
+【準備舊檔】舊的共用檔要另存成 shared/game_before.js，舊遊戲檔裡的連結也要指向它。例如（改之前的提交是 abc123）：
+  git show abc123:shared/game.js > shared/game_before.js
+  git show abc123:games/drinks/index.html | sed 's#\.\./\.\./shared/game\.js#../../shared/game_before.js#' > /tmp/drinks_old.html
+  python3 tools/compare_shots.py drinks /tmp/drinks_old.html /tmp/cmp_drinks
+  rm shared/game_before.js        # 用完要刪；推之前用 git status 確認沒有未追蹤的檔案
+
+【注意】工具直接讀這個資料夾：比對時不要改檔案，也不要同時跑 smoke.py；同一個遊戲不能同時跑兩次
+（都會用 games/<遊戲>/_before.html，跑完或出錯會自動刪掉）。
+【判讀】「不一樣」＝畫面有明顯差異（≥ 80 個明顯像素）；「微小差異」是肉眼看不出的雜訊，只列出位置；
+「[按鈕]」＝右邊分頁按鈕的座標／樣式／文字不同，會列出哪一項。
+某一組（繁西／簡英拼音／手機／嵌入）兩邊的步驟不同時，那一組不比（可能是某次點擊剛好失敗讓編號錯開，重跑一次就好）。
+有任何不一樣時，結束代碼是 1。"""
+import sys, os, re, json, shutil, pathlib, atexit
+FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
+ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
+if len(ARGS) < 2 or FLAGS - {'--keep-pulse', '--real-tabs'}:
+    print(__doc__); sys.exit(2)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import smoke
-smoke_timeout = 8000
 from playwright.sync_api import sync_playwright
 from PIL import Image, ImageChops
 
-game, old = sys.argv[1], sys.argv[2]
-OUT = pathlib.Path(sys.argv[3] if len(sys.argv) > 3 else f'/tmp/cmp_{game}'); OUT.mkdir(parents=True, exist_ok=True)
+game, old = ARGS[0], ARGS[1]
+OUT = pathlib.Path(ARGS[2] if len(ARGS) > 2 else f'/tmp/cmp_{game}'); OUT.mkdir(parents=True, exist_ok=True)
 GDIR = pathlib.Path(smoke.ROOT) / 'games' / game
 tmp = GDIR / '_before.html'; shutil.copy(old, tmp)
-INIT = """(() => { let s = 12345; Math.random = () => { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; };
-  const T0 = 1760500000000; Date.now = () => T0; localStorage.clear();
+atexit.register(lambda: tmp.unlink(missing_ok=True))      # 中途出錯也要刪掉暫存檔
+KEEP_PULSE = '--keep-pulse' in FLAGS
+FIX_TABS = '--real-tabs' not in FLAGS
+# 閃動的開關是 shared/game.js 的 HintPulse（localStorage 的 hanziGames.hintSeen）；那邊改名的話，這裡也要跟著改
+INIT = ("""(() => { let s = 12345; Math.random = () => { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; };
+  const T0 = 1760500000000; Date.now = () => T0; localStorage.clear(); __SEEN__
   document.addEventListener('DOMContentLoaded', () => { const st = document.createElement('style');
-    st.textContent = '*,*::before,*::after{transition:none!important;animation:none!important;caret-color:transparent!important}'; document.head.appendChild(st); }); })();"""
+    st.textContent = '*,*::before,*::after{transition:none!important;animation:none!important;caret-color:transparent!important}' + __CSS__; document.head.appendChild(st); }); })();"""
+        .replace('__SEEN__', '' if KEEP_PULSE else "localStorage.setItem('hanziGames.hintSeen', '1');")
+        .replace('__CSS__', json.dumps('#side-tabs{transform:none!important;top:240px!important}' if FIX_TABS else '')))
+print(f'模式：任務提示閃動{"保留" if KEEP_PULSE else "關閉"}、右邊分頁條{"原本位置" if not FIX_TABS else "固定在整數位置"}')
+
+# 右邊三顆分頁按鈕＋外框的座標、樣式、文字、裡面的小字（每拍一張截圖就記一份）
+SNAP_JS = """() => { const props = ['display','width','height','paddingTop','paddingBottom','paddingLeft','paddingRight','marginTop','fontSize','fontWeight','letterSpacing','lineHeight','color','backgroundColor','borderRadius','transform','outlineStyle','outlineWidth','boxShadow','opacity','writingMode'];
+  const r = id => { const e = document.getElementById(id); if (!e) return null; const b = e.getBoundingClientRect(), c = getComputedStyle(e), st = {}; props.forEach(p => st[p] = c[p]);
+    const kids = [...e.children].map(k => { const kc = getComputedStyle(k), kb = k.getBoundingClientRect(); return { cls: k.className, text: k.textContent, top: +kb.top.toFixed(3), height: +kb.height.toFixed(3), fontSize: kc.fontSize, display: kc.display, color: kc.color, bg: kc.backgroundColor }; });
+    return { rect: [+b.top.toFixed(3), +b.height.toFixed(3), +b.left.toFixed(3), +b.width.toFixed(3)], text: e.textContent, cls: e.className, hidden: e.hidden, st, kids }; };
+  return { stack: r('side-tabs'), hint: r('hint-tab'), vocab: r('vocab-tab'), log: r('log-tab') }; }"""
+SNAPS = []
+
+def snap_diff(a, b, path=''):
+    out = []
+    if isinstance(a, dict) and isinstance(b, dict):
+        for k in sorted(set(a) | set(b)): out += snap_diff(a.get(k), b.get(k), f'{path}/{k}')
+    elif isinstance(a, list) and isinstance(b, list) and len(a) == len(b):
+        for i, (x, y) in enumerate(zip(a, b)): out += snap_diff(x, y, f'{path}/{i}')
+    elif a != b: out.append(f'{path}: {a!r} → {b!r}')
+    return out
 
 def shot(page):
     page.mouse.move(0, 0); page.wait_for_timeout(60)
     try: page.wait_for_function("[...document.images].every(i => i.complete)", timeout=3000)   # 等圖片載完
     except Exception: pass
+    SNAPS.append(page.evaluate(SNAP_JS))
     return page.screenshot(full_page=True)
 
 def play(page, scenario):
@@ -36,6 +86,8 @@ def play(page, scenario):
             if st == 'RESULT' and page.evaluate('EMBED'): shots.append(('RESULT', shot(page))); break
             if game == 'breakfast' and page.evaluate("!!(Game.getConfig()[Game.state]||{}).pad"):
                 page.evaluate("Game.pad.ticket=[...Game.C.target]; Game.padSubmit()"); continue
+            if page.locator('#ami-pop').count():          # Ami 的懸浮視窗（冰淇淋店）會擋住選項：和 smoke.py 一樣先按掉
+                page.click('#ami-pop [data-act="open"]' if page.locator('#ami-pop [data-act="open"]').count() else '#ami-pop [data-act="reply"]'); continue
             opts = smoke.texts(page)
             if not opts: continue
             shots.append((f'{step:02d}_{st}', shot(page)))
@@ -72,16 +124,17 @@ def play(page, scenario):
 
 SCEN = [('trad_es', {}, '', 'panels'), ('simp_en_py', {}, 'simp_en', 'pinyin'), ('phone', {'width': 390, 'height': 844}, '', ''),
         ('embed', {}, 'embed', '')]
-diffs = 0; total = 0
+diffs = 0; total = 0; tabdiffs = 0
 with sync_playwright() as p:
     b = p.chromium.launch()
     res = {}
     for which, fname in [('old', '_before.html'), ('new', 'index.html')]:
         for name, vp, mode, extra in SCEN:
             ctx = b.new_context(viewport=vp or {'width': 1000, 'height': 900}, reduced_motion='reduce'); ctx.route('**/*', smoke.route); ctx.add_init_script(INIT)
-            page = ctx.new_page(); errs = []
+            page = ctx.new_page(); page.set_default_timeout(8000); errs = []      # 單次等待最多 8 秒，卡住時不會一等 30 秒
             page.on('pageerror', lambda e: errs.append(str(e))); page.on('dialog', lambda d: d.accept())
             q = '?embed=1&name=Ana' if mode == 'embed' else ''
+            SNAPS.clear()
             page.goto(f'http://127.0.0.1:{smoke.PORT}/games/{game}/{fname}{q}'); page.wait_for_timeout(500)
             shots = [('login', shot(page))]
             if mode != 'embed':
@@ -91,14 +144,14 @@ with sync_playwright() as p:
                 page.fill('#player-name-input', 'María'); page.click('.btn-primary'); page.wait_for_timeout(300)
                 if extra == 'pinyin': page.click('#btn-pinyin'); page.click('[data-k=phon][data-v=pinyin]'); page.click('#set-done'); page.wait_for_timeout(200)
             shots += play(page, extra)
-            res[(which, name)] = (shots, errs)
+            res[(which, name)] = (shots, errs, list(SNAPS))
             ctx.close()
     b.close()
 for name, *_ in SCEN:
-    so, eo = res[('old', name)]; sn, en = res[('new', name)]
+    so, eo, ao = res[('old', name)]; sn, en, an = res[('new', name)]
     if eo or en: print(f'  {name} 錯誤 old={eo[:2]} new={en[:2]}')
     if [k for k, _ in so] != [k for k, _ in sn]:
-        print(f'  {name} 步驟不同：old 共 {len(so)} 步、new 共 {len(sn)} 步；第一個不同：', next((a[0]+' / '+b[0] for a, b in zip(so, sn) if a[0] != b[0]), '長度不同')); diffs += 1; continue
+        print(f'  {name} 步驟不同：old 共 {len(so)} 步、new 共 {len(sn)} 步；第一個不同：', next((a[0]+' / '+b[0] for a, b in zip(so, sn) if a[0] != b[0]), '長度不同'), '（這一組沒有比對，請重跑）'); diffs += 1; continue
     for (k, a), (_, c) in zip(so, sn):
         total += 1
         fa, fc = OUT / f'{name}_{k}_old.png', OUT / f'{name}_{k}_new.png'
@@ -106,11 +159,20 @@ for name, *_ in SCEN:
         A, C = Image.open(fa).convert('RGB'), Image.open(fc).convert('RGB')
         D = ImageChops.difference(A, C) if A.size == C.size else None
         if D is None or D.getbbox():
-            big = None if D is None else sum(1 for px in D.convert('L').point(lambda v: 255 if v > 16 else 0).getdata() if px)
+            big = None if D is None else sum(D.convert('L').histogram()[17:])
             if big is not None and big < 80:          # 肉眼看不出的雜訊（反鋸齒、陰影動畫的瞬間）
-                print(f'  · {name} {k} 微小差異（{big} 個明顯像素），不算'); fa.unlink(); fc.unlink(); continue
+                print(f'  · {name} {k} 微小差異（{big} 個明顯像素）box={D.getbbox()}，不算'); fa.unlink(); fc.unlink(); continue
             diffs += 1
             print(f'  ✗ {name} {k} 不一樣 size {A.size}/{C.size} box={None if D is None else D.getbbox()} 明顯像素={big}')
         else: fa.unlink(); fc.unlink()
-tmp.unlink()
-print(f'{game}：比對 {total} 張畫面，不一樣 {diffs} 張')
+    shown = 0; bad_snaps = 0
+    for i, (a, c) in enumerate(zip(ao, an)):
+        d = snap_diff(a, c)
+        if d:
+            bad_snaps += 1
+            if shown < 3:
+                shown += 1; print(f'  [按鈕] {name} 第{i}張（{so[i][0]}）：' + '；'.join(d[:4]) + (f'…共 {len(d)} 項' if len(d) > 4 else ''))
+    tabdiffs += bad_snaps
+    if bad_snaps: print(f'  [按鈕] {name}：{len(ao)} 張裡右邊分頁按鈕不一樣的有 {bad_snaps} 張')
+print(f'{game}：比對 {total} 張畫面，不一樣 {diffs} 張；右邊分頁按鈕不一樣 {tabdiffs} 張')
+sys.exit(1 if diffs or tabdiffs else 0)

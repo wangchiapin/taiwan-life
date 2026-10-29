@@ -72,11 +72,11 @@ parent.postMessage({ type: 'scene-complete', scene: '<scene>', score, mistakes }
 每個遊戲的 index.html 裡留下的：
 1. 載入順序：`shared/player.js` → Firebase（`initFB`）→ `<link shared/game.css>` → 自己的 `<style>`（顏色變數和自己的樣式）→ 畫面 HTML → `const GAME = {…}` → `shared/game.js` → 自己的程式。
 2. `GAME = { scene, track, settingsKey, timerPrefix?, roles }`：場景 ID、GA4 的 game 名稱（沿用舊名）、存設定的 localStorage 名稱、計時器前面的字（預設 ⏱）、朗讀角色的音高。可選 `restartParams(p)`。
-3. 自己的程式：`pinyinPro.customPinyin`、資料、`WHO`／`SPEAKER_RE`、`VOCAB`／`VOCAB_OF`、`Hints`、`STAGE`、`NEXT_LABEL`、`const Game = defineGame({ … })`（`setup`、`getConfig`、`render`、`handleChoice`、`formatText`、`setPlace`、`setImage`…；同名功能會蓋過共用版；開始時要多做的事寫在 `onStart()`）、最後 `GameBoot();` 和 `Music.init({…})`。
+3. 自己的程式：`pinyinPro.customPinyin`、資料、`WHO`／`SPEAKER_RE`、`VOCAB`／`VOCAB_OF`、`Hints`、`STAGE`、`NEXT_LABEL`、`const Game = defineGame({ … })`（`setup`、`getConfig`、`render`、`handleChoice`、`setPlace`…；`setImage` 和多數遊戲的 `formatText` 已改用共用版，只有少數遊戲（如 reserva）還有自己的；同名功能會蓋過共用版；開始時要多做的事寫在 `onStart()`）、最後 `GameBoot();` 和 `Music.init({…})`。
 
 ## 新增遊戲
 複製一個現有遊戲（建議 mrt 或 street，最新），只改上面第 2、3 點的遊戲專屬部分，共用的不用複製。
-改完跑 `tools/smoke.py` 四種測試。改共用檔時，可以用 `tools/compare_shots.py <遊戲> <舊檔>` 逐畫面比對改之前／改之後。
+改完跑 `tools/smoke.py` 四種測試。改共用檔時，可以用 `tools/compare_shots.py <遊戲> <舊檔>` 逐畫面比對改之前／改之後（預設會關掉右邊按鈕的閃動和 1 像素雜訊；用法和限制寫在檔案最上面，有不一樣時結束代碼是 1）。
 
 ## 關卡設計原則（2026-10-27，Ben 決定；新遊戲、改舊遊戲都照這個）
 新做的遊戲曾經太簡單：對方永遠不會錯，玩家只要照 Ami 的話選就對。原本的九個遊戲不是這樣。每個遊戲至少要有：
