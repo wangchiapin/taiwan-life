@@ -114,7 +114,7 @@ parent.postMessage({ type: 'scene-complete', scene: '<scene>', score, mistakes }
 - 付錢不用 `billFor`：光明燈固定 500 元、身上只有一張一千元，所以 `PAY`／`PAY_FIX`／`CHANGE` 寫在這個遊戲自己的 `getConfig()` 裡（用 `catchState`），找完錢接到平安符。
 - 正解在 `tools/oracles/guandi.py`；`tools/smoke.py` 已加入名單。
 - 圖片提示詞在 `docs/image-prompts-guandi.md`（16 張），圖片檔還沒有，缺圖時自動顯示 emoji。
-- **地圖已往下加一條馬路（2026-10-29）**：`ROWS` 42→56，第四條橫向馬路在第 47、48 列，新增 `BUILD_SLOTS` 24–31（現在是 8 個空位，新遊戲用 slot 24 開始）。人行道、樹、行人、貓、車、路口、阿嬤斑馬線事件都跟著加了。
+- **地圖已往下加一條馬路（2026-10-29）**：`ROWS` 42→56，第四條橫向馬路在第 47、48 列，新增 `BUILD_SLOTS` 24–31（當時是 8 個空位；slot 24 之後已給服飾店，現在剩 slot 25–31 共 7 個空位，新遊戲從 slot 25 開始）。人行道、樹、行人、貓、車、路口、阿嬤斑馬線事件都跟著加了。
 - 台詞和拼音是第一版草稿，需要 Ben 審。籤詩的多音字（例如「長」「行」）拼音沒有逐一核對。
 
 ## 冰淇淋店 icecream（2026-10-28 更新）
@@ -157,12 +157,12 @@ iPhone 版 Chrome 上，頁面可以捲動時，往下捲之後有時回不到�
 （範圍：首頁、music.html，以及 games/ 底下全部小遊戲；admin、map、tools 沒動。）
 
 ## 新遊戲：服飾店 clothes（2026-10-29）
-排行榜 `clothesgame_scores`。**地圖位置還沒登記**（`index.html` 的 `SCENES`、`ZHS`、`SUGGEST`）：地圖擴充另外一個對話在做，位置確定後再補，之後 `gated: true`（預設維修中）。
+排行榜 `clothesgame_scores`。地圖位置：slot 24（第四條馬路上的第一格），已登記在 `index.html` 的 `SCENES`、`ZHS`、`SUGGEST`，`gated: true`＝預設維修中，管理員頁「地圖開關」打開才能玩。Firestore 規則已更新為 24 個排行榜（含 `clothesgame_scores`）。
 劇情（Ben 決定）：玩家自己想買新衣服，**不出現 Ami、沒有 LINE**；一件襯衫＋一條長褲，顏色隨機，優惠隨機（兩件85折／第二件5折，折在比較便宜的襯衫）。我的狀況：平常穿上衣 M 號、褲子三十腰、褲長蓋到鞋面、身上有一千元和兩千元。
 
 流程（程式裡的 `ORDER`）：START → SIZE（挑 M／L 號和三十／三十二腰，先記下來不判對錯）→ **ROOM_TAG（店員數件數，可能數錯）** → **FIT_SHIRT（試穿，這個牌子偏小／剛好／偏大，隨機）** → **SHIRT_SWAP（換尺寸，吊牌可能不對；只有不合身才出現）** → FIT_WAIST（選三十二腰才出現，腰太鬆，換三十腰）→ **FIT_LENGTH（褲腳約六成機率太長）** → **HEM（改褲管，別針可能折太短；一百元、三十分鐘）** → **PAY／PAY_FIX／CHANGE（報價可能沒打折或多收改褲管費，找錢可能不對）** → **PICKUP（拿改好的褲子，可能拿到沒改過的；只有改過褲管才出現）** → END（店員提醒七天內帶發票可換貨、改過褲管的不能換）。
 - 真正合身的上衣尺寸 `t.tgt` = M − 偏差（偏小要 L、剛好是 M、偏大要 S），所以 Ami 式的「照說的選」不一定對，要看試穿結果。
 - 付錢：總價都超過一千元，所以 `billFor` 在這個遊戲改成固定付兩千元、`shortBill` 一定不夠的是一千元（和超商不同，改的時候兩邊要分開看）。`payStates` 的 `finish` 有改褲管時先到 PICKUP 再結束。
 - 正解在 `tools/oracles/clothes.py`；`tools/smoke.py` 已加入名單。
-- 圖片檔還沒有（缺圖時自動顯示 emoji），清單在 `docs/image-todo.md`。
+- 圖片檔還沒有（缺圖時自動顯示 emoji）；12 張圖的提示詞在 `docs/image-prompts-clothes.md`，進度清單在 `docs/image-todo.md`。
 - 台詞和拼音是第一版草稿，需要 Ben 審。真實資料：UNIQLO 台灣官網說明改褲長只能改長度、改完不能再放長、改過的商品除瑕疵外不能退換；其他（試衣間號碼牌、七天內換貨、改褲管一百元）是常見做法，Ben 要再確認。
