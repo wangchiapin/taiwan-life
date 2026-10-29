@@ -450,7 +450,6 @@ const DEST = {
   '市政府':     { dir: '南港展覽館', stops: ['善導寺', '忠孝新生', '忠孝復興', '忠孝敦化', '國父紀念館', '市政府'] }
 };
 Object.entries(DEST).forEach(([k, v]) => { v.es = v.en = ROM[k]; });
-const NZ = n => n === 2 ? '兩' : CN[n];
 const DRINKS = [['珍珠奶茶', 'té con leche y perlas de tapioca', 'a bubble tea'], ['冰紅茶', 'un té negro helado', 'an iced black tea']];
 
 /* 過場按鈕上的情境句：key 是下一關；沒有寫的就顯示「繼續」 */

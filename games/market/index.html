@@ -358,7 +358,6 @@ const ITEMS = [
   { zh: '豬肉', es: 'carne de cerdo', en: 'pork', m: '塊', price: 100, icon: '🥩' }
 ];
 const MEASURES = ['把', '顆', '條', '盒', '塊'];
-const QN = n => n === 2 ? '兩' : CN[n];
 
 
 /* ══════════════════════════════════════
@@ -458,7 +457,7 @@ const Game = defineGame({
     const N = this.N, t = this.task;
     return [
       L(`Ami：${N}，我今天晚上要在家煮飯，你來我家一起吃吧！不過，你可以幫我去菜市場買菜嗎？`, `${N}, esta noche cocino en casa: ¡ven a mi casa a cenar conmigo! Pero antes, ¿puedes ir al mercado a comprar?`, `${N}, I'm cooking at home tonight — come over and eat with me! But first, could you buy groceries at the market?`),
-      L('Ami：我要買：' + t.items.map(it => `${QN(it.q)}${it.m}${it.zh}`).join('、') + '。', 'Necesito: ' + t.items.map(it => `${it.q} ${it.es}`).join(', ') + '.', 'I need: ' + t.items.map(it => `${it.q} ${it.en}`).join(', ') + '.'),
+      L('Ami：我要買：' + t.items.map(it => `${NZ(it.q)}${it.m}${it.zh}`).join('、') + '。', 'Necesito: ' + t.items.map(it => `${it.q} ${it.es}`).join(', ') + '.', 'I need: ' + t.items.map(it => `${it.q} ${it.en}`).join(', ') + '.'),
       L('Ami：記得帶環保袋，不要拿塑膠袋。還有，可以問問看能不能算便宜一點喔！', 'Lleva una bolsa reutilizable, no aceptes bolsa de plástico. ¡Y pregunta si te pueden hacer un descuento!', "Bring a reusable bag — don't take a plastic one. And ask if they can give you a discount!")
     ];
   },
@@ -475,7 +474,7 @@ const Game = defineGame({
   listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s);
     const rows = [
-      ...t.items.map(it => ({ zh: `${it.icon} ${QN(it.q)}${it.m}${it.zh}`, es: `${it.q} ${it.es}`, en: `${it.q} ${it.en}` })),
+      ...t.items.map(it => ({ zh: `${it.icon} ${NZ(it.q)}${it.m}${it.zh}`, es: `${it.q} ${it.es}`, en: `${it.q} ${it.en}` })),
       { zh: '要帶環保袋，不拿塑膠袋', es: 'Lleva la bolsa reutilizable, sin plástico', en: 'Use the reusable bag, no plastic' },
       { zh: '你身上有：一張五百元', es: 'Llevas: un billete de quinientos dólares', en: 'You have: a 500-dollar bill' }
     ];
@@ -495,7 +494,7 @@ const Game = defineGame({
     const N = this.N, t = this.task;
     const vend = (zh, es, en) => L(`老闆：${zh}`, es, en);
     const chFix = `老闆，好像找錯了，應該找${zhNum(t.shortChange ? 500 - t.final : 500 - t.final - 50)}元吧？`;
-    const bagLine = (it, q) => `${it.zh}我要的是${QN(it.q)}${it.m}，不是${QN(q)}${it.m}。`;
+    const bagLine = (it, q) => `${it.zh}我要的是${NZ(it.q)}${it.m}，不是${NZ(q)}${it.m}。`;
     const bgFix = `老闆，${t.bagWrong ? bagLine(t.items[t.wi], t.wq) : bagLine(t.items[t.wi], t.fq)}`;
     const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
     const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
@@ -515,10 +514,10 @@ const Game = defineGame({
         place: 'shop',
         html: () => Game.basketHTML(),
         dialogue: () => { const it = t.items[Game.k]; return [vend(`歡迎光臨！要買什麼？`, '¡Bienvenido(a)! ¿Qué va a llevar?', 'Welcome! What would you like?'), L(`（你要買${it.icon}${it.zh}。）`, `(Quieres comprar ${it.es}.)`, `(You want to buy ${it.en}.)`)]; },
-        options: () => { const it = t.items[Game.k]; const ms = [it.m, ...shuffle(MEASURES.filter(x => x !== it.m)).slice(0, 2)]; return rot(ms).map(m => `我要${QN(it.q)}${m}${it.zh}。`); },
+        options: () => { const it = t.items[Game.k]; const ms = [it.m, ...shuffle(MEASURES.filter(x => x !== it.m)).slice(0, 2)]; return rot(ms).map(m => `我要${NZ(it.q)}${m}${it.zh}。`); },
         next: c => {
           const it = t.items[Game.k];
-          if (c !== `我要${QN(it.q)}${it.m}${it.zh}。`) { Game.itemWrong = true; Game.addMistake(M(`記住！${it.zh}的量詞是「${it.m}」。`, `¡Recuerda! El clasificador de ${it.es} es «${it.m}».`, `Remember! The measure word for ${it.en} is "${it.m}".`)); return; }
+          if (c !== `我要${NZ(it.q)}${it.m}${it.zh}。`) { Game.itemWrong = true; Game.addMistake(M(`記住！${it.zh}的量詞是「${it.m}」。`, `¡Recuerda! El clasificador de ${it.es} es «${it.m}».`, `Remember! The measure word for ${it.en} is "${it.m}".`)); return; }
           if (!Game.itemWrong) Game.good(`對了！${it.zh}用「${it.m}」。`, `¡Correcto! Para ${it.es} se usa «${it.m}».`, `Right! Use "${it.m}" for ${it.en}.`);
           Game.itemWrong = false;
           Game.k += 1;
@@ -587,21 +586,21 @@ const Game = defineGame({
       /* ═══ 拿到東西：老闆可能裝錯數量 ═══ */
       CHECK: {
         place: 'shop',
-        html: () => `<div class="basket" style="flex-direction:column;align-items:flex-start;gap:4px">${t.items.map((it, i) => `<div>${it.icon} ${Game.ruby(it.zh)}　${QN(t.bagWrong && i === t.wi ? t.wq : it.q)}${Game.ruby(it.m)}</div>`).join('')}</div>`,
+        html: () => `<div class="basket" style="flex-direction:column;align-items:flex-start;gap:4px">${t.items.map((it, i) => `<div>${it.icon} ${Game.ruby(it.zh)}　${NZ(t.bagWrong && i === t.wi ? t.wq : it.q)}${Game.ruby(it.m)}</div>`).join('')}</div>`,
         dialogue: () => [vend('這是你的菜，請拿好。', 'Aquí tiene sus compras, tome.', "Here are your groceries — take them.")],
         options: () => rot(['好，謝謝。', bgFix, '老闆，你是不是故意的啊？']),
         next: c => {
           const right = t.bagWrong ? bgFix : '好，謝謝。', it = t.items[t.wi];
           if (c !== right) {
             Game.addMistake(c === '好，謝謝。'
-              ? M(`數量不對：Ami要${QN(it.q)}${it.m}${it.zh}，老闆放了${QN(t.wq)}${it.m}。拿東西以前，要先看一看。`, `Cantidad equivocada: Ami quiere ${it.q} de ${it.es} y pusieron ${t.wq}. Revisa antes de llevártelo.`, `Wrong amount: Ami wants ${it.q} of ${it.en} and he put in ${t.wq}. Check before you take it.`)
+              ? M(`數量不對：Ami要${NZ(it.q)}${it.m}${it.zh}，老闆放了${NZ(t.wq)}${it.m}。拿東西以前，要先看一看。`, `Cantidad equivocada: Ami quiere ${it.q} de ${it.es} y pusieron ${t.wq}. Revisa antes de llevártelo.`, `Wrong amount: Ami wants ${it.q} of ${it.en} and he put in ${t.wq}. Check before you take it.`)
               : c === bgFix
-                ? M(`數量是對的：${it.zh}就是${QN(it.q)}${it.m}。`, `La cantidad está bien: ${it.q} de ${it.es}.`, `The amount is right: ${it.q} of ${it.en}.`)
+                ? M(`數量是對的：${it.zh}就是${NZ(it.q)}${it.m}。`, `La cantidad está bien: ${it.q} de ${it.es}.`, `The amount is right: ${it.q} of ${it.en}.`)
                 : M('要有禮貌，說清楚你要的數量就好。', 'Hay que ser cortés: di claramente la cantidad que querías.', 'Be polite: just state clearly the amount you wanted.'));
             return;
           }
           goodFirst('CHECK', t.bagWrong ? '你很細心！數量放錯了，要馬上說。' : '拿到東西以後，先看一下數量對不對。', t.bagWrong ? '¡Qué atento! Pusieron mal la cantidad; hay que decirlo enseguida.' : 'Al recibir las compras, revisa que las cantidades sean correctas.', t.bagWrong ? 'Well spotted! The amount was wrong — say so right away.' : 'When you get your groceries, check the amounts.');
-          Game.thought = t.bagWrong ? [vend(`啊，我看錯了！我幫你換成${QN(it.q)}${it.m}。`, `¡Ay, me confundí! Se lo cambio a ${it.q}.`, `Oh, my mistake! I'll change it to ${it.q}.`)] : null;
+          Game.thought = t.bagWrong ? [vend(`啊，我看錯了！我幫你換成${NZ(it.q)}${it.m}。`, `¡Ay, me confundí! Se lo cambio a ${it.q}.`, `Oh, my mistake! I'll change it to ${it.q}.`)] : null;
           Game.stopTimer();
           Game.state = 'END';
         }

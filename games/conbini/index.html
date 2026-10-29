@@ -471,7 +471,6 @@ const PLACES = {
   phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
   shop: ['🏪', '超商', 'Tienda 24 h', 'Convenience store', '']
 };
-const NZ = n => n === 2 ? '兩' : CN[n];
 const CODE_CH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const rndCode = () => '/' + Array.from({ length: 7 }, () => pick([...CODE_CH])).join('');
 const mutate = (code, avoid = []) => {      // 換掉其中一個字，看起來很像但不一樣

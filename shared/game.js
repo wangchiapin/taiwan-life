@@ -243,21 +243,37 @@ const M = (zh, es, en) => ({ zh, es, en });                 // 扣分原因
 const money = n => n + '元';
 const esM = n => `${n} dólares`;
 const enM = n => `NT$${n}`;
-/* 中文數字：zhNum(850) → 八百五十；zhNum(1000) → 一千；200 → 兩百 */
+/* 念數字（金額、數量、年份以外的一般數字）
+   zhNum(850) → 八百五十；zhNum(2) → 二；200 → 兩百；2000 → 兩千；20000 → 兩萬；2002 → 兩千零二；兩億
+   NZ(n)：後面要接量詞時用（兩個、兩球、十二片）：NZ(2) → 兩，其他和 zhNum 一樣 */
 const zhNum = n => {
   n = Math.round(n);
   if (n === 0) return '零';
-  const D = '零一二三四五六七八九';
-  const th = Math.floor(n / 1000), h = Math.floor(n / 100) % 10, te = Math.floor(n / 10) % 10, u = n % 10;
-  let s = '';
-  if (th) s += (th === 2 ? '兩' : D[th]) + '千';
-  if (h) s += (h === 2 ? '兩' : D[h]) + '百';
-  else if (th && (te || u)) s += '零';
-  if (te) s += (te === 1 && !th && !h ? '' : D[te]) + '十';
-  else if ((th || h) && u) s += '零';
-  if (u) s += D[u];
-  return s;
+  if (n < 0) return '負' + zhNum(-n);
+  if (n >= 1e16) return String(n);
+  const D = '零一二三四五六七八九', UNIT = ['', '十', '百', '千'], BIG = ['', '萬', '億', '兆'];
+  const groups = [];                                        // 每四位一組，由低到高
+  for (let m = n; m > 0; m = Math.floor(m / 10000)) groups.push(m % 10000);
+  let out = '', pendingZero = false;
+  for (let gi = groups.length - 1; gi >= 0; gi--) {
+    const g = groups[gi], hasHigher = out !== '';
+    if (g === 0) { if (hasHigher) pendingZero = true; continue; }
+    let s = '', zero = false;
+    for (let p = 3; p >= 0; p--) {
+      const d = Math.floor(g / 10 ** p) % 10;
+      if (d === 0) { if (s) zero = true; continue; }
+      if (zero) { s += '零'; zero = false; }
+      if (p === 1 && d === 1 && !s && !hasHigher) s += '十';                 // 整個數字開頭的十幾：十二，不是一十二
+      else s += ((p >= 2 && d === 2) ? '兩' : D[d]) + UNIT[p];
+    }
+    if (gi > 0 && g === 2) s = '兩';                                          // 兩萬、兩億
+    if (hasHigher && (pendingZero || g < 1000)) s = '零' + s;                  // 一萬零二、一億零五百
+    pendingZero = false;
+    out += s + BIG[gi];
+  }
+  return out;
 };
+const NZ = n => n === 2 ? '兩' : zhNum(n);
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const shuffle = arr => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

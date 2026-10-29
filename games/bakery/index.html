@@ -448,8 +448,6 @@ const breadImg = (id, cls) => `<span class="bimg ${cls || ''}"><img src="images/
 const BYZH = Object.fromEntries(SHELF.map(i => [i.zh, i]));
 const BREAD_ES = { pine: 'pan piña', floss: 'pan de carne con hebras de cerdo', bean: 'pan de frijol rojo' };
 const BREAD_EN = { pine: 'pineapple buns', floss: 'pork floss buns', bean: 'red bean buns' };
-/* 數字：念法（兩個、八片、十二片…） */
-const NZ = n => ({ 2: '兩', 3: '三', 4: '四', 5: '五', 6: '六', 7: '七', 8: '八', 9: '九', 10: '十', 12: '十二' })[n];
 const PICKUP_ES = { '明天上午十點': 'mañana a las 10 de la mañana', '明天下午三點': 'mañana a las 3 de la tarde', '後天下午三點': 'pasado mañana a las 3 de la tarde' };
 const PICKUP_EN = { '明天上午十點': 'tomorrow at 10 a.m.', '明天下午三點': 'tomorrow at 3 p.m.', '後天下午三點': 'the day after tomorrow at 3 p.m.' };
 const FLAVORS = [['草莓鮮奶油', '草莓', 'fresa con crema', 'strawberry cream'], ['巧克力', '巧克力', 'chocolate', 'chocolate'], ['核桃咖啡', '核桃', 'café con nuez', 'walnut coffee']];
