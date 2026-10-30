@@ -77,7 +77,7 @@
 - `payStates()`：報價（PAY）、重算後付錢（PAY_FIX）、找錢（CHANGE）三關。付的鈔票由 `billFor()` 決定（一百、兩百、五百；服飾店、關帝廟的金額不同，各自改）。
   - 選用參數 `finish(G, t)`：付完錢／找完錢之後要做的事，預設是停表、進 END。服飾店用它換成「有改褲管就先等三十分鐘去拿褲子」。
   - 選用參數 `shortBill(n)`：給「一定不夠的那張鈔票」，預設 20～500 元（`stdShortBill`）。服飾店金額較大，自己帶一個。
-  - 關帝廟只用 `catchState()`，付錢流程是自己寫的（它自己的 `shortBill` 要留著）。
+  - 關帝廟只用 `catchState()`，付錢流程是自己寫的；它的「一定不夠的鈔票」直接用共用的 `stdShortBill(n)`。
 
 複雜遊戲（多個出錯點、多種結局）的完整做法，看 `docs/icecream-logic-notes.md`。
 

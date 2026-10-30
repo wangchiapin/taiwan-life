@@ -278,7 +278,6 @@ const SPEAKER_RE = /^(Ami|廟公|我)：/;
 /* ══════════════════════════════════════
    本遊戲的小工具（POLITE、rotOf、catchState 已搬到 shared/game.js）
 ══════════════════════════════════════ */
-const shortBill = n => n > 500 ? 500 : n > 200 ? 200 : n > 100 ? 100 : n > 50 ? 50 : 20;   // 一定不夠的那張
 
 /* ══════════════════════════════════════
    籤詩：關聖帝君一百籤，從五種等級各取幾支（共 20 支）
@@ -765,7 +764,7 @@ const Game = defineGame({
       PAY_FIX: {
         place: 'temple', html: board,
         dialogue: () => [st(`啊，不好意思！是${zhNum(t.total)}元。`, `¡Ay, disculpe! Son ${esM(t.total)}.`, `Oh, sorry! It's ${enM(t.total)}.`)],
-        options: () => rotOf(t, [payOk, `給你${zhNum(shortBill(t.total))}元。`, '我下次再付，可以嗎？']),
+        options: () => rotOf(t, [payOk, `給你${zhNum(stdShortBill(t.total))}元。`, '我下次再付，可以嗎？']),
         next: c => {
           if (c !== payOk) {
             Game.addMistake(c === '我下次再付，可以嗎？'
