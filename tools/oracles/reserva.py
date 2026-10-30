@@ -17,11 +17,14 @@ ORACLE = """() => {
     C1_HOLD: '好，謝謝，到時候見！', MID_AMI: '好，我再打給餐廳。',
     C2_GREET: '你好，我剛剛有打電話訂位，我想要更正一下。',
     C2_LOOKUP: () => N + '，' + zhDigits(Game.myPhone),
-    C2_PEOPLE: () => zhNum(t.finalPeople) + '位', C2_TABLE: '麻煩幫我們併桌。',
+    C2_PEOPLE: () => zhNum(t.finalPeople) + '位', C2_TABLE: () => b.seat === '包廂' ? '改成併桌好了。' : '麻煩幫我們併桌。',
     C2_TIME: () => '可以改成' + timeStr(t.ask2) + '嗎？',
     C2_FULL: () => !A.time2 ? ask : (t.amiPrefersKeep ? '維持' + timeStr(t.t1) + '。' : '改到' + timeStr(t.alt2) + '。'),
     C2_CHAIRS: () => b.chairs ? '對，一樣。' : '對，都一樣。', C2_BYE: '謝謝，再見！',
-    CALL_AMI: '好，我跟餐廳說。'
+    CALL_AMI: '好，我跟餐廳說。',
+    WRONG_NUMBER: '不好意思，打錯了。', DELIVERY_LINE: '好，謝謝。',
+    C2_ADD_CHAIRS: () => ['一張', '兩張', '三張'][t.kids - 1],
+    END: '查看結果', RESULT: '查看排行榜'
   };
   const v = m[s]; return typeof v === 'function' ? v() : (v ?? null);
 }"""

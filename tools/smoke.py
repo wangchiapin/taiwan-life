@@ -41,7 +41,7 @@ EXTRA={'drinks': '''() => {
     TYPE_2: c2.drink, SIZE_2: c2.size, SUGAR_2: c2.sugar, ICE_2: c2.ice,
     TOPPING_2: '椰果', NO_COCONUT: '等一下，我問一下我朋友。', CALL_AMI: '好，我跟店員說。', TOPPING_3: Game.alt,
     PAYMENT: () => '拿出' + Game.bill + '元', CHANGE: () => Game.given === Game.bill - Game.total ? '好，謝謝。' : '不好意思，你找錯了。',
-    APOLOGIZE: '沒關係，謝謝。', FINISH: '謝謝！' };
+    APOLOGIZE: '沒關係，謝謝。', FINISH: '謝謝！', END: '查看結果', RESULT: '查看排行榜' };
   const v = m[s]; return typeof v === 'function' ? v() : (v ?? null);
 }'''}
 TRANS=set()  # 每個遊戲額外的 oracle（覆蓋）
