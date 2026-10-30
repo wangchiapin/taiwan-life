@@ -53,12 +53,8 @@
     --bad: #c0392b;
   }
   body {
-    margin: 0; min-height: 100vh; color: var(--ink);
     background: radial-gradient(circle at 20% 0%, #2c2650 0, var(--night) 55%);
     background-attachment: fixed;
-    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
-    display: flex; justify-content: center; align-items: flex-start;
-    padding: 24px 16px 40px;
   }
   /* 嵌入模式：不要閃一下開始畫面 */
   /* ── 登入：燈籠招牌 ── */
@@ -99,10 +95,6 @@
   .mood .bar i { width: 14px; height: 8px; border-radius: 4px; background: #d6d0e2; }
   .mood .bar i.on { background: var(--red); }
   .mood .lbl { font-size: 12px; color: var(--muted); }
-  @media (hover: hover) {
-    .opt:hover { background: var(--ink); color: #fff; }
-    .opt:hover rt { color: #ffd9cf; }
-  }
   /* ── 排行榜 ── */
   #lb-table tr.highlight-row { background: #fff4cc; font-weight: 700; }
   @media (max-width: 600px) {
@@ -128,10 +120,6 @@
   /* ── 即時回饋卡（停留到下一次選擇） ── */
   .v-head b { font-size: 18px; }
   .v-head small { color: var(--muted); }
-  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
-  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
-  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
-  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
 </style>
 </head>
 <body>

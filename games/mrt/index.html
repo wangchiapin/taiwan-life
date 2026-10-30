@@ -53,11 +53,7 @@
     --bad: #c0392b;
   }
   body {
-    margin: 0; min-height: 100vh; color: var(--ink);
     background: #dde6f3;
-    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
-    display: flex; justify-content: center; align-items: flex-start;
-    padding: 24px 16px 40px;
   }
   /* 嵌入模式：不要閃一下開始畫面 */
   /* ── 登入：麵包店招牌 ── */
@@ -86,10 +82,6 @@
   .machine { margin: 8px 0 12px; background: #2b3a55; border-radius: 10px; padding: 10px 14px; color: #fff; box-shadow: inset 0 0 0 3px #3c4d6e; }
   .machine .mh { font-weight: 700; color: var(--yolk); }
   .machine .scr { margin-top: 6px; background: #0e1726; color: #7df0b5; border-radius: 6px; padding: 8px 12px; font-size: 20px; font-family: 'Courier New', monospace; }
-  @media (hover: hover) {
-    .opt:hover { background: var(--ink); color: #fff; }
-    .opt:hover rt { color: #ffd9cf; }
-  }
   /* ── 排行榜 ── */
   @media (max-width: 600px) {
     .screen { padding: 26px 18px; }
@@ -116,10 +108,6 @@
     background: var(--paper); color: var(--red); border: none;
   }
   .seg button[aria-pressed="true"] { background: var(--red); color: #fff; font-weight: 700; }
-  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
-  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
-  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
-  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
 </style>
 </head>
 <body>

@@ -53,20 +53,12 @@
     --bad: #c0392b;
   }
   body {
-    margin: 0; min-height: 100vh; color: var(--ink);
     background: #e3ecf7;
-    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
-    display: flex; justify-content: center; align-items: flex-start;
-    padding: 24px 16px 40px;
   }
   /* 嵌入模式：不要閃一下開始畫面 */
   /* ── 登入：麵包店招牌 ── */
   /* ── 遊戲 ── */
   /* 購物清單 */
-  @media (hover: hover) {
-    .opt:hover { background: var(--ink); color: #fff; }
-    .opt:hover rt { color: #ffd9cf; }
-  }
   /* ── 排行榜 ── */
   @media (max-width: 600px) {
     .screen { padding: 26px 18px; }
@@ -82,10 +74,6 @@
   /* ── 本關單字（右側抽屜） ── */
   /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
   /* ── 即時回饋卡（停留到下一次選擇） ── */
-  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
-  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
-  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
-  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
 
   .signs { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 8px 0 12px; background: #fff; border: 2px solid #cfdbec; border-radius: 12px; padding: 10px 14px; font-size: 17px; }
   .shelf { display: flex; gap: 10px; align-items: flex-end; justify-content: center; margin: 10px 0 14px; padding: 14px 12px 0; border-bottom: 10px solid #9a6b3c; background: #f4ead9; border-radius: 10px 10px 0 0; min-height: 190px; }

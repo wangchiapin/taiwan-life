@@ -53,11 +53,7 @@
     --bad: #c0392b;
   }
   body {
-    margin: 0; min-height: 100vh; color: var(--ink);
     background: #f3e6d3;
-    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
-    display: flex; justify-content: center; align-items: flex-start;
-    padding: 24px 16px 40px;
   }
   /* 嵌入模式：不要閃一下開始畫面 */
   /* ── 登入：麵包店招牌 ── */
@@ -95,10 +91,6 @@
   .shelf .bun:active { transform: translateY(1px); }
   .tray .total { display: flex; justify-content: space-between; border-top: 2px dashed #b99764; margin-top: 4px; padding-top: 4px; font-size: 18px; }
   .tray .total b { color: var(--red-dark); font-size: 22px; }
-  @media (hover: hover) {
-    .opt:hover { background: var(--ink); color: #fff; }
-    .opt:hover rt { color: #ffd9cf; }
-  }
   /* ── 排行榜 ── */
   @media (max-width: 600px) {
     .screen { padding: 26px 18px; }
@@ -121,10 +113,6 @@
   /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
   /* ── 即時回饋卡（停留到下一次選擇） ── */
   .seg button[aria-pressed="true"] { background: var(--red); color: #fff; font-weight: 700; }
-  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
-  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
-  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
-  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
 </style>
 </head>
 <body>

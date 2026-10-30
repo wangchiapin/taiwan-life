@@ -53,11 +53,7 @@
     --bad: #c0392b;
   }
   body {
-    margin: 0; min-height: 100vh; color: var(--ink);
     background: #e8edf3;
-    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
-    display: flex; justify-content: center; align-items: flex-start;
-    padding: 24px 16px 40px;
   }
   /* 嵌入模式：不要閃一下開始畫面 */
   /* ── 登入：店招牌 ── */
@@ -68,7 +64,6 @@
     background: #fafcfe; border: 1px dashed #b7c5d6; font-size: 18px; line-height: 1.95;
   }
   @media (hover: hover) {
-    .opt:hover { background: var(--ink); color: #fff; }
     .opt:hover rt { color: #dce6f2; }
   }
   .opt.deal rt { color: #dce6f2; }
@@ -89,10 +84,6 @@
   /* ── 本關單字（右側抽屜） ── */
   /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
   /* ── 即時回饋卡（停留到下一次選擇） ── */
-  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
-  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
-  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
-  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
 
   /* 貨架、結帳螢幕 */
   .shelf { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0 12px; }
@@ -102,7 +93,6 @@
   .pcard .pp { font-size: 17px; margin-top: 2px; }
   .pcard .tag { display: inline-block; margin-top: 6px; background: #c0392b; color: #fff; border-radius: 6px; padding: 2px 8px; font-size: 14px; font-weight: 700; }
   .menu { margin: 8px 0 12px; background: #f4f7fb; border: 2px solid #c8d3e0; border-radius: 12px; padding: 10px 14px; }
-  .menu .mh { font-weight: 700; color: var(--red-dark); margin-bottom: 4px; }
   .menu .mrow { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; font-size: 17px; border-bottom: 1px dashed #c8d3e0; }
   .menu .mrow:last-child { border-bottom: none; }
   .menu .mrow .am { font-variant-numeric: tabular-nums; white-space: nowrap; }

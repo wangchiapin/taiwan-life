@@ -50,13 +50,9 @@
     --bad: #c0392b;
   }
   body {
-    margin: 0; min-height: 100vh; color: var(--ink);
     background-color: var(--wall);
     background-image: radial-gradient(#e9dfd2 1.5px, transparent 1.5px);
     background-size: 22px 22px;
-    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
-    display: flex; justify-content: center; align-items: flex-start;
-    padding: 24px 16px 40px;
   }
   /* ── 登入 ── */
   .game-logo { font-size: 56px; line-height: 1; }
@@ -97,7 +93,6 @@
   .menu-board td:first-child { text-align: left; font-weight: 500; }
   .menu-board .mb-foot { padding: 4px 12px; font-size: 14px; color: var(--muted); }
   @media (hover: hover) {
-    .opt:hover { background: var(--ink); color: #fff; }
     .opt:hover rt { color: #ffd9b8; }
   }
   .opt.call { border-color: #b3456b; color: #b3456b; }
@@ -164,8 +159,6 @@
   }
   .seg button + button { border-left: 2px solid var(--main); }
   .seg button[aria-pressed="true"] { background: var(--main); color: #fff; font-weight: 700; }
-  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
-  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
 </style>
 </head>
 <body>

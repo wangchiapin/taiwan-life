@@ -52,11 +52,7 @@
     --bad: #b52a24;
   }
   body {
-    margin: 0; min-height: 100vh; color: var(--ink);
     background: var(--wall);
-    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
-    display: flex; justify-content: center; align-items: flex-start;
-    padding: 24px 16px 40px;
   }
   /* 嵌入模式：不要閃一下開始畫面 */
   /* ── 登入：店招 ── */
@@ -97,7 +93,6 @@
   }
   .label .no { font-variant-numeric: tabular-nums; letter-spacing: 1px; font-weight: 700; }
   @media (hover: hover) {
-    .opt:hover { background: var(--ink); color: #fff; }
     .opt:hover rt { color: #d8cdfa; }
   }
   /* ── 排行榜 ── */
@@ -127,10 +122,6 @@
   /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
   /* ── 即時回饋卡（停留到下一次選擇） ── */
   .v-head small { color: var(--muted); }
-  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
-  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
-  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
-  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
 </style>
 </head>
 <body>

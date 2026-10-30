@@ -50,13 +50,9 @@
     --bad: #b52a24;
   }
   body {
-    margin: 0; min-height: 100vh; color: var(--ink);
     background-color: var(--wall);
     background-image: linear-gradient(#efe7d6 1px, transparent 1px), linear-gradient(90deg, #efe7d6 1px, transparent 1px);
     background-size: 44px 44px;
-    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
-    display: flex; justify-content: center; align-items: flex-start;
-    padding: 24px 16px 40px;
   }
   /* ── 登入：招牌 ── */
   .sign {
@@ -83,7 +79,6 @@
   .note b { color: var(--red); }
   #options-area.pad { display: block; }
   @media (hover: hover) {
-    .opt:hover { background: var(--ink); color: #fff; }
     .opt:hover rt { color: #ffd9d6; }
   }
   /* ── 點餐面板：這個遊戲的招牌元素 ── */
@@ -157,10 +152,6 @@
   .v-head b { font-size: 18px; }
   .v-head small { color: var(--muted); }
   .seg button[aria-pressed="true"] { background: var(--red); color: #fff; font-weight: 700; }
-  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
-  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
-  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
-  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
   #npc-dialogue .speaker.kid { color: #2f7d6d; }
 </style>
 </head>

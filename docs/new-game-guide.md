@@ -39,6 +39,7 @@
 - **抓錯關卡與付錢三關（2026-10-30 已進共用檔，見第 5 節）**：`POLITE`、`rotOf(t, 選項)`、`catchState()`、`payStates()`、`stdShortBill`。遊戲不能再用 `const` 宣告這幾個名字，否則整個遊戲打不開。`billFor()`（你給的鈔票）金額每個遊戲不同，仍寫在遊戲裡。
 - **共用樣式（`shared/game.css`，2026-10-30 又搬進 8 條）**：地點列的 `.clock`、`.icon`、`.who`，清單框裡的 `.done`、`.rule`、`.t .grow`，以及紅色成交按鈕 `.opt.deal`（含滑過去變色）。新遊戲不要再自己寫這幾條。另外 `shared/game.css` 還有「預設值」：地點列 `#place-bar`（深色底、黃色底線）、`#place-bar .status`、電話列 `#place-bar.phone`（Ami 色）、清單框 `.list`、`.list .t`、成交按鈕上的拼音 `.opt.deal rt`。新遊戲直接用，不用再寫；配色不同的遊戲在自己的 `<style>` 裡覆蓋（早餐店、飲料店、包裹店的地點列與電話列；服飾店、超商的清單框與按鈕拼音色；麵包店、夜市的清單時間字色），要覆蓋地點列時記得明確寫 `border-bottom`（共用版有黃色底線）。
 - **共用樣式（2026-10-30 再搬 4 條）**：減少動態時的抽屜 `@media (prefers-reduced-motion: reduce) { .drawer … }`、Ami 說話者名字顏色 `#npc-dialogue .speaker.ami`（用 `--ami`）、手機版翻譯鈕 `.tr-btn` 的小尺寸 `@media (max-width: 560px)`、招牌店名 `.storefront .name`。新遊戲不要再寫；包裹店與訂位遊戲的 `.tr-btn` 尺寸不同，保留自己的。
+- **共用樣式（2026-10-30 第二批）**：`body` 的版面（置中、字體、內距，各遊戲只寫自己的 `background`）、重新開始鈕 `.btn-pinyin.restart`（灰黑色；訂位遊戲是紅色，保留自己的）、選項滑過去變色 `.opt:hover`（含預設的拼音色 `#ffd9cf`，拼音色不同的遊戲只寫自己的 `.opt:hover rt`）、`.menu .mh`。新遊戲不要再寫。
 - **付錢欄位與加總（2026-10-30 已進共用檔）**：`initPay(t, total, extras)`（算出真正總價、對方報價有沒有多算、鈔票、找零、找錯的錢；鈔票金額用遊戲自己的 `billFor()`）和 `sum(陣列)`。遊戲不能再用 `const`／`function` 宣告這兩個名字，否則整個遊戲打不開；遊戲自己要用不同做法的加總，請取別的名字（早餐店用 `sumPrice`）。關帝廟的鈔票固定是一千元，付錢欄位自己寫，不用 `initPay`。
 
 ## 3. 遊戲自己要寫的

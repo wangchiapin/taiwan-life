@@ -240,3 +240,18 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--yolk); outl
 #npc-dialogue .speaker.ami { color: var(--ami); }
 @media (max-width: 560px) { .tr-btn { width: 34px; height: 34px; margin-left: 8px; } }
 .storefront .name { background: var(--night); color: var(--yolk); text-align: center; font-size: 30px; font-weight: 700; letter-spacing: 6px; padding: 12px 0; }
+
+/* ══ 各遊戲相同的規則（2026-10-30 第二批搬進共用檔）══ */
+body {
+  margin: 0; min-height: 100vh; color: var(--ink);
+  font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
+  display: flex; justify-content: center; align-items: flex-start;
+  padding: 24px 16px 40px;
+}
+.btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
+.btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
+.menu .mh { font-weight: 700; color: var(--red-dark); margin-bottom: 4px; }
+@media (hover: hover) {
+  .opt:hover { background: var(--ink); color: #fff; }
+  .opt:hover rt { color: #ffd9cf; }
+}

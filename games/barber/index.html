@@ -53,11 +53,7 @@
     --bad: #c0392b;
   }
   body {
-    margin: 0; min-height: 100vh; color: var(--ink);
     background: #dde6f3;
-    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
-    display: flex; justify-content: center; align-items: flex-start;
-    padding: 24px 16px 40px;
   }
   /* 嵌入模式：不要閃一下開始畫面 */
   /* ── 登入 ── */
@@ -74,10 +70,6 @@
   .slots .sl { padding: 8px 14px; font-size: 19px; font-weight: 700; border-top: 1px solid var(--line); }
   .bill .bl { display: flex; justify-content: space-between; padding: 8px 14px; font-size: 19px; }
   .bill b { font-variant-numeric: tabular-nums; font-size: 24px; color: var(--red-dark); }
-  @media (hover: hover) {
-    .opt:hover { background: var(--ink); color: #fff; }
-    .opt:hover rt { color: #ffd9cf; }
-  }
   /* ── 排行榜 ── */
   @media (max-width: 600px) {
     .screen { padding: 26px 18px; }
@@ -99,10 +91,6 @@
   /* ── 即時回饋卡（停留到下一次選擇） ── */
   .v-head b { font-size: 18px; }
   .v-head small { color: var(--muted); }
-  .btn-pinyin.restart { color: var(--bad); border-color: var(--bad); }
-  .btn-pinyin.restart:hover { background: var(--bad); color: #fff; }
-  .btn-pinyin.restart { color: var(--ink); border-color: var(--ink); }
-  .btn-pinyin.restart:hover { background: var(--ink); color: #fff; }
 </style>
 </head>
 <body>
