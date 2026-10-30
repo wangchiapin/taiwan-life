@@ -36,7 +36,7 @@
   - `zhNum(n)`：念一個數字，2 單獨念「二」，200 念「兩百」，20000 念「兩萬」，可以念到兆；金額、日期、時間、人數、號碼牌、樓層都用它。
   - `NZ(n)`：後面要接量詞時用，2 念「兩」（兩個、兩球、兩張），其他和 `zhNum` 一樣（十二片、兩萬個）。
   - `zhDigits(s)`：一個一個數字念（電話、號碼、西元年），其他字（`-`、`，`、空格）原樣保留。`zhDigits('02-4967-2308')` 念成「零二-四九六七-二三零八」，`zhDigits(2026)` 念成「二零二六」。0 念「零」、1 念「一」（不念「幺」）。要分組念（例如手機 4-3-3、中間停頓）就自己先切好，每一組各呼叫一次再用「，」接起來（barber 的電話就是這樣做）。
-- **還沒進共用檔的**：`catchState()`、`payStates()`（第 5 節）目前是 noodle、conbini、yansuji、guandi、clothes 各自一份，改的時候要一起看。
+- **抓錯關卡與付錢三關（2026-10-30 已進共用檔，見第 5 節）**：`POLITE`、`rotOf(t, 選項)`、`catchState()`、`payStates()`、`stdShortBill`。遊戲不能再用 `const` 宣告這幾個名字，否則整個遊戲打不開。`billFor()`（你給的鈔票）金額每個遊戲不同，仍寫在遊戲裡。
 
 ## 3. 遊戲自己要寫的
 
@@ -72,9 +72,12 @@
 8. **價錢照實際做出來的算**：不要用 Ami 訂單的總價。對方報的價和實際應收的價要分開記（例如 `real()`／`said()`），付錢與找零的對話用它們。
 9. **新增需要補的圖**，先記在 `docs/image-todo.md`，最後一起做。
 
-共用寫法（各遊戲目前各有一份，改的時候要一起看）：
+共用寫法（在 `shared/game.js`，改它會影響麵店、超商、鹽酥雞、關帝廟、服飾店，改完要比對這五個遊戲）：
 - `catchState()`：一關「①沒錯／謝謝 ②有禮貌指出 ③沒禮貌」，由 `wrong()` 決定這次對方有沒有出錯。
 - `payStates()`：報價（PAY）、重算後付錢（PAY_FIX）、找錢（CHANGE）三關。付的鈔票由 `billFor()` 決定（一百、兩百、五百；服飾店、關帝廟的金額不同，各自改）。
+  - 選用參數 `finish(G, t)`：付完錢／找完錢之後要做的事，預設是停表、進 END。服飾店用它換成「有改褲管就先等三十分鐘去拿褲子」。
+  - 選用參數 `shortBill(n)`：給「一定不夠的那張鈔票」，預設 20～500 元（`stdShortBill`）。服飾店金額較大，自己帶一個。
+  - 關帝廟只用 `catchState()`，付錢流程是自己寫的（它自己的 `shortBill` 要留著）。
 
 複雜遊戲（多個出錯點、多種結局）的完整做法，看 `docs/icecream-logic-notes.md`。
 
@@ -120,7 +123,7 @@
 ## 11. 推上去之前
 
 - 先 `git pull --rebase origin main`（Ben 常直接在 GitHub 網頁上傳圖片，也可能有別的對話框同時在改）。
-- 推之前確認沒有遊戲重複宣告共用檔的名字（例如 `grep -rn "const zhNum\|const NZ\|const zhDigits" games`）。
+- 推之前確認沒有遊戲重複宣告共用檔的名字（例如 `grep -rn "const zhNum\|const NZ\|const zhDigits\|const POLITE\|const rotOf\|function catchState\|function payStates" games`）。
 - 改到 Firestore 的資料結構（collection、欄位、儲存方式）時，要提醒 Ben 更新 Apps Script 同步腳本。
 - Ben 說「推」才推。
 

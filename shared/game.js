@@ -305,6 +305,85 @@ const zhDigits = s => String(s).replace(/\d/g, d => CN[+d]);
 const pick =arr => arr[Math.floor(Math.random() * arr.length)];
 const shuffle = arr => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ══════════════════════════════════════
+   「對方可能出錯」的關卡、付錢三關（報價／付錢／找錢）
+   麵店、超商、鹽酥雞、關帝廟、服飾店共用（2026-10-30 從各遊戲搬進共用檔）
+   選用參數：payStates 的 o.finish(G, t)＝付完錢／找完錢之後要做的事（預設：停表、進 END）；
+            o.shortBill(n)＝「一定不夠的那張鈔票」（預設用下面的 stdShortBill，20～500 元）
+   billFor（你給的鈔票）各遊戲金額不同，仍然寫在各遊戲裡
+══════════════════════════════════════ */
+const POLITE = M('要有禮貌，說「不好意思」，告訴他正確的就好。', 'Hay que ser cortés: di «disculpe» y dile lo correcto.', 'Be polite: say "excuse me" and tell them the correct one.');
+const rotOf = (t, o) => o.map((_, i) => o[(i + t.rot) % o.length]);
+const stdShortBill = n => n > 500 ? 500 : n > 200 ? 200 : n > 100 ? 100 : n > 50 ? 50 : 20;   // 一定不夠的那張
+
+/* 一關：①沒錯／謝謝 ②有禮貌指出問題 ③沒禮貌。對方有沒有出錯由 o.wrong() 決定
+   o: { key, place, html, dialogue, ok, fix(), rude, wrong(), whyWrong(), whyRight(), goodWrong[3], goodOk[3], apology(), go(wrong) } */
+function catchState(G, o) {
+  const t = G.task;
+  return {
+    place: o.place, html: o.html, dialogue: o.dialogue,
+    options: () => rotOf(t, [o.ok, o.fix(), o.rude]),
+    next: c => {
+      const wrong = o.wrong(), fix = o.fix(), right = wrong ? fix : o.ok;
+      if (c !== right) { G.addMistake(c === o.ok ? o.whyWrong() : c === fix ? o.whyRight() : POLITE); return; }
+      if (G.att[o.key] === 1) G.good(...(wrong ? o.goodWrong : o.goodOk));
+      G.thought = wrong && o.apology ? o.apology() : null;
+      o.go(wrong);
+    }
+  };
+}
+
+/* 報價、付錢、找錢三關。o: { who, place, html, key 前綴不用, nextAfter（找完錢之後的關卡，預設 END）, extraWhy(), priceZh(),… } */
+function payStates(G, o) {
+  const t = G.task, who = o.who, st = (zh, es, en) => L(`${who}：${zh}`, es, en);
+  const finish = () => { if (o.finish) o.finish(G, t); else { G.stopTimer(); G.state = 'END'; } };   // 服飾店要先等改褲子，用 o.finish 換掉
+  const toChange = () => { if (t.change > 0) G.state = 'CHANGE'; else finish(); };
+  const payOk = `給你${zhNum(t.bill)}元。`;
+  const claim = t.payWrong ? t.total : t.total + t.extra.price;   // 沒算錯時，「抓錯」說的是錯的數字
+  const fixTotal = `不好意思，好像算錯了，應該是${zhNum(claim)}元吧？`;
+  const fixChange = `不好意思，好像找錯了，應該找${zhNum(t.changeWrong ? t.change : t.given + 10)}元吧？`;
+  return {
+    PAY: catchState(G, {
+      key: 'PAY', place: o.place, html: o.html,
+      dialogue: () => [st(`好的，一共是${zhNum(t.said)}元。`, `Muy bien, son ${esM(t.said)} en total.`, `All right, that's ${enM(t.said)} in total.`)],
+      ok: payOk, fix: () => fixTotal, rude: o.rudePay || '你是不是想騙我的錢啊？',
+      wrong: () => t.payWrong,
+      whyWrong: () => o.extraWhy(),
+      whyRight: () => M(`${who}算對了：一共是${t.total}元。`, `Lo calculó bien: son ${esM(t.total)}.`, `They were right: ${enM(t.total)} in total.`),
+      goodWrong: ['你很細心！付錢以前，要先對一下價目表和自己點的東西。', '¡Qué atento! Antes de pagar, compara con la lista de precios y con lo que pediste.', 'Well spotted! Before you pay, check the price list against what you ordered.'],
+      goodOk: ['沒錯！付錢以前，要先自己算一下。', '¡Exacto! Antes de pagar, calcula tú también.', 'Right! Do the math yourself before you pay.'],
+      go: wrong => { if (wrong) { G.state = 'PAY_FIX'; return; } toChange(); }
+    }),
+    PAY_FIX: {
+      place: o.place, html: o.html,
+      dialogue: () => [st(`啊，不好意思！是${zhNum(t.total)}元。`, `¡Ay, disculpe! Son ${esM(t.total)}.`, `Oh, sorry! It's ${enM(t.total)}.`)],
+      options: () => rotOf(t, [payOk, `給你${zhNum((o.shortBill || stdShortBill)(t.total))}元。`, '我下次再付，可以嗎？']),
+      next: c => {
+        if (c !== payOk) {
+          G.addMistake(c === '我下次再付，可以嗎？'
+            ? M('不能下次再付。買東西要當場付錢。', 'No se puede pagar después: hay que pagar en el momento.', "You can't pay later — you pay on the spot.")
+            : M(`一共是${t.total}元，這樣不夠啦。`, `El total es ${esM(t.total)}: eso no alcanza.`, `The total is ${enM(t.total)} — that isn't enough.`));
+          return;
+        }
+        if (G.att.PAY_FIX === 1) G.good('沒錯！要給夠錢，他會找錢給你。', '¡Exacto! Das lo suficiente y te dan el cambio.', "Right! Hand over enough and you'll get change.");
+        toChange();
+      }
+    },
+    CHANGE: catchState(G, {
+      key: 'CHANGE', place: o.place, html: o.html,
+      dialogue: () => [st(`收你${zhNum(t.bill)}元，找你${zhNum(t.given)}元。`, `Recibo ${esM(t.bill)}; le doy ${esM(t.given)} de cambio.`, `Out of ${enM(t.bill)} — here's ${enM(t.given)} change.`)],
+      ok: '好，謝謝。', fix: () => fixChange, rude: '你是不是故意少找我錢啊？',
+      wrong: () => t.changeWrong,
+      whyWrong: () => M(`找錯了：${t.bill}減${t.total}，應該找${t.change}元，他找了${t.given}元。`, `Se equivocó con el cambio: ${t.bill} − ${t.total} = ${t.change}; le dieron ${t.given}.`, `Wrong change: ${t.bill} − ${t.total} = ${t.change}, but you got ${t.given}.`),
+      whyRight: () => M(`找對了：${t.bill}−${t.total}＝${t.change}元。`, `El cambio está bien: ${t.bill} − ${t.total} = ${t.change}.`, `The change is right: ${t.bill} − ${t.total} = ${t.change}.`),
+      goodWrong: ['你很細心！拿到零錢要馬上數。', '¡Qué atento! Cuenta el cambio en el momento.', 'Well spotted! Count your change right away.'],
+      goodOk: ['找的錢要自己算一下：給的錢減掉總價。', 'Calcula el cambio tú mismo: lo que diste menos el total.', 'Work out the change yourself: what you gave minus the total.'],
+      apology: () => [st(`啊，不好意思！找你${zhNum(t.change)}元。`, `¡Ay, disculpe! Le doy ${esM(t.change)} de cambio.`, `Oh, sorry! Here's ${enM(t.change)} change.`)],
+      go: () => finish()
+    })
+  };
+}
 function track(name, params) { try { gtag('event', name, params || {}); } catch (e) {} }
 
 /* ══════════════════════════════════════

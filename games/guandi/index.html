@@ -276,27 +276,9 @@ const WHO = { 'Ami': ['Ami', 'Ami'], '廟公': ['El encargado del templo', 'The 
 const SPEAKER_RE = /^(Ami|廟公|我)：/;
 
 /* ══════════════════════════════════════
-   共用小工具：「對方可能出錯」的關卡（和麵店、超商、鹽酥雞同一套寫法）
+   本遊戲的小工具（POLITE、rotOf、catchState 已搬到 shared/game.js）
 ══════════════════════════════════════ */
-const POLITE = M('要有禮貌，說「不好意思」，告訴他正確的就好。', 'Hay que ser cortés: di «disculpe» y dile lo correcto.', 'Be polite: say "excuse me" and tell them the correct one.');
 const shortBill = n => n > 500 ? 500 : n > 200 ? 200 : n > 100 ? 100 : n > 50 ? 50 : 20;   // 一定不夠的那張
-const rotOf = (t, o) => o.map((_, i) => o[(i + t.rot) % o.length]);
-
-/* 一關：①沒錯／謝謝 ②有禮貌指出問題 ③沒禮貌。對方有沒有出錯由 o.wrong() 決定 */
-function catchState(G, o) {
-  const t = G.task;
-  return {
-    place: o.place, html: o.html, dialogue: o.dialogue,
-    options: () => rotOf(t, [o.ok, o.fix(), o.rude]),
-    next: c => {
-      const wrong = o.wrong(), fix = o.fix(), right = wrong ? fix : o.ok;
-      if (c !== right) { G.addMistake(c === o.ok ? o.whyWrong() : c === fix ? o.whyRight() : POLITE); return; }
-      if (G.att[o.key] === 1) G.good(...(wrong ? o.goodWrong : o.goodOk));
-      G.thought = wrong && o.apology ? o.apology() : null;
-      o.go(wrong);
-    }
-  };
-}
 
 /* ══════════════════════════════════════
    籤詩：關聖帝君一百籤，從五種等級各取幾支（共 20 支）
