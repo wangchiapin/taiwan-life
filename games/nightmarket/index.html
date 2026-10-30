@@ -75,10 +75,7 @@
     border-bottom: 4px solid var(--yolk);
   }
   #place-bar.phone { background: var(--ami); }
-  #place-bar .icon { font-size: 22px; line-height: 1; }
-  #place-bar .who { font-weight: 700; font-size: 16px; }
   #place-bar .status { font-size: 13px; opacity: .85; }
-  #place-bar .clock { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; }
   #npc-dialogue .speaker.ami { color: var(--ami); }
   /* 購物清單 */
   .list {
@@ -86,9 +83,6 @@
     background: #fffdf3; border: 1px dashed #c9bfa4; font-size: 18px; line-height: 1.95;
   }
   .list .t { font-weight: 700; color: var(--ami); font-size: 15px; display: flex; align-items: center; gap: 2px; }
-  .list .t .grow { flex: 1; }
-  .list .done { text-decoration: line-through; color: var(--muted); }
-  .list .rule { color: var(--muted); font-size: 15px; }
   /* 夜市地圖 */
   .stalls { margin: 8px 0 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .stall {
@@ -121,9 +115,7 @@
     .opt:hover { background: var(--ink); color: #fff; }
     .opt:hover rt { color: #ffd9cf; }
   }
-  .opt.deal { border-color: var(--red); background: var(--red); color: #fff; }
   .opt.deal rt { color: #ffe1d8; }
-  .opt.deal:hover { background: var(--red-dark); }
   /* ── 排行榜 ── */
   #lb-table tr.highlight-row { background: #fff4cc; font-weight: 700; }
   @media (max-width: 600px) {

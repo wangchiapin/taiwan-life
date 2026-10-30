@@ -216,3 +216,13 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--yolk); outl
   font: inherit; font-size: 15px; font-weight: 500; padding: 9px 0; cursor: pointer;
   background: var(--paper); color: var(--red); border: none;
 }
+
+/* ══ 各遊戲完全相同的規則（2026-10-30 從各遊戲搬進共用檔）：地點列文字、清單框內文字、紅色成交按鈕 ══ */
+#place-bar .clock { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; }
+#place-bar .icon { font-size: 22px; line-height: 1; }
+#place-bar .who { font-weight: 700; font-size: 16px; }
+.list .done { text-decoration: line-through; color: var(--muted); }
+.list .rule { color: var(--muted); font-size: 15px; }
+.list .t .grow { flex: 1; }
+.opt.deal { border-color: var(--red); background: var(--red); color: #fff; }
+.opt.deal:hover { background: var(--red-dark); }
