@@ -41,6 +41,7 @@
 - **共用樣式（2026-10-30 再搬 4 條）**：減少動態時的抽屜 `@media (prefers-reduced-motion: reduce) { .drawer … }`、Ami 說話者名字顏色 `#npc-dialogue .speaker.ami`（用 `--ami`）、手機版翻譯鈕 `.tr-btn` 的小尺寸 `@media (max-width: 560px)`、招牌店名 `.storefront .name`。新遊戲不要再寫；包裹店與訂位遊戲的 `.tr-btn` 尺寸不同，保留自己的。
 - **共用樣式（2026-10-30 第二批）**：`body` 的版面（置中、字體、內距，各遊戲只寫自己的 `background`）、重新開始鈕 `.btn-pinyin.restart`（灰黑色；訂位遊戲是紅色，保留自己的）、選項滑過去變色 `.opt:hover`（含預設的拼音色 `#ffd9cf`，拼音色不同的遊戲只寫自己的 `.opt:hover rt`）、`.menu .mh`。新遊戲不要再寫。
 - **付錢欄位與加總（2026-10-30 已進共用檔）**：`initPay(t, total, extras)`（算出真正總價、對方報價有沒有多算、鈔票、找零、找錯的錢；鈔票金額用遊戲自己的 `billFor()`）和 `sum(陣列)`。遊戲不能再用 `const`／`function` 宣告這兩個名字，否則整個遊戲打不開；遊戲自己要用不同做法的加總，請取別的名字（早餐店用 `sumPrice`）。關帝廟的鈔票固定是一千元，付錢欄位自己寫，不用 `initPay`。
+- **提示面板與結算畫面（2026-10-30 已進共用檔）**：提示面板的開關程式是共用的 `makeHints({ render })`，遊戲只要給自己的 `render`；如果「我的狀況＋`Game.hintSections()`」這種標準內容就夠用，直接寫 `const Hints = makeHints({ render: stdHintsRender });`。結算畫面（Ami 傳成果訊息＋查看排行榜）是共用的 `stdResultCfg(place)`，`place` 填 `'phone'`（手機）或 `'shop'`（店裡），在 `STAGE` 裡寫 `RESULT: stdResultCfg('phone')`。遊戲不能再自己宣告 `makeHints`、`stdHintsRender`、`stdResultCfg`。
 
 ## 3. 遊戲自己要寫的
 
@@ -127,7 +128,7 @@
 ## 11. 推上去之前
 
 - 先 `git pull --rebase origin main`（Ben 常直接在 GitHub 網頁上傳圖片，也可能有別的對話框同時在改）。
-- 推之前確認沒有遊戲重複宣告共用檔的名字（例如 `grep -rn "const zhNum\|const NZ\|const zhDigits\|const POLITE\|const rotOf\|function catchState\|function payStates\|const sum \|function initPay" games`）。
+- 推之前確認沒有遊戲重複宣告共用檔的名字（例如 `grep -rn "const zhNum\|const NZ\|const zhDigits\|const POLITE\|const rotOf\|function catchState\|function payStates\|const sum \|function initPay\|function makeHints\|const stdHintsRender\|const stdResultCfg" games`）。
 - 改到 Firestore 的資料結構（collection、欄位、儲存方式）時，要提醒 Ben 更新 Apps Script 同步腳本。
 - Ben 說「推」才推。
 

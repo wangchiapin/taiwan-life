@@ -420,14 +420,7 @@ const VOCAB = {
 /* ══════════════════════════════════════
    任務提示：只列出 Ami 說過的話（聽到了才出現），不扣分，結果頁顯示看了幾次
 ══════════════════════════════════════ */
-const Hints = {
-  open: false,
-  toggle(force) {
-    this.open = force ?? !this.open;
-    if (this.open) { Vocab.toggle(false); Log.toggle(false); Game.hintViews += 1; this.render(); }
-    document.getElementById('hints').classList.toggle('open', this.open);
-    document.getElementById('hint-tab').setAttribute('aria-expanded', this.open);
-  },
+const Hints = makeHints({
   render() {
     const t = Game.task, h = Game.heard;
     if (!t) return;
@@ -453,7 +446,7 @@ const Hints = {
       : item(`Ami：阿哲${timeStr(t.t1)}來不及，改成${timeStr(t.alt2)}。`, `Ami: A-Zhe no llega a ${esTime(t.t1)}; cambiar a ${esTime(t.alt2)}.`, `Ami: A-Zhe can't make it by ${enTime(t.t1)}; change to ${enTime(t.alt2)}`);
     document.getElementById('hint-body').innerHTML = html;
   }
-};
+});
 document.getElementById('hint-tab').onclick = () => Hints.toggle();
 document.getElementById('hint-close').onclick = () => Hints.toggle(false);
 

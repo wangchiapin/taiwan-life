@@ -353,14 +353,7 @@ const VOCAB_OF = { SIZE_1: 'SIZE', SIZE_2: 'SIZE', SUGAR_1: 'SUGAR', SUGAR_2: 'S
 /* ══════════════════════════════════════
    任務提示：只列出 Ami 說過的話（聽到了才出現），不扣分，結果頁顯示看了幾次
 ══════════════════════════════════════ */
-const Hints = {
-  open: false,
-  toggle(force) {
-    this.open = force ?? !this.open;
-    if (this.open) { Vocab.toggle(false); Log.toggle(false); Game.hintViews += 1; this.render(); }
-    document.getElementById('hints').classList.toggle('open', this.open);
-    document.getElementById('hint-tab').setAttribute('aria-expanded', this.open);
-  },
+const Hints = makeHints({
   render() {
     const t = Game.target, me = Game.mine;
     if (!t) return;
@@ -374,7 +367,7 @@ const Hints = {
       item(`椰果賣完了，改加${Game.alt}。`, `No hay gelatina de coco: cambiar a ${T[Game.alt][0]}.`, `No coconut jelly: switch to ${T[Game.alt][1]}.`);
     document.getElementById('hint-body').innerHTML = html;
   }
-};
+});
 document.getElementById('hint-tab').onclick = () => Hints.toggle();
 document.getElementById('hint-close').onclick = () => Hints.toggle(false);
 

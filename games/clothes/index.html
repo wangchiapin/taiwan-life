@@ -318,41 +318,12 @@ const staffL = (zh, es, en) => L(`店員：${zh}`, es, en);
    任務提示：只列出 NPC 交代過的原話；不扣分，結果頁顯示看了幾次
    各遊戲的 Game.hintSections() 回傳 [{ title, lines:[L(…)…] }]
 ══════════════════════════════════════ */
-const Hints = {
-  open: false,
-  toggle(force) {
-    this.open = force ?? !this.open;
-    if (this.open) { Vocab.toggle(false); Log.toggle(false); Game.hintViews += 1; this.render(); }
-    document.getElementById('hints').classList.toggle('open', this.open);
-    document.getElementById('hint-tab').setAttribute('aria-expanded', this.open);
-  },
-  render() {
-    if (!Game.task) return;
-    const r = s => Game.ruby(s);
-    const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
-    const sit = `<div class="h-sec">${r('我的狀況')}</div>` + Game.listHTML(true).map(x => `<div class="h-item"><div class="h-zh">${r(x.zh)}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`).join('');
-    document.getElementById('hint-body').innerHTML = sit + Game.hintSections().map(sec => `<div class="h-sec">${r(sec.title)}</div>` + sec.lines.map(item).join('')).join('');
-  }
-};
+const Hints = makeHints({ render: stdHintsRender });
 document.getElementById('hint-tab').onclick = () => Hints.toggle();
 document.getElementById('hint-close').onclick = () => Hints.toggle(false);
 
 
 /* 結果頁（每個遊戲都一樣） */
-const resultCfg = () => ({
-  place: 'shop',
-  dialogue: () => {
-    const w = (zh, es, en) => zh + ' ' + X(es, en);
-    let msg = `【${w('任務成果', 'Resultados', 'Results')}】\n${w('玩家', 'Jugador', 'Player')}：${Game.N}\n${w('最後分數', 'Puntos', 'Score')}：${Game.score} 分\n` +
-      `${w('錯誤次數', 'Errores', 'Mistakes')}：${Game.mistakes} 次\n${w('時間', 'Tiempo', 'Time')}：${Game.elapsedTime} 秒\n` +
-      `${w('看任務提示', 'Pistas consultadas', 'Hints viewed')}：${Game.hintViews} 次\n\n${w('扣分原因', 'Penalizaciones', 'Penalties')}：`;
-    if (!Game.log.length) msg += '\n沒有扣分！' + X('¡Sin errores!', 'No mistakes!') + ' 🎉';
-    else Game.log.forEach((m, i) => { msg += `\n${i + 1}. ${m.zh} ${X(m.es, m.en)}（−10）`; });
-    return msg.split('\n').map(zh => ({ zh }));
-  },
-  options: () => ['查看排行榜 ' + X('Ver clasificación', 'See leaderboard')],
-  next: () => showLeaderboard()
-});
 
 /* ══════════════════════════════════════
    遊戲主體
@@ -671,7 +642,7 @@ const Game = defineGame({
         options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
         next: () => { Game.state = 'RESULT'; uploadResult(); }
       },
-      RESULT: resultCfg()
+      RESULT: stdResultCfg('shop')
     };
   },
 

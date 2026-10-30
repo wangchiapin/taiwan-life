@@ -206,7 +206,7 @@ HGPlays.gameFn = function () { return 'tw_' + GAME.scene; };   // 共用引擎�
      };
    遊戲物件用 defineGame({ … }) 建立：會帶入下面 GameCore 的共用功能，遊戲自己寫的同名功能會蓋過共用版。
    遊戲最後呼叫 GameBoot()（從「重新開始」或清單頁回來時直接開始）。
-   遊戲自己要寫的：customPinyin、WHO／SPEAKER_RE、VOCAB／VOCAB_OF、Hints、STAGE、NEXT_LABEL、Game（getConfig、render…）、Music.init
+   遊戲自己要寫的：customPinyin、WHO／SPEAKER_RE、VOCAB／VOCAB_OF、STAGE、NEXT_LABEL、Game（getConfig、render…）、Music.init
    可選的掛勾：Game.onStart()（按開始後、換到遊戲畫面前）、GAME.restartParams(p)（重新開始時多帶的網址參數）
 ══════════════════════════════════════ */
 
@@ -330,6 +330,42 @@ function initPay(t, total, extras) {
   const ds = [-20, -10, 10, 20].filter(d => t.change + d >= 0);
   t.given = t.changeWrong ? t.change + pick(ds) : t.change;
 }
+
+// 提示面板：開關的程式每個遊戲都一樣，各遊戲只要給自己的 render。大部分遊戲的 render 也一樣，直接用 stdHintsRender
+function makeHints(own) {
+  return Object.assign({
+    open: false,
+    toggle(force) {
+      this.open = force ?? !this.open;
+      if (this.open) { Vocab.toggle(false); Log.toggle(false); Game.hintViews += 1; this.render(); }
+      document.getElementById('hints').classList.toggle('open', this.open);
+      document.getElementById('hint-tab').setAttribute('aria-expanded', this.open);
+    }
+  }, own);
+}
+const stdHintsRender = function () {
+  if (!Game.task) return;
+  const r = s => Game.ruby(s);
+  const item = x => `<div class="h-item"><div class="h-zh">${r(x.zh.replace(SPEAKER_RE, ''))}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`;
+  const sit = `<div class="h-sec">${r('我的狀況')}</div>` + Game.listHTML(true).map(x => `<div class="h-item"><div class="h-zh">${r(x.zh)}</div><div class="h-es">${esc(X(x.es, x.en))}</div></div>`).join('');
+  document.getElementById('hint-body').innerHTML = sit + Game.hintSections().map(sec => `<div class="h-sec">${r(sec.title)}</div>` + sec.lines.map(item).join('')).join('');
+};
+
+// 結算畫面（Ami 傳成果訊息＋查看排行榜）：place 是 'phone'（手機）或 'shop'（店裡）
+const stdResultCfg = place => ({
+  place,
+  dialogue: () => {
+    const w = (zh, es, en) => zh + ' ' + X(es, en);
+    let msg = `【${w('任務成果', 'Resultados', 'Results')}】\n${w('玩家', 'Jugador', 'Player')}：${Game.N}\n${w('最後分數', 'Puntos', 'Score')}：${Game.score} 分\n` +
+      `${w('錯誤次數', 'Errores', 'Mistakes')}：${Game.mistakes} 次\n${w('時間', 'Tiempo', 'Time')}：${Game.elapsedTime} 秒\n` +
+      `${w('看任務提示', 'Pistas consultadas', 'Hints viewed')}：${Game.hintViews} 次\n\n${w('扣分原因', 'Penalizaciones', 'Penalties')}：`;
+    if (!Game.log.length) msg += '\n沒有扣分！' + X('¡Sin errores!', 'No mistakes!') + ' 🎉';
+    else Game.log.forEach((m, i) => { msg += `\n${i + 1}. ${m.zh} ${X(m.es, m.en)}（−10）`; });
+    return msg.split('\n').map(zh => ({ zh }));
+  },
+  options: () => ['查看排行榜 ' + X('Ver clasificación', 'See leaderboard')],
+  next: () => showLeaderboard()
+});
 
 /* 一關：①沒錯／謝謝 ②有禮貌指出問題 ③沒禮貌。對方有沒有出錯由 o.wrong() 決定
    o: { key, place, html, dialogue, ok, fix(), rude, wrong(), whyWrong(), whyRight(), goodWrong[3], goodOk[3], apology(), go(wrong) } */

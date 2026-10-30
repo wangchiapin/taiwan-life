@@ -320,14 +320,7 @@ const VOCAB = {
 ══════════════════════════════════════ */
 const FLOW = ['START', 'STORE', 'GREET', 'M_TAIL', 'M_NAME', 'M_CHECK', 'M_PAY', 'M_CHANGE', 'CALL', 'D_TAIL', 'D_NAME', 'D_CONFIRM',
               'Y_ASK', 'Y_NOTFOUND', 'Y_NAME', 'Y_CONFIRM', 'CARD', 'CARD_AMT', 'CARD_TAP', 'BAG', 'END', 'RESULT'];
-const Hints = {
-  open: false,
-  toggle(force) {
-    this.open = force ?? !this.open;
-    if (this.open) { Vocab.toggle(false); Log.toggle(false); Game.hintViews += 1; this.render(); }
-    document.getElementById('hints').classList.toggle('open', this.open);
-    document.getElementById('hint-tab').setAttribute('aria-expanded', this.open);
-  },
+const Hints = makeHints({
   render() {
     if (!Game.task) return;
     const r = s => Game.ruby(s);
@@ -338,7 +331,7 @@ const Hints = {
     }
     document.getElementById('hint-body').innerHTML = html;
   }
-};
+});
 document.getElementById('hint-tab').onclick = () => Hints.toggle();
 document.getElementById('hint-close').onclick = () => Hints.toggle(false);
 

@@ -279,14 +279,7 @@ const VOCAB = {
 /* ══════════════════════════════════════
    任務提示：只列出 NPC 交代過的原話，聽到了才出現；不扣分，結果頁顯示看了幾次
 ══════════════════════════════════════ */
-const Hints = {
-  open: false,
-  toggle(force) {
-    this.open = force ?? !this.open;
-    if (this.open) { Vocab.toggle(false); Log.toggle(false); Game.hintViews += 1; this.render(); }
-    document.getElementById('hints').classList.toggle('open', this.open);
-    document.getElementById('hint-tab').setAttribute('aria-expanded', this.open);
-  },
+const Hints = makeHints({
   render() {
     if (!Game.task) return;
     const r = s => Game.ruby(s);
@@ -298,7 +291,7 @@ const Hints = {
     if (past('M_MED', 'M_NOW', 'E_ASK', 'END', 'RESULT')) html += `<div class="h-sec">${r('藥師說的話')}</div>` + Game.pharmLines().map(item).join('');
     document.getElementById('hint-body').innerHTML = html;
   }
-};
+});
 document.getElementById('hint-tab').onclick = () => Hints.toggle();
 document.getElementById('hint-close').onclick = () => Hints.toggle(false);
 

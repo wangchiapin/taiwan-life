@@ -242,14 +242,7 @@ const VOCAB = {
    任務提示：放「我的狀況」（原因、請假時間、對象）；不扣分，結果頁顯示看了幾次
 ══════════════════════════════════════ */
 const ORDER = ['START', 'MSG_OPEN', 'MSG_REASON', 'MSG_TIME', 'MSG_OK', 'BACK', 'NOTES', 'FORM', 'SUBMIT', 'END', 'RESULT'];
-const Hints = {
-  open: false,
-  toggle(force) {
-    this.open = force ?? !this.open;
-    if (this.open) { Vocab.toggle(false); Log.toggle(false); Game.hintViews += 1; this.render(); }
-    document.getElementById('hints').classList.toggle('open', this.open);
-    document.getElementById('hint-tab').setAttribute('aria-expanded', this.open);
-  },
+const Hints = makeHints({
   render() {
     if (!Game.task) return;
     const r = s => Game.ruby(s);
@@ -257,7 +250,7 @@ const Hints = {
     let html = `<div class="h-sec">${r('我的狀況')}</div>` + Game.situationRows().map(item).join('');
     document.getElementById('hint-body').innerHTML = html;
   }
-};
+});
 document.getElementById('hint-tab').onclick = () => Hints.toggle();
 document.getElementById('hint-close').onclick = () => Hints.toggle(false);
 
