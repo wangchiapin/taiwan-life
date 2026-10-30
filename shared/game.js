@@ -316,6 +316,20 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>'
 const POLITE = M('要有禮貌，說「不好意思」，告訴他正確的就好。', 'Hay que ser cortés: di «disculpe» y dile lo correcto.', 'Be polite: say "excuse me" and tell them the correct one.');
 const rotOf = (t, o) => o.map((_, i) => o[(i + t.rot) % o.length]);
 const stdShortBill = n => n > 500 ? 500 : n > 200 ? 200 : n > 100 ? 100 : n > 50 ? 50 : 20;   // 一定不夠的那張
+const sum = a => a.reduce((x, y) => x + y, 0);   // 一串數字加總（2026-10-30 從麵店、鹽酥雞、超商、服飾店搬進共用檔）
+
+/* 付錢用的欄位（麵店、鹽酥雞、超商、服飾店共用；關帝廟鈔票固定，自己寫）
+   t.total 真正的總價；t.payWrong 老闆／店員報價有沒有多算；t.changeWrong 找的錢對不對
+   extras：多算時可能多出來的項目 { zh, es, en, price }；鈔票金額由各遊戲自己的 billFor() 決定 */
+function initPay(t, total, extras) {
+  t.total = total; t.payWrong = Math.random() < 0.45;
+  t.extra = pick(extras);                                   // 多算的那一項 { zh, es, en, price }
+  t.said = t.payWrong ? total + t.extra.price : total;
+  t.bill = billFor(Math.max(total, t.said)); t.change = t.bill - total;
+  t.changeWrong = t.change > 0 && Math.random() < 0.4;
+  const ds = [-20, -10, 10, 20].filter(d => t.change + d >= 0);
+  t.given = t.changeWrong ? t.change + pick(ds) : t.change;
+}
 
 /* 一關：①沒錯／謝謝 ②有禮貌指出問題 ③沒禮貌。對方有沒有出錯由 o.wrong() 決定
    o: { key, place, html, dialogue, ok, fix(), rude, wrong(), whyWrong(), whyRight(), goodWrong[3], goodOk[3], apology(), go(wrong) } */

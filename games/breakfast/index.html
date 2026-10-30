@@ -370,7 +370,7 @@ const enList = list => list.map(en1).join(', ');
 /* ══════════════════════════════════════
    小工具
 ══════════════════════════════════════ */
-const sum = list => list.reduce((a, n) => a + priceOf(n), 0);
+const sumPrice = list => list.reduce((a, n) => a + priceOf(n), 0);
 const sameList = (a, b) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
 function numOpts(correct, deltas) {      // 正確答案 + 幾個很像的錯誤答案
   const set = new Set([correct]);
@@ -575,7 +575,7 @@ const Game = defineGame({
       }
     ];
     this.customers.forEach(c => {
-      c.total = (c.pickup ? sum(c.pre.food) : 0) + sum(c.target);
+      c.total = (c.pickup ? sumPrice(c.pre.food) : 0) + sumPrice(c.target);
       while (c.bill < c.total) c.bill *= 2;
       c.tries = 0;
     });

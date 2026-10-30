@@ -37,6 +37,7 @@
   - `NZ(n)`：後面要接量詞時用，2 念「兩」（兩個、兩球、兩張），其他和 `zhNum` 一樣（十二片、兩萬個）。
   - `zhDigits(s)`：一個一個數字念（電話、號碼、西元年），其他字（`-`、`，`、空格）原樣保留。`zhDigits('02-4967-2308')` 念成「零二-四九六七-二三零八」，`zhDigits(2026)` 念成「二零二六」。0 念「零」、1 念「一」（不念「幺」）。要分組念（例如手機 4-3-3、中間停頓）就自己先切好，每一組各呼叫一次再用「，」接起來（barber 的電話就是這樣做）。
 - **抓錯關卡與付錢三關（2026-10-30 已進共用檔，見第 5 節）**：`POLITE`、`rotOf(t, 選項)`、`catchState()`、`payStates()`、`stdShortBill`。遊戲不能再用 `const` 宣告這幾個名字，否則整個遊戲打不開。`billFor()`（你給的鈔票）金額每個遊戲不同，仍寫在遊戲裡。
+- **付錢欄位與加總（2026-10-30 已進共用檔）**：`initPay(t, total, extras)`（算出真正總價、對方報價有沒有多算、鈔票、找零、找錯的錢；鈔票金額用遊戲自己的 `billFor()`）和 `sum(陣列)`。遊戲不能再用 `const`／`function` 宣告這兩個名字，否則整個遊戲打不開；遊戲自己要用不同做法的加總，請取別的名字（早餐店用 `sumPrice`）。關帝廟的鈔票固定是一千元，付錢欄位自己寫，不用 `initPay`。
 
 ## 3. 遊戲自己要寫的
 
@@ -123,7 +124,7 @@
 ## 11. 推上去之前
 
 - 先 `git pull --rebase origin main`（Ben 常直接在 GitHub 網頁上傳圖片，也可能有別的對話框同時在改）。
-- 推之前確認沒有遊戲重複宣告共用檔的名字（例如 `grep -rn "const zhNum\|const NZ\|const zhDigits\|const POLITE\|const rotOf\|function catchState\|function payStates" games`）。
+- 推之前確認沒有遊戲重複宣告共用檔的名字（例如 `grep -rn "const zhNum\|const NZ\|const zhDigits\|const POLITE\|const rotOf\|function catchState\|function payStates\|const sum \|function initPay" games`）。
 - 改到 Firestore 的資料結構（collection、欄位、儲存方式）時，要提醒 Ben 更新 Apps Script 同步腳本。
 - Ben 說「推」才推。
 

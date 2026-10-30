@@ -277,18 +277,7 @@ const SPEAKER_RE = /^(Ami|老闆|我)：/;
    2026-10-27 新遊戲（麵店、超商、鹽酥雞）共用同一套寫法
 ══════════════════════════════════════ */
 const billFor = n => n <= 100 ? 100 : n <= 200 ? 200 : n <= 500 ? 500 : 1000;           // 你給的鈔票
-const sum = a => a.reduce((x, y) => x + y, 0);
 
-/* 付錢用的欄位：total 真正的總價；payWrong 老闆／店員報價有沒有多算；changeWrong 找的錢對不對 */
-function initPay(t, total, extras) {
-  t.total = total; t.payWrong = Math.random() < 0.45;
-  t.extra = pick(extras);                                   // 多算的那一項 { zh, es, en, price }
-  t.said = t.payWrong ? total + t.extra.price : total;
-  t.bill = billFor(Math.max(total, t.said)); t.change = t.bill - total;
-  t.changeWrong = t.change > 0 && Math.random() < 0.4;
-  const ds = [-20, -10, 10, 20].filter(d => t.change + d >= 0);
-  t.given = t.changeWrong ? t.change + pick(ds) : t.change;
-}
 
 /* ══════════════════════════════════════
    每一關的單字（中文、西文、英文；拼音自動產生）
