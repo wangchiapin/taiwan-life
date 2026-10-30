@@ -61,9 +61,7 @@
   }
   /* 嵌入模式：不要閃一下開始畫面 */
   /* ── 登入：麵包店招牌 ── */
-  .storefront .name { background: var(--night); color: var(--yolk); text-align: center; font-size: 30px; font-weight: 700; letter-spacing: 6px; padding: 12px 0; }
   /* ── 遊戲 ── */
-  #npc-dialogue .speaker.ami { color: var(--ami); }
   /* 購物清單 */
   /* 路線圖 + 加值機：這個遊戲的招牌元素 */
   .map { overflow-x: auto; margin: 8px 0 12px; background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 10px; }
@@ -108,12 +106,8 @@
   }
   /* ── 句子翻譯 ── */
   /* 加大可點範圍 */
-  @media (max-width: 560px) {
-    .tr-btn { width: 34px; height: 34px; margin-left: 8px; }
-  }
   /* ── 本關單字（右側抽屜） ── */
   /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
-  @media (prefers-reduced-motion: reduce) { .drawer { transition: none; } }
   /* ── 即時回饋卡（停留到下一次選擇） ── */
   .v-head small { color: var(--muted); }
   .v-head button { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink); padding: 2px 6px; }
