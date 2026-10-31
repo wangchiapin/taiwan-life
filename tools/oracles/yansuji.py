@@ -8,7 +8,8 @@ ORACLE = """() => {
     HANDOVER: () => t.hoWrong ? OC.fix(t.hoKind, T[t.hoKind], t.hoIdx) : '好，謝謝。',
     PAY: () => t.payWrong ? '不好意思，好像算錯了，應該是' + zhNum(t.total) + '元吧？' : '給你' + zhNum(t.bill) + '元。',
     PAY_FIX: '給你' + zhNum(t.bill) + '元。',
-    CHANGE: () => t.changeWrong ? '不好意思，好像找錯了，應該找' + zhNum(t.change) + '元吧？' : '好，謝謝。'
+    CHANGE: () => t.changeWrong ? '不好意思，好像找錯了，應該找' + zhNum(t.change) + '元吧？' : '好，謝謝。',
+    END: '查看結果', RESULT: '查看排行榜'
   };
   const v = m[s]; return typeof v === 'function' ? v() : (v ?? null);
 }"""
