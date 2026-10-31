@@ -1,4 +1,4 @@
-r"""涵蓋測試：python3 tools/coverage.py <遊戲…> [--max 40] [--min 10] [--out 資料夾]
+r"""涵蓋測試：python3 tools/coverage.py <遊戲…> [--max 40] [--min 10] [--time 900] [--out 資料夾]
 
 用途：不是把幾千萬種組合都跑一遍，而是保證
   1. 每個隨機項的每個選項至少出現過；而且「每兩個隨機項的每種搭配」也至少出現過（處理互相牽動）
@@ -189,5 +189,6 @@ if __name__ == '__main__':
         if name in a: i = a.index(name); v = a[i + 1]; del a[i:i + 2]; return type(d)(v)
         return d
     mx, mn, out = opt('--max', 40), opt('--min', 10), opt('--out', '/tmp/coverage')
+    tl = opt('--time', 900)   # 單一遊戲最多跑幾秒（預設 900）
     games = a or ['school', 'bookstore', 'reserva']
-    for g in games: run_game(g, mx, mn, out)
+    for g in games: run_game(g, mx, mn, out, time_limit=tl)
