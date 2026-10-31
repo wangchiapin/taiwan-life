@@ -39,7 +39,8 @@ ORACLE = """() => {
     K_GREET: '好，我去訂蛋糕', K_SIZE: '我想訂' + NZ(t.size) + '吋的', K_FLAVOR: t.flavor === '草莓' ? '草莓鮮奶油' : '巧克力',
     K_CANDLE: NZ(t.candles) + '根', K_PLATE: '寫「' + t.friend + '，生日快樂」', K_TIME: t.pickup,
     K_CONFIRM: t.err ? '有一個地方不對' : '對，都沒有錯', K_FIX: ({size:'尺寸不對',candle:'蠟燭不對',time:'取貨時間不對'})[t.err] || '',
-    K_NAME: '我叫' + Game.N
+    K_NAME: '我叫' + Game.N,
+    END: '查看結果', RESULT: '查看排行榜'
   };
   return m[s] ?? null;
 }"""
