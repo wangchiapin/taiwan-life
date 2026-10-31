@@ -435,7 +435,6 @@ const Game = defineGame({
     document.getElementById('place-status').textContent = X(es, en);
   },
 
-
   IMAGES: {
     START: ['images/start.jpg', '🍦'], SCOOPS: ['images/shop.jpg', '🍦'], CONTAINER: ['images/shop.jpg', '🍦'], FLAVOR: ['images/flavors.jpg', '🍨'], SCOOP_CHECK: ['images/flavors.jpg', '🍨'],
     TOPPING: ['images/topping.jpg', '🍬'], EAT: ['images/shop.jpg', '🍦'], ORDER_CHECK: ['images/shop.jpg', '🍦'], PAY_FIX: ['images/pay_oops.jpg', '💵'], PAY: ['images/pay.jpg', '💵'], PICKUP: ['images/shop_pickup.jpg', '🍦'], HANDOVER: ['images/shop.jpg', '🍦'],
@@ -854,7 +853,6 @@ const Game = defineGame({
     };
   },
 
-
   /* Ami 的新訊息：懸浮視窗。先問「打開來看／不要理她」；打開來看後要按「回覆：知道了」才繼續 */
   applyAmiChange() {   // Ami 改口味：只有「打開來看」才生效；「不要理她」就維持原本的訂單
     const t = this.task, p = t.pendingAmi;
@@ -899,30 +897,6 @@ const Game = defineGame({
     Object.assign(layer.style, { left: (img.offsetLeft + W / 2 - w / 2) + 'px', top: (img.offsetTop + H * 0.62 - h) + 'px', width: w + 'px' });
     layer.innerHTML = pixIce(v.k, shownList.map(f => f.c), this.top);
     scene.appendChild(layer);
-  },
-
-  handleChoice(choice) {
-    if (this.state === '_TRANS') {          // 離開過場，進下一關
-      const t = this._trans; this._trans = null;
-      Tr.closeAll(); Speech.stop();
-      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
-      if (this.updateCash) this.updateCash();
-      if (document.getElementById('game-window').classList.contains('active')) this.render();
-      return;
-    }
-    const cfg = this.getConfig()[this.state];
-    Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
-    Speech.stop();
-    this.thought = null;
-    this.feedback = [];
-    const before = this.state;
-    this.att[before] = (this.att[before] || 0) + 1;
-    cfg.next(choice);
-    this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
-    if (this.thoughtFirst) this.visit += 1;
-    this.updateCash();
-    this.maybeTrans(before);
-    if (document.getElementById('game-window').classList.contains('active')) this.render();
   },
 
   render() {

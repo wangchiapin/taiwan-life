@@ -1101,6 +1101,36 @@ const GameCore = {
       this._trans = { from: before, to: this.state };
       this.state = '_TRANS';
     }
+  },
+  /* 玩家按下選項：標準流程。遊戲有自己的小動作時，掛這三個入口（都可以不寫）：
+     onLeaveTrans()  離開過場、進下一關時
+     beforeNext(choice)  執行這個選項的 next 之前
+     afterNext(before)   next 執行完之後（before = 選之前的關卡） */
+  handleChoice(choice) {
+    if (this.state === '_TRANS') {          // 離開過場，進下一關
+      const t = this._trans; this._trans = null;
+      if (this.onLeaveTrans) this.onLeaveTrans();
+      Tr.closeAll(); Speech.stop();
+      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
+      if (this.updateCash) this.updateCash();
+      if (document.getElementById('game-window').classList.contains('active')) this.render();
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
+    Speech.stop();
+    this.thought = null;
+    this.feedback = [];
+    const before = this.state;
+    this.att[before] = (this.att[before] || 0) + 1;
+    if (this.beforeNext) this.beforeNext(choice);
+    cfg.next(choice);
+    if (this.afterNext) this.afterNext(before);
+    this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
+    if (this.thoughtFirst) this.visit += 1;
+    if (this.updateCash) this.updateCash();
+    this.maybeTrans(before);
+    if (document.getElementById('game-window').classList.contains('active')) this.render();
   }
 };
 /* 合併時保留 get（例如 get N()、get total()），不能用 {...} 展開 */

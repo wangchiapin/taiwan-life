@@ -282,7 +282,6 @@ const Game = defineGame({
     document.getElementById('place-status').textContent = X(es, en);
   },
 
-
   IMAGES: {
     START: ['images/start.jpg', '🥬'], ITEM: ['images/stall.jpg', '🥬'], BARGAIN: ['images/stall.jpg', '💬'], PAY: ['images/pay.jpg', '💵'],
     CHANGE: ['images/pay.jpg', '🪙'], BAG: ['images/stall.jpg', '🛍️'], CHECK: ['images/stall.jpg', '🛍️'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
@@ -476,30 +475,6 @@ const Game = defineGame({
     };
   },
 
-
-  handleChoice(choice) {
-    if (this.state === '_TRANS') {          // 離開過場，進下一關
-      const t = this._trans; this._trans = null;
-      Tr.closeAll(); Speech.stop();
-      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
-      if (this.updateCash) this.updateCash();
-      if (document.getElementById('game-window').classList.contains('active')) this.render();
-      return;
-    }
-    const cfg = this.getConfig()[this.state];
-    Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
-    Speech.stop();
-    this.thought = null;
-    this.feedback = [];
-    const before = this.state;
-    this.att[before] = (this.att[before] || 0) + 1;
-    cfg.next(choice);
-    this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
-    if (this.thoughtFirst) this.visit += 1;
-    this.updateCash();
-    this.maybeTrans(before);
-    if (document.getElementById('game-window').classList.contains('active')) this.render();
-  },
 
   render() {
     if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果

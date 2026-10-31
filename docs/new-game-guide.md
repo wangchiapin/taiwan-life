@@ -50,7 +50,8 @@
 
 - `GAME = { scene, track, settingsKey, roles }`：場景 ID、GA4 名稱、存設定的 localStorage 名稱、朗讀角色的音高（可選 `timerPrefix`、`restartParams(p)`）。
 - `pinyinPro.customPinyin`（台灣讀音）、資料、`WHO`／`SPEAKER_RE`、`VOCAB`／`VOCAB_OF`、`Hints`、`STAGE`、`NEXT_LABEL`。
-- `const Game = defineGame({ … })`：`setup`、`getConfig`、`render`、`handleChoice`、`setPlace`…；開始時要多做的事寫在 `onStart()`。
+- `const Game = defineGame({ … })`：`setup`、`getConfig`、`render`、`setPlace`…；開始時要多做的事寫在 `onStart()`。
+- **`handleChoice`（玩家按下選項）共用檔已經有標準版，新遊戲不用自己寫**（會關翻譯視窗、停語音、記每關按幾次、換關、更新 `updateCash`、進過場、重畫）。有自己的小動作時掛這三個入口（都可不寫）：`onLeaveTrans()` 離開過場時、`beforeNext(choice)` 執行選項的 `next` 之前、`afterNext(before)` 執行完之後。只有 breakfast、drinks、reserva 三個因為流程差比較多，保留自己的 `handleChoice`。
 - 最後一行 `GameBoot();` 和 `Music.init({…})`。
 
 ## 4. 每個遊戲都要有的設定

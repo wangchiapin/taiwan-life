@@ -243,6 +243,10 @@ const VOCAB = {
    任務提示：只列出 Ami 和店員說過的原話；不扣分，結果頁顯示看了幾次
 ══════════════════════════════════════ */
 const Hints = makeHints({
+  /* 玩家按選項的前後小動作（標準流程在 shared/game.js） */
+  beforeNext() { this._cs = false; },
+  afterNext(before) { if (this.state !== before && !this._cs) this.carry = null; },
+
   render() {
     if (!Game.task) return;
     const r = s => Game.ruby(s);
@@ -647,30 +651,6 @@ const Game = defineGame({
   },
 
   /* ── 共用：台詞、圖片、過場、畫面（和其他遊戲一樣） ── */
-  handleChoice(choice) {
-    if (this.state === '_TRANS') {          // 離開過場，進下一關
-      const t = this._trans; this._trans = null;
-      Tr.closeAll(); Speech.stop();
-      this.state = t.to; this.thought = null; this.feedback = []; this.thoughtFirst = false;
-      
-      if (document.getElementById('game-window').classList.contains('active')) this.render();
-      return;
-    }
-    const cfg = this.getConfig()[this.state];
-    Tr.closeAll();                       // 選了選項，翻譯視窗全部關掉
-    Speech.stop();
-    this.thought = null;
-    this.feedback = [];
-    const before = this.state;
-    this.att[before] = (this.att[before] || 0) + 1;
-    this._cs = false;
-    cfg.next(choice);
-    if (this.state !== before && !this._cs) this.carry = null;
-    this.thoughtFirst = this.state !== before;   // 換關卡時，過場的話放在對話前面
-    if (this.thoughtFirst) this.visit += 1;
-    this.maybeTrans(before);
-    if (document.getElementById('game-window').classList.contains('active')) this.render();
-  },
 
   render() {
     if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果
