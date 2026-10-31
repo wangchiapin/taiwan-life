@@ -1112,6 +1112,65 @@ const GameCore = {
       this.state = '_TRANS';
     }
   },
+  /* 畫面：標準流程。遊戲的小差異用這些設定／入口（都可以不寫）：
+     GAME.defaultPlace / GAME.defaultEmoji   關卡沒指定位置、沒有圖片時用的預設（預設 'gate'、🚇）
+     imageFor()        自己決定這一關用哪張圖（回傳 [圖, emoji, alt]；回傳空值就用 IMAGES）
+     adjustImage(img)  圖片決定好、結局圖換完之後再微調（img = [圖, emoji, alt]，要回傳陣列）
+     關卡設定可用：mount(box) 對話框畫好後掛東西、single 強制單排按鈕、html() 對話前面加的內容 */
+  render() {
+    if (this.state === '_TRANS' && !this._transMode) {     // 用上一關的圖片、位置，只顯示結果
+      const t = this._trans;
+      this.state = t.from;
+      this._transMode = true;
+      try { this.render(); } finally { this._transMode = false; this.state = '_TRANS'; }
+      return;
+    }
+    const cfg = this.getConfig()[this.state];
+    if (!cfg) { console.error('狀態錯誤：' + this.state); return; }
+    const val = v => typeof v === 'function' ? v() : v;
+    this.setPlace(val(cfg.place) || GAME.defaultPlace || 'gate');
+
+    // END 的 dialogue 會決定結局，所以只算一次
+    const raw = this._transMode ? [] : this.state === 'END' ? (this._endText ??= cfg.dialogue()) : val(cfg.dialogue);
+    let [src, emoji, alt] = (this.imageFor && this.imageFor()) || this.IMAGES[this.state] || ['', GAME.defaultEmoji || '🚇'];
+    if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
+    if (this.adjustImage) [src, emoji, alt] = this.adjustImage([src, emoji, alt]);
+    this.setImage(src, emoji, alt);
+    Vocab.render(this.state);
+    if (Hints.open) Hints.render();
+    Log.render();
+
+    this._tr = []; this._spk = [];
+    let html = (this.showList && this.state !== 'START' && !['END', 'RESULT'].includes(this.state)) ? this.listHTML() : '';
+    html += cfg.html ? cfg.html() : '';
+    if (this._transMode) html = '';
+    const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
+    const main = this.formatText(raw);
+    // 過場畫面：先給評語（綠卡），再接旁白，最後才是過場按鈕
+    html += this._transMode ? this.feedbackHTML() + th : (this.thoughtFirst ? th + main : main + th) + this.feedbackHTML();
+    const box = document.getElementById('npc-dialogue');
+    box.innerHTML = html;
+    box.querySelectorAll('[data-tr]').forEach(btn => {
+      btn.onclick = () => Tr.open(this._tr[+btn.dataset.tr], btn);
+    });
+    box.querySelectorAll('[data-spk]').forEach(btn => {
+      btn.onclick = () => { const x = this._spk[+btn.dataset.spk]; Speech.speak(x.text, btn, x.who); };
+    });
+
+    if (cfg.mount && !this._transMode) cfg.mount(box);
+    const area = document.getElementById('options-area');
+    area.className = '';
+    area.innerHTML = '';
+    const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
+    area.classList.toggle('single', cfg.single ?? (opts.length === 1 || opts.some(o => o.length > 12)));
+    opts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.innerHTML = this.ruby(opt);
+      btn.onclick = () => this.handleChoice(opt);
+      area.appendChild(btn);
+    });
+  },
   /* 玩家按下選項：標準流程。遊戲有自己的小動作時，掛這三個入口（都可以不寫）：
      onLeaveTrans()  離開過場、進下一關時
      beforeNext(choice)  執行這個選項的 next 之前
