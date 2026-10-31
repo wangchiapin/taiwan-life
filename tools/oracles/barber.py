@@ -6,7 +6,8 @@ ORACLE = """() => {
     ARRIVE: '有，我有預約，我叫' + N + '。', STYLE_LEN: '剪到' + t.len[0], STYLE_BANG: '瀏海' + t.bang[0],
     WASH: '不好意思，水有點燙。', MIRROR: '後面可以再短一點嗎？', PAY: '給老闆五百元，請他找錢',
     CHANGE: t.wrong ? '老闆' : '沒錯，謝謝',
-    CHANGE_FIX: '這次對了，謝謝'
+    CHANGE_FIX: '這次對了，謝謝',
+    END: '查看結果', RESULT: '查看排行榜'
   };
   return m[s] ?? null;
 }"""
