@@ -8,7 +8,8 @@ ORACLE = """() => {
     PRICE: () => '一共' + c.total + '元。',
     CHANGE: () => '收您' + c.bill + '元，找您' + (c.bill - c.total) + '元。',
     BYE: () => c.dine === '外帶' ? '謝謝光臨，慢走！' : '請慢用！',
-    PHONE: '老樣子，還加一個薯餅。'
+    PHONE: '老樣子，還加一個薯餅。',
+    END: '查看結果', RESULT: '查看排行榜'
   };
   const v = m[s]; return typeof v === 'function' ? v() : (v ?? null);
 }"""

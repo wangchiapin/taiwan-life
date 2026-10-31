@@ -30,7 +30,8 @@ ORACLE = """() => {
     D_ALLERGY: t.allergy ? '有，我對止痛藥過敏' : '沒有，沒有過敏',
     D_ADVICE: '好，謝謝醫生', P_PAY: '給200元', M_MED: '好，我知道了',
     M_NOW: t.now === 'lunch' ? '感冒藥' : '止咳藥',
-    E_ASK: '醫生說是感冒，藥吃' + NZ(t.rx) + '天，要多喝水、多休息。'
+    E_ASK: '醫生說是感冒，藥吃' + NZ(t.rx) + '天，要多喝水、多休息。',
+    END: '查看結果', RESULT: '查看排行榜'
   };
   return m[s] ?? null;
 }"""

@@ -38,7 +38,8 @@ ORACLE = """() => {
     A_GREET: t.aColor + '的', A_QTY: '一個就好。',
     HAGGLE: hg(), PAY: '給' + (S[cur].ask <= 100 ? 100 : 500) + '元',
     F_GREET: CN[t.chicken] + '份', F_SPICY: (t.chicken - 1) + '份要辣，一份不要辣。', F_CUT: '要切，謝謝。', F_PAY: '好，給你',
-    CALL: '好，我回去問問看。', X_GREET: '不好意思，這件可以換', X_PRICE: '老闆，你剛剛不是說'
+    CALL: '好，我回去問問看。', X_GREET: '不好意思，這件可以換', X_PRICE: '老闆，你剛剛不是說',
+    END: '查看結果', RESULT: '查看排行榜'
   };
   return m[s] ?? null;
 }"""

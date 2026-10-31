@@ -10,7 +10,8 @@ ORACLE = """() => {
     SNACK: '一份' + SNACKS[t.snack][0] + '爆米花。', SNACK_CHECK: () => t.snackWrong ? '不好意思，我要的是' + SNACKS[t.snack][0] + '的，不是' + SNACKS[t.snack === 'salty' ? 'sweet' : 'salty'][0] + '的。' : '好，謝謝。',
     GATE: '好，這是電影票，這是學生證。',
     FIND_HALL: '走進' + CN[t.hall] + '廳', SEAT_TAKEN: () => '不好意思，我們的票是' + seatZh(Game.chosen) + '，請你再看一下票。',
-    PHONE: '馬上把手機調成靜音。'
+    PHONE: '馬上把手機調成靜音。',
+    END: '查看結果', RESULT: '查看排行榜'
   };
   const v = m[s]; return typeof v === 'function' ? v() : (v ?? null);
 }"""

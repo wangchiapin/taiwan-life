@@ -17,7 +17,8 @@ ORACLE = """() => {
     CHANGE: () => t.changeWrong ? `不好意思，好像找錯了，應該找${zhNum(t.change)}元吧？` : '好，謝謝。',
     AMULET: '自己拿一個平安符，隨喜投一點香油錢。',
     GUOLU: '在香爐上方，順時針繞三圈。',
-    EXIT: '走虎邊的門出去（面對廟，在左邊）。'
+    EXIT: '走虎邊的門出去（面對廟，在左邊）。',
+    END: '查看結果', RESULT: '查看排行榜'
   };
   const v = m[s]; return typeof v === 'function' ? v() : (v ?? null);
 }"""

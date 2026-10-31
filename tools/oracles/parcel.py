@@ -31,7 +31,8 @@ ORACLE = """() => {
     CALL: '好，我再問問看。', D_TAIL: '末三碼是' + t.dadTail + '。', D_NAME: t.dadName + '。', D_CONFIRM: '按「確認取貨」',
     Y_ASK: t.yourArrived ? '還有我的包裹，末三碼是' + t.yourTail + '。' : '我的包裹還沒到店，不用了。',
     Y_NAME: N + '。', Y_CONFIRM: '按「確認取貨」', CARD: '我要加值悠遊卡。', CARD_AMT: amt[t.cardTop],
-    CARD_TAP: '把卡放在感應區上', BAG: '不用，我自己拿就好，謝謝。'
+    CARD_TAP: '把卡放在感應區上', BAG: '不用，我自己拿就好，謝謝。',
+    END: '查看結果', RESULT: '查看排行榜'
   };
   return m[s] ?? null;
 }"""
