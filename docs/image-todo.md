@@ -36,3 +36,7 @@
 ## 服飾店 clothes（2026-10-29）
 提示詞已寫好：`docs/image-prompts-clothes.md`（照順序一次做一張）。圖片檔名：start、rack、fittingroom、mirror、mirror_pants、tag、hem、counter、bag、result、end_good、end_bad（共 12 張，720×720）。主角看不到臉、看不出性別（只拍手和鞋子）；沒有 Ami。
 - [ ] clothes：start、rack、fittingroom、mirror、mirror_pants、tag、hem、counter、bag、result、end_good、end_bad
+
+## 飯店 hotel（2026-11-01，P-004 草稿：尚未修改）
+提示詞：`docs/image-prompts-hotel.md`（照順序一次做一張，Ben 確認再下一張）。圖片檔名：start、desk、room、phone、housekeeper、checkout、result、end_good、end_bad（共 9 張，720×720）。Ami 用 `games/drinks/images/call.jpg` 的頭肩裁切當角色參考圖。
+- [ ] hotel：start、desk、room、phone、housekeeper、checkout、result、end_good、end_bad

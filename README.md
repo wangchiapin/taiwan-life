@@ -159,3 +159,7 @@ iPhone 版 Chrome 上，頁面可以捲動時，往下捲之後有時回不到�
 - 正解在 `tools/oracles/clothes.py`；`tools/smoke.py` 已加入名單。
 - 圖片檔還沒有（缺圖時自動顯示 emoji）；12 張圖的提示詞在 `docs/image-prompts-clothes.md`，進度清單在 `docs/image-todo.md`。
 - 台詞和拼音是第一版草稿，需要 Ben 審。真實資料：UNIQLO 台灣官網說明改褲長只能改長度、改完不能再放長、改過的商品除瑕疵外不能退換；其他（試衣間號碼牌、七天內換貨、改褲管一百元）是常見做法，Ben 要再確認。
+
+## 草稿遊戲（尚未放進地圖）
+每個遊戲一行：編號、名稱、scene、說明文件、狀態。這些遊戲沒有登記到首頁、後台、Firebase 規則，排行榜暫時寫不進去。
+- P-004 飯店 `hotel`：[docs/draft-games/hotel.md](docs/draft-games/hotel.md)，尚未修改（第一版草稿：台詞、拼音、流程待 Ben 審；測試等修改完再寫；讀音沒有對照 game-kit）

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<title>飯店 · Hotel</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：hotelgame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "hotelgame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #22313c;
+    --red: #2f6f8f;
+    --red-dark: #1f4f68;
+    --yolk: #d9a441;
+    --night: #1f3342;
+    --kraft: #e3edf3;
+    --wall: #f2f7fa;
+    --paper: #ffffff;
+    --line: #cfdde7;
+    --muted: #5f7686;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    background: #e9f1f6;
+  }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  /* ── 登入：店招牌 ── */
+  /* ── 遊戲 ── */
+  /* 購物清單 */
+  @media (hover: hover) {
+    .opt:hover rt { color: #cfe6f5; }
+  }
+  /* ── 排行榜 ── */
+  #lb-table tr.highlight-row { background: #d6e7f1; font-weight: 700; }
+  /* ── 句子翻譯 ── */
+  .tr-btn:hover { background: #d6e7f1; border-color: var(--red); }
+  /* 加大可點範圍 */
+  /* ── 本關單字（右側抽屜） ── */
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+
+  /* 房間檢查卡 */
+  .roomcard { margin: 8px 0 12px; background: #f4f8fb; border: 2px solid #b9cfe0; border-radius: 12px; padding: 10px 14px; }
+  .roomcard .rh { font-weight: 700; margin-bottom: 4px; }
+  .roomcard .rc { display: flex; gap: 6px 8px; flex-wrap: wrap; }
+  .roomcard .rc span { background: #fff; border: 1.5px solid #b9cfe0; border-radius: 999px; padding: 3px 11px; font-size: 16px; }
+  .roomcard .rc span.bad { border-color: var(--bad); color: var(--bad); }
+
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">宿</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">飯店</h1>
+  <p class="subtitle" data-es="Hospedarse en un hotel en Taiwán" data-en="Staying at a hotel in Taiwan">Hospedarse en un hotel en Taiwán</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    Ami 幫你訂好了飯店。辦入住、跟櫃台說房號，房間的冷氣、熱水、吹風機、網路可能有問題，要打電話請房務處理。櫃台和房務有時候會聽錯、做錯，要自己多注意喔！<br>
+    <span data-es="Ami te reservó un hotel. Haces el check-in, das tu número de habitación y, si algo falla (aire acondicionado, agua caliente, secador, internet), llamas para que lo arreglen. ¡A veces la recepción o el personal de limpieza se equivoca, así que presta atención!" data-en="Ami booked a hotel for you. You check in, give your room number, and if something in the room is broken (AC, hot water, hair dryer, internet) you call for help. Staff sometimes get things wrong, so stay alert!">Ami te reservó un hotel. Haces el check-in, das tu número de habitación y, si algo falla (aire acondicionado, agua caliente, secador, internet), llamas para que lo arreglen. ¡A veces la recepción o el personal de limpieza se equivoca, así que presta atención!</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">📱</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 10 名 · Top 10</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'hotel', track: 'hotel', settingsKey: 'hotel_settings',
+  defaultPlace: 'desk', defaultEmoji: '🏨',
+  roles: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '櫃台': { pitch: 1.05 }, '房務': { pitch: 0.95 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+   第一版草稿：本次沒有對照 game-kit（讀不到），只用共用檔內建的 GoodTeacher 規則
+══════════════════════════════════════ */
+pinyinPro.customPinyin({
+  '星期': 'xīng qí', '期': 'qí', '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '還要': 'hái yào', '還好': 'hái hǎo',
+  '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '覺得': 'jué de', '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan',
+  '時間': 'shí jiān', '時候': 'shí hou', '太太': 'tài tai', '先生': 'xiān sheng', '東西': 'dōng xi', '告訴': 'gào su',
+  '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '著': 'zhe', '只': 'zhǐ', '囉': 'luo', '啦': 'la', '耶': 'ye',
+  '意思': 'yì si', '不好意思': 'bù hǎo yì si', '關係': 'guān xi', '這個': 'zhè ge', '那個': 'nà ge', '一個': 'yí ge', '兩個': 'liǎng ge', '一共': 'yí gòng',
+  '看看': 'kàn kan', '試試看': 'shì shi kàn', '好像': 'hǎo xiàng', '衣服': 'yī fu', '喜歡': 'xǐ huān', '漂亮': 'piào liang', '欸': 'éi',
+  '訊息': 'xùn xí', '朋友': 'péng yǒu', '清單': 'qīng dān', '辛苦': 'xīn kǔ', '零錢': 'líng qián', '複誦': 'fù sòng', '應該': 'yīng gāi', '重做': 'chóng zuò'
+});
+pinyinPro.customPinyin({
+  '飯店': 'fàn diàn', '櫃台': 'guì tái', '房務': 'fáng wù', '房務員': 'fáng wù yuán', '同仁': 'tóng rén', '退房': 'tuì fáng', '房卡': 'fáng kǎ', '訂房': 'dìng fáng',
+  '房間': 'fáng jiān', '房號': 'fáng hào', '單人房': 'dān rén fáng', '雙人房': 'shuāng rén fáng', '早餐': 'zǎo cān', '含早餐': 'hán zǎo cān', '住': 'zhù',
+  '冷氣': 'lěng qì', '熱水': 'rè shuǐ', '吹風機': 'chuī fēng jī', '網路': 'wǎng lù', '連不上': 'lián bú shàng', '迷你吧': 'mí nǐ bā', '分機': 'fēn jī',
+  '電梯': 'diàn tī', '樓': 'lóu', '處理': 'chǔ lǐ', '修好': 'xiū hǎo', '礦泉水': 'kuàng quán shuǐ', '入住': 'rù zhù', '辦理': 'bàn lǐ', '晚': 'wǎn', '浴室': 'yù shì',
+  '淋浴': 'lín yù', '怎麼': 'zěn me', '舒服': 'shū fu', '還舒服': 'hái shū fu', '住得': 'zhù de', '連得上': 'lián de shàng', '沒反應': 'méi fǎn yìng', '悶': 'mēn', '熱風': 'rè fēng', '無法連線': 'wú fǎ lián xiàn', '道歉': 'dào qiàn', '消費': 'xiāo fèi', '一瓶': 'yì píng'
+});
+// 台灣讀音修正：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '櫃台': ['La recepción', 'The front desk'], '房務': ['El personal de limpieza', 'Housekeeping'] };
+const SPEAKER_RE = /^(Ami|櫃台|房務|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['飯店', 'hotel', 'hotel'], ['訂房', 'reservar una habitación', 'book a room'], ['房間', 'habitación', 'room'], ['櫃台', 'recepción', 'front desk'], ['退房', 'hacer el check-out', 'check out']],
+  DESK: [['歡迎光臨', 'bienvenido(a)', 'welcome'], ['入住', 'hacer el check-in', 'check in'], ['訂房', 'reservar una habitación', 'book a room']],
+  DESK_CHECK: [['單人房', 'habitación individual', 'single room'], ['雙人房', 'habitación doble', 'double room'], ['晚', 'noche', 'night'], ['含早餐', 'con desayuno incluido', 'breakfast included'], ['確認', 'confirmar', 'confirm'], ['不好意思', 'disculpe', 'excuse me']],
+  ROOM: [['房卡', 'tarjeta de la habitación', 'room key card'], ['冷氣', 'aire acondicionado', 'air conditioner'], ['熱水', 'agua caliente', 'hot water'], ['吹風機', 'secador de pelo', 'hair dryer'], ['網路', 'internet', 'internet'], ['分機', 'extensión (teléfono interno)', 'extension (hotel phone)'], ['房務', 'personal de limpieza', 'housekeeping']],
+  REPORT1: [['沒有熱水', 'no hay agua caliente', 'no hot water'], ['連不上', 'no se puede conectar', "can't connect"], ['沒有反應', 'no responde', 'no response'], ['不冷', 'no enfría', "isn't cold"]],
+  ROOMNO: [['房號', 'número de habitación', 'room number'], ['幾號房', '¿qué número de habitación?', 'which room number?']],
+  HK_CHECK: [['同仁', 'compañero(a) de trabajo (formal)', 'colleague (staff)'], ['處理', 'encargarse de, resolver', 'handle, deal with'], ['對嗎', '¿es correcto?', 'is that right?']],
+  HK_DONE: [['修好', 'arreglar', 'fix'], ['還是', 'todavía, aun así', 'still'], ['試試看', 'probar', 'try it out'], ['房務員', 'personal de limpieza de habitaciones', 'housekeeper']],
+  CHECKOUT: [['退房', 'hacer el check-out', 'check out'], ['迷你吧', 'minibar', 'minibar'], ['礦泉水', 'agua mineral', 'mineral water'], ['消費', 'consumo, gasto', 'charge, spending'], ['零錢', 'monedas, cambio suelto', 'small change']],
+  END: [['舒服', 'cómodo', 'comfortable'], ['下次', 'la próxima vez', 'next time']],
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = (() => {
+  const r = ['回報問題', 'reportar el problema', 'reporting the problem'];
+  return { DESK: ['辦入住', 'el check-in', 'checking in'], DESK_CHECK: ['核對訂房', 'revisar la reserva', 'checking the booking'], ROOM: ['聯絡櫃台', 'llamar a la recepción', 'calling the front desk'],
+    REPORT1: r, REPORT2: r, ROOMNO: ['說房號', 'dar el número de habitación', 'giving the room number'], HK_CHECK: ['核對報修', 'revisar el aviso', 'checking the report'],
+    HK_DONE: ['核對修理結果', 'revisar la reparación', 'checking the repair'], CHECKOUT: ['退房', 'el check-out', 'checking out'] };
+})();
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = {
+  DESK: '走到櫃台', DESK_CHECK: '聽櫃台確認', ROOM: '走進房間', REPORT1: '撥分機找櫃台', REPORT2: '繼續說明', ROOMNO: '回答櫃台', HK_CHECK: '聽櫃台確認',
+  HK_DONE: '等房務來', CHECKOUT: '去櫃台退房', END: '離開飯店'
+};
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const PLACES = {
+  phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
+  desk: ['🏨', '飯店櫃台', 'Recepción del hotel', 'Hotel front desk', ''],
+  room: ['🛏️', '房間', 'Habitación', 'Hotel room', '']
+};
+const TYPES = {
+  single: { zh: '單人房', es: 'habitación individual', en: 'a single room' },
+  double: { zh: '雙人房', es: 'habitación doble', en: 'a double room' }
+};
+const nightsZh = n => zhNum(n) + '晚';
+const nightsEs = n => n + (n > 1 ? ' noches' : ' noche');
+const nightsEn = n => n + (n > 1 ? ' nights' : ' night');
+const PROBS = [
+  { k: 'ac', zh: '冷氣', es: 'el aire acondicionado', en: 'the air conditioner', say: '房間的冷氣不冷。', issue: '冷氣不冷', issueEs: 'el aire no enfría', issueEn: 'the AC is not cold',
+    scene: '（你打開冷氣，吹出來的卻是熱風，房間一直很悶。）', sceneEs: '(Enciendes el aire acondicionado, pero sale aire caliente y la habitación sigue sofocante.)', sceneEn: '(You turn on the AC, but only warm air comes out and the room stays stuffy.)',
+    good: '✅ 冷氣變冷了', bad: '❌ 還是吹熱風', still: '不好意思，冷氣好像還是不冷。' },
+  { k: 'water', zh: '熱水', es: 'el agua caliente', en: 'the hot water', say: '浴室沒有熱水。', issue: '沒有熱水', issueEs: 'no hay agua caliente', issueEn: 'there is no hot water',
+    scene: '（你開了淋浴，水一直是冷的。）', sceneEs: '(Abres la ducha y el agua sigue fría.)', sceneEn: '(You turn on the shower and the water stays cold.)',
+    good: '✅ 有熱水了', bad: '❌ 還是冷水', still: '不好意思，熱水好像還是沒有。' },
+  { k: 'dryer', zh: '吹風機', es: 'el secador de pelo', en: 'the hair dryer', say: '吹風機打開沒有反應。', issue: '吹風機沒有反應', issueEs: 'el secador no responde', issueEn: 'the hair dryer does not respond',
+    scene: '（你想吹頭髮，吹風機一按開關，一點反應也沒有。）', sceneEs: '(Quieres secarte el pelo, pero al pulsar el interruptor el secador no hace nada.)', sceneEn: '(You want to dry your hair, but the hair dryer does nothing when you press the switch.)',
+    good: '✅ 吹風機會動了', bad: '❌ 還是沒反應', still: '不好意思，吹風機好像還是沒有反應。' },
+  { k: 'wifi', zh: '網路', es: 'el internet', en: 'the internet', say: '網路連不上。', issue: '網路連不上', issueEs: 'no hay conexión a internet', issueEn: "the internet won't connect",
+    scene: '（你想連上Wi-Fi，手機一直顯示「無法連線」。）', sceneEs: '(Intentas conectarte al Wi-Fi, pero el celular dice «no se puede conectar».)', sceneEn: '(You try to join the Wi-Fi, but your phone keeps saying "cannot connect".)',
+    good: '✅ 連得上了', bad: '❌ 還是連不上', still: '不好意思，網路好像還是連不上。' }
+];
+const MB_PRICE = 50;   // 迷你吧礦泉水（待確認）
+
+/* 櫃台複誦（DESK_CHECK）：一次只會錯一項。type：房型；nights：晚數；bkf：含不含早餐 */
+const KEYS = ['type', 'nights', 'bkf'];
+const OC = {
+  zh: (k, v) => k === 'type' ? TYPES[v].zh : k === 'nights' ? nightsZh(v) : (v ? '含早餐' : '不含早餐'),
+  es: (k, v) => k === 'type' ? TYPES[v].es : k === 'nights' ? nightsEs(v) : (v ? 'con desayuno' : 'sin desayuno'),
+  en: (k, v) => k === 'type' ? TYPES[v].en : k === 'nights' ? nightsEn(v) : (v ? 'breakfast included' : 'no breakfast'),
+  fix: (k, v) => k === 'type' ? `不好意思，我訂的是${TYPES[v].zh}。` : k === 'nights' ? `不好意思，我訂的是${nightsZh(v)}。` : (v ? '不好意思，我訂的有含早餐。' : '不好意思，我訂的沒有含早餐。'),
+  full: (o, f) => KEYS.map(k => OC[f](k, o[k])).join(f === 'zh' ? '，' : ', ')
+};
+const flipOf = (t, k) => k === 'type' ? (t.type === 'single' ? 'double' : 'single') : k === 'nights' ? pick([1, 2, 3].filter(n => n !== t.nights)) : !t.bkf;
+
+/* 櫃台複誦報修（HK_CHECK）：room 房號；p1、p2 兩個問題 */
+const HKEYS = ['room', 'p1', 'p2'];
+const HC = {
+  zh: (k, v) => k === 'room' ? `${zhDigits(v)}號房` : v.issue,
+  es: (k, v) => k === 'room' ? `habitación ${v}` : v.issueEs,
+  en: (k, v) => k === 'room' ? `room ${v}` : v.issueEn,
+  fix: (k, v) => k === 'room' ? `不好意思，我是${zhDigits(v)}號房。` : `不好意思，我說的是${v.issue}。`,
+  full: (o, f) => HKEYS.map(k => HC[f](k, o[k])).join(f === 'zh' ? '，' : ', ')
+};
+const hflip = (t, k) => k === 'room' ? t.room + 10 : pick(PROBS.filter(p => !t.probs.includes(p)));
+
+/* ══════════════════════════════════════
+   任務提示
+══════════════════════════════════════ */
+const Hints = makeHints({ render: stdHintsRender });
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+const ORDER = ['START', 'DESK', 'DESK_CHECK', 'ROOM', 'REPORT1', 'REPORT2', 'ROOMNO', 'HK_CHECK', 'HK_DONE', 'CHECKOUT', 'END', 'RESULT'];
+const at = s => ORDER.indexOf(Game.st0) >= ORDER.indexOf(s);
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,
+  hintViews: 0, log: [], feedback: [], visit: 0, att: {}, cash: null,
+  onStart() { this.updateCash(); },
+  updateCash() { document.getElementById('cash-badge').textContent = ''; },
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+  IMAGES: {
+    START: ['images/start.jpg', '🏨'], DESK: ['images/desk.jpg', '🏨'], DESK_CHECK: ['images/desk.jpg', '🏨'],
+    ROOM: ['images/room.jpg', '🛏️'], REPORT1: ['images/phone.jpg', '☎️'], REPORT2: ['images/phone.jpg', '☎️'], ROOMNO: ['images/phone.jpg', '☎️'], HK_CHECK: ['images/phone.jpg', '☎️'],
+    HK_DONE: ['images/housekeeper.jpg', '🧹'], CHECKOUT: ['images/checkout.jpg', '🏨'],
+    END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+  },
+
+  setup() {
+    const type = pick(['single', 'double']), nights = pick([1, 2, 3]), bkf = Math.random() < 0.5;
+    const probs = shuffle(PROBS).slice(0, 2);
+    const floor = pick([3, 4, 5, 6, 7, 8]), room = floor * 100 + pick([1, 2, 3, 5, 6, 8, 9, 10, 12]);
+    const t = this.task = { type, nights, bkf, probs, room, floor, rot: Math.floor(Math.random() * 3) };
+    t.truth = { type, nights, bkf };
+    /* 櫃台複誦訂房：45% 有一項說錯 */
+    t.ocWrong = Math.random() < 0.45; t.ocKind = pick(KEYS); t.ocFlip = flipOf(t, t.ocKind);
+    t.ocSaid = { ...t.truth, ...(t.ocWrong ? { [t.ocKind]: t.ocFlip } : {}) };
+    /* 櫃台複誦報修：45% 有一項說錯 */
+    t.htruth = { room, p1: probs[0], p2: probs[1] };
+    t.hcWrong = Math.random() < 0.45; t.hcKind = pick(HKEYS); t.hcFlip = hflip(t, t.hcKind);
+    t.hcSaid = { ...t.htruth, ...(t.hcWrong ? { [t.hcKind]: t.hcFlip } : {}) };
+    /* 房務修好之後：45% 有一個其實沒修好 */
+    t.hdWrong = Math.random() < 0.45; t.hdIdx = pick([0, 1]);
+    /* 迷你吧：玩家喝了一瓶水或沒動；櫃台 45% 說錯 */
+    t.drank = Math.random() < 0.5;
+    t.mbWrong = Math.random() < 0.45;
+    t.mbSaid = t.mbWrong ? !t.drank : t.drank;
+  },
+
+  amiLines() {
+    const t = this.task, N = this.N;
+    return [
+      L(`Ami：${N}，我幫你訂好飯店了，用我的名字訂的：Ami。`, `${N}, te reservé el hotel a mi nombre: Ami.`, `${N}, I booked the hotel under my name: Ami.`),
+      L(`Ami：我訂的是${TYPES[t.type].zh}，住${nightsZh(t.nights)}，${t.bkf ? '有含早餐' : '沒有含早餐'}。`, `Reservé ${TYPES[t.type].es}, ${nightsEs(t.nights)}, ${t.bkf ? 'con desayuno incluido' : 'sin desayuno'}.`, `I booked ${TYPES[t.type].en}, ${nightsEn(t.nights)}, ${t.bkf ? 'breakfast included' : 'no breakfast'}.`),
+      L('Ami：進房間以後，如果有東西壞掉，打電話給櫃台，請房務來處理。', 'Si algo no funciona en la habitación, llama a la recepción para que venga el personal de limpieza.', 'If something in the room is broken, call the front desk and ask housekeeping to come.')
+    ];
+  },
+  hintSections() {
+    const t = this.task;
+    const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
+    if (at('ROOM')) out.push({ title: '櫃台說的話', lines: [L(`櫃台：您的房間在${zhNum(t.floor)}樓，房號是${zhDigits(t.room)}，電梯在右手邊。`, `Su habitación está en el piso ${t.floor}, número ${t.room}; el ascensor queda a la derecha.`, `Your room is on floor ${t.floor}, number ${t.room}; the elevator is on your right.`)] });
+    return out;
+  },
+
+  listHTML(rowsOnly) {
+    const t = this.task, r = s => this.ruby(s);
+    const rows = [
+      { zh: `訂房：${TYPES[t.type].zh}，${nightsZh(t.nights)}，${t.bkf ? '含早餐' : '不含早餐'}`, es: `Reserva: ${TYPES[t.type].es}, ${nightsEs(t.nights)}, ${t.bkf ? 'con desayuno' : 'sin desayuno'}`, en: `Booking: ${TYPES[t.type].en}, ${nightsEn(t.nights)}, ${t.bkf ? 'breakfast included' : 'no breakfast'}` },
+      { zh: '訂房的名字：Ami', es: 'Nombre de la reserva: Ami', en: 'Name on the booking: Ami' },
+      { zh: t.drank ? '迷你吧：你喝了一瓶礦泉水' : '迷你吧：你什麼都沒有動', es: t.drank ? 'Minibar: bebiste una botella de agua mineral' : 'Minibar: no tocaste nada', en: t.drank ? 'Minibar: you drank one bottle of mineral water' : "Minibar: you didn't touch anything" }
+    ];
+    if (at('ROOM')) rows.splice(2, 0, { zh: `房間的問題：${t.probs.map(p => p.issue).join('、')}`, es: `Problemas de la habitación: ${t.probs.map(p => p.issueEs).join('; ')}`, en: `Room problems: ${t.probs.map(p => p.issueEn).join('; ')}` });
+    rows.push({ zh: '你身上有：一千元的鈔票，還有零錢', es: 'Llevas: un billete de mil dólares y algo de cambio', en: 'You have: a 1000-dollar bill, plus some small change' });
+    if (rowsOnly) return rows;
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 房務修好之後的房間檢查卡 */
+  roomHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    const chips = t.probs.map((p, i) => t.hdWrong && i === t.hdIdx ? `<span class="bad">${r(p.bad)}</span>` : `<span>${r(p.good)}</span>`);
+    return `<div class="roomcard"><div class="rh">🛏️ ${r('你試試看')}</div><div class="rc">${chips.join('')}</div></div>`;
+  },
+
+  getConfig() {
+    const N = this.N, t = this.task, T = t.truth, H = t.htruth;
+    const desk = (zh, es, en) => L(`櫃台：${zh}`, es, en);
+    const hk = (zh, es, en) => L(`房務：${zh}`, es, en);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const ocK = t.ocKind, hcK = t.hcKind;
+    const sayOf = p => p.say;
+    /* 通話報修：兩個問題，各一關 */
+    const reportOpts = i => {
+      const p = t.probs[i], others = shuffle(PROBS.filter(x => !t.probs.includes(x))).slice(0, 2);
+      return rotOf(t, [p, ...others]).map(x => sayOf(x));
+    };
+    const reportNext = i => c => {
+      const p = t.probs[i];
+      if (c !== p.say) { Game.addMistake(M(`你房間的問題是：${p.issue}。`, `El problema de tu habitación es: ${p.issueEs}.`, `The problem in your room is: ${p.issueEn}.`)); return; }
+      goodFirst(i ? 'REPORT2' : 'REPORT1', '沒錯！把問題說清楚，房務才知道要修什麼。', '¡Exacto! Explica bien el problema para que sepan qué arreglar.', 'Right! Say the problem clearly so they know what to fix.');
+      Game.thought = i ? null : [desk('好的。還有別的問題嗎？', 'Muy bien. ¿Algún otro problema?', 'Okay. Any other problems?')];
+      Game.state = i ? 'ROOMNO' : 'REPORT2';
+    };
+    /* 退房：迷你吧有沒有消費 */
+    const mbZh = v => v ? `迷你吧的礦泉水有消費一瓶，${zhNum(MB_PRICE)}元。` : '迷你吧沒有消費。';
+    const mbEs = v => v ? `Se consumió una botella de agua del minibar: ${esM(MB_PRICE)}.` : 'No hay consumo del minibar.';
+    const mbEn = v => v ? `One bottle of minibar water was used: ${enM(MB_PRICE)}.` : 'No minibar charges.';
+    const mbFix = v => v ? `不好意思，我有喝一瓶迷你吧的礦泉水，要付${zhNum(MB_PRICE)}元。` : '不好意思，我沒有喝迷你吧的東西喔。';
+    const ocRoomN = () => { const a = t.room + 10, b = t.room % 100 > 1 ? t.room - 1 : t.room + 1; return [t.room, a, b]; };
+
+    return {
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你走到飯店門口。手機響了一聲，是Ami傳來的LINE。）', '(Llegas a la puerta del hotel. Tu celular suena: es un LINE de Ami.)', '(You reach the hotel entrance. Your phone buzzes — a LINE from Ami.)'),
+          ...Game.amiLines(),
+          L('我：好，我現在去辦入住！', '¡Bien, voy a hacer el check-in ahora!', "OK, I'll go check in now!")
+        ],
+        options: ['走進飯店'],
+        next: () => { Game.startTimer(); Game.state = 'DESK'; }
+      },
+
+      /* ═══ 櫃台：辦入住 ═══ */
+      DESK: {
+        place: 'desk',
+        dialogue: () => [desk('歡迎光臨！請問有訂房嗎？', '¡Bienvenido(a)! ¿Tiene una reserva?', 'Welcome! Do you have a reservation?')],
+        options: () => rotOf(t, ['我有訂房，名字是Ami。', '我有訂房，名字是王小明。', '我沒有訂房，我要現場訂。']),
+        next: c => {
+          if (c !== '我有訂房，名字是Ami。') { Game.addMistake(c === '我沒有訂房，我要現場訂。' ? M('Ami已經幫你訂好了房間。', 'Ami ya reservó la habitación por ti.', 'Ami has already booked the room for you.') : M('訂房的名字是Ami。', 'La reserva está a nombre de Ami.', 'The booking is under the name Ami.')); return; }
+          goodFirst('DESK', '沒錯！訂房的名字是Ami。', '¡Exacto! La reserva está a nombre de Ami.', 'Right! The booking is under Ami.');
+          Game.state = 'DESK_CHECK';
+        }
+      },
+      DESK_CHECK: catchState(Game, {
+        key: 'DESK_CHECK', place: 'desk',
+        dialogue: () => [L(`櫃台：好，找到了。跟您確認一下：${OC.full(t.ocSaid, 'zh')}，對嗎？`, `Bien, la encontré. Le confirmo: ${OC.full(t.ocSaid, 'es')}. ¿Es correcto?`, `Okay, found it. Let me confirm: ${OC.full(t.ocSaid, 'en')}. Is that right?`)],
+        ok: '對，沒錯。', fix: () => OC.fix(ocK, t.ocWrong ? T[ocK] : t.ocFlip), rude: '你們是不是把我的訂房弄錯了？',
+        wrong: () => t.ocWrong,
+        whyWrong: () => M(`櫃台說錯了：他說「${OC.zh(ocK, t.ocSaid[ocK])}」，Ami訂的是「${OC.zh(ocK, T[ocK])}」。`, `La recepción se equivocó: dijo «${OC.es(ocK, t.ocSaid[ocK])}», pero Ami reservó «${OC.es(ocK, T[ocK])}».`, `The desk got it wrong: they said "${OC.en(ocK, t.ocSaid[ocK])}", but Ami booked "${OC.en(ocK, T[ocK])}".`),
+        whyRight: () => M(`櫃台說的是對的：「${OC.zh(ocK, T[ocK])}」。`, `Lo que dijo la recepción es correcto: «${OC.es(ocK, T[ocK])}».`, `The desk was right: "${OC.en(ocK, T[ocK])}".`),
+        goodWrong: ['你很細心！訂房內容櫃台說錯了，要馬上說。', '¡Qué atento! La recepción dijo mal la reserva; hay que decirlo enseguida.', 'Well spotted! The desk got the booking wrong — speak up right away.'],
+        goodOk: ['櫃台複誦的時候，要對一下Ami說的話。', 'Cuando la recepción repita la reserva, compárala con lo que dijo Ami.', 'When the desk repeats the booking, compare it with what Ami said.'],
+        apology: () => [desk(`啊，不好意思！是${OC.zh(ocK, T[ocK])}。`, `¡Ay, disculpe! Es «${OC.es(ocK, T[ocK])}».`, `Oh, sorry! It's "${OC.en(ocK, T[ocK])}".`),
+          desk(`好，${OC.full(T, 'zh')}，沒錯了。`, `Bien, ${OC.full(T, 'es')}: ahora sí.`, `Okay, ${OC.full(T, 'en')} — got it now.`)],
+        go: () => { Game.thought = [...(Game.thought || []), desk(`這是您的房卡。房間在${zhNum(t.floor)}樓，房號是${zhDigits(t.room)}，電梯在右手邊。`, `Esta es su tarjeta. La habitación está en el piso ${t.floor}, número ${t.room}; el ascensor queda a la derecha.`, `Here is your key card. Your room is on floor ${t.floor}, number ${t.room}; the elevator is on your right.`)]; Game.state = 'ROOM'; }
+      }),
+
+      /* ═══ 房間：東西壞了，怎麼找人 ═══ */
+      ROOM: {
+        place: 'room',
+        dialogue: () => [...t.probs.map(p => L(p.scene, p.sceneEs, p.sceneEn)), L('我：房間裡的電話可以直接打給櫃台。我該怎麼辦？', 'El teléfono de la habitación llama directo a la recepción. ¿Qué hago?', 'The room phone calls the front desk directly. What should I do?')],
+        options: () => rotOf(t, ['拿起房間的電話，撥分機找櫃台。', '自己把冷氣和吹風機拆開來修。', '先不要說，退房的時候再講。']),
+        next: c => {
+          if (c !== '拿起房間的電話，撥分機找櫃台。') { Game.addMistake(c === '先不要說，退房的時候再講。' ? M('有問題要馬上說，飯店才能馬上處理。', 'Si hay un problema, avísalo enseguida para que lo puedan resolver.', 'If something is wrong, tell them right away so they can fix it.') : M('不能自己拆設備，要請房務來處理。', 'No se deben desarmar los equipos; pide que venga el personal.', "Don't take the equipment apart yourself — ask housekeeping to come.")); return; }
+          goodFirst('ROOM', '沒錯！房間有問題，打電話給櫃台。', '¡Exacto! Si algo falla en la habitación, llama a la recepción.', 'Right! If something is wrong in the room, call the front desk.');
+          Game.thought = [desk('您好，櫃台。請問有什麼可以幫您的嗎？', 'Hola, recepción. ¿En qué puedo ayudarle?', 'Hello, front desk. How can I help you?')];
+          Game.state = 'REPORT1';
+        }
+      },
+      REPORT1: { place: 'room', dialogue: () => [desk('請問房間有什麼問題？', '¿Qué problema tiene la habitación?', 'What seems to be the problem with the room?')], options: () => reportOpts(0), next: reportNext(0) },
+      REPORT2: { place: 'room', dialogue: () => [desk('好，我記下來了。還有別的問題嗎？', 'Muy bien, lo anoté. ¿Algún otro problema?', 'Okay, noted. Any other problems?')], options: () => reportOpts(1), next: reportNext(1) },
+      ROOMNO: {
+        place: 'room',
+        dialogue: () => [desk('請問您是幾號房？', '¿Qué número de habitación tiene?', 'What is your room number?')],
+        options: () => rotOf(t, ocRoomN()).map(n => `我是${zhDigits(n)}號房。`),
+        next: c => {
+          if (c !== `我是${zhDigits(t.room)}號房。`) { Game.addMistake(M(`你的房號是${zhDigits(t.room)}。`, `Tu habitación es la ${t.room}.`, `Your room number is ${t.room}.`)); return; }
+          goodFirst('ROOMNO', '沒錯！房號要記清楚。', '¡Exacto! Hay que recordar bien el número de habitación.', 'Right! Remember your room number.');
+          Game.state = 'HK_CHECK';
+        }
+      },
+      HK_CHECK: catchState(Game, {
+        key: 'HK_CHECK', place: 'room',
+        dialogue: () => [L(`櫃台：好的，${HC.full(t.hcSaid, 'zh')}，我請房務同仁過去處理，對嗎？`, `Muy bien: ${HC.full(t.hcSaid, 'es')}. Enviaré a alguien del personal; ¿es correcto?`, `Okay: ${HC.full(t.hcSaid, 'en')}. I'll send housekeeping over — is that right?`)],
+        ok: '對，麻煩你了。', fix: () => HC.fix(hcK, t.hcWrong ? H[hcK] : t.hcFlip), rude: '你到底有沒有在聽啊？',
+        wrong: () => t.hcWrong,
+        whyWrong: () => M(`櫃台說錯了：他說「${HC.zh(hcK, t.hcSaid[hcK])}」，實際上是「${HC.zh(hcK, H[hcK])}」。`, `La recepción se equivocó: dijo «${HC.es(hcK, t.hcSaid[hcK])}», pero es «${HC.es(hcK, H[hcK])}».`, `The desk got it wrong: they said "${HC.en(hcK, t.hcSaid[hcK])}", but it is "${HC.en(hcK, H[hcK])}".`),
+        whyRight: () => M(`櫃台說的是對的：「${HC.zh(hcK, H[hcK])}」。`, `Lo que dijo la recepción es correcto: «${HC.es(hcK, H[hcK])}».`, `The desk was right: "${HC.en(hcK, H[hcK])}".`),
+        goodWrong: ['你很細心！報修的內容櫃台說錯了，要馬上說。', '¡Qué atento! La recepción repitió mal el aviso; hay que decirlo enseguida.', 'Well spotted! The desk repeated the report wrong — speak up right away.'],
+        goodOk: ['櫃台複誦報修的時候，要對一下房號和問題。', 'Cuando la recepción repita el aviso, revisa el número y el problema.', 'When the desk repeats your report, check the room number and the problems.'],
+        apology: () => [desk(`啊，不好意思！是${HC.zh(hcK, H[hcK])}。`, `¡Ay, disculpe! Es «${HC.es(hcK, H[hcK])}».`, `Oh, sorry! It's "${HC.en(hcK, H[hcK])}".`),
+          desk(`好，${HC.full(H, 'zh')}，我馬上請房務過去。`, `Bien, ${HC.full(H, 'es')}: envío al personal enseguida.`, `Okay, ${HC.full(H, 'en')} — I'll send someone right away.`)],
+        go: () => { Game.state = 'HK_DONE'; }
+      }),
+
+      /* ═══ 房務修完：核對有沒有真的修好 ═══ */
+      HK_DONE: catchState(Game, {
+        key: 'HK_DONE', place: 'room',
+        html: () => Game.roomHTML(),
+        dialogue: () => [L('（二十分鐘後，有人敲門。是房務員。）', '(Veinte minutos después, alguien llama a la puerta: es el personal de limpieza.)', '(Twenty minutes later, someone knocks. It is housekeeping.)'),
+          hk(`您好，${t.probs.map(p => p.zh).join('和')}都處理好了，您再試試看。`, `Hola, ya se resolvió ${t.probs.map(p => p.es).join(' y ')}. Pruebe, por favor.`, `Hello, ${t.probs.map(p => p.en).join(' and ')} are all fixed. Please try them.`)],
+        ok: '好，謝謝你。', fix: () => t.probs[t.hdIdx].still, rude: '你們到底會不會修啊？',
+        wrong: () => t.hdWrong,
+        whyWrong: () => M(`${t.probs[t.hdIdx].zh}其實還沒有修好，你要說出來。`, `${t.probs[t.hdIdx].es} todavía no está arreglado; hay que decirlo.`, `${t.probs[t.hdIdx].en} still isn't fixed — you need to say so.`),
+        whyRight: () => M(`${t.probs[t.hdIdx].zh}已經修好了。`, `${t.probs[t.hdIdx].es} ya está arreglado.`, `${t.probs[t.hdIdx].en} is already fixed.`),
+        goodWrong: ['你很細心！房務說修好了，但有一個還是壞的，要馬上說。', '¡Qué atento! Dijeron que estaba arreglado, pero uno seguía mal; hay que decirlo enseguida.', 'Well spotted! They said everything was fixed, but one thing was still broken — say so right away.'],
+        goodOk: ['房務說修好以後，要自己試試看。', 'Cuando digan que está arreglado, pruébalo tú mismo(a).', 'When they say it is fixed, try it yourself.'],
+        apology: () => [hk('啊，真的很不好意思！我馬上再處理一次。', '¡Ay, lo siento mucho! Lo reviso otra vez enseguida.', "Oh, I'm so sorry! I'll fix it again right away."), L('（房務員重新處理。這次是真的好了。）', '(El personal lo arregla de nuevo. Esta vez sí funciona.)', '(Housekeeping fixes it again. This time it really works.)')],
+        go: () => { Game.thought = [...(Game.thought || []), L('（隔天早上，你拿著房卡走到櫃台。）', '(A la mañana siguiente, bajas a la recepción con tu tarjeta.)', '(The next morning, you walk to the front desk with your key card.)')]; Game.state = 'CHECKOUT'; }
+      }),
+
+      /* ═══ 退房：迷你吧有沒有被多算或漏算 ═══ */
+      CHECKOUT: catchState(Game, {
+        key: 'CHECKOUT', place: 'desk',
+        dialogue: () => [desk('早安！退房嗎？房卡先給我，我幫您辦理退房。', '¡Buenos días! ¿Hace el check-out? Deme su tarjeta, por favor.', 'Good morning! Checking out? Your key card, please.'), L(`櫃台：${mbZh(t.mbSaid)}`, `${mbEs(t.mbSaid)}`, `${mbEn(t.mbSaid)}`)],
+        ok: t.mbSaid ? `好，這是${zhNum(MB_PRICE)}元。` : '好，謝謝。', fix: () => mbFix(t.mbWrong ? t.drank : !t.drank), rude: '你們是不是亂收錢啊？',
+        wrong: () => t.mbWrong,
+        whyWrong: () => t.mbSaid ? M('你沒有喝迷你吧的東西，櫃台多收了錢。', 'No tomaste nada del minibar; la recepción cobró de más.', "You didn't take anything from the minibar, but the desk charged you.") : M(`你有喝一瓶礦泉水，要付${MB_PRICE}元，櫃台漏算了。`, `Bebiste una botella de agua y hay que pagar ${esM(MB_PRICE)}; la recepción lo omitió.`, `You drank a bottle of water, so you owe ${enM(MB_PRICE)}; the desk missed it.`),
+        whyRight: () => t.drank ? M(`你有喝一瓶礦泉水，要付${MB_PRICE}元。`, `Bebiste una botella de agua: son ${esM(MB_PRICE)}.`, `You drank a bottle of water: ${enM(MB_PRICE)}.`) : M('你沒有動迷你吧，櫃台說得對。', 'No tocaste el minibar; la recepción tiene razón.', "You didn't touch the minibar; the desk is right."),
+        goodWrong: ['你很誠實也很細心！退房時，帳要自己核對。', '¡Qué honesto(a) y atento(a)! En el check-out, revisa tú mismo(a) la cuenta.', 'Honest and sharp! Check the bill yourself when you check out.'],
+        goodOk: ['退房的時候，要想一想迷你吧有沒有動過。', 'Al hacer el check-out, piensa si usaste el minibar.', 'When you check out, think about whether you used the minibar.'],
+        apology: () => [desk('啊，不好意思！我改一下帳。', '¡Ay, disculpe! Corrijo la cuenta.', 'Oh, sorry! Let me correct the bill.')],
+        go: () => { Game.stopTimer(); Game.state = 'END'; }
+      }),
+
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2;
+          track('game_complete', { game: 'hotel', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            desk('謝謝您的入住，歡迎再來！', 'Gracias por hospedarse con nosotros, ¡vuelva pronto!', 'Thank you for staying with us — please come again!'),
+            Game._endGood
+              ? L(`Ami：你住得還舒服嗎？房間有問題你都處理好了，太棒了！謝謝你，${N}！`, `¿Estuviste cómodo(a)? Resolviste todo lo de la habitación, ¡genial! ¡Gracias, ${N}!`, `Was your stay comfortable? You sorted out every problem — great! Thanks, ${N}!`)
+              : L('Ami：欸，聽起來這次住得不太順利……下次房間有問題，要記得跟櫃台好好確認喔！', 'Parece que la estancia no fue muy fluida… la próxima vez confirma bien con la recepción cuando haya un problema.', "Hmm, sounds like the stay didn't go smoothly… next time, confirm things carefully with the front desk.")
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: stdResultCfg('phone')
+    };
+  }
+});
+
+GameBoot();
+Music.init({ bpm: 108, tracks: [
+  { wave: 'sine', vol: 0.5, notes: 'E5 G5 B5 G5 E5 - D5 . | C5 E5 G5 E5 C5 - B4 . | D5 F5 A5 F5 D5 - C5 . | B4 D5 G5 - E5 - . .' },
+  { wave: 'triangle', vol: 0.5, notes: 'E3 . B3 . E3 . B3 . | C3 . G3 . C3 . G3 . | D3 . A3 . D3 . A3 . | G2 . D3 . E3 . . .' },
+  { vol: 0.2, notes: 'k . . . s . h .' }] });
+</script>
+</body>
+</html>
