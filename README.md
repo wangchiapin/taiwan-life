@@ -163,3 +163,4 @@ iPhone 版 Chrome 上，頁面可以捲動時，往下捲之後有時回不到�
 ## 草稿遊戲（尚未放進地圖）
 每個遊戲一行：編號、名稱、scene、說明文件、狀態。這些遊戲沒有登記到首頁、後台、Firebase 規則，排行榜暫時寫不進去。
 - P-004 飯店 `hotel`：[docs/draft-games/hotel.md](docs/draft-games/hotel.md)，尚未修改（第一版草稿：台詞、拼音、流程待 Ben 審；測試等修改完再寫；讀音沒有對照 game-kit）
+- P-005 台鐵 `train`：[docs/draft-games/train.md](docs/draft-games/train.md)，尚未修改（第一版草稿：台詞、拼音、流程待 Ben 審；測試等修改完再寫；讀音沒有對照 game-kit）
