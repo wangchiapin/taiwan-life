@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<title>高鐵 · Tren de alta velocidad (HSR)</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：hsrgame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "hsrgame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #33261f;
+    --red: #c8501e;
+    --red-dark: #8f3513;
+    --yolk: #e0a43a;
+    --night: #2e2630;
+    --kraft: #f3e4d3;
+    --wall: #fbf3ea;
+    --paper: #ffffff;
+    --line: #e5d2bd;
+    --muted: #7a6454;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    background: #eef2f6;
+  }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  /* ── 登入：店招牌 ── */
+  /* ── 遊戲 ── */
+  /* 購物清單 */
+  @media (hover: hover) {
+    .opt:hover rt { color: #ffe0d2; }
+  }
+  /* ── 排行榜 ── */
+  #lb-table tr.highlight-row { background: #f7dccb; font-weight: 700; }
+  /* ── 句子翻譯 ── */
+  .tr-btn:hover { background: #f7dccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  /* ── 本關單字（右側抽屜） ── */
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+
+
+
+  /* 車票卡、電子看板 */
+  .tkt { margin: 8px 0 12px; background: #fffdf6; border: 2px dashed #c8501e; border-radius: 10px; padding: 10px 14px; }
+  .tkt .th { font-weight: 700; margin-bottom: 4px; }
+  .tkt .tr { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 17px; }
+  .tkt .tr b { color: var(--red-dark); }
+  .board { margin: 8px 0 12px; background: #1b1b22; color: #ffd36b; border-radius: 10px; padding: 8px 10px; font-size: 16px; }
+  .board .bh { color: #fff; font-weight: 700; margin-bottom: 4px; }
+  .board table { width: 100%; border-collapse: collapse; }
+  .board td { padding: 3px 6px; border-top: 1px solid #44444f; white-space: nowrap; }
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">高鐵</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">高鐵</h1>
+  <p class="subtitle" data-es="Viajar en el tren de alta velocidad (HSR)" data-en="Riding the Taiwan High Speed Rail (HSR)">Viajar en el tren de alta velocidad (HSR)</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    Ami 已經在台中等你了。你要在高鐵台北站買一張到台中的車票，跟站務員核對，再找票閘、找月台、找候車位置和座位。站務員和車票有時候會弄錯，要自己多注意喔！<br>
+    <span data-es="Ami ya te espera en Taichung. Compras en la estación de Taipei un boleto de alta velocidad a Taichung, lo revisas con el empleado, y luego buscas el torniquete, el andén, tu vagón y tu asiento. ¡A veces el empleado o el boleto se equivoca, así que presta atención!" data-en="Ami is already waiting for you in Taichung. You buy a high-speed rail ticket to Taichung at Taipei Station, check it with the staff, then find the ticket gate, platform, car and seat. Mistakes happen, so stay alert!">Ami ya te espera en Taichung. Compras en la estación de Taipei un boleto de alta velocidad a Taichung, lo revisas con el empleado, y luego buscas el torniquete, el andén, tu vagón y tu asiento. ¡A veces el empleado o el boleto se equivoca, así que presta atención!</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">📱</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 10 名 · Top 10</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'hsr', track: 'hsr', settingsKey: 'hsr_settings',
+  defaultPlace: 'counter', defaultEmoji: '🚄',
+  roles: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '站務員': { pitch: 1.05 }, '乘客': { pitch: 0.95 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+   第一版草稿：本次沒有對照 game-kit（讀不到），只用共用檔內建的 GoodTeacher 規則
+══════════════════════════════════════ */
+pinyinPro.customPinyin({
+  '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '還要': 'hái yào', '還好': 'hái hǎo',
+  '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '覺得': 'jué de', '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan',
+  '時間': 'shí jiān', '時候': 'shí hou', '太太': 'tài tai', '先生': 'xiān sheng', '東西': 'dōng xi', '告訴': 'gào su',
+  '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '著': 'zhe', '只': 'zhǐ', '囉': 'luo', '啦': 'la', '耶': 'ye',
+  '意思': 'yì si', '不好意思': 'bù hǎo yì si', '關係': 'guān xi', '這個': 'zhè ge', '那個': 'nà ge', '一個': 'yí ge', '兩個': 'liǎng ge',
+  '看看': 'kàn kan', '好像': 'hǎo xiàng', '欸': 'éi', '朋友': 'péng yǒu', '辛苦': 'xīn kǔ', '零錢': 'líng qián', '應該': 'yīng gāi',
+  '訊息': 'xùn xí', '怎麼': 'zěn me', '舒服': 'shū fu', '位子': 'wèi zi', '座位': 'zuò wèi'
+});
+pinyinPro.customPinyin({
+  '高鐵': 'gāo tiě', '台北': 'tái běi', '台中': 'tái zhōng', '台南': 'tái nán', '新竹': 'xīn zhú', '桃園': 'táo yuán', '嘉義': 'jiā yì', '板橋': 'bǎn qiáo', '左營': 'zuǒ yíng', '南港': 'nán gǎng',
+  '標準車廂': 'biāo zhǔn chē xiāng', '商務車廂': 'shāng wù chē xiāng', '自由座': 'zì yóu zuò', '對號座': 'duì hào zuò',
+  '服務櫃檯': 'fú wù guì tái', '站務員': 'zhàn wù yuán', '票閘': 'piào zhá', '進站': 'jìn zhàn', '悠遊卡': 'yōu yóu kǎ', '候車位置': 'hòu chē wèi zhì', '位置': 'wèi zhì', '印得對': 'yìn de duì', '禮貌地': 'lǐ mào de',
+  '南下': 'nán xià', '北上': 'běi shàng', '月台': 'yuè tái', '看板': 'kàn bǎn', '停靠': 'tíng kào', '車次': 'chē cì', '車廂': 'chē xiāng',
+  '車票': 'chē piào', '那班': 'nà bān', '下一班': 'xià yì bān', '一張': 'yì zhāng', '票價': 'piào jià', '找錢': 'zhǎo qián', '乘客': 'chéng kè', '包包': 'bāo bao',
+  '座': 'zuò', '號': 'hào', '張': 'zhāng', '往': 'wǎng', '車': 'chē', '火車': 'huǒ chē', '點': 'diǎn', '半': 'bàn', '開': 'kāi', '分': 'fēn', '站': 'zhàn', '次': 'cì'
+});
+// 台灣讀音修正：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '站務員': ['El empleado de la estación', 'The station staff'], '乘客': ['El pasajero', 'The passenger'] };
+const SPEAKER_RE = /^(Ami|站務員|乘客|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+   START、SEAT、END 的單字依這一局的情況（車廂種類、有沒有人佔位、好壞結局）決定
+══════════════════════════════════════ */
+const KIND_WORD = {
+  std: [['標準車廂', 'vagón estándar', 'standard car'], ['對號座', 'asiento reservado (numerado)', 'reserved seat']],
+  biz: [['商務車廂', 'vagón de negocios', 'business car']],
+  free: [['自由座', 'asiento libre (sin número)', 'non-reserved seat']]
+};
+const VOCAB = {
+  get START() { const m = Game.task ? Game.task.mode : 'std'; return [['高鐵', 'tren de alta velocidad (HSR)', 'High Speed Rail (HSR)'], ['車票', 'boleto', 'ticket'], ...KIND_WORD[m]]; },
+  COUNTER: [['服務櫃檯', 'mostrador de servicio', 'service counter'], ['我要', 'quiero', 'I want'], ['那班', 'ese tren', 'that train']],
+  SOLD: [['滿了', 'lleno, agotado', 'full'], ['剩下', 'quedar, sobrar', 'be left'], ['下一班', 'el próximo tren', 'the next train']],
+  TK_CHECK: [['開', 'salir (el tren)', 'depart'], ['一張', 'un boleto', 'one ticket'], ['對嗎', '¿es correcto?', 'is that right?'], ['不好意思', 'disculpe', 'excuse me']],
+  PAY: [['一共', 'en total', 'in total'], ['零錢', 'monedas, cambio suelto', 'small change']],
+  CHANGE: [['找', 'dar el cambio', 'give change'], ['收', 'recibir, cobrar', 'receive, take payment']],
+  TICKET: [['車次', 'número de tren', 'train number'], ['車票', 'boleto', 'ticket']],
+  GATE: [['票閘', 'torniquete', 'ticket gate'], ['悠遊卡', 'tarjeta EasyCard', 'EasyCard'], ['進站', 'entrar a la estación', 'enter the station']],
+  DIRECTION: [['南下', 'rumbo al sur', 'southbound'], ['北上', 'rumbo al norte', 'northbound'], ['月台', 'andén', 'platform']],
+  BOARD: [['看板', 'tablero de información', 'information board'], ['停靠', 'parar (en una estación)', 'stop at (a station)'], ['車次', 'número de tren', 'train number']],
+  CAR: [['候車位置', 'zona de espera marcada en el andén', 'marked boarding spot'], ['車廂', 'vagón', 'train car']],
+  get SEAT() { const t = Game.task, o = t && t.occupied, f = t && t.mode === 'free'; return [['位子', 'asiento, lugar', 'seat, spot'], ...(o && !f ? [['乘客', 'pasajero', 'passenger']] : []), ...(o && f ? [['包包', 'bolso, mochila', 'bag']] : [])]; },
+  get END() { return Game.mistakes <= 2 ? [['順利', 'sin problemas', 'smoothly']] : [['下次', 'la próxima vez', 'next time']]; },
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = (() => {
+  const p = ['付錢', 'pagar', 'paying'];
+  return { COUNTER: ['買車票', 'comprar el boleto', 'buying the ticket'], SOLD: ['座位滿了', 'asientos agotados', 'seats sold out'], TK_CHECK: ['核對購票', 'revisar la compra', 'checking the order'],
+    PAY: p, PAY_FIX: p, CHANGE: ['找錢', 'el cambio', 'the change'], TICKET: ['核對車票', 'revisar el boleto', 'checking the ticket'], GATE: ['進站', 'entrar a la estación', 'entering the station'],
+    DIRECTION: ['選南下或北上', 'elegir sur o norte', 'southbound or northbound'], BOARD: ['看板找車次', 'buscar el tren en el tablero', 'finding the train on the board'],
+    CAR: ['找候車位置', 'buscar la zona de espera', 'finding the boarding spot'], SEAT: ['找位子', 'buscar el asiento', 'finding the seat'] };
+})();
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = {
+  COUNTER: '走到服務櫃檯', SOLD: '聽站務員說', TK_CHECK: '聽站務員確認', PAY: '聽站務員報價', GATE: '走到票閘', DIRECTION: '過了票閘，看指示牌', BOARD: '搭手扶梯上月台', CAR: '走到候車位置', SEAT: '上車找位子', END: '列車開動了'
+};
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const PLACES = {
+  phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
+  counter: ['🎫', '高鐵台北站服務櫃檯', 'Mostrador de servicio', 'Service counter', ''],
+  gate: ['🚪', '票閘', 'Torniquetes', 'Ticket gates', ''],
+  platform: ['🚄', '月台', 'Andén', 'Platform', ''],
+  train: ['💺', '高鐵車廂', 'Vagón del tren', 'Train car', '']
+};
+const FARES = { std: 700, biz: 1250, free: 675 };   // 台北－台中 全票（待確認：現行價）
+const DESTS = {
+  taichung: { zh: '台中', es: 'Taichung', en: 'Taichung' },
+  tainan: { zh: '台南', es: 'Tainan', en: 'Tainan' },
+  hsinchu: { zh: '新竹', es: 'Hsinchu', en: 'Hsinchu' },
+  chiayi: { zh: '嘉義', es: 'Chiayi', en: 'Chiayi' }
+};
+const KINDS = {
+  std: { zh: '標準車廂對號座', es: 'vagón estándar con asiento reservado', en: 'standard car, reserved seat' },
+  biz: { zh: '商務車廂', es: 'vagón de negocios', en: 'business car' },
+  free: { zh: '自由座', es: 'asiento libre (sin número)', en: 'non-reserved seat' }
+};
+const BIZ_CAR = 6, FREE_CARS = [1, 2, 3];   // 商務車廂 6 車、自由座 1–3 車（待確認：實際依車次不同）
+const tmZh = m => { const h = Math.floor(m / 60), mm = m % 60; return mm === 30 ? `${zhNum(h)}點半` : mm === 0 ? `${zhNum(h)}點` : `${zhNum(h)}點${mm < 10 ? '零' : ''}${zhNum(mm)}分`; };
+const tmNum = m => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+const p4 = n => String(n).padStart(4, '0');
+const seatZh = (c, r, l) => `${zhNum(c)}車${zhNum(r)}${l}`;
+const seatNum = (c, r, l) => `${c}車${r}${l}`;
+
+/* 站務員複誦（TK_CHECK）：一次只會錯一項。dest：目的地；cabin：車廂種類；time：開車時間（分鐘數） */
+const KEYS = ['dest', 'cabin', 'time'];
+const OC = {
+  zh: (k, v) => k === 'dest' ? `到${v.zh}` : k === 'cabin' ? KINDS[v].zh : `${tmZh(v)}開`,
+  es: (k, v) => k === 'dest' ? `a ${v.es}` : k === 'cabin' ? KINDS[v].es : `sale a las ${tmNum(v)}`,
+  en: (k, v) => k === 'dest' ? `to ${v.en}` : k === 'cabin' ? KINDS[v].en : `departs at ${tmNum(v)}`,
+  fix: (k, v) => k === 'dest' ? `不好意思，我要去${v.zh}。` : k === 'cabin' ? `不好意思，我要買${KINDS[v].zh}。` : `不好意思，我要搭${tmZh(v)}那班。`,
+  full: (o, f) => KEYS.map(k => OC[f](k, o[k])).join(f === 'zh' ? '，' : ', ')
+};
+const flipOf = (t, k) => k === 'dest' ? t.destFlip : k === 'cabin' ? (t.mode === 'std' ? 'biz' : 'std') : t.time + 20;
+
+/* 車票印出來的內容（TICKET）：dest 目的地、time 開車時間 */
+const TKEYS = ['dest', 'time'];
+const tflip = (t, k) => k === 'dest' ? t.destFlip : t.time + 20;
+const TC = {
+  zh: (k, v) => k === 'dest' ? v.zh : tmZh(v),
+  es: (k, v) => k === 'dest' ? v.es : tmNum(v),
+  en: (k, v) => k === 'dest' ? v.en : tmNum(v),
+  fix: (k, v) => k === 'dest' ? `不好意思，我要去${v.zh}，這張好像印錯了。` : `不好意思，我要搭${tmZh(v)}那班，這張好像印錯了。`
+};
+
+/* ══════════════════════════════════════
+   任務提示
+══════════════════════════════════════ */
+const Hints = makeHints({ render: stdHintsRender });
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+const ORDER = ['START', 'COUNTER', 'SOLD', 'TK_CHECK', 'PAY', 'PAY_FIX', 'CHANGE', 'TICKET', 'GATE', 'DIRECTION', 'BOARD', 'CAR', 'SEAT', 'END', 'RESULT'];
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const billFor = n => n <= 1000 ? 1000 : 2000;           // 你給的鈔票
+
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,
+  hintViews: 0, log: [], feedback: [], visit: 0, att: {}, cash: null,
+  onStart() { this.updateCash(); },
+  updateCash() { document.getElementById('cash-badge').textContent = ''; },
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+  IMAGES: {
+    START: ['images/start.jpg', '📱'], COUNTER: ['images/counter.jpg', '🎫'], SOLD: ['images/counter.jpg', '🎫'], TK_CHECK: ['images/counter.jpg', '🎫'],
+    PAY: ['images/counter.jpg', '🎫'], PAY_FIX: ['images/counter.jpg', '🎫'], CHANGE: ['images/counter.jpg', '🎫'], TICKET: ['images/ticket.jpg', '🎫'],
+    GATE: ['images/gate.jpg', '🚪'], DIRECTION: ['images/signs.jpg', '🪧'], BOARD: ['images/platform.jpg', '🚄'], CAR: ['images/spot.jpg', '🚄'], SEAT: ['images/seat.jpg', '💺'],
+    END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+  },
+
+  setup() {
+    const r = Math.random(), mode = r < 0.55 ? 'std' : r < 0.8 ? 'biz' : 'free';
+    const h = pick([7, 8, 9, 10, 11, 13, 14, 15, 17, 19]), t1 = h * 60 + pick([5, 25, 45]);
+    const soldout = mode === 'std' && Math.random() < 0.4, time = soldout ? t1 + 20 : t1;
+    const car = mode === 'biz' ? BIZ_CAR : mode === 'std' ? pick([4, 5, 7, 8, 9, 10]) : null;
+    const row = pick([3, 6, 9, 12, 14, 16, 18]), letter = mode === 'biz' ? pick(['A', 'C', 'D']) : pick(['A', 'B', 'C', 'D', 'E']);
+    const no = pick([615, 617, 623, 633, 637, 643, 651, 661]);
+    const fc = pick(FREE_CARS);
+    const others = shuffle([DESTS.tainan, DESTS.hsinchu, DESTS.chiayi]);
+    const t = this.task = { mode, dest: DESTS.taichung, t1, time, soldout, car, row, letter, no, fc, destFlip: others[0], rot: Math.floor(Math.random() * 3) };
+    t.truth = { dest: DESTS.taichung, cabin: mode, time };
+    /* 看板：你的車、同時間但不停台中的車、比較早但車次不同的車 */
+    t.board = shuffle([
+      { t: time, no, mine: true, stops: [['板橋', 'bǎn qiáo'], ['新竹', 'xīn zhú'], ['台中', 'tái zhōng'], ['台南', 'tái nán'], ['左營', 'zuǒ yíng']] },
+      { t: time, no: no + 4, stops: [['板橋', ''], ['新竹', ''], ['嘉義', ''], ['左營', '']] },
+      { t: time - 10, no: no - 6, stops: [['板橋', ''], ['桃園', ''], ['台中', ''], ['左營', '']] }
+    ]);
+    initPay(t, FARES[mode], [{ zh: '第二張車票', es: 'un segundo boleto', en: 'a second ticket', price: FARES[mode] }]);
+    /* 站務員複誦：45% 有一項說錯 */
+    t.ocWrong = Math.random() < 0.45; t.ocKind = pick(KEYS); t.ocFlip = flipOf(t, t.ocKind);
+    t.ocSaid = { ...t.truth, ...(t.ocWrong ? { [t.ocKind]: t.ocFlip } : {}) };
+    /* 車票印出來：40% 有一項印錯 */
+    t.tkWrong = Math.random() < 0.4; t.tkKind = pick(TKEYS); t.tkFlip = tflip(t, t.tkKind);
+    t.tkPrinted = { dest: t.dest, time, ...(t.tkWrong ? { [t.tkKind]: t.tkFlip } : {}) };
+    /* 找到位子：45% 有人坐了（自由座是座位上放著包包） */
+    t.occupied = Math.random() < 0.45;
+  },
+
+  amiLines() {
+    const t = this.task, N = this.N, tm = tmZh(t.t1), tn = tmNum(t.t1);
+    const l2 = t.mode === 'std'
+      ? L(`Ami：你搭高鐵${tm}那班過來，買標準車廂的對號座就好，商務車廂太貴了。`, `Toma el tren de alta velocidad de las ${tn}; con el vagón estándar y asiento reservado basta, el de negocios es muy caro.`, `Take the ${tn} high-speed train. A standard-car reserved seat is fine — the business car is too expensive.`)
+      : t.mode === 'biz'
+        ? L(`Ami：今天你坐商務車廂，舒服一點，錢我晚點轉給你。你搭高鐵${tm}那班。`, `Hoy viaja en el vagón de negocios, más cómodo; luego te transfiero el dinero. Toma el tren de las ${tn}.`, `Today you ride the business car, nice and comfy — I'll send you the money later. Take the ${tn} train.`)
+        : L(`Ami：你搭高鐵${tm}那班，買自由座就好，比較省錢，不用指定座位。`, `Toma el tren de las ${tn}; compra asiento libre, que es más barato y no tiene número.`, `Take the ${tn} train and buy a non-reserved seat — it's cheaper and has no seat number.`);
+    return [
+      L(`Ami：${N}，我先到台中了，在高鐵站出口等你。`, `${N}, ya llegué a Taichung; te espero en la salida de la estación.`, `${N}, I'm already in Taichung, waiting at the station exit.`),
+      l2,
+      L('Ami：先去服務櫃檯買一張到台中的車票，我等你喔！', 'Primero compra en el mostrador de servicio un boleto a Taichung. ¡Te espero!', 'First buy a ticket to Taichung at the service counter. See you soon!')
+    ];
+  },
+  ticketInfo() {
+    const t = this.task;
+    return L(`車票：${zhDigits(p4(t.no))}次，${tmZh(t.time)}開，台北到台中，${t.mode === 'free' ? '自由座，不指定座位' : (t.mode === 'biz' ? '商務車廂' : '標準車廂') + seatZh(t.car, t.row, t.letter)}。`,
+      `Boleto: tren n.º ${p4(t.no)}, sale a las ${tmNum(t.time)}, de Taipei a Taichung, ${t.mode === 'free' ? 'asiento libre, sin número' : (t.mode === 'biz' ? 'vagón de negocios ' : 'vagón estándar ') + seatNum(t.car, t.row, t.letter)}.`,
+      `Ticket: train No. ${p4(t.no)}, departs ${tmNum(t.time)}, Taipei to Taichung, ${t.mode === 'free' ? 'non-reserved, no seat number' : (t.mode === 'biz' ? 'business car ' : 'standard car ') + seatNum(t.car, t.row, t.letter)}.`);
+  },
+  hintSections() {
+    const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
+    if (ORDER.indexOf(this.st0) >= ORDER.indexOf('GATE')) out.push({ title: '你的車票', lines: [this.ticketInfo()] });
+    return out;
+  },
+
+  listHTML(rowsOnly) {
+    const t = this.task, r = s => this.ruby(s), K = KINDS[t.mode];
+    const rows = [
+      { zh: `目的地：台中，${tmZh(t.t1)}的高鐵，${K.zh}`, es: `Destino: Taichung, tren de alta velocidad de las ${tmNum(t.t1)}, ${K.es}`, en: `Destination: Taichung, the ${tmNum(t.t1)} high-speed train, ${K.en}` },
+      { zh: '你身上有：一千元和兩千元的鈔票，還有零錢', es: 'Llevas: un billete de mil, uno de dos mil dólares y algo de cambio', en: 'You have: a 1000-dollar bill, a 2000-dollar bill, plus some small change' }
+    ];
+    if (rowsOnly) return rows;
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 印出來的車票 */
+  ticketHTML() {
+    const t = this.task, r = s => this.ruby(s), P = t.tkPrinted;
+    const seat = t.mode === 'free' ? `<span>${r('自由座')}</span>` : `<span>${r(t.mode === 'biz' ? '商務車廂' : '標準車廂')} ${t.car}${r('車')}${t.row}${t.letter}</span>`;
+    return `<div class="tkt"><div class="th">🎫 ${r('高鐵')} ${r('車票')}</div><div class="tr"><span>${r('台北')}→<b>${r(P.dest.zh)}</b></span><span>${tmNum(P.time)} ${r('開')}</span><span>${r('車次')} ${p4(t.no)}</span>${seat}</div></div>`;
+  },
+  /* 月台的旅客資訊看板 */
+  boardHTML(extra) {
+    const t = this.task, r = s => this.ruby(s);
+    const rows = t.board.map(b => `<tr><td>${tmNum(b.t)}</td><td>${p4(b.no)}</td><td>${r('往')}${r('左營')}</td><td>${r('停靠')}：${b.stops.map(s => r(s[0])).join('、')}</td></tr>`).join('');
+    return `<div class="board" style="overflow-x:auto"><div class="bh">${r('看板')} · ${r('南下')}</div><table>${rows}</table>${extra || ''}</div>`;
+  },
+
+  getConfig() {
+    const N = this.N, t = this.task, T = t.truth;
+    const clerk = (zh, es, en) => L(`站務員：${zh}`, es, en);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const ocK = t.ocKind, tkK = t.tkKind, free = t.mode === 'free';
+    const goodOrder = () => `我要一張到台中的${KINDS[t.mode].zh}，${tmZh(t.t1)}那班。`;
+    const askNext = '那請問下一班還有標準車廂的對號座嗎？';
+    const pays = payStates(Game, {
+      who: '站務員', place: 'counter',
+      finish: (G, tt) => { G.state = 'TICKET'; },
+      extraWhy: () => M(`站務員算錯了：你只買一張，一張是${t.total}元，他多算了一張（${t.said}元）。`, `El empleado se equivocó: solo compraste un boleto de ${esM(t.total)} y cobró otro más (${esM(t.said)}).`, `The staff got it wrong: you only bought one ticket (${enM(t.total)}), but charged for a second one (${enM(t.said)}).`)
+    });
+
+    return {
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你站在高鐵台北站的大廳。手機響了一聲，是Ami傳來的LINE。）', '(Estás en el vestíbulo de la estación de alta velocidad de Taipei. Tu celular suena: es un LINE de Ami.)', '(You are in the Taipei HSR station hall. Your phone buzzes — a LINE from Ami.)'),
+          ...Game.amiLines(),
+          L('我：好，我現在去買票！', '¡Bien, voy a comprar el boleto ahora!', "OK, I'll go buy the ticket now!")
+        ],
+        options: ['走到服務櫃檯'],
+        next: () => { Game.startTimer(); Game.state = 'COUNTER'; }
+      },
+
+      /* ═══ 服務櫃檯：說要買哪一班 ═══ */
+      COUNTER: {
+        place: 'counter',
+        dialogue: () => [clerk('您好，請問要買哪裡的票？', '¡Hola! ¿Para dónde es el boleto?', 'Hello! Where would you like to go?')],
+        options: () => rotOf(t, [goodOrder(), `我要一張到台中的${KINDS[flipOf(t, 'cabin')].zh}，${tmZh(t.t1)}那班。`, `我要一張到${t.destFlip.zh}的${KINDS[t.mode].zh}，${tmZh(t.t1)}那班。`]),
+        next: c => {
+          if (c !== goodOrder()) {
+            if (c.includes('到台中')) {
+              Game.addMistake(t.mode === 'std'
+                ? M('Ami說買標準車廂的對號座。自由座沒有座位號碼，要自己找空位。', 'Ami dijo vagón estándar con asiento reservado. El asiento libre no tiene número y hay que buscar uno vacío.', 'Ami said a standard-car reserved seat. A non-reserved seat has no number — you have to find an empty one.')
+                : t.mode === 'biz'
+                  ? M('Ami說今天坐商務車廂，不是標準車廂。', 'Ami dijo hoy en el vagón de negocios, no en el estándar.', 'Ami said the business car today, not the standard car.')
+                  : M('Ami說買自由座，比較省錢。標準車廂的對號座比較貴。', 'Ami dijo asiento libre, que es más barato. El reservado del vagón estándar cuesta más.', 'Ami said a non-reserved seat, which is cheaper. A standard-car reserved seat costs more.'));
+            } else Game.addMistake(M('Ami在台中等你，要買到台中的票。', 'Ami te espera en Taichung: el boleto es a Taichung.', 'Ami is waiting in Taichung, so buy a ticket to Taichung.'));
+            return;
+          }
+          goodFirst('COUNTER', '沒錯！買票要說清楚：去哪裡、哪一種座位、幾點。', '¡Exacto! Al comprar, di claro: destino, tipo de asiento y hora.', 'Right! Say it clearly: where, which kind of seat, and what time.');
+          Game.state = t.soldout ? 'SOLD' : 'TK_CHECK';
+        }
+      },
+      /* 標準車廂 40%：原本那班的對號座位滿了，只剩商務車廂和自由座 */
+      SOLD: {
+        place: 'counter',
+        dialogue: () => [clerk(`不好意思，${tmZh(t.t1)}這班標準車廂的對號座位滿了，剩下商務車廂和自由座。`, `Lo siento, el vagón estándar con asiento reservado del tren de las ${tmNum(t.t1)} está lleno; solo quedan el vagón de negocios y asiento libre.`, `Sorry, the standard-car reserved seats on the ${tmNum(t.t1)} train are full — only the business car and non-reserved seats are left.`)],
+        options: () => rotOf(t, [askNext, '好，那給我商務車廂。', '那我買自由座好了。']),
+        next: c => {
+          if (c !== askNext) {
+            Game.addMistake(c === '好，那給我商務車廂。'
+              ? M('商務車廂比標準車廂貴很多。Ami說買標準車廂的對號座，可以問下一班。', 'El vagón de negocios cuesta mucho más. Ami quiere el estándar reservado: pregunta por el próximo tren.', 'The business car costs much more. Ami wants a standard reserved seat — ask about the next train.')
+              : M('自由座沒有座位號碼。Ami說要對號座，可以問下一班。', 'El asiento libre no tiene número. Ami quiere asiento reservado: pregunta por el próximo tren.', 'A non-reserved seat has no number. Ami wants a reserved seat — ask about the next train.'));
+            return;
+          }
+          goodFirst('SOLD', '沒錯！這班滿了，可以問下一班。', '¡Exacto! Si ese tren está lleno, pregunta por el siguiente.', 'Right! If that train is full, ask about the next one.');
+          Game.thought = [clerk(`有，${tmZh(t.time)}這班還有標準車廂的對號座。`, `Sí, en el tren de las ${tmNum(t.time)} todavía hay asientos reservados en el vagón estándar.`, `Yes, the ${tmNum(t.time)} train still has standard-car reserved seats.`)];
+          Game.state = 'TK_CHECK';
+        }
+      },
+      TK_CHECK: catchState(Game, {
+        key: 'TK_CHECK', place: 'counter',
+        dialogue: () => [L(`站務員：好，${OC.full(t.ocSaid, 'zh')}，一張，對嗎？`, `Bien: ${OC.full(t.ocSaid, 'es')}, un boleto. ¿Es correcto?`, `Okay: ${OC.full(t.ocSaid, 'en')}, one ticket. Is that right?`)],
+        ok: '對，沒錯。', fix: () => OC.fix(ocK, t.ocWrong ? T[ocK] : t.ocFlip), rude: '你到底有沒有在聽啊？',
+        wrong: () => t.ocWrong,
+        whyWrong: () => M(`站務員說錯了：他說「${OC.zh(ocK, t.ocSaid[ocK])}」，你要的是「${OC.zh(ocK, T[ocK])}」。`, `El empleado se equivocó: dijo «${OC.es(ocK, t.ocSaid[ocK])}», pero tú quieres «${OC.es(ocK, T[ocK])}».`, `The staff got it wrong: they said "${OC.en(ocK, t.ocSaid[ocK])}", but you want "${OC.en(ocK, T[ocK])}".`),
+        whyRight: () => M(`站務員說的是對的：「${OC.zh(ocK, T[ocK])}」。`, `Lo que dijo el empleado es correcto: «${OC.es(ocK, T[ocK])}».`, `The staff was right: "${OC.en(ocK, T[ocK])}".`),
+        goodWrong: ['你很細心！站務員說錯了，要馬上說。', '¡Qué atento! El empleado se equivocó; hay que decirlo enseguida.', 'Well spotted! The staff got it wrong — speak up right away.'],
+        goodOk: ['站務員複誦的時候，要對一下你要的是什麼。', 'Cuando el empleado repita, compáralo con lo que pediste.', 'When the staff repeats the order, compare it with what you asked for.'],
+        apology: () => [clerk(`啊，不好意思！是${OC.zh(ocK, T[ocK])}。`, `¡Ay, disculpe! Es «${OC.es(ocK, T[ocK])}».`, `Oh, sorry! It's "${OC.en(ocK, T[ocK])}".`),
+          clerk(`好，${OC.full(T, 'zh')}，沒錯了。`, `Bien, ${OC.full(T, 'es')}: ahora sí.`, `Okay, ${OC.full(T, 'en')} — got it now.`)],
+        go: () => { Game.state = 'PAY'; }
+      }),
+
+      PAY: pays.PAY, PAY_FIX: pays.PAY_FIX, CHANGE: pays.CHANGE,
+
+      /* ═══ 看車票印得對不對 ═══ */
+      TICKET: catchState(Game, {
+        key: 'TICKET', place: 'counter',
+        html: () => Game.ticketHTML(),
+        dialogue: () => [clerk('好，這是您的車票，請看一下。', 'Muy bien, aquí tiene su boleto; revíselo, por favor.', 'All right, here is your ticket. Please take a look.')],
+        ok: '好，謝謝。', fix: () => TC.fix(tkK, t.tkWrong ? t.truth[tkK] : t.tkFlip), rude: '你們的機器是不是壞了？',
+        wrong: () => t.tkWrong,
+        whyWrong: () => M(`車票印錯了：票上是「${TC.zh(tkK, t.tkPrinted[tkK])}」，你要的是「${TC.zh(tkK, t.truth[tkK])}」。`, `El boleto salió mal: dice «${TC.es(tkK, t.tkPrinted[tkK])}», pero querías «${TC.es(tkK, t.truth[tkK])}».`, `The ticket was misprinted: it says "${TC.en(tkK, t.tkPrinted[tkK])}", but you wanted "${TC.en(tkK, t.truth[tkK])}".`),
+        whyRight: () => M(`車票印得對：「${TC.zh(tkK, t.truth[tkK])}」。`, `El boleto está bien: «${TC.es(tkK, t.truth[tkK])}».`, `The ticket is right: "${TC.en(tkK, t.truth[tkK])}".`),
+        goodWrong: ['你很細心！拿到車票要馬上看，印錯了要請他重印。', '¡Qué atento! Revisa el boleto en el momento; si salió mal, pide que lo impriman otra vez.', 'Well spotted! Check the ticket right away, and ask for a reprint if it is wrong.'],
+        goodOk: ['拿到車票，要看一下目的地和時間。', 'Al recibir el boleto, revisa el destino y la hora.', 'When you get the ticket, check the destination and the time.'],
+        apology: () => [clerk('啊，不好意思！我重印一張給您。', '¡Ay, disculpe! Le imprimo otro.', "Oh, sorry! I'll print another one for you."), L('（站務員重新印了一張車票。這次是對的。）', '(El empleado imprime otro boleto. Esta vez está bien.)', '(The staff prints a new ticket. This time it is right.)')],
+        go: wrong => { if (wrong) t.tkPrinted = { dest: t.dest, time: t.time }; Game.state = 'GATE'; }
+      }),
+
+      /* ═══ 票閘 ═══ */
+      GATE: {
+        place: 'gate',
+        dialogue: () => [L('（你走到票閘。票閘旁邊有人把紙本車票插進去，閘門開了。）', '(Llegas a los torniquetes. Junto a ti, alguien inserta su boleto de papel y la puerta se abre.)', '(You reach the ticket gates. Next to you, someone inserts a paper ticket and the gate opens.)'), L('我：我手上有剛買的高鐵車票。', 'Tengo en la mano el boleto de alta velocidad que acabo de comprar.', 'I have the high-speed rail ticket I just bought.')],
+        options: () => rotOf(t, ['把車票插進票閘，進站。', '拿悠遊卡刷票閘，進站。', '不用刷，從旁邊的出口走進去。']),
+        next: c => {
+          if (c !== '把車票插進票閘，進站。') {
+            Game.addMistake(c === '拿悠遊卡刷票閘，進站。'
+              ? M('你已經買了車票，要用車票進站。（一般悠遊卡不能直接進高鐵站。）', 'Ya compraste el boleto: entra con el boleto. (Una EasyCard normal no sirve para entrar a la estación de alta velocidad.)', 'You already bought a ticket — use it to enter. (A regular EasyCard cannot be used to enter an HSR station.)')
+              : M('進站一定要用車票通過票閘，不能直接走進去。', 'Para entrar hay que pasar el boleto por el torniquete.', 'You must go through the ticket gate with your ticket; you cannot just walk in.'));
+            return;
+          }
+          goodFirst('GATE', '沒錯！有車票就用車票進站。', '¡Exacto! Si tienes boleto, entra con el boleto.', 'Right! If you have a ticket, use it to enter.');
+          Game.state = 'DIRECTION';
+        }
+      },
+
+      /* ═══ 看指示牌：南下還是北上 ═══ */
+      DIRECTION: {
+        place: 'gate',
+        dialogue: () => [L('（你過了票閘。前面有兩個指示牌：「南下」往左營方向，「北上」往南港方向。）', '(Pasas el torniquete. Delante hay dos letreros: «南下» rumbo a Zuoying (al sur) y «北上» rumbo a Nangang (al norte).)', '(You pass the gate. Two signs ahead: "南下" southbound toward Zuoying, "北上" northbound toward Nangang.)'), L('我：台中在台北的南邊。', 'Taichung queda al sur de Taipei.', 'Taichung is south of Taipei.')],
+        options: () => rotOf(t, ['我走南下的月台。', '我走北上的月台。', '我跟著前面的人走。']),
+        next: c => {
+          if (c !== '我走南下的月台。') {
+            Game.addMistake(c === '我走北上的月台。'
+              ? M('台中在台北的南邊，要搭南下的車。北上是往南港、台北的方向。', 'Taichung está al sur de Taipei: toma el tren rumbo al sur. «北上» va hacia el norte.', 'Taichung is south of Taipei, so take the southbound train. Northbound goes the other way.')
+              : M('前面的人不一定和你去同一個方向，要自己看指示牌。', 'La gente de delante no siempre va a tu mismo destino; lee los letreros.', 'The people ahead may be going the other way — read the signs yourself.'));
+            return;
+          }
+          goodFirst('DIRECTION', '沒錯！台中在南邊，要走南下的月台。', '¡Exacto! Taichung está al sur: ve al andén rumbo al sur.', 'Right! Taichung is to the south, so go to the southbound platform.');
+          Game.state = 'BOARD';
+        }
+      },
+
+      /* ═══ 看板找車次 ═══ */
+      BOARD: {
+        place: 'platform',
+        html: () => Game.boardHTML(),
+        dialogue: () => [L('（你搭手扶梯上了月台，抬頭看旅客資訊看板，上面有好幾班車。）', '(Subes en la escalera mecánica al andén y miras el tablero: hay varios trenes.)', '(You ride the escalator up to the platform and look at the information board — several trains are listed.)'), L('我：我要找自己的車次，而且要有停靠台中的。', 'Tengo que encontrar mi número de tren, y que pare en Taichung.', 'I need to find my train number, and it has to stop at Taichung.')],
+        options: () => rotOf(t, t.board.map(b => b.no)).map(n => `我搭${zhDigits(p4(n))}次。`),
+        next: c => {
+          if (c !== `我搭${zhDigits(p4(t.no))}次。`) { Game.addMistake(M(`你的車票是${zhDigits(p4(t.no))}次，${tmZh(t.time)}開。別班車不一樣，有的車不停台中。`, `Tu boleto es del tren n.º ${p4(t.no)} de las ${tmNum(t.time)}. Los otros son distintos, y alguno no para en Taichung.`, `Your ticket is for train No. ${p4(t.no)} at ${tmNum(t.time)}. The others differ, and one does not stop at Taichung.`)); return; }
+          goodFirst('BOARD', '沒錯！要看車次和停靠站，不是只看時間。', '¡Exacto! Mira el número de tren y las paradas, no solo la hora.', 'Right! Check the train number and the stops, not just the time.');
+          Game.state = 'CAR';
+        }
+      },
+      CAR: {
+        place: 'platform',
+        html: () => free ? Game.boardHTML(`<div style="margin-top:6px;color:#fff">${Game.ruby('自由座')}：${FREE_CARS.map(zhNum).join('、')}${Game.ruby('車')}　${Game.ruby('商務車廂')}：${zhNum(BIZ_CAR)}${Game.ruby('車')}</div>`) : '',
+        dialogue: () => [L('（你走到月台上。地上有一格一格的候車位置，每格寫著車廂號碼。）', '(Llegas al andén. En el suelo hay zonas de espera marcadas, cada una con un número de vagón.)', '(You reach the platform. The floor has marked boarding spots, each with a car number.)'), free ? L('我：自由座在幾車？', '¿En qué vagones está el asiento libre?', 'Which cars are non-reserved?') : L('我：我的車票上，是第幾車？', '¿Qué vagón dice mi boleto?', 'Which car does my ticket say?')],
+        options: () => {
+          const list = free ? [t.fc, BIZ_CAR, 9] : [t.car, t.car + 1, t.car - 1];
+          return rotOf(t, list).map(c => `我到第${zhNum(c)}車的候車位置等。`);
+        },
+        next: c => {
+          const good = `我到第${zhNum(free ? t.fc : t.car)}車的候車位置等。`;
+          if (c !== good) { Game.addMistake(free ? M(`自由座在${FREE_CARS.map(zhNum).join('、')}車；${zhNum(BIZ_CAR)}車是商務車廂，其他車廂是對號座。`, `El asiento libre está en los vagones ${FREE_CARS.join(', ')}; el ${BIZ_CAR} es de negocios y los demás son con asiento reservado.`, `Non-reserved cars are ${FREE_CARS.join(', ')}; car ${BIZ_CAR} is business and the rest are reserved.`) : M(`車票上是${t.car}車，座位是${t.row}${t.letter}。`, `Tu boleto dice vagón ${t.car}, asiento ${t.row}${t.letter}.`, `Your ticket says car ${t.car}, seat ${t.row}${t.letter}.`)); return; }
+          goodFirst('CAR', free ? '沒錯！自由座有固定的車廂，要先找對。' : '沒錯！對號座要先找對車廂。', free ? '¡Exacto! El asiento libre tiene vagones fijos: primero encuéntralos.' : '¡Exacto! Con asiento reservado, primero encuentra el vagón.', free ? 'Right! Non-reserved seats are in set cars — find those first.' : 'Right! With a reserved seat, find the right car first.');
+          Game.state = 'SEAT';
+        }
+      },
+      SEAT: catchState(Game, {
+        key: 'SEAT', place: 'train',
+        dialogue: () => [free
+          ? L(`（你走進自由座車廂，找到一個靠窗的位子。${t.occupied ? '座位上放著一個包包。' : '位子是空的。'}）`, `(Entras al vagón de asiento libre y encuentras uno junto a la ventana. ${t.occupied ? 'Hay un bolso sobre el asiento.' : 'Está vacío.'})`, `(You enter a non-reserved car and find a window seat. ${t.occupied ? 'There is a bag on the seat.' : 'It is empty.'})`)
+          : L(`（你上了車，找到${t.row}${t.letter}的位子。${t.occupied ? '有一位乘客坐在你的位子上。' : '位子是空的。'}）`, `(Subes al tren y encuentras el asiento ${t.row}${t.letter}. ${t.occupied ? 'Hay un pasajero sentado ahí.' : 'Está vacío.'})`, `(You board and find seat ${t.row}${t.letter}. ${t.occupied ? 'A passenger is sitting there.' : 'It is empty.'})`)],
+        ok: t.occupied ? '算了，我去別的地方站著。' : '好，我坐下來。',
+        fix: () => free ? '不好意思，請問這個位子有人坐嗎？可以請您把包包拿開嗎？' : `不好意思，這是我的位子，我的票是${seatZh(t.car, t.occupied ? t.row : t.row + 1, t.letter)}。`,
+        rude: free ? '包包不要放在位子上啦！' : '你坐錯了啦，快起來！',
+        wrong: () => t.occupied,
+        whyWrong: () => free ? M('自由座的位子誰先坐誰的，包包不能佔位。有禮貌地請對方拿開就好。', 'En asiento libre, el asiento es de quien lo ocupa primero; un bolso no lo reserva. Pide con cortesía que lo quite.', 'Non-reserved seats are first come, first served; a bag does not hold one. Politely ask for it to be moved.')
+          : M('那是你的位子，有人坐了要有禮貌地請他看票。', 'Ese es tu asiento: pídele cortésmente al pasajero que revise su boleto.', 'That is your seat — politely ask the passenger to check their ticket.'),
+        whyRight: () => free ? M('位子是空的，直接坐就好，不用問別人。', 'El asiento está vacío: siéntate, no hace falta preguntar.', 'The seat is empty — just sit; no need to ask anyone.')
+          : M(`沒有人坐你的位子，你的位子就是${t.row}${t.letter}，不用請別人讓位。`, `Nadie está en tu asiento (${t.row}${t.letter}); no hace falta pedirle a nadie que se mueva.`, `Nobody is in your seat (${t.row}${t.letter}), so there is no need to ask anyone to move.`),
+        goodWrong: free ? ['你很有禮貌！包包不能佔位，可以請他拿開。', '¡Qué educado! Un bolso no reserva el asiento; puedes pedir que lo quite.', 'Nicely done! A bag does not hold a seat — you can ask for it to be moved.'] : ['你很有禮貌！位子被坐了，可以請他看一下票。', '¡Qué educado! Si ocupan tu asiento, pídele que revise su boleto.', 'Nicely done! If someone is in your seat, politely ask them to check their ticket.'],
+        goodOk: ['先確認位子是不是空的，再坐下來。', 'Primero confirma que el asiento esté libre, y luego siéntate.', 'Make sure the seat is free before you sit down.'],
+        apology: () => [free ? L('乘客：啊，不好意思！我把包包拿下來。', 'Pasajero: ¡Ay, disculpe! Quito el bolso.', 'Passenger: Oh, sorry! I will take my bag off.') : L('乘客：啊，不好意思！我看錯車廂了，我馬上換。', 'Pasajero: ¡Ay, disculpe! Me equivoqué de vagón; me cambio enseguida.', 'Passenger: Oh, sorry! I am in the wrong car — I will move right away.')],
+        go: () => { Game.stopTimer(); Game.state = 'END'; }
+      }),
+
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2;
+          track('game_complete', { game: 'hsr', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            L('（列車開動了。你坐在位子上，看著窗外的風景一直往後跑。）', '(El tren arranca. Estás en tu asiento, viendo el paisaje pasar rápido por la ventana.)', '(The train pulls out. You sit in your seat, watching the scenery rush by.)'),
+            Game._endGood
+              ? L(`Ami：這趟高鐵順利嗎？${N}，謝謝你！台中見！`, `¿Todo salió bien en el tren? ¡Gracias, ${N}! ¡Nos vemos en Taichung!`, `Did the trip go smoothly? Thanks, ${N}! See you in Taichung!`)
+              : L('Ami：欸，聽起來這次買票不太順利……下次買票和看車票，要記得多核對喔！', 'Parece que la compra del boleto no fue muy bien… la próxima vez revisa bien lo que compras y lo que dice el boleto.', "Hmm, sounds like buying the ticket didn't go smoothly… next time, double-check the order and the ticket.")
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: stdResultCfg('phone')
+    };
+  }
+});
+
+GameBoot();
+Music.init({ bpm: 132, tracks: [
+  { wave: 'square', vol: 0.28, notes: 'E5 . E5 G5 A5 . G5 . | C5 . C5 E5 G5 . E5 . | D5 . D5 F5 A5 . F5 . | G5 - E5 . D5 - . .' },
+  { wave: 'triangle', vol: 0.5, notes: 'C3 . G3 . C3 . G3 . | A2 . E3 . A2 . E3 . | F2 . C3 . F2 . C3 . | G2 . D3 . G2 . . .' },
+  { vol: 0.2, notes: 'k h s h k h s h' }] });
+</script>
+</body>
+</html>

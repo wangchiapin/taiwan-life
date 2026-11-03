@@ -44,3 +44,7 @@
 ## 台鐵 train（2026-11-02，P-005 草稿：尚未修改）
 提示詞：`docs/image-prompts-train.md`（照順序一次做一張，Ben 確認再下一張）。圖片檔名：start、counter、ticket、gate、platform、aisle、seat、result、end_good、end_bad（共 10 張，720×720）。Ami 用 `games/drinks/images/call.jpg` 的頭肩裁切當角色參考圖。
 - [ ] train：start、counter、ticket、gate、platform、aisle、seat、result、end_good、end_bad
+
+## 高鐵 hsr（2026-11-03，P-006 草稿：尚未修改）
+提示詞：`docs/image-prompts-hsr.md`（照順序一次做一張，Ben 確認再下一張）。圖片檔名：start、counter、ticket、gate、signs、platform、spot、seat、result、end_good、end_bad（共 11 張，720×720）。Ami 用 `games/drinks/images/call.jpg` 的頭肩裁切當角色參考圖。
+- [ ] hsr：start、counter、ticket、gate、signs、platform、spot、seat、result、end_good、end_bad
