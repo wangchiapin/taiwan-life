@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<title>計程車 · Tomar un taxi</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：taxigame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "taxigame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #33261f;
+    --red: #c8501e;
+    --red-dark: #8f3513;
+    --yolk: #e0a43a;
+    --night: #2e2630;
+    --kraft: #f3e4d3;
+    --wall: #fbf3ea;
+    --paper: #ffffff;
+    --line: #e5d2bd;
+    --muted: #7a6454;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    background: #eef2f6;
+  }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  /* ── 登入：店招牌 ── */
+  /* ── 遊戲 ── */
+  /* 購物清單 */
+  @media (hover: hover) {
+    .opt:hover rt { color: #ffe0d2; }
+  }
+  /* ── 排行榜 ── */
+  #lb-table tr.highlight-row { background: #f7dccb; font-weight: 700; }
+  /* ── 句子翻譯 ── */
+  .tr-btn:hover { background: #f7dccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  /* ── 本關單字（右側抽屜） ── */
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+
+
+
+  /* 計費表 */
+  .meter { margin: 8px 0 12px; background: #1b1b22; color: #ff5a4d; border-radius: 10px; padding: 8px 14px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .meter .mh { color: #fff; font-weight: 700; font-size: 16px; }
+  .meter .mv { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 30px; font-weight: 700; letter-spacing: 2px; }
+  .meter .mv.off { color: #6a6a74; }
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">計程車</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">計程車</h1>
+  <p class="subtitle" data-es="Tomar un taxi" data-en="Taking a taxi">Tomar un taxi</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    Ami 已經在目的地等你了。你要在路邊招一台計程車，告訴司機要去哪裡，注意計費表，下車時付錢、核對找的錢。司機有時候會聽錯、忘記跳表或多算錢，要自己多注意喔！<br>
+    <span data-es="Ami ya te espera en el destino. Tienes que parar un taxi en la calle, decirle al conductor adónde vas, fijarte en el taxímetro y, al bajar, pagar y revisar el cambio. ¡A veces el conductor entiende mal, olvida poner el taxímetro o cobra de más, así que presta atención!" data-en="Ami is already waiting at the destination. Hail a taxi on the street, tell the driver where to go, watch the meter, and pay and check your change when you get out. Drivers sometimes mishear, forget the meter or overcharge, so stay alert!">Ami ya te espera en el destino. Tienes que parar un taxi en la calle, decirle al conductor adónde vas, fijarte en el taxímetro y, al bajar, pagar y revisar el cambio. ¡A veces el conductor entiende mal, olvida poner el taxímetro o cobra de más, así que presta atención!</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">📱</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 10 名 · Top 10</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'taxi', track: 'taxi', settingsKey: 'taxi_settings',
+  defaultPlace: 'car', defaultEmoji: '🚕',
+  roles: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '司機': { pitch: 0.8 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+   第一版草稿：本次沒有對照 game-kit（讀不到），只用共用檔內建的 GoodTeacher 規則
+══════════════════════════════════════ */
+pinyinPro.customPinyin({
+  '還是': 'hái shì', '還有': 'hái yǒu', '人行道': 'rén xíng dào', '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan',
+  '時間': 'shí jiān', '時候': 'shí hou', '東西': 'dōng xi', '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '著': 'zhe', '囉': 'luo', '啦': 'la', '耶': 'ye',
+  '不好意思': 'bù hǎo yì si', '這個': 'zhè ge', '那個': 'nà ge', '好像': 'hǎo xiàng', '欸': 'éi', '零錢': 'líng qián', '應該': 'yīng gāi',
+  '怎麼': 'zěn me', '位子': 'wèi zi', '舒服': 'shū fu'
+});
+pinyinPro.customPinyin({
+  '計程車': 'jì chéng chē', '空車': 'kòng chē', '招手': 'zhāo shǒu', '司機': 'sī jī', '計費表': 'jì fèi biǎo', '跳表': 'tiào biǎo', '車資': 'chē zī',
+  '安全帶': 'ān quán dài', '繫': 'jì', '下車': 'xià chē', '路口': 'lù kǒu', '車門': 'chē mén', '後座': 'hòu zuò', '夜間加成': 'yè jiān jiā chéng', '小費': 'xiǎo fèi',
+  '國父紀念館': 'guó fù jì niàn guǎn', '中正紀念堂': 'zhōng zhèng jì niàn táng', '松山機場': 'sōng shān jī chǎng', '松山車站': 'sōng shān chē zhàn',
+  '士林夜市': 'shì lín yè shì', '士林官邸': 'shì lín guān dǐ', '台北車站': 'tái běi chē zhàn', '台北': 'tái běi', '找錢': 'zhǎo qián', '一共': 'yí gòng',
+  '目的地': 'mù dì dì', '馬路': 'mǎ lù', '路邊': 'lù biān', '攔': 'lán', '亮著': 'liàng zhe', '開車': 'kāi chē', '停': 'tíng', '車': 'chē', '座': 'zuò', '找': 'zhǎo', '收': 'shōu'
+});
+// 台灣讀音修正：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '司機': ['El conductor', 'The driver'] };
+const SPEAKER_RE = /^(Ami|司機|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['計程車', 'taxi', 'taxi'], ['招手', 'hacer señas con la mano (para parar un taxi)', 'wave down (a taxi)'], ['路邊', 'borde de la calle', 'roadside']],
+  HAIL: [['空車', 'libre (taxi sin pasajeros)', 'vacant (taxi)'], ['招手', 'hacer señas con la mano', 'wave down']],
+  TELL: [['司機', 'conductor', 'driver'], ['麻煩您', 'por favor (cortés)', 'please (polite)'], ['要去哪裡', '¿adónde va?', 'where to?']],
+  DEST_CHECK: [['對嗎', '¿es correcto?', 'is that right?'], ['不好意思', 'disculpe', 'excuse me']],
+  BELT: [['安全帶', 'cinturón de seguridad', 'seat belt'], ['繫', 'abrochar', 'fasten']],
+  METER: [['計費表', 'taxímetro', 'taxi meter'], ['跳表', 'poner el taxímetro en marcha', 'start the meter']],
+  STOP: [['下車', 'bajar del vehículo', 'get out (of a vehicle)'], ['路口', 'esquina, cruce', 'intersection'], ['停', 'parar, detenerse', 'stop']],
+  PAY: [['一共', 'en total', 'in total'], ['車資', 'tarifa del viaje', 'fare']],
+  CHANGE: [['找', 'dar el cambio', 'give change'], ['收', 'recibir, cobrar', 'receive, take payment']],
+  EXIT: [['東西', 'cosas, pertenencias', 'belongings'], ['後面', 'atrás, detrás', 'behind'], ['車門', 'puerta del coche', 'car door']],
+  get END() { return Game.mistakes <= 2 ? [['順利', 'sin problemas', 'smoothly']] : [['下次', 'la próxima vez', 'next time']]; },
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = (() => {
+  const p = ['付錢', 'pagar', 'paying'];
+  return { HAIL: ['招計程車', 'parar un taxi', 'hailing a taxi'], TELL: ['說目的地', 'decir el destino', 'telling the destination'], DEST_CHECK: ['核對目的地', 'revisar el destino', 'checking the destination'],
+    BELT: ['繫安全帶', 'abrocharse el cinturón', 'fastening the seat belt'], METER: ['看計費表', 'mirar el taxímetro', 'checking the meter'], STOP: ['說在哪裡下車', 'decir dónde bajar', 'saying where to get out'],
+    PAY: p, PAY_FIX: p, CHANGE: ['找錢', 'el cambio', 'the change'], EXIT: ['下車', 'bajar del taxi', 'getting out'] };
+})();
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = {
+  HAIL: '走到路邊', TELL: '上車', BELT: '坐好', METER: '車子開動了', STOP: '快到了', PAY: '聽司機報價', EXIT: '準備下車', END: '看到 Ami 了'
+};
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const PLACES = {
+  phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
+  street: ['🚕', '路邊', 'Calle', 'Roadside', ''],
+  car: ['🚕', '計程車', 'Taxi', 'Taxi', ''],
+  arrive: ['📍', '目的地', 'Destino', 'Destination', '']
+};
+/* 目的地與「聽起來像、容易聽錯」的地方（待確認：實際常被聽錯的地名） */
+const DESTS = [
+  { zh: '國父紀念館', es: 'el Salón Memorial Sun Yat-sen', en: 'Sun Yat-sen Memorial Hall', flip: { zh: '中正紀念堂', es: 'el Salón Memorial Chiang Kai-shek', en: 'Chiang Kai-shek Memorial Hall' } },
+  { zh: '松山機場', es: 'el aeropuerto de Songshan', en: 'Songshan Airport', flip: { zh: '松山車站', es: 'la estación de Songshan', en: 'Songshan Station' } },
+  { zh: '士林夜市', es: 'el mercado nocturno de Shilin', en: 'Shilin Night Market', flip: { zh: '士林官邸', es: 'la residencia oficial de Shilin', en: 'Shilin Official Residence' } },
+  { zh: '台北一零一', es: 'Taipei 101', en: 'Taipei 101', flip: { zh: '台北車站', es: 'la estación de Taipei', en: 'Taipei Main Station' } }
+];
+const FARE0 = 85;   // 起跳價（待確認：現行台北市費率，起跳 1.25 公里內 85 元，之後每 200 公尺 5 元）
+
+/* ══════════════════════════════════════
+   任務提示
+══════════════════════════════════════ */
+const Hints = makeHints({ render: stdHintsRender });
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+const ORDER = ['START', 'HAIL', 'TELL', 'DEST_CHECK', 'BELT', 'METER', 'STOP', 'PAY', 'PAY_FIX', 'CHANGE', 'EXIT', 'END', 'RESULT'];
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const billFor = n => n <= 200 ? 200 : 500;           // 你給的鈔票
+
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,
+  hintViews: 0, log: [], feedback: [], visit: 0, att: {}, cash: null,
+  onStart() { this.updateCash(); },
+  updateCash() { document.getElementById('cash-badge').textContent = ''; },
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+  IMAGES: {
+    START: ['images/start.jpg', '📱'], HAIL: ['images/hail.jpg', '🚕'], TELL: ['images/inside.jpg', '🚕'], DEST_CHECK: ['images/inside.jpg', '🚕'], BELT: ['images/belt.jpg', '🪢'],
+    METER: ['images/meter.jpg', '🧮'], STOP: ['images/arrive.jpg', '📍'], PAY: ['images/pay.jpg', '💵'], PAY_FIX: ['images/pay.jpg', '💵'], CHANGE: ['images/pay.jpg', '💵'],
+    EXIT: ['images/exit.jpg', '🚪'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+  },
+
+  setup() {
+    const d = pick(DESTS), steps = 10 + Math.floor(Math.random() * 13);   // 135～195 元
+    const t = this.task = { dest: d, steps, fare: FARE0 + steps * 5, rot: Math.floor(Math.random() * 3) };
+    /* 多算：夜間加成（現在是下午，不能加）、小費（不用給） */
+    initPay(t, t.fare, [
+      { zh: '夜間加成', es: 'el recargo nocturno', en: 'the night surcharge', price: 20 },
+      { zh: '小費', es: 'la propina', en: 'a tip', price: 20 }
+    ]);
+    /* 司機複誦目的地：45% 聽成別的地方 */
+    t.ocWrong = Math.random() < 0.45;
+    t.ocSaid = t.ocWrong ? d.flip : d;
+    /* 計費表：40% 司機忘了跳表 */
+    t.meterOff = Math.random() < 0.4;
+  },
+
+  amiLines() {
+    const N = this.N, d = this.task.dest;
+    return [
+      L(`Ami：${N}，我已經到${d.zh}了，在門口等你。`, `${N}, ya llegué a ${d.es}; te espero en la entrada.`, `${N}, I'm already at ${d.en}, waiting at the entrance.`),
+      L('Ami：現在是下午，你在路邊招手攔一台計程車過來就可以了。上車要跟司機說清楚去哪裡。', 'Ahora es por la tarde: basta con que pares un taxi en la calle haciéndole señas. Al subir, dile claramente al conductor adónde vas.', "It's afternoon now — just wave down a taxi on the street. When you get in, tell the driver clearly where you're going."),
+      L('Ami：下車付錢的時候，要看一下計費表上的車資喔！', 'Al bajar y pagar, ¡fíjate en la tarifa del taxímetro!', 'When you get out and pay, check the fare on the meter!')
+    ];
+  },
+  hintSections() { return [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }]; },
+
+  listHTML(rowsOnly) {
+    const t = this.task, r = s => this.ruby(s), d = t.dest;
+    const rows = [
+      { zh: `目的地：${d.zh}（現在是下午）`, es: `Destino: ${d.es} (ahora es por la tarde)`, en: `Destination: ${d.en} (it is afternoon now)` },
+      { zh: '你身上有：一百元、兩百元和五百元的鈔票，還有零錢', es: 'Llevas: billetes de cien, doscientos y quinientos dólares, y algo de cambio', en: 'You have: 100, 200 and 500-dollar bills, plus some small change' }
+    ];
+    if (rowsOnly) return rows;
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 計費表：off 時沒有在跳；fare 是目前顯示的車資 */
+  meterHTML(off, fare) {
+    const r = s => this.ruby(s);
+    return `<div class="meter"><span class="mh">🧮 ${r('計費表')} · ${r('車資')}</span><span class="mv${off ? ' off' : ''}">${off ? '— — —' : 'NT$ ' + fare}</span></div>`;
+  },
+
+  getConfig() {
+    const N = this.N, t = this.task, d = t.dest, F = d.flip;
+    const drv = (zh, es, en) => L(`司機：${zh}`, es, en);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const pays = payStates(Game, {
+      who: '司機', place: 'car', html: () => Game.meterHTML(false, t.total),
+      rudePay: '你是不是想亂喊價啊？',
+      finish: () => { Game.state = 'EXIT'; },
+      extraWhy: () => t.extra.zh === '夜間加成'
+        ? M(`司機多算了：計費表是${t.total}元，他多加了夜間加成。夜間加成只有晚上十一點到早上六點才有，現在是下午。`, `El conductor cobró de más: el taxímetro marca ${esM(t.total)} y añadió el recargo nocturno, que solo se aplica de las 23:00 a las 6:00; ahora es por la tarde.`, `The driver overcharged: the meter says ${enM(t.total)} and he added the night surcharge, which only applies from 11 pm to 6 am. It is afternoon now.`)
+        : M(`司機多算了：計費表是${t.total}元，他多收了二十元小費。在台灣坐計程車不用給小費。`, `El conductor cobró de más: el taxímetro marca ${esM(t.total)} y pidió veinte dólares de propina. En Taiwán no hace falta dar propina en el taxi.`, `The driver overcharged: the meter says ${enM(t.total)} and he asked for a 20-dollar tip. You don't need to tip taxi drivers in Taiwan.`)
+    });
+
+    return {
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你站在台北街頭。手機響了一聲，是Ami傳來的LINE。）', '(Estás en una calle de Taipei. Tu celular suena: es un LINE de Ami.)', '(You are on a Taipei street. Your phone buzzes — a LINE from Ami.)'),
+          ...Game.amiLines(),
+          L('我：好，我現在去招計程車！', '¡Bien, voy a parar un taxi ahora!', "OK, I'll go hail a taxi now!")
+        ],
+        options: ['走到路邊'],
+        next: () => { Game.startTimer(); Game.state = 'HAIL'; }
+      },
+
+      /* ═══ 招計程車 ═══ */
+      HAIL: {
+        place: 'street',
+        dialogue: () => [L('（你站在人行道上。馬路上有好幾台計程車開過來：有的擋風玻璃下面亮著紅色的「空車」燈，有的沒有亮燈，車上有人。）', '(Estás en la acera. Se acercan varios taxis: unos tienen encendida la luz roja «空車» (libre) bajo el parabrisas; otros no, y llevan pasajeros.)', '(You stand on the sidewalk. Several taxis come down the road: some have a red "空車" (vacant) light under the windshield; others have no light and are carrying passengers.)')],
+        options: () => rotOf(t, ['看到亮著「空車」燈的計程車，站在路邊伸手招手。', '跑到馬路中間，對著計程車招手。', '對著沒有亮「空車」燈的計程車招手。']),
+        next: c => {
+          if (c !== '看到亮著「空車」燈的計程車，站在路邊伸手招手。') {
+            Game.addMistake(c === '跑到馬路中間，對著計程車招手。'
+              ? M('不要跑到馬路中間，很危險。站在路邊招手，司機看到會自己靠邊停。', 'No corras al medio de la calle: es peligroso. Quédate en la acera y haz señas; el conductor se detendrá.', "Don't run into the middle of the road — it's dangerous. Stand at the curb and wave; the driver will pull over.")
+              : M('沒有亮「空車」燈，表示車上已經有客人了。要招有亮燈的空車。', 'Sin la luz «空車» el taxi ya lleva pasajeros. Para uno que la tenga encendida.', 'No "空車" light means the taxi already has passengers. Wave down one with the light on.'));
+            return;
+          }
+          goodFirst('HAIL', '沒錯！看到亮「空車」燈的車，站在路邊招手就可以了。', '¡Exacto! Si ves la luz «空車», haz señas desde la acera.', 'Right! See a "空車" light, wave from the curb.');
+          Game.state = 'TELL';
+        }
+      },
+
+      /* ═══ 上車，說目的地 ═══ */
+      TELL: {
+        place: 'car',
+        dialogue: () => [L('（一台計程車在你面前停下來。你打開後座的車門，坐進去。）', '(Un taxi se detiene frente a ti. Abres la puerta de atrás y subes.)', '(A taxi stops in front of you. You open the back door and get in.)'), drv('你好，要去哪裡？', '¡Hola! ¿Adónde va?', 'Hello! Where to?')],
+        options: () => rotOf(t, [`我要去${d.zh}，麻煩您。`, `我要去${F.zh}，麻煩您。`, `去${d.zh}，快開！`]),
+        next: c => {
+          if (c !== `我要去${d.zh}，麻煩您。`) {
+            Game.addMistake(c.includes(F.zh)
+              ? M(`Ami在${d.zh}等你，不是${F.zh}。`, `Ami te espera en ${d.es}, no en ${F.es}.`, `Ami is waiting at ${d.en}, not ${F.en}.`)
+              : M('跟司機說話要有禮貌，說「麻煩您」，不要叫他快開。', 'Habla con cortesía al conductor: di «麻煩您» y no le pidas que acelere.', 'Be polite to the driver: say "麻煩您", and do not tell them to hurry.'));
+            return;
+          }
+          goodFirst('TELL', '沒錯！上車先說清楚要去哪裡，還要有禮貌。', '¡Exacto! Al subir, di claramente adónde vas, con cortesía.', 'Right! Say clearly where you are going, and be polite.');
+          Game.state = 'DEST_CHECK';
+        }
+      },
+      /* 司機複誦：45% 聽成別的地方 */
+      DEST_CHECK: catchState(Game, {
+        key: 'DEST_CHECK', place: 'car',
+        dialogue: () => [L(`司機：好，去${t.ocSaid.zh}，對嗎？`, `Bien, a ${t.ocSaid.es}, ¿correcto?`, `Okay, to ${t.ocSaid.en}, right?`)],
+        ok: '對，沒錯，謝謝。', fix: () => `不好意思，我要去${(t.ocWrong ? d : F).zh}。`, rude: '你到底有沒有在聽啊？',
+        wrong: () => t.ocWrong,
+        whyWrong: () => M(`司機聽錯了：他說「${t.ocSaid.zh}」，你要去的是「${d.zh}」。`, `El conductor entendió mal: dijo «${t.ocSaid.es}», pero tú vas a «${d.es}».`, `The driver misheard: he said "${t.ocSaid.en}", but you are going to "${d.en}".`),
+        whyRight: () => M(`司機說對了：就是「${d.zh}」。`, `El conductor lo dijo bien: es «${d.es}».`, `The driver had it right: "${d.en}".`),
+        goodWrong: ['你很細心！司機複誦的地方不對，要馬上說。', '¡Qué atento! El conductor repitió mal el destino; hay que decirlo enseguida.', 'Well spotted! The driver repeated the wrong place — speak up right away.'],
+        goodOk: ['司機複誦的時候，要對一下是不是你要去的地方。', 'Cuando el conductor repita el destino, compáralo con adónde quieres ir.', 'When the driver repeats the destination, check it is where you want to go.'],
+        apology: () => [drv(`啊，不好意思！是${d.zh}。`, `¡Ay, disculpe! Es ${d.es}.`, `Oh, sorry! It's ${d.en}.`), drv(`好，${d.zh}，沒問題。`, `Bien, ${d.es}; sin problema.`, `Okay, ${d.en} — no problem.`)],
+        go: () => { Game.state = 'BELT'; }
+      }),
+
+      /* ═══ 繫安全帶 ═══ */
+      BELT: {
+        place: 'car',
+        dialogue: () => [L('（車子準備開動。你坐在後座，手邊就有安全帶。）', '(El taxi se prepara para arrancar. Estás en el asiento de atrás y tienes el cinturón al alcance.)', '(The taxi is about to move. You are in the back seat, and the seat belt is within reach.)'), drv('好，我們出發囉。', 'Bien, nos vamos.', "Okay, let's go.")],
+        options: () => rotOf(t, ['我把安全帶繫好。', '後座很安全，不用繫。', '等司機提醒我再繫。']),
+        next: c => {
+          if (c !== '我把安全帶繫好。') {
+            Game.addMistake(c === '後座很安全，不用繫。'
+              ? M('坐計程車，後座也要繫安全帶，這是規定。', 'En el taxi también hay que abrocharse el cinturón en el asiento de atrás: es la norma.', 'In a taxi you must also wear a seat belt in the back seat — it is the rule.')
+              : M('不用等司機提醒，自己上車就要繫安全帶。（司機已經告知後座乘客仍沒繫，會處罰乘客。）', 'No esperes a que te lo recuerden: abróchalo al subir. (Si el conductor ya avisó y el pasajero de atrás no lo usa, la multa es para el pasajero.)', "Don't wait to be reminded — buckle up as soon as you get in. (If the driver has already told you and you still don't, the passenger gets the fine.)"));
+            return;
+          }
+          goodFirst('BELT', '沒錯！上車就把安全帶繫好，後座也一樣。', '¡Exacto! Abróchate el cinturón al subir, también atrás.', 'Right! Buckle up as soon as you get in — back seat too.');
+          Game.state = 'METER';
+        }
+      },
+
+      /* ═══ 看計費表：40% 司機忘了跳表 ═══ */
+      METER: catchState(Game, {
+        key: 'METER', place: 'car',
+        html: () => Game.meterHTML(t.meterOff, FARE0),
+        dialogue: () => [L('（車子開動了。你看一下前面的計費表。）', '(El taxi arranca. Miras el taxímetro de adelante.)', '(The taxi pulls away. You look at the meter up front.)')],
+        ok: '好，謝謝。', fix: () => '不好意思，請問可以跳表嗎？', rude: '你是不是想亂喊價啊？',
+        wrong: () => t.meterOff,
+        whyWrong: () => M('計費表沒有跳。計程車要跳表收費，要有禮貌地請司機按表。', 'El taxímetro no está en marcha. El taxi debe cobrar con taxímetro: pide con cortesía que lo ponga.', 'The meter is not running. Taxis must charge by the meter — politely ask the driver to start it.'),
+        whyRight: () => M('計費表已經在跳了，不用再請司機按。', 'El taxímetro ya está en marcha; no hace falta pedírselo.', 'The meter is already running — no need to ask.'),
+        goodWrong: ['你很細心！上車後要看計費表有沒有跳。', '¡Qué atento! Después de subir, fíjate en que el taxímetro esté en marcha.', 'Well spotted! After getting in, check the meter is running.'],
+        goodOk: ['上車後，要看一下計費表有沒有開始跳。', 'Después de subir, comprueba que el taxímetro haya empezado a correr.', 'After getting in, check that the meter has started.'],
+        apology: () => [drv('啊，不好意思，我忘了按！', '¡Ay, disculpe, se me olvidó ponerlo!', 'Oh, sorry, I forgot to start it!'), L('（司機按下計費表，數字開始跳了。）', '(El conductor activa el taxímetro y los números empiezan a correr.)', '(The driver starts the meter and the numbers begin to run.)')],
+        go: () => { Game.state = 'STOP'; }
+      }),
+
+      /* ═══ 說在哪裡下車 ═══ */
+      STOP: {
+        place: 'car',
+        dialogue: () => [L(`（車子開了一陣子，快到${d.zh}了。前面路口右邊，你看到Ami在揮手。）`, `(Tras un rato de camino, ya casi llegan a ${d.es}. En la esquina de adelante, a la derecha, ves a Ami saludándote.)`, `(After a while you are nearly at ${d.en}. At the next corner on the right, you see Ami waving.)`), drv('請問要在哪裡下車？', '¿Dónde quiere bajar?', 'Where would you like to get out?')],
+        options: () => rotOf(t, ['麻煩在前面的路口停，謝謝。', '我要在這裡下車，現在就停！', '你自己決定吧。']),
+        next: c => {
+          if (c !== '麻煩在前面的路口停，謝謝。') {
+            Game.addMistake(c === '我要在這裡下車，現在就停！'
+              ? M('不能叫司機在車道中間突然停車，後面的車會撞上來。要說一個前面可以停車的地方。', 'No se puede pedir que frene en medio del carril: los coches de atrás pueden chocar. Indica un lugar adelante donde se pueda parar.', "Don't ask the driver to stop suddenly in the traffic lane — cars behind may crash into you. Name a spot ahead where it's safe to stop.")
+              : M('司機不知道你要在哪裡下車，要自己說一個地方。', 'El conductor no sabe dónde quieres bajar: dile tú un lugar.', 'The driver does not know where you want to get out — tell them a spot.'));
+            return;
+          }
+          goodFirst('STOP', '沒錯！說一個前面安全的地方，請司機靠邊停。', '¡Exacto! Indica un lugar seguro adelante para que se detenga.', 'Right! Name a safe spot ahead for the driver to pull over.');
+          Game.state = 'PAY';
+          t.arrived = true;
+        }
+      },
+
+      PAY: pays.PAY, PAY_FIX: pays.PAY_FIX, CHANGE: pays.CHANGE,
+
+      /* ═══ 下車 ═══ */
+      EXIT: {
+        place: 'car',
+        dialogue: () => [L('（車子靠邊停好了。你把錢收好。這時後面有一台機車慢慢騎過來。）', '(El taxi se orilla y se detiene. Guardas tu dinero. Justo entonces, una moto se acerca despacio por detrás.)', '(The taxi pulls over. You put your money away. Just then a scooter comes slowly up from behind.)')],
+        options: () => rotOf(t, ['先回頭看後面有沒有車，拿好東西，再開門下車。', '直接開車門下車。', '先下車，東西等一下再拿。']),
+        next: c => {
+          if (c !== '先回頭看後面有沒有車，拿好東西，再開門下車。') {
+            Game.addMistake(c === '直接開車門下車。'
+              ? M('開車門以前，要先回頭看後面有沒有機車或車子，不然會撞到人。', 'Antes de abrir la puerta, mira atrás: podría venir una moto o un coche y chocar con la puerta.', 'Before opening the door, look behind you — a scooter or car could hit it.')
+              : M('下車以前要把東西拿好，不要留在車上。', 'Antes de bajar, toma tus cosas; no las dejes en el taxi.', "Take your belongings before you get out; don't leave them in the taxi."));
+            return;
+          }
+          goodFirst('EXIT', '沒錯！下車前先看後面，也要拿好自己的東西。', '¡Exacto! Antes de bajar, mira atrás y toma tus cosas.', 'Right! Look behind you and take your belongings before getting out.');
+          Game.stopTimer(); Game.state = 'END';
+        }
+      },
+
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2;
+          track('game_complete', { game: 'taxi', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            L(`（你下了車，輕輕關上車門。Ami跑過來迎接你。）`, `(Bajas y cierras la puerta con cuidado. Ami corre a recibirte.)`, `(You get out and close the door gently. Ami runs over to meet you.)`),
+            Game._endGood
+              ? L(`Ami：這趟計程車順利嗎？${N}，謝謝你！我們進去吧！`, `¿Todo salió bien en el taxi? ¡Gracias, ${N}! ¡Vamos adentro!`, `Did the ride go smoothly? Thanks, ${N}! Let's go in!`)
+              : L('Ami：欸，聽起來這趟計程車不太順利……下次上車要說清楚目的地，也要看一下計費表和找的錢喔！', 'Parece que el viaje en taxi no fue muy bien… la próxima vez di claro el destino y fíjate en el taxímetro y en el cambio.', "Hmm, sounds like the ride didn't go smoothly… next time, state your destination clearly and check the meter and your change.")
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: stdResultCfg('phone')
+    };
+  }
+});
+
+GameBoot();
+Music.init({ bpm: 114, tracks: [
+  { wave: 'square', vol: 0.26, notes: 'D5 . F5 A5 . G5 F5 . | Bb4 . D5 F5 . E5 D5 . | C5 . E5 G5 . F5 E5 . | A4 - D5 - C5 - . .' },
+  { wave: 'triangle', vol: 0.5, notes: 'D3 . A3 . D3 . A3 . | Bb2 . F3 . Bb2 . F3 . | C3 . G3 . C3 . G3 . | A2 . E3 . A2 . . .' },
+  { vol: 0.2, notes: 'k . h h s . h h' }] });
+</script>
+</body>
+</html>

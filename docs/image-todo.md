@@ -48,3 +48,7 @@
 ## 高鐵 hsr（2026-11-03，P-006 草稿：尚未修改）
 提示詞：`docs/image-prompts-hsr.md`（照順序一次做一張，Ben 確認再下一張）。圖片檔名：start、counter、ticket、gate、signs、platform、spot、seat、result、end_good、end_bad（共 11 張，720×720）。Ami 用 `games/drinks/images/call.jpg` 的頭肩裁切當角色參考圖。
 - [ ] hsr：start、counter、ticket、gate、signs、platform、spot、seat、result、end_good、end_bad
+
+## 計程車 taxi（2026-11-04，P-007 草稿：尚未修改）
+提示詞：`docs/image-prompts-taxi.md`（照順序一次做一張，Ben 確認再下一張）。圖片檔名：start、hail、inside、belt、meter、arrive、pay、exit、result、end_good、end_bad（共 11 張，720×720）。Ami 用 `games/drinks/images/call.jpg` 的頭肩裁切當角色參考圖。
+- [ ] taxi：start、hail、inside、belt、meter、arrive、pay、exit、result、end_good、end_bad
