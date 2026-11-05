@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<title>藥局 · En la farmacia</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：pharmacygame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "pharmacygame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #33261f;
+    --red: #c8501e;
+    --red-dark: #8f3513;
+    --yolk: #e0a43a;
+    --night: #2e2630;
+    --kraft: #f3e4d3;
+    --wall: #fbf3ea;
+    --paper: #ffffff;
+    --line: #e5d2bd;
+    --muted: #7a6454;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    background: #eaf4f1;
+  }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  /* ── 登入：店招牌 ── */
+  /* ── 遊戲 ── */
+  /* 購物清單 */
+  @media (hover: hover) {
+    .opt:hover rt { color: #ffe0d2; }
+  }
+  /* ── 排行榜 ── */
+  #lb-table tr.highlight-row { background: #f7dccb; font-weight: 700; }
+  /* ── 句子翻譯 ── */
+  .tr-btn:hover { background: #f7dccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  /* ── 本關單字（右側抽屜） ── */
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+
+
+
+  /* 藥盒、說明書、價目 */
+  .pbox { margin: 8px 0 12px; background: #fff; border: 2px solid #2f8f83; border-radius: 10px; padding: 8px 14px; }
+  .pbox .ph { color: #2f8f83; font-weight: 700; font-size: 15px; }
+  .pbox .pv { font-size: 22px; font-weight: 700; color: var(--ink); margin-top: 2px; }
+  .pbox .pl { font-size: 15px; color: var(--ink); margin-top: 2px; }
+  .pbox.bill { border-color: var(--red); }
+  .pbox.bill .pv { font-size: 18px; }
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">藥局</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">藥局</h1>
+  <p class="subtitle" data-es="En la farmacia" data-en="At the pharmacy">En la farmacia</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    Ami 感冒了，請你去藥局幫她買成藥。你要跟藥師說清楚症狀，核對藥師拿的藥對不對、藥怎麼吃，最後付錢、核對找的錢。藥師有時候會拿錯藥、說錯吃法或多算錢，要自己多注意喔！<br>
+    <span data-es="Ami está resfriada y te pide que le compres medicina en la farmacia. Debes explicar los síntomas al farmacéutico, comprobar que te dé el medicamento correcto y la forma de tomarlo, y por último pagar y revisar el cambio. ¡A veces se equivoca de medicina, de dosis o cobra de más, así que presta atención!" data-en="Ami has a cold and asks you to buy medicine at the pharmacy. Explain the symptoms to the pharmacist, check you get the right medicine and the right dosing instructions, then pay and check your change. The pharmacist may hand you the wrong box, misstate the dose or overcharge, so stay alert!">Ami está resfriada y te pide que le compres medicina en la farmacia. Debes explicar los síntomas al farmacéutico, comprobar que te dé el medicamento correcto y la forma de tomarlo, y por último pagar y revisar el cambio. ¡A veces se equivoca de medicina, de dosis o cobra de más, así que presta atención!</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">📱</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 10 名 · Top 10</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'pharmacy', track: 'pharmacy', settingsKey: 'pharmacy_settings',
+  defaultPlace: 'shop', defaultEmoji: '💊',
+  roles: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '藥師': { pitch: 1.0 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+   第一版草稿：本次沒有對照 game-kit（讀不到），只用共用檔內建的 GoodTeacher 規則
+══════════════════════════════════════ */
+pinyinPro.customPinyin({
+  '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan',
+  '時間': 'shí jiān', '時候': 'shí hou', '東西': 'dōng xi', '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '著': 'zhe', '囉': 'luo', '啦': 'la', '耶': 'ye',
+  '不好意思': 'bù hǎo yì si', '這個': 'zhè ge', '那個': 'nà ge', '好像': 'hǎo xiàng', '欸': 'éi', '零錢': 'líng qián', '應該': 'yīng gāi',
+  '怎麼': 'zěn me', '舒服': 'shū fu'
+});
+pinyinPro.customPinyin({
+  '藥師': 'yào shī', '藥局': 'yào jú', '成藥': 'chéng yào', '綜合感冒藥': 'zōng hé gǎn mào yào', '感冒藥': 'gǎn mào yào', '腸胃藥': 'cháng wèi yào', '止痛藥': 'zhǐ tòng yào',
+  '說明書': 'shuō míng shū', '喉嚨': 'hóu lóng', '流鼻水': 'liú bí shuǐ', '發燒': 'fā shāo', '喉糖': 'hóu táng', '過敏': 'guò mǐn', '飯後': 'fàn hòu', '飯前': 'fàn qián',
+  '一天三次': 'yì tiān sān cì', '一天兩次': 'yì tiān liǎng cì', '一次一包': 'yí cì yì bāo', '一次兩包': 'yí cì liǎng bāo', '一包': 'yì bāo', '兩包': 'liǎng bāo',
+  '啤酒': 'pí jiǔ', '看醫生': 'kàn yī shēng', '醫生': 'yī shēng', '拉肚子': 'lā dù zi', '肚子痛': 'dù zi tòng', '咳嗽': 'ké sou', '維他命': 'wéi tā mìng', '漱口水': 'shù kǒu shuǐ',
+  '一共': 'yí gòng', '找錢': 'zhǎo qián', '找': 'zhǎo', '收': 'shōu', '痛': 'tòng', '藥': 'yào'
+});
+// 台灣讀音修正：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '藥師': ['El farmacéutico', 'The pharmacist'] };
+const SPEAKER_RE = /^(Ami|藥師|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['藥局', 'farmacia', 'pharmacy'], ['感冒藥', 'medicina para el resfriado', 'cold medicine'], ['喉糖', 'pastillas para la garganta', 'throat lozenges']],
+  ENTER: [['藥師', 'farmacéutico/a', 'pharmacist'], ['感冒', 'resfriarse, resfriado', 'a cold']],
+  SYMPTOM: [['哪裡不舒服', '¿qué molestias tiene?', "what's bothering her?"], ['症狀', 'síntoma', 'symptom'], ['發燒', 'tener fiebre', 'have a fever']],
+  ALLERGY: [['過敏', 'alergia', 'allergy'], ['別的藥', 'otros medicamentos', 'other medicine']],
+  ASK: [['怎麼吃', '¿cómo se toma?', 'how to take it'], ['一天吃幾次', '¿cuántas veces al día?', 'how many times a day']],
+  PICK: [['這盒', 'esta caja', 'this box'], ['腸胃藥', 'medicina para el estómago', 'stomach medicine'], ['止痛藥', 'analgésico', 'painkiller']],
+  DOSE: [['說明書', 'prospecto, instrucciones', 'instructions leaflet'], ['飯後', 'después de comer', 'after meals'], ['一次', 'cada toma', 'each dose']],
+  WARN: [['喝酒', 'beber alcohol', 'drink alcohol'], ['看醫生', 'ir al médico', 'see a doctor']],
+  PAY: [['一共', 'en total', 'in total']],
+  CHANGE: [['找', 'dar el cambio', 'give change'], ['收', 'recibir, cobrar', 'receive, take payment']],
+  get END() { return Game.mistakes <= 2 ? [['順利', 'sin problemas', 'smoothly']] : [['下次', 'la próxima vez', 'next time']]; },
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = (() => {
+  const p = ['付錢', 'pagar', 'paying'];
+  return { ENTER: ['進藥局', 'entrar a la farmacia', 'entering the pharmacy'], SYMPTOM: ['說症狀', 'decir los síntomas', 'describing the symptoms'], ALLERGY: ['回答過敏', 'responder sobre alergias', 'answering about allergies'],
+    ASK: ['問怎麼吃', 'preguntar cómo tomarlo', 'asking how to take it'], PICK: ['核對藥盒', 'revisar la caja', 'checking the box'], DOSE: ['核對吃法', 'revisar la dosis', 'checking the dosing'],
+    WARN: ['聽注意事項', 'escuchar las advertencias', 'hearing the warnings'], PAY: p, PAY_FIX: p, CHANGE: ['找錢', 'el cambio', 'the change'] };
+})();
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = { ENTER: '走進藥局', PAY: '去櫃檯結帳', END: '離開藥局' };
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const PLACES = {
+  phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
+  street: ['🚶', '路上', 'Calle', 'On the way', ''],
+  shop: ['💊', '藥局', 'Farmacia', 'Pharmacy', '']
+};
+/* 症狀兩種（都買綜合感冒藥）；待確認：實際藥師會問的問題 */
+const SYMS = [
+  { zh: '喉嚨痛，還有流鼻水', es: 'dolor de garganta y mocos', en: 'a sore throat and a runny nose' },
+  { zh: '咳嗽，還有流鼻水', es: 'tos y mocos', en: 'a cough and a runny nose' }
+];
+/* 藥師可能拿錯的藥 */
+const BAD_BOX = [
+  { zh: '腸胃藥', es: 'medicina para el estómago', en: 'stomach medicine' },
+  { zh: '止痛藥', es: 'analgésico', en: 'painkiller' }
+];
+/* 吃法：對的與說錯的（說明書上寫的是 DOSE_OK） */
+const DOSE_OK = { zh: '一天三次，飯後吃，一次一包', es: 'tres veces al día, después de comer, un sobre cada vez', en: 'three times a day, after meals, one packet each time' };
+const DOSE_BAD = [
+  { zh: '一天三次，飯前吃，一次一包', es: 'tres veces al día, antes de comer, un sobre cada vez', en: 'three times a day, before meals, one packet each time' },
+  { zh: '一天三次，飯後吃，一次兩包', es: 'tres veces al día, después de comer, dos sobres cada vez', en: 'three times a day, after meals, two packets each time' },
+  { zh: '一天兩次，飯後吃，一次一包', es: 'dos veces al día, después de comer, un sobre cada vez', en: 'twice a day, after meals, one packet each time' }
+];
+const LOZ = 60;   // 喉糖（待確認：實際售價）
+
+/* ══════════════════════════════════════
+   任務提示
+══════════════════════════════════════ */
+const Hints = makeHints({ render: stdHintsRender });
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+const ORDER = ['START', 'ENTER', 'SYMPTOM', 'ALLERGY', 'ASK', 'PICK', 'DOSE', 'WARN', 'PAY', 'PAY_FIX', 'CHANGE', 'END', 'RESULT'];
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const billFor = n => n <= 200 ? 200 : 500;           // 你給的鈔票
+
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,
+  hintViews: 0, log: [], feedback: [], visit: 0, att: {}, cash: null,
+  onStart() { this.updateCash(); },
+  updateCash() { document.getElementById('cash-badge').textContent = ''; },
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+  IMAGES: {
+    START: ['images/start.jpg', '📱'], ENTER: ['images/inside.jpg', '💊'], SYMPTOM: ['images/inside.jpg', '💊'], ALLERGY: ['images/inside.jpg', '💊'], ASK: ['images/inside.jpg', '💊'],
+    PICK: ['images/box.jpg', '📦'], DOSE: ['images/label.jpg', '📄'], WARN: ['images/inside.jpg', '💊'],
+    PAY: ['images/counter.jpg', '💵'], PAY_FIX: ['images/counter.jpg', '💵'], CHANGE: ['images/counter.jpg', '💵'],
+    END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+  },
+
+  setup() {
+    const t = this.task = { sym: pick(SYMS), price: pick([120, 150, 180]), rot: Math.floor(Math.random() * 3) };
+    /* 多算：你沒有買的維他命、漱口水 */
+    initPay(t, t.price + LOZ, [
+      { zh: '一罐維他命', es: 'un bote de vitaminas', en: 'a bottle of vitamins', price: 100 },
+      { zh: '一瓶漱口水', es: 'un enjuague bucal', en: 'a bottle of mouthwash', price: 80 }
+    ]);
+    /* 藥師拿藥：45% 拿錯盒 */
+    t.pickWrong = Math.random() < 0.45;
+    t.badBox = pick(BAD_BOX);
+    /* 藥師口頭說明吃法：40% 說得和說明書不一樣 */
+    t.doseWrong = Math.random() < 0.4;
+    t.doseFalse = pick(DOSE_BAD);
+    t.doseSaid = t.doseWrong ? t.doseFalse : DOSE_OK;
+  },
+
+  amiLines() {
+    const N = this.N, s = this.task.sym;
+    return [
+      L(`Ami：${N}，我感冒了，${s.zh}，沒有發燒。你可以幫我去藥局買藥嗎？`, `${N}, estoy resfriada: tengo ${s.es} y no tengo fiebre. ¿Puedes ir a la farmacia a comprarme medicina?`, `${N}, I have a cold — ${s.en}, no fever. Can you go to the pharmacy and buy me some medicine?`),
+      L('Ami：我對藥沒有過敏，也沒有在吃別的藥。請你買綜合感冒藥，還有一盒喉糖。', 'No soy alérgica a ningún medicamento y no estoy tomando otros. Compra un medicamento combinado para el resfriado y una caja de pastillas para la garganta.', "I'm not allergic to any medicine and I'm not taking anything else. Please buy a combination cold medicine and a box of throat lozenges."),
+      L('Ami：藥師拿藥給你的時候，要看一下藥盒；也要問清楚藥怎麼吃，回來告訴我喔！', 'Cuando el farmacéutico te dé la medicina, mira la caja; y pregunta bien cómo se toma, ¡y luego me lo cuentas!', 'When the pharmacist hands you the medicine, check the box, and ask clearly how to take it, then tell me!')
+    ];
+  },
+  hintSections() { return [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }]; },
+
+  listHTML(rowsOnly) {
+    const t = this.task, r = s => this.ruby(s), s = t.sym;
+    const rows = [
+      { zh: `Ami 的症狀：${s.zh}，沒有發燒`, es: `Síntomas de Ami: ${s.es}, sin fiebre`, en: `Ami's symptoms: ${s.en}, no fever` },
+      { zh: '要買：綜合感冒藥、一盒喉糖（Ami 沒有過敏）', es: 'Comprar: un medicamento combinado para el resfriado y una caja de pastillas para la garganta (Ami no tiene alergias)', en: 'To buy: a combination cold medicine and a box of throat lozenges (Ami has no allergies)' },
+      { zh: '你身上有：一百元、兩百元和五百元的鈔票，還有零錢', es: 'Llevas: billetes de cien, doscientos y quinientos dólares, y algo de cambio', en: 'You have: 100, 200 and 500-dollar bills, plus some small change' }
+    ];
+    if (rowsOnly) return rows;
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 藥盒：name 是盒子上的品名 */
+  boxHTML(name) {
+    const r = s => this.ruby(s);
+    return `<div class="pbox"><div class="ph">📦 ${r('這盒')}</div><div class="pv">${r(name)}</div></div>`;
+  },
+  /* 說明書：寫著正確的吃法 */
+  labelHTML() {
+    const r = s => this.ruby(s);
+    return `<div class="pbox"><div class="ph">📄 ${r('說明書')}</div><div class="pl">${r('一天三次')}</div><div class="pl">${r('飯後吃')}</div><div class="pl">${r('一次一包')}</div></div>`;
+  },
+  /* 價目：藥盒和喉糖的標價 */
+  billHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    return `<div class="pbox bill"><div class="ph">🧾 ${r('價錢')}</div><div class="pl">${r('綜合感冒藥')} NT$ ${t.price}</div><div class="pl">${r('喉糖')} NT$ ${LOZ}</div></div>`;
+  },
+
+  getConfig() {
+    const N = this.N, t = this.task, s = t.sym;
+    const ph = (zh, es, en) => L(`藥師：${zh}`, es, en);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const pays = payStates(Game, {
+      who: '藥師', place: 'shop', html: () => Game.billHTML(),
+      rudePay: '你是不是想亂喊價啊？',
+      extraWhy: () => M(`藥師多算了：你只買了綜合感冒藥（${t.price}元）和喉糖（${LOZ}元），一共${t.total}元。他多收了${t.extra.zh}（${t.extra.price}元），你沒有買。`, `El farmacéutico cobró de más: solo compraste el medicamento (${esM(t.price)}) y las pastillas (${esM(LOZ)}), total ${esM(t.total)}. Añadió ${t.extra.es} (${esM(t.extra.price)}), que no compraste.`, `The pharmacist overcharged: you only bought the cold medicine (${enM(t.price)}) and lozenges (${enM(LOZ)}), ${enM(t.total)} in total. He added ${t.extra.en} (${enM(t.extra.price)}), which you did not buy.`)
+    });
+
+    return {
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你在家附近。手機響了一聲，是Ami傳來的LINE。）', '(Estás cerca de tu casa. Tu celular suena: es un LINE de Ami.)', '(You are near home. Your phone buzzes — a LINE from Ami.)'),
+          ...Game.amiLines(),
+          L('我：好，我現在去藥局！', '¡Bien, voy a la farmacia ahora!', "OK, I'm heading to the pharmacy now!")
+        ],
+        options: ['走進藥局'],
+        next: () => { Game.startTimer(); Game.state = 'ENTER'; }
+      },
+
+      /* ═══ 進藥局 ═══ */
+      ENTER: {
+        place: 'shop',
+        dialogue: () => [L('（你走進藥局。櫃檯後面，藥師穿著白袍。）', '(Entras a la farmacia. Detrás del mostrador, el farmacéutico lleva bata blanca.)', '(You walk into the pharmacy. Behind the counter, the pharmacist wears a white coat.)'), ph('你好，請問需要什麼？', '¡Hola, buenas! ¿Qué necesita?', 'Hello! What do you need?')],
+        options: () => rotOf(t, ['你好，我朋友感冒了，想請問可以買什麼藥？', '給我感冒藥，快一點！', '（不說話，自己在架上隨便拿一盒藥。）']),
+        next: c => {
+          if (c !== '你好，我朋友感冒了，想請問可以買什麼藥？') {
+            Game.addMistake(c.startsWith('給我')
+              ? M('跟藥師說話要有禮貌，不要命令他。', 'Habla con cortesía al farmacéutico; no le des órdenes.', "Be polite to the pharmacist; don't give orders.")
+              : M('不要自己亂拿藥。成藥也要先問藥師，藥師才知道哪一種適合。', 'No tomes una medicina al azar: pregunta al farmacéutico, que sabe cuál conviene.', "Don't grab a medicine at random — ask the pharmacist which one is suitable."));
+            return;
+          }
+          goodFirst('ENTER', '沒錯！買藥以前，先跟藥師說明狀況。', '¡Exacto! Antes de comprar, explica la situación al farmacéutico.', 'Right! Before buying, explain the situation to the pharmacist.');
+          Game.state = 'SYMPTOM';
+        }
+      },
+
+      /* ═══ 說症狀 ═══ */
+      SYMPTOM: {
+        place: 'shop',
+        dialogue: () => [ph('她哪裡不舒服？有什麼症狀？有發燒嗎？', '¿Qué molestias tiene? ¿Algún síntoma? ¿Tiene fiebre?', 'What is bothering her? Any symptoms? Does she have a fever?')],
+        options: () => rotOf(t, [`她${s.zh}，沒有發燒。`, '她肚子痛，一直拉肚子。', '你是藥師，你自己看啊！']),
+        next: c => {
+          if (c !== `她${s.zh}，沒有發燒。`) {
+            Game.addMistake(c.includes('肚子痛')
+              ? M(`Ami 的症狀是${s.zh}，不是肚子痛。症狀說錯，藥師會拿錯藥。`, `Los síntomas de Ami son ${s.es}, no dolor de estómago. Si dices mal los síntomas, te darán otra medicina.`, `Ami's symptoms are ${s.en}, not a stomachache. Wrong symptoms mean the wrong medicine.`)
+              : M('藥師看不出來她哪裡不舒服，要自己說清楚症狀。', 'El farmacéutico no puede adivinar qué le pasa; descríbele los síntomas.', "The pharmacist can't tell what's wrong — describe the symptoms."));
+            return;
+          }
+          goodFirst('SYMPTOM', '沒錯！把症狀說清楚，藥師才知道怎麼幫你。', '¡Exacto! Describe bien los síntomas para que el farmacéutico pueda ayudar.', 'Right! Describe the symptoms clearly so the pharmacist can help.');
+          Game.state = 'ALLERGY';
+        }
+      },
+
+      /* ═══ 過敏、別的藥 ═══ */
+      ALLERGY: {
+        place: 'shop',
+        dialogue: () => [ph('好。她有沒有對什麼藥過敏？現在有沒有在吃別的藥？', 'Bien. ¿Es alérgica a algún medicamento? ¿Está tomando otras medicinas?', 'Okay. Is she allergic to any medicine? Is she taking anything else?')],
+        options: () => rotOf(t, ['她沒有對藥過敏，也沒有在吃別的藥。', '我不知道，沒關係，給我藥就好。', '這跟你沒關係吧！']),
+        next: c => {
+          if (c !== '她沒有對藥過敏，也沒有在吃別的藥。') {
+            Game.addMistake(c.startsWith('我不知道')
+              ? M('過敏和別的藥很重要。Ami 的 LINE 說她沒有過敏、沒有吃別的藥，要照實告訴藥師。', 'Las alergias y otras medicinas son importantes. Ami te escribió que no tiene alergias ni toma otros medicamentos: díselo al farmacéutico.', 'Allergies and other medicines matter. Ami said in her LINE that she has no allergies and takes nothing else — tell the pharmacist.')
+              : M('藥師問這些是為了她的安全，要有禮貌地回答。', 'El farmacéutico pregunta por su seguridad; responde con cortesía.', 'The pharmacist asks for her safety — answer politely.'));
+            return;
+          }
+          goodFirst('ALLERGY', '沒錯！過敏和正在吃的藥，要照實告訴藥師。', '¡Exacto! Cuéntale al farmacéutico las alergias y las medicinas que toma.', 'Right! Tell the pharmacist about allergies and other medicines.');
+          Game.state = 'ASK';
+        }
+      },
+
+      /* ═══ 問怎麼吃 ═══ */
+      ASK: {
+        place: 'shop',
+        dialogue: () => [ph('好，那我拿一盒綜合感冒藥給你。', 'Bien, le doy una caja de medicamento combinado para el resfriado.', "Okay, I'll get you a box of combination cold medicine."), L('（你想知道這個藥怎麼吃。）', '(Quieres saber cómo se toma esta medicina.)', '(You want to know how to take this medicine.)')],
+        options: () => rotOf(t, ['請問這個藥要怎麼吃？一天吃幾次？', '這個藥我自己看就好，不用問了。', '吃多少都可以吧？']),
+        next: c => {
+          if (c !== '請問這個藥要怎麼吃？一天吃幾次？') {
+            Game.addMistake(c.startsWith('吃多少')
+              ? M('藥不能亂吃，吃太多會有危險。要問清楚一次吃多少、一天吃幾次。', 'No se puede tomar cualquier cantidad: es peligroso. Pregunta cuánto por toma y cuántas veces al día.', "You can't take any amount — too much is dangerous. Ask how much each time and how many times a day.")
+              : M('買藥的時候，要請藥師說明怎麼吃，這樣比較安全。', 'Al comprar medicinas, pide al farmacéutico que te explique cómo tomarlas; es más seguro.', 'When buying medicine, ask the pharmacist how to take it — it is safer.'));
+            return;
+          }
+          goodFirst('ASK', '沒錯！買藥要問清楚怎麼吃。', '¡Exacto! Al comprar medicina, pregunta cómo se toma.', 'Right! When you buy medicine, ask how to take it.');
+          Game.state = 'PICK';
+        }
+      },
+
+      /* ═══ 核對藥盒：45% 拿錯盒 ═══ */
+      PICK: catchState(Game, {
+        key: 'PICK', place: 'shop',
+        html: () => Game.boxHTML(t.pickWrong ? t.badBox.zh : '綜合感冒藥'),
+        dialogue: () => [ph('好，這盒給你，這是綜合感冒藥。', 'Bien, aquí tiene; es el medicamento combinado para el resfriado.', "Here you go — this is the combination cold medicine."), L('（你看一下藥盒上的品名。）', '(Miras el nombre en la caja.)', '(You look at the name on the box.)')],
+        ok: '好，謝謝。', fix: () => `不好意思，這盒是${t.badBox.zh}，我要的是綜合感冒藥。`, rude: '你到底有沒有在聽啊？',
+        wrong: () => t.pickWrong,
+        whyWrong: () => M(`藥師拿錯了：藥盒上寫「${t.badBox.zh}」，不是綜合感冒藥。`, `El farmacéutico se equivocó: la caja dice «${t.badBox.es}», no el medicamento para el resfriado.`, `The pharmacist grabbed the wrong box: it says "${t.badBox.en}", not the cold medicine.`),
+        whyRight: () => M('藥盒上寫的就是「綜合感冒藥」，沒有拿錯。', 'La caja dice «綜合感冒藥»; no hubo error.', 'The box says "綜合感冒藥" — there was no mistake.'),
+        goodWrong: ['你很細心！藥師拿給你的藥，要看一下品名對不對。', '¡Qué atento! Revisa el nombre de la medicina que te dan.', 'Well spotted! Check the name on the medicine you are handed.'],
+        goodOk: ['拿到藥以後，要看一下藥盒上的品名。', 'Al recibir la medicina, mira el nombre de la caja.', 'After you get the medicine, check the name on the box.'],
+        apology: () => [ph('啊，不好意思！我拿錯了。', '¡Ay, disculpe! Me equivoqué de caja.', 'Oh, sorry! I grabbed the wrong one.'), L('（藥師換了一盒給你，藥盒上寫著「綜合感冒藥」。）', '(El farmacéutico te cambia la caja; ahora dice «綜合感冒藥».)', '(The pharmacist swaps the box; it now says "綜合感冒藥".)')],
+        go: () => { Game.state = 'DOSE'; }
+      }),
+
+      /* ═══ 核對吃法：40% 口頭說的和說明書不一樣 ═══ */
+      DOSE: catchState(Game, {
+        key: 'DOSE', place: 'shop',
+        html: () => Game.labelHTML(),
+        dialogue: () => [ph(`這個藥，${t.doseSaid.zh}。`, `Este medicamento: ${t.doseSaid.es}.`, `This medicine: ${t.doseSaid.en}.`), L('（你對一下說明書上寫的吃法。）', '(Comparas con lo que dice el prospecto.)', '(You compare it with the dosing printed on the leaflet.)')],
+        ok: '好，我知道了，謝謝。', fix: () => `不好意思，說明書上寫的是${(t.doseWrong ? DOSE_OK : t.doseFalse).zh}，對嗎？`, rude: '你剛剛是不是講錯了啊？',
+        wrong: () => t.doseWrong,
+        whyWrong: () => M(`藥師說錯了：他說「${t.doseSaid.zh}」，說明書上寫的是「${DOSE_OK.zh}」。`, `El farmacéutico se equivocó: dijo «${t.doseSaid.es}», pero el prospecto dice «${DOSE_OK.es}».`, `The pharmacist misspoke: he said "${t.doseSaid.en}", but the leaflet says "${DOSE_OK.en}".`),
+        whyRight: () => M(`藥師說對了：說明書上寫的就是「${DOSE_OK.zh}」。`, `El farmacéutico lo dijo bien: el prospecto dice «${DOSE_OK.es}».`, `The pharmacist was right: the leaflet says "${DOSE_OK.en}".`),
+        goodWrong: ['你很細心！藥師說的吃法，要對一下說明書。', '¡Qué atento! Compara lo que dice el farmacéutico con el prospecto.', 'Well spotted! Compare what the pharmacist says with the leaflet.'],
+        goodOk: ['藥師說的吃法，要和說明書對一下。', 'Compara lo que dice el farmacéutico con el prospecto.', 'Check what the pharmacist says against the leaflet.'],
+        apology: () => [ph(`啊，不好意思！是${DOSE_OK.zh}。`, `¡Ay, disculpe! Es ${DOSE_OK.es}.`, `Oh, sorry! It's ${DOSE_OK.en}.`)],
+        go: () => { Game.state = 'WARN'; }
+      }),
+
+      /* ═══ 注意事項 ═══ */
+      WARN: {
+        place: 'shop',
+        dialogue: () => [ph('吃藥的時候不要喝酒。如果吃了三天還沒有好，要去看醫生喔。', 'Mientras tome la medicina no beba alcohol. Si después de tres días no mejora, vaya al médico.', "Don't drink alcohol while taking it. If she isn't better after three days, she should see a doctor.")],
+        options: () => rotOf(t, ['好，我會告訴她。', '喝一點啤酒應該沒關係吧？', '不用看醫生，多吃幾天就好了。']),
+        next: c => {
+          if (c !== '好，我會告訴她。') {
+            Game.addMistake(c.includes('啤酒')
+              ? M('吃感冒藥的時候不能喝酒，酒和藥會互相影響，可能傷肝、很想睡覺。', 'Con la medicina no se debe beber alcohol: interactúan y pueden dañar el hígado o dar mucho sueño.', "Don't drink alcohol with cold medicine — they interact and can harm the liver or cause drowsiness.")
+              : M('吃了三天還沒好，不要再自己亂吃，要去看醫生。', 'Si tras tres días no mejora, no sigas automedicándote: ve al médico.', "If she's no better after three days, stop self-medicating and see a doctor."));
+            return;
+          }
+          goodFirst('WARN', '沒錯！藥師說的注意事項，要記得告訴 Ami。', '¡Exacto! Recuerda contarle a Ami lo que advirtió el farmacéutico.', 'Right! Remember to tell Ami what the pharmacist warned.');
+          Game.state = 'PAY';
+        }
+      },
+
+      PAY: pays.PAY, PAY_FIX: pays.PAY_FIX, CHANGE: pays.CHANGE,
+
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2;
+          track('game_complete', { game: 'pharmacy', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            L('（你拿著藥離開藥局，把藥送到Ami家。）', '(Sales de la farmacia con la medicina y se la llevas a Ami.)', '(You leave the pharmacy with the medicine and take it to Ami.)'),
+            Game._endGood
+              ? L(`Ami：太好了，${N}，謝謝你！我知道了，一天三次，飯後吃，不喝酒，三天沒好就去看醫生。`, `¡Qué bien, ${N}, gracias! Ya lo sé: tres veces al día, después de comer, nada de alcohol, y si en tres días no mejoro iré al médico.`, `Great, ${N}, thank you! Got it: three times a day after meals, no alcohol, and see a doctor if I'm not better in three days.`)
+              : L('Ami：欸，聽起來買藥不太順利……下次要把症狀說清楚，也要看藥盒、問清楚怎麼吃，付錢時算一下喔！', 'Parece que la compra no salió muy bien… la próxima vez describe bien los síntomas, revisa la caja, pregunta cómo se toma y calcula el pago.', "Hmm, sounds like buying the medicine didn't go smoothly… next time describe the symptoms clearly, check the box, ask how to take it, and check the bill.")
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: stdResultCfg('phone')
+    };
+  }
+});
+
+GameBoot();
+Music.init({ bpm: 106, tracks: [
+  { wave: 'square', vol: 0.24, notes: 'E5 . G5 B5 . A5 G5 . | C5 . E5 G5 . F5 E5 . | D5 . F5 A5 . G5 F5 . | B4 - E5 - D5 - . .' },
+  { wave: 'triangle', vol: 0.5, notes: 'E3 . B3 . E3 . B3 . | C3 . G3 . C3 . G3 . | D3 . A3 . D3 . A3 . | B2 . F3 . B2 . . .' },
+  { vol: 0.2, notes: 'k . h . s . h h' }] });
+</script>
+</body>
+</html>

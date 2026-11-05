@@ -52,3 +52,7 @@
 ## 計程車 taxi（2026-11-04，P-007 草稿：尚未修改）
 提示詞：`docs/image-prompts-taxi.md`（照順序一次做一張，Ben 確認再下一張）。圖片檔名：start、hail、inside、belt、meter、arrive、pay、exit、result、end_good、end_bad（共 11 張，720×720）。Ami 用 `games/drinks/images/call.jpg` 的頭肩裁切當角色參考圖。
 - [ ] taxi：start、hail、inside、belt、meter、arrive、pay、exit、result、end_good、end_bad
+
+## 藥局 pharmacy（2026-11-05，P-008 草稿：尚未修改）
+提示詞：`docs/image-prompts-pharmacy.md`（照順序一次做一張，Ben 確認再下一張）。圖片檔名：start、inside、box、label、counter、result、end_good、end_bad（共 8 張，720×720）。Ami 用 `games/drinks/images/call.jpg` 的頭肩裁切當角色參考圖。
+- [ ] pharmacy：start、inside、box、label、counter、result、end_good、end_bad
