@@ -1,6 +1,7 @@
 // ===== Firebase 專案 tiendadebebidas-d75ac 的 Firestore 規則（整份貼上取代）=====
-// 連接的 repo：taiwan-life（台灣生存日記系列）；cadadiaunosminutos-share-zone 也會讀。最後更新：2026-10-29 15:25（以下為這次整理：規則內容沒改，只加註解）
+// 連接的 repo：taiwan-life（台灣生存日記系列）；cadadiaunosminutos-share-zone 也會讀。最後更新：2026-11-05 09:35（新增 hotel／hsr／train／taxi 四個遊戲的成績與排行榜）
 // 變更紀錄（只留最新 3 筆，新的放最上面；每次改規則都要寫日期＋時間）：
+//   - 2026-11-05 09:35 scoreCols() 加 hotelgame_scores／hsrgame_scores／traingame_scores／taxigame_scores；scenes() 加 hotel／hsr／train／taxi
 //   - 2026-10-29 15:25 加最上方註解、規則檔改名（規則內容沒改）
 rules_version = '2';
 // 台灣情境對話遊戲系列（tiendadebebidas-d75ac）的 Firestore 規則
@@ -20,15 +21,17 @@ service cloud.firestore {
               'nightmarket_scores', 'bakerygame_scores', 'clinicgame_scores', 'mrtgame_scores', 'streetgame_scores',
               'schoolgame_scores', 'ubikegame_scores', 'busgame_scores', 'barbergame_scores',
               'cinemagame_scores', 'parkinggame_scores', 'icecreamgame_scores', 'bookstoregame_scores', 'marketgame_scores', 'elevatorgame_scores',
-              'noodlegame_scores', 'conbinigame_scores', 'yansujigame_scores', 'guandigame_scores', 'clothesgame_scores'];
+              'noodlegame_scores', 'conbinigame_scores', 'yansujigame_scores', 'guandigame_scores', 'clothesgame_scores',
+              'hotelgame_scores', 'hsrgame_scores', 'traingame_scores', 'taxigame_scores'];
     }
     function scenes() {
       return ['drinks', 'reserva', 'breakfast', 'parcel', 'nightmarket', 'bakery', 'clinic', 'mrt', 'street', 'school', 'ubike', 'bus', 'barber',
-              'cinema', 'parking', 'icecream', 'bookstore', 'market', 'elevator', 'noodle', 'conbini', 'yansuji', 'guandi', 'clothes'];
+              'cinema', 'parking', 'icecream', 'bookstore', 'market', 'elevator', 'noodle', 'conbini', 'yansuji', 'guandi', 'clothes',
+              'hotel', 'hsr', 'train', 'taxi'];
     }
     function okName(n) { return n is string && n.size() > 0 && n.size() <= 30; }
 
-    // ── 24 個排行榜：任何人可以看、可以新增；不能修改；只有管理員能刪 ──
+    // ── 28 個排行榜：任何人可以看、可以新增；不能修改；只有管理員能刪 ──
     match /{col}/{id} {
       allow read: if col in scoreCols();
       allow create: if col in scoreCols()
