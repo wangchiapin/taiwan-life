@@ -86,7 +86,9 @@
 <div id="gate">
   <h2 style="margin-top:0">台灣情境對話遊戲 · 成績管理</h2>
   <p id="gate-msg">只有管理員帳號可以看。</p>
-  <button class="btn primary" id="btn-in">用 Google 登入</button>
+  <div id="gsi-btn" style="display:flex;justify-content:center;min-height:44px"></div>
+  <p id="alt-hint" style="margin:14px 0 6px;font-size:13px">上面的按鈕沒出現或登不進去時：</p>
+  <button class="btn small" id="btn-in">改用彈出視窗登入（備用）</button>
 </div>
 
 <main id="app" hidden>
@@ -116,7 +118,7 @@
 
 <script type="module">
 import { app, db, SCORE_COLS, collection, doc, getDocs, getDoc, setDoc, deleteDoc, query, orderBy, limit, writeBatch } from "../shared/firebase.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithCredential, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
 const ADMIN = 'a2224907@gmail.com';
 const SCENES = [
@@ -487,11 +489,37 @@ $('view').addEventListener('click', e => {
 
 /* ── 登入 ── */
 const auth = getAuth(app);
+/* 主要登入方式：Google 一鍵登入（Google Identity Services）。
+   iPhone 的 Chrome／Safari 會擋掉 Firebase 的彈出視窗回傳結果（出現 cancelled-popup-request），
+   所以改成：Google 給一張憑證 → 交給 Firebase 登入。這個方式不靠彈出視窗回傳。
+   需要：Google Cloud 的網頁用戶端「已授權的 JavaScript 來源」有 https://wangchiapin.github.io */
+const GOOGLE_CLIENT_ID = '947444542062-7paptejivn10tu5vj4vstnn0bucs294m.apps.googleusercontent.com';
+async function onGoogleCredential(resp) {
+  try {
+    $('gate-msg').textContent = '登入中……';
+    await signInWithCredential(auth, GoogleAuthProvider.credential(resp.credential));
+  } catch (e) { $('gate-msg').textContent = '登入失敗：' + (e.code || e.message); }
+}
+function startGoogleButton() {
+  try {
+    window.google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onGoogleCredential, ux_mode: 'popup', auto_select: false });
+    window.google.accounts.id.renderButton($('gsi-btn'), { type: 'standard', theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', locale: 'zh-TW', width: 260 });
+  } catch (e) { console.error(e); $('gsi-btn').textContent = '（Google 登入按鈕載入失敗，請用下面的備用方式）'; }
+}
+(function loadGsi() {
+  const s = document.createElement('script');
+  s.src = 'https://accounts.google.com/gsi/client'; s.async = true; s.defer = true;
+  s.onload = startGoogleButton;
+  s.onerror = () => { $('gsi-btn').textContent = '（Google 登入按鈕載入失敗，請用下面的備用方式）'; };
+  document.head.appendChild(s);
+})();
+
+/* 備用：Firebase 彈出視窗登入（電腦上可用） */
 $('btn-in').onclick = async () => {
   try { await signInWithPopup(auth, new GoogleAuthProvider()); }
   catch (e) { $('gate-msg').textContent = '登入失敗：' + (e.code || e.message); }
 };
-$('btn-out').onclick = () => signOut(auth);
+$('btn-out').onclick = () => { signOut(auth); try { window.google && google.accounts.id.disableAutoSelect(); } catch (e) {} };
 onAuthStateChanged(auth, user => {
   const ok = user && user.email === ADMIN;
   $('who').textContent = user ? user.email : '';
@@ -500,6 +528,7 @@ onAuthStateChanged(auth, user => {
   if (user && !ok) $('gate-msg').textContent = `${user.email} 沒有權限。請登出，換管理員帳號登入。`;
   if (!user) $('gate-msg').textContent = '只有管理員帳號可以看。';
   $('btn-in').hidden = !!user;
+  $('gsi-btn').style.display = user ? 'none' : 'flex'; $('alt-hint').hidden = !!user;
   if (ok && !D.loaded) loadAll();
 });
 </script>
