@@ -13,7 +13,7 @@
   var NAME_GETTER = null;                // ← 可選：function(){ return 目前暱稱或'' }
   var CFG = { apiKey: 'AIzaSyC_YSDn2OH6_GKKwCq0d8QFNl3fYXzTC60', authDomain: 'memorma-24dab.firebaseapp.com',
               projectId: 'memorma-24dab', appId: '1:806709458465:web:f0d12acb2f911f2f165560' };
-  var V = '10.12.2', CDN = 'https://www.gstatic.com/firebasejs/' + V + '/';
+  var V = '12.17.1', CDN = 'https://www.gstatic.com/firebasejs/' + V + '/';
   var cur = null, readyP = null, lib = null;
 
   function tzName() { // 玩家裝置的時區；抓不到就回空字串（這時紀錄不帶 tz）

@@ -7,11 +7,11 @@
    progress/<玩家代碼>                        玩家名字＋地圖進度（換裝置時用代碼讀回）
    規則在 tools/tiendadebebidas-d75ac.rules.txt
 ══════════════════════════════════════ */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import {
   getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs, deleteDoc,
   query, where, orderBy, limit, writeBatch
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 export const firebaseConfig = {
   apiKey:            "AIzaSyD2lxec6JTbERwFPGjDzriYzIH7o9IRWnw",
