@@ -167,3 +167,4 @@ iPhone 版 Chrome 上，頁面可以捲動時，往下捲之後有時回不到�
 - P-006 高鐵 `hsr`：[docs/draft-games/hsr.md](docs/draft-games/hsr.md)，尚未修改（第一版草稿：台詞、拼音、流程待 Ben 審；測試等修改完再寫；讀音沒有對照 game-kit）
 - P-007 計程車 `taxi`：[docs/draft-games/taxi.md](docs/draft-games/taxi.md)，尚未修改（第一版草稿：台詞、拼音、流程待 Ben 審；測試等修改完再寫；讀音沒有對照 game-kit）
 - P-008 藥局 `pharmacy`：[docs/draft-games/pharmacy.md](docs/draft-games/pharmacy.md)，尚未修改（第一版草稿：台詞、拼音、流程待 Ben 審；測試等修改完再寫；讀音沒有對照 game-kit）
+- P-009 銀行 `bank`：[docs/draft-games/bank.md](docs/draft-games/bank.md)，尚未修改（第一版草稿：台詞、拼音、流程待 Ben 審；測試等修改完再寫；讀音沒有對照 game-kit）

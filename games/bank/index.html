@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<title>銀行 · En el banco</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：bankgame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "bankgame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #33261f;
+    --red: #c8501e;
+    --red-dark: #8f3513;
+    --yolk: #e0a43a;
+    --night: #2e2630;
+    --kraft: #f3e4d3;
+    --wall: #fbf3ea;
+    --paper: #ffffff;
+    --line: #e5d2bd;
+    --muted: #7a6454;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    background: #eaf4f1;
+  }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  /* ── 登入：店招牌 ── */
+  /* ── 遊戲 ── */
+  /* 購物清單 */
+  @media (hover: hover) {
+    .opt:hover rt { color: #ffe0d2; }
+  }
+  /* ── 排行榜 ── */
+  #lb-table tr.highlight-row { background: #f7dccb; font-weight: 700; }
+  /* ── 句子翻譯 ── */
+  .tr-btn:hover { background: #f7dccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  /* ── 本關單字（右側抽屜） ── */
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+
+
+
+  /* 號碼牌、匯款單、鈔票 */
+  .pbox { margin: 8px 0 12px; background: #fff; border: 2px solid #2f8f83; border-radius: 10px; padding: 8px 14px; }
+  .pbox .ph { color: #2f8f83; font-weight: 700; font-size: 15px; }
+  .pbox .pv { font-size: 22px; font-weight: 700; color: var(--ink); margin-top: 2px; }
+  .pbox .pl { font-size: 15px; color: var(--ink); margin-top: 2px; }
+  .pbox.bill { border-color: var(--red); }
+  .pbox.bill .pv { font-size: 18px; }
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">銀行</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">銀行</h1>
+  <p class="subtitle" data-es="En el banco" data-en="At the bank">En el banco</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    你要去銀行把房租匯給房東，還要領一些現金。你要取號碼牌、填匯款單、聽叫號、給行員證件，再核對行員複誦的匯款內容，最後點一下領到的鈔票。行員有時候會叫錯號、說錯金額或少給鈔票，要自己多注意喔！<br>
+    <span data-es="Vas al banco a transferir el alquiler a tu casero y a sacar algo de efectivo. Debes sacar turno, llenar el formulario, escuchar tu número, mostrar tu documento, revisar lo que repite el empleado y contar los billetes. ¡A veces llaman otro número, repiten mal el monto o dan menos billetes, así que presta atención!" data-en="You go to the bank to wire the rent to your landlord and withdraw some cash. Take a ticket, fill in the form, listen for your number, show your ID, check what the clerk reads back, and count your bills. The clerk may call the wrong number, misstate the amount or hand you too few bills, so stay alert!">Vas al banco a transferir el alquiler a tu casero y a sacar algo de efectivo. Debes sacar turno, llenar el formulario, escuchar tu número, mostrar tu documento, revisar lo que repite el empleado y contar los billetes. ¡A veces llaman otro número, repiten mal el monto o dan menos billetes, así que presta atención!</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">📱</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 10 名 · Top 10</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'bank', track: 'bank', settingsKey: 'bank_settings',
+  defaultPlace: 'bank', defaultEmoji: '🏦',
+  roles: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '行員': { pitch: 1.05 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+   第一版草稿：本次沒有對照 game-kit（讀不到），只用共用檔內建的 GoodTeacher 規則
+══════════════════════════════════════ */
+pinyinPro.customPinyin({
+  '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan',
+  '時間': 'shí jiān', '時候': 'shí hou', '東西': 'dōng xi', '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '著': 'zhe', '囉': 'luo', '啦': 'la', '耶': 'ye',
+  '不好意思': 'bù hǎo yì si', '這個': 'zhè ge', '那個': 'nà ge', '好像': 'hǎo xiàng', '欸': 'éi', '應該': 'yīng gāi', '怎麼': 'zěn me', '舒服': 'shū fu'
+});
+pinyinPro.customPinyin({
+  '行員': 'háng yuán', '銀行': 'yín háng', '第一銀行': 'dì yī yín háng', '匯款': 'huì kuǎn', '領錢': 'lǐng qián', '存摺': 'cún zhé', '居留證': 'jū liú zhèng',
+  '號碼牌': 'hào mǎ pái', '取號機': 'qǔ hào jī', '取號': 'qǔ hào', '叫號': 'jiào hào', '櫃檯': 'guì tái', '手續費': 'shǒu xù fèi', '戶名': 'hù míng', '帳號': 'zhàng hào',
+  '千元鈔': 'qiān yuán chāo', '百元鈔': 'bǎi yuán chāo', '鈔票': 'chāo piào', '點一下': 'diǎn yí xià', '業務': 'yè wù', '房租': 'fáng zū', '房東': 'fáng dōng',
+  '一共': 'yí gòng', '找': 'zhǎo', '收': 'shōu', '申請書': 'shēn qǐng shū', '代號': 'dài hào', '轉帳': 'zhuǎn zhàng', '確認': 'què rèn', '少': 'shǎo', '張': 'zhāng', '還需要': 'hái xū yào', '仔細': 'zǐ xì'
+});
+// 台灣讀音修正：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '行員': ['El empleado del banco', 'The bank clerk'] };
+const SPEAKER_RE = /^(Ami|行員|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['房租', 'alquiler', 'rent'], ['匯款', 'transferir dinero, giro', 'remit money, wire'], ['現金', 'efectivo', 'cash']],
+  ENTER: [['業務', 'trámite, servicio', 'banking service'], ['取號', 'sacar turno', 'take a number']],
+  TICKET: [['取號機', 'máquina de turnos', 'ticket machine'], ['按鈕', 'botón', 'button']],
+  FORM: [['號碼牌', 'ticket de turno', 'queue ticket'], ['帳號', 'número de cuenta', 'account number'], ['戶名', 'nombre del titular', 'account holder name'], ['金額', 'monto, importe', 'amount']],
+  CALL: [['叫號', 'llamar el turno', 'call the number'], ['櫃檯', 'ventanilla, mostrador', 'counter, teller window']],
+  ID: [['存摺', 'libreta de ahorros', 'passbook'], ['居留證', 'tarjeta de residente (ARC)', 'resident certificate (ARC)'], ['證件', 'documento de identidad', 'ID document']],
+  REPEAT: [['手續費', 'comisión', 'service fee'], ['確認', 'confirmar', 'confirm']],
+  WITHDRAW: [['千元鈔', 'billete de mil', '1,000-dollar bill'], ['百元鈔', 'billete de cien', '100-dollar bill']],
+  CASH: [['鈔票', 'billetes', 'bills, banknotes'], ['點一下', 'contar (un momento)', 'count it (quickly)']],
+  get END() { return Game.mistakes <= 2 ? [['順利', 'sin problemas', 'smoothly']] : [['下次', 'la próxima vez', 'next time']]; },
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = { ENTER: ['進銀行', 'entrar al banco', 'entering the bank'], TICKET: ['取號碼牌', 'sacar turno', 'taking a ticket'], FORM: ['填匯款單', 'llenar el formulario', 'filling in the form'],
+  CALL: ['聽叫號', 'escuchar el turno', 'listening for your number'], ID: ['給證件', 'dar el documento', 'showing ID'], REPEAT: ['核對匯款', 'revisar la transferencia', 'checking the transfer'],
+  WITHDRAW: ['說要領多少', 'decir cuánto sacar', 'saying how much to withdraw'], CASH: ['點鈔票', 'contar los billetes', 'counting the bills'] };
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = { ENTER: '走進銀行', FORM: '去桌子那邊填單', CALL: '等叫號', END: '離開銀行' };
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const PLACES = {
+  phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
+  bank: ['🏦', '銀行', 'Banco', 'Bank', '']
+};
+const AMTS = [8000, 12000, 15000, 18000];          // 房租（待確認：金額只是示範）
+const LANDLORD = '陳美玲';                          // 房東（虛構）
+const BANKNAME = '第一銀行', BANKCODE = '007';      // 收款銀行（代號 007 是第一銀行；帳號是虛構的）
+const FEE = 30;                                    // 臨櫃跨行轉帳匯款手續費（富邦公開資料；各銀行不同，待確認）
+const spoken = n => 'A' + zhDigits(n);              // 號碼牌念法：A零三八
+const swap2 = s => { const a = s.split(''); [a[a.length - 1], a[a.length - 2]] = [a[a.length - 2], a[a.length - 1]]; const r = a.join(''); return r === s ? s.slice(0, -1) + String((+s.slice(-1) + 1) % 10) : r; };
+
+/* ══════════════════════════════════════
+   任務提示
+══════════════════════════════════════ */
+const Hints = makeHints({ render: stdHintsRender });
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+const ORDER = ['START', 'ENTER', 'TICKET', 'FORM', 'CALL', 'ID', 'REPEAT', 'WITHDRAW', 'CASH', 'END', 'RESULT'];
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const billFor = n => n <= 200 ? 200 : 500;           // 這個遊戲沒有付現金，只是共用檔需要
+
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,
+  hintViews: 0, log: [], feedback: [], visit: 0, att: {}, cash: null,
+  onStart() { this.updateCash(); },
+  updateCash() { document.getElementById('cash-badge').textContent = ''; },
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+  IMAGES: {
+    START: ['images/start.jpg', '📱'], ENTER: ['images/lobby.jpg', '🏦'], TICKET: ['images/ticket.jpg', '🎫'], FORM: ['images/table.jpg', '📝'],
+    CALL: ['images/counter.jpg', '🏦'], ID: ['images/counter.jpg', '🏦'], REPEAT: ['images/counter.jpg', '🏦'], WITHDRAW: ['images/counter.jpg', '🏦'],
+    CASH: ['images/cash.jpg', '💵'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+  },
+
+  setup() {
+    const t = this.task = { rot: Math.floor(Math.random() * 3) };
+    t.amt = pick(AMTS);
+    t.amtAlt = pick(AMTS.filter(a => a !== t.amt));
+    t.acct = String(Math.floor(1e11 + Math.random() * 9e11));          // 12 碼，虛構
+    t.last4 = t.acct.slice(-4); t.last4Alt = swap2(t.last4);
+    t.amtWrongForm = t.amtAlt;
+    /* 領現金：k 張千元鈔 + h 張百元鈔 */
+    t.k = pick([2, 3, 4]); t.h = pick([3, 5]); t.cashAmt = t.k * 1000 + t.h * 100;
+    /* 號碼牌 */
+    t.ticket = String(20 + Math.floor(Math.random() * 70)).padStart(3, '0');
+    t.ticketAlt = swap2(t.ticket);
+    t.before = 2 + Math.floor(Math.random() * 4);
+    /* 行員叫號：45% 叫的是別人的號碼（兩碼對調） */
+    t.callWrong = Math.random() < 0.45; t.called = t.callWrong ? t.ticketAlt : t.ticket;
+    /* 行員複誦匯款：45% 說錯（金額或帳號末四碼，擇一） */
+    t.repWrong = Math.random() < 0.45; t.repType = pick(['amt', 'acct']);
+    t.repAmt = t.repWrong && t.repType === 'amt' ? t.amtAlt : t.amt;
+    t.repLast4 = t.repWrong && t.repType === 'acct' ? t.last4Alt : t.last4;
+    /* 行員數鈔票：40% 千元鈔少給一張 */
+    t.cashWrong = Math.random() < 0.4; t.gotK = t.cashWrong ? t.k - 1 : t.k;
+  },
+
+  amiLines() {
+    const N = this.N, t = this.task;
+    return [
+      L(`Ami：${N}，你不是要匯房租給房東嗎？我幫你問好了。收款銀行是${BANKNAME}（代號${zhDigits(BANKCODE)}），戶名是「${LANDLORD}」，帳號是${zhDigits(t.acct)}，金額是${zhNum(t.amt)}元。`, `${N}, ¿no ibas a transferirle el alquiler a la casera? Ya le pregunté: el banco es ${BANKNAME} (código ${BANKCODE}), titular «${LANDLORD}», cuenta ${t.acct}, monto ${esM(t.amt)}.`, `${N}, aren't you wiring the rent to your landlord? I asked her already: the bank is ${BANKNAME} (code ${BANKCODE}), account holder "${LANDLORD}", account number ${t.acct}, amount ${enM(t.amt)}.`),
+      L(`Ami：你也順便領現金吧，領${zhNum(t.cashAmt)}元，我想要${NZ(t.k)}張千元鈔，其他的是百元鈔。`, `Aprovecha y saca efectivo: ${esM(t.cashAmt)}, con ${t.k} billetes de mil y el resto de cien.`, `Withdraw some cash while you're there: ${enM(t.cashAmt)}, as ${t.k} 1,000-dollar bills and the rest in 100s.`),
+      L('Ami：記得帶存摺和居留證。行員複誦匯款的時候，要仔細聽，也要看一下號碼牌和鈔票喔！', 'Lleva la libreta y tu tarjeta de residente. Cuando el empleado repita la transferencia, escucha bien, ¡y revisa el turno y los billetes!', 'Bring your passbook and resident certificate. When the clerk repeats the transfer, listen carefully — and check your ticket number and the bills!')
+    ];
+  },
+  hintSections() { return [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }]; },
+
+  listHTML(rowsOnly) {
+    const t = this.task, r = s => this.ruby(s);
+    const rows = [
+      { zh: `要匯款：${BANKNAME}（${BANKCODE}）、戶名${LANDLORD}、帳號${t.acct}、${t.amt}元`, es: `Transferir: ${BANKNAME} (${BANKCODE}), titular ${LANDLORD}, cuenta ${t.acct}, ${esM(t.amt)}`, en: `To wire: ${BANKNAME} (${BANKCODE}), holder ${LANDLORD}, account ${t.acct}, ${enM(t.amt)}` },
+      { zh: `要領現金：${t.cashAmt}元（${t.k}張千元鈔、${t.h}張百元鈔）`, es: `Sacar efectivo: ${esM(t.cashAmt)} (${t.k} billetes de mil y ${t.h} de cien)`, en: `Withdraw cash: ${enM(t.cashAmt)} (${t.k} 1,000s and ${t.h} 100s)` },
+      { zh: '你帶著：存摺、居留證（有效）、手機', es: 'Llevas: libreta, tarjeta de residente (vigente) y celular', en: 'You have: passbook, resident certificate (valid), phone' }
+    ];
+    if (rowsOnly) return rows;
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 號碼牌＋叫號螢幕 */
+  ticketHTML(called) {
+    const t = this.task, r = s => this.ruby(s);
+    return `<div class="pbox"><div class="ph">🎫 ${r('號碼牌')}</div><div class="pv">A${t.ticket}</div>` +
+      (called ? `<div class="pl">📺 ${r('叫號')}：A${called}</div>` : '') + `</div>`;
+  },
+  /* 匯款申請書 */
+  formHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    return `<div class="pbox bill"><div class="ph">📝 ${r('匯款申請書')}</div><div class="pl">${r('收款銀行')}：${BANKNAME}（${BANKCODE}）</div><div class="pl">${r('帳號')}：${t.acct}</div><div class="pl">${r('戶名')}：${LANDLORD}</div><div class="pl">${r('金額')}：NT$ ${t.amt}</div></div>`;
+  },
+  /* 行員給的鈔票 */
+  cashHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    return `<div class="pbox"><div class="ph">💵 ${r('鈔票')}</div><div class="pl">${r('千元鈔')}：${t.gotK} ${r('張')}</div><div class="pl">${r('百元鈔')}：${t.h} ${r('張')}</div></div>`;
+  },
+
+  getConfig() {
+    const N = this.N, t = this.task;
+    const ph = (zh, es, en) => L(`行員：${zh}`, es, en);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const alt = (a, b) => [a, b];
+
+    return {
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你在家附近。手機響了一聲，是Ami傳來的LINE。）', '(Estás cerca de tu casa. Tu celular suena: es un LINE de Ami.)', '(You are near home. Your phone buzzes — a LINE from Ami.)'),
+          ...Game.amiLines(),
+          L('我：好，我現在去銀行！', '¡Bien, voy al banco ahora!', "OK, I'm heading to the bank now!")
+        ],
+        options: ['走進銀行'],
+        next: () => { Game.startTimer(); Game.state = 'ENTER'; }
+      },
+
+      /* ═══ 進銀行 ═══ */
+      ENTER: {
+        place: 'bank',
+        dialogue: () => [L('（你走進銀行。大廳裡有取號機，旁邊站著一位行員。）', '(Entras al banco. En el vestíbulo hay una máquina de turnos y un empleado.)', '(You walk into the bank. There is a ticket machine in the lobby and a clerk standing beside it.)'), ph('您好，請問今天要辦什麼業務？', '¡Hola, buenas! ¿Qué trámite desea hacer hoy?', 'Hello! What service do you need today?')],
+        options: () => rotOf(t, ['你好，我要匯款，還要領錢。請問要怎麼取號？', '我趕時間，不要排隊，先幫我辦！', '（不說話，直接走到櫃檯前面站著等。）']),
+        next: c => {
+          if (c !== '你好，我要匯款，還要領錢。請問要怎麼取號？') {
+            Game.addMistake(c.startsWith('我趕時間')
+              ? M('銀行每個人都要取號碼牌、照順序辦，不能插隊，也不要命令行員。', 'En el banco todos sacan turno y esperan su orden; no se cuela ni se dan órdenes al empleado.', "At a bank everyone takes a number and waits their turn — no cutting in, no giving orders.")
+              : M('要先取號碼牌，行員才會依號碼叫你，直接站在櫃檯前面不行。', 'Primero hay que sacar un turno; si te quedas de pie frente a la ventanilla, no te atenderán.', "Take a ticket first — staff call people by number, so standing at the counter doesn't work."));
+            return;
+          }
+          goodFirst('ENTER', '沒錯！進銀行先說要辦什麼業務，再取號碼牌。', '¡Exacto! Al entrar, di qué trámite necesitas y saca tu turno.', 'Right! Say what service you need, then take a number.');
+          Game.state = 'TICKET';
+        }
+      },
+
+      /* ═══ 取號機 ═══ */
+      TICKET: {
+        place: 'bank',
+        dialogue: () => [ph('請按螢幕上的按鈕，匯款和領錢是同一個。', 'Pulse el botón de la pantalla; transferir y retirar dinero van en el mismo.', 'Press the button on the screen — remittance and withdrawals are the same one.'), L('（取號機的螢幕上有三個按鈕：「存款、提款、匯款」、「開戶」、「貸款、理財」。）', '(La pantalla muestra tres botones: «存款、提款、匯款», «開戶» y «貸款、理財».)', '(The screen shows three buttons: "存款、提款、匯款", "開戶" and "貸款、理財".)')],
+        options: () => rotOf(t, ['按「存款、提款、匯款」', '按「開戶」', '按「貸款、理財」']),
+        next: c => {
+          if (c !== '按「存款、提款、匯款」') {
+            Game.addMistake(c === '按「開戶」'
+              ? M('「開戶」是開新帳戶用的。你已經有帳戶，要匯款和領錢，請按「存款、提款、匯款」。', '«開戶» es para abrir una cuenta nueva. Ya tienes cuenta: para transferir y sacar dinero, pulsa «存款、提款、匯款».', '"開戶" is for opening a new account. You already have one — for remittance and withdrawals press "存款、提款、匯款".')
+              : M('「貸款、理財」是辦貸款和投資的。匯款和領錢要按「存款、提款、匯款」。', '«貸款、理財» es para préstamos e inversiones. Para transferir y sacar dinero, pulsa «存款、提款、匯款».', '"貸款、理財" is for loans and investments. For remittance and withdrawals press "存款、提款、匯款".'));
+            return;
+          }
+          goodFirst('TICKET', '沒錯！選對業務，才會拿到對的號碼牌。', '¡Exacto! Eligiendo bien el trámite, el turno es el correcto.', 'Right! Choose the right service and you get the right ticket.');
+          Game.state = 'FORM';
+        }
+      },
+
+      /* ═══ 填匯款單（等叫號的時候） ═══ */
+      FORM: {
+        place: 'bank',
+        html: () => Game.ticketHTML(),
+        dialogue: () => [L(`（機器吐出一張號碼牌：A${t.ticket}。你前面還有${t.before}位客人。）`, `(La máquina imprime un turno: A${t.ticket}. Hay ${t.before} personas delante de ti.)`, `(The machine prints a ticket: A${t.ticket}. There are ${t.before} people ahead of you.)`),
+          L('（你走到旁邊的桌子，拿一張匯款申請書。你要填收款銀行、帳號、戶名和金額。）', '(Vas a una mesa y tomas un formulario de transferencia. Debes escribir banco, cuenta, titular y monto.)', '(You go to the table and take a remittance form. Fill in the bank, account number, holder name and amount.)')],
+        options: () => rotOf(t, [`照 Ami 傳的填：帳號${zhDigits(t.acct)}，金額${zhNum(t.amt)}元。`, `帳號照 Ami 傳的填，金額寫${zhNum(t.amtWrongForm)}元。`, '帳號最後兩個數字我不確定，隨便填兩個。']),
+        next: c => {
+          if (c !== `照 Ami 傳的填：帳號${zhDigits(t.acct)}，金額${zhNum(t.amt)}元。`) {
+            Game.addMistake(c.startsWith('帳號照')
+              ? M(`金額寫錯了。Ami 傳的金額是${t.amt}元，不是${t.amtWrongForm}元。`, `El monto está mal: Ami dijo ${esM(t.amt)}, no ${esM(t.amtWrongForm)}.`, `Wrong amount: Ami said ${enM(t.amt)}, not ${enM(t.amtWrongForm)}.`)
+              : M('帳號一個數字都不能錯，錯了錢會匯到別人那裡。不確定就看 Ami 傳的訊息。', 'Un solo dígito mal y el dinero va a otra persona. Si dudas, mira el mensaje de Ami.', 'One wrong digit and the money goes to someone else. If unsure, check Ami\'s message.'));
+            return;
+          }
+          goodFirst('FORM', '沒錯！帳號和金額要照訊息一個一個對。', '¡Exacto! Copia la cuenta y el monto dígito por dígito.', 'Right! Copy the account number and amount digit by digit.');
+          Game.state = 'CALL';
+        }
+      },
+
+      /* ═══ 叫號：45% 叫的是別人（兩碼對調） ═══ */
+      CALL: catchState(Game, {
+        key: 'CALL', place: 'bank',
+        html: () => Game.ticketHTML(t.called),
+        dialogue: () => [L('（你坐在椅子上等。過了一會兒，廣播響了。）', '(Esperas sentado. Al rato suena el altavoz.)', '(You wait in a chair. After a while an announcement plays.)'),
+          ph(`${spoken(t.called)}號客人，請到三號櫃檯。`, `Cliente con el turno ${spoken(t.called)}, pase a la ventanilla tres.`, `Customer number ${spoken(t.called)}, please come to counter three.`)],
+        ok: '好，我過去。', fix: () => `不好意思，我的號碼是${spoken(t.callWrong ? t.ticket : t.ticketAlt)}，不是${spoken(t.called)}，我再等一下。`, rude: '你們是不是叫錯人了啊？',
+        wrong: () => t.callWrong,
+        whyWrong: () => M(`叫的是 A${t.called}，你的號碼牌是 A${t.ticket}，還沒輪到你。`, `Llamaron A${t.called}; tu turno es A${t.ticket}, todavía no te toca.`, `They called A${t.called}; your ticket is A${t.ticket}, so it isn't your turn yet.`),
+        whyRight: () => M(`叫的就是你的號碼 A${t.ticket}，輪到你了。`, `Llamaron tu turno, A${t.ticket}: ya te toca.`, `They called your number, A${t.ticket} — it is your turn.`),
+        goodWrong: ['你很細心！叫號的時候，要對一下自己的號碼牌。', '¡Qué atento! Cuando llamen, compara con tu turno.', 'Well spotted! When a number is called, compare it with your ticket.'],
+        goodOk: ['叫號的時候，要先對一下自己的號碼牌。', 'Cuando llamen un turno, compara con el tuyo.', 'When a number is called, check it against your ticket.'],
+        apology: () => [L('（行員低頭看了一下螢幕。）', '(El empleado mira la pantalla.)', '(The clerk looks down at the screen.)'), ph('啊，不好意思，是我看錯了。請再稍等一下。', '¡Ay, disculpe! Me equivoqué. Espere un momento, por favor.', 'Oh, sorry, my mistake. Please wait a moment.'), L(`（沒多久，廣播真的叫到 ${spoken(t.ticket)}，你走到三號櫃檯。）`, `(Poco después sí llaman ${spoken(t.ticket)} y vas a la ventanilla tres.)`, `(Soon ${spoken(t.ticket)} is called, and you walk to counter three.)`)],
+        go: () => { Game.state = 'ID'; }
+      }),
+
+      /* ═══ 給證件和存摺 ═══ */
+      ID: {
+        place: 'bank',
+        dialogue: () => [ph('您好，匯款是嗎？請給我申請書、存摺，還有您的證件。', '¡Hola, buenas! ¿Una transferencia? Deme el formulario, la libreta y su documento, por favor.', 'Hello! A remittance? Please give me the form, your passbook and your ID.'), L('（你把填好的申請書遞給行員。）', '(Le das el formulario ya lleno.)', '(You hand over the completed form.)')],
+        options: () => rotOf(t, ['好的，這是存摺和我的居留證。', '我只有手機，手機裡有居留證的照片，可以嗎？', '為什麼要看證件？我又不是壞人！']),
+        next: c => {
+          if (c !== '好的，這是存摺和我的居留證。') {
+            Game.addMistake(c.startsWith('我只有手機')
+              ? M('臨櫃辦理要給行員看證件正本，手機裡的照片通常不行（各銀行可能不同，待確認）。', 'En ventanilla se muestra el documento original; una foto en el celular normalmente no sirve (puede variar según el banco).', 'At the counter you show the original ID; a phone photo usually does not work (may vary by bank).')
+              : M('行員看證件是為了確認你本人，保護你的帳戶，要有禮貌地配合。', 'El empleado verifica que eres tú para proteger tu cuenta; coopera con cortesía.', 'The clerk checks ID to protect your account — cooperate politely.'));
+            return;
+          }
+          goodFirst('ID', '沒錯！臨櫃辦理要帶存摺和證件。外國人通常用居留證。', '¡Exacto! En ventanilla lleva libreta y documento; los extranjeros suelen usar la tarjeta de residente.', 'Right! Bring your passbook and ID to the counter; foreigners usually use their resident certificate.');
+          Game.state = 'REPEAT';
+        }
+      },
+
+      /* ═══ 行員複誦匯款：45% 說錯金額或帳號末四碼 ═══ */
+      REPEAT: catchState(Game, {
+        key: 'REPEAT', place: 'bank',
+        html: () => Game.formHTML(),
+        dialogue: () => [ph(`我跟您確認一下：匯${zhNum(t.repAmt)}元，到${BANKNAME}，帳號最後四碼是${zhDigits(t.repLast4)}，手續費${zhNum(FEE)}元，從您的帳戶扣。對嗎？`, `Le confirmo: transferir ${esM(t.repAmt)} al ${BANKNAME}, la cuenta termina en ${t.repLast4}, comisión ${esM(FEE)}, que se descuenta de su cuenta. ¿Correcto?`, `Let me confirm: remit ${enM(t.repAmt)} to ${BANKNAME}, account ending in ${t.repLast4}, service fee ${enM(FEE)}, taken from your account. Is that right?`), L('（你對一下自己的申請書。）', '(Comparas con tu formulario.)', '(You compare it with your form.)')],
+        ok: '對，麻煩你了。', fix: () => `不好意思，我要匯的是${zhNum(t.repWrong ? t.amt : t.amtAlt)}元，帳號最後四碼是${zhDigits(t.repWrong ? t.last4 : t.last4Alt)}。`, rude: '你有沒有在看啊？別弄錯我的錢！',
+        wrong: () => t.repWrong,
+        whyWrong: () => t.repType === 'amt'
+          ? M(`行員說錯了金額：他說${t.repAmt}元，申請書上寫的是${t.amt}元。`, `El empleado se equivocó de monto: dijo ${esM(t.repAmt)}, el formulario dice ${esM(t.amt)}.`, `The clerk got the amount wrong: he said ${enM(t.repAmt)}, the form says ${enM(t.amt)}.`)
+          : M(`行員說錯了帳號：他說最後四碼是${t.repLast4}，申請書上是${t.last4}。`, `El empleado se equivocó de cuenta: dijo que termina en ${t.repLast4}, el formulario dice ${t.last4}.`, `The clerk got the account wrong: he said it ends in ${t.repLast4}, the form says ${t.last4}.`),
+        whyRight: () => M(`行員說對了：金額${t.amt}元，帳號最後四碼${t.last4}，手續費${FEE}元。`, `El empleado lo dijo bien: ${esM(t.amt)}, cuenta terminada en ${t.last4}, comisión ${esM(FEE)}.`, `The clerk was right: ${enM(t.amt)}, account ending ${t.last4}, fee ${enM(FEE)}.`),
+        goodWrong: ['你很細心！行員複誦的時候，要和申請書一個一個對。', '¡Qué atento! Cuando el empleado repita, compara con tu formulario.', 'Well spotted! When the clerk reads it back, check against your form.'],
+        goodOk: ['行員複誦匯款的金額和帳號，要和自己的申請書對一下。', 'Cuando repita el monto y la cuenta, compáralos con tu formulario.', 'Check the amount and account the clerk reads back against your form.'],
+        apology: () => [ph(`啊，不好意思！是匯${zhNum(t.amt)}元，帳號最後四碼${zhDigits(t.last4)}。我改過來了。`, `¡Ay, disculpe! Son ${esM(t.amt)}, la cuenta termina en ${t.last4}. Ya lo corregí.`, `Oh, sorry! It's ${enM(t.amt)}, account ending ${t.last4}. I've corrected it.`), L('（行員按了幾下鍵盤，把匯款處理好，蓋章後把存摺還給你。）', '(El empleado teclea, procesa la transferencia, sella y te devuelve la libreta.)', '(The clerk types, processes the transfer, stamps it and gives your passbook back.)')],
+        go: wrong => { Game.state = 'WITHDRAW'; }
+      }),
+
+      /* ═══ 要領多少 ═══ */
+      WITHDRAW: {
+        place: 'bank',
+        dialogue: () => [ph('匯款辦好了，這是您的回條。還需要辦別的嗎？', 'La transferencia está hecha; aquí tiene su comprobante. ¿Necesita algo más?', 'The remittance is done — here is your receipt. Anything else?')],
+        options: () => rotOf(t, [`我還要領錢，領${zhNum(t.cashAmt)}元，${NZ(t.k)}張千元鈔，其他要百元鈔。`, `我還要領錢，領${zhNum(t.cashAmt + 1000)}元，${NZ(t.k + 1)}張千元鈔，其他要百元鈔。`, '我要領錢，隨便給我就好。']),
+        next: c => {
+          if (c !== `我還要領錢，領${zhNum(t.cashAmt)}元，${NZ(t.k)}張千元鈔，其他要百元鈔。`) {
+            Game.addMistake(c.includes('隨便')
+              ? M('要說清楚領多少錢、要什麼面額，行員才不會拿錯。', 'Di cuánto quieres y en qué billetes, para que no se equivoquen.', 'Say exactly how much and which bills you want, so the clerk gets it right.')
+              : M(`Ami 說要領${t.cashAmt}元（${t.k}張千元鈔、${t.h}張百元鈔），不是${t.cashAmt + 1000}元。`, `Ami dijo ${esM(t.cashAmt)} (${t.k} de mil y ${t.h} de cien), no ${esM(t.cashAmt + 1000)}.`, `Ami said ${enM(t.cashAmt)} (${t.k} 1,000s and ${t.h} 100s), not ${enM(t.cashAmt + 1000)}.`));
+            return;
+          }
+          goodFirst('WITHDRAW', '沒錯！領錢要說清楚金額和面額。', '¡Exacto! Al sacar dinero, di el monto y los billetes.', 'Right! When you withdraw, state the amount and the bills.');
+          Game.state = 'CASH';
+        }
+      },
+
+      /* ═══ 點鈔票：40% 千元鈔少一張 ═══ */
+      CASH: catchState(Game, {
+        key: 'CASH', place: 'bank',
+        html: () => Game.cashHTML(),
+        dialogue: () => [ph(`好，${zhNum(t.cashAmt)}元，請您點一下。`, `Bien, ${esM(t.cashAmt)}; cuéntelos, por favor.`, `Okay, ${enM(t.cashAmt)} — please count it.`), L('（行員把鈔票放在櫃檯上，你數一數千元鈔和百元鈔。）', '(El empleado deja los billetes en el mostrador y tú cuentas los de mil y los de cien.)', '(The clerk lays the bills on the counter and you count the 1,000s and 100s.)')],
+        ok: '好，沒問題，謝謝。', fix: () => `不好意思，千元鈔應該有${NZ(t.cashWrong ? t.k : t.k + 1)}張吧？`, rude: '你是不是少給我錢啊？',
+        wrong: () => t.cashWrong,
+        whyWrong: () => M(`千元鈔少了一張：應該有${t.k}張，只有${t.gotK}張，少了一千元。`, `Falta un billete de mil: deberían ser ${t.k} y hay ${t.gotK}; faltan ${esM(1000)}.`, `A 1,000 bill is missing: there should be ${t.k} but there are ${t.gotK} — ${enM(1000)} short.`),
+        whyRight: () => M(`鈔票沒有少：千元鈔${t.k}張、百元鈔${t.h}張，一共${t.cashAmt}元。`, `No falta nada: ${t.k} de mil y ${t.h} de cien, total ${esM(t.cashAmt)}.`, `Nothing is missing: ${t.k} 1,000s and ${t.h} 100s, ${enM(t.cashAmt)} in total.`),
+        goodWrong: ['你很細心！領到現金要當場點清楚。', '¡Qué atento! Cuenta el efectivo en el momento.', 'Well spotted! Count your cash on the spot.'],
+        goodOk: ['領到現金，要在櫃檯前自己點一下。', 'Cuando te den efectivo, cuéntalo frente a la ventanilla.', 'Count your cash at the counter.'],
+        apology: () => [ph('啊，不好意思！我少放一張。', '¡Ay, disculpe! Me faltó un billete.', 'Oh, sorry! I left one out.'), L('（行員補了一張千元鈔，你再數一次，剛剛好。）', '(El empleado añade un billete de mil; vuelves a contar y está justo.)', '(The clerk adds a 1,000 bill; you count again and it is exact.)')],
+        go: () => { Game.stopTimer(); Game.state = 'END'; }
+      }),
+
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2;
+          track('game_complete', { game: 'bank', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            L('（你把鈔票收進錢包，走出銀行，傳訊息給Ami。）', '(Guardas los billetes en la cartera, sales del banco y le escribes a Ami.)', '(You put the bills in your wallet, leave the bank and message Ami.)'),
+            Game._endGood
+              ? L(`Ami：太好了，${N}，謝謝你！房租匯出去了，也領到${zhNum(t.cashAmt)}元。我去跟房東說一聲。`, `¡Qué bien, ${N}, gracias! El alquiler está transferido y sacaste ${esM(t.cashAmt)}. Le aviso a la casera.`, `Great, ${N}, thank you! The rent is sent and you got ${enM(t.cashAmt)}. I'll let the landlord know.`)
+              : L('Ami：欸，聽起來辦得不太順利……下次填單要看清楚、聽叫號和行員複誦、也要點一下鈔票喔！', 'Parece que no salió muy bien… la próxima vez revisa el formulario, escucha el turno y lo que repite el empleado, y cuenta los billetes.', "Hmm, sounds like it didn't go smoothly… next time check the form, listen for your number and the clerk's read-back, and count the bills.")
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: stdResultCfg('phone')
+    };
+  }
+});
+
+GameBoot();
+Music.init({ bpm: 98, tracks: [
+  { wave: 'square', vol: 0.22, notes: 'D5 . F5 A5 . G5 F5 . | E5 . G5 B5 . A5 G5 . | F5 . A5 C6 . B5 A5 . | G5 - D5 - E5 - . .' },
+  { wave: 'triangle', vol: 0.5, notes: 'D3 . A3 . D3 . A3 . | E3 . B3 . E3 . B3 . | F3 . C4 . F3 . C4 . | G3 . D4 . G3 . . .' },
+  { vol: 0.2, notes: 'k . h . s . h k' }] });
+</script>
+</body>
+</html>
