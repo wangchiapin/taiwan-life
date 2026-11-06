@@ -297,8 +297,7 @@ const Game = defineGame({
   amiLines() {
     const N = this.N, t = this.task;
     return [
-      L(`Ami：${N}，下禮拜是我朋友的生日，我想買一本書當禮物，你覺得怎麼樣？`, `${N}, la semana que viene es el cumpleaños de una amiga y quiero regalarle un libro. ¿Qué te parece?`, `${N}, my friend's birthday is next week and I want to give her a book. What do you think?`),
-      L(`Ami：你可以幫我買一下嗎？她喜歡看${t.sec.zh}，所以去${t.sec.zh}書區找。書名是《${t.book[0]}》。`, `¿Puedes comprarlo por mí? Le gusta leer ${t.sec.es}, así que busca en la sección de ${t.sec.es}. El título es «${t.book[0]}».`, `Could you buy it for me? She likes ${t.sec.en}, so look in the ${t.sec.en} section. The title is "${t.book[0]}".`),
+      L(`Ami：${N}，下禮拜是我朋友的生日，我想買一本書送她當禮物，你可以幫我買一下嗎？她喜歡看${t.sec.zh}，所以去${t.sec.zh}區找。書名是《${t.book[0]}》。`, `${N}, la semana que viene es el cumpleaños de una amiga y quiero regalarle un libro. ¿Puedes comprarlo por mí? Le gusta leer ${t.sec.es}, así que busca en la sección de ${t.sec.es}. El título es «${t.book[0]}».`, `${N}, my friend's birthday is next week and I want to give her a book. Could you buy it for me? She likes ${t.sec.en}, so look in the ${t.sec.en} section. The title is "${t.book[0]}".`),
       L('Ami：對了！再買一個書籤好了，然後請店員幫忙包裝。', '¡Ah, cierto! Compra también un marcapáginas y pide al personal que lo envuelva.', 'Oh, right! Let’s also get a bookmark, and ask the staff to wrap it.')
     ];
   },
@@ -360,10 +359,10 @@ const Game = defineGame({
         place: 'shop',
         html: () => Game.signsHTML(),
         dialogue: () => [L('我：Ami的朋友喜歡看什麼書？我要去哪一區？', '¿Qué libros le gustan a la amiga de Ami? ¿A qué sección voy?', "What kind of books does Ami's friend like? Which section do I go to?")],
-        options: () => rot(shuffle(SECTIONS.filter(s => s !== t.sec)).slice(0, 2).concat([t.sec])).map(s => `去${s.zh}書區。`),
+        options: () => rot(shuffle(SECTIONS.filter(s => s !== t.sec)).slice(0, 2).concat([t.sec])).map(s => `去${s.zh}區。`),
         next: c => {
-          if (c !== `去${t.sec.zh}書區。`) { Game.addMistake(M(`你記錯了喔！Ami說朋友喜歡看${t.sec.zh}。`, `¡Te equivocaste! Ami dijo que a su amiga le gusta leer ${t.sec.es}.`, `You got it wrong! Ami said her friend likes ${t.sec.en}.`)); return; }
-          goodFirst('SECTION', '沒錯！去' + t.sec.zh + '書區。', '¡Exacto! A la sección de ' + t.sec.es + '.', 'Right! The ' + t.sec.en + ' section.');
+          if (c !== `去${t.sec.zh}區。`) { Game.addMistake(M(`你記錯了喔！Ami說朋友喜歡看${t.sec.zh}。`, `¡Te equivocaste! Ami dijo que a su amiga le gusta leer ${t.sec.es}.`, `You got it wrong! Ami said her friend likes ${t.sec.en}.`)); return; }
+          goodFirst('SECTION', '沒錯！去' + t.sec.zh + '區。', '¡Exacto! A la sección de ' + t.sec.es + '.', 'Right! The ' + t.sec.en + ' section.');
           Game.thought = null;
           Game.state = 'FIND';
         }
