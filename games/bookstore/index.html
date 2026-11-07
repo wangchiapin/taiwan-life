@@ -66,8 +66,8 @@
   /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
   /* ── 即時回饋卡（停留到下一次選擇） ── */
 
-  .signs { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 8px 0 12px; background: #fff; border: 2px solid #cfdbec; border-radius: 12px; padding: 10px 14px; font-size: 17px; }
-  .signs .sign { font: inherit; color: inherit; background: #f4f8fd; border: 2px solid #cfdbec; border-radius: 10px; padding: 6px 12px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .signs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 8px 0 12px; background: #fff; border: 2px solid #cfdbec; border-radius: 12px; padding: 12px; font-size: 18px; }
+  .signs .sign { font: inherit; color: inherit; background: #f4f8fd; border: 2px solid #cfdbec; border-radius: 10px; padding: 10px 4px; text-align: center; min-width: 0; min-height: 72px; display: flex; align-items: center; justify-content: center; line-height: 1.2; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .signs .sign:active { background: #dbe8f8; border-color: #8fb0d8; }
   .shelf { display: flex; flex-wrap: wrap; gap: 14px 10px; align-items: flex-end; justify-content: center; margin: 10px 0 14px; padding: 14px 12px 0; border-bottom: 10px solid #9a6b3c; background: #f4ead9; border-radius: 10px 10px 0 0; }
   .shelf .book { appearance: none; -webkit-appearance: none; border: 0; font: inherit; flex: 0 0 calc(50% - 5px); min-width: 0; max-width: 170px; aspect-ratio: 3 / 3.9; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px 12px 14px; border-radius: 3px 7px 7px 3px; color: #fff; text-align: center; cursor: pointer; box-shadow: inset 8px 0 0 rgba(0,0,0,.2), 2px 3px 0 rgba(0,0,0,.2); -webkit-tap-highlight-color: transparent; transition: transform .1s; }
@@ -241,7 +241,7 @@ const VOCAB = {
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 const STAGE = { SECTION: ['找書區', 'buscar sección', 'finding the section'], FIND: ['找書', 'buscar el libro', 'finding the book'], SEEK: ['找書籤', 'buscar el marcapáginas', 'finding the bookmark'], STOCK: ['問庫存', 'preguntar existencias', 'asking about stock'], ASK: ['問店員', 'preguntar', 'asking staff'], LOOK: ['找書籤', 'buscar el marcapáginas', 'finding the bookmark'], MARK: ['挑書籤', 'elegir el marcapáginas', 'choosing the bookmark'], WRAP: ['包裝', 'envolver', 'wrapping'], PAY: ['付錢', 'pagar', 'paying'], PAY_FIX: ['付錢', 'pagar', 'paying'], CHANGE: ['找錢', 'el cambio', 'the change'], FAREWELL: ['道別', 'despedirse', 'saying goodbye'] };
-const NEXT_LABEL = { SECTION: '看招牌', FIND: '走到書架', SEEK: '繼續', LOOK: '繼續', STOCK: '走到櫃台', ASK: '問店員', MARK: '走到櫃台', WRAP: '去結帳', PAY: '付錢', PAY_FIX: '聽店員重算', CHANGE: '等找錢', FAREWELL: '拿書', END: '回去找Ami' };
+const NEXT_LABEL = { SECTION: '看招牌', FIND: '走到書架', SEEK: '繼續', LOOK: '繼續', STOCK: '走到櫃台', ASK: '問店員', MARK: '走到櫃台', WRAP: '去結帳', PAY: '繼續', PAY_FIX: '聽店員重算', CHANGE: '等找錢', FAREWELL: '拿書', END: '回去找Ami' };
 
 const PLACES = {
   phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
@@ -330,7 +330,7 @@ const Game = defineGame({
   },
 
   IMAGES: {
-    START: ['images/start.jpg', '📚'], SECTION: ['images/shop.jpg', '📚'], FIND: ['images/shelf.jpg', '📖'], SEEK: ['images/shop.jpg', '🔖'], STOCK: ['images/counter.jpg', '🙋'], ASK: ['images/shop.jpg', '🙋'], LOOK: ['images/shop.jpg', '🔖'], MARK: ['images/shop.jpg', '🔖'],
+    START: ['images/start.jpg', '📚'], SECTION: ['images/shop.jpg', '📚'], FIND: ['images/shelf.jpg', '📖'], SEEK: ['images/shop.jpg', '🔖'], STOCK: ['images/counter.jpg', '🙋'], ASK: ['images/shop.jpg', '🙋'], LOOK: ['images/lost.jpg', '😵'], MARK: ['images/shop.jpg', '🔖'],
     WRAP: ['images/counter.jpg', '🎁'], PAY: ['images/pay.jpg', '💵'], PAY_FIX: ['images/pay.jpg', '💵'], CHANGE: ['images/pay.jpg', '💵'], FAREWELL: ['images/counter.jpg', '🎁'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
   setup() {
@@ -339,6 +339,11 @@ const Game = defineGame({
     const book = [sec.books[bi][0], sec.books[bi][1] + pick([-20, -10, 0, 10, 20])];   // 每局書價稍微不同
     const others = sec.books.filter((_, i) => i !== bi);
     this.task = { sec, bi, book, total: book[1] + MARK, extra: { zh: '一個書籤', es: 'un marcapáginas', en: 'a bookmark', price: MARK }, cwFlag: Math.random() < 0.4, others, soldOut: Math.random() < 0.4, payWrong: Math.random() < 0.45, noMark: false, card: false, rot: Math.floor(Math.random() * 3) };
+  },
+  /* 店員算錯價錢（PAY_FIX）、或找錯錢被抓到的道歉（CHANGE 的過場）時，用尷尬臉那張 */
+  imageFor() {
+    if (this.state === 'PAY_FIX' || (this.state === 'CHANGE' && this._transMode && this.task.changeWrong)) return ['images/pay_sorry.jpg', '😅'];
+    return null;
   },
   amiLines() {
     const N = this.N, t = this.task;
@@ -386,7 +391,7 @@ const Game = defineGame({
   },
   signsHTML() {
     const r = s => this.ruby(s);
-    return `<div class="signs">${SECTIONS.map((s, i) => `<button type="button" class="sign" data-sec="${i}"><b>${s.icon}</b> ${r(s.zh)}</button>`).join('')}</div>`;
+    return `<div class="signs">${SECTIONS.map((s, i) => `<button type="button" class="sign" data-sec="${i}">${r(s.zh)}</button>`).join('')}</div>`;
   },
   shelfHTML() {
     const t = this.task, r = s => this.ruby(s);
@@ -414,7 +419,6 @@ const Game = defineGame({
         dialogue: () => [
           L('（你走到書店門口。手機響了一聲，是Ami傳來的LINE。）', '(Llegas a la librería. Tu celular suena: es un LINE de Ami.)', '(You reach the bookstore. Your phone buzzes — a LINE from Ami.)'),
           ...Game.amiLines(),
-          L('（你看一下錢包，裡面只有一張五百元。）', '(Miras tu cartera: solo tienes un billete de quinientos.)', '(You check your wallet: just one 500-dollar bill.)'),
           L('我：好，我現在去找！', '¡Bien, voy a buscarlo!', "OK, I'll go find it!")
         ],
         options: ['走進書店'],
@@ -551,7 +555,7 @@ const Game = defineGame({
             return;
           }
           goodFirst('MARK', '很好！挑一個漂亮的書籤，當禮物最合適。', '¡Muy bien! Un marcapáginas bonito va perfecto con el regalo.', 'Good! A pretty bookmark goes well with a gift.');
-          Game.thought = [L(`（你挑了一張最漂亮的書籤，標價${zhNum(MARK)}元。你拿著書和書籤走到櫃台。）`, `(Eliges el marcapáginas más bonito: cuesta ${esM(MARK)}. Vas a la caja con el libro y el marcapáginas.)`, `(You pick the prettiest bookmark — it costs ${enM(MARK)}. You head to the counter with the book and bookmark.)`)];
+          Game.thought = [L(`（書籤標價${zhNum(MARK)}元。你拿著書和書籤走到櫃台。）`, `(El marcapáginas cuesta ${esM(MARK)}. Vas a la caja con el libro y el marcapáginas.)`, `(The bookmark costs ${enM(MARK)}. You head to the counter with the book and bookmark.)`)];
           Game.state = 'WRAP';
         }
       },
@@ -595,6 +599,11 @@ const Game = defineGame({
           Game._endGood = Game.mistakes <= 2 && !t.noMark;
           track('game_complete', { game: 'bookstore', score: Game.score, elapsed: Game.elapsedTime });
           return [
+            t.card
+              ? L('我：Ami，我幫你買好書和卡片了。', 'Ami, ya te compré el libro y la tarjeta.', 'Ami, I got you the book and a card.')
+              : t.noMark
+              ? L('我：Ami，我幫你買好書了。', 'Ami, ya te compré el libro.', 'Ami, I got you the book.')
+              : L('我：Ami，我幫你買好書和書籤了。', 'Ami, ya te compré el libro y el marcapáginas.', 'Ami, I got you the book and the bookmark.'),
             t.card
               ? L('Ami：謝謝你……咦？這是卡片，不是書籤欸。算了……', '¡Gracias!… ¿Eh? Esto es una tarjeta, no un marcapáginas. Bueno, da igual…', 'Thanks!… Huh? This is a card, not a bookmark. Never mind…')
               : t.noMark
