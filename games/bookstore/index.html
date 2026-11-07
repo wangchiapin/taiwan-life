@@ -330,7 +330,7 @@ const Game = defineGame({
   },
 
   IMAGES: {
-    START: ['images/start.jpg', '📚'], SECTION: ['images/shop.jpg', '📚'], FIND: ['images/shelf.jpg', '📖'], SEEK: ['images/shop.jpg', '🔖'], STOCK: ['images/counter.jpg', '🙋'], ASK: ['images/shop.jpg', '🙋'], LOOK: ['images/lost.jpg', '😵'], MARK: ['images/mark.jpg', '🔖'],
+    START: ['images/start.jpg', '📚'], SECTION: ['images/shop.jpg', '📚'], FIND: ['images/shelf.jpg', '📖'], SEEK: ['images/shop.jpg', '🔖'], STOCK: ['images/counter_empty.jpg', '🙋'], ASK: ['images/shop.jpg', '🙋'], LOOK: ['images/lost.jpg', '😵'], MARK: ['images/mark.jpg', '🔖'],
     WRAP: ['images/counter.jpg', '🎁'], PAY: ['images/pay_wrapped.jpg', '💵'], PAY_FIX: ['images/pay_wrapped.jpg', '💵'], CHANGE: ['images/pay_wrapped.jpg', '💵'], FAREWELL: ['images/counter_wrapped.jpg', '🎁'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
   setup() {
@@ -342,6 +342,8 @@ const Game = defineGame({
   },
   /* 店員算錯價錢（PAY_FIX）、或找錯錢被抓到的道歉（CHANGE 的過場）時，用尷尬臉那張 */
   imageFor() {
+    if (this.state === 'WRAP' && this.task.card) return ['images/counter_card.jpg', '🎁'];   // 買了卡片：桌上是書和卡片
+    if (this.state === 'WRAP' && this.task.noMark && !this.task.card) return ['images/counter_book.jpg', '🎁'];   // 沒買書籤：桌上只有書
     if (this.state === 'PAY_FIX' || (this.state === 'CHANGE' && this._transMode && this.task.changeWrong)) return ['images/pay_sorry_wrapped.jpg', '😅'];
     return null;
   },
