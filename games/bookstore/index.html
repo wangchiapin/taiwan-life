@@ -491,10 +491,10 @@ const Game = defineGame({
       SEEK: {
         place: 'shop',
         dialogue: () => [L('我：書拿到了，接下來要做什麼？', 'Ya tengo el libro. ¿Qué hago ahora?', 'I have the book. What should I do next?')],
-        options: () => rot(['去找書籤。', '直接去結帳。', '請店員包裝。']),
+        options: () => rot(['去找書籤。', '直接去結帳。', '謝謝，我不要了。']),
         next: c => {
-          if (c === '請店員包裝。') {
-            Game.addMistake(M('要先買到書籤，才能請店員一起包裝。', 'Primero hay que comprar el marcapáginas; después se pide que lo envuelvan todo junto.', 'Get the bookmark first — then ask the staff to wrap everything together.'));
+          if (c === '謝謝，我不要了。') {
+            Game.addMistake(M('Ami說要幫她買禮物啦！不要忘記了！', '¡Ami dijo que le compres un regalo! ¡No lo olvides!', 'Ami asked you to buy her a gift! Don\'t forget!'));
             return;
           }
           if (c === '直接去結帳。') {      // 忘了書籤：照樣可以結帳，但會扣分，結局變壞結局
