@@ -464,6 +464,7 @@ const Game = defineGame({
           if (c === '直接去結帳。') {      // 忘了書籤：照樣可以結帳，但會扣分，結局變壞結局
             t.noMark = true; t.total = t.book[1]; t.payWrong = false;
             Game.addMistake(M('Ami說還要買一個書籤，你忘了買。', 'Ami dijo que también quería un marcapáginas y se te olvidó comprarlo.', 'Ami also asked for a bookmark and you forgot to buy it.'));
+            Game.feedback.pop();      // 不跳紅卡：玩家要到結局、看 Ami 的反應才發現（分數和錯誤紀錄照記）
             Game.thought = [L('（你拿著書，直接走到櫃台。）', '(Con el libro en la mano, vas directo a la caja.)', '(Book in hand, you head straight to the counter.)')];
             Game.state = 'WRAP';
             return;
