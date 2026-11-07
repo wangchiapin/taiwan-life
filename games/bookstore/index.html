@@ -410,6 +410,11 @@ const Game = defineGame({
     });
     pays.PAY.dialogue = () => [Game.priceLine(), L('（你只有一張五百元。）', '(Solo tienes un billete de quinientos dólares.)', '(You only have a 500-dollar bill.)')];
     const bookPrice = () => L(`（書上的標價是${zhNum(t.book[1])}元。）`, `(La etiqueta del libro dice ${esM(t.book[1])}.)`, `(The price tag on the book says ${enM(t.book[1])}.)`);
+    // 抓到店員算錯時：不另外跳過場卡，直接進到店員尷尬道歉的畫面（說明併進旁白）
+    const payNext = pays.PAY.next;
+    pays.PAY.next = c => { payNext(c); if (Game.state === 'PAY_FIX') Game.feedback.length = 0; };
+    const fixDlg = pays.PAY_FIX.dialogue;
+    pays.PAY_FIX.dialogue = () => [L('（你發現店員算錯錢了。）', '(Te das cuenta de que el empleado se equivocó con la cuenta.)', '(You notice the clerk got the total wrong.)'), ...fixDlg()];
     const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
     const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
     return {
