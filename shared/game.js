@@ -885,6 +885,15 @@ const HintPulse = (() => {
 })();
 document.getElementById('log-close').onclick = () => Log.toggle(false);
 
+/* 側邊面板（任務提示／本關單字／錯誤紀錄）開著時，點面板以外的地方（例如左邊的遊戲畫面）就關閉；
+   這一下只關面板，不會順便按到底下的按鈕（用 capture 先攔下來） */
+document.addEventListener('click', e => {
+  if (!(Hints.open || Vocab.open || Log.open)) return;
+  if (e.target.closest('.drawer, .side-tab')) return;
+  e.preventDefault(); e.stopPropagation();
+  Hints.toggle(false); Vocab.toggle(false); Log.toggle(false);
+}, true);
+
 /* ══════════════════════════════════════
    登入
 ══════════════════════════════════════ */
