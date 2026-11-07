@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<title>電信行 · En la tienda de telefonía</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：telecomgame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "telecomgame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #33261f;
+    --red: #c8501e;
+    --red-dark: #8f3513;
+    --yolk: #e0a43a;
+    --night: #2e2630;
+    --kraft: #f3e4d3;
+    --wall: #fbf3ea;
+    --paper: #ffffff;
+    --line: #e5d2bd;
+    --muted: #7a6454;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    background: #e9eff8;
+  }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  /* ── 登入：店招牌 ── */
+  /* ── 遊戲 ── */
+  /* 購物清單 */
+  @media (hover: hover) {
+    .opt:hover rt { color: #ffe0d2; }
+  }
+  /* ── 排行榜 ── */
+  #lb-table tr.highlight-row { background: #f7dccb; font-weight: 700; }
+  /* ── 句子翻譯 ── */
+  .tr-btn:hover { background: #f7dccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  /* ── 本關單字（右側抽屜） ── */
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+
+
+
+  /* 號碼牌、匯款單、鈔票 */
+  .pbox { margin: 8px 0 12px; background: #fff; border: 2px solid #2f8f83; border-radius: 10px; padding: 8px 14px; }
+  .pbox .ph { color: #2f8f83; font-weight: 700; font-size: 15px; }
+  .pbox .pv { font-size: 22px; font-weight: 700; color: var(--ink); margin-top: 2px; }
+  .pbox .pl { font-size: 15px; color: var(--ink); margin-top: 2px; }
+  .pbox.bill { border-color: var(--red); }
+  .pbox.bill .pv { font-size: 18px; }
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">電信行</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">電信行</h1>
+  <p class="subtitle" data-es="En la tienda de telefonía" data-en="At the phone shop">En la tienda de telefonía</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    你的手機門號沒有網路了，要去電信行辦一張新的預付卡。你要說明來意、出示護照和居留證、選方案、聽店員複誦、付錢，拿到新卡以後還要核對門號，手機沒訊號也要請店員幫忙。店員有時候會說錯方案、算錯錢、找錯錢或唸錯門號，要自己多注意喔！<br>
+    <span data-es="Tu número de celular se quedó sin datos y vas a una tienda de telefonía a sacar una tarjeta prepago nueva. Explicas qué necesitas, muestras el pasaporte y la tarjeta de residente, eliges el plan, escuchas lo que repite el empleado, pagas, revisas tu nuevo número y, si el celular no tiene señal, pides ayuda. ¡A veces el empleado dice mal el plan, cobra de más, da mal el cambio o lee mal el número, así que presta atención!" data-en="Your phone number has run out of data, so you go to a phone shop to get a new prepaid SIM. Explain what you need, show your passport and resident certificate, pick a plan, listen to the clerk's read-back, pay, check your new number, and ask for help if the phone has no signal. The clerk may misstate the plan, overcharge, give wrong change or read the number wrong, so stay alert!">Tu número de celular se quedó sin datos y vas a una tienda de telefonía a sacar una tarjeta prepago nueva. Explicas qué necesitas, muestras el pasaporte y la tarjeta de residente, eliges el plan, escuchas lo que repite el empleado, pagas, revisas tu nuevo número y, si el celular no tiene señal, pides ayuda. ¡A veces el empleado dice mal el plan, cobra de más, da mal el cambio o lee mal el número, así que presta atención!</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">📱</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 10 名 · Top 10</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'telecom', track: 'telecom', settingsKey: 'telecom_settings',
+  defaultPlace: 'shop', defaultEmoji: '📱',
+  roles: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '店員': { pitch: 1.05 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+   第一版草稿：本次沒有對照 game-kit（讀不到），只用共用檔內建的 GoodTeacher 規則
+══════════════════════════════════════ */
+pinyinPro.customPinyin({
+  '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan',
+  '時間': 'shí jiān', '時候': 'shí hou', '東西': 'dōng xi', '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '著': 'zhe', '囉': 'luo', '啦': 'la', '耶': 'ye',
+  '不好意思': 'bù hǎo yì si', '這個': 'zhè ge', '那個': 'nà ge', '好像': 'hǎo xiàng', '欸': 'éi', '應該': 'yīng gāi', '怎麼': 'zěn me', '舒服': 'shū fu'
+});
+pinyinPro.customPinyin({
+  '電信行': 'diàn xìn háng', '門號': 'mén hào', '預付卡': 'yù fù kǎ', '儲值': 'chǔ zhí', '方案': 'fāng àn', '居留證': 'jū liú zhèng', '護照': 'hù zhào', '證件': 'zhèng jiàn',
+  '訊號': 'xùn hào', '重新開機': 'chóng xīn kāi jī', '還需要': 'hái xū yào', '還要': 'hái yào', '上網': 'shàng wǎng', '找': 'zhǎo', '收': 'shōu', '一共': 'yí gòng',
+  '店員': 'diàn yuán', '櫃檯': 'guì tái', '確認': 'què rèn', '仔細': 'zǐ xì', '行動': 'xíng dòng', '網路': 'wǎng lù', '單據': 'dān jù', '開通': 'kāi tōng',
+  '馬上數': 'mǎ shàng shǔ', '裝得不好': 'zhuāng de bù hǎo'
+});
+// 台灣讀音修正：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '店員': ['El empleado de la tienda', 'The shop clerk'] };
+const SPEAKER_RE = /^(Ami|店員|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['門號', 'número de celular', 'phone number'], ['預付卡', 'tarjeta prepago', 'prepaid SIM'], ['方案', 'plan', 'plan']],
+  ENTER: [['電信行', 'tienda de telefonía', 'phone shop'], ['辦', 'tramitar, sacar', 'to apply for, to set up']],
+  DOCS: [['護照', 'pasaporte', 'passport'], ['居留證', 'tarjeta de residente (ARC)', 'resident certificate (ARC)'], ['證件', 'documento de identidad', 'ID document']],
+  PLAN: [['上網', 'conectarse a internet, datos', 'mobile data'], ['天', 'día', 'day']],
+  REPEAT: [['確認', 'confirmar', 'confirm'], ['新辦', 'nueva línea', 'new line']],
+  PAY: [['一共', 'en total', 'in total'], ['算錯', 'calcular mal', 'miscalculate'], ['應該', 'debería', 'should']],
+  PAY_FIX: [['不好意思', 'disculpe, perdón', 'excuse me, sorry']],
+  CHANGE: [['找', 'dar de cambio', 'give as change'], ['找錯', 'dar mal el cambio', 'give wrong change'], ['應該找', 'debería darme de cambio', 'should give back']],
+  SIM: [['單據', 'comprobante', 'receipt, slip'], ['換上', 'poner, cambiar por', 'put in, swap in']],
+  NOSIGNAL: [['訊號', 'señal', 'signal'], ['無服務', 'sin servicio', 'no service']],
+  TOPUP: [['儲值', 'recargar saldo', 'top up'], ['到期', 'vencer', 'expire'], ['重新開機', 'reiniciar', 'restart']],
+  get END() { return Game.mistakes <= 2 ? [['順利', 'sin problemas', 'smoothly']] : [['下次', 'la próxima vez', 'next time']]; },
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = { ENTER: ['進電信行', 'entrar a la tienda', 'entering the shop'], DOCS: ['給證件', 'dar los documentos', 'showing ID'], PLAN: ['選方案', 'elegir el plan', 'choosing a plan'],
+  REPEAT: ['核對方案', 'revisar el plan', 'checking the plan'], PAY: ['付錢', 'pagar', 'paying'], PAY_FIX: ['付錢', 'pagar', 'paying'], CHANGE: ['找錢', 'el cambio', 'the change'],
+  SIM: ['核對門號', 'revisar el número', 'checking the number'], NOSIGNAL: ['手機沒訊號', 'sin señal', 'no signal'], TOPUP: ['問儲值', 'preguntar por la recarga', 'asking about top-ups'] };
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = { ENTER: '走進電信行', DOCS: '走到櫃檯', PLAN: '看方案', REPEAT: '聽店員確認', PAY: '付錢', PAY_FIX: '聽店員重算', CHANGE: '等找錢', SIM: '拿到新卡', NOSIGNAL: '把卡裝進手機', TOPUP: '問店員', END: '離開電信行' };
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const PLACES = {
+  phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
+  shop: ['📱', '電信行', 'Tienda de telefonía', 'Phone shop', '']
+};
+/* 方案：日數、流量、價錢（參考中華電信預付卡 5G 計日型公開價格；各家與各時期不同，待確認） */
+const PLANS = [{ d: 3, gb: 12, p: 399 }, { d: 30, gb: 24, p: 599 }, { d: 30, gb: 60, p: 999 }];
+const planZh = p => `${zhNum(p.d)}天${zhNum(p.gb)}G上網`;
+const planEs = p => `${p.d} días, ${p.gb} GB`, planEn = p => `${p.d} days, ${p.gb} GB`;
+const EXTRAS = [
+  { zh: '手機保護貼', es: 'un protector de pantalla', en: 'a screen protector', price: 150 },
+  { zh: '備用SIM卡', es: 'una SIM de repuesto', en: 'a spare SIM card', price: 100 }
+];
+const swap2 = s => { const a = s.split(''); [a[a.length - 1], a[a.length - 2]] = [a[a.length - 2], a[a.length - 1]]; const r = a.join(''); return r === s ? s.slice(0, -1) + String((+s.slice(-1) + 1) % 10) : r; };
+/* 門號念法：四碼、三碼、三碼各念一組，中間停頓 */
+const phoneSay = s => `${zhDigits(s.slice(0, 4))}，${zhDigits(s.slice(4, 7))}，${zhDigits(s.slice(7))}`;
+const phoneShow = s => `${s.slice(0, 4)}-${s.slice(4, 7)}-${s.slice(7)}`;
+
+/* ══════════════════════════════════════
+   任務提示
+══════════════════════════════════════ */
+const Hints = makeHints({ render: stdHintsRender });
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+const ORDER = ['START', 'ENTER', 'DOCS', 'PLAN', 'REPEAT', 'PAY', 'PAY_FIX', 'CHANGE', 'SIM', 'NOSIGNAL', 'TOPUP', 'END', 'RESULT'];
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const billFor = n => n <= 500 ? 500 : n <= 900 ? 1000 : 2000;     // 你給的鈔票（五百、一千、兩千；九百元以上用兩千）
+
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,
+  hintViews: 0, log: [], feedback: [], visit: 0, att: {}, cash: null,
+  onStart() { this.updateCash(); },
+  updateCash() { document.getElementById('cash-badge').textContent = ''; },
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+  IMAGES: {
+    START: ['images/start.jpg', '📱'], ENTER: ['images/shop.jpg', '📱'], DOCS: ['images/counter.jpg', '🪪'], PLAN: ['images/plan.jpg', '📋'], REPEAT: ['images/counter.jpg', '📱'],
+    PAY: ['images/pay.jpg', '💵'], PAY_FIX: ['images/pay.jpg', '💵'], CHANGE: ['images/pay.jpg', '💵'],
+    SIM: ['images/sim.jpg', '🧾'], NOSIGNAL: ['images/nosignal.jpg', '📵'], TOPUP: ['images/counter.jpg', '📱'],
+    END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+  },
+
+  setup() {
+    const t = this.task = { rot: Math.floor(Math.random() * 3) };
+    t.plan = pick(PLANS);
+    t.planAlt = pick(PLANS.filter(p => p !== t.plan));
+    /* 新門號（虛構）：09 開頭十碼 */
+    t.num = '09' + String(Math.floor(1e7 + Math.random() * 9e7 - 1)).padStart(8, '0');
+    t.numAlt = t.num.slice(0, 7) + swap2(t.num.slice(7));
+    /* 店員複誦方案：45% 說成另一個方案 */
+    t.repWrong = Math.random() < 0.45; t.repPlan = t.repWrong ? t.planAlt : t.plan;
+    /* 店員唸門號：45% 最後兩碼唸反 */
+    t.numWrong = Math.random() < 0.45; t.numSaid = t.numWrong ? t.numAlt : t.num;
+    /* 價錢：方案價錢；店員可能多算一項沒要的加購品 */
+    initPay(t, t.plan.p, EXTRAS);
+  },
+
+  amiLines() {
+    const N = this.N, t = this.task, p = t.plan;
+    return [
+      L(`Ami：${N}，你的手機沒有網路了對吧？去電信行辦一張新的預付卡吧。你要的方案是「${planZh(p)}」，${zhNum(p.p)}元。`, `${N}, ¿tu celular se quedó sin datos? Ve a una tienda de telefonía y saca una tarjeta prepago nueva. El plan que necesitas es «${planEs(p)}», ${esM(p.p)}.`, `${N}, your phone has no data left, right? Go to a phone shop and get a new prepaid SIM. The plan you need is "${planEn(p)}", ${enM(p.p)}.`),
+      L('Ami：記得帶護照和居留證，辦預付卡要看兩種證件的正本。', 'Lleva el pasaporte y la tarjeta de residente: para una tarjeta prepago piden los dos originales.', 'Bring your passport and resident certificate — they need to see both originals for a prepaid SIM.'),
+      L('Ami：店員確認方案和算錢的時候要仔細聽，拿到新卡也要對一下門號喔！', 'Cuando el empleado confirme el plan y cobre, escucha bien. ¡Y revisa tu número nuevo!', 'Listen carefully when the clerk confirms the plan and charges you — and check your new number!')
+    ];
+  },
+  hintSections() { return [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }]; },
+
+  listHTML(rowsOnly) {
+    const t = this.task, p = t.plan, r = s => this.ruby(s);
+    const rows = [
+      { zh: `要辦：預付卡「${planZh(p)}」，${p.p}元`, es: `Sacar: tarjeta prepago «${planEs(p)}», ${esM(p.p)}`, en: `Get: prepaid SIM "${planEn(p)}", ${enM(p.p)}` },
+      { zh: '你帶著：護照、居留證（有效）、手機', es: 'Llevas: pasaporte, tarjeta de residente (vigente) y celular', en: 'You have: passport, resident certificate (valid), phone' },
+      { zh: '身上有：五百元、一千元、兩千元的鈔票', es: 'Tienes billetes de quinientos, mil y dos mil pesos taiwaneses', en: 'You have NT$500, 1,000 and 2,000 bills' }
+    ];
+    if (rowsOnly) return rows;
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 櫃檯上的方案牌（確認方案時顯示店員說的） */
+  planHTML(p) {
+    const r = s => this.ruby(s);
+    return `<div class="pbox"><div class="ph">📋 ${r('方案')}</div><div class="pv">${r(planZh(p))}</div><div class="pl">NT$ ${p.p}</div></div>`;
+  },
+  /* 付錢時的單據 */
+  payHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    return `<div class="pbox bill"><div class="ph">🧾 ${r('單據')}</div><div class="pl">${r('預付卡')}：${r(planZh(t.plan))}　NT$ ${t.plan.p}</div></div>`;
+  },
+  /* 新卡的單據：門號 */
+  simHTML() {
+    const t = this.task, r = s => this.ruby(s);
+    return `<div class="pbox bill"><div class="ph">🧾 ${r('單據')}</div><div class="pl">${r('門號')}：${phoneShow(t.num)}</div><div class="pl">${r('方案')}：${r(planZh(t.plan))}</div></div>`;
+  },
+
+  getConfig() {
+    const N = this.N, t = this.task, p = t.plan;
+    const ph = (zh, es, en) => L(`店員：${zh}`, es, en);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const pays = payStates(Game, {
+      who: '店員', place: 'shop', html: () => Game.payHTML(),
+      finish: (G, tt) => { G.state = 'SIM'; },
+      extraWhy: () => M(`店員算錯了：你只辦了預付卡${t.total}元，沒有要${t.extra.zh}，他多算了${t.extra.price}元（${t.said}元）。`, `El empleado se equivocó: solo pediste la tarjeta (${esM(t.total)}), no ${t.extra.es}; cobró ${esM(t.extra.price)} de más (${esM(t.said)}).`, `The clerk got it wrong: you only asked for the SIM (${enM(t.total)}), not ${t.extra.en}; he charged ${enM(t.extra.price)} extra (${enM(t.said)}).`)
+    });
+
+    return {
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你在家附近。手機響了一聲，是Ami傳來的LINE。）', '(Estás cerca de tu casa. Tu celular suena: es un LINE de Ami.)', '(You are near home. Your phone buzzes — a LINE from Ami.)'),
+          ...Game.amiLines(),
+          L('我：好，我現在去電信行！', '¡Bien, voy a la tienda ahora!', "OK, I'm heading to the phone shop now!")
+        ],
+        options: ['走進電信行'],
+        next: () => { Game.startTimer(); Game.state = 'ENTER'; }
+      },
+
+      /* ═══ 進電信行 ═══ */
+      ENTER: {
+        place: 'shop',
+        dialogue: () => [L('（你走進電信行。櫃檯後面坐著一位店員，旁邊的牆上貼著方案海報。）', '(Entras a la tienda. Detrás del mostrador hay un empleado y en la pared, carteles de planes.)', '(You walk into the shop. A clerk sits behind the counter and plan posters hang on the wall.)'), ph('您好，請問要辦什麼？', '¡Hola, buenas! ¿Qué desea tramitar?', 'Hello! What can I help you with?')],
+        options: () => rotOf(t, ['你好，我想辦一張新的預付卡。', '我要辦月租型的，兩年約，送我最新的手機。', '我的手機壞了，你幫我修一下。']),
+        next: c => {
+          if (c !== '你好，我想辦一張新的預付卡。') {
+            Game.addMistake(c.startsWith('我要辦月租')
+              ? M('Ami 要你辦的是預付卡，不是月租型的長期合約，而且你只想要網路。', 'Ami te pidió una tarjeta prepago, no un contrato mensual de largo plazo.', 'Ami asked for a prepaid SIM, not a long-term monthly contract.')
+              : M('你的手機沒有壞，只是門號沒有網路了。你要辦的是新的預付卡。', 'Tu celular no está dañado; solo el número se quedó sin datos. Lo que necesitas es una tarjeta prepago nueva.', 'Your phone is not broken — the number just has no data. What you need is a new prepaid SIM.'));
+            return;
+          }
+          goodFirst('ENTER', '沒錯！一進門就說清楚要辦什麼，店員才知道怎麼幫你。', '¡Exacto! Di claramente qué necesitas al entrar.', 'Right! Say clearly what you need as you walk in.');
+          Game.state = 'DOCS';
+        }
+      },
+
+      /* ═══ 給證件 ═══ */
+      DOCS: {
+        place: 'shop',
+        dialogue: () => [ph('好的，辦預付卡要看兩種證件的正本，請給我護照和居留證。', 'Muy bien. Para una tarjeta prepago necesito ver dos documentos originales: pasaporte y tarjeta de residente.', 'Sure. For a prepaid SIM I need to see two original documents — your passport and resident certificate.')],
+        options: () => rotOf(t, ['好的，這是我的護照和居留證。', '我只帶了居留證，另一個證件手機裡有照片，可以嗎？', '為什麼要看兩種證件？太麻煩了吧！']),
+        next: c => {
+          if (c !== '好的，這是我的護照和居留證。') {
+            Game.addMistake(c.startsWith('我只帶了')
+              ? M('辦預付卡要給店員看兩種證件的正本，手機裡的照片通常不行（各電信公司可能不同，待確認）。', 'Para la tarjeta prepago se muestran dos documentos originales; una foto en el celular normalmente no sirve (puede variar según la compañía).', 'A prepaid SIM needs two original documents; a phone photo usually does not work (may vary by carrier).')
+              : M('預付卡要實名登記，店員看證件是規定，要有禮貌地配合。', 'La tarjeta prepago se registra con nombre real; que el empleado vea tus documentos es obligatorio, coopera con cortesía.', 'Prepaid SIMs are registered under a real name; checking ID is required, so cooperate politely.'));
+            return;
+          }
+          goodFirst('DOCS', '沒錯！辦預付卡要帶兩種證件，外國人通常是護照和居留證。', '¡Exacto! Lleva dos documentos; los extranjeros suelen usar pasaporte y tarjeta de residente.', 'Right! Bring two IDs; foreigners usually use a passport and a resident certificate.');
+          Game.state = 'PLAN';
+        }
+      },
+
+      /* ═══ 選方案（照 Ami 說的） ═══ */
+      PLAN: {
+        place: 'shop',
+        dialogue: () => [L('（店員把證件拍照存檔，指著牆上的方案海報。）', '(El empleado fotografía tus documentos y señala los carteles de la pared.)', '(The clerk scans your documents and points to the posters on the wall.)'), ph('好，請問您要哪一個方案？', 'Bien, ¿qué plan desea?', 'OK, which plan would you like?')],
+        options: () => {
+          return rotOf(t, [`我要「${planZh(p)}」，${zhNum(p.p)}元。`, ...PLANS.filter(x => x !== p).map(x => `我要「${planZh(x)}」，${zhNum(x.p)}元。`)]);
+        },
+        next: c => {
+          if (c !== `我要「${planZh(p)}」，${zhNum(p.p)}元。`) {
+            const other = PLANS.find(x => c.includes(`「${planZh(x)}」`));
+            Game.addMistake(M(`Ami 要你辦的是「${planZh(p)}」${p.p}元，不是「${planZh(other)}」${other.p}元。`, `Ami pidió «${planEs(p)}» (${esM(p.p)}), no «${planEs(other)}» (${esM(other.p)}).`, `Ami asked for "${planEn(p)}" (${enM(p.p)}), not "${planEn(other)}" (${enM(other.p)}).`));
+            return;
+          }
+          goodFirst('PLAN', '沒錯！方案要照需要選，天數和流量都要看清楚。', '¡Exacto! Elige el plan según lo que necesitas y revisa los días y los GB.', 'Right! Pick the plan you need and check the days and GB.');
+          Game.state = 'REPEAT';
+        }
+      },
+
+      /* ═══ 店員複誦方案：45% 說成另一個方案 ═══ */
+      REPEAT: catchState(Game, {
+        key: 'REPEAT', place: 'shop',
+        html: () => Game.listHTML(),
+        dialogue: () => [ph(`我跟您確認一下：新辦預付卡，「${planZh(t.repPlan)}」，${zhNum(t.repPlan.p)}元。對嗎？`, `Le confirmo: tarjeta prepago nueva, «${planEs(t.repPlan)}», ${esM(t.repPlan.p)}. ¿Correcto?`, `Let me confirm: a new prepaid SIM, "${planEn(t.repPlan)}", ${enM(t.repPlan.p)}. Is that right?`)],
+        ok: '對，麻煩你了。', fix: () => `不好意思，我要的是「${planZh(t.repWrong ? p : t.planAlt)}」，${zhNum((t.repWrong ? p : t.planAlt).p)}元。`, rude: '你有沒有在聽啊？別弄錯！',
+        wrong: () => t.repWrong,
+        whyWrong: () => M(`店員說錯了方案：他說「${planZh(t.repPlan)}」${t.repPlan.p}元，你要的是「${planZh(p)}」${p.p}元。`, `El empleado dijo mal el plan: «${planEs(t.repPlan)}» (${esM(t.repPlan.p)}); tú querías «${planEs(p)}» (${esM(p.p)}).`, `The clerk got the plan wrong: "${planEn(t.repPlan)}" (${enM(t.repPlan.p)}); you wanted "${planEn(p)}" (${enM(p.p)}).`),
+        whyRight: () => M(`店員說對了：「${planZh(p)}」${p.p}元。`, `El empleado lo dijo bien: «${planEs(p)}», ${esM(p.p)}.`, `The clerk was right: "${planEn(p)}", ${enM(p.p)}.`),
+        goodWrong: ['你很細心！店員複誦方案的時候，要和自己選的對一下。', '¡Qué atento! Cuando repita el plan, compáralo con el que elegiste.', 'Well spotted! When the clerk reads the plan back, compare it with your choice.'],
+        goodOk: ['店員複誦方案和價錢，要和自己要的對一下。', 'Cuando repita el plan y el precio, compáralos con lo que quieres.', 'Check the plan and price the clerk reads back against what you want.'],
+        apology: () => [ph(`啊，不好意思！是「${planZh(p)}」，${zhNum(p.p)}元。我改過來了。`, `¡Ay, disculpe! Es «${planEs(p)}», ${esM(p.p)}. Ya lo corregí.`, `Oh, sorry! It's "${planEn(p)}", ${enM(p.p)}. I've corrected it.`), L('（店員在電腦上改好方案，列印單據。）', '(El empleado corrige el plan en la computadora e imprime el comprobante.)', '(The clerk fixes the plan on the computer and prints the slip.)')],
+        go: wrong => { Game.state = 'PAY'; }
+      }),
+
+      /* ═══ 付錢三關（共用） ═══ */
+      PAY: pays.PAY, PAY_FIX: pays.PAY_FIX, CHANGE: pays.CHANGE,
+
+      /* ═══ 拿到新卡：店員唸門號，45% 最後兩碼唸反 ═══ */
+      SIM: catchState(Game, {
+        key: 'SIM', place: 'shop',
+        html: () => Game.simHTML(),
+        dialogue: () => [L('（店員把舊的卡槽打開，換上新卡，再把單據遞給你。）', '(El empleado cambia la SIM y te entrega el comprobante.)', '(The clerk swaps in the new SIM and hands you the slip.)'), ph(`新的門號是${phoneSay(t.numSaid)}。單據上有，請您看一下。`, `Su número nuevo es ${t.numSaid}. Está en el comprobante; échele un vistazo.`, `Your new number is ${t.numSaid}. It's on the slip — please take a look.`)],
+        ok: '好，沒問題，謝謝。', fix: () => `不好意思，單據上的門號最後三碼是${zhDigits((t.numWrong ? t.num : t.numAlt).slice(7))}。`, rude: '你連號碼都會唸錯喔？',
+        wrong: () => t.numWrong,
+        whyWrong: () => M(`店員唸錯了門號：他唸最後三碼是${t.numSaid.slice(7)}，單據上是${t.num.slice(7)}。`, `El empleado leyó mal el número: dijo que termina en ${t.numSaid.slice(7)}, el comprobante dice ${t.num.slice(7)}.`, `The clerk read the number wrong: he said it ends in ${t.numSaid.slice(7)}, the slip says ${t.num.slice(7)}.`),
+        whyRight: () => M(`店員唸對了：門號是${phoneShow(t.num)}。`, `Lo leyó bien: el número es ${phoneShow(t.num)}.`, `The clerk read it correctly: the number is ${phoneShow(t.num)}.`),
+        goodWrong: ['你很細心！新門號要和單據一個一個數字對。', '¡Qué atento! Compara el número nuevo con el comprobante dígito por dígito.', 'Well spotted! Check the new number against the slip, digit by digit.'],
+        goodOk: ['拿到新門號，要對一下單據上的號碼。', 'Cuando recibas el número nuevo, compáralo con el comprobante.', 'When you get a new number, check it against the slip.'],
+        apology: () => [ph(`啊，不好意思，是我唸反了。門號是${phoneSay(t.num)}。`, `¡Ay, disculpe! Lo leí al revés. El número es ${t.num}.`, `Oh, sorry, I read it backwards. The number is ${t.num}.`)],
+        go: () => { Game.state = 'NOSIGNAL'; }
+      }),
+
+      /* ═══ 手機沒訊號 ═══ */
+      NOSIGNAL: {
+        place: 'shop',
+        dialogue: () => [L('（你把新卡裝進自己的手機，等了一下，螢幕左上角寫著「無服務」，沒有訊號。）', '(Pones la SIM nueva en tu celular y esperas; arriba a la izquierda dice «無服務»: no hay señal.)', '(You put the new SIM in your phone and wait; the top-left corner says "無服務" — no signal.)')],
+        options: () => rotOf(t, ['不好意思，手機沒有訊號，可以幫我看一下嗎？', '你們的卡是壞的吧！退錢給我！', '（自己把手機重設成原廠設定。）']),
+        next: c => {
+          if (c !== '不好意思，手機沒有訊號，可以幫我看一下嗎？') {
+            Game.addMistake(c.startsWith('你們的卡')
+              ? M('卡可能只是還沒開通或裝得不好，先請店員幫忙檢查，不要一開始就生氣要退錢。', 'Quizá la SIM aún no está activa o está mal puesta; pide ayuda al empleado antes de enojarte y exigir el reembolso.', 'The SIM may just be inactive or badly seated — ask the clerk to check before getting angry and demanding a refund.')
+              : M('重設成原廠設定會把手機裡的資料全部刪掉，這樣太冒險了。沒有訊號先請店員檢查卡和設定。', 'Restablecer de fábrica borra todos los datos del celular: es muy arriesgado. Primero pide al empleado que revise la SIM y los ajustes.', 'A factory reset wipes everything on your phone — too risky. First ask the clerk to check the SIM and settings.'));
+            return;
+          }
+          goodFirst('NOSIGNAL', '沒錯！手機有問題，先請店員幫忙看，他們有工具也有經驗。', '¡Exacto! Si el celular falla, pide ayuda al empleado: tienen herramientas y experiencia.', 'Right! If the phone has a problem, ask the clerk — they have the tools and the experience.');
+          Game.state = 'TOPUP';
+        }
+      },
+
+      /* ═══ 問以後怎麼儲值 ═══ */
+      TOPUP: {
+        place: 'shop',
+        dialogue: () => [L('（店員把卡拿出來擦一擦，重新裝好，請你重新開機。過了一會兒，螢幕左上角出現訊號格，網路通了。）', '(El empleado limpia la SIM, la coloca otra vez y te pide reiniciar. Al rato aparecen las barras de señal y ya hay internet.)', '(The clerk wipes the SIM, reseats it and asks you to restart. After a moment the signal bars appear and the internet works.)'), ph('好了，網路通了。還有其他問題嗎？', 'Listo, ya hay internet. ¿Alguna otra duda?', 'There you go, you are connected. Any other questions?')],
+        options: () => rotOf(t, ['有，請問以後方案到期了，要怎麼儲值？', '不用問了，這張卡到期以後一定會自己從我的銀行帳戶扣錢吧？', '儲值太麻煩了，你現在直接幫我儲值五千元！']),
+        next: c => {
+          if (c !== '有，請問以後方案到期了，要怎麼儲值？') {
+            Game.addMistake(c.startsWith('不用問了')
+              ? M('預付卡不會自動從銀行扣款，方案到期後要自己儲值或再購買。', 'La tarjeta prepago no cobra automáticamente de tu banco; al vencer el plan debes recargar o comprar otro.', 'A prepaid SIM does not auto-charge your bank; when the plan ends you top up or buy another one yourself.')
+              : M('你只要辦這個方案，不需要現在儲值五千元；而且要有禮貌地問，不要命令店員。', 'Solo querías este plan; no hace falta recargar cinco mil ahora, y hay que preguntar con cortesía, no dar órdenes.', 'You only wanted this plan — no need to top up 5,000 now, and ask politely instead of giving orders.'));
+            return;
+          }
+          goodFirst('TOPUP', '沒錯！店員說：方案到期以後，可以上電信公司的網站儲值，也可以再來門市。（實際方式待確認）', '¡Exacto! El empleado explica que al vencer el plan puedes recargar en el sitio web de la compañía o volver a la tienda (detalles por confirmar).', 'Right! The clerk explains you can top up on the carrier\'s website or come back to the shop (details to be confirmed).');
+          Game.stopTimer(); Game.state = 'END';
+        }
+      },
+
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2;
+          track('game_complete', { game: 'telecom', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            L('（你走出電信行，打開手機，傳訊息給Ami。）', '(Sales de la tienda, abres el celular y le escribes a Ami.)', '(You step out of the shop, open your phone and message Ami.)'),
+            Game._endGood
+              ? L(`Ami：太好了，${N}，謝謝你！新門號${phoneShow(t.num)}可以上網了，我馬上加你的新號碼。`, `¡Qué bien, ${N}, gracias! Tu número nuevo ${phoneShow(t.num)} ya tiene internet; lo agrego ahora mismo.`, `Great, ${N}, thank you! Your new number ${phoneShow(t.num)} is online — I'll add it right now.`)
+              : L('Ami：欸，聽起來辦得不太順利……下次要聽清楚店員複誦的方案、算錢，也要對一下門號喔！', 'Parece que no salió muy bien… la próxima vez escucha el plan que repite el empleado, revisa el cobro y compara tu número.', "Hmm, sounds like it didn't go smoothly… next time listen to the plan the clerk reads back, check the charge, and compare the number.")
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: stdResultCfg('phone')
+    };
+  }
+});
+
+GameBoot();
+Music.init({ bpm: 102, tracks: [
+  { wave: 'square', vol: 0.22, notes: 'E5 . G5 B5 . A5 G5 . | F5 . A5 C6 . B5 A5 . | G5 . B5 D6 . C6 B5 . | A5 - E5 - G5 - . .' },
+  { wave: 'triangle', vol: 0.5, notes: 'E3 . B3 . E3 . B3 . | F3 . C4 . F3 . C4 . | G3 . D4 . G3 . D4 . | A3 . E4 . A3 . . .' },
+  { vol: 0.2, notes: 'k . h . s . h .' }] });
+</script>
+</body>
+</html>
