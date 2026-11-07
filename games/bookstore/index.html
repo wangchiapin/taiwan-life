@@ -233,23 +233,26 @@ const VOCAB = {
   ASK: [['請問', 'disculpe, una pregunta', 'excuse me'], ['在哪裡', 'dónde está', 'where is'], ['櫃台', 'mostrador, caja', 'counter'], ['旁邊', 'al lado', 'next to']],
   MARK: [['書籤', 'marcapáginas', 'bookmark'], ['漂亮', 'bonito', 'pretty'], ['一模一樣', 'idéntico', 'exactly the same']],
   WRAP: [['包裝', 'envolver', 'wrap'], ['禮物', 'regalo', 'gift'], ['麻煩', 'por favor, molestar', 'please / trouble'], ['不用', 'no hace falta', 'no need']],
-  PAY: [['一共', 'en total', 'in total'], ['夠', 'alcanzar', 'be enough'], ['找錢', 'dar el cambio', 'give change'], ['賒帳', 'comprar a crédito', 'buy on credit']],
+  PAY: [['一共', 'en total', 'in total'], ['算錯', 'calcular mal', 'miscalculate'], ['應該', 'debería', 'should']],
+  PAY_FIX: [['夠', 'alcanzar, ser suficiente', 'be enough'], ['當場', 'en el momento', 'on the spot'], ['下次再付', 'pagar la próxima vez', 'pay next time']],
+  CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give wrong change'], ['應該找', 'debería darme de cambio', 'should give back']],
+  FAREWELL: [['包好', 'ya envuelto', 'wrapped'], ['漂亮', 'bonito', 'pretty'], ['謝謝', 'gracias', 'thanks']],
   END: [['喜歡', 'gustar', 'like'], ['包好', 'ya envuelto', 'wrapped'], ['謝謝', 'gracias', 'thanks']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
-const STAGE = { SECTION: ['找書區', 'buscar sección', 'finding the section'], FIND: ['找書', 'buscar el libro', 'finding the book'], SEEK: ['找書籤', 'buscar el marcapáginas', 'finding the bookmark'], STOCK: ['問庫存', 'preguntar existencias', 'asking about stock'], ASK: ['問店員', 'preguntar', 'asking staff'], LOOK: ['找書籤', 'buscar el marcapáginas', 'finding the bookmark'], MARK: ['挑書籤', 'elegir el marcapáginas', 'choosing the bookmark'], WRAP: ['包裝', 'envolver', 'wrapping'], PAY: ['付錢', 'pagar', 'paying'] };
-const NEXT_LABEL = { SECTION: '看招牌', FIND: '走到書架', SEEK: '繼續', LOOK: '繼續', STOCK: '走到櫃台', ASK: '問店員', MARK: '走到櫃台', WRAP: '去結帳', PAY: '付錢', END: '回去找Ami' };
+const STAGE = { SECTION: ['找書區', 'buscar sección', 'finding the section'], FIND: ['找書', 'buscar el libro', 'finding the book'], SEEK: ['找書籤', 'buscar el marcapáginas', 'finding the bookmark'], STOCK: ['問庫存', 'preguntar existencias', 'asking about stock'], ASK: ['問店員', 'preguntar', 'asking staff'], LOOK: ['找書籤', 'buscar el marcapáginas', 'finding the bookmark'], MARK: ['挑書籤', 'elegir el marcapáginas', 'choosing the bookmark'], WRAP: ['包裝', 'envolver', 'wrapping'], PAY: ['付錢', 'pagar', 'paying'], PAY_FIX: ['付錢', 'pagar', 'paying'], CHANGE: ['找錢', 'el cambio', 'the change'], FAREWELL: ['道別', 'despedirse', 'saying goodbye'] };
+const NEXT_LABEL = { SECTION: '看招牌', FIND: '走到書架', SEEK: '繼續', LOOK: '繼續', STOCK: '走到櫃台', ASK: '問店員', MARK: '走到櫃台', WRAP: '去結帳', PAY: '付錢', PAY_FIX: '聽店員重算', CHANGE: '等找錢', FAREWELL: '拿書', END: '回去找Ami' };
 
 const PLACES = {
   phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
   shop: ['📚', '書店', 'Librería', 'Bookstore', '']
 };
 const SECTIONS = [
-  { zh: '小說', es: 'novelas', en: 'novels', icon: '📖', books: [['星空下的約定', 250], ['雨天的來信', 280], ['山裡的小店', 320]] },
-  { zh: '漫畫', es: 'cómics', en: 'comics', icon: '🦸', books: [['貓咪偵探團', 120], ['飛天麵包師', 150], ['小小廚師長', 130]] },
-  { zh: '童書', es: 'libros infantiles', en: "children's books", icon: '🧸', books: [['小熊的生日', 260], ['月亮去哪裡', 300], ['會說話的雨傘', 280]] },
-  { zh: '料理', es: 'cocina', en: 'cooking', icon: '🍳', books: [['十分鐘晚餐', 330], ['台灣家常菜', 350], ['一個人的早餐', 290]] },
-  { zh: '語言', es: 'idiomas', en: 'languages', icon: '🔤', books: [['每天學中文', 300], ['旅行西班牙語', 280], ['日常英語會話', 260]] }
+  { zh: '小說', es: 'novelas', en: 'novels', icon: '📖', like: ['看小說', 'leer novelas', 'reading novels'], books: [['星空下的約定', 250], ['雨天的來信', 280], ['山裡的小店', 320]] },
+  { zh: '漫畫', es: 'cómics', en: 'comics', icon: '🦸', like: ['看漫畫', 'leer cómics', 'reading comics'], books: [['貓咪偵探團', 120], ['飛天麵包師', 150], ['小小廚師長', 130]] },
+  { zh: '童書', es: 'libros infantiles', en: "children's books", icon: '🧸', like: ['看童書', 'leer libros infantiles', "reading children's books"], books: [['小熊的生日', 260], ['月亮去哪裡', 300], ['會說話的雨傘', 280]] },
+  { zh: '料理', es: 'cocina', en: 'cooking', icon: '🍳', like: ['學做菜', 'aprender a cocinar', 'learning to cook'], books: [['十分鐘晚餐', 330], ['台灣家常菜', 350], ['一個人的早餐', 290]] },
+  { zh: '語言', es: 'idiomas', en: 'languages', icon: '🔤', like: ['學語言', 'aprender idiomas', 'learning languages'], books: [['每天學中文', 300], ['旅行西班牙語', 280], ['日常英語會話', 260]] }
 ];
 /* 每本書的封面：底色＋跟書名有關的小插圖（自己畫的向量圖，每支手機長一樣） */
 const CR = '#fff4dc', YL = '#ffd35c', DK = 'rgba(0,0,0,.28)';
@@ -281,7 +284,8 @@ const COVER = {
   '十分鐘晚餐': [ART.dinner, '#c8602d'], '台灣家常菜': [ART.rice, '#8f6b1f'], '一個人的早餐': [ART.breakfast, '#8a5a3b'],
   '每天學中文': [ART.chinese, '#b83a32'], '旅行西班牙語': [ART.travel, '#b5651d'], '日常英語會話': [ART.english, '#3b6ea5']
 };
-const MARK = 50;
+const billFor = () => 500;   // 你只有一張五百元（共用付錢小工具要用）
+let MARK = 50;   // 每局隨機（setup 裡設定）
 
 
 /* ══════════════════════════════════════
@@ -327,27 +331,40 @@ const Game = defineGame({
 
   IMAGES: {
     START: ['images/start.jpg', '📚'], SECTION: ['images/shop.jpg', '📚'], FIND: ['images/shelf.jpg', '📖'], SEEK: ['images/shop.jpg', '🔖'], STOCK: ['images/counter.jpg', '🙋'], ASK: ['images/shop.jpg', '🙋'], LOOK: ['images/shop.jpg', '🔖'], MARK: ['images/shop.jpg', '🔖'],
-    WRAP: ['images/counter.jpg', '🎁'], PAY: ['images/pay.jpg', '💵'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+    WRAP: ['images/counter.jpg', '🎁'], PAY: ['images/pay.jpg', '💵'], PAY_FIX: ['images/pay.jpg', '💵'], CHANGE: ['images/pay.jpg', '💵'], FAREWELL: ['images/counter.jpg', '🎁'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
   setup() {
-    const sec = pick(SECTIONS), bi = Math.floor(Math.random() * 3), book = sec.books[bi];
+    const sec = pick(SECTIONS), bi = Math.floor(Math.random() * 3);
+    MARK = pick([40, 50, 60]);
+    const book = [sec.books[bi][0], sec.books[bi][1] + pick([-20, -10, 0, 10, 20])];   // 每局書價稍微不同
     const others = sec.books.filter((_, i) => i !== bi);
-    this.task = { sec, bi, book, total: book[1] + MARK, others, soldOut: Math.random() < 0.4, payWrong: Math.random() < 0.45, noMark: false, rot: Math.floor(Math.random() * 3) };
+    this.task = { sec, bi, book, total: book[1] + MARK, extra: { zh: '一個書籤', es: 'un marcapáginas', en: 'a bookmark', price: MARK }, cwFlag: Math.random() < 0.4, others, soldOut: Math.random() < 0.4, payWrong: Math.random() < 0.45, noMark: false, card: false, rot: Math.floor(Math.random() * 3) };
   },
   amiLines() {
     const N = this.N, t = this.task;
     return [
-      L(`Ami：${N}，下禮拜是我朋友的生日，我想買一本書送她當禮物，你可以幫我買一下嗎？她喜歡看${t.sec.zh}，所以去${t.sec.zh}區找。書名是《${t.book[0]}》。`, `${N}, la semana que viene es el cumpleaños de una amiga y quiero regalarle un libro. ¿Puedes comprarlo por mí? Le gusta leer ${t.sec.es}, así que busca en la sección de ${t.sec.es}. El título es «${t.book[0]}».`, `${N}, my friend's birthday is next week and I want to give her a book. Could you buy it for me? She likes ${t.sec.en}, so look in the ${t.sec.en} section. The title is "${t.book[0]}".`),
+      L(`Ami：${N}，下禮拜是我朋友的生日，我想買一本書送她當禮物，你可以幫我買一下嗎？她喜歡${t.sec.like[0]}，所以去${t.sec.zh}區找。書名是《${t.book[0]}》。`, `${N}, la semana que viene es el cumpleaños de una amiga y quiero regalarle un libro. ¿Puedes comprarlo por mí? Le gusta ${t.sec.like[1]}, así que busca en la sección de ${t.sec.es}. El título es «${t.book[0]}».`, `${N}, my friend's birthday is next week and I want to give her a book. Could you buy it for me? She enjoys ${t.sec.like[2]}, so look in the ${t.sec.en} section. The title is "${t.book[0]}".`),
       L('Ami：對了！再買一個書籤好了，然後請店員幫忙包裝。', '¡Ah, cierto! Compra también un marcapáginas y pide al personal que lo envuelva.', 'Oh, right! Let’s also get a bookmark, and ask the staff to wrap it.')
     ];
   },
+  /* 買完東西、要結帳時才算：總價（會因為沒買書籤／買卡片而不同）、店員報價、找錢 */
+  finalizePay() {
+    const t = this.task;
+    t.extra = { ...t.extra, price: MARK };
+    t.said = t.payWrong ? t.total + MARK : t.total;
+    t.bill = 500; t.change = 500 - t.total;
+    t.changeWrong = t.cwFlag;
+    t.given = t.changeWrong ? t.change + pick([-20, -10, 10, 20].filter(d => t.change + d >= 0)) : t.change;
+  },
   said() { const t = this.task; return t.payWrong ? t.book[1] + 2 * MARK : t.total; },   // 店員報的價（算錯時＝書籤算兩個）
   priceLine(fixed) {
-    const t = this.task, n = fixed ? t.total : this.said();
-    return L(`店員：一共是${zhNum(n)}元。`, `Son ${esM(n)} en total.`, `That's ${enM(n)} in total.`);
+    const t = this.task, n = fixed ? t.total : this.said(), b = t.book[1];
+    if (t.noMark && !t.card) return L(`店員：書${zhNum(b)}元，一共是${zhNum(n)}元。`, `El libro cuesta ${esM(b)}; son ${esM(n)} en total.`, `The book is ${enM(b)}; that's ${enM(n)} in total.`);
+    const w = t.card ? ['卡片', 'la tarjeta', 'the card'] : ['書籤', 'el marcapáginas', 'the bookmark'];
+    return L(`店員：書${zhNum(b)}元，${w[0]}${zhNum(MARK)}元，一共是${zhNum(n)}元。`, `El libro cuesta ${esM(b)}, ${w[1]} ${esM(MARK)}; son ${esM(n)} en total.`, `The book is ${enM(b)}, ${w[2]} ${enM(MARK)}; that's ${enM(n)} in total.`);
   },
   hintSections() {
-    const ORDER = ['START', 'SECTION', 'FIND', 'SEEK', 'STOCK', 'LOOK', 'ASK', 'MARK', 'WRAP', 'PAY', 'END', 'RESULT'];
+    const ORDER = ['START', 'SECTION', 'FIND', 'SEEK', 'STOCK', 'LOOK', 'ASK', 'MARK', 'WRAP', 'PAY', 'PAY_FIX', 'CHANGE', 'FAREWELL', 'END', 'RESULT'];
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
     if (ORDER.indexOf(this.st0) >= ORDER.indexOf('END')) out.push({ title: '店員說的話', lines: [this.priceLine(true)] });
     return out;
@@ -380,9 +397,14 @@ const Game = defineGame({
     const N = this.N, t = this.task;
     const staff = (zh, es, en) => L(`店員：${zh}`, es, en);
     const askOpt = '找不到，去問店員。';
-    const shortBill = () => Game.said() > 200 ? 200 : 100;   // 付不夠的那個選項：總價不超過兩百時，兩百元其實夠，改成一百元
     const lostMark = () => L('（你拿著書在店裡四處找書籤，繞了一圈還是找不到。）', '(Con el libro en la mano, buscas los marcapáginas por toda la tienda, pero después de dar una vuelta no los encuentras.)', '(Book in hand, you look around the shop for the bookmarks, but after a full lap you still can’t find them.)');
-    const fixTotal = `不好意思，好像算錯了，應該是${zhNum(t.payWrong ? t.total : t.book[1] + (t.noMark && !t.card ? MARK : 2 * MARK))}元吧？`;
+    const pays = payStates(Game, {
+      who: '店員', place: 'shop',
+      extraWhy: () => M(`店員算錯了：書${t.book[1]}元加${t.card ? '卡片' : '書籤'}${MARK}元是${t.total}元，他把${t.card ? '卡片' : '書籤'}算成兩個（${t.said}元）。`, `El empleado se equivocó: libro ${esM(t.book[1])} + ${t.card ? 'tarjeta' : 'marcapáginas'} ${esM(MARK)} = ${esM(t.total)}; contó dos (${esM(t.said)}).`, `The clerk got it wrong: book ${enM(t.book[1])} + ${t.card ? 'card' : 'bookmark'} ${enM(MARK)} = ${enM(t.total)}; he counted two (${enM(t.said)}).`),
+      finish: () => { Game.state = 'FAREWELL'; }
+    });
+    pays.PAY.dialogue = () => [Game.priceLine(), L('（你只有一張五百元。）', '(Solo tienes un billete de quinientos dólares.)', '(You only have a 500-dollar bill.)')];
+    const bookPrice = () => L(`（書上的標價是${zhNum(t.book[1])}元。）`, `(La etiqueta del libro dice ${esM(t.book[1])}.)`, `(The price tag on the book says ${enM(t.book[1])}.)`);
     const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
     const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
     return {
@@ -392,6 +414,7 @@ const Game = defineGame({
         dialogue: () => [
           L('（你走到書店門口。手機響了一聲，是Ami傳來的LINE。）', '(Llegas a la librería. Tu celular suena: es un LINE de Ami.)', '(You reach the bookstore. Your phone buzzes — a LINE from Ami.)'),
           ...Game.amiLines(),
+          L('（你看一下錢包，裡面只有一張五百元。）', '(Miras tu cartera: solo tienes un billete de quinientos.)', '(You check your wallet: just one 500-dollar bill.)'),
           L('我：好，我現在去找！', '¡Bien, voy a buscarlo!', "OK, I'll go find it!")
         ],
         options: ['走進書店'],
@@ -400,11 +423,11 @@ const Game = defineGame({
       SECTION: {
         place: 'shop',
         html: () => Game.signsHTML(),
-        dialogue: () => [L('我：Ami的朋友喜歡看什麼書？我要去哪一區？', '¿Qué libros le gustan a la amiga de Ami? ¿A qué sección voy?', "What kind of books does Ami's friend like? Which section do I go to?")],
+        dialogue: () => [L('我：Ami的朋友喜歡什麼？我要去哪一區？', '¿Qué libros le gustan a la amiga de Ami? ¿A qué sección voy?', "What kind of books does Ami's friend like? Which section do I go to?")],
         options: () => [],   // 不用下方按鈕：直接點上方的書區圖示
         mount: box => box.querySelectorAll('.sign').forEach(b => { b.onclick = () => Game.handleChoice(`去${SECTIONS[+b.dataset.sec].zh}區。`); }),
         next: c => {
-          if (c !== `去${t.sec.zh}區。`) { Game.addMistake(M(`你記錯了喔！Ami說朋友喜歡看${t.sec.zh}。`, `¡Te equivocaste! Ami dijo que a su amiga le gusta leer ${t.sec.es}.`, `You got it wrong! Ami said her friend likes ${t.sec.en}.`)); return; }
+          if (c !== `去${t.sec.zh}區。`) { Game.addMistake(M(`你記錯了喔！Ami說朋友喜歡${t.sec.like[0]}。`, `¡Te equivocaste! Ami dijo que a su amiga le gusta ${t.sec.like[1]}.`, `You got it wrong! Ami said her friend enjoys ${t.sec.like[2]}.`)); return; }
           goodFirst('SECTION', '沒錯！去' + t.sec.zh + '區。', '¡Exacto! A la sección de ' + t.sec.es + '.', 'Right! The ' + t.sec.en + ' section.');
           Game.thought = null;
           Game.state = 'FIND';
@@ -433,7 +456,7 @@ const Game = defineGame({
             return;
           }
           goodFirst('FIND', '找到了！就是《' + t.book[0] + '》。', '¡Lo encontraste! Es «' + t.book[0] + '».', 'Found it! It is "' + t.book[0] + '".');
-          Game.thought = null;
+          Game.thought = [bookPrice()];
           Game.state = 'SEEK';
         }
       },
@@ -450,7 +473,7 @@ const Game = defineGame({
             return;
           }
           goodFirst('STOCK', '問得很好！「還有嗎」用來問有沒有庫存。', '¡Bien preguntado! «還有嗎» sirve para preguntar si hay existencias.', 'Well asked! "還有嗎" is for asking whether they still have it.');
-          Game.thought = [staff(`我幫你查一下……庫存還有一本，我去拿，請稍等。`, 'Déjeme revisar… todavía queda uno en existencias; voy por él, un momento por favor.', "Let me check… we still have one in stock; I'll go get it, one moment please."), L('（店員把《' + t.book[0] + '》拿來了。）', '(El personal trae «' + t.book[0] + '».)', '(The staff brings «' + t.book[0] + '».)')];
+          Game.thought = [staff(`我幫你查一下……庫存還有一本，我去拿，請稍等。`, 'Déjeme revisar… todavía queda uno en existencias; voy por él, un momento por favor.', "Let me check… we still have one in stock; I'll go get it, one moment please."), L('（店員把《' + t.book[0] + '》拿來了。）', '(El personal trae «' + t.book[0] + '».)', '(The staff brings «' + t.book[0] + '».)'), bookPrice()];
           Game.state = 'SEEK';
         }
       },
@@ -489,7 +512,7 @@ const Game = defineGame({
               : M('Ami說還要買一個書籤，你放棄了。', 'Ami dijo que también quería un marcapáginas y te rendiste.', 'Ami also asked for a bookmark and you gave up.'));
             Game.feedback.pop();
             Game.thought = [card
-              ? L('（你隨手拿了一張卡片，和書一起走到櫃台。）', '(Agarras una tarjeta cualquiera y vas a la caja con el libro.)', '(You grab a random card and head to the counter with the book.)')
+              ? L(`（你隨手拿了一張卡片，標價${zhNum(MARK)}元，和書一起走到櫃台。）`, `(Agarras una tarjeta cualquiera: cuesta ${esM(MARK)}. Vas a la caja con el libro.)`, `(You grab a random card — it costs ${enM(MARK)}. You head to the counter with the book.)`)
               : L('（你放棄了，拿著書直接走到櫃台。）', '(Te rindes y vas directo a la caja con el libro.)', '(You give up and head straight to the counter with the book.)')];
             Game.state = 'WRAP';
             return;
@@ -528,7 +551,7 @@ const Game = defineGame({
             return;
           }
           goodFirst('MARK', '很好！挑一個漂亮的書籤，當禮物最合適。', '¡Muy bien! Un marcapáginas bonito va perfecto con el regalo.', 'Good! A pretty bookmark goes well with a gift.');
-          Game.thought = [L('（你挑了一張最漂亮的書籤，拿著書和書籤走到櫃台。）', '(Eliges el marcapáginas más bonito y vas a la caja con el libro.)', '(You pick the prettiest bookmark and head to the counter with the book and bookmark.)')];
+          Game.thought = [L(`（你挑了一張最漂亮的書籤，標價${zhNum(MARK)}元。你拿著書和書籤走到櫃台。）`, `(Eliges el marcapáginas más bonito: cuesta ${esM(MARK)}. Vas a la caja con el libro y el marcapáginas.)`, `(You pick the prettiest bookmark — it costs ${enM(MARK)}. You head to the counter with the book and bookmark.)`)];
           Game.state = 'WRAP';
         }
       },
@@ -544,29 +567,24 @@ const Game = defineGame({
             return;
           }
           goodFirst('WRAP', '很好！「麻煩你……」是有禮貌的請求。', '¡Muy bien! «麻煩你…» es una petición educada.', 'Good! "麻煩你…" is a polite request.');
-          Game.thought = [Game.priceLine()];
+          Game.finalizePay();
+          Game.thought = null;
           Game.state = 'PAY';
         }
       },
-      PAY: {
+      PAY: pays.PAY, PAY_FIX: pays.PAY_FIX, CHANGE: pays.CHANGE,
+      FAREWELL: {
         place: 'shop',
-        dialogue: () => [L('（你只有一張五百元。）', '(Solo tienes un billete de quinientos dólares.)', '(You only have a 500-dollar bill.)')],
-        options: () => rot(['給你五百元。', fixTotal, `給你${zhNum(shortBill())}元。`]),
+        dialogue: () => [t.card
+          ? staff('這是您的書和卡片，已經包好了。謝謝光臨！', 'Aquí tiene su libro y la tarjeta, ya envueltos. ¡Gracias por venir!', 'Here are your book and card, already wrapped. Thank you!')
+          : t.noMark
+          ? staff('這是您的書，已經包好了。謝謝光臨！', 'Aquí tiene su libro, ya envuelto. ¡Gracias por venir!', 'Here is your book, already wrapped. Thank you!')
+          : staff('這是您的書和書籤，已經包好了。謝謝光臨！', 'Aquí tiene su libro y el marcapáginas, ya envueltos. ¡Gracias por venir!', 'Here are your book and bookmark, already wrapped. Thank you!')],
+        options: () => rot(['謝謝，你包得很漂亮。', '媽的！你包得好醜喔！']),
         next: c => {
-          const right = t.payWrong ? fixTotal : '給你五百元。', said = Game.said();
-          if (c !== right) {
-            Game.addMistake(c === '給你五百元。'
-              ? M(`店員算錯了：書${t.book[1]}元加書籤${MARK}元是${t.total}元，他把書籤算成兩個（${said}元）。`, `El empleado se equivocó: libro ${esM(t.book[1])} + marcapáginas ${esM(MARK)} = ${esM(t.total)}; contó dos marcapáginas (${esM(said)}).`, `The clerk got it wrong: book ${enM(t.book[1])} + bookmark ${enM(MARK)} = ${enM(t.total)}; he counted two bookmarks (${enM(said)}).`)
-              : c === fixTotal
-                ? (t.noMark && !t.card
-                  ? M(`店員算對了：你沒有買書籤，書就是${t.total}元。`, `El empleado calculó bien: no compraste el marcapáginas, el libro cuesta ${esM(t.total)}.`, `The clerk was right: you didn't buy a bookmark, so the book is ${enM(t.total)}.`)
-                  : M(`店員算對了：${t.book[1]} + ${MARK} = ${t.total}元。`, `El empleado calculó bien: ${t.book[1]} + ${MARK} = ${t.total}.`, `The clerk was right: ${t.book[1]} + ${MARK} = ${t.total}.`))
-                : M(`你算錯了吧！一共是${said}元，${zhNum(shortBill())}元不夠。`, `¡Calculaste mal! El total es ${esM(said)}: ${esM(shortBill())} no alcanzan.`, `You miscalculated! The total is ${enM(said)} — ${enM(shortBill())} isn't enough.`));
-            return;
-          }
-          goodFirst('PAY', t.payWrong ? '你很細心！付錢以前，要先算一算對不對。' : '沒錯！五百元夠了，他會找錢給你。', t.payWrong ? '¡Qué atento! Antes de pagar, comprueba la cuenta.' : '¡Exacto! Quinientos alcanzan y te darán el cambio.', t.payWrong ? 'Well spotted! Check the total before you pay.' : "Right! 500 is enough and you'll get change.");
-          Game.thought = [...(t.payWrong ? [staff(`啊，不好意思！是${zhNum(t.total)}元。`, `¡Ay, disculpe! Son ${esM(t.total)}.`, `Oh, sorry! It's ${enM(t.total)}.`)] : []),
-            staff(`收你五百元，找你${zhNum(500 - t.total)}元。`, `Recibo quinientos; le doy ${esM(500 - t.total)} de cambio.`, `Out of 500 — here's ${enM(500 - t.total)} change.`)];
+          if (c !== '謝謝，你包得很漂亮。') { Game.addMistake(M('這樣說太沒禮貌了！店員幫你包好了，要說謝謝。', '¡Eso es muy grosero! El empleado lo envolvió por ti: hay que dar las gracias.', 'That is very rude! The clerk wrapped it for you — say thank you.')); return; }
+          goodFirst('FAREWELL', '很好！店員幫了忙，要說謝謝。', '¡Muy bien! El empleado te ayudó: da las gracias.', 'Good! The clerk helped you — say thank you.');
+          Game.thought = null;
           Game.stopTimer();
           Game.state = 'END';
         }
@@ -577,11 +595,6 @@ const Game = defineGame({
           Game._endGood = Game.mistakes <= 2 && !t.noMark;
           track('game_complete', { game: 'bookstore', score: Game.score, elapsed: Game.elapsedTime });
           return [
-            t.card
-              ? staff('這是您的書和卡片，已經包好了。謝謝光臨！', 'Aquí tiene su libro y la tarjeta, ya envueltos. ¡Gracias por venir!', 'Here are your book and card, already wrapped. Thank you!')
-              : t.noMark
-              ? staff('這是您的書，已經包好了。謝謝光臨！', 'Aquí tiene su libro, ya envuelto. ¡Gracias por venir!', 'Here is your book, already wrapped. Thank you!')
-              : staff('這是您的書和書籤，已經包好了。謝謝光臨！', 'Aquí tiene su libro y el marcapáginas, ya envueltos. ¡Gracias por venir!', "Here are your book and bookmark, already wrapped. Thank you!"),
             t.card
               ? L('Ami：謝謝你……咦？這是卡片，不是書籤欸。算了……', '¡Gracias!… ¿Eh? Esto es una tarjeta, no un marcapáginas. Bueno, da igual…', 'Thanks!… Huh? This is a card, not a bookmark. Never mind…')
               : t.noMark
