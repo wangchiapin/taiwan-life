@@ -67,6 +67,8 @@
   /* ── 即時回饋卡（停留到下一次選擇） ── */
 
   .signs { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 8px 0 12px; background: #fff; border: 2px solid #cfdbec; border-radius: 12px; padding: 10px 14px; font-size: 17px; }
+  .signs .sign { font: inherit; color: inherit; background: #f4f8fd; border: 2px solid #cfdbec; border-radius: 10px; padding: 6px 12px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .signs .sign:active { background: #dbe8f8; border-color: #8fb0d8; }
   .shelf { display: flex; gap: 10px; align-items: flex-end; justify-content: center; margin: 10px 0 14px; padding: 14px 12px 0; border-bottom: 10px solid #9a6b3c; background: #f4ead9; border-radius: 10px 10px 0 0; min-height: 190px; }
   .shelf .book { width: 78px; height: 170px; border-radius: 4px 4px 0 0; color: #fff; display: flex; align-items: center; justify-content: center; padding: 6px; box-shadow: inset -6px 0 0 rgba(0,0,0,.15); text-align: center; font-size: 15px; font-weight: 700; line-height: 1.5; }
   .shelf .book:nth-child(2) { height: 150px; } .shelf .book:nth-child(3) { height: 180px; }
@@ -329,7 +331,7 @@ const Game = defineGame({
   },
   signsHTML() {
     const r = s => this.ruby(s);
-    return `<div class="signs">${SECTIONS.map(s => `<span><b>${s.icon}</b> ${r(s.zh)}</span>`).join('')}</div>`;
+    return `<div class="signs">${SECTIONS.map((s, i) => `<button type="button" class="sign" data-sec="${i}"><b>${s.icon}</b> ${r(s.zh)}</button>`).join('')}</div>`;
   },
   shelfHTML() {
     const t = this.task, r = s => this.ruby(s), cols = ['#c9503f', '#3b6ea5', '#e0a526', '#5f9a5b', '#8a5aa8'];
@@ -359,7 +361,8 @@ const Game = defineGame({
         place: 'shop',
         html: () => Game.signsHTML(),
         dialogue: () => [L('我：Ami的朋友喜歡看什麼書？我要去哪一區？', '¿Qué libros le gustan a la amiga de Ami? ¿A qué sección voy?', "What kind of books does Ami's friend like? Which section do I go to?")],
-        options: () => rot(shuffle(SECTIONS.filter(s => s !== t.sec)).slice(0, 2).concat([t.sec])).map(s => `去${s.zh}區。`),
+        options: () => [],   // 不用下方按鈕：直接點上方的書區圖示
+        mount: box => box.querySelectorAll('.sign').forEach(b => { b.onclick = () => Game.handleChoice(`去${SECTIONS[+b.dataset.sec].zh}區。`); }),
         next: c => {
           if (c !== `去${t.sec.zh}區。`) { Game.addMistake(M(`你記錯了喔！Ami說朋友喜歡看${t.sec.zh}。`, `¡Te equivocaste! Ami dijo que a su amiga le gusta leer ${t.sec.es}.`, `You got it wrong! Ami said her friend likes ${t.sec.en}.`)); return; }
           goodFirst('SECTION', '沒錯！去' + t.sec.zh + '區。', '¡Exacto! A la sección de ' + t.sec.es + '.', 'Right! The ' + t.sec.en + ' section.');
