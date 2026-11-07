@@ -943,8 +943,15 @@ function finishEmbed() {
 }
 
 /* 每局完整紀錄：結果頁出現時上傳到 results（管理員成績頁看得到）；一局只傳一次 */
+/* 分數只寫一次：結果頁出現時先寫；若當時 Firebase 還沒就緒，按排行榜時再補 */
+function saveLeaderboardScore() {
+  if (Game._lbSave) return Game._lbSave;
+  if (!window._FB) return null;
+  return Game._lbSave = window._FB.saveScore(Game.playerName, Game.score, Game.elapsedTime);
+}
 function uploadResult() {
   if (Game._sent) return; Game._sent = true;
+  saveLeaderboardScore();   // 進結果頁就先記名次，不用等玩家按「查看排行榜」
   try { window.HGPlays && HGPlays.end({ score: Game.score, secs: Game.elapsedTime, name: Game.playerName }); } catch (e) {}
   try {
     TWResults.send({ scene: GAME.scene, name: Game.playerName, code: QS.get('code'), score: Game.score, mistakes: Game.mistakes,
@@ -969,7 +976,7 @@ async function showLeaderboard() {
   document.getElementById('leaderboard-screen').classList.add('active');
   const myName = Game.playerName, myScore = Game.score, myElapsed = Game.elapsedTime;
 
-  if (window._FB) await window._FB.saveScore(myName, myScore, myElapsed);
+  if (window._FB) await saveLeaderboardScore();
   const rows = window._FB ? await window._FB.getLeaderboard() : [];
 
   document.getElementById('lb-loading').style.display = 'none';
