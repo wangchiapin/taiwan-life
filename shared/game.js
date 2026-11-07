@@ -899,6 +899,7 @@ function startGame() {
   saveSettings(); applyLang();
   simpObserver.observe(document.body, { childList: true, subtree: true, characterData: true }); convertNode(document.body); cleanZh(document.body);
   Game.playerName = name;
+  try { localStorage.setItem(NAME_KEY, name); } catch (e) {}   // 記住暱稱：下次打開自動填進名字欄
   Game.setup();
   document.getElementById('player-badge').textContent = '玩家：' + name;
   if (Game.onStart) Game.onStart();
@@ -1295,9 +1296,16 @@ const SetUI = {
 SetUI.init();
 
 /* 從「重新開始」或清單頁回來：直接用原本的名字開新的一局（遊戲最後呼叫） */
+const NAME_KEY = 'hanziGames.playerName';   // 同一個網站的遊戲共用同一個暱稱
 function GameBoot() {
   const again = EMBED ? QS.get('name') : QS.get('again');
-  if (!again) return;
+  if (!again) {                                   // 自己打開網址：把上次的暱稱填進名字欄（不自動開始）
+    try {
+      const saved = localStorage.getItem(NAME_KEY), inp = document.getElementById('player-name-input');
+      if (saved && inp && !inp.value) inp.value = saved;
+    } catch (e) {}
+    return;
+  }
   if (!EMBED) history.replaceState(null, '', location.pathname);
   document.getElementById('player-name-input').value = again;
   startGame();
