@@ -329,6 +329,7 @@ const Game = defineGame({
     document.getElementById('place-status').textContent = X(es, en);
   },
 
+  EXTRA_IMAGES: ['images/counter_card.jpg', 'images/counter_book.jpg', 'images/pay_sorry_wrapped.jpg', 'images/end_bad.jpg'],   // imageFor() 才會用到的圖，也先載好
   IMAGES: {
     START: ['images/start.jpg', '📚'], SECTION: ['images/shop.jpg', '📚'], FIND: ['images/shelf.jpg', '📖'], SEEK: ['images/shop.jpg', '🔖'], STOCK: ['images/counter_empty.jpg', '🙋'], ASK: ['images/shop.jpg', '🙋'], LOOK: ['images/lost.jpg', '😵'], MARK: ['images/mark.jpg', '🔖'],
     WRAP: ['images/counter.jpg', '🎁'], PAY: ['images/pay_wrapped.jpg', '💵'], PAY_FIX: ['images/pay_wrapped.jpg', '💵'], CHANGE: ['images/pay_wrapped.jpg', '💵'], FAREWELL: ['images/counter_wrapped.jpg', '🎁'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']

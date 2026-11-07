@@ -888,6 +888,14 @@ document.getElementById('log-close').onclick = () => Log.toggle(false);
 /* ══════════════════════════════════════
    登入
 ══════════════════════════════════════ */
+function preloadImages() {
+  try {
+    const list = [];
+    Object.values(Game.IMAGES || {}).forEach(v => { if (v && typeof v[0] === 'string' && /\.(jpe?g|png|webp|gif)$/i.test(v[0])) list.push(v[0]); });
+    (Game.EXTRA_IMAGES || []).forEach(u => list.push(u));
+    [...new Set(list)].forEach(u => { const i = new Image(); i.src = u; });
+  } catch (e) {}
+}
 function startGame() {
   const input = document.getElementById('player-name-input');
   const name = input.value.trim();
@@ -901,6 +909,7 @@ function startGame() {
   Game.playerName = name;
   try { localStorage.setItem(NAME_KEY, name); } catch (e) {}   // 記住暱稱：下次打開自動填進名字欄
   Game.setup();
+  preloadImages();   // 進遊戲就先把這款遊戲的圖背景載好，換關卡時不用再等
   document.getElementById('player-badge').textContent = '玩家：' + name;
   if (Game.onStart) Game.onStart();
   document.getElementById('login-screen').classList.remove('active');
