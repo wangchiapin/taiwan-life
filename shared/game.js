@@ -892,6 +892,7 @@ function preloadImages() {
   try {
     const list = [];
     Object.values(Game.IMAGES || {}).forEach(v => { if (v && typeof v[0] === 'string' && /\.(jpe?g|png|webp|gif)$/i.test(v[0])) list.push(v[0]); });
+    if (Game.IMAGES && Game.IMAGES.END) list.push('images/end_bad.jpg');   // 壞結局圖是引擎固定用的
     (Game.EXTRA_IMAGES || []).forEach(u => list.push(u));
     [...new Set(list)].forEach(u => { const i = new Image(); i.src = u; });
   } catch (e) {}
