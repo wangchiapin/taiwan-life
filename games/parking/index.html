@@ -213,7 +213,7 @@ pinyinPro.customPinyin({
   '愛心': 'ài xīn', '柵欄': 'zhà lán', '地下': 'dì xià', '繳費機': 'jiǎo fèi jī', '繳費': 'jiǎo fèi', '折抵': 'zhé dǐ', '發票': 'fā piào', '罰單': 'fá dān', '柱子': 'zhù zi',
   '空位': 'kòng wèi', '滿了': 'mǎn le', '出口': 'chū kǒu', '入口': 'rù kǒu', '按鈕': 'àn niǔ', '喇叭': 'lǎ ba', '區': 'qū', '號': 'hào', '輪椅': 'lún yǐ',
   '星光百貨': 'xīng guāng bǎi huò', '車道': 'chē dào', '百貨公司': 'bǎi huò gōng sī', '逛': 'guàng', '傳': 'chuán', '書店': 'shū diàn', '雨刷': 'yǔ shuā',
-  '掃描': 'sǎo miáo', '出場': 'chū chǎng', '十五分鐘': 'shí wǔ fēn zhōng', '一般': 'yì bān', '專用': 'zhuān yòng', '停': 'tíng', '一小時': 'yì xiǎo shí'
+  '掃描': 'sǎo miáo', '出場': 'chū chǎng', '十五分鐘': 'shí wǔ fēn zhōng', '一般': 'yì bān', '專用': 'zhuān yòng', '停': 'tíng', '一小時': 'yì xiǎo shí', '車': 'chē', '車子': 'chē zi'
 
 });
 // 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
@@ -321,7 +321,7 @@ const Game = defineGame({
   sent: null,          // 你傳給 Ami 的位置訊息
 
   setup() {
-    const rate = pick([30, 40, 50]), h = pick([4, 5]), R = pick([520, 680, 880, 1200, 1500]), d = R >= 1000 ? 2 : 1;
+    const rate = pick([30, 40, 50]), h = pick([4, 5]), R = pick([520, 680, 880, 1200, 1400]), d = R >= 1000 ? 2 : 1;
     const floor = pick([1, 2, 3]), zone = pick(['A', 'B', 'C']), n = 21 + Math.floor(Math.random() * 18);
     this.task = {
       rate, h, R, d, floor, zone, n, n2: n + 10,
@@ -339,11 +339,10 @@ const Game = defineGame({
   amiLines() {
     const N = this.N, t = this.task;
     return [
-      L(`Ami：${N}，我在三樓的書局等你。你先把車停到地下室。不要占用愛心專用車位喔！`, `${N}, te espero en la librería del tercer piso. Primero estaciona el auto en el sótano. ¡No ocupes un espacio reservado «de corazón» para personas con discapacidad!`, `${N}, I'll wait at the bookstore on the 3rd floor. First park the car in the basement. Don't take a priority "heart" space!`),
-      L('Ami：停好車以後，傳訊息告訴我你停在哪裡，這樣等一下我們才找得到車。', 'Cuando termines, mándame un mensaje diciendo dónde estacionaste, para que después podamos encontrar el auto.', "Once you've parked, message me where you parked so we can find the car later."),
-      L(`Ami：我們大概會逛${NZ(t.h)}個小時。停車每小時${t.rate}元；不過好像發票滿五百元折抵一小時，以此類推。`,
-        `Vamos a estar unas ${t.h} horas. El estacionamiento cuesta ${esM(t.rate)} por hora; pero parece que un recibo de ${esM(500)} o más descuenta 1 hora, y así sucesivamente.`,
-        `We'll be shopping about ${t.h} hours. Parking is ${enM(t.rate)} per hour; but it seems a receipt of ${enM(500)} or more takes off 1 hour, and so on.`)
+      L(`Ami：${N}，我在三樓書局等你。你先把車停到地下室，別停愛心專用車位喔！`, `${N}, te espero en la librería del tercer piso. Primero estaciona el auto en el sótano, ¡y no ocupes un espacio reservado «de corazón» para personas con discapacidad!`, `${N}, I'll wait at the bookstore on the 3rd floor. First park the car in the basement — and don't take a priority "heart" space!`),
+      L(`Ami：停車每小時${t.rate}元，發票每滿五百元折一小時，我們應該會逛${NZ(t.h)}個小時，嗯。`,
+        `El estacionamiento cuesta ${esM(t.rate)} por hora; por cada ${esM(500)} en recibos te descuentan 1 hora. Creo que vamos a estar unas ${t.h} horas, mmm.`,
+        `Parking is ${enM(t.rate)} per hour, and every ${enM(500)} on a receipt takes off 1 hour. I think we'll be shopping about ${t.h} hours, hmm.`)
     ];
   },
   hintSections() {
@@ -485,7 +484,9 @@ const Game = defineGame({
         place: 'phone',
         html: () => Game.pillarHTML(),
         dialogue: () => [
-          ami('你停好了嗎？你停在哪裡？', '¿Ya estacionaste? ¿Dónde quedó?', 'Did you park? Where are you parked?')
+          L('（車停好了。你拿出手機，傳訊息給Ami。）', '(Terminas de estacionar. Sacas tu celular y le escribes a Ami.)', '(You finish parking. You take out your phone and message Ami.)'),
+          L('我：車子停好了！', '¡Ya estacioné el auto!', "I've parked the car!"),
+          ami('好！你停在哪裡？', '¡Bien! ¿Dónde estacionaste?', 'Great! Where did you park?')
         ],
         options: () => rot([okMsg, '我停在地下室，很多車的地方。', `我停在${Game.locZh(t.floor, t.zone, t.n2)}。`]),
         next: c => {
