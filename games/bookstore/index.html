@@ -206,9 +206,9 @@ pinyinPro.customPinyin({
 });
 pinyinPro.customPinyin({
 
-  '書店': 'shū diàn', '怎麼樣': 'zěn me yàng', '書籤': 'shū qiān', '小說': 'xiǎo shuō', '漫畫': 'màn huà', '童書': 'tóng shū', '料理': 'liào lǐ', '食譜': 'shí pǔ', '語言': 'yǔ yán',
+  '書店': 'shū diàn', '怎麼樣': 'zěn me yàng', '怎麼辦': 'zěn me bàn', '書籤': 'shū qiān', '小說': 'xiǎo shuō', '漫畫': 'màn huà', '童書': 'tóng shū', '料理': 'liào lǐ', '食譜': 'shí pǔ', '語言': 'yǔ yán',
   '書區': 'shū qū', '包裝': 'bāo zhuāng', '店員': 'diàn yuán', '生日': 'shēng rì', '禮物': 'lǐ wù', '收銀台': 'shōu yín tái', '書架': 'shū jià',
-  '請問': 'qǐng wèn', '在哪裡': 'zài nǎ lǐ', '一共': 'yì gòng', '五百': 'wǔ bǎi', '兩百': 'liǎng bǎi', '賒帳': 'shē zhàng', '作者': 'zuò zhě',
+  '請問': 'qǐng wèn', '在哪裡': 'zài nǎ lǐ', '五百': 'wǔ bǎi', '兩百': 'liǎng bǎi', '賒帳': 'shē zhàng', '作者': 'zuò zhě',
   '星空': 'xīng kōng', '約定': 'yuē dìng', '旁邊': 'páng biān', '歡迎光臨': 'huān yíng guāng lín', '分類': 'fēn lèi', '招牌': 'zhāo pái'
 
 });
@@ -224,21 +224,21 @@ const WHO = { 'Ami': ['Ami', 'Ami'], '店員': ['El personal de la librería', '
 const SPEAKER_RE = /^(Ami|店員|我)：/;
 
 const VOCAB = {
-  START: [['書店', 'librería', 'bookstore'], ['生日', 'cumpleaños', 'birthday'], ['禮物', 'regalo', 'gift'], ['書籤', 'marcapáginas', 'bookmark'], ['包裝', 'envolver, empaquetar', 'wrap']],
-  SECTION: [['書區', 'sección de libros', 'book section'], ['小說', 'novela', 'novel'], ['漫畫', 'cómic, manga', 'comic'], ['童書', 'libro infantil', "children's book"], ['料理', 'cocina, platillo', 'cooking'], ['喜歡', 'gustar', 'like']],
-  FIND: [['書名', 'título del libro', 'book title'], ['拿', 'tomar, coger', 'take'], ['找到', 'encontrar', 'find']],
-  SEEK: [['書籤', 'marcapáginas', 'bookmark'], ['結帳', 'pagar en la caja', 'check out'], ['包裝', 'envolver', 'wrap']],
-  STOCK: [['還有嗎', 'todavía hay', 'do you still have it'], ['庫存', 'existencias', 'stock']],
-  LOOK: [['書籤', 'marcapáginas', 'bookmark'], ['放棄', 'rendirse', 'give up'], ['卡片', 'tarjeta', 'card']],
-  ASK: [['請問', 'disculpe, una pregunta', 'excuse me'], ['在哪裡', 'dónde está', 'where is'], ['櫃台', 'mostrador, caja', 'counter'], ['旁邊', 'al lado', 'next to']],
-  MARK: [['書籤', 'marcapáginas', 'bookmark'], ['漂亮', 'bonito', 'pretty'], ['一模一樣', 'idéntico', 'exactly the same']],
-  WRAP: [['包裝', 'envolver', 'wrap'], ['禮物', 'regalo', 'gift'], ['麻煩', 'por favor, molestar', 'please / trouble'], ['不用', 'no hace falta', 'no need']],
-  PAY: [['一共', 'en total', 'in total'], ['算錯', 'calcular mal', 'miscalculate'], ['應該', 'debería', 'should']],
-  PAY_FIX: [['夠', 'alcanzar, ser suficiente', 'be enough'], ['當場', 'en el momento', 'on the spot'], ['下次再付', 'pagar la próxima vez', 'pay next time']],
-  CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give wrong change'], ['應該找', 'debería darme de cambio', 'should give back']],
-  FAREWELL: [['包好', 'ya envuelto', 'wrapped'], ['漂亮', 'bonito', 'pretty'], ['謝謝', 'gracias', 'thanks']],
-  END: [['喜歡', 'gustar', 'like'], ['包好', 'ya envuelto', 'wrapped'], ['謝謝', 'gracias', 'thanks']],
-  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+  START: [['書店', 'librería', 'bookstore'], ['生日', 'cumpleaños', 'birthday'], ['禮物', 'regalo', 'gift'], ['書籤', 'marcapáginas', 'bookmark'], ['包裝', 'envolver, empaquetar', 'wrap'], ['下禮拜', 'la próxima semana', 'next week'], ['幫忙', 'ayudar', 'help']],
+  SECTION: [['區', 'sección, zona', 'section'], ['小說', 'novela', 'novel'], ['漫畫', 'cómic, manga', 'comic'], ['童書', 'libro infantil', "children's book"], ['料理', 'cocina (comida)', 'cooking'], ['語言', 'idiomas', 'languages'], ['喜歡', 'gustar', 'like']],
+  FIND: [['哪一本', 'cuál (libro)', 'which one'], ['找不到', 'no encontrar', "can't find"], ['問', 'preguntar', 'ask'], ['店員', 'empleado/a de la tienda', 'shop staff']],
+  SEEK: [['書籤', 'marcapáginas', 'bookmark'], ['結帳', 'pagar en la caja', 'check out'], ['不要', 'no querer', "don't want"], ['接下來', 'a continuación', 'next']],
+  STOCK: [['還有嗎', 'todavía hay', 'do you still have it'], ['多少錢', 'cuánto cuesta', 'how much'], ['便宜', 'barato', 'cheap'], ['請問', 'disculpe, una pregunta', 'excuse me'], ['比較', 'más (comparativo)', 'more / relatively']],
+  LOOK: [['書籤', 'marcapáginas', 'bookmark'], ['放棄', 'rendirse', 'give up'], ['卡片', 'tarjeta', 'card'], ['隨便', 'cualquiera', 'any / whichever'], ['怎麼辦', 'qué hago', 'what should I do']],
+  ASK: [['請問', 'disculpe, una pregunta', 'excuse me'], ['在哪裡', 'dónde está', 'where is'], ['旁邊', 'al lado', 'next to'], ['簽書會', 'firma de libros', 'book signing'], ['貴', 'caro', 'expensive']],
+  MARK: [['書籤', 'marcapáginas', 'bookmark'], ['櫃台', 'mostrador, caja', 'counter'], ['漂亮', 'bonito', 'pretty'], ['挑', 'elegir', 'pick'], ['醜', 'feo', 'ugly'], ['一模一樣', 'idéntico', 'exactly the same'], ['架子', 'estante, repisa', 'rack'], ['張', 'clasificador de objetos planos', 'measure word for flat items']],
+  WRAP: [['包裝', 'envolver', 'wrap'], ['禮物', 'regalo', 'gift'], ['結帳', 'pagar en la caja', 'check out'], ['麻煩', 'por favor (pedir un favor)', 'please (polite request)'], ['不用', 'no hace falta', 'no need'], ['幫忙', 'ayudar', 'help']],
+  PAY: [['一共', 'en total', 'in total'], ['算錯', 'calcular mal', 'miscalculate'], ['應該', 'debería', 'should'], ['只有', 'solo, solamente', 'only'], ['好像', 'parece que', 'it seems'], ['騙', 'engañar', 'cheat']],
+  PAY_FIX: [['不好意思', 'disculpe', 'sorry / excuse me'], ['給你', 'le doy, aquí tiene', 'here you are'], ['下次再付', 'pagar la próxima vez', 'pay next time'], ['發現', 'darse cuenta', 'notice']],
+  CHANGE: [['收你', 'recibo de usted', 'received from you'], ['找你', 'le doy de cambio', 'I give you change'], ['找錯', 'dar mal el cambio', 'give wrong change'], ['應該找', 'debería darme de cambio', 'should give back'], ['少找', 'dar de menos el cambio', 'give too little change'], ['故意', 'a propósito', 'on purpose']],
+  FAREWELL: [['包好', 'ya envuelto', 'wrapped'], ['漂亮', 'bonito', 'pretty'], ['醜', 'feo', 'ugly'], ['謝謝', 'gracias', 'thanks'], ['光臨', 'visitar (cortesía)', 'visit (polite)'], ['您', 'usted', 'you (polite)']],
+  END: [['買好', 'ya comprado', 'done buying'], ['就是', 'justo, exactamente', 'exactly'], ['算了', 'bueno, da igual', 'never mind'], ['喜歡', 'gustar', 'like'], ['咦', '¿eh?', 'huh?'], ['一定', 'seguro, sin duda', 'definitely']],
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points'], ['排行榜', 'clasificación', 'leaderboard']]
 };
 const STAGE = { SECTION: ['找書區', 'buscar sección', 'finding the section'], FIND: ['找書', 'buscar el libro', 'finding the book'], SEEK: ['找書籤', 'buscar el marcapáginas', 'finding the bookmark'], STOCK: ['問庫存', 'preguntar existencias', 'asking about stock'], ASK: ['問店員', 'preguntar', 'asking staff'], LOOK: ['找書籤', 'buscar el marcapáginas', 'finding the bookmark'], MARK: ['挑書籤', 'elegir el marcapáginas', 'choosing the bookmark'], WRAP: ['包裝', 'envolver', 'wrapping'], PAY: ['付錢', 'pagar', 'paying'], PAY_FIX: ['付錢', 'pagar', 'paying'], CHANGE: ['找錢', 'el cambio', 'the change'], FAREWELL: ['道別', 'despedirse', 'saying goodbye'] };
 const NEXT_LABEL = { SECTION: '看招牌', FIND: '走到書架', SEEK: '繼續', LOOK: '繼續', STOCK: '走到櫃台', ASK: '問店員', MARK: '走到櫃台', WRAP: '去結帳', PAY: '繼續', PAY_FIX: '聽店員重算', CHANGE: '等找錢', FAREWELL: '拿書', END: '回去找Ami' };
@@ -501,7 +501,7 @@ const Game = defineGame({
         options: () => rot(['去找書籤。', '直接去結帳。', '謝謝，我不要了。']),
         next: c => {
           if (c === '謝謝，我不要了。') {
-            Game.addMistake(M('Ami說要幫她買禮物啦！不要忘記了！', '¡Ami dijo que le compres un regalo! ¡No lo olvides!', 'Ami asked you to buy her a gift! Don\'t forget!'));
+            Game.addMistake(M('Ami說要幫她買禮物啦！不要忘記了！', '¡Ami te pidió que le compraras un regalo! ¡No lo olvides!', 'Ami asked you to buy a gift for her! Don\'t forget!'));
             return;
           }
           if (c === '直接去結帳。') {      // 忘了書籤：照樣可以結帳，但會扣分，結局變壞結局
@@ -575,7 +575,7 @@ const Game = defineGame({
       },
       WRAP: {
         place: 'shop',
-        dialogue: () => [staff('你好，請問這些要結帳嗎？', 'Hola, ¿va a pagar esto?', 'Hello, are you checking these out?'), L('我：對。這是生日禮物。', 'Sí. Es un regalo de cumpleaños.', 'Yes. It is a birthday gift.'), staff('請問需要幫忙包裝嗎？', '¿Quiere que se lo envuelva?', 'Would you like it gift-wrapped?')],
+        dialogue: () => [staff('你好，請問這些要結帳嗎？', 'Hola, ¿va a pagar esto?', 'Hello, are you ready to pay for these?'), L('我：對。這是生日禮物。', 'Sí. Es un regalo de cumpleaños.', 'Yes. It is a birthday gift.'), staff('請問需要幫忙包裝嗎？', '¿Quiere que se lo envuelva?', 'Would you like it gift-wrapped?')],
         options: () => rot(['不用麻煩了。', '要，麻煩幫我包裝一下。', '包裝個屁！直接給我。']),
         next: c => {
           if (c !== '要，麻煩幫我包裝一下。') {
