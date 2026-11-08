@@ -272,6 +272,8 @@ const VOCAB = {
   FLOOR: [['地下一樓', 'sótano 1', 'basement level 1'], ['空位', 'espacio libre', 'free space'], ['滿了', 'lleno', 'full'], ['指示牌', 'letrero indicador', 'sign'], ['開到', 'conducir hasta', 'drive to']],
   SPOT: [['一般車位', 'espacio normal', 'regular parking space'], ['愛心專用車位', 'espacio reservado', 'priority space'], ['輪椅', 'silla de ruedas', 'wheelchair'], ['車道', 'carril de circulación', 'driving lane'], ['空位', 'espacio libre', 'free space']],
   REMEMBER: [['區', 'zona', 'zone'], ['號', 'número', 'number'], ['地下室', 'sótano', 'basement'], ['停在', 'estacionar en', 'park at'], ['哪裡', 'dónde', 'where']],
+  UPSTAIRS: [['三樓', 'tercer piso', 'third floor'], ['書店', 'librería', 'bookstore'], ['上樓', 'subir', 'go upstairs'], ['離開', 'irse', 'leave']],
+  MALL: [['逛街', 'ir de compras, pasear', 'go shopping'], ['百貨公司', 'centro comercial', 'department store'], ['購物袋', 'bolsa de compras', 'shopping bag']],
   PAY_CHECK: [['應付金額', 'importe a pagar', 'amount due'], ['對講機', 'interfono', 'intercom'], ['管理員', 'encargado', 'attendant'], ['折抵', 'descontar', 'deduct']],
   PAY: [['繳費機', 'máquina de pago', 'pay station'], ['折抵', 'descontar', 'deduct'], ['掃描', 'escanear', 'scan'], ['發票', 'recibo', 'receipt'], ['每小時', 'por hora', 'per hour'], ['出場', 'salir (del estacionamiento)', 'exit the lot'], ['十五分鐘', 'quince minutos', 'fifteen minutes']],
   FIND_CAR: [['停在哪裡', 'dónde estacionaste', 'where parked'], ['地下二樓', 'sótano 2', 'basement level 2'], ['車', 'auto, coche', 'car'], ['記得', 'recordar', 'remember']],
@@ -283,12 +285,12 @@ const VOCAB = {
 /* 關卡名稱（錯誤紀錄用） */
 const STAGE = (() => {
   const enter = ['進場', 'entrar', 'entering'], park = ['停車', 'estacionar', 'parking'], msg = ['傳位置', 'avisar dónde', 'telling Ami where'], pay = ['繳費', 'pagar', 'paying'], find = ['找車', 'buscar el auto', 'finding the car'], out = ['出場', 'salir', 'leaving'];
-  return { ENTRANCE: enter, FLOOR: park, SPOT: park, REMEMBER: msg, PAY: pay, PAY_CHECK: pay, FIND_CAR: find, EXIT: out };
+  return { ENTRANCE: enter, FLOOR: park, SPOT: park, REMEMBER: msg, UPSTAIRS: msg, MALL: ['逛街', 'pasear', 'shopping'], PAY: pay, PAY_CHECK: pay, FIND_CAR: find, EXIT: out };
 })();
 
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
-  ENTRANCE: '開到入口', FLOOR: '往地下室開', SPOT: '繼續', REMEMBER: '下車', PAY: '逛完街，走到繳費機', PAY_CHECK: '看螢幕上的金額', FIND_CAR: '走去找車', EXIT: '開到出口', END: '開出去'
+  ENTRANCE: '開到入口', FLOOR: '往地下室開', SPOT: '繼續', REMEMBER: '下車', UPSTAIRS: '繼續', MALL: '走到Ami旁邊', PAY: '走到一樓的繳費機', PAY_CHECK: '看螢幕上的金額', FIND_CAR: '走去找車', EXIT: '開到出口', END: '開出去'
 };
 
 /* ══════════════════════════════════════
@@ -300,6 +302,7 @@ const PLACES = {
   sign: ['🅿️', '停車場', 'Estacionamiento', 'Parking garage', ''],
   garage: ['🚗', '地下停車場', 'Estacionamiento subterráneo', 'Underground garage', ''],
   machine: ['💳', '自動繳費機', 'Máquina de pago', 'Pay station', ''],
+  mall: ['🛍️', '星光百貨', 'Centro comercial', 'Department store', ''],
   exit: ['🚧', '停車場出口', 'Salida del estacionamiento', 'Parking exit', '']
 };
 const FL = f => `地下${CN[f]}樓`;                 // 地下一樓
@@ -349,7 +352,7 @@ const Game = defineGame({
 
   IMAGES: {
     START: ['images/start.jpg', '🚗'], ENTRANCE: ['images/entrance.jpg', '🚧'], FLOOR: ['images/sign.jpg', '🅿️'], SPOT: ['images/spot.jpg', '♿'],
-    REMEMBER: ['images/pillar.jpg', '🔢'], PAY: ['images/machine.jpg', '💳'], PAY_CHECK: ['images/machine.jpg', '💳'], FIND_CAR: ['images/garage.jpg', '🚗'], EXIT: ['images/exit.jpg', '🚧'],
+    REMEMBER: ['images/pillar.jpg', '🔢'], UPSTAIRS: ['images/pillar.jpg', '📱'], MALL: ['images/mall.jpg', '🛍️'], PAY: ['images/machine.jpg', '💳'], PAY_CHECK: ['images/machine.jpg', '💳'], FIND_CAR: ['images/garage.jpg', '🚗'], EXIT: ['images/exit.jpg', '🚧'],
     END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
   wrongSpot: false,
@@ -388,10 +391,10 @@ const Game = defineGame({
     ];
   },
   hintSections() {
-    const ORDER = ['START', 'ENTRANCE', 'FLOOR', 'SPOT', 'REMEMBER', 'PAY', 'PAY_CHECK', 'FIND_CAR', 'EXIT', 'END', 'RESULT'];
+    const ORDER = ['START', 'ENTRANCE', 'FLOOR', 'SPOT', 'REMEMBER', 'UPSTAIRS', 'MALL', 'PAY', 'PAY_CHECK', 'FIND_CAR', 'EXIT', 'END', 'RESULT'];
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
-    if (at('PAY') && this.sent) out.push({ title: '你傳給 Ami 的訊息', lines: [this.sent] });
+    if (at('UPSTAIRS') && this.sent) out.push({ title: '你傳給 Ami 的訊息', lines: [this.sent] });
     return out;
   },
 
@@ -484,10 +487,10 @@ const Game = defineGame({
       ENTRANCE: {
         place: 'gate',
         dialogue: () => [L('（入口柵欄旁邊有一台機器，上面有一個按鈕。）', '(Junto a la barrera de la entrada hay una máquina con un botón.)', '(Next to the entrance barrier is a machine with a button.)')],
-        options: () => rot(['按按鈕，拿停車票。', '直接開過去。', '按喇叭，叫人來開門。']),
+        options: () => rot(['按按鈕，拿停車票。', '幹！衝過去啦！', '狂按喇叭，叫人來開門。']),
         next: c => {
           if (c !== '按按鈕，拿停車票。') {
-            Game.addMistake(c === '直接開過去。'
+            Game.addMistake(c === '幹！衝過去啦！'
               ? M('柵欄是關著的，要先拿停車票，柵欄才會升起來。', 'La barrera está cerrada: primero hay que sacar el boleto para que suba.', 'The barrier is down — you need to take a parking ticket first for it to go up.')
               : M('不用按喇叭，這是自動的，按按鈕拿票就可以了。', 'No hace falta tocar la bocina: es automático, basta con pulsar el botón y tomar el boleto.', "No need to honk — it's automatic. Just press the button and take the ticket."));
             return;
@@ -567,10 +570,38 @@ const Game = defineGame({
           }
           goodFirst('REMEMBER', '說得很清楚！哪一層、哪一區、幾號，都說到了。', '¡Lo dijiste muy claro! Nivel, zona y número.', 'Clearly said! Level, zone and number — all there.');
           Game.sent = L(`我：${okMsg}`, `Estoy en ${Game.locEs()}.`, `I'm at ${Game.locEn()}.`);
-          Game.thought = [ami('好，我知道了！', '¡Bien, entendido!', 'Got it!'),
-            L(`（你們在百貨公司逛了${NZ(t.h)}個小時。）`, `(Pasan ${t.h} horas en el centro comercial.)`, `(You spend ${t.h} hours in the department store.)`)];
-          Game.state = 'PAY';
+          Game.thought = [ami('好喔！趕快上來吧！我等你。', '¡Bien! ¡Sube rápido! Te espero.', "OK! Come up quick! I'll be waiting.")];
+          Game.state = 'UPSTAIRS';
         }
+      },
+
+      /* ═══ 車停好了：上樓找 Ami ═══ */
+      UPSTAIRS: {
+        place: 'phone',
+        dialogue: () => [L('（Ami在三樓的書店等你。）', '(Ami te espera en la librería del tercer piso.)', '(Ami is waiting for you at the bookstore on the third floor.)')],
+        options: () => rot(['上樓找Ami。', '直接離開。', '自己逛自己的。']),
+        next: c => {
+          if (c !== '上樓找Ami。') {
+            Game.addMistake(c === '直接離開。'
+              ? M('Ami還在三樓等你，不可以自己先走。', 'Ami te está esperando en el tercer piso: no puedes irte solo.', 'Ami is waiting for you on the third floor — you can\'t just leave.')
+              : M('你和Ami約好要一起逛，要先上樓找她。', 'Quedaste con Ami en ir juntos: primero sube a buscarla.', 'You agreed to shop together — go up and find Ami first.'));
+            return;
+          }
+          goodFirst('UPSTAIRS', '對！跟朋友有約，要上樓去找她。', '¡Bien! Quedaste con tu amiga: sube a buscarla.', 'Right! You made plans with your friend — go up and find her.');
+          Game.thought = [L('（你搭手扶梯上三樓，看到Ami在前面。）', '(Subes en la escalera eléctrica al tercer piso y ves a Ami adelante.)', '(You ride the escalator up to the third floor and see Ami ahead.)')];
+          Game.state = 'MALL';
+        }
+      },
+
+      /* ═══ 跟 Ami 逛街（不用答題） ═══ */
+      MALL: {
+        place: 'mall',
+        dialogue: () => [
+          ami('這邊這邊！我們慢慢逛吧！', '¡Por aquí! ¡Vamos a pasear con calma!', "Over here! Let's take our time!"),
+          L(`（你們在百貨公司逛了${NZ(t.h)}個小時，買了很多東西。）`, `(Pasan ${t.h} horas en el centro comercial y compran muchas cosas.)`, `(You spend ${t.h} hours in the department store and buy a lot.)`)
+        ],
+        options: ['逛完街了'],
+        next: () => { Game.state = 'PAY'; }
       },
 
       /* ═══ 自動繳費機：發票折抵 ═══ */
