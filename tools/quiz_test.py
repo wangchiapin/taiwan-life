@@ -16,15 +16,26 @@ def enabled():
 
 def play_to_result(page, g, wrong_once=True):
     orc = smoke.EXTRA.get(g) or smoke.ORACLES.get(g)
-    tried = False
-    for _ in range(300):
+    tried = False; bad = set()
+    for _ in range(600):
         st = page.evaluate('Game.state')
         if st == 'RESULT': return True
+        if page.locator('#ami-pop').count():   # Ami 的懸浮視窗會擋住按鈕：打開來看，再按「回覆：知道了」
+            page.click('#ami-pop [data-act="open"]' if page.locator('#ami-pop [data-act="open"]').count() else '#ami-pop [data-act="reply"]'); continue
         if st == '_TRANS': smoke.click_i(page, 0); continue
+        if g == 'breakfast' and page.evaluate("!!(Game.getConfig()[Game.state]||{}).pad"):
+            page.evaluate("Game.pad.ticket=[...Game.C.target]; Game.padSubmit()"); continue
         page.evaluate("g=>{if(typeof Game.testPrep==='function')Game.testPrep(g)}", True)
         c = smoke.cands(page); opts = [x for x, _ in c]
         if not opts: page.wait_for_timeout(200); continue
-        ans = page.evaluate(orc)
+        if page.evaluate('Game.mistakes') >= 8: page.evaluate('Game.mistakes=0')
+        ans = page.evaluate(orc) if orc else None   # 沒有正解檔的遊戲：隨機點（答錯也沒關係，一定走得到結果頁）
+        if not orc:
+            import random
+            cand = [i for i, o in enumerate(opts) if (st, o) not in bad] or list(range(len(opts)))
+            idx = random.choice(cand); m0 = page.evaluate('Game.mistakes'); smoke.click_c(page, c, idx)
+            if page.evaluate('Game.state') == st and page.evaluate('Game.mistakes') > m0: bad.add((st, opts[idx]))
+            continue
         az = page.evaluate('a=>a&&Z(a)', ans)   # 簡體時畫面上的選項是簡體字
         idx = next((i for i, o in enumerate(opts) if o.strip() in (ans, az)), None)
         if idx is None: idx = next((i for i, o in enumerate(opts) if ans and (ans in o or az in o)), 0)
@@ -59,8 +70,8 @@ def check_game(p, g, lang='es', script='trad'):
         if lang == 'en' and q['right'] == q['es'] and False: pass
     # 答錯過的關卡的單字要排前面
     if bad_states:
-        bad_words = set(page.evaluate("s=>s.flatMap(k=>{try{return (VOCAB[k]||[]).map(w=>w[0])}catch(e){return []}})", bad_states))
-        cand_bad = [z for z in bad_words if VocabQuiz_ok(page, z)]
+        bad_words = set(page.evaluate("s=>s.flatMap(k=>{try{return (VOCAB[k]||[]).filter(w=>VocabQuiz.isWord(w)).map(w=>w[0])}catch(e){return []}})", bad_states))
+        cand_bad = list(bad_words)
         k = min(len(cand_bad), n)
         if k and not all(z in bad_words for z in zhs[:k]): fails.append(f'答錯過的關卡的單字沒排前面：{zhs} / 錯的關卡 {bad_states}')
     hits = 0
@@ -88,6 +99,7 @@ def check_game(p, g, lang='es', script='trad'):
     page.goto(f'http://127.0.0.1:{PORT}/games/{g}/index.html'); page.wait_for_timeout(400)
     page.fill('#player-name-input', 'AAA'); page.click('.btn-primary'); page.wait_for_timeout(800)
     play_to_result(page, g, wrong_once=False); page.wait_for_timeout(300)
+    if not page.locator('[data-quiz-go]').count(): b.close(); return ['結果頁沒有邀請卡片（點不到）'], errs
     page.click('[data-quiz-go]'); page.wait_for_timeout(300)
     page.click('[data-quiz-skip]'); page.wait_for_timeout(1500)
     if not page.evaluate("document.getElementById('leaderboard-screen').classList.contains('active')"): fails.append('中途「先不要」去不了排行榜')
@@ -101,7 +113,9 @@ def check_embed(p, g):
     page = ctx.new_page(); page.goto(f'http://127.0.0.1:{PORT}/games/{g}/index.html?embed=1&name=Ana'); page.wait_for_timeout(600)
     fails = []
     if not play_to_result(page, g, wrong_once=False): b.close(); return ['地圖模式玩不到結果頁']
-    page.wait_for_timeout(300); page.click('[data-quiz-go]'); page.wait_for_timeout(400)
+    page.wait_for_timeout(300)
+    if not page.locator('[data-quiz-go]').count(): b.close(); return ['地圖模式結果頁沒有邀請卡片']
+    page.click('[data-quiz-go]'); page.wait_for_timeout(400)
     n1 = page.evaluate("__m.filter(t=>t==='scene-result').length")
     if n1 != 1: fails.append(f'進小考時 scene-result 應該送 1 次，實際 {n1}')
     page.click('[data-quiz-skip]'); page.wait_for_timeout(1200)
@@ -117,6 +131,7 @@ def check_disabled(p, g):
     ctx = b.new_context(viewport={'width': 390, 'height': 844}); ctx.route('**/*', route)
     page = ctx.new_page(); page.goto(f'http://127.0.0.1:{PORT}/games/{g}/index.html'); page.wait_for_timeout(400)
     page.fill('#player-name-input', 'AAA'); page.click('.btn-primary'); page.wait_for_timeout(800)
+    page.evaluate('GAME.vocabQuiz=false')
     ok = play_to_result(page, g, wrong_once=False); page.wait_for_timeout(300)
     n = page.locator('[data-quiz-go]').count(); b.close()
     return [] if (ok and n == 0) else ['沒開小考的遊戲結果頁卻出現邀請卡片' if n else '玩不到結果頁']
@@ -128,13 +143,16 @@ def main():
     with sync_playwright() as p:
         for g in games:
             for lang, script in (('es', 'trad'), ('en', 'trad'), ('zh', 'trad'), ('es', 'simp')):
-                f, e = check_game(p, g, lang, script)
+                try: f, e = check_game(p, g, lang, script)
+                except Exception as ex: f, e = [f'測試中斷：{str(ex).splitlines()[0][:80]}'], []
                 tag = f'{g} [{lang}/{script}]'
                 if f or e: bad += 1; print('✗', tag, f, e)
                 else: print('✓', tag)
         for g in games:
-            f = check_embed(p, g); print('✓' if not f else '✗', g, '（地圖模式）', f); bad += bool(f)
-        for g in [x for x in (os.path.basename(os.path.dirname(f)) for f in sorted(glob.glob(ROOT + '/games/*/index.html'))) if x in smoke.ORACLES and x not in enabled()][:1]:
+            try: f = check_embed(p, g)
+            except Exception as ex: f = [f'測試中斷：{str(ex).splitlines()[0][:80]}']
+            print('✓' if not f else '✗', g, '（地圖模式）', f); bad += bool(f)
+        for g in ['bakery']:   # 旗標關掉就不能出現邀請卡
             f = check_disabled(p, g); print('✓' if not f else '✗', g, '（沒開小考）', f); bad += bool(f)
     sys.exit(1 if bad else 0)
 

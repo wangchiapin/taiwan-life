@@ -529,7 +529,7 @@ function loadT2S() {
   return new Promise(res => {
     const sc = document.createElement('script');
     sc.src = 'https://cdn.jsdelivr.net/npm/opencc-js@1.4.2/dist/umd/t2cn.js';
-    sc.onload = () => { try { _t2s = OpenCC.Converter({ from: 'tw', to: 'cn' }); } catch (e) {} res(); };
+    sc.onload = () => { try { const cv = OpenCC.Converter({ from: 'tw', to: 'cn' }); _t2s = t => cv(String(t).replace(/么/g, '\uE000')).replace(/\uE000/g, '么'); } catch (e) {} res(); };   // 已經是簡體的「么」再轉一次會變成「幺」（怎么→怎幺），所以先保護起來
     sc.onerror = () => res();
     document.head.appendChild(sc);
   });
@@ -846,17 +846,22 @@ const VocabQuiz = {
     const zh = w[0], es = w[1] || '';
     if (/[…、，。？！]/.test(zh) || /[你我他妳]/.test(zh) || Array.from(zh).length > 5) return false;
     if (/grosero|rude|vulgar/i.test(es + ' ' + (w[2] || ''))) return false;
+    // 整句／問句／文法小字不出題（可以嗎、對嗎、誰的、來了沒、快到了、第、把、都…）
+    if (/[0-9]|[嗎呢吧沒]$|哪裡|幾次/.test(zh)) return false;
+    if (/了$/.test(zh) && !/^(算了|辛苦了|不用了)$/.test(zh)) return false;
+    if (/^(第|把|都|又|往|誰的|這裡不是|到時候見|讓您久等了|沒抽中|沒問題|咦|還有嗎)$/.test(zh)) return false;
     return true;
   },
   tr(w) { return Settings.lang === 'en' ? (w[2] || w[1]) : w[1]; },   // 只有中文的設定時，用西文出題
   states() { return Object.keys(VOCAB).filter(s => { try { return (VOCAB[s] || []).length; } catch (e) { return false; } }); },
   pickWords() {
     const shuffle = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(p => p[1]);
-    const played = Object.keys(Game.att || {}), bad = Game._mistakeSt || new Set();
+    const bad = Game._mistakeSt || new Set(), played = [...new Set([...Object.keys(Game.att || {}), ...bad])];   // 答錯的關卡一定算玩過
     const seen = new Set(), grab = states => shuffle(states.flatMap(s => { try { return VOCAB[s] || []; } catch (e) { return []; } }))
       .filter(w => this.isWord(w) && !seen.has(w[0]) && seen.add(w[0]));
     const first = grab(played.filter(s => bad.has(s))), rest = grab(played.filter(s => !bad.has(s)));
-    return first.concat(rest).slice(0, this.N);
+    const more = grab(this.states().filter(s => !played.includes(s)));   // 玩過的關卡單字不夠（或遊戲沒記錄關卡）就用整個遊戲的單字補
+    return first.concat(rest, more).slice(0, this.N);
   },
   makeQuestions() {
     const words = this.pickWords();
@@ -1352,7 +1357,6 @@ const GameCore = {
     });
 
     if (cfg.mount && !this._transMode) cfg.mount(box);
-    if (this.state === 'RESULT' && GAME.vocabQuiz && !this._transMode) VocabQuiz.invite(box);   // 結果頁：單字小考邀請
     const area = document.getElementById('options-area');
     area.className = '';
     area.innerHTML = '';
@@ -1404,6 +1408,16 @@ function defineGame(own) {
   Object.defineProperties(g, Object.getOwnPropertyDescriptors(own));
   // 拼音／注音要不要顯示，一律看共用設定（各遊戲原本的 showPinyin: false 不再使用）
   Object.defineProperty(g, 'showPinyin', { get: () => Settings.phon !== 'off', set() {}, configurable: true });
+  // 結果頁的單字小考邀請：包在 render 外面，遊戲自己改寫 render（bakery、drinks、reserva…）也會出現
+  const baseRender = g.render;
+  g.render = function () {
+    const v = baseRender.apply(this, arguments);
+    if (this.state === 'RESULT' && GAME.vocabQuiz && !this._transMode) {
+      const box = document.getElementById('npc-dialogue');
+      if (box) { box.querySelectorAll('.quiz-invite').forEach(e => e.remove()); VocabQuiz.invite(box); }
+    }
+    return v;
+  };
   return g;
 }
 
