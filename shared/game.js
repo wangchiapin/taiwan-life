@@ -832,6 +832,167 @@ const Vocab = {
 };
 document.getElementById('vocab-tab').onclick = () => Vocab.toggle();
 document.getElementById('vocab-close').onclick = () => Vocab.toggle(false);
+
+/* ══════════════════════════════════════
+   單字小考（結果頁最下面的「挑戰自己」）
+   遊戲要開：在 GAME 設定加 vocabQuiz: true。
+   抽 8 個「這局玩到的關卡」的單字（答錯過的關卡優先），選擇題，不計分、不上傳、答錯沒關係；
+   考完可以把這 8 個單字下載成一張圖片。
+══════════════════════════════════════ */
+const VocabQuiz = {
+  N: 8,
+  /* 不算「單字」的不抽：句型（…）、含你／我／他的片段（找你、找我、收你）、太長的句子、粗話 */
+  isWord(w) {
+    const zh = w[0], es = w[1] || '';
+    if (/[…、，。？！]/.test(zh) || /[你我他妳]/.test(zh) || Array.from(zh).length > 5) return false;
+    if (/grosero|rude|vulgar/i.test(es + ' ' + (w[2] || ''))) return false;
+    return true;
+  },
+  tr(w) { return Settings.lang === 'en' ? (w[2] || w[1]) : w[1]; },   // 只有中文的設定時，用西文出題
+  states() { return Object.keys(VOCAB).filter(s => { try { return (VOCAB[s] || []).length; } catch (e) { return false; } }); },
+  pickWords() {
+    const shuffle = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(p => p[1]);
+    const played = Object.keys(Game.att || {}), bad = Game._mistakeSt || new Set();
+    const seen = new Set(), grab = states => shuffle(states.flatMap(s => { try { return VOCAB[s] || []; } catch (e) { return []; } }))
+      .filter(w => this.isWord(w) && !seen.has(w[0]) && seen.add(w[0]));
+    const first = grab(played.filter(s => bad.has(s))), rest = grab(played.filter(s => !bad.has(s)));
+    return first.concat(rest).slice(0, this.N);
+  },
+  makeQuestions() {
+    const words = this.pickWords();
+    const pool = []; this.states().forEach(s => { try { (VOCAB[s] || []).forEach(w => { if (this.isWord(w)) pool.push(w); }); } catch (e) {} });
+    return words.map(w => {
+      const right = this.tr(w), seen = new Set([right]), wrongs = [];
+      pool.map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).forEach(([, x]) => {
+        const t = this.tr(x);
+        if (wrongs.length < 3 && t && !seen.has(t)) { seen.add(t); wrongs.push(t); }
+      });
+      const opts = [right, ...wrongs].map(t => [Math.random(), t]).sort((a, b) => a[0] - b[0]).map(p => p[1]);
+      return { w, right, opts };
+    });
+  },
+  css() {
+    if (document.getElementById('quiz-css')) return;
+    const s = document.createElement('style'); s.id = 'quiz-css';
+    s.textContent = `
+.quiz-invite { margin: 18px 0 4px; padding: 14px; border-radius: 14px; background: #fff8e1; border: 2px dashed var(--yolk, #f2b632); text-align: center; line-height: 1.9; }
+.quiz-invite .q-t { font-size: 18px; font-weight: 700; }
+.quiz-invite .q-es { color: var(--muted, #5b6b73); font-size: 13px; margin-bottom: 10px; }
+.quiz-invite .opt { width: 100%; }
+#quiz-screen { overflow-y: auto; }
+#quiz-screen .q-box { width: 100%; max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+#quiz-screen .q-prog { text-align: center; color: var(--muted, #5b6b73); font-size: 14px; }
+#quiz-screen .q-zh { text-align: center; font-size: 44px; font-weight: 700; line-height: 2; }
+#quiz-screen .q-zh .tr-btn { vertical-align: middle; }
+#quiz-screen .opt { width: 100%; }
+#quiz-screen .opt.q-ok { border-color: #2e9c5b; background: #e6f6ec; color: var(--ink, #1b2a33); }
+#quiz-screen .opt.q-bad { border-color: #c0392b; background: #fdecea; color: var(--ink, #1b2a33); }
+#quiz-screen .opt:disabled { cursor: default; }
+#quiz-screen .q-fb { text-align: center; font-weight: 700; line-height: 1.9; }
+#quiz-screen .q-skip { align-self: center; background: none; border: none; font: inherit; font-size: 14px; color: var(--muted, #5b6b73); text-decoration: underline; cursor: pointer; padding: 6px; }
+#quiz-screen .q-score { text-align: center; font-size: 22px; font-weight: 700; }
+#quiz-screen .q-img { width: 100%; border-radius: 12px; border: 1px solid #c9bfa4; }
+#quiz-screen .q-hint { text-align: center; color: var(--muted, #5b6b73); font-size: 13px; }`;
+    document.head.appendChild(s);
+  },
+  /* 結果頁：在「查看排行榜」上面放邀請卡片 */
+  invite(box) {
+    if (!GAME.vocabQuiz || !this.makeQuestions().length) return;
+    this.css();
+    const d = document.createElement('div'); d.className = 'quiz-invite';
+    d.innerHTML = `<div class="q-t">${Game.ruby('你學會了幾個單字？挑戰一下自己吧！')}</div>
+      <div class="q-es">${esc(X('¿Cuántas palabras aprendiste? ¡Ponte a prueba!', 'How many words did you learn? Challenge yourself!'))}</div>
+      <button class="opt deal" id="quiz-go" data-quiz-go>${Game.ruby('挑戰自己')} ${esc(X('Ponte a prueba', 'Challenge yourself'))}</button>`;
+    box.appendChild(d);
+    d.querySelector('#quiz-go').onclick = () => this.start();
+  },
+  screen() {
+    let el = document.getElementById('quiz-screen');
+    if (!el) { el = document.createElement('div'); el.id = 'quiz-screen'; el.className = 'screen'; document.body.appendChild(el); }
+    return el;
+  },
+  start() {
+    this.css();
+    this.qs = this.makeQuestions(); this.i = 0; this.hit = 0;
+    if (!this.qs.length) { showLeaderboard(); return; }
+    // 地圖模式：先把成績交給地圖（學生中途按 ✕ Salir 離開也算完成）
+    if (EMBED) postEmbedResult();
+    Tr.closeAll(); Speech.stop(); Vocab.toggle(false); Hints.toggle(false); Log.toggle(false);
+    document.getElementById('side-tabs').hidden = true;
+    document.getElementById('game-window').classList.remove('active');
+    this.screen().classList.add('active');
+    this.showQ();
+  },
+  skipLink() { return `<button class="q-skip" data-quiz-skip>${Game.ruby('先不要，去排行榜')} ${esc(X('Salir al ranking', 'Skip to leaderboard'))}</button>`; },
+  leave() { this.screen().classList.remove('active'); showLeaderboard(); },
+  showQ() {
+    const q = this.qs[this.i], el = this.screen();
+    el.innerHTML = `<div class="q-box">
+      <div class="q-prog">${Z('第')} ${this.i + 1} ／ ${this.qs.length} ${esc(X(`Pregunta ${this.i + 1} de ${this.qs.length}`, `Question ${this.i + 1} of ${this.qs.length}`))}</div>
+      <div class="q-zh">${Game.ruby(q.w[0])} ${spkBtn(q.w[0], '朗讀')}</div>
+      ${q.opts.map((o, k) => `<button class="opt" data-q="${k}" data-choice="${esc(o)}">${esc(o)}</button>`).join('')}
+      <div class="q-fb" id="q-fb"></div><div id="q-next"></div>${this.skipLink()}</div>`;
+    el.querySelectorAll('[data-spk]').forEach(btn => { btn.onclick = () => Speech.speak(btn.dataset.spk, btn); });
+    el.querySelectorAll('[data-q]').forEach(btn => { btn.onclick = () => this.answer(btn); });
+    el.querySelector('[data-quiz-skip]').onclick = () => this.leave();
+  },
+  answer(btn) {
+    const q = this.qs[this.i], el = this.screen(), ok = q.opts[+btn.dataset.q] === q.right;
+    if (ok) this.hit += 1;
+    el.querySelectorAll('[data-q]').forEach(b => { b.disabled = true; if (q.opts[+b.dataset.q] === q.right) b.classList.add('q-ok'); });
+    if (!ok) btn.classList.add('q-bad');
+    const last = this.i === this.qs.length - 1;
+    el.querySelector('#q-fb').innerHTML = ok ? `${Z('答對了！')} ${esc(X('¡Correcto!', 'Correct!'))}` : `${Z('不對喔。')} ${Game.ruby(q.w[0])} ＝ ${esc(q.right)}`;
+    el.querySelector('#q-next').innerHTML = `<button class="opt deal" data-quiz-next>${last ? Game.ruby('看結果') + ' ' + esc(X('Ver resultado', 'See results')) : Game.ruby('下一題') + ' ' + esc(X('Siguiente', 'Next'))}</button>`;
+    el.querySelector('[data-quiz-next]').onclick = () => { if (last) this.finish(); else { this.i += 1; this.showQ(); } };
+  },
+  finish() {
+    const el = this.screen(), n = this.qs.length;
+    const msg = this.hit === n ? ['太棒了，全部答對！', '¡Genial, todas correctas!', 'Perfect, all correct!']
+      : this.hit >= n * 0.6 ? ['很不錯喔！', '¡Muy bien!', 'Nice work!'] : ['沒關係，看看單字卡再試一次！', 'No pasa nada: repasa la tarjeta y vuelve a intentarlo.', 'No worries — review the card and try again!'];
+    const url = this.cardPNG();
+    el.innerHTML = `<div class="q-box">
+      <div class="q-score">${Z('答對')} ${this.hit} ／ ${n}</div>
+      <div class="q-fb">${Game.ruby(msg[0])}<br><small>${esc(X(msg[1], msg[2]))}</small></div>
+      <img class="q-img" alt="${esc(Z('單字卡'))}" src="${url}">
+      <div class="q-hint">${Game.ruby('手機可以長按圖片儲存')} ${esc(X('En el móvil: mantén pulsada la imagen para guardarla', 'On mobile: long-press the image to save it'))}</div>
+      <button class="opt deal" data-quiz-dl>${Game.ruby('下載圖片')} ${esc(X('Descargar imagen', 'Download image'))}</button>
+      <button class="opt" data-quiz-lb>${Game.ruby('查看排行榜')} ${esc(X('Ver clasificación', 'See leaderboard'))}</button></div>`;
+    el.querySelector('[data-quiz-dl]').onclick = () => {
+      const a = document.createElement('a'); a.href = url; a.download = `vocab-${GAME.scene}.png`;
+      document.body.appendChild(a); a.click(); a.remove();
+    };
+    el.querySelector('[data-quiz-lb]').onclick = () => this.leave();
+  },
+  /* 把這 8 個單字畫成一張圖（中文、拼音、意思） */
+  cardPNG() {
+    const cs = getComputedStyle(document.documentElement), col = (v, d) => (cs.getPropertyValue(v) || '').trim() || d;
+    const red = col('--red', '#2c7a8c'), redDark = col('--red-dark', '#1f5d6b'), ink = col('--ink', '#1b2a33');
+    const W = 900, PAD = 40, ROW = 104, HEAD = 150, FOOT = 70, rows = this.qs.length;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = HEAD + ROW * rows + FOOT;
+    const g = cv.getContext('2d'), FONT = "'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif";
+    g.fillStyle = '#fffdf3'; g.fillRect(0, 0, W, cv.height);
+    g.strokeStyle = red; g.lineWidth = 8; g.strokeRect(10, 10, W - 20, cv.height - 20);
+    g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+    g.fillStyle = redDark; g.font = `700 44px ${FONT}`; g.fillText(Z('單字卡') + ' · ' + (Settings.lang === 'en' ? 'Vocabulary card' : 'Tarjeta de vocabulario'), W / 2, 76);
+    g.fillStyle = '#5b6b73'; g.font = `400 24px ${FONT}`; g.fillText(`${(document.title || '').split(/[｜|]/)[0].trim()}　${Game.N || ''}`.trim(), W / 2, 116);
+    const fit = (t, max, size, wt) => { g.font = `${wt} ${size}px ${FONT}`; while (g.measureText(t).width > max && size > 14) { size -= 1; g.font = `${wt} ${size}px ${FONT}`; } return size; };
+    const wrap = (t, max) => { const out = []; let line = ''; t.split(' ').forEach(wd => { const tryL = line ? line + ' ' + wd : wd; if (g.measureText(tryL).width > max && line) { out.push(line); line = wd; } else line = tryL; }); if (line) out.push(line); return out; };
+    this.qs.forEach((q, i) => {
+      const y = HEAD + i * ROW;
+      g.strokeStyle = '#c9bfa4'; g.setLineDash([6, 6]); g.lineWidth = 2; g.beginPath(); g.moveTo(PAD, y); g.lineTo(W - PAD, y); g.stroke(); g.setLineDash([]);
+      g.textAlign = 'left';
+      g.fillStyle = red; fit(phLine(q.w[0]), 400, 22, 500); g.fillText(phLine(q.w[0]), PAD, y + 36);
+      g.fillStyle = ink; fit(Z(q.w[0]), 400, 46, 700); g.fillText(Z(q.w[0]), PAD, y + 84);
+      g.textAlign = 'right'; g.fillStyle = ink; g.font = `500 26px ${FONT}`;
+      const lines = wrap(this.tr(q.w), 400).slice(0, 2), y0 = y + ROW / 2 + 9 - (lines.length - 1) * 16;
+      lines.forEach((ln, k) => g.fillText(ln, W - PAD, y0 + k * 32));
+    });
+    g.textAlign = 'center'; g.fillStyle = '#5b6b73'; g.font = `400 20px ${FONT}`;
+    g.fillText('© 每天一分鐘 @cadadiaunosminutos_ben_chino', W / 2, cv.height - 28);
+    return cv.toDataURL('image/png');
+  }
+};
 /* ══════════════════════════════════════
    錯誤紀錄：整局累積、即時更新、最新的在上面、標出關卡（關卡名稱 STAGE 寫在各遊戲）
 ══════════════════════════════════════ */
@@ -945,6 +1106,11 @@ function restartGame(skipConfirm) {
   location.replace(location.pathname + '?' + p.toString());
 }
 
+/* 嵌入模式：把成績告訴地圖（只送一次；單字小考開始前或排行榜出現時，誰先到誰送） */
+function postEmbedResult() {
+  if (Game._embedPosted) return; Game._embedPosted = true;
+  try { parent.postMessage({ type: 'scene-result', scene: GAME.scene, score: Game.score, mistakes: Game.mistakes }, '*'); } catch (e) {}
+}
 /* 嵌入模式：玩完把成績交給地圖，由地圖關掉這一關 */
 function finishEmbed() {
   Tr.closeAll(); Speech.stop();
@@ -977,7 +1143,7 @@ async function showLeaderboard() {
     const back = document.querySelector('#leaderboard-screen .btn-restart');
     if (back) { back.dataset.zh = '回到地圖'; back.dataset.es = 'Volver al mapa'; back.dataset.en = 'Back to the map'; back.textContent = '回到地圖 ' + X('Volver al mapa', 'Back to the map'); back.onclick = finishEmbed; }
     // 先告訴地圖成績（學生直接按地圖右上角「✕ Salir」離開，也算完成）
-    try { parent.postMessage({ type: 'scene-result', scene: GAME.scene, score: Game.score, mistakes: Game.mistakes }, '*'); } catch (e) {}
+    postEmbedResult();
   }
   Tr.closeAll(); Speech.stop(); Vocab.toggle(false); Hints.toggle(false); Log.toggle(false);
   document.getElementById('side-tabs').hidden = true;
@@ -1024,6 +1190,7 @@ const GameCore = {
   stopTimer() { clearInterval(this.timerInterval); },
   addMistake(r, thought) {
     this.score -= 10; this.mistakes += 1; this.mistakeLog.push(r.zh + ' ' + r.es);
+    (this._mistakeSt = this._mistakeSt || new Set()).add(this.state);   // 單字小考：答錯過的關卡的單字優先
     this.log.push({ ...r, stage: stageOf(), visit: this.visit });
     if (this.state !== 'END') this.feedback.push({ type: 'bad', ...r });
     document.getElementById('score-badge').textContent = this.score + ' 分';
@@ -1185,6 +1352,7 @@ const GameCore = {
     });
 
     if (cfg.mount && !this._transMode) cfg.mount(box);
+    if (this.state === 'RESULT' && GAME.vocabQuiz && !this._transMode) VocabQuiz.invite(box);   // 結果頁：單字小考邀請
     const area = document.getElementById('options-area');
     area.className = '';
     area.innerHTML = '';
