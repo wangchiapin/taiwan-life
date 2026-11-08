@@ -64,3 +64,7 @@
 ## 電信行 telecom（2026-11-07，P-010 草稿：尚未修改）
 提示詞：`docs/image-prompts-telecom.md`（照順序一次做一張，Ben 確認再下一張）。圖片檔名：start、shop、counter、plan、pay、sim、nosignal、result、end_good、end_bad（共 10 張，720×720）。Ami 用 `games/drinks/images/call.jpg` 的頭肩裁切當角色參考圖。
 - [ ] telecom：start、shop、counter、plan、pay、sim、nosignal、result、end_good、end_bad
+
+## 自助洗衣店 laundry（2026-11-08，P-011 草稿：尚未修改）
+提示詞：`docs/image-prompts-laundry.md`（照順序一次做一張，Ben 確認再下一張）。圖片檔名：start、shop、coins、washer、wait、dryer、result、end_good、end_bad（共 9 張，720×720）。Ami 用 `games/drinks/images/call.jpg` 的頭肩裁切當角色參考圖。
+- [ ] laundry：start、shop、coins、washer、wait、dryer、result、end_good、end_bad

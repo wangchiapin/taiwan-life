@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<title>自助洗衣店 · La lavandería de autoservicio</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：laundrygame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "laundrygame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #33261f;
+    --red: #c8501e;
+    --red-dark: #8f3513;
+    --yolk: #e0a43a;
+    --night: #2e2630;
+    --kraft: #f3e4d3;
+    --wall: #fbf3ea;
+    --paper: #ffffff;
+    --line: #e5d2bd;
+    --muted: #7a6454;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    background: #e9eff8;
+  }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  /* ── 登入：店招牌 ── */
+  /* ── 遊戲 ── */
+  /* 購物清單 */
+  @media (hover: hover) {
+    .opt:hover rt { color: #ffe0d2; }
+  }
+  /* ── 排行榜 ── */
+  #lb-table tr.highlight-row { background: #f7dccb; font-weight: 700; }
+  /* ── 句子翻譯 ── */
+  .tr-btn:hover { background: #f7dccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  /* ── 本關單字（右側抽屜） ── */
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+
+
+
+  /* 號碼牌、匯款單、鈔票 */
+  .pbox { margin: 8px 0 12px; background: #fff; border: 2px solid #2f8f83; border-radius: 10px; padding: 8px 14px; }
+  .pbox .ph { color: #2f8f83; font-weight: 700; font-size: 15px; }
+  .pbox .pv { font-size: 22px; font-weight: 700; color: var(--ink); margin-top: 2px; }
+  .pbox .pl { font-size: 15px; color: var(--ink); margin-top: 2px; }
+  .pbox.bill { border-color: var(--red); }
+  .pbox.bill .pv { font-size: 18px; }
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">自助洗衣店</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">自助洗衣店</h1>
+  <p class="subtitle" data-es="La lavandería de autoservicio" data-en="At the self-service laundromat">La lavandería de autoservicio</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    衣服堆很多了，Ami 叫你去自助洗衣店。你要換零錢、選洗衣機、聽店員說洗衣的錢、投幣，洗好以後再烘乾、把衣服拿出來。店員有時候會少給你硬幣、說錯錢或烘衣時間，烘好的衣服裡也可能混進別人的東西，要自己多注意喔！<br>
+    <span data-es="Tienes mucha ropa sucia y Ami te manda a una lavandería de autoservicio. Cambias monedas, eliges la lavadora, escuchas cuánto cobra el empleado, metes las monedas, y cuando termina secas la ropa y la sacas. ¡A veces el empleado da menos monedas, dice mal el precio o el tiempo de secado, y en la ropa seca puede colarse algo de otra persona, así que presta atención!" data-en="You have a pile of dirty laundry and Ami sends you to a self-service laundromat. You get coins, pick a washer, listen to what the clerk says it costs, insert coins, then dry the clothes and take them out. The clerk may give you too few coins or misstate the price or drying time, and someone else's item may end up in your dryer, so stay alert!">Tienes mucha ropa sucia y Ami te manda a una lavandería de autoservicio. Cambias monedas, eliges la lavadora, escuchas cuánto cobra el empleado, metes las monedas, y cuando termina secas la ropa y la sacas. ¡A veces el empleado da menos monedas, dice mal el precio o el tiempo de secado, y en la ropa seca puede colarse algo de otra persona, así que presta atención!</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">🧺</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 10 名 · Top 10</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'laundry', track: 'laundry', settingsKey: 'laundry_settings',
+  defaultPlace: 'shop', defaultEmoji: '🧺',
+  roles: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '店員': { pitch: 1.05 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+   第一版草稿：本次沒有對照 game-kit（讀不到），只用共用檔內建的 GoodTeacher 規則
+══════════════════════════════════════ */
+pinyinPro.customPinyin({
+  '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan',
+  '時間': 'shí jiān', '時候': 'shí hou', '東西': 'dōng xi', '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '著': 'zhe', '囉': 'luo', '啦': 'la', '耶': 'ye',
+  '不好意思': 'bù hǎo yì si', '這個': 'zhè ge', '那個': 'nà ge', '好像': 'hǎo xiàng', '欸': 'éi', '應該': 'yīng gāi', '怎麼': 'zěn me', '舒服': 'shū fu'
+});
+pinyinPro.customPinyin({
+  '自助洗衣店': 'zì zhù xǐ yī diàn', '洗衣機': 'xǐ yī jī', '烘衣機': 'hōng yī jī', '烘乾': 'hōng gān', '烘': 'hōng', '投幣': 'tóu bì', '硬幣': 'yìng bì', '零錢': 'líng qián',
+  '換幣機': 'huàn bì jī', '洗劑': 'xǐ jì', '洗程': 'xǐ chéng', '口袋': 'kǒu dài', '外套': 'wài tào', '分鐘': 'fēn zhōng', '使用中': 'shǐ yòng zhōng', '螢幕': 'yíng mù',
+  '乾淨': 'gān jìng', '乾乾淨淨': 'gān gān jìng jìng', '仔細': 'zǐ xì', '鑰匙': 'yào shi', '烘得': 'hōng de', '塞得': 'sāi de',
+  '店員': 'diàn yuán', '找': 'zhǎo', '還': 'hái', '收': 'shōu', '少': 'shǎo', '數': 'shǔ', '一共': 'yí gòng', '尺寸': 'chǐ cùn', '公斤': 'gōng jīn', '大型': 'dà xíng', '小型': 'xiǎo xíng', '中型': 'zhōng xíng'
+});
+// 台灣讀音修正：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '店員': ['El empleado de la lavandería', 'The laundromat clerk'] };
+const SPEAKER_RE = /^(Ami|店員|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['自助洗衣店', 'lavandería de autoservicio', 'self-service laundromat'], ['洗衣機', 'lavadora', 'washing machine'], ['烘衣機', 'secadora', 'dryer'], ['分鐘', 'minuto', 'minute']],
+  ENTER: [['使用中', 'en uso', 'in use'], ['空的', 'vacío, libre', 'empty, free']],
+  COINS: [['零錢', 'monedas, cambio', 'small change'], ['硬幣', 'moneda', 'coin'], ['換', 'cambiar', 'to exchange']],
+  LOAD: [['口袋', 'bolsillo', 'pocket'], ['關好', 'cerrar bien', 'close properly']],
+  WASHSET: [['洗劑', 'detergente', 'detergent'], ['螢幕', 'pantalla', 'screen'], ['尺寸', 'tamaño', 'size']],
+  INSERT: [['投幣', 'meter monedas', 'insert coins']],
+  WAIT: [['洗好', 'terminar de lavar', 'finished washing'], ['濕', 'mojado', 'wet']],
+  DRYSET: [['烘乾', 'secar', 'to dry (in a dryer)'], ['設定', 'configurar', 'to set']],
+  DRYPAY: [['剩', 'quedar', 'be left']],
+  TAKEOUT: [['外套', 'chaqueta', 'jacket'], ['不是我的', 'no es mío', 'is not mine'], ['拿出來', 'sacar', 'take out']],
+  get END() { return Game.mistakes <= 2 ? [['乾淨', 'limpio', 'clean']] : [['下次', 'la próxima vez', 'next time']]; },
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = { ENTER: ['進洗衣店', 'entrar a la lavandería', 'entering the laundromat'], COINS: ['換零錢', 'cambiar monedas', 'getting coins'], LOAD: ['放衣服', 'poner la ropa', 'loading clothes'],
+  WASHSET: ['洗衣的錢', 'el precio del lavado', 'the wash price'], INSERT: ['投幣', 'meter monedas', 'inserting coins'], WAIT: ['洗好以後', 'cuando termina el lavado', 'after washing'],
+  DRYSET: ['烘衣時間', 'el tiempo de secado', 'the drying time'], DRYPAY: ['烘衣投幣', 'monedas para secar', 'coins for drying'], TAKEOUT: ['拿衣服', 'sacar la ropa', 'taking out the clothes'] };
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = { ENTER: '走進自助洗衣店', COINS: '去換零錢', LOAD: '走到洗衣機前', WASHSET: '請店員幫忙設定', INSERT: '看螢幕上的錢', WAIT: '等洗衣機轉完', DRYSET: '走到烘衣機前', DRYPAY: '準備投幣', TAKEOUT: '等烘衣機停', END: '提著衣服離開' };
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const PLACES = {
+  phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
+  shop: ['🧺', '自助洗衣店', 'Lavandería de autoservicio', 'Self-service laundromat', '']
+};
+/* 洗衣機尺寸與價錢（洗衣＋自動加洗劑十元）；價錢是依印象，待確認 */
+const SIZES = [{ n: '小型', es: 'pequeña', en: 'small', kg: 8, w: 40 }, { n: '中型', es: 'mediana', en: 'medium', kg: 12, w: 60 }];
+const DRYMIN = [20, 30];
+const CLOTHES = ['T恤', '牛仔褲', '襪子'];
+const coinsHTML = n => `${'🪙'.repeat(n)}`;
+
+/* ══════════════════════════════════════
+   任務提示
+══════════════════════════════════════ */
+const Hints = makeHints({ render: stdHintsRender });
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+const ORDER = ['START', 'ENTER', 'COINS', 'LOAD', 'WASHSET', 'INSERT', 'WAIT', 'DRYSET', 'DRYPAY', 'TAKEOUT', 'END', 'RESULT'];
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,
+  hintViews: 0, log: [], feedback: [], visit: 0, att: {}, cash: null,
+  onStart() { this.updateCash(); },
+  updateCash() { document.getElementById('cash-badge').textContent = ''; },
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+  IMAGES: {
+    START: ['images/start.jpg', '📱'], ENTER: ['images/shop.jpg', '🧺'], COINS: ['images/coins.jpg', '🪙'], LOAD: ['images/washer.jpg', '🧺'], WASHSET: ['images/washer.jpg', '🧺'],
+    INSERT: ['images/washer.jpg', '🪙'], WAIT: ['images/wait.jpg', '⏳'], DRYSET: ['images/dryer.jpg', '♨️'], DRYPAY: ['images/dryer.jpg', '🪙'], TAKEOUT: ['images/dryer.jpg', '👕'],
+    END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+  },
+
+  setup() {
+    const t = this.task = { rot: Math.floor(Math.random() * 3) };
+    t.size = pick(SIZES);
+    t.washP = t.size.w + 10;                 // 洗衣＋自動加洗劑
+    t.dry = pick(DRYMIN);                    // Ami 要烘幾分鐘；一分鐘一元
+    t.dryAlt = t.dry === 20 ? 30 : 20;
+    /* 換零錢：一百元換十個十元；40% 少給一個 */
+    t.coinWrong = Math.random() < 0.4; t.coinGot = t.coinWrong ? 9 : 10;
+    /* 店員說洗衣的錢：45% 說錯（和螢幕差十元） */
+    t.washWrong = Math.random() < 0.45; t.washSaid = t.washWrong ? (t.washP === 50 ? 60 : 50) : t.washP;
+    /* 店員幫忙設定烘衣：45% 設成另一個時間 */
+    t.dryWrong = Math.random() < 0.45; t.drySaid = t.dryWrong ? t.dryAlt : t.dry;
+    /* 拿衣服：40% 烘衣機裡混進一件別人的外套 */
+    t.coatWrong = Math.random() < 0.4;
+  },
+
+  amiLines() {
+    const N = this.N, t = this.task, s = t.size;
+    return [
+      L(`Ami：${N}，你的髒衣服是不是堆很多了？去自助洗衣店洗一洗吧。用「${s.n}」的洗衣機就夠了（大約${zhNum(s.kg)}公斤），洗劑用機器自動加的。`, `${N}, ¿no se te ha acumulado mucha ropa sucia? Ve a una lavandería de autoservicio. Una lavadora ${s.es} (unos ${s.kg} kg) basta; usa el detergente automático de la máquina.`, `${N}, isn't your laundry piling up? Go to a self-service laundromat. A ${s.en} washer (about ${s.kg} kg) is enough; use the machine's automatic detergent.`),
+      L(`Ami：洗好以後要烘乾，烘${zhNum(t.dry)}分鐘。烘衣機一分鐘一元，用十元硬幣。你有一張一百元的鈔票，先去換十個十元硬幣。`, `Cuando termine, sécala ${t.dry} minutos. La secadora cuesta un peso por minuto y usa monedas de diez. Tienes un billete de cien: primero cámbialo por diez monedas de diez.`, `After washing, dry it for ${t.dry} minutes. The dryer costs NT$1 per minute and takes 10-dollar coins. You have a 100-dollar bill: first change it into ten 10-dollar coins.`),
+      L('Ami：你洗的是T恤、牛仔褲和襪子，沒有外套喔。換硬幣、算錢、烘衣時間，都要仔細對一下！', 'Lavas camisetas, jeans y calcetines; no hay chaqueta. ¡Revisa bien las monedas, el cobro y el tiempo de secado!', 'You are washing T-shirts, jeans and socks — no jacket. Check the coins, the charge and the drying time carefully!')
+    ];
+  },
+  hintSections() { return [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }]; },
+
+  listHTML(rowsOnly) {
+    const t = this.task, s = t.size, r = x => this.ruby(x);
+    const rows = [
+      { zh: `要洗：${CLOTHES.join('、')}（沒有外套）`, es: 'Vas a lavar: camisetas, jeans y calcetines (sin chaqueta)', en: 'Washing: T-shirts, jeans and socks (no jacket)' },
+      { zh: `洗衣機：${s.n}，洗劑自動加；烘衣：${zhNum(t.dry)}分鐘`, es: `Lavadora ${s.es}, detergente automático; secado: ${t.dry} minutos`, en: `${s.en} washer, automatic detergent; drying: ${t.dry} minutes` },
+      { zh: '身上有：一張一百元鈔票', es: 'Tienes un billete de cien pesos taiwaneses', en: 'You have one NT$100 bill' }
+    ];
+    if (rowsOnly) return rows;
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  coinsBox() {
+    const t = this.task, r = x => this.ruby(x);
+    return `<div class="pbox"><div class="ph">🪙 ${r('零錢')}</div><div class="pv">${coinsHTML(t.coinGot)}</div><div class="pl">${r('十元硬幣')}</div></div>`;
+  },
+  washBox() {
+    const t = this.task, r = x => this.ruby(x);
+    return `<div class="pbox bill"><div class="ph">🖥️ ${r('洗衣機')} ${r('螢幕')}</div><div class="pl">${r('尺寸')}：${r(t.size.n)}</div><div class="pl">${r('洗劑')}：${r('自動加')}</div><div class="pv">NT$ ${t.washP}</div></div>`;
+  },
+  dryBox(min) {
+    const r = x => this.ruby(x);
+    return `<div class="pbox bill"><div class="ph">🖥️ ${r('烘衣機')} ${r('螢幕')}</div><div class="pv">${min} ${r('分鐘')}　NT$ ${min}</div></div>`;
+  },
+  outBox() {
+    const t = this.task, r = x => this.ruby(x);
+    const items = t.coatWrong ? [...CLOTHES, '紅色外套'] : CLOTHES;
+    return `<div class="pbox"><div class="ph">👕 ${r('烘衣機')}</div><div class="pl">${items.map(r).join('、')}</div></div>`;
+  },
+
+  getConfig() {
+    const N = this.N, t = this.task, s = t.size;
+    const ph = (zh, es, en) => L(`店員：${zh}`, es, en);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+        const dry = t.dry;
+
+    return {
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你在家，看著一大堆髒衣服。手機響了一聲，是Ami傳來的LINE。）', '(Estás en casa mirando una montaña de ropa sucia. Tu celular suena: es un LINE de Ami.)', '(You are at home looking at a mountain of dirty laundry. Your phone buzzes — a LINE from Ami.)'),
+          ...Game.amiLines(),
+          L('我：好，我現在去自助洗衣店！', '¡Bien, voy a la lavandería ahora!', "OK, I'm heading to the laundromat now!")
+        ],
+        options: ['走進自助洗衣店'],
+        next: () => { Game.startTimer(); Game.state = 'ENTER'; }
+      },
+
+      /* ═══ 進店：選空的機器 ═══ */
+      ENTER: {
+        place: 'shop',
+        dialogue: () => [L(`（你提著衣服走進自助洗衣店。裡面有好幾台洗衣機：一台門上掛著「使用中」的牌子，裡面還有別人的衣服在轉；另一台${s.n}的是空的。店員坐在櫃檯後面。）`, `(Entras con tu ropa. Hay varias lavadoras: una tiene un cartel de «使用中» (en uso) y ropa ajena girando; otra ${s.es} está vacía. El empleado está detrás del mostrador.)`, `(You walk in with your laundry. Several washers: one has an "in use" sign with someone's clothes spinning; another ${s.en} one is empty. The clerk sits behind the counter.)`), ph('歡迎光臨！', '¡Hola, buenas!', 'Welcome!')],
+        options: () => rotOf(t, [`好，這台${s.n}的是空的，我用這一台。`, '這台有人用，我先把他的衣服拿出來。', '我把衣服放在地上，等有空的再說。']),
+        next: c => {
+          if (c !== `好，這台${s.n}的是空的，我用這一台。`) {
+            Game.addMistake(c.startsWith('這台有人用')
+              ? M('「使用中」的機器是別人的，不可以動別人的衣服，要用空的那一台。', 'La máquina «en uso» es de otra persona; no toques su ropa, usa la que está vacía.', 'The "in use" machine is someone else\'s — never touch their clothes; use the empty one.')
+              : M('旁邊就有一台空的洗衣機，不用等；衣服也不要放在地上。', 'Hay una lavadora vacía justo al lado; no hace falta esperar, y no dejes la ropa en el suelo.', 'There is an empty washer right there — no need to wait, and don\'t leave clothes on the floor.'));
+            return;
+          }
+          goodFirst('ENTER', '沒錯！先看看哪一台是空的、尺寸對不對。', '¡Exacto! Primero mira cuál está libre y si el tamaño es el correcto.', 'Right! First see which one is free and whether the size is right.');
+          Game.state = 'COINS';
+        }
+      },
+
+      /* ═══ 換零錢：40% 少給一個 ═══ */
+      COINS: catchState(Game, {
+        key: 'COINS', place: 'shop',
+        html: () => Game.coinsBox(),
+        dialogue: () => [L('（你走到櫃檯，把一百元鈔票遞給店員。）', '(Vas al mostrador y le das el billete de cien al empleado.)', '(You go to the counter and hand the clerk your 100-dollar bill.)'), ph(`一百元換十元硬幣對不對？好，給你，十個十元。`, `¿Cien pesos en monedas de diez? Muy bien, aquí tiene: diez monedas de diez.`, `A hundred in ten-dollar coins, right? Here you go — ten coins.`)],
+        ok: '好，謝謝。', fix: () => '不好意思，這裡好像只有九個，應該是十個吧？', rude: '你是不是故意少給我啊？',
+        wrong: () => t.coinWrong,
+        whyWrong: () => M('店員少給了一個：一百元要換十個十元硬幣，你只拿到九個。', 'El empleado dio una de menos: cien pesos son diez monedas de diez, y recibiste nueve.', 'The clerk gave one too few: 100 should be ten 10-dollar coins, and you got nine.'),
+        whyRight: () => M('店員給對了：十個十元硬幣，剛好一百元。', 'Estaba bien: diez monedas de diez, justo cien pesos.', 'It was right: ten 10-dollar coins, exactly 100.'),
+        goodWrong: ['你很細心！拿到零錢要馬上數一數。', '¡Qué atento! Cuenta las monedas en el momento.', 'Well spotted! Count your coins right away.'],
+        goodOk: ['換到的硬幣要自己數：一百元是十個十元。', 'Cuenta tú mismo las monedas: cien son diez de diez.', 'Count the coins yourself: 100 is ten 10-dollar coins.'],
+        apology: () => [ph('啊，不好意思！我數錯了，再給你一個，一共十個。', '¡Ay, disculpe! Me equivoqué; le doy una más, son diez.', 'Oh, sorry! I miscounted — here is one more, ten in total.')],
+        go: () => { Game.state = 'LOAD'; }
+      }),
+
+      /* ═══ 放衣服 ═══ */
+      LOAD: {
+        place: 'shop',
+        dialogue: () => [L('（你拿著十個十元硬幣，回到空的洗衣機前，打開門。）', '(Con las diez monedas, vuelves a la lavadora vacía y abres la puerta.)', '(With ten coins in hand, you return to the empty washer and open its door.)')],
+        options: () => rotOf(t, ['先檢查口袋，沒有東西再放進去，然後把門關好。', '口袋不用看，直接全部丟進去就好。', '衣服塞得滿滿的，門用力壓一壓關起來。']),
+        next: c => {
+          if (c !== '先檢查口袋，沒有東西再放進去，然後把門關好。') {
+            Game.addMistake(c.startsWith('口袋不用看')
+              ? M('洗衣服以前要檢查口袋，裡面的紙鈔、衛生紙或鑰匙會弄壞衣服或機器。', 'Antes de lavar hay que revisar los bolsillos: billetes, pañuelos o llaves pueden dañar la ropa o la máquina.', 'Check your pockets before washing — bills, tissues or keys can ruin clothes or the machine.')
+              : M('衣服不要塞太滿，洗不乾淨，門也可能關不好、機器不會動。', 'No llenes demasiado la máquina: no lava bien y la puerta puede no cerrar.', 'Don\'t overstuff the machine — it won\'t clean well and the door may not close.'));
+            return;
+          }
+          goodFirst('LOAD', '沒錯！先檢查口袋，門要關好機器才會動。', '¡Exacto! Revisa los bolsillos y cierra bien la puerta para que la máquina funcione.', 'Right! Check the pockets and close the door properly or the machine won\'t start.');
+          Game.state = 'WASHSET';
+        }
+      },
+
+      /* ═══ 店員說洗衣的錢：45% 說錯（螢幕才是對的） ═══ */
+      WASHSET: catchState(Game, {
+        key: 'WASHSET', place: 'shop',
+        html: () => Game.washBox(),
+        dialogue: () => [L('（你選了「自動加洗劑」，螢幕上跳出要投的錢。店員走過來看一眼。）', '(Eliges «detergente automático» y la pantalla muestra cuánto meter. El empleado se acerca a mirar.)', '(You choose "automatic detergent" and the screen shows how much to insert. The clerk comes over to take a look.)'), ph(`${s.n}的洗衣機，加洗劑是${zhNum(t.washSaid)}元喔。`, `Lavadora ${s.es} con detergente: son ${esM(t.washSaid)}.`, `A ${s.en} washer with detergent is ${enM(t.washSaid)}.`)],
+        ok: '好，我知道了。', fix: () => `不好意思，螢幕上寫的是${zhNum(t.washWrong ? t.washP : t.washSaid + 10)}元。`, rude: '你是不是想多收我的錢？',
+        wrong: () => t.washWrong,
+        whyWrong: () => M(`店員說錯了：他說${t.washSaid}元，螢幕上是${t.washP}元。`, `El empleado se equivocó: dijo ${esM(t.washSaid)} y la pantalla marca ${esM(t.washP)}.`, `The clerk was wrong: he said ${enM(t.washSaid)} but the screen shows ${enM(t.washP)}.`),
+        whyRight: () => M(`店員說對了：螢幕上就是${t.washP}元。`, `El empleado tenía razón: la pantalla marca ${esM(t.washP)}.`, `The clerk was right: the screen shows ${enM(t.washP)}.`),
+        goodWrong: ['你很細心！要投多少錢，以機器螢幕上的為準。', '¡Qué atento! Lo que cuenta es lo que marca la pantalla de la máquina.', 'Well spotted! What counts is the amount on the machine screen.'],
+        goodOk: ['店員說的錢，要和螢幕上的對一下。', 'Compara lo que dice el empleado con la pantalla.', 'Check what the clerk says against the screen.'],
+        apology: () => [ph(`啊，對不起，我看錯了。是${zhNum(t.washP)}元沒錯。`, `¡Ay, perdón, lo leí mal! Son ${esM(t.washP)}, como dice la pantalla.`, `Oh, sorry, I misread it. It is ${enM(t.washP)}, as the screen says.`)],
+        go: () => { Game.state = 'INSERT'; }
+      }),
+
+      /* ═══ 投幣 ═══ */
+      INSERT: {
+        place: 'shop',
+        html: () => Game.washBox(),
+        dialogue: () => [L(`（螢幕上要投${zhNum(t.washP)}元，投幣孔上寫著只收十元硬幣。）`, `(La pantalla pide ${esM(t.washP)}; la ranura solo acepta monedas de diez.)`, `(The screen asks for ${enM(t.washP)}; the slot only accepts 10-dollar coins.)`)],
+        options: () => { const n = t.washP / 10; return rotOf(t, [`投${zhNum(n)}個十元硬幣。`, `先投${zhNum(n - 1)}個，剩下的洗到一半再投。`, '把一百元鈔票塞進投幣孔。']); },
+        next: c => {
+          const n = t.washP / 10;
+          if (c !== `投${zhNum(n)}個十元硬幣。`) {
+            Game.addMistake(c.startsWith('先投')
+              ? M(`錢沒投夠機器不會開始，要一次投完螢幕上的${t.washP}元。`, `Si no metes todo el dinero la máquina no arranca; mete los ${esM(t.washP)} de una vez.`, `The machine won't start until you insert the full amount — put in all ${enM(t.washP)} at once.`)
+              : M('投幣孔只收硬幣，鈔票塞不進去，還可能卡住機器。', 'La ranura solo acepta monedas; un billete no entra y puede atascarla.', 'The slot only takes coins — a bill won\'t go in and may jam it.'));
+            return;
+          }
+          goodFirst('INSERT', '沒錯！照螢幕上的錢，一次投完。', '¡Exacto! Mete el monto de la pantalla de una vez.', 'Right! Insert the amount shown on the screen, all at once.');
+          t.left = 10 - n;
+          Game.state = 'WAIT';
+        }
+      },
+
+      /* ═══ 洗好以後 ═══ */
+      WAIT: {
+        place: 'shop',
+        dialogue: () => [L('（洗衣機轉了一陣子，嗶嗶響了。你坐在旁邊的椅子上等，洗好了。衣服濕濕的、很重。）', '(La lavadora gira un rato y pita. Esperas en una silla; ya terminó. La ropa está mojada y pesada.)', '(The washer runs, then beeps. You wait on a chair nearby; it is done. The clothes are wet and heavy.)')],
+        options: () => rotOf(t, ['把洗好的濕衣服拿去烘衣機。', '濕衣服直接裝回袋子，回家晾。', '先放在洗衣機裡，明天再來拿。']),
+        next: c => {
+          if (c !== '把洗好的濕衣服拿去烘衣機。') {
+            Game.addMistake(c.startsWith('濕衣服直接')
+              ? M('Ami 要你在店裡烘乾，濕衣服裝袋子會弄濕、發臭。', 'Ami te pidió secar la ropa en la tienda; mojada en la bolsa se echa a perder.', 'Ami asked you to dry the clothes at the shop; wet clothes in a bag get damp and smelly.')
+              : M('洗好的衣服不能一直放在洗衣機裡，別人還要用機器。', 'No dejes la ropa en la lavadora; otras personas necesitan usarla.', 'Don\'t leave your clothes in the washer — other people need it.'));
+            return;
+          }
+          goodFirst('WAIT', '沒錯！洗好就把衣服拿出來，別佔著機器。', '¡Exacto! Cuando termine, saca la ropa y no ocupes la máquina.', 'Right! Take the clothes out as soon as it finishes so you don\'t hog the machine.');
+          Game.state = 'DRYSET';
+        }
+      },
+
+      /* ═══ 店員幫忙設定烘衣：45% 設成另一個時間 ═══ */
+      DRYSET: catchState(Game, {
+        key: 'DRYSET', place: 'shop',
+        html: () => Game.dryBox(t.drySaid),
+        dialogue: () => [L('（你把濕衣服放進烘衣機，想把它烘乾，卻不知道怎麼設定。店員過來幫你按了按鈕。）', '(Pones la ropa mojada en la secadora para secarla, pero no sabes cómo configurarla. El empleado se acerca y pulsa los botones.)', '(You put the wet clothes in the dryer to dry them, but you don\'t know how to set it. The clerk comes over and presses the buttons.)'), ph(`好，我幫你設定好了，烘${zhNum(t.drySaid)}分鐘，${zhNum(t.drySaid)}元。`, `Listo, ya la configuré: ${t.drySaid} minutos, ${esM(t.drySaid)}.`, `OK, I set it for you: ${t.drySaid} minutes, ${enM(t.drySaid)}.`)],
+        ok: '好，麻煩你了。', fix: () => `不好意思，我要烘${zhNum(t.dryWrong ? t.dry : t.dryAlt)}分鐘，${zhNum(t.dryWrong ? t.dry : t.dryAlt)}元。`, rude: '你有沒有在聽我說話啊？',
+        wrong: () => t.dryWrong,
+        whyWrong: () => M(`店員設錯了：Ami 要烘${dry}分鐘，他設成${t.drySaid}分鐘。`, `El empleado lo configuró mal: Ami pidió ${dry} minutos y puso ${t.drySaid}.`, `The clerk set it wrong: Ami wanted ${dry} minutes and he set ${t.drySaid}.`),
+        whyRight: () => M(`店員設對了：烘${dry}分鐘。`, `Estaba bien: ${dry} minutos.`, `He set it right: ${dry} minutes.`),
+        goodWrong: ['你很細心！烘多久要和 Ami 說的對一下。', '¡Qué atento! Compara el tiempo con lo que dijo Ami.', 'Well spotted! Check the time against what Ami said.'],
+        goodOk: ['店員設定的時間，要和 Ami 說的對一下。', 'Compara el tiempo que puso el empleado con lo que dijo Ami.', 'Compare the time the clerk set with what Ami said.'],
+        apology: () => [ph(`啊，不好意思，我按錯了！改成${zhNum(t.dry)}分鐘。`, `¡Ay, disculpe, pulsé mal! Lo cambio a ${t.dry} minutos.`, `Oh, sorry, I pressed the wrong button! Changing it to ${t.dry} minutes.`)],
+        go: () => { Game.state = 'DRYPAY'; }
+      }),
+
+      /* ═══ 烘衣投幣 ═══ */
+      DRYPAY: {
+        place: 'shop',
+        html: () => Game.dryBox(t.dry),
+        dialogue: () => [L(`（螢幕上要投${zhNum(t.dry)}元。你手上還剩${zhNum(t.left)}個十元硬幣。）`, `(La pantalla pide ${esM(t.dry)}. Te quedan ${t.left} monedas de diez.)`, `(The screen asks for ${enM(t.dry)}. You have ${t.left} ten-dollar coins left.)`)],
+        options: () => { const n = t.dry / 10; return rotOf(t, [`投${zhNum(n)}個十元硬幣。`, `投${zhNum(n + 1)}個十元硬幣，多烘一下比較保險。`, '不用投幣，先烘烘看，等一下再付。']); },
+        next: c => {
+          const n = t.dry / 10;
+          if (c !== `投${zhNum(n)}個十元硬幣。`) {
+            Game.addMistake(c.startsWith('投' + zhNum(n + 1))
+              ? M(`螢幕上要投${t.dry}元，就投${n}個十元，多投的錢拿不回來。`, `La pantalla pide ${esM(t.dry)}: mete ${n} monedas de diez; lo que sobre no se devuelve.`, `The screen asks for ${enM(t.dry)}: insert ${n} ten-dollar coins; extra money isn't returned.`)
+              : M('烘衣機要先投幣才會動，不能先用後付。', 'La secadora no funciona sin monedas; no se paga después.', 'The dryer only runs after you insert coins — no paying later.'));
+            return;
+          }
+          goodFirst('DRYPAY', '沒錯！照螢幕上的錢投，不多也不少。', '¡Exacto! Mete lo que marca la pantalla, ni más ni menos.', 'Right! Insert what the screen shows, no more, no less.');
+          Game.state = 'TAKEOUT';
+        }
+      },
+
+      /* ═══ 拿衣服：40% 烘衣機裡混進別人的外套 ═══ */
+      TAKEOUT: catchState(Game, {
+        key: 'TAKEOUT', place: 'shop',
+        html: () => Game.outBox(),
+        dialogue: () => [L(`（烘衣機停了，你打開門，熱熱的。你把衣服都拿出來，放在摺衣桌上。店員在旁邊問：）`, `(La secadora se detiene; abres la puerta, está caliente. Sacas todo y lo pones en la mesa de doblar. El empleado pregunta:)`, `(The dryer stops; you open the door, it is hot. You take everything out onto the folding table. The clerk asks:)`), ph('都拿完了嗎？有沒有漏掉什麼？', '¿Ya sacó todo? ¿Se le quedó algo?', 'Got everything? Did you leave anything behind?')],
+        ok: '都拿完了，謝謝。', fix: () => (t.coatWrong ? '不好意思，這件紅色外套不是我的。' : '不好意思，這件牛仔外套不是我的。'), rude: '你們的機器怎麼這麼髒！',
+        wrong: () => t.coatWrong,
+        whyWrong: () => M('你拿到一件不是自己的紅色外套：你洗的只有T恤、牛仔褲和襪子，要還給店員。', 'Te llevaste una chaqueta roja que no es tuya: solo lavaste camisetas, jeans y calcetines; hay que devolverla.', 'You took a red jacket that isn\'t yours — you only washed T-shirts, jeans and socks; give it back.'),
+        whyRight: () => M('沒有外套：桌上只有你的T恤、牛仔褲和襪子，沒有牛仔外套。', 'No hay chaqueta: en la mesa solo están tus camisetas, jeans y calcetines.', 'There was no jacket — the table has only your T-shirts, jeans and socks.'),
+        goodWrong: ['你很細心！拿衣服時要對一下，別帶走別人的東西。', '¡Qué atento! Revisa al sacar la ropa y no te lleves cosas ajenas.', 'Well spotted! Check what you take out so you don\'t leave with someone else\'s things.'],
+        goodOk: ['拿衣服以前，要和自己洗的東西對一下。', 'Antes de llevarte la ropa, compárala con lo que lavaste.', 'Before you take the clothes, compare them with what you washed.'],
+        apology: () => [ph('啊，這是別人忘記拿的，謝謝你告訴我，我先幫他收起來。', 'Ah, es de alguien que se la olvidó. Gracias por avisar; la guardo.', 'Oh, someone forgot it. Thanks for telling me — I\'ll keep it for them.')],
+        go: () => { Game.stopTimer(); Game.state = 'END'; }
+      }),
+
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2;
+          track('game_complete', { game: 'laundry', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            L('（你提著乾乾淨淨的衣服走出洗衣店，打開手機，傳訊息給Ami。）', '(Sales con la ropa limpia, abres el celular y le escribes a Ami.)', '(You walk out with clean clothes, open your phone and message Ami.)'),
+            Game._endGood
+              ? L(`Ami：太好了，${N}，謝謝你！衣服洗得很乾淨，也烘得剛剛好。`, `¡Qué bien, ${N}, gracias! La ropa quedó limpia y bien seca.`, `Great, ${N}, thank you! The clothes are clean and perfectly dry.`)
+              : L('Ami：欸，聽起來有點不順利……下次要數硬幣、對螢幕上的錢、烘衣時間，拿衣服也要對一下喔！', 'Parece que hubo problemas… la próxima vez cuenta las monedas, compara el precio de la pantalla, el tiempo de secado y revisa la ropa.', "Hmm, sounds like it didn't go smoothly… next time count the coins, check the price and drying time, and check the clothes you take out.")
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: stdResultCfg('phone')
+    };
+  }
+});
+
+GameBoot();
+Music.init({ bpm: 112, tracks: [
+  { wave: 'square', vol: 0.22, notes: 'A4 . C5 E5 . D5 C5 . | G4 . B4 D5 . C5 B4 . | F4 . A4 C5 . B4 A4 . | E4 - A4 - C5 - . .' },
+  { wave: 'triangle', vol: 0.5, notes: 'A2 . E3 . A2 . E3 . | G2 . D3 . G2 . D3 . | F2 . C3 . F2 . C3 . | E2 . B2 . E2 . . .' },
+  { vol: 0.2, notes: 'k . h h s . h h' }] });
+</script>
+</body>
+</html>
