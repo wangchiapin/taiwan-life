@@ -67,7 +67,9 @@ def play(page,g,mode,log):
             click_i(page,0); continue
         if g=='breakfast' and page.evaluate("!!(Game.getConfig()[Game.state]||{}).pad"):
             page.evaluate("Game.pad.ticket=[...Game.C.target]; Game.padSubmit()"); continue
-        opts=texts(page)
+        opts=texts(page); tap=False
+        if not opts:   # 直接點畫面上的東西（元素有 data-choice＝選項文字）：看板、平面圖這類
+            opts=page.evaluate("[...document.querySelectorAll('[data-choice]')].filter(e=>e.offsetParent!==null).map(e=>e.dataset.choice)"); tap=bool(opts)
         if not opts: page.wait_for_timeout(200); continue
         use=bool(orc and (mode=='perfect' or random.random()<0.6))
         page.evaluate("g=>{if(typeof Game.testPrep==='function')Game.testPrep(g)}",use)   # 座位表這類要先「選」再按確定的關卡
@@ -85,7 +87,7 @@ def play(page,g,mode,log):
         if idx is None:
             cand=[i for i,o in enumerate(opts) if (st,o) not in bad] or list(range(len(opts)))
             idx=random.choice(cand)
-        m0=page.evaluate('Game.mistakes'); click_i(page,idx)
+        m0=page.evaluate('Game.mistakes'); (page.locator('[data-choice]:visible').nth(idx).click() if tap else click_i(page,idx))
         if page.evaluate('Game.state')==st and page.evaluate('Game.mistakes')>m0: bad.add((st,opts[idx]))
     log.append(seen); return 'timeout',trans
 def fbcheck(page,g,embed):
