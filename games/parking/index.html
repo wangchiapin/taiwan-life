@@ -313,17 +313,17 @@ const SPEAKER_RE = /^(Ami|機器|我)：/;
    每一關的單字（中文、西文、英文；拼音自動產生）
 ══════════════════════════════════════ */
 const VOCAB = {
-  START: [['停車場', 'estacionamiento', 'parking lot'], ['愛心專用車位', 'espacio reservado (personas con discapacidad)', 'priority parking space'], ['停車費', 'tarifa de estacionamiento', 'parking fee'], ['折抵', 'descontar, compensar', 'offset, deduct'], ['發票', 'recibo de compra (factura)', 'receipt'], ['小時', 'hora', 'hour']],
-  ENTRANCE: [['入口', 'entrada', 'entrance'], ['柵欄', 'barrera', 'barrier gate'], ['按鈕', 'botón', 'button'], ['停車票', 'boleto de estacionamiento', 'parking ticket'], ['感應磁扣', 'ficha magnética de acceso', 'magnetic access tag'], ['喇叭', 'bocina', 'car horn']],
+  START: [['停車場', 'estacionamiento', 'parking lot'], ['愛心專用車位', 'espacio reservado (personas con discapacidad)', 'priority parking space'], ['停車費', 'tarifa de estacionamiento', 'parking fee'], ['折抵', 'descontar, compensar', 'offset, deduct'], ['發票', 'recibo de compra (factura)', 'receipt'], ['小時', 'hora', 'hour'], ['書局', 'librería', 'bookstore'], ['地下室', 'sótano', 'basement']],
+  ENTRANCE: [['入口', 'entrada', 'entrance'], ['柵欄', 'barrera', 'barrier gate'], ['按鈕', 'botón', 'button'], ['停車票', 'boleto de estacionamiento', 'parking ticket'], ['感應磁扣', 'ficha magnética de acceso', 'magnetic access tag'], ['喇叭', 'bocina', 'car horn'], ['衝過去', 'pasar a toda prisa', 'rush through']],
   FLOOR: [['地下一樓', 'sótano 1', 'basement level 1'], ['空位', 'espacio libre', 'free space'], ['滿了', 'lleno', 'full'], ['指示牌', 'letrero indicador', 'sign'], ['開到', 'conducir hasta', 'drive to']],
   SPOT: [['一般車位', 'espacio normal', 'regular parking space'], ['愛心專用車位', 'espacio reservado', 'priority space'], ['輪椅', 'silla de ruedas', 'wheelchair'], ['車道', 'carril de circulación', 'driving lane'], ['空位', 'espacio libre', 'free space'], ['充電車位', 'espacio de carga (autos eléctricos)', 'EV charging space'], ['電梯', 'ascensor', 'elevator'], ['滅火器', 'extintor', 'fire extinguisher'], ['出入口', 'entrada y salida', 'entrance / exit'], ['廁所', 'baño', 'restroom']],
-  REMEMBER: [['區', 'zona', 'zone'], ['號', 'número', 'number'], ['地下室', 'sótano', 'basement'], ['停在', 'estacionar en', 'park at'], ['旁邊', 'al lado', 'next to'], ['上樓', 'subir', 'go upstairs'], ['離開', 'irse', 'leave']],
-  MALL: [['逛街', 'ir de compras, pasear', 'go shopping'], ['百貨公司', 'centro comercial', 'department store'], ['購物袋', 'bolsa de compras', 'shopping bag']],
+  REMEMBER: [['區', 'zona', 'zone'], ['號', 'número', 'number'], ['停在', 'estacionar en', 'park at'], ['旁邊', 'al lado', 'next to'], ['電梯', 'ascensor', 'elevator'], ['廁所', 'baño', 'restroom'], ['滅火器', 'extintor', 'fire extinguisher'], ['出入口', 'entrada y salida', 'entrance / exit'], ['上樓', 'subir', 'go upstairs'], ['離開', 'irse', 'leave']],
+  MALL: [['手扶梯', 'escalera eléctrica', 'escalator'], ['逛街', 'ir de compras, pasear', 'go shopping'], ['百貨公司', 'centro comercial', 'department store'], ['慢慢', 'con calma', 'taking our time']],
   PAY_CHECK: [['應付金額', 'importe a pagar', 'amount due'], ['對講機', 'interfono', 'intercom'], ['管理員', 'encargado', 'attendant'], ['折抵', 'descontar', 'deduct']],
-  PAY: [['繳費機', 'máquina de pago', 'pay station'], ['暫停使用', 'fuera de servicio', 'out of service'], ['折抵', 'descontar', 'deduct'], ['掃描', 'escanear', 'scan'], ['發票', 'recibo', 'receipt'], ['每小時', 'por hora', 'per hour'], ['出場', 'salir (del estacionamiento)', 'exit the lot'], ['十五分鐘', 'quince minutos', 'fifteen minutes']],
-  FIND_CAR: [['停在哪裡', 'dónde estacionaste', 'where parked'], ['地下二樓', 'sótano 2', 'basement level 2'], ['車', 'auto, coche', 'car'], ['記得', 'recordar', 'remember']],
-  EXIT: [['出口', 'salida', 'exit'], ['放進', 'meter, introducir', 'put into'], ['機器', 'máquina', 'machine']],
-  END: [['罰單', 'multa', 'ticket (fine)'], ['雨刷', 'limpiaparabrisas', 'windshield wiper'], ['開車', 'conducir', 'drive'], ['穩', 'estable, seguro', 'steady'], ['晚餐', 'cena', 'dinner']],
+  PAY: [['繳費機', 'máquina de pago', 'pay station'], ['左邊', 'izquierda', 'left'], ['右邊', 'derecha', 'right'], ['暫停使用', 'fuera de servicio', 'out of service'], ['掃描', 'escanear', 'scan'], ['感應', 'acercar al lector', 'tap on the reader'], ['發票', 'recibo', 'receipt'], ['每小時', 'por hora', 'per hour'], ['折抵', 'descontar', 'deduct']],
+  FIND_CAR: [['十五分鐘', 'quince minutos', 'fifteen minutes'], ['出場', 'salir (del estacionamiento)', 'exit the lot'], ['停在哪裡', 'dónde está estacionado', 'where it is parked'], ['車', 'auto, coche', 'car']],
+  EXIT: [['出口', 'salida', 'exit'], ['放進', 'meter, introducir', 'put into'], ['感應區', 'zona del lector', 'reader area'], ['推開', 'empujar', 'push open'], ['機器', 'máquina', 'machine']],
+  END: [['罰單', 'multa', 'parking ticket (fine)'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort'], ['雨刷', 'limpiaparabrisas', 'windshield wiper'], ['開車', 'conducir', 'drive'], ['穩', 'estable, seguro', 'steady'], ['晚餐', 'cena', 'dinner']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 
@@ -459,7 +459,7 @@ const Game = defineGame({
   amiLines() {
     const N = this.N, t = this.task;
     return [
-      L(`Ami：${N}，我在三樓書局等你。你先把車停到地下室，別停愛心專用車位喔！`, `${N}, te espero en la librería del tercer piso. Primero estaciona el auto en el sótano, ¡y no ocupes un espacio reservado «de corazón» para personas con discapacidad!`, `${N}, I'll wait at the bookstore on the 3rd floor. First park the car in the basement — and don't take a priority "heart" space!`),
+      L(`Ami：${N}，我在三樓書局等你。你先把車停到地下室，別停愛心專用車位喔！`, `${N}, te espero en la librería del tercer piso. Primero estaciona el auto en el sótano, ¡y no uses el espacio con el corazón «愛心», reservado para personas con discapacidad!`, `${N}, I'll wait at the bookstore on the 3rd floor. First park the car in the basement — and don't take a priority "heart" space!`),
       L(`Ami：停車每小時${t.rate}元，發票每滿五百元折一小時，我們應該會逛${NZ(t.h)}個小時，嗯。`,
         `El estacionamiento cuesta ${esM(t.rate)} por hora; por cada ${esM(500)} en recibos te descuentan 1 hora. Creo que vamos a estar unas ${t.h} horas, mmm.`,
         `Parking is ${enM(t.rate)} per hour, and every ${enM(500)} on a receipt takes off 1 hour. I think we'll be shopping about ${t.h} hours, hmm.`)
@@ -477,7 +477,7 @@ const Game = defineGame({
   listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s);
     const rows = [
-      { zh: '目的地：星光百貨，Ami在三樓書店', es: 'Destino: centro comercial Xingguang; Ami está en la librería del 3.er piso', en: 'Destination: Starlight department store; Ami is at the 3rd-floor bookstore' },
+      { zh: '目的地：星光百貨，Ami在三樓書店', es: 'Destino: centro comercial 星光 (Xīngguāng); Ami está en la librería del 3.er piso', en: 'Destination: Xingguang (Starlight) department store; Ami is at the 3rd-floor bookstore' },
       { zh: '要停：一般車位，不停愛心專用車位和充電車位', es: 'Estacionar: espacio normal, no el reservado ni el de carga eléctrica', en: 'Park: a regular space — not a priority or EV-charging space' },
       { zh: `預計逛${NZ(t.h)}個小時，每小時${t.rate}元`, es: `Tiempo: unas ${t.h} horas; ${esM(t.rate)} por hora`, en: `Time: about ${t.h} hours; ${enM(t.rate)} per hour` },
       { zh: '發票每滿五百元折一小時', es: `Descuento: cada ${esM(500)} en recibos → 1 hora`, en: `Discount: every ${enM(500)} on receipts → 1 hour off` }
@@ -754,8 +754,8 @@ const Game = defineGame({
         dialogue: () => t.payStep === 0
           ? [L('（你們走到一樓，那裡有兩台自動繳費機。）', '(Bajan a la planta baja: hay dos máquinas de pago automáticas.)', '(You go down to the ground floor. There are two automatic pay stations.)'),
              ami('我們去繳費吧！', '¡Vamos a pagar!', "Let's go pay!")]
-          : [L(`（你們走到那台機器前，${t.tk ? '把停車票放進去' : '把感應磁扣放在感應區'}。）`, `(Se acercan a esa máquina y ${t.tk ? 'meten el boleto' : 'apoyan la ficha en el lector'}.)`, `(You step up to that machine and ${t.tk ? 'insert the ticket' : 'tap the magnetic tag on the reader'}.)`),
-             ami(`我們今天買了${t.R}元的東西，發票在這裡。`, `Hoy compramos ${esM(t.R)} en cosas; aquí está el recibo.`, `We bought ${enM(t.R)} worth of things today; here's the receipt.`)],
+          : [L(`（你們走到那台機器前，${t.tk ? '掃描停車票' : '把感應磁扣放在感應區'}。）`, `(Se acercan a esa máquina y ${t.tk ? 'escanean el boleto' : 'apoyan la ficha en el lector'}.)`, `(You step up to that machine and ${t.tk ? 'scan the ticket' : 'tap the magnetic tag on the reader'}.)`),
+             ami(`我們今天買了${t.R}元的東西，發票在這裡。`, `Hoy compramos cosas por ${esM(t.R)}; aquí está el recibo.`, `We bought ${enM(t.R)} worth of things today; here's the receipt.`)],
         options: () => t.payStep === 0 ? [] : rot(['掃描發票。', '不掃描發票，直接付款。', '按旁邊的對講機，請管理員過來。']),
         mount: box => {
           if (t.payStep !== 0) return;
