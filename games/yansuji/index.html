@@ -364,11 +364,10 @@ const Game = defineGame({
     const N = this.N, t = this.task, sp = t.spicy;
     const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
     return [
-      L(`Ami：${N}，我想吃鹽酥雞！幫我去買，好嗎？我在家等你。`, `${N}, ¡se me antoja pollo frito crujiente! ¿Me lo compras? Te espero en casa.`, `${N}, I'm craving fried chicken! Could you buy some for me? I'm waiting at home.`),
-      L(`Ami：我要${itemsText(t.items, 'zh')}。`, `Quiero: ${itemsText(t.items, 'es')}.`, `I want: ${itemsText(t.items, 'en')}.`),
-      L(`Ami：雞排${t.cut ? '要切' : '不用切，我要整片'}。${sp.say === '不要辣' ? '我不要辣' : '我' + sp.say}。`,
-        `${t.cut ? 'El filete, cortado' : 'El filete, entero, sin cortar'}. ${cap(sp.es)}.`, `${t.cut ? 'Cut the cutlet up' : 'Leave the cutlet whole'}. ${cap(sp.en)}.`),
-      L(`Ami：蔥、蒜、洋蔥，我${topsZh(t.tops)}。`, `Cebollín, ajo y cebolla: ${topsL(t.tops, 'es')}.`, `Scallion, garlic and onion: ${topsL(t.tops, 'en')}.`)
+      L(`Ami：${N}，我想吃鹽酥雞！幫我去買，好嗎？`, `${N}, ¡se me antoja pollo frito crujiente! ¿Me lo compras?`, `${N}, I'm craving fried chicken! Could you buy some for me?`),
+      L(`Ami：我要${itemsText(t.items, 'zh')}。雞排${t.cut ? '要切' : '不用切，我要整片'}，${sp.say === '不要辣' ? '不要辣' : '我' + sp.say}。${/^要/.test(topsZh(t.tops)) ? '我' + topsZh(t.tops) : topsZh(t.tops).replace('都', '我都')}。`,
+        `Quiero: ${itemsText(t.items, 'es')}. ${t.cut ? 'El filete, cortado' : 'El filete, entero, sin cortar'}. ${cap(sp.es)}. Cebollín, ajo y cebolla: ${topsL(t.tops, 'es')}.`,
+        `I want: ${itemsText(t.items, 'en')}. ${t.cut ? 'Cut the cutlet up' : 'Leave the cutlet whole'}. ${cap(sp.en)}. Scallion, garlic and onion: ${topsL(t.tops, 'en')}.`)
     ];
   },
   hintSections() {
