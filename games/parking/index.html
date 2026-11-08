@@ -244,7 +244,7 @@ pinyinPro.customPinyin({
 });
 pinyinPro.customPinyin({
 
-  '停車場': 'tíng chē chǎng', '停車票': 'tíng chē piào', '停車費': 'tíng chē fèi', '停車': 'tíng chē', '停好': 'tíng hǎo', '車位': 'chē wèi', '愛心專用車位': 'ài xīn zhuān yòng chē wèi',
+  '停車場': 'tíng chē chǎng', '停車票': 'tíng chē piào', '感應磁扣': 'gǎn yìng cí kòu', '感應區': 'gǎn yìng qū', '感應': 'gǎn yìng', '停車費': 'tíng chē fèi', '停車': 'tíng chē', '停好': 'tíng hǎo', '車位': 'chē wèi', '愛心專用車位': 'ài xīn zhuān yòng chē wèi',
   '愛心': 'ài xīn', '柵欄': 'zhà lán', '地下': 'dì xià', '繳費機': 'jiǎo fèi jī', '繳費': 'jiǎo fèi', '折抵': 'zhé dǐ', '發票': 'fā piào', '罰單': 'fá dān', '柱子': 'zhù zi',
   '空位': 'kòng wèi', '滿了': 'mǎn le', '出口': 'chū kǒu', '入口': 'rù kǒu', '按鈕': 'àn niǔ', '喇叭': 'lǎ ba', '區': 'qū', '號': 'hào', '輪椅': 'lún yǐ',
   '星光百貨': 'xīng guāng bǎi huò', '車道': 'chē dào', '百貨公司': 'bǎi huò gōng sī', '逛': 'guàng', '傳': 'chuán', '書店': 'shū diàn', '雨刷': 'yǔ shuā',
@@ -268,11 +268,10 @@ const SPEAKER_RE = /^(Ami|機器|我)：/;
 ══════════════════════════════════════ */
 const VOCAB = {
   START: [['停車場', 'estacionamiento', 'parking lot'], ['愛心專用車位', 'espacio reservado (personas con discapacidad)', 'priority parking space'], ['停車費', 'tarifa de estacionamiento', 'parking fee'], ['折抵', 'descontar, compensar', 'offset, deduct'], ['發票', 'recibo de compra (factura)', 'receipt'], ['小時', 'hora', 'hour']],
-  ENTRANCE: [['入口', 'entrada', 'entrance'], ['柵欄', 'barrera', 'barrier gate'], ['按鈕', 'botón', 'button'], ['停車票', 'boleto de estacionamiento', 'parking ticket'], ['喇叭', 'bocina', 'car horn']],
+  ENTRANCE: [['入口', 'entrada', 'entrance'], ['柵欄', 'barrera', 'barrier gate'], ['按鈕', 'botón', 'button'], ['停車票', 'boleto de estacionamiento', 'parking ticket'], ['感應磁扣', 'ficha magnética de acceso', 'magnetic access tag'], ['喇叭', 'bocina', 'car horn']],
   FLOOR: [['地下一樓', 'sótano 1', 'basement level 1'], ['空位', 'espacio libre', 'free space'], ['滿了', 'lleno', 'full'], ['指示牌', 'letrero indicador', 'sign'], ['開到', 'conducir hasta', 'drive to']],
   SPOT: [['一般車位', 'espacio normal', 'regular parking space'], ['愛心專用車位', 'espacio reservado', 'priority space'], ['輪椅', 'silla de ruedas', 'wheelchair'], ['車道', 'carril de circulación', 'driving lane'], ['空位', 'espacio libre', 'free space']],
-  REMEMBER: [['區', 'zona', 'zone'], ['號', 'número', 'number'], ['地下室', 'sótano', 'basement'], ['停在', 'estacionar en', 'park at'], ['哪裡', 'dónde', 'where']],
-  UPSTAIRS: [['三樓', 'tercer piso', 'third floor'], ['書店', 'librería', 'bookstore'], ['上樓', 'subir', 'go upstairs'], ['離開', 'irse', 'leave']],
+  REMEMBER: [['區', 'zona', 'zone'], ['號', 'número', 'number'], ['地下室', 'sótano', 'basement'], ['停在', 'estacionar en', 'park at'], ['哪裡', 'dónde', 'where'], ['上樓', 'subir', 'go upstairs'], ['離開', 'irse', 'leave']],
   MALL: [['逛街', 'ir de compras, pasear', 'go shopping'], ['百貨公司', 'centro comercial', 'department store'], ['購物袋', 'bolsa de compras', 'shopping bag']],
   PAY_CHECK: [['應付金額', 'importe a pagar', 'amount due'], ['對講機', 'interfono', 'intercom'], ['管理員', 'encargado', 'attendant'], ['折抵', 'descontar', 'deduct']],
   PAY: [['繳費機', 'máquina de pago', 'pay station'], ['折抵', 'descontar', 'deduct'], ['掃描', 'escanear', 'scan'], ['發票', 'recibo', 'receipt'], ['每小時', 'por hora', 'per hour'], ['出場', 'salir (del estacionamiento)', 'exit the lot'], ['十五分鐘', 'quince minutos', 'fifteen minutes']],
@@ -285,12 +284,12 @@ const VOCAB = {
 /* 關卡名稱（錯誤紀錄用） */
 const STAGE = (() => {
   const enter = ['進場', 'entrar', 'entering'], park = ['停車', 'estacionar', 'parking'], msg = ['傳位置', 'avisar dónde', 'telling Ami where'], pay = ['繳費', 'pagar', 'paying'], find = ['找車', 'buscar el auto', 'finding the car'], out = ['出場', 'salir', 'leaving'];
-  return { ENTRANCE: enter, FLOOR: park, SPOT: park, REMEMBER: msg, UPSTAIRS: msg, MALL: ['逛街', 'pasear', 'shopping'], PAY: pay, PAY_CHECK: pay, FIND_CAR: find, EXIT: out };
+  return { ENTRANCE: enter, FLOOR: park, SPOT: park, REMEMBER: msg, MALL: ['逛街', 'pasear', 'shopping'], PAY: pay, PAY_CHECK: pay, FIND_CAR: find, EXIT: out };
 })();
 
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
-  ENTRANCE: '開到入口', FLOOR: '往地下室開', SPOT: '繼續', REMEMBER: '下車', UPSTAIRS: '繼續', MALL: '走到Ami旁邊', PAY: '走到一樓的繳費機', PAY_CHECK: '看螢幕上的金額', FIND_CAR: '走去找車', EXIT: '開到出口', END: '開出去'
+  ENTRANCE: '開到入口', FLOOR: '往地下室開', SPOT: '繼續', REMEMBER: '下車', MALL: '上三樓', PAY: '走到一樓的繳費機', PAY_CHECK: '看螢幕上的金額', FIND_CAR: '走去找車', EXIT: '開到出口', END: '開出去'
 };
 
 /* ══════════════════════════════════════
@@ -352,7 +351,7 @@ const Game = defineGame({
 
   IMAGES: {
     START: ['images/start.jpg', '🚗'], ENTRANCE: ['images/entrance.jpg', '🚧'], FLOOR: ['images/sign.jpg', '🅿️'], SPOT: ['images/spot.jpg', '♿'],
-    REMEMBER: ['images/pillar.jpg', '🔢'], UPSTAIRS: ['images/pillar.jpg', '📱'], MALL: ['images/mall.jpg', '🛍️'], PAY: ['images/machine.jpg', '💳'], PAY_CHECK: ['images/machine.jpg', '💳'], FIND_CAR: ['images/garage.jpg', '🚗'], EXIT: ['images/exit.jpg', '🚧'],
+    REMEMBER: ['images/pillar.jpg', '🔢'], MALL: ['images/mall.jpg', '🛍️'], PAY: ['images/machine.jpg', '💳'], PAY_CHECK: ['images/machine.jpg', '💳'], FIND_CAR: ['images/garage.jpg', '🚗'], EXIT: ['images/exit.jpg', '🚧'],
     END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
   wrongSpot: false,
@@ -366,6 +365,7 @@ const Game = defineGame({
       fee: rate * (h - d), noDisc: rate * h, over: rate * (h - d - 1),
       free: { 1: 0, 2: 0, 3: 0, [floor]: 8 + Math.floor(Math.random() * 18) },
       otherFloor: pick([1, 2, 3].filter(f => f !== floor)), otherZone: pick(['A', 'B', 'C'].filter(z => z !== zone)),
+      tk: Math.random() < 0.5,                   // true = 停車票，false = 感應磁扣
       machWrong: Math.random() < 0.45,           // 機器有沒有漏掉發票折抵
       rot: Math.floor(Math.random() * 3)
     };
@@ -391,10 +391,10 @@ const Game = defineGame({
     ];
   },
   hintSections() {
-    const ORDER = ['START', 'ENTRANCE', 'FLOOR', 'SPOT', 'REMEMBER', 'UPSTAIRS', 'MALL', 'PAY', 'PAY_CHECK', 'FIND_CAR', 'EXIT', 'END', 'RESULT'];
+    const ORDER = ['START', 'ENTRANCE', 'FLOOR', 'SPOT', 'REMEMBER', 'MALL', 'PAY', 'PAY_CHECK', 'FIND_CAR', 'EXIT', 'END', 'RESULT'];
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
-    if (at('UPSTAIRS') && this.sent) out.push({ title: '你傳給 Ami 的訊息', lines: [this.sent] });
+    if (at('MALL') && this.sent) out.push({ title: '你傳給 Ami 的訊息', lines: [this.sent] });
     return out;
   },
 
@@ -467,6 +467,8 @@ const Game = defineGame({
     const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
     const ami = (zh, es, en) => L(`Ami：${zh}`, es, en);
     const okMsg = `我停在${Game.locZh()}。`;
+    const Z = t.tk ? '停車票' : '感應磁扣', ZES = t.tk ? 'el boleto' : 'la ficha magnética', ZEN = t.tk ? 'the parking ticket' : 'the magnetic tag';
+    const exitOpt = t.tk ? '把停車票放進機器裡。' : '把感應磁扣放在感應區。';
     const floorOpts = [1, 2, 3].map(f => `開到${FL(f)}`);
 
     return {
@@ -487,16 +489,16 @@ const Game = defineGame({
       ENTRANCE: {
         place: 'gate',
         dialogue: () => [L('（入口柵欄旁邊有一台機器，上面有一個按鈕。）', '(Junto a la barrera de la entrada hay una máquina con un botón.)', '(Next to the entrance barrier is a machine with a button.)')],
-        options: () => rot(['按按鈕，拿停車票。', '幹！衝過去啦！', '狂按喇叭，叫人來開門。']),
+        options: () => rot([`按按鈕，拿${Z}。`, '幹！衝過去啦！', '狂按喇叭，叫人來開門。']),
         next: c => {
-          if (c !== '按按鈕，拿停車票。') {
+          if (c !== `按按鈕，拿${Z}。`) {
             Game.addMistake(c === '幹！衝過去啦！'
-              ? M('柵欄是關著的，要先拿停車票，柵欄才會升起來。', 'La barrera está cerrada: primero hay que sacar el boleto para que suba.', 'The barrier is down — you need to take a parking ticket first for it to go up.')
-              : M('不用按喇叭，這是自動的，按按鈕拿票就可以了。', 'No hace falta tocar la bocina: es automático, basta con pulsar el botón y tomar el boleto.', "No need to honk — it's automatic. Just press the button and take the ticket."));
+              ? M(`柵欄是關著的，要先拿${Z}，柵欄才會升起來。`, `La barrera está cerrada: primero hay que sacar ${ZES} para que suba.`, `The barrier is down — you need to take ${ZEN} first for it to go up.`)
+              : M(`不用按喇叭，這是自動的，按按鈕拿${t.tk ? '票' : '磁扣'}就可以了。`, `No hace falta tocar la bocina: es automático, basta con pulsar el botón y tomar ${ZES}.`, `No need to honk — it's automatic. Just press the button and take ${ZEN}.`));
             return;
           }
-          goodFirst('ENTRANCE', '很好！進停車場要先拿停車票，出去的時候會用到。', '¡Muy bien! Al entrar al estacionamiento se toma el boleto: lo usarás para salir.', 'Good! Take a parking ticket when you enter — you will need it to leave.');
-          Game.thought = [L('（機器「嗶」一聲，吐出一張停車票，柵欄升起來了。）', '(La máquina hace «bip», saca un boleto y la barrera sube.)', '(The machine beeps, prints a parking ticket, and the barrier rises.)')];
+          goodFirst('ENTRANCE', `很好！進停車場要先拿${Z}，出去的時候會用到。`, `¡Muy bien! Al entrar al estacionamiento se toma ${ZES}: lo usarás para salir.`, `Good! Take ${ZEN} when you enter — you will need it to leave.`);
+          Game.thought = [L(`（機器「嗶」一聲，${t.tk ? '吐出一張停車票' : '掉出一個感應磁扣'}，柵欄升起來了。）`, `(La máquina hace «bip», ${t.tk ? 'saca un boleto' : 'suelta una ficha magnética'} y la barrera sube.)`, `(The machine beeps, ${t.tk ? 'prints a parking ticket' : 'drops a magnetic tag'}, and the barrier rises.)`)];
           Game.state = 'FLOOR';
         }
       },
@@ -558,10 +560,23 @@ const Game = defineGame({
         dialogue: () => [
           L('（車停好了。你拿出手機，傳訊息給Ami。）', '(Terminas de estacionar. Sacas tu celular y le escribes a Ami.)', '(You finish parking. You take out your phone and message Ami.)'),
           L('我：車子停好了！', '¡Ya estacioné el auto!', "I've parked the car!"),
-          ami('好！你停在哪裡？', '¡Bien! ¿Dónde estacionaste?', 'Great! Where did you park?')
+          ami('好！你停在哪裡？', '¡Bien! ¿Dónde estacionaste?', 'Great! Where did you park?'),
+          ...(t.located ? [Game.sent, ami('好喔！趕快上來吧！我等你。', '¡Bien! ¡Sube rápido! Te espero.', "OK! Come up quick! I'll be waiting.")] : [])
         ],
-        options: () => rot([okMsg, '我停在地下室，很多車的地方。', `我停在${Game.locZh(t.floor, t.zone, t.n2)}。`]),
+        options: () => t.located
+          ? rot(['上樓找Ami。', '直接離開。', '自己逛自己的。'])
+          : rot([okMsg, '我停在地下室，很多車的地方。', `我停在${Game.locZh(t.floor, t.zone, t.n2)}。`]),
         next: c => {
+          if (t.located) {          // 第二步：Ami 叫你上樓（同一關，不另外過場）
+            if (c !== '上樓找Ami。') {
+              Game.addMistake(c === '直接離開。'
+                ? M('Ami還在三樓等你，不可以自己先走。', 'Ami te está esperando en el tercer piso: no puedes irte solo.', "Ami is waiting for you on the third floor — you can't just leave.")
+                : M('你和Ami約好要一起逛，要先上樓找她。', 'Quedaste con Ami en ir juntos: primero sube a buscarla.', 'You agreed to shop together — go up and find Ami first.'));
+              return;
+            }
+            Game.state = 'MALL';      // 答對直接進逛街，不顯示過場
+            return;
+          }
           if (c !== okMsg) {
             Game.addMistake(c.includes('很多車')
               ? M('Ami要知道哪一層、哪一區、幾號，說得清楚才找得到。', 'Ami necesita saber el nivel, la zona y el número; solo así se encuentra.', 'Ami needs the level, the zone and the number — only then can you find it.')
@@ -570,26 +585,7 @@ const Game = defineGame({
           }
           goodFirst('REMEMBER', '說得很清楚！哪一層、哪一區、幾號，都說到了。', '¡Lo dijiste muy claro! Nivel, zona y número.', 'Clearly said! Level, zone and number — all there.');
           Game.sent = L(`我：${okMsg}`, `Estoy en ${Game.locEs()}.`, `I'm at ${Game.locEn()}.`);
-          Game.thought = [ami('好喔！趕快上來吧！我等你。', '¡Bien! ¡Sube rápido! Te espero.', "OK! Come up quick! I'll be waiting.")];
-          Game.state = 'UPSTAIRS';
-        }
-      },
-
-      /* ═══ 車停好了：上樓找 Ami ═══ */
-      UPSTAIRS: {
-        place: 'phone',
-        dialogue: () => [L('（Ami在三樓的書店等你。）', '(Ami te espera en la librería del tercer piso.)', '(Ami is waiting for you at the bookstore on the third floor.)')],
-        options: () => rot(['上樓找Ami。', '直接離開。', '自己逛自己的。']),
-        next: c => {
-          if (c !== '上樓找Ami。') {
-            Game.addMistake(c === '直接離開。'
-              ? M('Ami還在三樓等你，不可以自己先走。', 'Ami te está esperando en el tercer piso: no puedes irte solo.', 'Ami is waiting for you on the third floor — you can\'t just leave.')
-              : M('你和Ami約好要一起逛，要先上樓找她。', 'Quedaste con Ami en ir juntos: primero sube a buscarla.', 'You agreed to shop together — go up and find Ami first.'));
-            return;
-          }
-          goodFirst('UPSTAIRS', '對！跟朋友有約，要上樓去找她。', '¡Bien! Quedaste con tu amiga: sube a buscarla.', 'Right! You made plans with your friend — go up and find her.');
-          Game.thought = [L('（你搭手扶梯上三樓，看到Ami在前面。）', '(Subes en la escalera eléctrica al tercer piso y ves a Ami adelante.)', '(You ride the escalator up to the third floor and see Ami ahead.)')];
-          Game.state = 'MALL';
+          t.located = true;           // 留在同一關：Ami 回覆，換成上樓的三個選項
         }
       },
 
@@ -597,6 +593,7 @@ const Game = defineGame({
       MALL: {
         place: 'mall',
         dialogue: () => [
+          L('（你搭手扶梯上三樓，看到Ami在前面。）', '(Subes en la escalera eléctrica al tercer piso y ves a Ami adelante.)', '(You ride the escalator up to the third floor and see Ami ahead.)'),
           ami('這邊這邊！我們慢慢逛吧！', '¡Por aquí! ¡Vamos a pasear con calma!', "Over here! Let's take our time!"),
           L(`（你們在百貨公司逛了${NZ(t.h)}個小時，買了很多東西。）`, `(Pasan ${t.h} horas en el centro comercial y compran muchas cosas.)`, `(You spend ${t.h} hours in the department store and buy a lot.)`)
         ],
@@ -609,7 +606,7 @@ const Game = defineGame({
         place: 'machine',
         html: () => Game.machineHTML(),
         dialogue: () => [
-          L('（你們走到一樓的自動繳費機，把停車票放進去。）', '(Llegan a la máquina de pago de la planta baja y meten el boleto.)', '(You walk to the pay station on the ground floor and insert the ticket.)'),
+          L(`（你們走到一樓的自動繳費機，${t.tk ? '把停車票放進去' : '把感應磁扣放在感應區'}。）`, `(Llegan a la máquina de pago de la planta baja y ${t.tk ? 'meten el boleto' : 'apoyan la ficha en el lector'}.)`, `(You walk to the pay station on the ground floor and ${t.tk ? 'insert the ticket' : 'tap the magnetic tag on the reader'}.)`),
           ami(`我們今天買了${t.R}元的東西，發票在這裡。`, `Hoy compramos ${esM(t.R)} en cosas; aquí está el recibo.`, `We bought ${enM(t.R)} worth of things today; here's the receipt.`)
         ],
         options: () => rot(['掃描發票。', '不掃描發票，直接付款。', '按旁邊的對講機，請管理員過來。']),
@@ -672,15 +669,15 @@ const Game = defineGame({
       EXIT: {
         place: 'exit',
         dialogue: () => [L('（車開到出口，柵欄又擋住了路。）', '(Llegas a la salida y la barrera vuelve a cerrarte el paso.)', '(You reach the exit and the barrier blocks the way again.)')],
-        options: () => rot(['把停車票放進機器裡。', '直接開過去。', '用手把柵欄推開。']),
+        options: () => rot([exitOpt, '直接開過去。', '用手把柵欄推開。']),
         next: c => {
-          if (c !== '把停車票放進機器裡。') {
+          if (c !== exitOpt) {
             Game.addMistake(c === '直接開過去。'
-              ? M('要先把票放進機器，柵欄才會升起來。', 'Primero hay que meter el boleto en la máquina para que suba la barrera.', 'Put the ticket into the machine first, then the barrier will rise.')
-              : M('不可以推柵欄，會壞掉，也很危險，要用停車票。', 'No se debe empujar la barrera: se rompe y es peligroso. Hay que usar el boleto.', "Don't push the barrier — it could break and it's dangerous. Use the ticket."));
+              ? M(t.tk ? '要先把票放進機器，柵欄才會升起來。' : '要先用感應磁扣感應，柵欄才會升起來。', t.tk ? 'Primero hay que meter el boleto en la máquina para que suba la barrera.' : 'Primero hay que pasar la ficha por el lector para que suba la barrera.', t.tk ? 'Put the ticket into the machine first, then the barrier will rise.' : 'Tap the magnetic tag on the reader first, then the barrier will rise.')
+              : M(`不可以推柵欄，會壞掉，也很危險，要用${Z}。`, `No se debe empujar la barrera: se rompe y es peligroso. Hay que usar ${ZES}.`, `Don't push the barrier — it could break and it's dangerous. Use ${ZEN}.`));
             return;
           }
-          goodFirst('EXIT', '沒錯！已經繳過費了，把票放進去就可以出去。', '¡Exacto! Como ya pagaste, metes el boleto y puedes salir.', "Right! You've already paid, so insert the ticket and you can leave.");
+          goodFirst('EXIT', `沒錯！已經繳過費了，${t.tk ? '把票放進去' : '用感應磁扣感應'}就可以出去。`, `¡Exacto! Como ya pagaste, ${t.tk ? 'metes el boleto' : 'pasas la ficha por el lector'} y puedes salir.`, `Right! You've already paid, so ${t.tk ? 'insert the ticket' : 'tap the magnetic tag'} and you can leave.`);
           Game.stopTimer();
           Game.state = 'END';
         }
