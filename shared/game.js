@@ -900,8 +900,8 @@ const VocabQuiz = {
     if (!GAME.vocabQuiz || !this.makeQuestions().length) return;
     this.css();
     const d = document.createElement('div'); d.className = 'quiz-invite';
-    d.innerHTML = `<div class="q-t">${Game.ruby('你學會了幾個單字？挑戰一下自己吧！')}</div>
-      <div class="q-es">${esc(X('¿Cuántas palabras aprendiste? ¡Ponte a prueba!', 'How many words did you learn? Challenge yourself!'))}</div>
+    d.innerHTML = `<div class="q-t">${Game.ruby('你學會了幾個單字？')}<br>${Game.ruby('挑戰一下自己吧！')}</div>
+      <div class="q-es">${X('¿Cuántas palabras aprendiste?<br>¡Ponte a prueba!', 'How many words did you learn?<br>Challenge yourself!')}</div>
       <button class="opt deal" id="quiz-go" data-quiz-go>${Game.ruby('挑戰自己')} ${esc(X('Ponte a prueba', 'Challenge yourself'))}</button>`;
     box.appendChild(d);
     d.querySelector('#quiz-go').onclick = () => this.start();
