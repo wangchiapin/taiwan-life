@@ -350,7 +350,7 @@ async function loadBoard() {
 /* ── 地圖開關＋遊戲連結 ──
    新遊戲（GATED）預設「維修中」；這裡選「開啟」，地圖上的房子才能進去。設定存在 Firebase settings/map */
 const LEGACY = ['drinks', 'reserva', 'breakfast', 'parcel', 'nightmarket', 'bakery', 'clinic', 'mrt', 'street'];   // 舊遊戲：沒設定過＝開啟
-const GATED = [...LEGACY, 'school', 'ubike', 'bus', 'barber', 'cinema', 'parking', 'icecream', 'bookstore', 'market', 'elevator', 'noodle', 'conbini', 'yansuji', 'guandi', 'clothes'];
+const GATED = [...LEGACY, 'school', 'ubike', 'bus', 'barber', 'cinema', 'parking', 'icecream', 'bookstore', 'market', 'elevator', 'noodle', 'conbini', 'yansuji', 'guandi', 'clothes', 'hotel', 'hsr', 'train', 'taxi'];
 const isOn = id => LEGACY.includes(id) ? OPENMAP[id] !== false : OPENMAP[id] === true;
 const OPENMAP = {};
 const gameUrl = id => new URL('../games/' + id + '/', location.href).href;
