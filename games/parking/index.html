@@ -111,6 +111,8 @@
   .mini .mc { height: 30px; border: 1px solid #5e7a73; border-radius: 3px; background: #2c3a3f; color: #9fb4ae; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 4px; }
   .mini .mc.me { background: #f2b632; border-color: #fff3d6; color: #1b2a33; font-weight: 700; }
   .mini .mc i { font-style: normal; font-size: 16px; }
+  .mini .mwall { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
+  .mini .mwall span { display: flex; justify-content: center; align-items: center; height: 24px; }
   .mini .mlane { height: 10px; margin: 3px 0; background: #2c3237; border-radius: 2px; }
   .plan .stall.ev { background: #1f6b4f; border-color: #b9f3d3; }
   .plan .stall.ev .no { color: #fff; }
@@ -525,11 +527,13 @@ const Game = defineGame({
     const t = this.task;
     return `<div class="pillar"><div class="pl"><span>B${t.floor}</span><i>·</i><span>${t.zone}</span><i>·</i><span>${t.n}</span></div></div>` + this.miniPlanHTML();
   },
-  /* 小平面圖：只標出你停的那一格（不標設施） */
+  /* 小平面圖：標出你停的那一格，和它外側的設施（圖示） */
   miniPlanHTML() {
     const t = this.task, r = s => this.ruby(s), me = t.plan.findIndex(x => x.num === t.n);
+    const fac = me >= 0 && t.plan[me].fac;
     const cell = (x, i) => `<div class="mc${i === me ? ' me' : ''}"><span>${x.num}</span>${i === me ? ICON('car', 18) : ''}</div>`;
-    return `<div class="mini"><div class="mh2">${r('你的車')}：${r(FL(t.floor))} · ${r(t.zone + '區')}</div><div class="mrow">${t.plan.slice(0, 5).map((x, i) => cell(x, i)).join('')}</div><div class="mlane"></div><div class="mrow">${t.plan.slice(5).map((x, i) => cell(x, i + 5)).join('')}</div></div>`;
+    const wall = (top) => `<div class="mwall">${[0, 1, 2, 3, 4].map(c => `<span>${fac && me >= 0 && (top ? me < 5 : me >= 5) && me % 5 === c ? ICON(fac.k, 22) : ''}</span>`).join('')}</div>`;
+    return `<div class="mini"><div class="mh2">${r('你的車')}：${r(FL(t.floor))} · ${r(t.zone + '區')}</div>${wall(true)}<div class="mrow">${t.plan.slice(0, 5).map((x, i) => cell(x, i)).join('')}</div><div class="mlane"></div><div class="mrow">${t.plan.slice(5).map((x, i) => cell(x, i + 5)).join('')}</div>${wall(false)}</div>`;
   },
   /* 組句：把字卡依序點成「我停在…」 */
   cmpTokens() { const t = this.task; return { w: '我停在', f: FL(t.floor), f2: FL(t.otherFloor), z: `${t.zone}區`, z2: `${t.otherZone}區`, n: `${zhNum(t.n)}號`, n2: `${zhNum(t.n2)}號` }; },
@@ -557,7 +561,7 @@ const Game = defineGame({
     const card = side => {
       const bad = t.broken === side;
       return `<button type="button" class="mach" data-choice="使用${side}邊的機器。"><span class="mh">${r(side + '邊')}</span><span class="mscreen ${bad ? 'bad' : 'ok'}">` +
-        (bad ? `<b>${ICON('warn', 20)} ${r('暫停使用')}</b><small>${r('請使用旁邊的機器')}</small>` : `<b>${r('歡迎使用')}</b><small>${r(t.tk ? '請放入停車票' : '請感應磁扣')}</small>`) + '</span></button>';
+        (bad ? `<b>${ICON('warn', 20)} ${r('暫停使用')}</b><small>${r('請使用旁邊的機器')}</small>` : `<b>${r('歡迎使用')}</b><small>${r(t.tk ? '請掃描停車票' : '請感應磁扣')}</small>`) + '</span></button>';
     };
     return `<div class="machines">${card('左')}${card('右')}</div>`;
   },
@@ -746,14 +750,19 @@ const Game = defineGame({
       /* ═══ 自動繳費機：①選沒壞的那台 ②掃描發票折抵 ═══ */
       PAY: {
         place: 'machine',
-        html: () => t.payStep === 0 ? Game.twoMachinesHTML() : Game.machineHTML(),
+        html: () => t.payStep === 0 ? '' : Game.machineHTML(),
         dialogue: () => t.payStep === 0
           ? [L('（你們走到一樓，那裡有兩台自動繳費機。）', '(Bajan a la planta baja: hay dos máquinas de pago automáticas.)', '(You go down to the ground floor. There are two automatic pay stations.)'),
              ami('我們去繳費吧！', '¡Vamos a pagar!', "Let's go pay!")]
           : [L(`（你們走到那台機器前，${t.tk ? '把停車票放進去' : '把感應磁扣放在感應區'}。）`, `(Se acercan a esa máquina y ${t.tk ? 'meten el boleto' : 'apoyan la ficha en el lector'}.)`, `(You step up to that machine and ${t.tk ? 'insert the ticket' : 'tap the magnetic tag on the reader'}.)`),
              ami(`我們今天買了${t.R}元的東西，發票在這裡。`, `Hoy compramos ${esM(t.R)} en cosas; aquí está el recibo.`, `We bought ${enM(t.R)} worth of things today; here's the receipt.`)],
         options: () => t.payStep === 0 ? [] : rot(['掃描發票。', '不掃描發票，直接付款。', '按旁邊的對講機，請管理員過來。']),
-        mount: box => { if (t.payStep === 0) box.querySelectorAll('.machines [data-choice]').forEach(b => { b.onclick = () => Game.handleChoice(b.dataset.choice); }); },
+        mount: box => {
+          if (t.payStep !== 0) return;
+          const d = document.createElement('div'); d.innerHTML = Game.twoMachinesHTML();
+          box.insertBefore(d, box.querySelector('.fb'));
+          d.querySelectorAll('[data-choice]').forEach(b => { b.onclick = () => Game.handleChoice(b.dataset.choice); });
+        },
         next: c => {
           if (t.payStep === 0) {
             if (c !== `使用${t.broken === '左' ? '右' : '左'}邊的機器。`) {
