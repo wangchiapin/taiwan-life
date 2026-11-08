@@ -49,6 +49,16 @@ def texts(page):
     # 拼音預設開啟時選項裡有 <rt>，先拿掉才對得上正解文字
     return page.evaluate("[...document.querySelectorAll('#options-area .opt')].map(b=>{if(b.dataset.raw)return b.dataset.raw;const c=b.cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.innerText.replace(/\\n/g,'')})")
 def click_i(page,i): page.locator('#options-area .opt').nth(i).click()
+def cands(page):
+    """畫面上所有可按的選項：下方按鈕（#options-area .opt）＋直接點畫面上的東西（元素有 data-choice＝選項文字：看板、平面圖、書架、機器…）。
+    回傳 [(文字, 是不是直接點畫面上的東西), …]"""
+    o=texts(page)
+    t=page.evaluate("[...document.querySelectorAll('[data-choice]')].filter(e=>e.offsetParent!==null).map(e=>e.dataset.choice)")
+    return [(x,False) for x in o]+[(x,True) for x in t]
+def click_c(page,c,i):
+    tap=c[i][1]; j=sum(1 for _,tp in c[:i] if tp==tap)
+    if tap: page.locator('[data-choice]:visible').nth(j).click()
+    else: click_i(page,j)
 def play(page,g,mode,log):
     bad=set(); trans=0; steps=0; seen=[]
     orc=EXTRA.get(g) or ORACLES.get(g)
@@ -67,12 +77,10 @@ def play(page,g,mode,log):
             click_i(page,0); continue
         if g=='breakfast' and page.evaluate("!!(Game.getConfig()[Game.state]||{}).pad"):
             page.evaluate("Game.pad.ticket=[...Game.C.target]; Game.padSubmit()"); continue
-        opts=texts(page); tap=False
-        if not opts:   # 直接點畫面上的東西（元素有 data-choice＝選項文字）：看板、平面圖這類
-            opts=page.evaluate("[...document.querySelectorAll('[data-choice]')].filter(e=>e.offsetParent!==null).map(e=>e.dataset.choice)"); tap=bool(opts)
-        if not opts: page.wait_for_timeout(200); continue
         use=bool(orc and (mode=='perfect' or random.random()<0.6))
-        page.evaluate("g=>{if(typeof Game.testPrep==='function')Game.testPrep(g)}",use)   # 座位表這類要先「選」再按確定的關卡
+        page.evaluate("g=>{if(typeof Game.testPrep==='function')Game.testPrep(g)}",use)   # 座位表、組句這類要先「選」再按確定的關卡
+        c=cands(page); opts=[x for x,_ in c]
+        if not opts: page.wait_for_timeout(200); continue
         ans=None
         if use:
             try: ans=page.evaluate(orc)
@@ -87,7 +95,7 @@ def play(page,g,mode,log):
         if idx is None:
             cand=[i for i,o in enumerate(opts) if (st,o) not in bad] or list(range(len(opts)))
             idx=random.choice(cand)
-        m0=page.evaluate('Game.mistakes'); (page.locator('[data-choice]:visible').nth(idx).click() if tap else click_i(page,idx))
+        m0=page.evaluate('Game.mistakes'); click_c(page,c,idx)
         if page.evaluate('Game.state')==st and page.evaluate('Game.mistakes')>m0: bad.add((st,opts[idx]))
     log.append(seen); return 'timeout',trans
 def fbcheck(page,g,embed):

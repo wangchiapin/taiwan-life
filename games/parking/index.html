@@ -549,6 +549,18 @@ const Game = defineGame({
     el.querySelector('.cmp-clear').onclick = () => { this.cmp = []; this.cmpDraw(el); };
     el.querySelector('.cmp-send').onclick = () => { if (this.cmp.length) this.handleChoice(this.cmpSentence()); };
   },
+  /* 自動測試用（tools/coverage.py）：多步驟關卡現在第幾步、組句的各種錯法 */
+  testClass(x) {   // 選項的「種類」：把這局隨機的樓層／區／號碼換成「本層／別層／本區／別區／本號／別號」
+    const t = this.task; if (!t) return x;
+    if (this.state === 'FLOOR') return x;   // 樓層看板：三層都要各按過
+    if (/^停在[ABC]區/.test(x)) return x.replace(/[ABC]區[零一二三四五六七八九十百]+號/, '#區#號');
+    return x.split(FL(t.floor)).join('本層').replace(/地下[一二三]樓/g, '別層').split(t.zone + '區').join('本區').replace(/[ABC]區/g, '別區').split(zhNum(t.n) + '號').join('本號').replace(/[零一二三四五六七八九十百]+號/g, '別號');
+  },
+  testBranch() { return this.state === 'END' ? (this.wrongSpot ? '罰單' : this._endGood ? '很穩' : '辛苦了') : null; },
+  testKey() { const t = this.task; return this.state === 'REMEMBER' ? 's' + t.step : this.state === 'PAY' ? 'p' + t.payStep : ''; },
+  TEST_WRONG: { '組句：沒有從「我停在」開始': ['f', 'z', 'n'], '組句：樓層選錯': ['w', 'f2', 'z', 'n'], '組句：區選錯': ['w', 'f', 'z2', 'n'], '組句：號碼選錯': ['w', 'f', 'z', 'n2'], '組句：缺字': ['w', 'f'], '組句：順序顛倒': ['w', 'z', 'f', 'n'] },
+  testWrongs() { return this.state === 'REMEMBER' && this.task.step === 0 ? Object.keys(this.TEST_WRONG) : []; },
+  testDoWrong(name) { this.cmp = [...this.TEST_WRONG[name]]; this.handleChoice(this.cmpSentence()); },
   testPrep(use) {   // 自動測試用：組句關先把字卡排好（對的一句，或亂排幾張）
     const t = this.task, el = document.querySelector('.cmp');
     if (this.state !== 'REMEMBER' || t.step !== 0 || !el) return;

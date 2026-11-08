@@ -227,7 +227,7 @@ const VOCAB = {
   START: [['書店', 'librería', 'bookstore'], ['生日', 'cumpleaños', 'birthday'], ['禮物', 'regalo', 'gift'], ['書籤', 'marcapáginas', 'bookmark'], ['包裝', 'envolver, empaquetar', 'wrap'], ['下禮拜', 'la próxima semana', 'next week'], ['幫忙', 'ayudar', 'help']],
   SECTION: [['區', 'sección, zona', 'section'], ['小說', 'novela', 'novel'], ['漫畫', 'cómic, manga', 'comic'], ['童書', 'libro infantil', "children's book"], ['料理', 'cocina (comida)', 'cooking'], ['語言', 'idiomas', 'languages'], ['喜歡', 'gustar', 'like']],
   FIND: [['哪一本', 'cuál (libro)', 'which one'], ['找不到', 'no encontrar', "can't find"], ['問', 'preguntar', 'ask'], ['店員', 'empleado/a de la tienda', 'shop staff']],
-  SEEK: [['書籤', 'marcapáginas', 'bookmark'], ['結帳', 'pagar en la caja', 'check out'], ['不要', 'no querer', "don't want"], ['接下來', 'a continuación', 'next']],
+  SEEK: [['書籤', 'marcapáginas', 'bookmark'], ['結帳', 'pagar en la caja', 'check out'], ['算了', 'olvídalo, da igual', 'forget it'], ['接下來', 'a continuación', 'next']],
   STOCK: [['還有嗎', 'todavía hay', 'do you still have it'], ['多少錢', 'cuánto cuesta', 'how much'], ['便宜', 'barato', 'cheap'], ['請問', 'disculpe, una pregunta', 'excuse me'], ['比較', 'más (comparativo)', 'more / relatively']],
   LOOK: [['書籤', 'marcapáginas', 'bookmark'], ['放棄', 'rendirse', 'give up'], ['卡片', 'tarjeta', 'card'], ['隨便', 'cualquiera', 'any / whichever'], ['怎麼辦', 'qué hago', 'what should I do']],
   ASK: [['請問', 'disculpe, una pregunta', 'excuse me'], ['在哪裡', 'dónde está', 'where is'], ['旁邊', 'al lado', 'next to'], ['簽書會', 'firma de libros', 'book signing'], ['貴', 'caro', 'expensive']],
@@ -354,6 +354,7 @@ const Game = defineGame({
     if (this.state === 'PAY_FIX' || (this.state === 'CHANGE' && this._transMode && this.task.changeWrong)) return ['images/pay_sorry_wrapped.jpg', '😅'];
     return null;
   },
+  testBranch() { const t = this.task; return this.state === 'END' ? (t.card ? '買了卡片' : t.noMark ? '沒買書籤' : this._endGood ? '全部做對' : '買到但出狀況') : null; },
   amiLines() {
     const N = this.N, t = this.task;
     return [
@@ -400,11 +401,11 @@ const Game = defineGame({
   },
   signsHTML() {
     const r = s => this.ruby(s);
-    return `<div class="signs">${SECTIONS.map((s, i) => `<button type="button" class="sign" data-sec="${i}">${r(s.zh)}</button>`).join('')}</div>`;
+    return `<div class="signs">${SECTIONS.map((s, i) => `<button type="button" class="sign" data-sec="${i}" data-choice="去${s.zh}區。">${r(s.zh)}</button>`).join('')}</div>`;
   },
   shelfHTML() {
     const t = this.task, r = s => this.ruby(s);
-    return `<div class="shelf">${t.sec.books.map((b, i) => (t.soldOut && i === t.bi) ? [t.sec.fill, 0] : b).map(b => { const c = COVER[b[0]] || ['', '#8a5a3b']; return `<button type="button" class="book" data-book="${b[0]}" style="background:${c[1]}"><span class="ic"><svg viewBox="0 0 64 64" aria-hidden="true">${c[0]}</svg></span><span class="tt">${r(b[0])}</span></button>`; }).join('')}</div>`;
+    return `<div class="shelf">${t.sec.books.map((b, i) => (t.soldOut && i === t.bi) ? [t.sec.fill, 0] : b).map(b => { const c = COVER[b[0]] || ['', '#8a5a3b']; return `<button type="button" class="book" data-book="${b[0]}" data-choice="拿《${b[0]}》。" style="background:${c[1]}"><span class="ic"><svg viewBox="0 0 64 64" aria-hidden="true">${c[0]}</svg></span><span class="tt">${r(b[0])}</span></button>`; }).join('')}</div>`;
   },
 
   getConfig() {
@@ -498,9 +499,9 @@ const Game = defineGame({
       SEEK: {
         place: 'shop',
         dialogue: () => [L('我：書拿到了，接下來要做什麼？', 'Ya tengo el libro. ¿Qué hago ahora?', 'I have the book. What should I do next?')],
-        options: () => rot(['去找書籤。', '直接去結帳。', '謝謝，我不要了。']),
+        options: () => rot(['去找書籤。', '直接去結帳。', '算了，我不買了。']),
         next: c => {
-          if (c === '謝謝，我不要了。') {
+          if (c === '算了，我不買了。') {
             Game.addMistake(M('Ami說要幫她買禮物啦！不要忘記了！', '¡Ami te pidió que le compraras un regalo! ¡No lo olvides!', 'Ami asked you to buy a gift for her! Don\'t forget!'));
             return;
           }

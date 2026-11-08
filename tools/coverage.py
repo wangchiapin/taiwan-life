@@ -13,6 +13,7 @@ r"""涵蓋測試：python3 tools/coverage.py <遊戲…> [--max 40] [--min 10] [
     所以「洗牌抽到哪幾個」只能靠多跑幾場來碰運氣，報告裡不算涵蓋。
   - 玩的時候：每到一關，先按一個還沒按過的錯選項，再按正解（用 tools/oracles 的正解）。
 
+【選項】下方按鈕＋直接點畫面上的東西（元素有 data-choice＝選項文字）都會測；遊戲可再提供 Game.testKey／testWrongs／testDoWrong／testClass／testBranch（見 play_cov 的說明）。
 【限制】正解（oracles）要有；點單板、拖曳這類 oracle 自己處理的操作，只當作「照正解走」，不另外試錯。
 【注意】跑的時候不要同時再跑 smoke.py（共用同一套測試伺服器邏輯，但各自開埠，其實可並行；保險起見不要改檔）。
 """
@@ -72,25 +73,38 @@ def route(r):
 def norm(t): return re.sub(r'\d+', '#', t)
 
 def play_cov(page, g, stats, tried):
-    """照正解走；每一關先按一個還沒按過的錯選項，再按正解。回傳 (結束狀態, 卡住的關卡)"""
+    """照正解走；每一關（多步驟的關卡每一步各算一關）先把還沒按過的錯選項「全部」按一遍，再按正解。
+    選項＝下方按鈕＋直接點畫面上的東西（data-choice）。遊戲可以提供：
+      Game.testKey()        → 多步驟關卡目前是第幾步（字串）
+      Game.testWrongs()     → 沒辦法直接按到的錯誤做法（例如組句的幾種錯法）的名稱清單；Game.testDoWrong(名稱) 去做
+      Game.testPrep(true)   → 先把「要先選再確定」的關卡排成正解
+    回傳 結束狀態"""
     orc = smoke.EXTRA.get(g) or smoke.ORACLES.get(g)
-    steps = 0; just_wrong = None
-    while steps < 500:
+    steps = 0
+    while steps < 600:
         steps += 1
         if page.evaluate("document.getElementById('leaderboard-screen').classList.contains('active')"): return 'leaderboard'
         if page.locator('#ami-pop').count():
             page.click('#ami-pop [data-act="open"]' if page.locator('#ami-pop [data-act="open"]').count() else '#ami-pop [data-act="reply"]'); continue
         st = page.evaluate('Game.state')
         stats['visited'].add(st)
+        if st == 'END':   # 結局有幾種寫法：遊戲用 Game.testBranch() 回報目前是哪一種
+            br = page.evaluate("typeof Game.testBranch==='function' ? Game.testBranch() : null")
+            if br: stats['branches'].add(br)
         if page.evaluate('Game.mistakes') >= 8: page.evaluate('Game.mistakes=0')
         if st == '_TRANS':
             stats['visited'].add('_TRANS:' + page.evaluate('Game._trans.from+">"+Game._trans.to'))
             smoke.click_i(page, 0); continue
         if g == 'breakfast' and page.evaluate("!!(Game.getConfig()[Game.state]||{}).pad"):
             page.evaluate("Game.pad.ticket=[...Game.C.target]; Game.padSubmit()"); continue
-        opts = smoke.texts(page)
-        if not opts: page.wait_for_timeout(200); continue
         page.evaluate("g=>{if(typeof Game.testPrep==='function')Game.testPrep(g)}", True)
+        c = smoke.cands(page); opts = [x for x, _ in c]
+        if not opts: page.wait_for_timeout(200); continue
+        # 選項的「種類」：數字視為同一個；遊戲可用 Game.testClass(文字) 再把隨機的樓層／區／號碼換成「本層／別層…」這種相對的說法
+        cls = page.evaluate("o=>typeof Game.testClass==='function' ? o.map(x=>Game.testClass(x)) : null", opts) or opts
+        cls = [norm(x) for x in cls]
+        key = page.evaluate("typeof Game.testKey==='function' ? String(Game.testKey()) : ''")
+        sk = st + (':' + key if key else '')
         ans = None
         if orc:
             try: ans = page.evaluate(orc)
@@ -102,25 +116,29 @@ def play_cov(page, g, stats, tried):
             if idx is None:
                 for i, o in enumerate(opts):
                     if ans in o: idx = i; break
-        seen = stats['seen'].setdefault(st, set()); seen.update(norm(o) for o in opts)
+        seen = stats['seen'].setdefault(sk, set()); seen.update(cls)
         if idx is None:
-            stats['no_oracle'].add(st)
+            stats['no_oracle'].add(sk)
             idx = random.randrange(len(opts))
         else:
-            stats['right'].setdefault(st, set()).add(norm(opts[idx]))
-            if just_wrong != st:
-                t = tried.setdefault(st, set())
-                cand = [i for i in range(len(opts)) if i != idx and norm(opts[i]) not in t]
-                if cand:
-                    w = cand[0]; t.add(norm(opts[w])); just_wrong = st
-                    stats['wrong'].setdefault(st, set()).add(norm(opts[w]))
-                    smoke.click_i(page, w); continue
-            just_wrong = None
-        smoke.click_i(page, idx)
+            stats['right'].setdefault(sk, set()).add(cls[idx])
+            t = tried.setdefault(sk, set())
+            extra = page.evaluate("typeof Game.testWrongs==='function' ? Game.testWrongs() : []")
+            seen.update('x:' + e for e in extra)
+            todo = [e for e in extra if 'x:' + e not in t]
+            if todo:
+                t.add('x:' + todo[0]); stats['wrong'].setdefault(sk, set()).add('x:' + todo[0])
+                page.evaluate("e=>Game.testDoWrong(e)", todo[0]); continue
+            cand = [i for i in range(len(opts)) if i != idx and cls[i] not in t]
+            if cand:
+                w = cand[0]; t.add(cls[w])
+                stats['wrong'].setdefault(sk, set()).add(cls[w])
+                smoke.click_c(page, c, w); continue
+        smoke.click_c(page, c, idx)
     return 'timeout'
 
 def run_game(g, max_runs, min_runs, out, time_limit=900):
-    cov = set(); sites = {}; stats = {'visited': set(), 'seen': {}, 'right': {}, 'wrong': {}, 'no_oracle': set()}
+    cov = set(); sites = {}; stats = {'visited': set(), 'seen': {}, 'right': {}, 'wrong': {}, 'no_oracle': set(), 'branches': set()}
     tried = {}; problems = []; bad_runs = set(); all_states = set(); stale = 0; runs = 0; t0 = time.time(); ends = []
     with sync_playwright() as p:
         b = p.chromium.launch()
@@ -174,8 +192,13 @@ def run_game(g, max_runs, min_runs, out, time_limit=900):
     for st, seen in sorted(stats['seen'].items()):
         miss = seen - stats['right'].get(st, set()) - stats['wrong'].get(st, set())
         if miss: nm.append(f'{st}（{len(miss)} 種沒按過）')
+    rep.append('- 逐關明細（✓＝當正解按過、✗＝當錯的按過、？＝出現過但沒按到）：')
+    for st, seen in sorted(stats['seen'].items()):
+        rt, wr = stats['right'].get(st, set()), stats['wrong'].get(st, set())
+        rep.append(f'  - {st}：' + '　'.join(('✓' if o in rt and o not in wr else '✗' if o in wr and o not in rt else '✓✗' if o in rt and o in wr else '？') + o for o in sorted(seen)))
     rep.append('- 還有錯選項沒按過的關卡：' + ('、'.join(nm) or '無'))
     if stats['no_oracle']: rep.append(f'- 沒有正解可用（隨機點選）的關卡：{sorted(stats["no_oracle"])}')
+    if stats['branches']: rep.append('- 結局種類（走到的）：' + '、'.join(sorted(stats['branches'])))
     rep.append('- 問題：' + ('；'.join(problems) if problems else '無'))
     text = '\n'.join(rep); print(text, flush=True)
     os.makedirs(out, exist_ok=True); open(os.path.join(out, f'{g}.md'), 'w', encoding='utf8').write(text + '\n')
