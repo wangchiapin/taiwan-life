@@ -100,7 +100,10 @@
   .plan .stall.hc.bot .wc { top: auto; bottom: 12px; }
   .plan .wall { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 0 0 4px; }
   .plan .wall.bot { padding: 4px 0 0; }
-  .plan .wall span { text-align: center; font-size: 20px; line-height: 24px; height: 24px; }
+  .plan .wall span { display: flex; justify-content: center; align-items: center; height: 26px; }
+  .plan .stall .wc svg, .plan .stall .bolt svg { display: inline-block; }
+  .mini .mc svg { flex: none; }
+  .machines .mscreen b { display: flex; align-items: center; gap: 6px; }
   .mini { margin: 8px 0 12px; background: #17453d; border-radius: 10px; padding: 8px 12px 10px; box-shadow: inset 0 0 0 3px #2d6a5f; color: #fff; }
   .mini .mh2 { font-weight: 700; color: #f2d36b; font-size: 14px; margin-bottom: 6px; }
   .mini ruby rt { color: #bfe0d8; }
@@ -115,7 +118,7 @@
   .plan .stall.ev.bot .bolt { top: auto; bottom: 12px; }
   .plan .stall.taken { cursor: not-allowed; }
   .plan .stall.taken .no { color: #dfe6ea; }
-  .plan .stall svg { position: absolute; left: 50%; top: 3px; transform: translateX(-50%); width: 80%; height: calc(100% - 24px); }   /* 車子塞滿格子，只留一條放號碼 */
+  .plan .stall svg:not(.ico) { position: absolute; left: 50%; top: 3px; transform: translateX(-50%); width: 80%; height: calc(100% - 24px); }   /* 車子塞滿格子，只留一條放號碼 */
   .plan .stall.bot svg { top: auto; bottom: 3px; }
   .plan .stall.bot .no { bottom: auto; top: 2px; }
   .plan .stall.shake { animation: stallshake .35s; }
@@ -311,8 +314,8 @@ const VOCAB = {
   START: [['停車場', 'estacionamiento', 'parking lot'], ['愛心專用車位', 'espacio reservado (personas con discapacidad)', 'priority parking space'], ['停車費', 'tarifa de estacionamiento', 'parking fee'], ['折抵', 'descontar, compensar', 'offset, deduct'], ['發票', 'recibo de compra (factura)', 'receipt'], ['小時', 'hora', 'hour']],
   ENTRANCE: [['入口', 'entrada', 'entrance'], ['柵欄', 'barrera', 'barrier gate'], ['按鈕', 'botón', 'button'], ['停車票', 'boleto de estacionamiento', 'parking ticket'], ['感應磁扣', 'ficha magnética de acceso', 'magnetic access tag'], ['喇叭', 'bocina', 'car horn']],
   FLOOR: [['地下一樓', 'sótano 1', 'basement level 1'], ['空位', 'espacio libre', 'free space'], ['滿了', 'lleno', 'full'], ['指示牌', 'letrero indicador', 'sign'], ['開到', 'conducir hasta', 'drive to']],
-  SPOT: [['一般車位', 'espacio normal', 'regular parking space'], ['愛心專用車位', 'espacio reservado', 'priority space'], ['輪椅', 'silla de ruedas', 'wheelchair'], ['車道', 'carril de circulación', 'driving lane'], ['空位', 'espacio libre', 'free space'], ['充電車位', 'espacio de carga (autos eléctricos)', 'EV charging space'], ['電梯', 'ascensor', 'elevator'], ['滅火器', 'extintor', 'fire extinguisher'], ['逃生門', 'puerta de emergencia', 'emergency exit door'], ['廁所', 'baño', 'restroom']],
-  REMEMBER: [['區', 'zona', 'zone'], ['號', 'número', 'number'], ['地下室', 'sótano', 'basement'], ['停在', 'estacionar en', 'park at'], ['旁邊', 'al lado', 'next to'], ['電梯', 'ascensor', 'elevator'], ['滅火器', 'extintor', 'fire extinguisher'], ['上樓', 'subir', 'go upstairs'], ['離開', 'irse', 'leave']],
+  SPOT: [['一般車位', 'espacio normal', 'regular parking space'], ['愛心專用車位', 'espacio reservado', 'priority space'], ['輪椅', 'silla de ruedas', 'wheelchair'], ['車道', 'carril de circulación', 'driving lane'], ['空位', 'espacio libre', 'free space'], ['充電車位', 'espacio de carga (autos eléctricos)', 'EV charging space'], ['電梯', 'ascensor', 'elevator'], ['滅火器', 'extintor', 'fire extinguisher'], ['出入口', 'entrada y salida', 'entrance / exit'], ['廁所', 'baño', 'restroom']],
+  REMEMBER: [['區', 'zona', 'zone'], ['號', 'número', 'number'], ['地下室', 'sótano', 'basement'], ['停在', 'estacionar en', 'park at'], ['旁邊', 'al lado', 'next to'], ['上樓', 'subir', 'go upstairs'], ['離開', 'irse', 'leave']],
   MALL: [['逛街', 'ir de compras, pasear', 'go shopping'], ['百貨公司', 'centro comercial', 'department store'], ['購物袋', 'bolsa de compras', 'shopping bag']],
   PAY_CHECK: [['應付金額', 'importe a pagar', 'amount due'], ['對講機', 'interfono', 'intercom'], ['管理員', 'encargado', 'attendant'], ['折抵', 'descontar', 'deduct']],
   PAY: [['繳費機', 'máquina de pago', 'pay station'], ['暫停使用', 'fuera de servicio', 'out of service'], ['折抵', 'descontar', 'deduct'], ['掃描', 'escanear', 'scan'], ['發票', 'recibo', 'receipt'], ['每小時', 'por hora', 'per hour'], ['出場', 'salir (del estacionamiento)', 'exit the lot'], ['十五分鐘', 'quince minutos', 'fifteen minutes']],
@@ -358,8 +361,20 @@ const Hints = makeHints({ render() {
   if (Game.task && ['REMEMBER', 'MALL', 'PAY', 'PAY_CHECK', 'FIND_CAR', 'EXIT', 'END'].includes(Game.state))
     document.getElementById('hint-body').insertAdjacentHTML('beforeend', `<div class="h-sec">${Game.ruby('你的車停的位置')}</div><div style="padding:0 16px 12px">${Game.miniPlanHTML()}</div>`);
 } });
-/* 停車格旁邊的設施：平面圖上每格外側畫一個 */
-const NEAR = [{ ic: '🛗', zh: '電梯', es: 'un ascensor', en: 'an elevator' }, { ic: '🧯', zh: '滅火器', es: 'un extintor', en: 'a fire extinguisher' }, { ic: '🚪', zh: '逃生門', es: 'una puerta de emergencia', en: 'an emergency exit door' }, { ic: '🚻', zh: '廁所', es: 'un baño', en: 'a restroom' }];
+/* 圖示：全部用 SVG 畫，不用表情符號 */
+const SVG = {
+  lift: '<rect x="2" y="2" width="20" height="20" rx="3" fill="#2f6fbf"/><path d="M6 11l3-5 3 5zM12 13l3 5 3-5z" fill="#fff"/>',
+  wc: '<rect x="2" y="2" width="20" height="20" rx="3" fill="#2f6fbf"/><circle cx="7.5" cy="6.5" r="1.8" fill="#fff"/><rect x="5.6" y="9" width="3.8" height="7" rx="1.2" fill="#fff"/><circle cx="16.5" cy="6.5" r="1.8" fill="#fff"/><path d="M16.5 9l-3.2 7.5h6.4z" fill="#fff"/><path d="M12 5v14" stroke="#fff" stroke-width="1"/>',
+  ext: '<rect x="8" y="9" width="8" height="12" rx="3" fill="#d93a2f"/><rect x="9" y="4" width="6" height="2" rx="1" fill="#333"/><rect x="10.5" y="6" width="3" height="3" fill="#333"/><path d="M15 5.5c4 0 4.5 4 4 8" stroke="#333" stroke-width="1.3" fill="none"/><rect x="9.6" y="12" width="4.8" height="4" rx=".8" fill="#fff"/>',
+  door: '<rect x="2" y="2" width="20" height="20" rx="3" fill="#1f8a4c"/><rect x="5" y="5" width="7" height="14" rx="1" fill="#fff"/><path d="M13.5 12h6M17 8.8l3.2 3.2-3.2 3.2" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  wheel: '<circle cx="11" cy="4.5" r="2" fill="#fff"/><path d="M11 8v6h5l3 6" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 11a5.5 5.5 0 1 0 7 7" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round"/>',
+  bolt: '<path d="M13 2L5 14h6l-1 8 9-13h-6z" fill="#ffe14d"/>',
+  car: '<rect x="4" y="1" width="16" height="22" rx="6" fill="#d83b2e"/><rect x="6.5" y="5" width="11" height="4" rx="1.5" fill="#f6d5d0"/><rect x="6.5" y="15" width="11" height="4" rx="1.5" fill="#f6d5d0"/>',
+  warn: '<path d="M12 3L2 21h20z" fill="#ffd166"/><rect x="11" y="9" width="2" height="6" fill="#5a1f1f"/><circle cx="12" cy="17.5" r="1.2" fill="#5a1f1f"/>'
+};
+const ICON = (k, px = 24) => `<svg class="ico" viewBox="0 0 24 24" width="${px}" height="${px}" aria-hidden="true">${SVG[k]}</svg>`;
+/* 停車格旁邊的設施：電梯、廁所、滅火器、出入口各一個，隨機放在平面圖外側 */
+const NEAR = [{ k: 'lift', zh: '電梯', es: 'un ascensor', en: 'an elevator' }, { k: 'wc', zh: '廁所', es: 'un baño', en: 'a restroom' }, { k: 'ext', zh: '滅火器', es: 'un extintor', en: 'a fire extinguisher' }, { k: 'door', zh: '出入口', es: 'una entrada/salida', en: 'an entrance/exit' }];
 document.getElementById('hint-tab').onclick = () => Hints.toggle();
 document.getElementById('hint-close').onclick = () => Hints.toggle(false);
 
@@ -424,16 +439,16 @@ const Game = defineGame({
     const evIdx = 1 + Math.floor(Math.random() * 9);   // 電動車充電車位
     const ids = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(i => i !== evIdx).sort(() => Math.random() - .5), freeIds = new Set(ids.slice(0, 3));
     const colors = ['#c0392b', '#2e86c1', '#d4ac0d', '#7f8c8d', '#ecf0f1', '#27ae60', '#8e44ad'];
-    this.task.plan = Array.from({ length: 10 }, (_, i) => ({ num: k + i, kind: i === 0 ? 'hc' : i === evIdx ? 'ev' : freeIds.has(i) ? 'free' : 'taken', color: pick(colors), fac: pick(NEAR) }));
+    this.task.plan = Array.from({ length: 10 }, (_, i) => ({ num: k + i, kind: i === 0 ? 'hc' : i === evIdx ? 'ev' : freeIds.has(i) ? 'free' : 'taken', color: pick(colors), fac: null }));
+    [...Array(10).keys()].sort(() => Math.random() - .5).slice(0, 4).forEach((slot, j) => { this.task.plan[slot].fac = NEAR[j]; });
     this.task.n = this.task.plan.find(x => x.kind === 'free').num;   // 預設答案；玩家點哪個空位，就以那個為準
     this.task.n2 = this.task.n + 10;
-    this.setNear(this.task.plan.find(x => x.kind === 'free'));
     this.cmp = [];
   },
-  /* 玩家停哪一格，Ami 問「旁邊有什麼？」的答案就是那一格外側的設施 */
-  setNear(item) {
-    const t = this.task; t.near = item.fac;
-    t.nearOpts = [item.fac, ...NEAR.filter(x => x.zh !== item.fac.zh).sort(() => Math.random() - .5).slice(0, 2)].sort(() => Math.random() - .5);
+  /* Ami 問「旁邊有什麼？」的答案就是玩家停的那一格外側的設施（沒有設施就不問） */
+  setNear(fac) {
+    const t = this.task; t.near = fac;
+    t.nearOpts = [fac, ...NEAR.filter(x => x.zh !== fac.zh).sort(() => Math.random() - .5).slice(0, 2)].sort(() => Math.random() - .5);
   },
   locZh(f = this.task.floor, z = this.task.zone, n = this.task.n) { return `${FL(f)}，${z}區，${zhNum(n)}號`; },
   locEs(f = this.task.floor, z = this.task.zone, n = this.task.n) { return `${FL_ES(f)}, zona ${z}, número ${n}`; },
@@ -488,12 +503,12 @@ const Game = defineGame({
     const cell = (x, i) => {
       const bot = i >= 5 ? ' bot' : '';
       if (x.kind === 'free') return `<button type="button" class="stall free${bot}" data-kind="free" data-num="${x.num}" data-choice="停在${t.zone}區${zhNum(x.num)}號。"><span class="no">${x.num}</span></button>`;
-      if (x.kind === 'hc') return `<button type="button" class="stall hc${bot}" data-kind="hc" data-num="${x.num}" data-choice="停在${t.zone}區${zhNum(x.num)}號，旁邊有輪椅的標誌。"><span class="no">${x.num}</span><span class="wc">♿</span></button>`;
-      if (x.kind === 'ev') return `<button type="button" class="stall ev${bot}" data-kind="ev" data-num="${x.num}" data-choice="停在${t.zone}區${zhNum(x.num)}號，旁邊有充電的標誌。"><span class="no">${x.num}</span><span class="bolt">⚡</span></button>`;
+      if (x.kind === 'hc') return `<button type="button" class="stall hc${bot}" data-kind="hc" data-num="${x.num}" data-choice="停在${t.zone}區${zhNum(x.num)}號，旁邊有輪椅的標誌。"><span class="no">${x.num}</span><span class="wc">${ICON('wheel', 30)}</span></button>`;
+      if (x.kind === 'ev') return `<button type="button" class="stall ev${bot}" data-kind="ev" data-num="${x.num}" data-choice="停在${t.zone}區${zhNum(x.num)}號，旁邊有充電的標誌。"><span class="no">${x.num}</span><span class="bolt">${ICON('bolt', 30)}</span></button>`;
       return `<button type="button" class="stall taken${bot}" data-kind="taken" data-num="${x.num}" data-choice="這個車位有車了。"><span class="no">${x.num}</span>${car(x.color)}</button>`;
     };
     const rows = [t.plan.slice(0, 5).map((x, i) => cell(x, i)), t.plan.slice(5).map((x, i) => cell(x, i + 5))];
-    const wall = a => `<div class="wall${a}" aria-hidden="true">${(a ? t.plan.slice(5) : t.plan.slice(0, 5)).map(x => `<span>${x.fac.ic}</span>`).join('')}</div>`;
+    const wall = a => `<div class="wall${a}" aria-hidden="true">${(a ? t.plan.slice(5) : t.plan.slice(0, 5)).map(x => `<span>${x.fac ? ICON(x.fac.k) : ''}</span>`).join('')}</div>`;
     return `<div class="plan"><div class="sh">${r(FL(t.floor))} · ${r(t.zone + '區')}</div>` + wall('') +
       `<div class="asphalt"><div class="row">${rows[0].join('')}</div>` +
       `<button type="button" class="lane" data-choice="停在車道中間，先停一下。"><span>⟵ ${r('車道')} ⟶</span></button>` +
@@ -513,7 +528,7 @@ const Game = defineGame({
   /* 小平面圖：只標出你停的那一格（不標設施） */
   miniPlanHTML() {
     const t = this.task, r = s => this.ruby(s), me = t.plan.findIndex(x => x.num === t.n);
-    const cell = (x, i) => `<div class="mc${i === me ? ' me' : ''}"><span>${x.num}</span>${i === me ? '<i>🚗</i>' : ''}</div>`;
+    const cell = (x, i) => `<div class="mc${i === me ? ' me' : ''}"><span>${x.num}</span>${i === me ? ICON('car', 18) : ''}</div>`;
     return `<div class="mini"><div class="mh2">${r('你的車')}：${r(FL(t.floor))} · ${r(t.zone + '區')}</div><div class="mrow">${t.plan.slice(0, 5).map((x, i) => cell(x, i)).join('')}</div><div class="mlane"></div><div class="mrow">${t.plan.slice(5).map((x, i) => cell(x, i + 5)).join('')}</div></div>`;
   },
   /* 組句：把字卡依序點成「我停在…」 */
@@ -542,14 +557,14 @@ const Game = defineGame({
     const card = side => {
       const bad = t.broken === side;
       return `<button type="button" class="mach" data-choice="使用${side}邊的機器。"><span class="mh">${r(side + '邊')}</span><span class="mscreen ${bad ? 'bad' : 'ok'}">` +
-        (bad ? `<b>⚠ ${r('暫停使用')}</b><small>${r('請使用旁邊的機器')}</small>` : `<b>${r('歡迎使用')}</b><small>${r(t.tk ? '請放入停車票' : '請感應磁扣')}</small>`) + '</span></button>';
+        (bad ? `<b>${ICON('warn', 20)} ${r('暫停使用')}</b><small>${r('請使用旁邊的機器')}</small>` : `<b>${r('歡迎使用')}</b><small>${r(t.tk ? '請放入停車票' : '請感應磁扣')}</small>`) + '</span></button>';
     };
     return `<div class="machines">${card('左')}${card('右')}</div>`;
   },
   shown() { const t = this.task; return t.machWrong ? t.noDisc : t.fee; },   // 機器螢幕上的應付金額
   machineHTML(showTotal) {
     const t = this.task, r = s => this.ruby(s);
-    return `<div class="sign"><div class="sh">💳 ${r('自動繳費機')}</div>` +
+    return `<div class="sign"><div class="sh">${r('自動繳費機')}</div>` +
       `<div class="srow2"><b>${r('停車時間')}</b><span class="n">${t.h}</span><small>${r('小時')}</small></div>` +
       `<div class="srow2"><b>${r('每小時')}</b><span class="n">${t.rate}</span><small>${r('元')}</small></div>` +
       `<div class="srow2"><b>${r('發票')}</b><span class="n">${t.R}</span><small>${r('元')}</small></div>` +
@@ -630,7 +645,7 @@ const Game = defineGame({
           box.querySelectorAll('.plan [data-choice]').forEach(b => {
             b.onclick = () => {
               if (b.dataset.kind === 'taken') { Game.bumpSpot(b, bump); return; }
-              if (b.dataset.kind === 'free') { t.n = +b.dataset.num; t.n2 = t.n + 10; Game.setNear(t.plan.find(x => x.num === t.n)); }   // 玩家停哪一格，柱子上就是那個號碼
+              if (b.dataset.kind === 'free') { t.n = +b.dataset.num; t.n2 = t.n + 10; }   // 玩家停哪一格，柱子上就是那個號碼
               Game.handleChoice(b.dataset.choice);
             };
           });
@@ -659,8 +674,8 @@ const Game = defineGame({
           L('（車停好了。你拿出手機，傳訊息給Ami。）', '(Terminas de estacionar. Sacas tu celular y le escribes a Ami.)', '(You finish parking. You take out your phone and message Ami.)'),
           L('我：車子停好了！', '¡Ya estacioné el auto!', "I've parked the car!"),
           ami('好！你停在哪裡？', '¡Bien! ¿Dónde estacionaste?', 'Great! Where did you park?'),
-          ...(t.step >= 1 ? [Game.sent, ami('旁邊有什麼？', '¿Qué hay al lado?', "What's next to it?")] : []),
-          ...(t.step >= 2 ? [Game.sentNear, ami('好喔！趕快上來吧！我等你。', '¡Bien! ¡Sube rápido! Te espero.', "OK! Come up quick! I'll be waiting.")] : [])
+          ...(t.step >= 1 ? [Game.sent, ...(t.asked ? [ami('旁邊有什麼？', '¿Qué hay al lado?', "What's next to it?")] : [])] : []),
+          ...(t.step >= 2 ? [...(t.asked ? [Game.sentNear] : []), ami('好喔！趕快上來吧！我等你。', '¡Bien! ¡Sube rápido! Te espero.', "OK! Come up quick! I'll be waiting.")] : [])
         ],
         options: () => t.step === 0 ? []
           : t.step === 1 ? rot(t.nearOpts.map(x => `旁邊有${x.zh}。`))
@@ -710,7 +725,9 @@ const Game = defineGame({
           }
           goodFirst('REMEMBER', '說得很清楚！哪一層、哪一區、幾號，都說到了。', '¡Lo dijiste muy claro! Nivel, zona y número.', 'Clearly said! Level, zone and number — all there.');
           Game.sent = L(`我：${okMsg}`, `Estoy en ${Game.locEs()}.`, `I'm at ${Game.locEn()}.`);
-          t.step = 1;                 // 留在同一關：Ami 接著問旁邊有什麼
+          const spot = t.plan.find(x => x.num === t.n);
+          if (spot && spot.fac) { Game.setNear(spot.fac); t.asked = true; t.step = 1; }   // 這一格外側有設施，Ami 才會問旁邊有什麼
+          else { Game.sentNear = null; t.step = 2; }
         }
       },
 
