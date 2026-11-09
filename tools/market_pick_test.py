@@ -380,12 +380,20 @@ with sync_playwright() as p:
     check('付錢後進入找錢', state(page) == 'CHANGE', state(page))
     ev(page, "Game.cc = {bill: 500, ask: 300, want: 200, given: 150, sc: true}; Game.render()")
     o = opts(page); page.locator('#options-area .opt').nth(next(k for k, t_ in enumerate(o) if '好像找錯了' in t_)).click(); page.wait_for_timeout(120)
-    check('少找錢被指出來 → 過場畫面是肉攤老闆尷尬臉', state(page) == '_TRANS' and 'stall_meat_sorry' in ev(page, "document.getElementById('npc-avatar').src"), (state(page), ev(page, "document.getElementById('npc-avatar').src")))
+    check('少找錢被指出來 → 過場畫面是肉攤老闆拿零錢的尷尬臉', state(page) == '_TRANS' and 'stall_meat_change' in ev(page, "document.getElementById('npc-avatar').src"), (state(page), ev(page, "document.getElementById('npc-avatar').src")))
     page.locator('#options-area .opt').first.click(); page.wait_for_timeout(100)
-    check('離開過場後恢復平常的圖', 'sorry' not in ev(page, "document.getElementById('npc-avatar').src"))
+    check('離開過場後恢復平常的圖', 'sorry' not in ev(page, "document.getElementById('npc-avatar').src") and 'change' not in ev(page, "document.getElementById('npc-avatar').src"))
     ev(page, "Game.state = 'CHECK'; Game.tx = [{id:'pork', q:1}]; Game.ck = {id:'pork', q:1, wrong:true, wq:2}; Game.render()")
     o = opts(page); page.locator('#options-area .opt').nth(next(k for k, t_ in enumerate(o) if '我要的是' in t_)).click(); page.wait_for_timeout(120)
     check('放錯數量被指出來 → 過場畫面也是尷尬臉', state(page) == '_TRANS' and 'stall_meat_sorry' in ev(page, "document.getElementById('npc-avatar').src"), state(page))
+
+    for stall_, item_, key_ in (('魚攤', 'fish', 'fish'), ('菜攤', 'cabbage', 'veg')):
+        new_game(page); setreq(page, [[item_, 1]]); ev(page, 'Game.bagDone = true; Game.checkDone = true')
+        tap(page, '去' + stall_); buy(page, item_, 1); tap(page, '買好了'); ev(page, 'Game.st.floor = 99'); tap(page, '好，'); P = ev(page, 'Game.payInfo()'); tap(page, P['payOk'])
+        ev(page, "Game.cc = {bill: 500, ask: 300, want: 200, given: 150, sc: true}; Game.render()")
+        o = opts(page); page.locator('#options-area .opt').nth(next(k for k, t_ in enumerate(o) if '好像找錯了' in t_)).click(); page.wait_for_timeout(120)
+        check('少找錢被指出來 → 過場畫面是%s拿零錢的尷尬臉' % stall_, state(page) == '_TRANS' and 'stall_%s_change' % key_ in ev(page, "document.getElementById('npc-avatar').src"), (state(page), ev(page, "document.getElementById('npc-avatar').src")))
+        page.locator('#options-area .opt').first.click(); page.wait_for_timeout(100)
 
     # 11. 外觀：手機版找錢卡、地圖、殺價
     page.set_viewport_size({'width': 390, 'height': 800})
