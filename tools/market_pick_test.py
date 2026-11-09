@@ -370,6 +370,19 @@ with sync_playwright() as p:
     wl = [l for l in fl if '買太' in l or '沒有要' in l]
     check('買錯的（數量不對、多買）合成同一句、口語', len(wl) == 1 and wl[0].count('Ami：') == 1 and '買太少了，我要一斤' in wl[0] and '買太多了，我只要' in wl[0] and '我沒有要洋蔥' in wl[0] and '！' not in wl[0], fl)
 
+    # 10d. 老闆弄錯（少找錢／放錯數量）玩家指出來 → 過場畫面是老闆尷尬臉（肉攤）
+    new_game(page); setreq(page, [['pork', 1]]); ev(page, 'Game.bagDone = true; Game.checkDone = true')
+    tap(page, '去肉攤'); buy(page, 'pork', 1); tap(page, '買好了'); tap(page, '好，'); P = ev(page, 'Game.payInfo()'); tap(page, P['payOk'])
+    check('付錢後進入找錢', state(page) == 'CHANGE', state(page))
+    ev(page, "Game.cc = {bill: 500, ask: 300, want: 200, given: 150, sc: true}; Game.render()")
+    o = opts(page); page.locator('#options-area .opt').nth(next(k for k, t_ in enumerate(o) if '好像找錯了' in t_)).click(); page.wait_for_timeout(120)
+    check('少找錢被指出來 → 過場畫面是肉攤老闆尷尬臉', state(page) == '_TRANS' and 'stall_meat_sorry' in ev(page, "document.getElementById('npc-avatar').src"), (state(page), ev(page, "document.getElementById('npc-avatar').src")))
+    page.locator('#options-area .opt').first.click(); page.wait_for_timeout(100)
+    check('離開過場後恢復平常的圖', 'sorry' not in ev(page, "document.getElementById('npc-avatar').src"))
+    ev(page, "Game.state = 'CHECK'; Game.tx = [{id:'pork', q:1}]; Game.ck = {id:'pork', q:1, wrong:true, wq:2}; Game.render()")
+    o = opts(page); page.locator('#options-area .opt').nth(next(k for k, t_ in enumerate(o) if '我要的是' in t_)).click(); page.wait_for_timeout(120)
+    check('放錯數量被指出來 → 過場畫面也是尷尬臉', state(page) == '_TRANS' and 'stall_meat_sorry' in ev(page, "document.getElementById('npc-avatar').src"), state(page))
+
     # 11. 外觀：手機版找錢卡、地圖、殺價
     page.set_viewport_size({'width': 390, 'height': 800})
     new_game(page); setreq(page, [['pork', 1], ['fish', 1], ['cabbage', 1], ['egg', 1]]); shot(page, 'mobile_map')
