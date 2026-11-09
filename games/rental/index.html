@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<title>租屋看房 · Ver un piso para alquilar</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：rentalgame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "rentalgame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #33261f;
+    --red: #c8501e;
+    --red-dark: #8f3513;
+    --yolk: #e0a43a;
+    --night: #2e2630;
+    --kraft: #f3e4d3;
+    --wall: #fbf3ea;
+    --paper: #ffffff;
+    --line: #e5d2bd;
+    --muted: #7a6454;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    background: #e9eff8;
+  }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  /* ── 登入：店招牌 ── */
+  /* ── 遊戲 ── */
+  /* 購物清單 */
+  @media (hover: hover) {
+    .opt:hover rt { color: #ffe0d2; }
+  }
+  /* ── 排行榜 ── */
+  #lb-table tr.highlight-row { background: #f7dccb; font-weight: 700; }
+  /* ── 句子翻譯 ── */
+  .tr-btn:hover { background: #f7dccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  /* ── 本關單字（右側抽屜） ── */
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+
+
+
+  /* 號碼牌、匯款單、鈔票 */
+  .pbox { margin: 8px 0 12px; background: #fff; border: 2px solid #2f8f83; border-radius: 10px; padding: 8px 14px; }
+  .pbox .ph { color: #2f8f83; font-weight: 700; font-size: 15px; }
+  .pbox .pv { font-size: 22px; font-weight: 700; color: var(--ink); margin-top: 2px; }
+  .pbox .pl { font-size: 15px; color: var(--ink); margin-top: 2px; }
+  .pbox.bill { border-color: var(--red); }
+  .pbox.bill .pv { font-size: 18px; }
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">租屋看房</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">租屋看房</h1>
+  <p class="subtitle" data-es="Ver un piso para alquilar" data-en="Viewing an apartment to rent">Ver un piso para alquilar</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    你想租一間套房，Ami 幫你找到一間，房東約你今天去看。你要看房間、問租金和押金、談價錢、問電費，最後看合約、付錢。房東有時候會說錯租金、押金，或房間裡少了東西，要自己多注意喔！<br>
+    <span data-es="Quieres alquilar un estudio y Ami te encontró uno; el casero te espera hoy para enseñártelo. Miras el cuarto, preguntas la renta y el depósito, negocias, preguntas por la luz y al final lees el contrato y pagas. ¡A veces el casero dice mal la renta o el depósito, o falta algo en el cuarto, así que presta atención!" data-en="You want to rent a studio and Ami found one; the landlord is expecting you today. You look at the room, ask about rent and deposit, negotiate, ask about electricity, then read the contract and pay. The landlord may misstate the rent or deposit, or something may be missing from the room, so stay alert!">Quieres alquilar un estudio y Ami te encontró uno; el casero te espera hoy para enseñártelo. Miras el cuarto, preguntas la renta y el depósito, negocias, preguntas por la luz y al final lees el contrato y pagas. ¡A veces el casero dice mal la renta o el depósito, o falta algo en el cuarto, así que presta atención!</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">🏠</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 10 名 · Top 10</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'rental', track: 'rental', vocabQuiz: true, settingsKey: 'rental_settings',
+  defaultPlace: 'apt', defaultEmoji: '🏠',
+  roles: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '房東': { pitch: 0.85 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+   第一版草稿：本次沒有對照 game-kit（讀不到），只用共用檔內建的 GoodTeacher 規則＋下面人工補的詞
+══════════════════════════════════════ */
+pinyinPro.customPinyin({
+  '還是': 'hái shì', '還有': 'hái yǒu', '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan',
+  '時間': 'shí jiān', '時候': 'shí hou', '東西': 'dōng xi', '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '著': 'zhe', '囉': 'luo', '啦': 'la', '耶': 'ye',
+  '不好意思': 'bù hǎo yì si', '這個': 'zhè ge', '那個': 'nà ge', '好像': 'hǎo xiàng', '欸': 'éi', '應該': 'yīng gāi', '怎麼': 'zěn me', '舒服': 'shū fu'
+});
+pinyinPro.customPinyin({
+  '租屋': 'zū wū', '套房': 'tào fáng', '月租': 'yuè zū', '租金': 'zū jīn', '房租': 'fáng zū', '押金': 'yā jīn', '房東': 'fáng dōng', '看房': 'kàn fáng',
+  '冷氣': 'lěng qì', '洗衣機': 'xǐ yī jī', '熱水器': 'rè shuǐ qì', '書桌': 'shū zhuō', '電費': 'diàn fèi', '台電': 'tái diàn', '電表': 'diàn biǎo',
+  '合約': 'hé yuē', '租期': 'zū qí', '簽名': 'qiān míng', '簽': 'qiān', '轉帳': 'zhuǎn zhàng', '帳戶': 'zhàng hù', '收據': 'shōu jù', '現金': 'xiàn jīn',
+  '便宜': 'pián yi', '一共': 'yí gòng', '算': 'suàn', '約': 'yuē', '度': 'dù', '大樓': 'dà lóu', '電梯': 'diàn tī', '房間': 'fáng jiān', '網路': 'wǎng lù',
+  '乾淨': 'gān jìng', '鑰匙': 'yào shi'
+});
+// 台灣讀音修正：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '房東': ['El casero', 'The landlord'] };
+const SPEAKER_RE = /^(Ami|房東|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['租屋', 'alquilar una vivienda', 'renting a place'], ['套房', 'estudio (cuarto con baño)', 'studio room'], ['月租', 'alquiler mensual', 'monthly rent'], ['押金', 'depósito', 'security deposit'], ['看房', 'ver el piso', 'viewing a place']],
+  MEET: [['房東', 'casero', 'landlord'], ['約', 'quedar, cita', 'appointment']],
+  LOOK: [['冷氣', 'aire acondicionado', 'air conditioner'], ['洗衣機', 'lavadora', 'washing machine'], ['熱水器', 'calentador de agua', 'water heater'], ['書桌', 'escritorio', 'desk']],
+  RENT: [['租金', 'renta', 'rent'], ['網路上', 'en internet', 'online']],
+  NEGO: [['便宜', 'barato, más barato', 'cheaper'], ['簽', 'firmar', 'to sign (a lease)']],
+  UTIL: [['電費', 'factura de luz', 'electricity bill'], ['台電', 'Taipower (compañía eléctrica)', 'Taipower (power company)'], ['度', 'kWh (unidad de luz)', 'unit of electricity (kWh)']],
+  DEPOSIT: [['一共', 'en total', 'in total'], ['個月', 'meses', 'months']],
+  CONTRACT: [['合約', 'contrato', 'lease contract'], ['簽名', 'firmar', 'to sign (your name)'], ['租期', 'plazo del alquiler', 'lease term']],
+  PAYWAY: [['轉帳', 'transferencia', 'bank transfer'], ['帳戶', 'cuenta bancaria', 'bank account'], ['收據', 'recibo', 'receipt'], ['現金', 'efectivo', 'cash']],
+  get END() { return Game.mistakes <= 2 ? [['鑰匙', 'llave', 'key']] : [['下次', 'la próxima vez', 'next time']]; },
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = { MEET: ['見房東', 'conocer al casero', 'meeting the landlord'], LOOK: ['看房間', 'ver el cuarto', 'viewing the room'], RENT: ['問租金', 'preguntar la renta', 'asking the rent'],
+  NEGO: ['談租金', 'negociar la renta', 'negotiating'], UTIL: ['問電費', 'preguntar la luz', 'asking about electricity'], DEPOSIT: ['押金和總額', 'depósito y total', 'deposit and total'],
+  CONTRACT: ['看合約', 'leer el contrato', 'reading the contract'], PAYWAY: ['付錢的方式', 'la forma de pagar', 'how to pay'] };
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = { MEET: '搭車去看房', LOOK: '跟房東上樓', RENT: '問房東租金', NEGO: '跟房東談談', UTIL: '問電費怎麼算', DEPOSIT: '坐下來談簽約', CONTRACT: '看房東拿來的合約', PAYWAY: '準備付錢', END: '拿著鑰匙離開' };
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const PLACES = {
+  phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
+  apt: ['🏠', '租屋看房', 'Ver un piso para alquilar', 'Viewing a rental', '']
+};
+const RENTS = [9000, 11000, 13000];   // 網路上寫的月租（依印象，待確認）
+const DISCOUNT = 500;                 // 簽一年少五百
+
+/* ══════════════════════════════════════
+   任務提示
+══════════════════════════════════════ */
+const Hints = makeHints({ render: stdHintsRender });
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+const ORDER = ['START', 'MEET', 'LOOK', 'RENT', 'NEGO', 'UTIL', 'DEPOSIT', 'CONTRACT', 'PAYWAY', 'END', 'RESULT'];
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,
+  hintViews: 0, log: [], feedback: [], visit: 0, att: {}, cash: null,
+  onStart() { this.updateCash(); },
+  updateCash() { document.getElementById('cash-badge').textContent = ''; },
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+  IMAGES: {
+    START: ['images/start.jpg', '📱'], MEET: ['images/building.jpg', '🏢'], LOOK: ['images/room.jpg', '🏠'], RENT: ['images/room.jpg', '🏠'], NEGO: ['images/room.jpg', '💬'],
+    UTIL: ['images/meter.jpg', '⚡'], DEPOSIT: ['images/table.jpg', '📄'], CONTRACT: ['images/table.jpg', '📄'], PAYWAY: ['images/table.jpg', '💳'],
+    END: ['images/end_good.jpg', '🔑'], RESULT: ['images/result.jpg', '📊']
+  },
+
+  setup() {
+    const t = this.task = { rot: Math.floor(Math.random() * 3) };
+    t.R = pick(RENTS);                       // 網路上寫的月租
+    t.Rf = t.R - DISCOUNT;                   // 簽一年少五百以後的月租
+    t.rentWrong = Math.random() < 0.45;      // 房東報的租金和網路上不同
+    t.rentSaid = t.rentWrong ? t.R + 1000 : t.R;
+    t.eqWrong = Math.random() < 0.4;         // 房間裡沒有洗衣機，房東卻說有
+    t.utilWrong = Math.random() < 0.4;       // 房東說電費一度八元
+    t.depWrong = Math.random() < 0.45;       // 房東說押金三個月
+    t.total = t.Rf * 3;                      // 押金兩個月＋第一個月租金
+    t.totalSaid = t.depWrong ? t.Rf * 4 : t.Rf * 3;
+  },
+
+  amiLines() {
+    const N = this.N, t = this.task;
+    return [
+      L(`Ami：${N}，我幫你找到一間套房，房東約你今天下午去看房。網路上寫月租${zhNum(t.R)}元，押金兩個月。`, `${N}, te encontré un estudio y el casero te espera esta tarde para verlo. En internet dice que la renta es de ${esM(t.R)} al mes, con depósito de dos meses.`, `${N}, I found you a studio and the landlord expects you this afternoon. Online it says rent is ${enM(t.R)} a month, with a two-month deposit.`),
+      L('Ami：房間要有冷氣和洗衣機。電費要照台電的帳單算，不能亂收。租金可以禮貌地問問看能不能便宜一點。', 'El cuarto debe tener aire acondicionado y lavadora. La luz se cobra según la factura de Taipower, sin recargos. Puedes preguntar con cortesía si bajan la renta.', 'The room must have an air conditioner and a washing machine. Electricity is charged by the Taipower bill, no markup. You can politely ask whether the rent can come down.'),
+      L('Ami：簽約以前要先看合約；付錢要轉帳，記得請房東寫收據喔。房東說的話，要和網路上寫的、房間裡看到的對一下！', 'Antes de firmar, lee el contrato; paga por transferencia y pídele un recibo. ¡Compara lo que diga el casero con lo del anuncio y con lo que veas en el cuarto!', 'Read the contract before signing; pay by bank transfer and ask for a receipt. Check what the landlord says against the ad and what you see in the room!')
+    ];
+  },
+  hintSections() { return [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }]; },
+
+  listHTML(rowsOnly) {
+    const t = this.task, r = x => this.ruby(x);
+    const rows = [
+      { zh: `網路上寫：套房，月租${zhNum(t.R)}元，押金兩個月`, es: `El anuncio dice: estudio, renta ${esM(t.R)} al mes, depósito de dos meses`, en: `The ad says: studio, ${enM(t.R)} a month, two-month deposit` },
+      { zh: '房間要有：冷氣、洗衣機', es: 'El cuarto debe tener: aire acondicionado y lavadora', en: 'The room must have: air conditioner and washing machine' },
+      { zh: '電費照台電的帳單算；租金可以禮貌地問能不能便宜', es: 'La luz según la factura de Taipower; puedes pedir con cortesía una renta menor', en: 'Electricity by the Taipower bill; you may politely ask for a lower rent' }
+    ];
+    if (rowsOnly) return rows;
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  roomBox() {
+    const t = this.task, r = x => this.ruby(x);
+    return `<div class="pbox"><div class="ph">🏠 ${r('房間')}</div><div class="pl">❄️ ${r('冷氣')}</div><div class="pl">🚿 ${r('熱水器')}</div><div class="pl">🪑 ${r('書桌')}</div><div class="pl">🧺 ${t.eqWrong ? r('洗衣機') + '：（空的）' : r('洗衣機')}</div></div>`;
+  },
+  meterBox() {
+    const r = x => this.ruby(x);
+    return `<div class="pbox bill"><div class="ph">⚡ ${r('電表')}</div><div class="pl">${r('台電')}</div></div>`;
+  },
+  payBox() {
+    const t = this.task, r = x => this.ruby(x);
+    return `<div class="pbox bill"><div class="ph">📄 ${r('租金')}：${zhNum(t.Rf)}元</div><div class="pl">${r('押金')}</div><div class="pl">${r('第一個月')}${r('租金')}</div></div>`;
+  },
+
+  getConfig() {
+    const N = this.N, t = this.task;
+    const ph = (zh, es, en) => L(`房東：${zh}`, es, en);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+
+    return {
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你在家，用手機看租屋網站。手機響了一聲，是Ami傳來的LINE。）', '(Estás en casa mirando anuncios de alquiler en el celular. Suena un LINE de Ami.)', '(You are at home browsing rental listings on your phone. A LINE from Ami comes in.)'),
+          ...Game.amiLines(),
+          L('我：好，我下午去看房！', '¡Bien, esta tarde voy a ver el piso!', "OK, I'll go see it this afternoon!")
+        ],
+        options: ['出門去看房'],
+        next: () => { Game.startTimer(); Game.state = 'MEET'; }
+      },
+
+      /* ═══ 見房東 ═══ */
+      MEET: {
+        place: 'apt',
+        dialogue: () => [L('（你到了一棟舊大樓的門口。房東已經站在電梯旁邊等你。）', '(Llegas a la puerta de un edificio antiguo. El casero ya te espera junto al elevador.)', '(You arrive at the entrance of an older apartment building. The landlord is already waiting by the elevator.)'), ph('你好，你是來看房的嗎？', '¡Hola, buenas! ¿Viene a ver el piso?', 'Hello! Are you here to see the room?')],
+        options: () => rotOf(t, ['您好，我跟您約三點看房。', '你就是房東嗎？快點帶我上去。', '（不說話，直接走進電梯。）']),
+        next: c => {
+          if (c !== '您好，我跟您約三點看房。') {
+            Game.addMistake(c.startsWith('你就是')
+              ? M('跟房東說話要有禮貌，先打招呼，說明你是約好來看房的人。', 'Habla con cortesía al casero: saluda y di que tienes cita para ver el piso.', 'Be polite to the landlord: greet them and say you have an appointment.')
+              : M('要先跟房東打招呼，說明你是誰，不能不說話就走進去。', 'Saluda primero al casero y di quién eres; no entres sin decir nada.', 'Greet the landlord and say who you are first — don\'t walk in silently.'));
+            return;
+          }
+          goodFirst('MEET', '沒錯！先打招呼，說清楚你是約好的人。', '¡Exacto! Saluda y di que tienes una cita.', 'Right! Greet them and say you have an appointment.');
+          Game.state = 'LOOK';
+        }
+      },
+
+      /* ═══ 看房間：40% 房東說有洗衣機，其實是空的 ═══ */
+      LOOK: catchState(Game, {
+        key: 'LOOK', place: 'apt',
+        html: () => Game.roomBox(),
+        dialogue: () => [L('（房東打開三樓的房門，你走進去看了一圈。房間不大，但很乾淨。）', '(El casero abre la puerta del tercer piso y entras a mirar. El cuarto es pequeño pero está limpio.)', '(The landlord opens the door on the third floor and you look around. The room is small but clean.)'), ph('這間冷氣和洗衣機都有喔，熱水器也是新的。', 'Este cuarto tiene aire acondicionado y lavadora, y el calentador es nuevo.', 'This room has an air conditioner and a washing machine, and the water heater is new.')],
+        ok: '好，我知道了。', fix: () => (t.eqWrong ? '不好意思，我沒有看到洗衣機耶。' : '不好意思，我沒有看到熱水器耶。'), rude: '你是不是騙我啊？',
+        wrong: () => t.eqWrong,
+        whyWrong: () => M('房東說有洗衣機，但房間裡洗衣機的位置是空的。', 'El casero dijo que había lavadora, pero el lugar está vacío.', 'The landlord said there was a washing machine, but its spot is empty.'),
+        whyRight: () => M('房東沒說錯：冷氣、洗衣機、熱水器房間裡都有。', 'El casero tenía razón: el cuarto tiene aire, lavadora y calentador.', 'The landlord was right: the room has the A/C, washer and water heater.'),
+        goodWrong: ['你很細心！房東說有的東西，要自己看一看。', '¡Qué atento! Verifica con tus ojos lo que dice el casero.', 'Well spotted! Check with your own eyes what the landlord says is there.'],
+        goodOk: ['房東說的設備，要和房間裡看到的對一下。', 'Compara lo que dice el casero con lo que ves en el cuarto.', 'Compare what the landlord says with what you see in the room.'],
+        apology: () => [ph('啊，洗衣機上禮拜送去修了，還沒送回來。我簽約前裝好，也寫進合約裡。', 'Ah, la lavadora se mandó a reparar la semana pasada y aún no vuelve. La pondré antes de firmar y lo escribiré en el contrato.', 'Oh, the washer went for repairs last week and hasn\'t come back. I\'ll install it before you sign and put it in the contract.')],
+        go: () => { Game.state = 'RENT'; }
+      }),
+
+      /* ═══ 問租金：45% 房東報的比網路上貴一千 ═══ */
+      RENT: catchState(Game, {
+        key: 'RENT', place: 'apt',
+        dialogue: () => [L('（你問房東：「請問一個月租金多少？」）', '(Le preguntas al casero: «¿Cuánto es la renta al mes?»)', '(You ask the landlord: "How much is the rent per month?")'), ph(`月租${zhNum(t.rentSaid)}元，很便宜了喔。`, `La renta es de ${esM(t.rentSaid)} al mes; está muy barato.`, `Rent is ${enM(t.rentSaid)} a month — that's a good price.`)],
+        ok: '好，我知道了。', fix: () => `不好意思，網路上寫的是${zhNum(t.rentWrong ? t.R : t.R - 1000)}元。`, rude: '你想多收我錢嗎？',
+        wrong: () => t.rentWrong,
+        whyWrong: () => M(`房東報錯了：他說${t.rentSaid}元，網路上寫的是${t.R}元。`, `El casero se equivocó: dijo ${esM(t.rentSaid)} y el anuncio dice ${esM(t.R)}.`, `The landlord misquoted: he said ${enM(t.rentSaid)} but the ad says ${enM(t.R)}.`),
+        whyRight: () => M(`房東說對了：網路上就是${t.R}元。`, `El casero tenía razón: el anuncio dice ${esM(t.R)}.`, `The landlord was right: the ad says ${enM(t.R)}.`),
+        goodWrong: ['你很細心！租金要和網路上寫的對一下。', '¡Qué atento! Compara la renta con el anuncio.', 'Well spotted! Compare the rent with the ad.'],
+        goodOk: ['房東說的租金，要和網路上寫的對一下。', 'Compara la renta que dice el casero con el anuncio.', 'Check the rent the landlord says against the ad.'],
+        apology: () => [ph(`啊，對不起，我記錯了。是${zhNum(t.R)}元沒錯。`, `¡Ay, perdón, lo recordé mal! Son ${esM(t.R)}.`, `Oh, sorry, I misremembered. It is ${enM(t.R)}.`)],
+        go: () => { Game.state = 'NEGO'; }
+      }),
+
+      /* ═══ 談租金 ═══ */
+      NEGO: {
+        place: 'apt',
+        dialogue: () => [L(`（房東說月租${zhNum(t.R)}元。你想起Ami說可以問問看。）`, `(El casero dice ${esM(t.R)} al mes. Recuerdas que Ami dijo que podías preguntar.)`, `(The landlord says ${enM(t.R)} a month. You remember Ami said you could ask.)`)],
+        options: () => rotOf(t, ['請問可以算便宜一點嗎？我簽一年的話呢？', '好，那就照這個租金。', '這麼貴！別間都比你便宜！']),
+        next: c => {
+          if (c !== '請問可以算便宜一點嗎？我簽一年的話呢？') {
+            Game.addMistake(c.startsWith('好，那就')
+              ? M('Ami 說可以禮貌地問問看能不能便宜一點；在台灣租屋，禮貌地談價錢很正常。', 'Ami dijo que podías preguntar con cortesía; en Taiwán es normal negociar la renta con educación.', 'Ami said to ask politely; negotiating rent politely is normal in Taiwan.')
+              : M('講價也要有禮貌，不能說房子貴、別間比較便宜。', 'Al negociar hay que ser cortés; no digas que es caro o que otros son más baratos.', 'Be polite when negotiating — don\'t say it is expensive or that others are cheaper.'));
+            return;
+          }
+          goodFirst('NEGO', '沒錯！禮貌地問，租一年可以少一點。', '¡Exacto! Pregunta con cortesía; con contrato de un año puede bajar.', 'Right! Ask politely; a one-year lease may get you a discount.');
+          Game.thought = [ph(`好啊，你簽一年的話，我算你少${zhNum(DISCOUNT)}元，一個月${zhNum(t.Rf)}元。`, `Está bien: si firma por un año, le bajo ${esM(DISCOUNT)}; son ${esM(t.Rf)} al mes.`, `Sure — if you sign for a year I'll take off ${enM(DISCOUNT)}: ${enM(t.Rf)} a month.`)];
+          Game.state = 'UTIL';
+        }
+      },
+
+      /* ═══ 問電費：40% 房東說一度八元 ═══ */
+      UTIL: catchState(Game, {
+        key: 'UTIL', place: 'apt',
+        html: () => Game.meterBox(),
+        dialogue: () => [L('（你看到門口有一個電表，問房東：「請問電費怎麼算？」）', '(Ves un medidor de luz junto a la puerta y preguntas: «¿Cómo se cobra la luz?»)', '(You see an electricity meter by the door and ask: "How is electricity charged?")'), t.utilWrong ? ph('電費一度八元，比較好算。', 'La luz cuesta ocho pesos por kWh; así es más fácil.', 'Electricity is NT$8 per unit — easier to calculate.') : ph('電費照台電的帳單算，用多少算多少。', 'La luz se cobra según la factura de Taipower: se paga lo que se usa.', 'Electricity follows the Taipower bill — you pay what you use.')],
+        ok: '好，謝謝你。', fix: () => (t.utilWrong ? '不好意思，電費不是應該照台電的帳單算嗎？' : '不好意思，電費不是應該一度三元嗎？'), rude: '你是不是想賺我的電費？',
+        wrong: () => t.utilWrong,
+        whyWrong: () => M('房東自己訂一度八元：電費應該照台電的帳單算，不能比台電貴。', 'El casero fijó ocho pesos por kWh: la luz debe cobrarse según Taipower, sin recargo.', 'The landlord set NT$8 per unit: electricity should follow the Taipower bill, with no markup.'),
+        whyRight: () => M('房東說對了：電費照台電的帳單算，沒有固定的價錢。', 'El casero tenía razón: la luz sigue la factura de Taipower, no hay un precio fijo.', 'The landlord was right: electricity follows the Taipower bill — there is no fixed price.'),
+        goodWrong: ['你很細心！電費要照台電的算，不能亂收。', '¡Qué atento! La luz se cobra según Taipower, sin recargos.', 'Well spotted! Electricity follows Taipower, no extra charges.'],
+        goodOk: ['電費照台電的帳單算，不是房東自己訂價錢。', 'La luz sigue la factura de Taipower; el casero no fija el precio.', 'Electricity follows the Taipower bill; the landlord doesn\'t set the price.'],
+        apology: () => [ph('啊，對，照台電的算就好，我寫進合約。', 'Ah, es verdad, se cobra según Taipower. Lo escribo en el contrato.', 'Oh, right — we\'ll go by Taipower. I\'ll write it in the contract.')],
+        go: () => { Game.state = 'DEPOSIT'; }
+      }),
+
+      /* ═══ 押金和總額：45% 房東說押金三個月 ═══ */
+      DEPOSIT: catchState(Game, {
+        key: 'DEPOSIT', place: 'apt',
+        html: () => Game.payBox(),
+        dialogue: () => [L('（你們回到一樓，坐在桌子旁邊。房東拿出計算機。）', '(Bajan a la planta baja y se sientan a una mesa. El casero saca una calculadora.)', '(You go back downstairs and sit at a table. The landlord takes out a calculator.)'), ph(t.depWrong ? `押金三個月，加第一個月的租金，今天一共是${zhNum(t.totalSaid)}元。` : `押金兩個月，加第一個月的租金，今天一共是${zhNum(t.totalSaid)}元。`, t.depWrong ? `Depósito de tres meses más el primer mes de renta: hoy son ${esM(t.totalSaid)} en total.` : `Depósito de dos meses más el primer mes de renta: hoy son ${esM(t.totalSaid)} en total.`, t.depWrong ? `A three-month deposit plus the first month's rent: ${enM(t.totalSaid)} in total today.` : `A two-month deposit plus the first month's rent: ${enM(t.totalSaid)} in total today.`)],
+        ok: '好，我知道了。', fix: () => (t.depWrong ? `不好意思，押金不是最多兩個月嗎？應該是${zhNum(t.total)}元吧？` : `不好意思，好像算錯了，應該是${zhNum(t.Rf * 4)}元吧？`), rude: '你想多收我的押金嗎？',
+        wrong: () => t.depWrong,
+        whyWrong: () => M(`房東多收了一個月押金：押金最多兩個月，加第一個月租金，一共是${t.total}元，他說${t.totalSaid}元。`, `El casero cobró un mes de más: el depósito es de dos meses como máximo; con el primer mes son ${esM(t.total)}, y dijo ${esM(t.totalSaid)}.`, `The landlord charged a month too many: deposit is two months at most; with the first month it is ${enM(t.total)}, but he said ${enM(t.totalSaid)}.`),
+        whyRight: () => M(`房東算對了：${t.Rf}元乘三，一共是${t.total}元。`, `El casero calculó bien: ${t.Rf} por tres son ${esM(t.total)}.`, `The landlord was right: ${t.Rf} times three is ${enM(t.total)}.`),
+        goodWrong: ['你很細心！押金最多只能收兩個月租金。', '¡Qué atento! El depósito no puede pasar de dos meses de renta.', 'Well spotted! The deposit can be at most two months of rent.'],
+        goodOk: ['付錢以前，要自己算一下：押金兩個月加第一個月租金。', 'Antes de pagar, calcula tú: dos meses de depósito más el primer mes.', 'Before paying, work it out: two months deposit plus the first month.'],
+        apology: () => [ph(`啊，不好意思，我多算了。押金兩個月，一共是${zhNum(t.total)}元。`, `¡Ay, disculpe, calculé de más! Depósito de dos meses: son ${esM(t.total)} en total.`, `Oh, sorry, I overcharged. Two-month deposit: ${enM(t.total)} in total.`)],
+        go: () => { Game.state = 'CONTRACT'; }
+      }),
+
+      /* ═══ 看合約 ═══ */
+      CONTRACT: {
+        place: 'apt',
+        dialogue: () => [L('（房東把合約放在桌上。）', '(El casero pone el contrato sobre la mesa.)', '(The landlord puts the contract on the table.)'), ph('租期一年，你看一下，沒問題就簽名。', 'El plazo es de un año. Léalo y, si todo está bien, firme.', 'The lease term is one year. Take a look, and sign if it is fine.')],
+        options: () => rotOf(t, [t.eqWrong ? `先看合約：租金、押金，還有房東會裝洗衣機，都有寫進去，再簽名。` : `先看合約：租金、押金，還有冷氣、洗衣機，都有寫進去，再簽名。`, '房東人很好，不用看，直接簽名。', '講好就好了，不用寫在合約上。']),
+        next: c => {
+          const good = t.eqWrong ? `先看合約：租金、押金，還有房東會裝洗衣機，都有寫進去，再簽名。` : `先看合約：租金、押金，還有冷氣、洗衣機，都有寫進去，再簽名。`;
+          if (c !== good) {
+            Game.addMistake(c.startsWith('房東人很好')
+              ? M('簽名以前一定要看合約，租期、租金、押金和設備都要確認。', 'Antes de firmar hay que leer el contrato: plazo, renta, depósito y equipos.', 'Always read the contract before signing: term, rent, deposit and equipment.')
+              : M('口頭講好的事要寫進合約，之後才有證據。', 'Lo acordado de palabra debe ir en el contrato para que quede prueba.', 'What you agreed verbally must be written in the contract so there is proof.'));
+            return;
+          }
+          goodFirst('CONTRACT', '沒錯！講好的事，都要寫進合約。', '¡Exacto! Todo lo acordado va en el contrato.', 'Right! Everything agreed goes into the contract.');
+          Game.state = 'PAYWAY';
+        }
+      },
+
+      /* ═══ 付錢的方式 ═══ */
+      PAYWAY: {
+        place: 'apt',
+        html: () => Game.payBox(),
+        dialogue: () => [L(`（你簽好名了。房東說：「那今天要付${zhNum(t.total)}元。」）`, `(Firmas el contrato. El casero dice: «Entonces hoy son ${esM(t.total)}».)`, `(You sign. The landlord says: "So today it is ${enM(t.total)}.")`)],
+        options: () => rotOf(t, [`轉帳${zhNum(t.total)}元到合約上房東的帳戶，請房東寫收據。`, `付現金${zhNum(t.total)}元，不用收據。`, '先轉到房東朋友的帳戶，他說比較方便。']),
+        next: c => {
+          if (c !== `轉帳${zhNum(t.total)}元到合約上房東的帳戶，請房東寫收據。`) {
+            Game.addMistake(c.startsWith('付現金')
+              ? M('付押金和租金最好轉帳，並請房東簽收據，才有付錢的紀錄。', 'Conviene pagar depósito y renta por transferencia y pedir recibo, para tener constancia.', 'Pay the deposit and rent by transfer and ask for a receipt so there is a record.')
+              : M('要轉到合約上房東本人的帳戶，不要轉給別人。', 'Transfiere a la cuenta del casero que figura en el contrato, no a otra persona.', 'Transfer to the landlord\'s own account in the contract, not to someone else.'));
+            return;
+          }
+          goodFirst('PAYWAY', '沒錯！轉到合約上的帳戶，還要收據。', '¡Exacto! Transfiere a la cuenta del contrato y pide recibo.', 'Right! Transfer to the account in the contract and get a receipt.');
+          Game.thought = [ph('好，收到了。這是收據，還有鑰匙，下個月一號搬進來。', 'Listo, recibido. Aquí tiene el recibo y la llave; puede mudarse el uno del mes que viene.', 'Got it. Here is your receipt and the key — you can move in on the 1st of next month.')];
+          Game.stopTimer(); Game.state = 'END';
+        }
+      },
+
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2;
+          track('game_complete', { game: 'rental', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            L('（你拿著鑰匙和收據離開，打開手機，傳訊息給Ami。）', '(Sales con la llave y el recibo, abres el celular y le escribes a Ami.)', '(You leave with the key and receipt, open your phone and message Ami.)'),
+            Game._endGood
+              ? L(`Ami：太好了，${N}，恭喜你租到房子！租金、押金、合約都沒問題。`, `¡Qué bien, ${N}, felicidades por tu nuevo piso! La renta, el depósito y el contrato están en orden.`, `Great, ${N}, congratulations on the new place! Rent, deposit and contract are all in order.`)
+              : L('Ami：欸，聽起來有點不順利……下次要對租金、押金，看房間有沒有少東西，簽約前也要看合約喔！', 'Parece que hubo problemas… la próxima vez compara la renta y el depósito, revisa que no falte nada en el cuarto y lee el contrato antes de firmar.', "Hmm, sounds like it didn't go smoothly… next time check the rent and deposit, check nothing is missing in the room, and read the contract before signing.")
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: stdResultCfg('phone')
+    };
+  }
+});
+
+GameBoot();
+Music.init({ bpm: 94, tracks: [
+  { wave: 'triangle', vol: 0.3, notes: 'G4 . B4 D5 . B4 G4 . | A4 . C5 E5 . C5 A4 . | B4 . D5 G5 . D5 B4 . | A4 - D5 - F#5 - . .' },
+  { wave: 'triangle', vol: 0.5, notes: 'G2 . D3 . G2 . D3 . | A2 . E3 . A2 . E3 . | B2 . F#3 . B2 . F#3 . | D3 . A2 . D3 . . .' },
+  { vol: 0.2, notes: 'k . h . s . h .' }] });
+</script>
+</body>
+</html>
