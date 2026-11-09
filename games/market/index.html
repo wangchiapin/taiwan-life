@@ -103,6 +103,44 @@
   .amt .amtx { position: absolute; top: 4px; right: 6px; border: 0; background: none; font-size: 18px; cursor: pointer; color: var(--muted); }
   @media (max-width: 600px) { .bun { font-size: 13px; padding: 6px 2px; } .bun .pr { font-size: 12px; } .bimg { width: 46px; height: 46px; } }
 
+  .stalls { margin: 8px 0 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stall {
+    border-radius: 10px; padding: 10px; text-align: center; font-size: 16px; line-height: 1.6;
+    background: var(--night); color: #fff; border-top: 6px solid var(--red);
+  }
+  .stall .e { font-size: 30px; display: block; }
+  .stall.done { opacity: .45; }
+  /* 紙板價目牌 + 老闆心情：這個遊戲的招牌元素 */
+  .haggle { margin: 8px 0 12px; display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: stretch; }
+  .tag {
+    background: var(--kraft); border-radius: 4px; padding: 10px 16px;
+    box-shadow: inset 0 0 0 3px #c4925a; transform: rotate(-1.2deg);
+    font-weight: 900; color: #1d1a16;
+  }
+  .tag .item { font-size: 15px; font-weight: 500; }
+  .tag .old { display: inline-block; margin-right: 10px; font-size: 22px; color: #6b4a22; text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 3px; }
+  .tag .now { font-size: 44px; color: var(--red-dark); line-height: 1.2; }
+  .tag .now small { font-size: 18px; }
+  .mood {
+    min-width: 92px; border-radius: 10px; background: var(--wall); padding: 8px 10px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  }
+  .mood .face { font-size: 40px; line-height: 1; }
+  .mood .bar { display: flex; gap: 4px; }
+  .mood .bar i { width: 14px; height: 8px; border-radius: 4px; background: #d6d0e2; }
+  .mood .bar i.on { background: var(--red); }
+  .mood .lbl { font-size: 12px; color: var(--muted); }
+  /* ── 排行榜 ── */
+  #lb-table tr.highlight-row { background: #fff4cc; font-weight: 700; }
+  @media (max-width: 600px) {
+    .tag .now { font-size: 36px; }
+    .stall { font-size: 14px; padding: 8px 4px; }
+  }
+
+  .stall.closed { opacity: .4; filter: grayscale(1); }
+  .shelf { grid-template-columns: repeat(3, 1fr); }
+  .cashcard { display: flex; justify-content: space-between; align-items: center; margin: 10px 0 14px; padding: 12px 16px; background: #fffaf0; border: 2px solid #c9a878; border-radius: 12px; font-size: 18px; }
+  .cashcard b { font-size: 30px; color: var(--red-dark); } .cashcard small { font-size: 16px; }
 </style></head>
 <body>
 
@@ -201,7 +239,7 @@
 const GAME = {
   scene: 'market', track: 'market', vocabQuiz: true, settingsKey: 'market_settings',
   roles: {
-    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '店員': { pitch: 1.05 }
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '店員': { pitch: 1.05 }, '老闆': { pitch: 0.95 }, '老闆娘': { pitch: 1.2 }
   }
 };
 </script>
@@ -233,7 +271,9 @@ pinyinPro.customPinyin({
 
   '菜市場': 'cài shì chǎng', '高麗菜': 'gāo lì cài', '小白菜': 'xiǎo bái cài', '雞肉': 'jī ròu', '牛肉': 'niú ròu', '半斤': 'bàn jīn', '一斤': 'yì jīn', '兩斤': 'liǎng jīn', '一顆': 'yì kē', '籃子': 'lán zi', '放回去': 'fàng huí qù', '老闆': 'lǎo bǎn', '青菜': 'qīng cài', '番茄': 'fān qié', '一把': 'yì bǎ', '兩把': 'liǎng bǎ', '三把': 'sān bǎ', '一條': 'yì tiáo', '兩條': 'liǎng tiáo',
   '一盒': 'yì hé', '兩盒': 'liǎng hé', '三顆': 'sān kē', '兩顆': 'liǎng kē', '一塊': 'yí kuài', '兩塊': 'liǎng kuài', '雞蛋': 'jī dàn', '豬肉': 'zhū ròu', '算': 'suàn',
-  '便宜': 'pián yi', '環保袋': 'huán bǎo dài', '塑膠袋': 'sù jiāo dài', '賒帳': 'shē zhàng', '兩百': 'liǎng bǎi', '五百': 'wǔ bǎi', '殺價': 'shā jià', '歡迎光臨': 'huān yíng guāng lín', '還可以': 'hái kě yǐ', '還省': 'hái shěng'
+  '便宜': 'pián yi', '環保袋': 'huán bǎo dài', '塑膠袋': 'sù jiāo dài', '賒帳': 'shē zhàng', '兩百': 'liǎng bǎi', '五百': 'wǔ bǎi', '殺價': 'shā jià', '歡迎光臨': 'huān yíng guāng lín', '還可以': 'hái kě yǐ', '還省': 'hái shěng',
+  '排骨': 'pái gǔ', '絞肉': 'jiǎo ròu', '雞腿': 'jī tuǐ', '蝦': 'xiā', '花枝': 'huā zhī', '蛤蜊': 'gé lí', '螃蟹': 'páng xiè', '玉米': 'yù mǐ', '洋蔥': 'yáng cōng',
+  '肉攤': 'ròu tān', '魚攤': 'yú tān', '菜攤': 'cài tān', '一隻': 'yì zhī', '兩隻': 'liǎng zhī', '一根': 'yì gēn', '兩根': 'liǎng gēn', '三根': 'sān gēn', '收攤': 'shōu tān', '虧本': 'kuī běn', '心情': 'xīn qíng'
 
 });
 // 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
@@ -244,13 +284,16 @@ pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
 ══════════════════════════════════════ */
 
 
-const WHO = { 'Ami': ['Ami', 'Ami'], '老闆': ['El vendedor', 'The vendor'] };
-const SPEAKER_RE = /^(Ami|老闆|我)：/;
+const WHO = { 'Ami': ['Ami', 'Ami'], '老闆': ['El vendedor', 'The vendor'], '老闆娘': ['La vendedora', 'The vendor'] };
+const SPEAKER_RE = /^(Ami|老闆娘|老闆|我)：/;
 
 const VOCAB = {
   START: [['菜市場', 'mercado tradicional', 'traditional market'], ['老闆', 'jefe (vendedor)', 'boss (vendor)'], ['量詞', 'clasificador', 'measure word'], ['環保袋', 'bolsa reutilizable', 'reusable bag']],
   PICK: [['斤', 'jin (unidad de peso, 1 斤 ≈ 600 g)', 'jin (unit of weight, 1 斤 ≈ 600 g)'], ['半斤', 'medio jin (≈300 g)', 'half a jin (≈300 g)'], ['把', 'clasificador de manojos', 'measure word for bunches'], ['顆', 'clasificador de cosas redondas', 'measure word for round things'], ['條', 'clasificador de cosas largas', 'measure word for long things'], ['盒', 'caja', 'box'], ['籃子', 'cesta', 'basket']],
-  BARGAIN: [['算', 'cobrar, contar', 'charge, count'], ['便宜', 'barato', 'cheap'], ['一點', 'un poco', 'a bit'], ['殺價', 'regatear', 'bargain']],
+  HAGGLE: [['算', 'cobrar, contar', 'charge, count'], ['便宜', 'barato', 'cheap'], ['一點', 'un poco', 'a bit'], ['殺價', 'regatear', 'bargain'], ['虧本', 'perder dinero', 'lose money']],
+  MAP: [['肉攤', 'puesto de carne', 'meat stall'], ['魚攤', 'puesto de pescado', 'fish stall'], ['菜攤', 'puesto de verduras', 'vegetable stall'], ['攤位', 'puesto', 'stall']],
+  REMOVE: [['不要', 'no querer', "don't want"], ['錢不夠', 'no alcanza el dinero', 'not enough money']],
+  EXPLAIN: [['忘記', 'olvidar', 'forget'], ['不賣', 'no vender', "won't sell"], ['原因', 'motivo', 'reason']],
   PAY: [['一共', 'en total', 'in total'], ['夠', 'alcanzar', 'be enough'], ['找錢', 'dar el cambio', 'give change'], ['賒帳', 'comprar a crédito', 'buy on credit']],
   CHANGE: [['找錢', 'dar cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give the wrong change']],
   CHECK: [['數量', 'cantidad', 'amount'], ['不是', 'no es', 'is not'], ['換', 'cambiar', 'change, swap']],
@@ -258,39 +301,65 @@ const VOCAB = {
   END: [['新鮮', 'fresco', 'fresh'], ['好吃', 'rico / delicioso', 'delicious']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
-const STAGE = { PICK: ['買菜', 'comprar', 'buying'], BARGAIN: ['殺價', 'regatear', 'bargaining'], PAY: ['付錢', 'pagar', 'paying'], CHANGE: ['找錢', 'cambio', 'change'], CHECK: ['核對東西', 'revisar las compras', 'checking the goods'], BAG: ['袋子', 'bolsa', 'bag'] };
-const NEXT_LABEL = { PICK: '走到攤位', BARGAIN: '算錢', PAY: '付錢', CHANGE: '數找的錢', BAG: '拿東西', CHECK: '拿菜', END: '回家' };
+const STAGE = { MAP: ['逛市場', 'recorrer el mercado', 'browsing the market'], PICK: ['買菜', 'comprar', 'buying'], HAGGLE: ['殺價', 'regatear', 'bargaining'], PAY: ['付錢', 'pagar', 'paying'], REMOVE: ['少買一樣', 'quitar algo', 'taking one out'], CHANGE: ['找錢', 'cambio', 'change'], CHECK: ['核對東西', 'revisar las compras', 'checking the goods'], BAG: ['袋子', 'bolsa', 'bag'], MSG: ['Ami的訊息', 'mensaje de Ami', "Ami's message"], EXPLAIN: ['說明原因', 'explicar el motivo', 'explaining'], END: ['回家', 'volver a casa', 'going home'] };
+const NEXT_LABEL = { MAP: '走進市場', PICK: '走到攤位', HAGGLE: '算錢', PAY: '付錢', REMOVE: '重新算錢', CHANGE: '數找的錢', BAG: '拿東西', CHECK: '拿菜', MSG: '看手機', EXPLAIN: '回答Ami', END: '回家' };
 
 const PLACES = {
   phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
-  shop: ['🥬', '菜市場', 'Mercado', 'Market', '']
+  map:   ['🧺', '菜市場', 'Mercado', 'Market', ''],
+  meat:  ['🥩', '肉攤', 'Puesto de carne', 'Meat stall', ''],
+  fish:  ['🐟', '魚攤', 'Puesto de pescado', 'Fish stall', ''],
+  veg:   ['🥬', '菜攤', 'Puesto de verduras', 'Vegetable stall', '']
 };
-/* 8 種菜：meat＝按斤賣（半斤／一斤／兩斤）；其他點一下加一個單位。價錢是 2026/11 參考全聯和市場行情估的 */
+/* 三個攤位（傳統市場各賣各的）。攤位圖：先都用 stall.jpg，做好 stall_meat.jpg、stall_fish.jpg 以後改這裡 */
+const STALLS = {
+  meat: { zh: '肉攤', es: 'puesto de carne',     en: 'meat stall',      icon: '🥩', boss: '老闆',   img: 'images/stall.jpg' },
+  fish: { zh: '魚攤', es: 'puesto de pescado',   en: 'fish stall',      icon: '🐟', boss: '老闆',   img: 'images/stall.jpg' },
+  veg:  { zh: '菜攤', es: 'puesto de verduras',  en: 'vegetable stall', icon: '🥬', boss: '老闆娘', img: 'images/stall.jpg' }
+};
+const STALL_KEYS = ['meat', 'fish', 'veg'];
+/* 17 種：jin＝按斤賣（半斤／一斤／兩斤）；其他點一下加一個單位。
+   價錢：豬絞肉（全聯 9 月原價 188 元／台斤）、排骨（全聯豬胸排骨 300g 135 元）是查到的，其他是參考全聯和市場行情估的 */
 const ITEMS = [
-  { id: 'pork',    zh: '豬肉',   es: 'carne de cerdo', en: 'pork',    m: '斤', price: 300, icon: '🥩', meat: true, qs: [0.5, 1] },
-  { id: 'beef',    zh: '牛肉',   es: 'carne de res',   en: 'beef',    m: '斤', price: 450, icon: '🍖', meat: true, qs: [0.5, 1] },
-  { id: 'chicken', zh: '雞肉',   es: 'carne de pollo', en: 'chicken', m: '斤', price: 180, icon: '🍗', meat: true, qs: [0.5, 1, 2] },
-  { id: 'egg',     zh: '雞蛋',   es: 'huevos',         en: 'eggs',    m: '盒', price: 55,  icon: '🥚', qs: [1, 2], u: ['caja de huevos', 'cajas de huevos', 'carton of eggs', 'cartons of eggs'] },
-  { id: 'fish',    zh: '魚',     es: 'pescado',        en: 'fish',    m: '條', price: 75,  icon: '🐟', qs: [1, 2], u: ['pescado', 'pescados', 'fish', 'fish'] },
-  { id: 'cabbage', zh: '高麗菜', es: 'repollo',        en: 'cabbage', m: '顆', price: 60,  icon: '🥬', qs: [1],    u: ['repollo', 'repollos', 'cabbage', 'cabbages'] },
-  { id: 'bokchoy', zh: '小白菜', es: 'bok choy (col china)', en: 'bok choy', m: '把', price: 30, icon: '🌿', qs: [1, 2], u: ['manojo de bok choy', 'manojos de bok choy', 'bunch of bok choy', 'bunches of bok choy'] },
-  { id: 'tomato',  zh: '番茄',   es: 'tomates',        en: 'tomatoes', m: '顆', price: 20, icon: '🍅', qs: [3],    u: ['tomate', 'tomates', 'tomato', 'tomatoes'] }
+  { id: 'pork',    stall: 'meat', zh: '豬肉',   es: 'carne de cerdo',        en: 'pork',        m: '斤', price: 300, icon: '🥩', jin: true, qs: [0.5, 1] },
+  { id: 'beef',    stall: 'meat', zh: '牛肉',   es: 'carne de res',          en: 'beef',        m: '斤', price: 450, icon: '🍖', jin: true, qs: [0.5, 1] },
+  { id: 'chicken', stall: 'meat', zh: '雞肉',   es: 'carne de pollo',        en: 'chicken',     m: '斤', price: 180, icon: '🍗', jin: true, qs: [0.5, 1, 2] },
+  { id: 'rib',     stall: 'meat', zh: '排骨',   es: 'costillas de cerdo',    en: 'pork ribs',   m: '斤', price: 270, icon: '🍖', jin: true, qs: [0.5, 1] },
+  { id: 'mince',   stall: 'meat', zh: '絞肉',   es: 'carne molida de cerdo', en: 'ground pork', m: '斤', price: 180, icon: '🥩', jin: true, qs: [0.5, 1] },
+  { id: 'leg',     stall: 'meat', zh: '雞腿',   es: 'pierna de pollo',       en: 'chicken leg', m: '隻', price: 60,  icon: '🍗', qs: [1, 2], u: ['pierna de pollo', 'piernas de pollo', 'chicken leg', 'chicken legs'] },
+  { id: 'fish',    stall: 'fish', zh: '魚',     es: 'pescado',               en: 'fish',        m: '條', price: 75,  icon: '🐟', qs: [1, 2], u: ['pescado', 'pescados', 'fish', 'fish'] },
+  { id: 'shrimp',  stall: 'fish', zh: '蝦',     es: 'camarones',             en: 'shrimp',      m: '斤', price: 300, icon: '🦐', jin: true, qs: [0.5, 1] },
+  { id: 'squid',   stall: 'fish', zh: '花枝',   es: 'sepia',                 en: 'cuttlefish',  m: '隻', price: 120, icon: '🦑', qs: [1, 2], u: ['sepia', 'sepias', 'cuttlefish', 'cuttlefish'] },
+  { id: 'clam',    stall: 'fish', zh: '蛤蜊',   es: 'almejas',               en: 'clams',       m: '斤', price: 100, icon: '🐚', jin: true, qs: [1, 2] },
+  { id: 'crab',    stall: 'fish', zh: '螃蟹',   es: 'cangrejo',              en: 'crab',        m: '隻', price: 200, icon: '🦀', qs: [1], u: ['cangrejo', 'cangrejos', 'crab', 'crabs'] },
+  { id: 'cabbage', stall: 'veg',  zh: '高麗菜', es: 'repollo',               en: 'cabbage',     m: '顆', price: 60,  icon: '🥬', qs: [1], u: ['repollo', 'repollos', 'cabbage', 'cabbages'] },
+  { id: 'bokchoy', stall: 'veg',  zh: '小白菜', es: 'bok choy (col china)',  en: 'bok choy',    m: '把', price: 30,  icon: '🌿', qs: [1, 2], u: ['manojo de bok choy', 'manojos de bok choy', 'bunch of bok choy', 'bunches of bok choy'] },
+  { id: 'tomato',  stall: 'veg',  zh: '番茄',   es: 'tomates',               en: 'tomatoes',    m: '顆', price: 20,  icon: '🍅', qs: [3], u: ['tomate', 'tomates', 'tomato', 'tomatoes'] },
+  { id: 'corn',    stall: 'veg',  zh: '玉米',   es: 'maíz',                  en: 'corn',        m: '根', price: 20,  icon: '🌽', qs: [2, 3], u: ['mazorca de maíz', 'mazorcas de maíz', 'ear of corn', 'ears of corn'] },
+  { id: 'onion',   stall: 'veg',  zh: '洋蔥',   es: 'cebolla',               en: 'onion',       m: '顆', price: 20,  icon: '🧅', qs: [2, 3], u: ['cebolla', 'cebollas', 'onion', 'onions'] },
+  { id: 'egg',     stall: 'veg',  zh: '雞蛋',   es: 'huevos',                en: 'eggs',        m: '盒', price: 55,  icon: '🥚', qs: [1, 2], u: ['caja de huevos', 'cajas de huevos', 'carton of eggs', 'cartons of eggs'] }
 ];
 const BYID = Object.fromEntries(ITEMS.map(i => [i.id, i]));
 const MEAT_AMTS = [0.5, 1, 2];
-const TOTAL_MAX = 900;                       // 身上只有一張一千元，每局的總價不超過這個數
-/* 數量怎麼說：肉 → 半斤／一斤／兩斤；其他 → 一把、三顆、兩盒… */
-const qZh = (it, q) => it.meat ? (q === 0.5 ? '半斤' : NZ(q) + '斤') : NZ(q) + it.m;
-const qEs = (it, q) => it.meat ? (q === 0.5 ? `medio jin (≈300 g) de ${it.es}` : `${q} jin (≈${q * 600} g) de ${it.es}`) : `${q} ${q === 1 ? it.u[0] : it.u[1]}`;
-const qEn = (it, q) => it.meat ? (q === 0.5 ? `half a jin (≈300 g) of ${it.en}` : `${q} jin (≈${q * 600} g) of ${it.en}`) : `${q} ${q === 1 ? it.u[2] : it.u[3]}`;
+const TOTAL_MAX = 900;                       // 身上帶一千元，Ami 的清單（含加買）總價不超過這個數
+const r10 = n => Math.round(n / 10) * 10;
+/* 數量怎麼說：按斤賣 → 半斤／一斤／兩斤；其他 → 一把、三顆、兩盒… */
+const qZh = (it, q) => it.jin ? (q === 0.5 ? '半斤' : NZ(q) + '斤') : NZ(q) + it.m;
+const qEs = (it, q) => it.jin ? (q === 0.5 ? `medio jin (≈300 g) de ${it.es}` : `${q} jin (≈${q * 600} g) de ${it.es}`) : `${q} ${q === 1 ? it.u[0] : it.u[1]}`;
+const qEn = (it, q) => it.jin ? (q === 0.5 ? `half a jin (≈300 g) of ${it.en}` : `${q} jin (≈${q * 600} g) of ${it.en}`) : `${q} ${q === 1 ? it.u[2] : it.u[3]}`;
 const cost = (it, q) => it.price * q;
 const buyStr = (it, q) => `買${qZh(it, q)}${it.zh}`;     // 點圖片（或選斤數）時送出的「選項文字」
 const CHOICES = {};
-ITEMS.forEach(it => { if (it.meat) MEAT_AMTS.forEach(q => { CHOICES[buyStr(it, q)] = { it, q, set: true }; }); else CHOICES[buyStr(it, 1)] = { it, q: 1 }; });
+ITEMS.forEach(it => { if (it.jin) MEAT_AMTS.forEach(q => { CHOICES[buyStr(it, q)] = { it, q, set: true }; }); else CHOICES[buyStr(it, 1)] = { it, q: 1 }; });
 /* 菜的小圖：images/item_<id>.jpg（例：item_pork.jpg）；檔案還沒放時自動顯示 emoji */
 const itemImg = (id, cls) => `<span class="bimg ${cls || ''}"><img src="images/item_${id}.jpg" alt="" onerror="this.parentNode.textContent='${BYID[id].icon}'"></span>`;
-const wrongQ = it => it.q === 1 ? 2 : it.q === 0.5 ? 1 : it.q - 1;      // 老闆裝錯的數量
-const PICK_DONE = '買好了，去結帳';
+const wrongQ = q => q === 1 ? 2 : q === 0.5 ? 1 : q - 1;      // 老闆裝錯的數量
+const labZh = (it, q) => qZh(it, q) + it.zh;
+const labEs = (it, q) => qEs(it, q), labEn = (it, q) => qEn(it, q);
+const PICK_DONE = '買好了，去結帳', LEAVE_STALL = '先不買了，去別的攤位逛逛', GO_HOME = '東西買好了，回家';
+const SHORT = '不好意思，我的錢不夠，有一樣不要了。', CREDIT = '我下次再付，可以嗎？', ACK = '好，我知道了。';
+const BILLS = [50, 100, 200, 500, 1000];
+const CAUSE_OPT = { money: '我的錢不夠，所以沒買。', refused: '老闆不賣給我。', forgot: '對不起，我忘記了。' };
 
 /* ══════════════════════════════════════
    任務提示：只列出 NPC 交代過的原話；不扣分，結果頁顯示看了幾次
@@ -318,12 +387,8 @@ const Game = defineGame({
   feedback: [],                  // 這一步的回饋卡
   visit: 0,                      // 第幾次進入關卡（標出「現在這關」的錯誤）
   att: {},                       // 每一關選了幾次（第一次就對才給綠卡）
-  cash: null,                    // 錢包（有的遊戲才用；null 就不顯示）
+  cash: 1000,                    // 錢包：身上一張一千元
   onStart() { this.updateCash(); },
-  updateCash() {
-    const e = document.getElementById('cash-badge');
-    e.textContent = (this.cash == null || ['START', 'END', 'RESULT'].includes(this.state)) ? '' : '💰 ' + money(this.cash);
-  },
   /* ── 位置列：PLACES[key] = [圖示, 中文, 西文, 英文, class] ── */
   setPlace(mode) {
     const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
@@ -334,52 +399,69 @@ const Game = defineGame({
   },
 
   IMAGES: {
-    START: ['images/start.jpg', '🥬'], PICK: ['images/stall.jpg', '🥬'], BARGAIN: ['images/stall.jpg', '💬'], PAY: ['images/pay.jpg', '💵'],
-    CHANGE: ['images/pay.jpg', '🪙'], BAG: ['images/stall.jpg', '🛍️'], CHECK: ['images/stall.jpg', '🛍️'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+    START: ['images/start.jpg', '🥬'], MAP: ['images/stall.jpg', '🧺'], PICK: ['images/stall.jpg', '🥬'], HAGGLE: ['images/stall.jpg', '💬'],
+    REMOVE: ['images/pay.jpg', '💵'], PAY: ['images/pay.jpg', '💵'], CHANGE: ['images/pay.jpg', '🪙'], BAG: ['images/stall.jpg', '🛍️'], CHECK: ['images/stall.jpg', '🛍️'],
+    MSG: ['images/start.jpg', '📱'], EXPLAIN: ['images/end_good.jpg', '🏠'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
-  cart: {},                      // 籃子：{ 菜id: 數量 }（肉是幾斤，其他是幾個單位）
-  meatPick: null,                // 正在選斤數的肉（點了肉的圖片以後）
-  lastAct: null, checkFails: 0,
+  /* 在攤位上的那幾關，用這個攤位的圖（STALLS[x].img） */
+  imageFor() {
+    if (['PICK', 'HAGGLE', 'BAG', 'CHECK'].includes(this.state) && STALLS[this.cur]) return [STALLS[this.cur].img, STALLS[this.cur].icon];
+    return null;
+  },
+  boss() { return STALLS[this.cur] ? STALLS[this.cur].boss : '老闆'; },
+  cart: {},                      // 這個攤位的籃子：{ 菜id: 數量 }（按斤賣的是幾斤，其他是幾個單位）
+  meatPick: null,                // 正在選斤數的菜（點了按斤賣的圖片以後）
+  lastAct: null,
   setup() {
-    let items, total;
+    let items, total, ks;
     do {
-      items = shuffle(ITEMS).slice(0, 3).map(it => ({ ...it, q: pick(it.qs) }));
+      items = shuffle(ITEMS).slice(0, 4).map(it => ({ ...it, q: pick(it.qs) }));
       total = items.reduce((a, it) => a + cost(it, it.q), 0);
-    } while (total > TOTAL_MAX);                    // 一千元要付得起
-    const disc = total >= 500 ? 50 : total >= 300 ? 30 : total >= 150 ? 20 : 10, refuse = Math.random() < 0.3;   // 老闆有時候不肯算便宜
-    const fin = refuse ? total : total - disc, wi = Math.floor(Math.random() * items.length);
-    this.task = {
-      items, total, disc, refuse, final: fin, rot: Math.floor(Math.random() * 3),
-      shortChange: Math.random() < 0.45,          // 老闆會不會少找錢
-      bagWrong: Math.random() < 0.45, wi, wq: wrongQ(items[wi]),   // 裝袋時某樣東西數量放錯
-      fq: wrongQ(items[wi])
-    };
-    this.task.given = 1000 - fin - (this.task.shortChange ? 50 : 0);
-    this.cart = {}; this.meatPick = null; this.lastAct = null; this.checkFails = 0;
+      ks = new Set(items.map(it => it.stall));
+    } while (total > TOTAL_MAX || ks.size < 2);           // 一千元要付得起；至少要逛兩個攤位
+    /* 一半的局，Ami 中途會傳訊息：加買新東西，或是改項目 */
+    let msg = null;
+    if (Math.random() < 0.5) {
+      const type = pick(['add', 'change']);
+      for (const y of shuffle(ITEMS.filter(it => !items.some(x => x.id === it.id)))) {
+        const yq = pick(y.qs);
+        if (total + cost(y, yq) <= TOTAL_MAX) { msg = { type, y: { ...y, q: yq }, xid: type === 'change' ? pick(items).id : null }; break; }
+      }
+    }
+    this.task = { items, total, msg, rot: Math.floor(Math.random() * 3), checkStall: pick(items).stall };
+    this.req = items.map(it => ({ id: it.id, q: it.q }));     // Ami 要的（Ami 中途改了，這裡跟著改）
+    this.cash = 1000; this.saved = 0; this.cur = null; this.st = null; this.tx = []; this.cc = null; this.ck = null;
+    this.cart = {}; this.meatPick = null; this.lastAct = null;
+    this.bought = {}; this.lack = {}; this.closed = {}; this.visited = {};
+    this.msgShown = false; this.bagDone = false; this.checkDone = false;
+    this.queue = []; this.qi = 0; this.explained = {}; this.final = null; this.wentHome = false; this._bonus = 0;
   },
+  reqLabel(a) { const it = BYID[a.id]; return L(labZh(it, a.q), labEs(it, a.q), labEn(it, a.q)); },
   amiLines() {
     const N = this.N, t = this.task;
+    const zh = t.items.map(it => labZh(it, it.q)).join('、'), es = t.items.map(it => labEs(it, it.q)).join(', '), en = t.items.map(it => labEn(it, it.q)).join(', ');
     return [
-      L(`Ami：${N}，我今天晚上要在家煮飯，你來我家一起吃吧！不過，你可以幫我去菜市場買菜嗎？`, `${N}, esta noche cocino en casa: ¡ven a mi casa a cenar conmigo! Pero antes, ¿puedes ir al mercado a comprar?`, `${N}, I'm cooking at home tonight — come over and eat with me! But first, could you buy groceries at the market?`),
-      L('Ami：我要買：' + t.items.map(it => qZh(it, it.q) + it.zh).join('、') + '。', 'Necesito: ' + t.items.map(it => qEs(it, it.q)).join(', ') + '.', 'I need: ' + t.items.map(it => qEn(it, it.q)).join(', ') + '.'),
-      L('Ami：記得帶環保袋，不要拿塑膠袋。還有，可以問問看能不能算便宜一點喔！', 'Lleva una bolsa reutilizable, no aceptes bolsa de plástico. ¡Y pregunta si te pueden hacer un descuento!', "Bring a reusable bag — don't take a plastic one. And ask if they can give you a discount!")
+      L(`Ami：${N}，我今晚煮飯，你來吃吧！幫我去菜市場買：${zh}。`, `${N}, esta noche cocino: ¡ven a cenar! Ve al mercado y cómprame: ${es}.`, `${N}, I'm cooking tonight — come eat with me! Please go to the market and get: ${en}.`),
+      L('Ami：記得帶環保袋，也可以問問看能不能算便宜一點喔！', 'Lleva tu bolsa reutilizable, ¡y también puedes preguntar si te hacen un descuento!', "Bring a reusable bag — and you can also ask if they'll give you a discount!")
     ];
   },
-  priceLine() {
-    const t = this.task;
-    return L(`老闆：一共是${zhNum(t.total)}元。`, `Son ${esM(t.total)} en total.`, `That's ${enM(t.total)} in total.`);
+  /* Ami 中途傳來的訊息（加買 或 改項目） */
+  msgLine() {
+    const m = this.task.msg, y = m.y;
+    if (m.type === 'add') return L(`Ami：我突然想到，還要加買${labZh(y, y.q)}！可以幫我買嗎？`, `Ami: ¡Se me acaba de ocurrir que también necesito ${labEs(y, y.q)}! ¿Me lo compras?`, `Ami: I just remembered I also need ${labEn(y, y.q)}! Could you get that too?`);
+    const a = this.task.items.find(it => it.id === m.xid);
+    return L(`Ami：不好意思，不用買${labZh(a, a.q)}了，改買${labZh(y, y.q)}！`, `Ami: Perdona, ya no hace falta ${labEs(a, a.q)}: ¡mejor compra ${labEs(y, y.q)}!`, `Ami: Sorry — no need for ${labEn(a, a.q)} anymore. Please get ${labEn(y, y.q)} instead!`);
   },
   hintSections() {
-    const ORDER = ['START', 'PICK', 'BARGAIN', 'PAY', 'CHANGE', 'BAG', 'CHECK', 'END', 'RESULT'];
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
-    if (ORDER.indexOf(this.st0) >= ORDER.indexOf('PAY')) out.push({ title: '老闆說的話', lines: [this.priceLine()] });
+    if (this.msgShown) out.push({ title: 'Ami 後來傳的訊息', lines: [this.msgLine()] });
     return out;
   },
   listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s);
     const rows = [
-      ...t.items.map(it => ({ zh: `${it.icon} ${qZh(it, it.q)}${it.zh}`, es: qEs(it, it.q), en: qEn(it, it.q) })),
-      { zh: '要帶環保袋，不拿塑膠袋', es: 'Lleva la bolsa reutilizable, sin plástico', en: 'Use the reusable bag, no plastic' },
+      ...t.items.map(it => ({ zh: `${it.icon} ${labZh(it, it.q)}`, es: labEs(it, it.q), en: labEn(it, it.q) })),
+      { zh: '要帶環保袋', es: 'Lleva la bolsa reutilizable', en: 'Use the reusable bag' },
       { zh: '你身上有：一張一千元', es: 'Llevas: un billete de mil dólares', en: 'You have: a 1,000-dollar bill' }
     ];
     if (rowsOnly) return rows;
@@ -389,19 +471,39 @@ const Game = defineGame({
     const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
     return `<div class="list"><div class="t">${r('購物清單')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
   },
-  /* 菜攤：8 張圖片卡（點一下放進籃子；肉要再選斤數）＋籃子（每列有 －／＋，合計） */
+  /* 市場地圖：三個攤位 */
+  mapHTML() {
+    const r = s => this.ruby(s);
+    return `<div class="stalls">${STALL_KEYS.map(k => {
+      const s = STALLS[k], cl = this.closed[k] ? 'closed' : this.visited[k] ? 'done' : '';
+      return `<div class="stall ${cl}"><span class="e">${s.icon}</span>${r(s.zh)}${this.closed[k] ? `<br>${r('收攤了')}` : this.visited[k] ? '<br>✔' : ''}</div>`;
+    }).join('')}</div>`;
+  },
+  /* 殺價畫面：紙板價目牌 + 老闆的心情（三格；三次出價太低，老闆就不賣了） */
+  haggleHTML(st) {
+    if (!st) return '';           // 過場畫面還會畫一次剛離開的那關（收攤時 st 已清掉）
+    const r = s => this.ruby(s), faces = ['😡', '😠', '😐', '😊'];
+    const old = st.history.map(p => `<span class="old">${p}</span>`).join('');
+    return `<div class="haggle">
+      <div class="tag"><div class="item">${r(st.item)}</div>${old}<div class="now">${st.ask}<small>${r('元')}</small></div></div>
+      <div class="mood"><span class="face">${faces[st.mood]}</span>
+        <span class="bar">${[1, 2, 3].map(i => `<i class="${i <= st.mood ? 'on' : ''}"></i>`).join('')}</span>
+        <span class="lbl">${r(this.boss() + '的心情')}</span></div></div>`;
+  },
+  /* 攤位上的圖片卡（點一下放進籃子；按斤賣的要再選斤數）＋籃子（每列有 －／＋，合計） */
   cartTotal() { return Object.entries(this.cart).reduce((s, [id, q]) => s + cost(BYID[id], q), 0); },
   updateCash() {
     const e = document.getElementById('cash-badge'), n = Object.keys(this.cart || {}).length;
-    e.textContent = (this.state === 'PICK' && n) ? '🧺 ' + n + ' · ' + money(this.cartTotal()) : '';
+    if (['START', 'END', 'RESULT', 'EXPLAIN'].includes(this.state)) { e.textContent = ''; return; }
+    e.textContent = (this.state === 'PICK' && n ? '🧺 ' + money(this.cartTotal()) + ' · ' : '') + '💰 ' + money(this.cash);
   },
   pickHTML() {
     const r = s => this.ruby(s), c = this.cart, mp = this.meatPick ? BYID[this.meatPick] : null;
-    const shelf = `<div class="shelf">${ITEMS.map(it => `<button type="button" class="bun${mp && mp.id === it.id ? ' on' : ''}" ${it.meat ? `data-meat="${it.id}"` : `data-veg="${it.id}" data-choice="${esc(buyStr(it, 1))}"`}><span class="e">${itemImg(it.id)}</span><span class="nm">${r(it.zh)}</span><span class="pr">${it.price}${r('元')}／${r(it.m)}</span></button>`).join('')}</div>`;
+    const shelf = `<div class="shelf">${ITEMS.filter(it => it.stall === this.cur).map(it => `<button type="button" class="bun${mp && mp.id === it.id ? ' on' : ''}" ${it.jin ? `data-jin="${it.id}"` : `data-veg="${it.id}" data-choice="${esc(buyStr(it, 1))}"`}><span class="e">${itemImg(it.id)}</span><span class="nm">${r(it.zh)}</span><span class="pr">${it.price}${r('元')}／${r(it.m)}</span></button>`).join('')}</div>`;
     const amt = mp ? `<div class="amt"><button type="button" class="amtx" data-amtx aria-label="取消 Cancelar">✕</button><div class="q">${r(mp.zh + '，要買多少？')}</div><div class="btns">${MEAT_AMTS.map(q => `<button type="button" class="amtb" data-choice="${esc(buyStr(mp, q))}">${r(qZh(mp, q))}<small>${mp.price * q}${r('元')}</small></button>`).join('')}</div></div>` : '';
     const rows = Object.keys(c).map(id => {
       const it = BYID[id], q = c[id];
-      const adj = it.meat
+      const adj = it.jin
         ? `<span class="adj"><i>${r(qZh(it, q))}</i><button type="button" data-adj="${id}" data-d="-1" aria-label="放回去 Devolver">－</button></span>`
         : `<span class="adj"><button type="button" data-adj="${id}" data-d="-1" aria-label="－">－</button><i>${q}${r(it.m)}</i><button type="button" data-adj="${id}" data-d="1" aria-label="＋"${q >= 9 ? ' disabled' : ''}>＋</button></span>`;
       return `<div class="row"><span>${itemImg(id, 'sm')} ${r(it.zh)}</span>${adj}<b>${cost(it, q)}${r('元')}</b></div>`;
@@ -409,7 +511,7 @@ const Game = defineGame({
     const act = this.lastAct ? `<div class="act">${r(this.lastAct.zh)}${ONLYZH() ? '' : `<small>${esc(X(this.lastAct.es, this.lastAct.en))}</small>`}</div>` : '';
     return shelf + amt + `<div class="tray"><div class="th">${r('籃子')}<small>${r('點菜放進籃子　－放回去')}</small></div>${act}${rows}<div class="total"><span>${r('合計')}</span><b>${this.cartTotal()}${r('元')}</b></div></div>`;
   },
-  /* 點肉的圖片：打開／收起「要買多少」；－：把這樣菜少拿一個（肉整份放回去） */
+  /* 點按斤賣的圖片：打開／收起「要買多少」；－：把這樣菜少拿一個（按斤賣的整份放回去） */
   openMeat(id) {
     Tr.closeAll(); Speech.stop(); this.thought = null; this.feedback = []; this.thoughtFirst = false;
     this.meatPick = (id && this.meatPick !== id) ? id : null;
@@ -418,7 +520,7 @@ const Game = defineGame({
   removeOne(id) {
     const it = BYID[id];
     if (!this.cart[id]) return;
-    if (it.meat || this.cart[id] <= 1) delete this.cart[id]; else this.cart[id] -= 1;
+    if (it.jin || this.cart[id] <= 1) delete this.cart[id]; else this.cart[id] -= 1;
     this.meatPick = null;
     this.lastAct = L(`你把${it.zh}放回去。`, `Devuelves: ${it.es}.`, `You put the ${it.en} back.`);
     Tr.closeAll(); Speech.stop(); this.thought = null; this.feedback = []; this.thoughtFirst = false;
@@ -427,63 +529,259 @@ const Game = defineGame({
   testPrep(use) {   // 自動測試用：亂玩時由這裡隨機放幾樣菜進籃子
     if (this.state !== 'PICK') return;
     if (!use) {
-      this.cart = {}; const n = Math.floor(Math.random() * 3);
-      for (let k = 0; k < n; k++) { const it = pick(ITEMS); this.cart[it.id] = it.meat ? pick(MEAT_AMTS) : (this.cart[it.id] || 0) + 1; }
+      this.cart = {}; const n = Math.floor(Math.random() * 3), pool = ITEMS.filter(it => it.stall === this.cur);
+      for (let k = 0; k < n; k++) { const it = pick(pool); this.cart[it.id] = it.jin ? pick(MEAT_AMTS) : (this.cart[it.id] || 0) + 1; }
     }
     this.updateCash();
   },
 
+  /* ── 殺價引擎（照夜市；差別：出價太低三次，老闆就不賣了） ── */
+  setAsk(st, price) { if (price !== st.ask) { st.history.push(st.ask); st.ask = price; } },
+  startHaggle() {
+    const start = this.cartTotal(), s = STALLS[this.cur];
+    this.st = { item: s.zh, ask: start, start, floor: r10(start * (0.68 + Math.random() * 0.1)), mood: 3, soft: false, walked: false, history: [] };
+  },
+  haggleOptions(st) {
+    const opts = [];
+    if (!st.soft && st.mood > 0) opts.push('老闆，算便宜一點啦！');
+    if (st.mood > 0) {
+      const raw = [r10(st.ask * 0.5), r10(st.ask * 0.72), r10(st.ask * 0.88)].filter(n => n < st.ask && n > 0);
+      [...new Set(raw)].forEach(n => opts.push(`${n}元可以嗎？`));
+      if (!st.walked) opts.push('我再看看好了。');
+    }
+    opts.push(`好，${st.ask}元，我買了。`);
+    return opts;
+  },
+  haggleChoose(st, c) {
+    const say = (zh, es, en) => L(`${this.boss()}：${zh}`, es, en);
+    if (c.startsWith('好，')) { this.state = 'PAY'; return; }
+    if (c.startsWith('老闆，算便宜')) {
+      st.soft = true;
+      const p = Math.max(st.floor, r10(st.ask * 0.9));
+      if (p < st.ask) {
+        this.setAsk(st, p);
+        this.thought = [say(`好啦好啦，看你很有誠意，${p}元！`, `Está bien, está bien, veo que lo dices en serio: ¡${esM(p)}!`, `All right, all right, you seem sincere: ${enM(p)}!`)];
+      } else this.thought = [say('已經是最便宜的了啦！', '¡Ya es el precio más bajo!', "That's already the lowest price!")];
+      return;
+    }
+    if (c.startsWith('我再看看')) {
+      st.walked = true;
+      // 「再看看」不一定有用：大約三分之一的老闆不留人，價錢不變，你只好再走回來
+      if (st.ask > st.floor && Math.random() < 0.35) {
+        this.thought = [L('（你轉身要走……）', '(Te das la vuelta para irte…)', '(You turn to leave…)'),
+          say('好啊，慢慢看，喜歡再回來喔！', '¡Claro, mira con calma! Si te gusta, vuelve.', 'Sure, take your time! Come back if you like it!'),
+          L('（老闆沒有叫住你。你走了幾步，又走回來。）', '(El vendedor no te detiene. Das unos pasos y vuelves.)', "(The vendor doesn't stop you. You take a few steps and come back.)")];
+        return;
+      }
+      if (st.ask > st.floor) {
+        const p = Math.max(st.floor, r10(st.ask - (st.ask - st.floor) * 0.6));
+        this.setAsk(st, p);
+        this.thought = [L('（你轉身要走……）', '(Te das la vuelta para irte…)', '(You turn to leave…)'),
+          say(`欸欸欸，等一下！${p}元賣你啦！`, `¡Eh, eh, espera! ¡Te lo vendo por ${esM(p)}!`, `Hey, hey, wait! I'll sell it to you for ${enM(p)}!`)];
+        this.good('聰明喔！你說了「再看看」，老闆就降價了！', '¡Qué buena idea! Dijiste «mirar un poco más» y el vendedor bajó el precio.', 'Smart! You said you\'d look around some more, and the vendor dropped the price!');
+      } else this.thought = [say('這已經是最低價了，不買就算了。', 'Este ya es el precio más bajo; si no compras, no importa.', "That's already my lowest price. If you don't want it, never mind.")];
+      return;
+    }
+    const o = +c.match(/^(\d+)/)[1];
+    if (o >= st.floor) {
+      this.setAsk(st, o);
+      this.thought = [say(`唉，好啦好啦，算你${o}元！`, `Ay, está bien, está bien: ¡te lo dejo en ${esM(o)}!`, `Ugh, fine, fine — ${enM(o)} for you!`)];
+      this.state = 'PAY'; return;
+    }
+    if (o >= st.floor * 0.8) {
+      const p = Math.max(st.floor, r10((o + st.ask) / 2));
+      this.setAsk(st, p);
+      this.thought = [say(`${o}元太少了啦！${p}元，不能再少了。`, `¡${esM(o)} es muy poco! ${esM(p)}, no puedo bajar más.`, `${enM(o)} is too low! ${enM(p)}, and that's final.`)];
+      return;
+    }
+    st.mood -= 1;
+    if (st.mood === 0) {          // 第三次出價太低：老闆生氣，不賣了，這個攤位收攤
+      this.addMistake(M('殺價殺太兇，老闆生氣了，不賣了。', 'Regateaste demasiado y el vendedor se enojó: ya no te vende nada.', 'You haggled too aggressively and the vendor got angry: no more sales.'),
+        [say(`${o}元？你在開玩笑嗎？不賣了！不賣了！`, `¿${esM(o)}? ¿Estás bromeando? ¡No te vendo nada!`, `${enM(o)}? Are you kidding? I'm not selling to you!`),
+         L('（老闆生氣地把東西收起來，你只好走開。）', '(El vendedor, enojado, guarda su mercancía y no te queda más que irte.)', '(The vendor angrily puts the goods away, and you have to walk off.)')]);
+      Object.keys(this.cart).forEach(id => { this.lack[id] = 'refused'; });
+      this.closed[this.cur] = true; this.cart = {}; this.meatPick = null; this.st = null;
+      this.state = 'MAP';
+    } else {
+      this.thought = [say(st.mood === 2 ? `${o}元？這樣我會虧本耶！` : `${o}元？你再殺這麼低，我真的不賣了喔！`,
+        st.mood === 2 ? `¿${esM(o)}? ¡Así pierdo dinero!` : `¿${esM(o)}? Si sigues pidiendo tan poco, ¡de verdad no te vendo!`,
+        st.mood === 2 ? `${enM(o)}? I'd lose money like that!` : `${enM(o)}? Keep lowballing me and I really won't sell!`)];
+    }
+  },
+
+  /* ── 付錢 ── */
+  payInfo() {
+    const ask = this.st.ask, cash = this.cash, short = cash < ask;
+    const bill = BILLS.find(b => b >= ask && b <= cash) || null;                 // 身上付得出的、最小的夠大鈔票
+    const bigBill = BILLS.find(b => b >= ask) || ask;
+    const payOk = short ? `給你${zhNum(bigBill)}元。` : bill ? `給你${zhNum(bill)}元。` : `給你${zhNum(ask)}元。`;   // 沒有適合的鈔票就剛好付
+    const shortB = stdShortBill(ask);
+    return { ask, cash, short, bill, payOk, shortB, shortOpt: `給你${zhNum(shortB)}元。` };
+  },
+  /* 付完錢：菜從籃子變成「買到的」；少找、核對東西都在後面 */
+  finishPay(P) {
+    const st = this.st;
+    this.cash -= P.ask; this.saved += st.start - st.ask;
+    this.tx = [];
+    Object.entries(this.cart).forEach(([id, q]) => { this.bought[id] = (this.bought[id] || 0) + q; delete this.lack[id]; this.tx.push({ id, q }); });
+    this.visited[this.cur] = true; this.cart = {}; this.meatPick = null;
+    if (P.bill && P.bill > P.ask) {
+      const want = P.bill - P.ask, sc = want >= 50 && Math.random() < 0.45;
+      this.cc = { bill: P.bill, ask: P.ask, want, sc, given: sc ? want - 50 : want };
+      this.state = 'CHANGE';
+    } else this.flowNext();
+  },
+  /* 付錢（和找錢）以後：問塑膠袋（第一次）→ 核對東西（某一個攤位）→ Ami 的訊息（一次）→ 回市場地圖 */
+  flowNext() {
+    const t = this.task;
+    if (!this.bagDone) { this.bagDone = true; this.state = 'BAG'; return; }
+    if (!this.checkDone && this.cur === t.checkStall && this.tx.length) {
+      this.checkDone = true;
+      const g = pick(this.tx);
+      this.ck = { id: g.id, q: g.q, wrong: Math.random() < 0.45, wq: wrongQ(g.q) };
+      this.state = 'CHECK'; return;
+    }
+    this.afterStall();
+  },
+  afterStall() {
+    this.st = null;
+    if (this.task.msg && !this.msgShown) { this.msgShown = true; this.state = 'MSG'; return; }
+    this.state = 'MAP';
+  },
+  /* Ami 的訊息要求加買或改項目；已經買完的東西，不能退換，要跟 Ami 說 */
+  msgInfo() {
+    const m = this.task.msg, y = m.y, a = m.type === 'change' ? this.task.items.find(it => it.id === m.xid) : null;
+    return { m, y, a, boughtX: !!(a && this.bought[a.id]) };
+  },
+  applyMsg() {
+    const { m, y, a, boughtX } = this.msgInfo();
+    if (m.type === 'add') this.req.push({ id: y.id, q: y.q });
+    else if (!boughtX) this.req = this.req.map(r => r.id === a.id ? { id: y.id, q: y.q } : r);
+  },
+  /* 回家：先看少買的東西（最多問兩樣原因），再結算 */
+  goHome() {
+    const miss = this.req.filter(a => !this.bought[a.id]);
+    this.wentHome = true; this.queue = miss.slice(0, 2); this.qi = 0;
+    if (this.queue.length) { this.state = 'EXPLAIN'; return; }
+    this.state = 'END'; this.settle();
+  },
+  causeOf(id) { return this.lack[id] || 'forgot'; },
+  /* 結算：Ami 一樣一樣核對（只算一次，扣分、結局好壞都在這裡決定） */
+  settle() {
+    const N = this.N, lines = [], pens = [];
+    this.stopTimer();
+    const bad = (m, say, light) => { pens.push(light ? { ...m, pen: 5 } : m); lines.push(say); };
+    this.req.forEach(a => {
+      const it = BYID[a.id], got = this.bought[a.id] || 0;
+      if (got === a.q) return;
+      if (got === 0) {
+        const cause = this.explained[a.id];
+        if (cause === 'money') bad(M(`${it.zh}沒買，因為錢不夠。`, `No compraste ${it.es} porque no te alcanzó el dinero.`, `You didn't buy the ${it.en} because you ran short of money.`),
+          L(`Ami：啊，是我給你的錢不夠！${it.zh}下次再買吧。`, `Ami: ¡Ay, fui yo quien no te dio suficiente dinero! ${it.es[0].toUpperCase() + it.es.slice(1)} lo compramos la próxima vez.`, `Ami: Oh, I didn't give you enough money! We'll get the ${it.en} next time.`), true);
+        else if (cause === 'refused') bad(M(`${it.zh}沒買到，因為老闆不賣了。`, `No pudiste comprar ${it.es} porque el vendedor ya no quiso venderte.`, `You couldn't buy the ${it.en} because the vendor stopped selling to you.`),
+          L(`Ami：老闆不賣就算了，${it.zh}下次再買吧。`, `Ami: Si no quiere vender, qué le vamos a hacer; ${it.es} lo compramos la próxima vez.`, `Ami: If he won't sell, never mind — we'll get the ${it.en} next time.`), true);
+        else bad(M(`Ami要${labZh(it, a.q)}，你沒有買。`, `Ami quería ${labEs(it, a.q)} y no lo compraste.`, `Ami wanted ${labEn(it, a.q)} and you didn't buy it.`),
+          L(`Ami：我要${labZh(it, a.q)}，你沒有買耶！`, `Ami: ¡Quería ${labEs(it, a.q)} y no lo trajiste!`, `Ami: I wanted ${labEn(it, a.q)} and you didn't get it!`));
+      } else bad(M(`Ami要${labZh(it, a.q)}，你買了${qZh(it, got)}。`, `Ami quería ${labEs(it, a.q)} y compraste ${labEs(it, got)}.`, `Ami wanted ${labEn(it, a.q)} and you bought ${labEn(it, got)}.`),
+        L(`Ami：${it.zh}我要的是${qZh(it, a.q)}，你買了${qZh(it, got)}耶！`, `Ami: ¡De ${it.es} quería ${labEs(it, a.q).replace(/ de .*$/, '')}, y compraste ${labEs(it, got).replace(/ de .*$/, '')}!`, `Ami: I wanted ${labEn(it, a.q)}, but you bought ${labEn(it, got)}!`));
+    });
+    Object.keys(this.bought).forEach(id => {
+      if (this.req.some(a => a.id === id)) return;
+      const it = BYID[id];
+      bad(M(`Ami沒有要${it.zh}。`, `Ami no pidió ${it.es}.`, `Ami didn't ask for ${it.en}.`), L(`Ami：我沒有要${it.zh}耶！`, `Ami: ¡Yo no pedí ${it.es}!`, `Ami: I didn't ask for ${it.en}!`));
+    });
+    this._endGood = pens.length === 0;
+    this.state = 'END';
+    pens.forEach(m => { this.addMistake(m); if (m.pen) { this.score += 10 - m.pen; } });
+    const bonus = Math.min(20, Math.floor(this.saved / 10));
+    this._bonus = bonus; this.score += bonus;
+    document.getElementById('score-badge').textContent = this.score + ' 分';
+    const spent = 1000 - this.cash, ok = this._endGood, heavy = pens.some(m => !m.pen);
+    const out = [];
+    if (!this.queue.length) out.push(L('（你提著環保袋回到Ami家，把菜拿給Ami。）', '(Vuelves a casa de Ami con tu bolsa reutilizable y le entregas las compras.)', '(You get back to Ami\'s place with your reusable bag and hand over the groceries.)'));
+    out.push(...lines);
+    out.push(ok ? L(`Ami：哇，菜都好新鮮唷${this.saved > 0 ? '，還省了不少錢' : ''}！謝謝你，${N}！我來煮好吃的給你吃。`, `Ami: ¡Guau, todo está muy fresco${this.saved > 0 ? ' y además ahorraste bastante' : ''}! ¡Gracias, ${N}! Yo cocino algo rico para ti.`, `Ami: Wow, everything is so fresh${this.saved > 0 ? ', and you saved quite a bit' : ''}! Thanks, ${N}! I'll cook something delicious for you.`)
+      : heavy ? L(`Ami：謝謝你！不過有一些東西買錯了……下次要看清楚喔！`, 'Ami: ¡Gracias! Pero compraste mal algunas cosas… ¡la próxima vez fíjate bien!', 'Ami: Thanks! But a few things were wrong… check carefully next time!')
+      : L(`Ami：謝謝你，${N}！今天沒買到的，下次再買。我先用這些來煮。`, `Ami: ¡Gracias, ${N}! Lo que no se pudo comprar hoy lo compramos otro día; cocino con lo que trajiste.`, `Ami: Thanks, ${N}! What we couldn't get today we'll get another time; I'll cook with what you brought.`));
+    out.push(L(`（你一共花了${spent}元，殺價省了${this.saved}元，殺價獎勵加${bonus}分。）`, `(Gastaste ${esM(spent)} en total; el regateo te ahorró ${esM(this.saved)} y te dio +${bonus} puntos.)`, `(You spent ${enM(spent)} in total; haggling saved you ${enM(this.saved)} and earned +${bonus} points.)`));
+    this.final = out;
+    track('game_complete', { game: 'market', score: this.score, elapsed: this.elapsedTime, saved: this.saved });
+  },
+
   getConfig() {
     const N = this.N, t = this.task;
-    const vend = (zh, es, en) => L(`老闆：${zh}`, es, en);
-    const shortB = stdShortBill(t.final), shortOpt = `給你${zhNum(shortB)}元。`, payOk = '給你一千元。';
-    const chFix = `老闆，好像找錯了，應該找${zhNum(t.shortChange ? 1000 - t.final : 1000 - t.final - 50)}元吧？`;
-    const bagLine = (it, q) => `${it.zh}我要的是${qZh(it, it.q)}，不是${qZh(it, q)}。`;
-    const bgFix = `老闆，${t.bagWrong ? bagLine(t.items[t.wi], t.wq) : bagLine(t.items[t.wi], t.fq)}`;
+    const vend = (zh, es, en) => L(`${Game.boss()}：${zh}`, es, en);
     const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
     const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const needStalls = () => STALL_KEYS.filter(k => !Game.closed[k] && Game.req.some(a => !Game.bought[a.id] && BYID[a.id].stall === k));
+    const chFix = () => `老闆，好像找錯了，應該找${zhNum(Game.cc.want)}元吧？`;
+    const bgFix = () => { const it = BYID[Game.ck.id]; return `老闆，${it.zh}我要的是${qZh(it, Game.ck.q)}，不是${qZh(it, Game.ck.wq)}。`; };
+    const greet = {
+      meat: () => vend('歡迎光臨！肉都是今天早上才送來的，自己看，要什麼跟我說。', '¡Bienvenido(a)! La carne llegó esta mañana. Mire con calma y dígame qué quiere.', 'Welcome! The meat came in this morning. Take a look and tell me what you want.'),
+      fish: () => vend('歡迎光臨！魚和蝦都很新鮮，自己看，要什麼跟我說。', '¡Bienvenido(a)! El pescado y los camarones están muy frescos. Mire y dígame qué quiere.', 'Welcome! The fish and shrimp are very fresh. Take a look and tell me what you want.'),
+      veg: () => vend('歡迎光臨！菜都很新鮮，自己看，要什麼跟我說。', '¡Bienvenido(a)! Las verduras están muy frescas. Mire con calma y dígame qué quiere.', 'Welcome! The vegetables are very fresh. Take a look and tell me what you want.')
+    };
     return {
       START: {
         place: 'phone',
         html: () => Game.listHTML(),
         dialogue: () => [
-          L('（你走到菜市場。手機響了一聲，是Ami傳來的LINE。）', '(Llegas al mercado. Tu celular suena: es un LINE de Ami.)', '(You arrive at the market. Your phone buzzes — a LINE from Ami.)'),
+          L('（你走到菜市場，手機響了，是Ami傳來的LINE。）', '(Llegas al mercado y suena tu celular: es un LINE de Ami.)', '(You arrive at the market and your phone buzzes — a LINE from Ami.)'),
           ...Game.amiLines(),
           L('我：好，我去買！', '¡Bien, voy a comprar!', "OK, I'll go buy it!")
         ],
         options: ['走進菜市場'],
-        next: () => { Game.startTimer(); Game.state = 'PICK'; }
+        ok: () => '走進菜市場',
+        next: () => { Game.startTimer(); Game.state = 'MAP'; }
       },
-      /* ═══ 買菜：點圖片放進籃子（跟麵包店一樣），按「買好了」才檢查 ═══ */
+      /* ═══ 市場地圖：自己決定先去哪一攤（買完不能退換貨） ═══ */
+      MAP: {
+        place: 'map',
+        html: () => Game.mapHTML(),
+        dialogue: () => [Object.keys(Game.visited).length || Object.keys(Game.closed).length
+          ? L('（還要去哪一攤？買好了就回家。）', '(¿A qué puesto vas ahora? Si ya terminaste, vuelve a casa.)', '(Which stall next? If you are done, head home.)')
+          : L('（菜市場好熱鬧！有肉攤、魚攤和菜攤，要先去哪一攤？）', '(¡El mercado está muy animado! Hay puesto de carne, de pescado y de verduras. ¿A cuál vas primero?)', '(The market is lively! There\'s a meat stall, a fish stall and a vegetable stall. Which one first?)')],
+        options: () => [...STALL_KEYS.filter(k => !Game.closed[k]).map(k => '去' + STALLS[k].zh), GO_HOME],
+        ok: () => { const n = needStalls(); return n.length ? '去' + STALLS[n[0]].zh : GO_HOME; },
+        next: c => {
+          if (c === GO_HOME) { Game.goHome(); return; }
+          const k = STALL_KEYS.find(x => '去' + STALLS[x].zh === c);
+          Game.cur = k; Game.cart = {}; Game.meatPick = null; Game.lastAct = null;
+          Game.thought = [greet[k]()];
+          Game.state = 'PICK';
+        }
+      },
+      /* ═══ 攤位：點圖片放進籃子（跟麵包店一樣），按「買好了」才殺價。不會攔你：買什麼都可以，最後 Ami 才對帳 ═══ */
       PICK: {
-        place: 'shop',
+        place: () => Game.cur,
         html: () => Game.pickHTML(),
-        dialogue: () => [vend('歡迎光臨！自己看，要什麼跟我說。', '¡Bienvenido(a)! Mire con calma y dígame qué quiere.', 'Welcome! Take a look and tell me what you want.')],
-        options: [PICK_DONE],
+        dialogue: () => [greet[Game.cur]()],
+        options: [PICK_DONE, LEAVE_STALL],
+        fill: () => {   // 自動測試用：把這個攤位上、Ami 要的東西裝進籃子
+          Game.cart = {};
+          Game.req.filter(a => BYID[a.id].stall === Game.cur && !Game.bought[a.id]).forEach(a => { const it = BYID[a.id]; if (it.jin) Game.handleChoice(buyStr(it, a.q)); else for (let k = 0; k < a.q; k++) Game.handleChoice(buyStr(it, 1)); });
+        },
+        ok: () => { Game.getConfig().PICK.fill(); return Object.keys(Game.cart).length ? PICK_DONE : LEAVE_STALL; },
         mount: box => {
           box.querySelectorAll('[data-veg]').forEach(el => { el.onclick = () => Game.handleChoice(el.dataset.choice); });
-          box.querySelectorAll('[data-meat]').forEach(el => { el.onclick = () => Game.openMeat(el.dataset.meat); });
+          box.querySelectorAll('[data-jin]').forEach(el => { el.onclick = () => Game.openMeat(el.dataset.jin); });
           box.querySelectorAll('.amt [data-choice]').forEach(el => { el.onclick = () => Game.handleChoice(el.dataset.choice); });
           box.querySelectorAll('[data-amtx]').forEach(el => { el.onclick = () => Game.openMeat(null); });
           box.querySelectorAll('[data-adj]').forEach(btn => { btn.onclick = () => { const id = btn.dataset.adj; if (+btn.dataset.d < 0) Game.removeOne(id); else Game.handleChoice(buyStr(BYID[id], 1)); }; });
           const a = box.querySelector('.amt'); if (a) a.scrollIntoView({ block: 'nearest' });
         },
         next: c => {
-          if (c === PICK_DONE) {
-            const cart = Game.cart, fail = m => { Game.checkFails += 1; Game.meatPick = null; Game.addMistake(m); };
-            const extra = Object.keys(cart).find(id => !t.items.some(it => it.id === id));
-            const miss = t.items.find(it => !cart[it.id]);
-            const bad = t.items.find(it => cart[it.id] && cart[it.id] !== it.q);
-            if (extra) { const e = BYID[extra]; fail(M(`Ami沒有要${e.zh}。`, `Ami no pidió ${e.es}.`, `Ami didn't ask for ${e.en}.`)); return; }
-            if (miss) { fail(M(`Ami還要${qZh(miss, miss.q)}${miss.zh}。`, `Ami también quería ${qEs(miss, miss.q)}.`, `Ami also wanted ${qEn(miss, miss.q)}.`)); return; }
-            if (bad) { const h = cart[bad.id]; fail(M(`Ami要${qZh(bad, bad.q)}${bad.zh}，你買了${qZh(bad, h)}。`, `Ami quería ${qEs(bad, bad.q)} y tomaste ${qEs(bad, h)}.`, `Ami wanted ${qEn(bad, bad.q)} and you took ${qEn(bad, h)}.`)); return; }
-            if (Game.checkFails === 0) Game.good('很棒！你記得Ami要買的東西和數量。', '¡Muy bien! Recordaste lo que Ami pidió y en qué cantidad.', 'Great! You remembered what Ami asked for and how much.');
-            Game.meatPick = null;
-            Game.thought = [vend('好，我幫你算一下。', 'Bien, le hago la cuenta.', "OK, let me add it up.")];
-            Game.state = 'BARGAIN';
-            return;
+          if (c === LEAVE_STALL || (c === PICK_DONE && !Object.keys(Game.cart).length)) {
+            Game.cart = {}; Game.meatPick = null;
+            Game.thought = c === PICK_DONE ? [vend('沒要買嗎？沒關係，再去看看別攤吧！', '¿No va a comprar? No importa, ¡mire otros puestos!', "Not buying anything? That's fine — have a look at the other stalls!")] : null;
+            Game.state = 'MAP'; return;
           }
-          const a = CHOICES[c]; if (!a) return;
+          if (c === PICK_DONE) {
+            Game.meatPick = null; Game.startHaggle();
+            Game.thought = [vend('好，我幫你算一下。', 'Bien, le hago la cuenta.', "OK, let me add it up.")];
+            Game.state = 'HAGGLE'; return;
+          }
+          const a = CHOICES[c]; if (!a || BYID[a.it.id].stall !== Game.cur) return;
           const it = a.it;
           if (a.set) {
             Game.cart[it.id] = a.q;
@@ -495,101 +793,179 @@ const Game = defineGame({
           Game.meatPick = null;
         }
       },
-      BARGAIN: {
-        place: 'shop',
-        dialogue: () => [
-          vend('你要的是：' + t.items.map(it => qZh(it, it.q) + it.zh).join('、') + '。', 'Lleva: ' + t.items.map(it => qEs(it, it.q)).join(', ') + '.', "You're getting: " + t.items.map(it => qEn(it, it.q)).join(', ') + '.'),
-          Game.priceLine()
-        ],
-        options: () => rot(['可以算便宜一點嗎？', '太貴了，我不買了！', '我只付一半。']),
+      /* ═══ 殺價（照夜市：出價太低，老闆心情變差，第三次就不賣了） ═══ */
+      HAGGLE: {
+        place: () => Game.cur,
+        html: () => Game.haggleHTML(Game.st),
+        dialogue: () => {
+          const st = Game.st, rows = Object.entries(Game.cart);
+          const out = [];
+          if (!st.history.length && !st.walked) out.push(vend('你要的是：' + rows.map(([id, q]) => labZh(BYID[id], q)).join('、') + '。', 'Lleva: ' + rows.map(([id, q]) => labEs(BYID[id], q)).join(', ') + '.', "You're getting: " + rows.map(([id, q]) => labEn(BYID[id], q)).join(', ') + '.'));
+          out.push(vend(`一共是${zhNum(st.ask)}元。`, `Son ${esM(st.ask)} en total.`, `That's ${enM(st.ask)} in total.`));
+          return out;
+        },
+        options: () => Game.haggleOptions(Game.st),
+        ok: () => `好，${Game.st.ask}元，我買了。`,
+        next: c => Game.haggleChoose(Game.st, c)
+      },
+      /* ═══ 付錢：錢夠不夠要自己算（照鹽酥雞）；不夠就說「有一樣不要了」 ═══ */
+      PAY: {
+        place: () => Game.cur,
+        html: () => Game.haggleHTML(Game.st),
+        dialogue: () => [vend(`好，${zhNum(Game.st.ask)}元，謝謝！`, `Bien, ${esM(Game.st.ask)}, ¡gracias!`, `OK, ${enM(Game.st.ask)}, thank you!`)],
+        options: () => { const P = Game.payInfo(); return rot([P.payOk, P.shortOpt, SHORT, CREDIT]); },
+        ok: () => { const P = Game.payInfo(); return P.short ? SHORT : P.payOk; },
         next: c => {
-          if (c !== '可以算便宜一點嗎？') { Game.addMistake(M('客氣一點問「可以算便宜一點嗎？」，會比較有禮貌喔！', 'Pregunta con más amabilidad: «可以算便宜一點嗎？». ¡Es más cortés!', 'Ask more politely: "可以算便宜一點嗎？" — it sounds more courteous!')); return; }
-          goodFirst('BARGAIN', '不錯喔！問得很客氣！', '¡Muy bien! ¡Qué cortés!', 'Nice! Very polite!');
-          Game.thought = t.refuse ? [vend('不行啦，這已經是最便宜的了。', '¡No se puede! Este ya es el precio más bajo.', "Can't do it — that's already the lowest price.")] : null;
-          Game.state = 'PAY';
+          const P = Game.payInfo();
+          if (c === SHORT) {
+            if (!P.short) { Game.addMistake(M(`你身上有${P.cash}元，一共${P.ask}元，錢是夠的。`, `Llevas ${esM(P.cash)} y son ${esM(P.ask)}: sí te alcanza.`, `You have ${enM(P.cash)} and it's ${enM(P.ask)}: you have enough.`)); return; }
+            goodFirst('PAY', '你很細心！錢不夠的時候，要馬上跟老闆說，拿掉一樣。', '¡Qué atento! Si no te alcanza el dinero, díselo al vendedor y quita algo.', 'Well spotted! If you are short of money, tell the vendor and take something out.');
+            Game.thought = null; Game.state = 'REMOVE'; return;
+          }
+          if (c === P.payOk) {
+            if (P.short) { Game.addMistake(M(`你身上只有${P.cash}元，不夠付${P.ask}元。要先告訴老闆。`, `Solo llevas ${esM(P.cash)}: no alcanza para ${esM(P.ask)}. Hay que decírselo al vendedor.`, `You only have ${enM(P.cash)}, not enough for ${enM(P.ask)}. Tell the vendor first.`)); return; }
+            goodFirst('PAY', '沒錯！付錢以前，要先自己算一下。', '¡Exacto! Antes de pagar, calcula tú también.', 'Right! Do the math yourself before you pay.');
+            Game.thought = null; Game.finishPay(P); return;
+          }
+          Game.addMistake(c === P.shortOpt ? M(`要${P.ask}元，${P.shortB}元不夠。`, `Son ${esM(P.ask)}: ${esM(P.shortB)} no alcanzan.`, `It's ${enM(P.ask)} — ${enM(P.shortB)} isn't enough.`) : M('不行啦！買東西要先付錢，不能賒帳。', '¡No se puede! Hay que pagar primero: no se compra a crédito.', 'No way! You have to pay first — no buying on credit.'));
         }
       },
-      PAY: {
-        place: 'shop',
-        dialogue: () => [t.refuse ? vend(`那就${zhNum(t.final)}元。`, `Entonces son ${esM(t.final)}.`, `So that's ${enM(t.final)}.`) : vend(`好啦，算你${zhNum(t.final)}元。`, `Está bien, se lo dejo en ${esM(t.final)}.`, `Alright, I'll make it ${enM(t.final)}.`)],
-        options: () => rot([payOk, shortOpt, '我下次再付，可以嗎？']),
+      /* 錢不夠：告訴老闆哪一樣不要了（整樣拿掉），老闆重新報價 */
+      REMOVE: {
+        place: () => Game.cur,
+        html: () => Game.haggleHTML(Game.st),
+        dialogue: () => [vend('好，哪一樣不要？', 'Bien, ¿cuál ya no quiere?', 'OK, which one do you not want?')],
+        options: () => rot(Object.keys(Game.cart).map(id => `${BYID[id].zh}不要了。`)),
+        ok: () => { const ids = Object.keys(Game.cart), id = ids.find(i => !Game.req.some(a => a.id === i)) || ids[0]; return `${BYID[id].zh}不要了。`; },
         next: c => {
-          if (c !== payOk) {
-            Game.addMistake(c === shortOpt ? M(`要${t.final}元，${shortB}元不夠。`, `Son ${esM(t.final)}: ${esM(shortB)} no alcanzan.`, `It's ${enM(t.final)} — ${enM(shortB)} isn't enough.`) : M('不行啦！買東西要先付錢，不能賒帳。', '¡No se puede! Hay que pagar primero: no se compra a crédito.', 'No way! You have to pay first — no buying on credit.'));
-            return;
+          const it = ITEMS.find(x => x.zh + '不要了。' === c), st = Game.st;
+          const oldStart = st.start;
+          delete Game.cart[it.id]; Game.lack[it.id] = 'money';
+          if (!Object.keys(Game.cart).length) {
+            Game.thought = [L(`（老闆把${it.zh}拿出來。籃子空了，你先離開了。）`, `(El vendedor saca ${it.es}. La cesta quedó vacía y te marchas.)`, `(The vendor takes out the ${it.en}. The basket is empty, so you leave.)`)];
+            Game.st = null; Game.state = 'MAP'; return;
           }
-          goodFirst('PAY', '沒錯！一千元就夠了。', '¡Exacto! Con mil alcanza.', 'Right! 1,000 is enough.');
-          Game.thought = null;
-          Game.state = 'CHANGE';
+          const start = Game.cartTotal(), ratio = st.ask / oldStart;
+          st.start = start; st.floor = r10(st.floor * start / oldStart); st.ask = Math.max(10, r10(start * ratio)); st.history = [];
+          Game.thought = [L(`（老闆把${it.zh}拿出來，重新算了一下。）`, `(El vendedor saca ${it.es} y vuelve a calcular.)`, `(The vendor takes out the ${it.en} and adds it up again.)`)];
+          Game.state = 'PAY';
         }
       },
       /* ═══ 找錢：老闆可能少找 ═══ */
       CHANGE: {
-        place: 'shop',
-        html: () => `<div class="basket"><b>💵 ${Game.ruby('找的錢')}</b>　<span>${t.given}</span> ${Game.ruby('元')}</div>`,
-        dialogue: () => [vend(`收你一千元，找你${zhNum(t.given)}元。`, `Recibo mil; le doy ${esM(t.given)} de cambio.`, `Out of 1,000 — here's ${enM(t.given)} change.`)],
-        options: () => rot(['好，謝謝。', chFix, '靠北！你找錯錢了吧！']),
+        place: () => Game.cur,
+        html: () => `<div class="cashcard"><span>💵 ${Game.ruby('找的錢')}</span><b>${Game.cc.given}<small>${Game.ruby('元')}</small></b></div>`,
+        dialogue: () => [vend(`收你${zhNum(Game.cc.bill)}元，找你${zhNum(Game.cc.given)}元。`, `Recibo ${esM(Game.cc.bill)}; le doy ${esM(Game.cc.given)} de cambio.`, `Out of ${enM(Game.cc.bill)} — here's ${enM(Game.cc.given)} change.`)],
+        options: () => rot(['好，謝謝。', chFix(), '靠北！你找錯錢了吧！']),
+        ok: () => Game.cc.sc ? chFix() : '好，謝謝。',
         next: c => {
-          const right = t.shortChange ? chFix : '好，謝謝。', want = 1000 - t.final;
+          const cc = Game.cc, right = cc.sc ? chFix() : '好，謝謝。';
           if (c !== right) {
             Game.addMistake(c === '好，謝謝。'
-              ? M(`老闆少找了：1000 − ${t.final} = ${want}元，他只找了${t.given}元。`, `Se equivocó: 1000 − ${t.final} = ${want}; solo le dio ${esM(t.given)}.`, `He short-changed you: 1000 − ${t.final} = ${want}, but he gave ${enM(t.given)}.`)
-              : c === chFix
-                ? M(`找的錢是對的：1000 − ${t.final} = ${want}元。`, `El cambio está bien: 1000 − ${t.final} = ${want}.`, `The change is correct: 1000 − ${t.final} = ${want}.`)
+              ? M(`老闆少找了：${cc.bill} − ${cc.ask} = ${cc.want}元，他只找了${cc.given}元。`, `Se equivocó: ${cc.bill} − ${cc.ask} = ${cc.want}; solo le dio ${esM(cc.given)}.`, `He short-changed you: ${cc.bill} − ${cc.ask} = ${cc.want}, but he gave ${enM(cc.given)}.`)
+              : c === chFix()
+                ? M(`找的錢是對的：${cc.bill} − ${cc.ask} = ${cc.want}元。`, `El cambio está bien: ${cc.bill} − ${cc.ask} = ${cc.want}.`, `The change is correct: ${cc.bill} − ${cc.ask} = ${cc.want}.`)
                 : M('要有禮貌，說「老闆，好像找錯了」就好。', 'Hay que ser cortés: di «jefe, creo que se equivocó con el cambio».', 'Be polite: just say "boss, I think the change is off".'));
             return;
           }
-          goodFirst('CHANGE', t.shortChange ? '你很細心！找的錢不對，要馬上說。' : '你會算！收下找的錢以前，先算一算。', t.shortChange ? '¡Qué atento! Si el cambio está mal, díselo enseguida.' : '¡Sabes calcular! Antes de guardar el cambio, cuéntalo.', t.shortChange ? 'Well spotted! If the change is wrong, speak up right away.' : 'You can count! Check the change before you pocket it.');
-          Game.thought = t.shortChange ? [vend(`啊，不好意思！這裡是${zhNum(1000 - t.final)}元。`, `¡Ay, perdón! Aquí tiene ${esM(1000 - t.final)}.`, `Oh, sorry! Here's ${enM(1000 - t.final)}.`)] : null;
-          Game.state = 'BAG';
+          goodFirst('CHANGE', cc.sc ? '你很細心！找的錢不對，要馬上說。' : '你會算！收下找的錢以前，先算一算。', cc.sc ? '¡Qué atento! Si el cambio está mal, díselo enseguida.' : '¡Sabes calcular! Antes de guardar el cambio, cuéntalo.', cc.sc ? 'Well spotted! If the change is wrong, speak up right away.' : 'You can count! Check the change before you pocket it.');
+          Game.thought = cc.sc ? [vend(`啊，不好意思！這裡是${zhNum(cc.want)}元。`, `¡Ay, perdón! Aquí tiene ${esM(cc.want)}.`, `Oh, sorry! Here's ${enM(cc.want)}.`)] : null;
+          Game.flowNext();
         }
       },
       BAG: {
-        place: 'shop',
+        place: () => Game.cur,
         dialogue: () => [vend('要塑膠袋嗎？', '¿Quiere una bolsa de plástico?', 'Would you like a plastic bag?')],
         options: () => rot(['不用，我有環保袋。', '要，給我五個塑膠袋。', '我不要菜了。']),
+        ok: () => '不用，我有環保袋。',
         next: c => {
-          if (c !== '不用，我有環保袋。') { Game.addMistake(M('Ami說不要拿塑膠袋，要用環保袋。保護地球！', 'Ami dijo que no tomaras bolsa de plástico y usaras la reutilizable. ¡Cuida el planeta!', 'Ami said no plastic bags — use the reusable one. Protect the planet!')); return; }
+          if (c !== '不用，我有環保袋。') { Game.addMistake(M('你有環保袋，不用再拿塑膠袋。保護地球！', 'Ya llevas bolsa reutilizable: no necesitas bolsa de plástico. ¡Cuida el planeta!', "You already have a reusable bag, so you don't need a plastic one. Protect the planet!")); return; }
           goodFirst('BAG', '很好！「不用，我有……」可以很客氣地拒絕。', '¡Muy bien! «不用，我有…» es una forma muy amable de rechazar.', 'Good! "不用，我有…" is a very polite way to decline.');
-          Game.state = 'CHECK';
           Game.thought = [vend('好，東西都幫你裝好了。', 'Bien, ya le puse todo en la bolsa.', "OK, everything's in the bag.")];
+          Game.flowNext();
         }
       },
-      /* ═══ 拿到東西：老闆可能裝錯數量 ═══ */
+      /* ═══ 拿到東西：老闆可能裝錯數量（只在其中一個攤位） ═══ */
       CHECK: {
-        place: 'shop',
-        html: () => `<div class="basket" style="flex-direction:column;align-items:flex-start;gap:4px">${t.items.map((it, i) => `<div>${it.icon} ${Game.ruby(it.zh)}　${Game.ruby(qZh(it, t.bagWrong && i === t.wi ? t.wq : it.q))}</div>`).join('')}</div>`,
+        place: () => Game.cur,
+        html: () => `<div class="basket" style="flex-direction:column;align-items:flex-start;gap:4px;font-size:22px">${Game.tx.map(g => { const it = BYID[g.id], q = Game.ck.wrong && g.id === Game.ck.id ? Game.ck.wq : g.q; return `<div>${it.icon} ${Game.ruby(it.zh)}　${Game.ruby(qZh(it, q))}</div>`; }).join('')}</div>`,
         dialogue: () => [vend('這是你的菜，請拿好。', 'Aquí tiene sus compras, tome.', "Here are your groceries — take them.")],
-        options: () => rot(['好，謝謝。', bgFix, '老闆，你是不是故意的啊？']),
+        options: () => rot(['好，謝謝。', bgFix(), '老闆，你是不是故意的啊？']),
+        ok: () => Game.ck.wrong ? bgFix() : '好，謝謝。',
         next: c => {
-          const right = t.bagWrong ? bgFix : '好，謝謝。', it = t.items[t.wi];
+          const ck = Game.ck, it = BYID[ck.id], right = ck.wrong ? bgFix() : '好，謝謝。';
           if (c !== right) {
             Game.addMistake(c === '好，謝謝。'
-              ? M(`數量不對：Ami要${qZh(it, it.q)}${it.zh}，老闆放了${qZh(it, t.wq)}。拿東西以前，要先看一看。`, `Cantidad equivocada: Ami quiere ${qEs(it, it.q)} y pusieron ${qEs(it, t.wq)}. Revisa antes de llevártelo.`, `Wrong amount: Ami wants ${qEn(it, it.q)} and he put in ${qEn(it, t.wq)}. Check before you take it.`)
-              : c === bgFix
-                ? M(`數量是對的：${it.zh}就是${qZh(it, it.q)}。`, `La cantidad está bien: ${qEs(it, it.q)}.`, `The amount is right: ${qEn(it, it.q)}.`)
+              ? M(`數量不對：你買了${qZh(it, ck.q)}${it.zh}，老闆放了${qZh(it, ck.wq)}。拿東西以前，要先看一看。`, `Cantidad equivocada: compraste ${qEs(it, ck.q)} y pusieron ${qEs(it, ck.wq)}. Revisa antes de llevártelo.`, `Wrong amount: you bought ${qEn(it, ck.q)} and he put in ${qEn(it, ck.wq)}. Check before you take it.`)
+              : c === bgFix()
+                ? M(`數量是對的：${it.zh}就是${qZh(it, ck.q)}。`, `La cantidad está bien: ${qEs(it, ck.q)}.`, `The amount is right: ${qEn(it, ck.q)}.`)
                 : M('要有禮貌，說清楚你要的數量就好。', 'Hay que ser cortés: di claramente la cantidad que querías.', 'Be polite: just state clearly the amount you wanted.'));
             return;
           }
-          goodFirst('CHECK', t.bagWrong ? '你很細心！數量放錯了，要馬上說。' : '拿到東西以後，先看一下數量對不對。', t.bagWrong ? '¡Qué atento! Pusieron mal la cantidad; hay que decirlo enseguida.' : 'Al recibir las compras, revisa que las cantidades sean correctas.', t.bagWrong ? 'Well spotted! The amount was wrong — say so right away.' : 'When you get your groceries, check the amounts.');
-          Game.thought = t.bagWrong ? [vend(`啊，我看錯了！我幫你換成${qZh(it, it.q)}。`, `¡Ay, me confundí! Se lo cambio a ${qEs(it, it.q)}.`, `Oh, my mistake! I'll change it to ${qEn(it, it.q)}.`)] : null;
-          Game.stopTimer();
-          Game.state = 'END';
+          goodFirst('CHECK', ck.wrong ? '你很細心！數量放錯了，要馬上說。' : '拿到東西以後，先看一下數量對不對。', ck.wrong ? '¡Qué atento! Pusieron mal la cantidad; hay que decirlo enseguida.' : 'Al recibir las compras, revisa que las cantidades sean correctas.', ck.wrong ? 'Well spotted! The amount was wrong — say so right away.' : 'When you get your groceries, check the amounts.');
+          Game.thought = ck.wrong ? [vend(`啊，我看錯了！我幫你換成${qZh(it, ck.q)}。`, `¡Ay, me confundí! Se lo cambio a ${qEs(it, ck.q)}.`, `Oh, my mistake! I'll change it to ${qEn(it, ck.q)}.`)] : null;
+          Game.afterStall();
+        }
+      },
+      /* ═══ Ami 中途傳訊息：加買新東西，或改項目（已經買完的不能退換，要跟 Ami 說） ═══ */
+      MSG: {
+        place: 'phone',
+        dialogue: () => [L('（手機響了一聲，是Ami傳來的LINE。）', '(Tu celular suena: es un LINE de Ami.)', '(Your phone buzzes — a LINE from Ami.)'), Game.msgLine()],
+        options: () => {
+          const I = Game.msgInfo();
+          if (!I.boughtX) return [ACK];
+          return rot([`Ami，${labZh(I.a, I.a.q)}我已經買了欸！`, `好，我再去買${labZh(I.y, I.y.q)}。`, 'Ami，你自己來買吧！']);
+        },
+        ok: () => { const I = Game.msgInfo(); return I.boughtX ? `Ami，${labZh(I.a, I.a.q)}我已經買了欸！` : ACK; },
+        next: c => {
+          const I = Game.msgInfo();
+          if (I.boughtX) {
+            const right = `Ami，${labZh(I.a, I.a.q)}我已經買了欸！`;
+            if (c !== right) {
+              Game.addMistake(c === 'Ami，你自己來買吧！' ? POLITE : M(`${I.a.zh}已經買好了，要告訴Ami。`, `${I.a.es[0].toUpperCase() + I.a.es.slice(1)} ya lo compraste; hay que decírselo a Ami.`, `You already bought the ${I.a.en}; tell Ami.`));
+              return;
+            }
+            Game.good('很好！已經買了的東西，要馬上告訴Ami。', '¡Muy bien! Lo que ya compraste, díselo enseguida a Ami.', 'Good! If you have already bought something, tell Ami right away.');
+            Game.thought = [L('Ami：啊，你已經買了喔？那就不用改了，謝謝！', 'Ami: ¡Ah, ¿ya lo compraste? Entonces no hace falta cambiarlo, gracias!', 'Ami: Oh, you already bought it? Then no need to change it. Thanks!')];
+          } else {
+            Game.thought = [L('Ami：謝謝你！', 'Ami: ¡Gracias!', 'Ami: Thank you!')];
+          }
+          Game.applyMsg(); Game.state = 'MAP';
+        }
+      },
+      /* ═══ 回到 Ami 家：少買的東西，要說明原因（錢不夠？老闆不賣？還是忘記了？） ═══ */
+      EXPLAIN: {
+        place: 'phone',
+        dialogue: () => {
+          const a = Game.queue[Game.qi], it = BYID[a.id];
+          return [...(Game.qi === 0 ? [L('（你提著環保袋回到Ami家，把菜拿給Ami。）', '(Vuelves a casa de Ami con tu bolsa reutilizable y le entregas las compras.)', '(You get back to Ami\'s place with your reusable bag and hand over the groceries.)')] : []),
+            L(`Ami：咦，${labZh(it, a.q)}呢？怎麼沒買？`, `Ami: Eh, ¿y ${labEs(it, a.q)}? ¿Por qué no lo compraste?`, `Ami: Huh, where's the ${labEn(it, a.q)}? Why didn't you buy it?`)];
+        },
+        options: () => rot([CAUSE_OPT.money, CAUSE_OPT.refused, CAUSE_OPT.forgot]),
+        ok: () => CAUSE_OPT[Game.causeOf(Game.queue[Game.qi].id)],
+        next: c => {
+          const a = Game.queue[Game.qi], it = BYID[a.id], real = Game.causeOf(a.id), said = Object.keys(CAUSE_OPT).find(k => CAUSE_OPT[k] === c);
+          if (said !== real) {
+            const why = {
+              money: { refused: M('不是錢不夠，是老闆生氣不賣給你。', 'No fue por el dinero: el vendedor se enojó y no quiso venderte.', "It wasn't the money: the vendor got angry and wouldn't sell to you."), forgot: M('你的錢是夠的，你是忘記買了。', 'Tenías dinero suficiente: simplemente se te olvidó comprarlo.', 'You had enough money — you simply forgot to buy it.') },
+              refused: { money: M('老闆沒有不賣，是你的錢不夠。', 'El vendedor sí quería vender: lo que pasó es que no te alcanzó el dinero.', 'The vendor was willing to sell — you ran short of money.'), forgot: M('老闆沒有不賣，你是忘記買了。', 'El vendedor sí quería vender: se te olvidó comprarlo.', 'The vendor was willing to sell — you forgot to buy it.') },
+              forgot: { money: M('你不是忘記，是錢不夠，要說清楚。', 'No lo olvidaste: no te alcanzó el dinero. Dilo claramente.', "You didn't forget: you ran short of money. Say it clearly."), refused: M('你不是忘記，是老闆不賣給你。', 'No lo olvidaste: el vendedor no quiso venderte.', "You didn't forget: the vendor wouldn't sell to you.") }
+            };
+            Game.addMistake(why[said][real], said === 'money' && real === 'forgot' ? [L('Ami：可是你的錢是夠的啊！', 'Ami: ¡Pero si tenías dinero de sobra!', 'Ami: But you had plenty of money!')] : null);
+            return;
+          }
+          Game.explained[a.id] = real;
+          Game.good(real === 'forgot' ? '誠實說「對不起，我忘記了」很好。' : '很好！你把原因說得很清楚。', real === 'forgot' ? 'Está bien decir con honestidad «对不起，我忘记了».' : '¡Muy bien! Explicaste claramente el motivo.', real === 'forgot' ? 'It is good to honestly say "Sorry, I forgot."' : 'Good! You explained the reason clearly.');
+          Game.qi += 1;
+          if (Game.qi < Game.queue.length) return;
+          Game.settle();
         }
       },
       END: {
         place: 'phone',
-        dialogue: () => {
-          Game._endGood = Game.mistakes <= 2;
-          track('game_complete', { game: 'market', score: Game.score, elapsed: Game.elapsedTime });
-          return [
-            vend('東西都在這裡，小心拿喔！謝謝！', 'Aquí está todo, ¡cuidado al llevarlo! ¡Gracias!', 'Everything is here — carry it carefully! Thanks!'),
-            Game._endGood
-              ? L(`Ami：哇，菜都好新鮮唷，還省了不少錢！謝謝你，${N}！我來煮好吃的給你吃。`, `¡Guau, todo está muy fresco y además ahorraste bastante! ¡Gracias, ${N}! Yo cocino algo rico para ti.`, `Wow, everything is so fresh, and you saved quite a bit! Thanks, ${N}! I'll cook something delicious for you.`)
-              : L('Ami：謝謝你！不過好像有一些東西買錯了……下次要看清楚喔！', '¡Gracias! Pero parece que compraste mal algunas cosas… ¡la próxima vez fíjate bien!', 'Thanks! But it seems you got a few things wrong… check carefully next time!')
-          ];
-        },
+        dialogue: () => Game.final,
         options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        ok: () => '查看結果',
         next: () => { Game.state = 'RESULT'; uploadResult(); }
       },
       RESULT: stdResultCfg('phone')
