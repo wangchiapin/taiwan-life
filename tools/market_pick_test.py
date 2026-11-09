@@ -356,7 +356,7 @@ with sync_playwright() as p:
     new_game(page); setreq(page, [['pork', 1]])
     ev(page, 'Game.checkDone = true; Game.bagDone = true')
     tap(page, '去肉攤'); buy(page, 'pork', 0.5); tap(page, '買好了'); pay_through(page)
-    check('去過的肉攤，地圖上還能再點', state(page) == 'MAP' and page.locator('button.stall[data-choice="去肉攤"]').count() == 1 and '買過了' in plain(page, '.stalls'))
+    check('去過的肉攤，地圖上還能再點', state(page) == 'MAP' and page.locator('button.stall[data-choice="去肉攤"]').count() == 1 and '買過了' not in plain(page, '.stalls') and ev(page, "getComputedStyle(document.querySelector('button.stall[data-choice]')).opacity") == '1')
     tap(page, '去肉攤'); buy(page, 'pork', 0.5); tap(page, '買好了'); pay_through(page)
     check('補買後數量加起來是一斤', ev(page, 'Game.bought.pork') == 1, ev(page, 'Game.bought.pork'))
     tap(page, '東西買好了，回家')
@@ -367,8 +367,8 @@ with sync_playwright() as p:
     ev(page, 'Game.bought = {pork: 0.5, egg: 2, onion: 2}; Game.lack = {}')
     tap(page, '東西買好了，回家')
     fl = ev(page, 'Game.final.map(x=>x.zh)')
-    wl = [l for l in fl if '你買了' in l or '沒有要' in l]
-    check('買錯的（數量不對、多買）合成同一句', len(wl) == 1 and wl[0].count('Ami：') == 1 and wl[0].count('耶') >= 2, fl)
+    wl = [l for l in fl if '買太' in l or '沒有要' in l]
+    check('買錯的（數量不對、多買）合成同一句、口語', len(wl) == 1 and wl[0].count('Ami：') == 1 and '買太少了，我要一斤' in wl[0] and '買太多了，我只要' in wl[0] and '我沒有要洋蔥' in wl[0] and '！' not in wl[0], fl)
 
     # 11. 外觀：手機版找錢卡、地圖、殺價
     page.set_viewport_size({'width': 390, 'height': 800})
