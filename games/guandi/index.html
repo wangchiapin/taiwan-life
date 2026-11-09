@@ -417,7 +417,7 @@ const Game = defineGame({
       THROW: L('告示牌：一平一圓是聖筊（同意）；兩個平面是笑筊（還沒決定）；兩個圓面是陰筊（不同意）。連續三個聖筊，才可以求籤。', 'Letrero: una plana y una redonda = sí; dos planas = sonrisa (aún no decide); dos redondas = no. Hacen falta tres «sí» seguidos para sacar la suerte.', 'Sign: one flat + one round = yes; both flat = smile (undecided); both round = no. You need three yeses in a row to draw a fortune.'),
       DRAW: L('告示牌：搖籤筒，掉出一支籤就好。', 'Letrero: agita el cilindro; basta con una varilla que caiga.', 'Sign: shake the holder — one stick that falls out is enough.'),
       SLIP_NUM: L('告示牌：籤支上的號碼，要和籤詩的號碼一樣。', 'Letrero: el número de la varilla debe ser igual al del papel.', 'Sign: the number on the stick must match the number on the slip.'),
-      REGISTER: L('告示牌：光明燈，一年五百元。請寫姓名。', 'Letrero: lámpara de luz, un año, 500 dólares. Escribe tu nombre.', 'Sign: light lamp, one year, NT$500. Please write your name.'),
+      REGISTER: L('告示牌：光明燈，一年五百元。請寫姓名。', 'Letrero: lámpara de luz, un año, NT$500. Escribe tu nombre.', 'Sign: light lamp, one year, NT$500. Please write your name.'),
       AMULET: L('告示牌：平安符請自己拿，隨喜投香油錢。', 'Letrero: toma el amuleto tú mismo y deja la donación que quieras.', 'Sign: take a charm yourself and donate as you wish.'),
       GUOLU: L('告示牌：平安符請在香爐上方，順時針繞三圈。', 'Letrero: pasa el amuleto sobre el incensario, tres vueltas en sentido horario.', 'Sign: pass your charm over the incense burner, three times clockwise.'),
       EXIT: L('告示牌：龍進虎出。', 'Letrero: entrar por el dragón, salir por el tigre.', 'Sign: enter by the dragon, exit by the tiger.')
@@ -440,7 +440,7 @@ const Game = defineGame({
     const rows = [
       { zh: '今天的事：請關公保佑，最近不太順利', es: 'Hoy: pedir la protección de Guan Gong; últimamente no te va bien', en: 'Today: ask Guan Gong for protection; things haven’t gone well lately' },
       { zh: `你的暱稱：${N}（登記的時候用這個名字）`, es: `Tu apodo: ${N} (úsalo al registrarte)`, en: `Your nickname: ${N} (use it when registering)` },
-      { zh: '你身上有：一張一千元的鈔票，還有一點零錢', es: 'Llevas: un billete de mil dólares y algo de cambio', en: 'You have: one 1,000-dollar bill and some small change' },
+      { zh: '你身上有：一張一千元的鈔票，還有一點零錢', es: 'Llevas: un billete de mil dólares taiwaneses y algo de cambio', en: 'You have: one 1,000-dollar bill and some small change' },
       { zh: 'Ami 會陪你，但是不會幫你', es: 'Ami te acompaña, pero no te ayuda', en: "Ami keeps you company, but won't help" }
     ];
     if (rowsOnly) return rows;
@@ -673,7 +673,7 @@ const Game = defineGame({
           : M('廟公說的是對的：一年。', 'Lo que dijo es correcto: un año.', 'He was right: one year.'),
         goodWrong: ['你很細心！登記的內容說錯了，要馬上說。', '¡Qué atento! Si repiten mal el registro, hay que decirlo enseguida.', 'Well spotted! If the registration is repeated wrong, speak up right away.'],
         goodOk: ['廟公複誦的時候，要對一下登記單。', 'Cuando el encargado repita los datos, compáralos con el formulario.', 'When the keeper reads it back, compare it with the form.'],
-        apology: () => [staff('啊，不好意思！我改過來。', '¡Ay, disculpe! Lo corrijo.', 'Oh, sorry! I will fix it.'), staff(`好，「${N}」，一年，沒錯了。光明燈五百元。`, `Bien: «${N}», un año. Ahora sí. La lámpara de luz cuesta 500 dólares.`, `Okay: "${N}", one year — correct now. The light lamp is NT$500.`)],
+        apology: () => [staff('啊，不好意思！我改過來。', '¡Ay, disculpe! Lo corrijo.', 'Oh, sorry! I will fix it.'), staff(`好，「${N}」，一年，沒錯了。光明燈五百元。`, `Bien: «${N}», un año. Ahora sí. La lámpara de luz cuesta NT$500.`, `Okay: "${N}", one year — correct now. The light lamp is NT$500.`)],
         go: () => { Game.state = 'PAY'; }
       }),
 

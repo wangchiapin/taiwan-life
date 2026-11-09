@@ -828,7 +828,7 @@ const Game = defineGame({
         dialogue: () => {
           const big = c.bill >= 500;
           return [L(`${c.who}：給你${c.bill}元${big ? '，不好意思，我沒有零錢' : ''}。`,
-            `Aquí tienes ${c.bill} dólares${big ? '; perdón, no tengo cambio' : ''}.`,
+            `Aquí tienes NT$${c.bill}${big ? '; perdón, no tengo cambio' : ''}.`,
             `Here's NT$${c.bill}${big ? "; sorry, I don't have small change" : ''}.`)];
         },
         options: () => {
@@ -842,8 +842,8 @@ const Game = defineGame({
             const d = Math.abs(right - given);
             Game.addMistake(M('找錯錢了。', 'Diste mal el cambio.', 'You gave the wrong change.'),
               [given < right
-                ? L(`${c.who}：你好像少找我${d}元喔。`, `Creo que me diste ${d} dólares de menos.`, `I think you gave me NT$${d} too little.`)
-                : L(`${c.who}：你多找我${d}元了，還你。`, `Me diste ${d} dólares de más; toma.`, `You gave me NT$${d} too much; here you go.`)]);
+                ? L(`${c.who}：你好像少找我${d}元喔。`, `Creo que me diste NT$${d} de menos.`, `I think you gave me NT$${d} too little.`)
+                : L(`${c.who}：你多找我${d}元了，還你。`, `Me diste NT$${d} de más; toma.`, `You gave me NT$${d} too much; here you go.`)]);
             return;
           }
           Game.sales += c.total;
@@ -898,7 +898,7 @@ const Game = defineGame({
           track('game_complete', { game: 'breakfast', score: Game.score, elapsed: Game.elapsedTime });
           return [
             L('（八點，陳姐回來了。）', '(A las ocho, la señora Chen vuelve.)', '(At eight, Ms. Chen comes back.)'),
-            L(`陳姐：我回來了！今天賣了${Game.sales}元耶。`, `¡Ya volví! Hoy vendimos ${Game.sales} dólares.`, `I'm back! We sold NT$${Game.sales} today.`),
+            L(`陳姐：我回來了！今天賣了${Game.sales}元耶。`, `¡Ya volví! Hoy vendimos NT$${Game.sales}.`, `I'm back! We sold NT$${Game.sales} today.`),
             good
               ? L(`陳姐：${N}，你好棒喔！以後我出去，櫃台都交給你！`, `¡${N}, qué bien lo hiciste! De ahora en adelante, cuando salga, el mostrador es tuyo.`, `${N}, you're awesome! From now on, whenever I go out, the counter is yours!`)
               : L('陳姐：辛苦了！有一些小問題，下次再加油喔。', '¡Gracias por tu esfuerzo! Hubo algunos problemitas; la próxima vez te irá mejor.', "Thanks for your hard work! There were a few small problems; you'll do better next time.")

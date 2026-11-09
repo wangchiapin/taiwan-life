@@ -140,7 +140,7 @@
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
     你和Ami、Ami 的奶奶一起去逛夜市。Ami 帶奶奶去上廁所，所以她把一千塊給你，請你幫忙買東西。敢殺價，就能省下錢！<br>
-    <span data-es="Paseas por el mercado nocturno con Ami y su abuela. Ami lleva a su abuela al baño, así que te da mil dólares y te pide que compres unas cosas. ¡Si te atreves a regatear, ahorras!" data-en="You're strolling the night market with Ami and her grandma. Ami takes her grandma to the restroom, so she gives you NT$1,000 and asks you to buy a few things. If you dare to haggle, you save money!">Paseas por el mercado nocturno con Ami y su abuela. Ami lleva a su abuela al baño, así que te da mil dólares y te pide que compres unas cosas. ¡Si te atreves a regatear, ahorras!</span>
+    <span data-es="Paseas por el mercado nocturno con Ami y su abuela. Ami lleva a su abuela al baño, así que te da mil dólares taiwaneses y te pide que compres unas cosas. ¡Si te atreves a regatear, ahorras!" data-en="You're strolling the night market with Ami and her grandma. Ami takes her grandma to the restroom, so she gives you NT$1,000 and asks you to buy a few things. If you dare to haggle, you save money!">Paseas por el mercado nocturno con Ami y su abuela. Ami lleva a su abuela al baño, así que te da mil dólares taiwaneses y te pide que compres unas cosas. ¡Si te atreves a regatear, ahorras!</span>
   </p>
 </div>
 
@@ -278,7 +278,7 @@ const VOCAB = {
   F_PAY: [['一共', 'en total', 'in total'], ['吃的', 'comida', 'food'], ['殺價', 'regatear', 'haggle'], ['排', 'hacer fila', 'line up'], ['貴', 'caro', 'expensive']],
   CALL: [['變胖', 'engordar', 'gain weight'], ['太小', 'demasiado pequeño', 'too small'], ['換', 'cambiar', 'exchange'], ['拜託', 'por favor (pidiendo un favor)', 'please (asking a favor)']],
   X_GREET: [['換', 'cambiar', 'exchange'], ['退錢', 'devolver el dinero', 'give a refund'], ['不好意思', 'disculpe', 'excuse me'], ['又', 'otra vez', 'again']],
-  X_PRICE: [['多加', 'pagar de más', 'add extra'], ['五十塊', 'cincuenta dólares', 'fifty dollars'], ['剛剛', 'hace un momento', 'just now'], ['一樣價錢', 'el mismo precio', 'the same price']],
+  X_PRICE: [['多加', 'pagar de más', 'add extra'], ['五十塊', 'cincuenta dólares taiwaneses', 'fifty dollars'], ['剛剛', 'hace un momento', 'just now'], ['一樣價錢', 'el mismo precio', 'the same price']],
   END: [['會合', 'reunirse', 'meet up'], ['花了', 'gastaste', 'spent'], ['剩', 'quedar (sobrar)', 'be left'], ['省', 'ahorrar', 'save'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your hard work']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points'], ['獎勵', 'bonificación', 'bonus']]
 };
@@ -740,7 +740,7 @@ const Game = defineGame({
       },
       X_PRICE: {
         place: 'T',
-        dialogue: () => [L(`老闆：可以啊，可是${t.bigSize}號要多加五十塊喔。`, `Se puede, pero la talla ${t.bigSize} cuesta cincuenta dólares más.`, `Sure, but size ${t.bigSize} costs fifty dollars extra.`)],
+        dialogue: () => [L(`老闆：可以啊，可是${t.bigSize}號要多加五十塊喔。`, `Se puede, pero la talla ${t.bigSize} cuesta cincuenta dólares taiwaneses más.`, `Sure, but size ${t.bigSize} costs fifty dollars extra.`)],
         options: ['好，加五十塊。', '老闆，你剛剛不是說每個尺寸都一樣價錢嗎？'],
         next: c => {
           if (c.startsWith('好')) {

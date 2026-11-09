@@ -394,7 +394,7 @@ const Game = defineGame({
     const t = this.task, r = s => this.ruby(s), K = KINDS[t.mode];
     const rows = [
       { zh: `目的地：台中，${tmZh(t.t1)}的高鐵，${K.zh}`, es: `Destino: Taichung, tren de alta velocidad de las ${tmNum(t.t1)}, ${K.es}`, en: `Destination: Taichung, the ${tmNum(t.t1)} high-speed train, ${K.en}` },
-      { zh: '你身上有：一千元和兩千元的鈔票，還有零錢', es: 'Llevas: un billete de mil, uno de dos mil dólares y algo de cambio', en: 'You have: a 1000-dollar bill, a 2000-dollar bill, plus some small change' }
+      { zh: '你身上有：一千元和兩千元的鈔票，還有零錢', es: 'Llevas: un billete de mil, uno de dos mil dólares taiwaneses y algo de cambio', en: 'You have: a 1000-dollar bill, a 2000-dollar bill, plus some small change' }
     ];
     if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });

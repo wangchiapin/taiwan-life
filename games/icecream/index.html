@@ -530,7 +530,7 @@ const Game = defineGame({
         en: 'Flavors: ' + t.flavors.map((f, i) => `#${i + 1} ${shown(i).en}${changed(i) ? ` (Ami changed to ${f.en})` : ''}`).join(', ') },
       { zh: `要：${t.vessel.zh}；${t.top ? '加' + t.top.zh : '不加配料'}`, es: `Quiere: ${t.vessel.es}; ${t.top ? t.top.es : 'sin topping'}`, en: `She wants: ${t.vessel.en}; ${t.top ? t.top.en : 'no toppings'}` },
       { zh: `${EATS[t.eat].zh}`, es: `${EATS[t.eat].es}`, en: `${EATS[t.eat].en}` },
-      { zh: `你身上有：一張一百元、一張${zhNum(t.payBill)}元`, es: `Llevas: un billete de cien y uno de ${t.payBill} dólares`, en: `You have: a 100-dollar bill and a ${t.payBill}-dollar bill` }
+      { zh: `你身上有：一張一百元、一張${zhNum(t.payBill)}元`, es: `Llevas: un billete de cien y uno de NT$${t.payBill}`, en: `You have: a 100-dollar bill and a ${t.payBill}-dollar bill` }
     ];
     if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
@@ -675,7 +675,7 @@ const Game = defineGame({
       TOPPING: {
         place: 'shop',
         html: () => Game.iceHTML(),
-        dialogue: () => [staff('要加配料嗎？配料每種十元。', '¿Quiere agregar algún topping? Cada uno cuesta diez dólares.', 'Would you like a topping? Each one is ten dollars.')],
+        dialogue: () => [staff('要加配料嗎？配料每種十元。', '¿Quiere agregar algún topping? Cada uno cuesta diez dólares taiwaneses.', 'Would you like a topping? Each one is ten dollars.')],
         options: () => rot(topOpts),
         next: c => {
           Game.topPick = c === '不用加配料，謝謝。' ? null : (TOPS.find(x => `加${x.zh}` === c) || null);   // 配料先記下來，對不對最後 END 才說
@@ -784,7 +784,7 @@ const Game = defineGame({
                 : M('要有禮貌，說「不好意思，好像算錯了」就好。', 'Hay que ser cortés: di «disculpe, creo que se equivocó con la cuenta».', 'Be polite: say "excuse me, I think the total is wrong".'));
             return;
           }
-          goodFirst('PAY', t.payWrong ? '你很細心！付錢以前，要先對一下價目表。' : `沒錯！一百元不夠，要給${zhNum(t.payBill)}元，他會找錢給你。`, t.payWrong ? '¡Qué atento! Antes de pagar, compara con la lista de precios.' : `¡Exacto! Cien no alcanza: das ${t.payBill} dólares y te dan el cambio.`, t.payWrong ? 'Well spotted! Check the price list before you pay.' : `Right! 100 isn't enough, so hand over ${t.payBill} and you'll get change.`);
+          goodFirst('PAY', t.payWrong ? '你很細心！付錢以前，要先對一下價目表。' : `沒錯！一百元不夠，要給${zhNum(t.payBill)}元，他會找錢給你。`, t.payWrong ? '¡Qué atento! Antes de pagar, compara con la lista de precios.' : `¡Exacto! Cien no alcanza: das NT$${t.payBill} y te dan el cambio.`, t.payWrong ? 'Well spotted! Check the price list before you pay.' : `Right! 100 isn't enough, so hand over ${t.payBill} and you'll get change.`);
           if (t.payWrong) { Game.state = 'PAY_FIX'; return; }   // 抓到多收錢：下一關要真的把錢給出去
           Game.thought = [staff(`收你${zhNum(t.payBill)}元，找你${zhNum(t.payBill - real())}元。`, `Recibo ${esM(t.payBill)}; le doy ${esM(t.payBill - real())} de cambio.`, `Out of ${t.payBill} — here's ${enM(t.payBill - real())} change.`)];
           Game.stopTimer();
@@ -805,7 +805,7 @@ const Game = defineGame({
               : M('不能下次再付。買東西要當場付錢。', 'No se puede pagar después: hay que pagar en el momento.', "You can't pay later — you pay on the spot."));
             return;
           }
-          goodFirst('PAY_FIX', `沒錯！一百元不夠，要給${zhNum(t.payBill)}元，他會找錢給你。`, `¡Exacto! Cien no alcanza: das ${t.payBill} dólares y te dan el cambio.`, `Right! 100 isn't enough, so hand over ${t.payBill} and you'll get change.`);
+          goodFirst('PAY_FIX', `沒錯！一百元不夠，要給${zhNum(t.payBill)}元，他會找錢給你。`, `¡Exacto! Cien no alcanza: das NT$${t.payBill} y te dan el cambio.`, `Right! 100 isn't enough, so hand over ${t.payBill} and you'll get change.`);
           Game.thought = [staff(`收你${zhNum(t.payBill)}元，找你${zhNum(t.payBill - real())}元。`, `Recibo ${esM(t.payBill)}; le doy ${esM(t.payBill - real())} de cambio.`, `Out of ${t.payBill} — here's ${enM(t.payBill - real())} change.`)];
           Game.stopTimer();
           Game.state = 'END';

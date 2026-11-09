@@ -500,7 +500,7 @@ const Game = defineGame({
     const rows = [
       ...t.items.map(it => ({ zh: labZh(it, it.q), es: labEs(it, it.q), en: labEn(it, it.q) })),
       { zh: '要帶環保袋', es: 'Lleva la bolsa reutilizable', en: 'Use the reusable bag' },
-      { zh: '你身上有：一張一千元', es: 'Llevas: un billete de mil dólares', en: 'You have: a 1,000-dollar bill' }
+      { zh: '你身上有：一張一千元', es: 'Llevas: un billete de mil dólares taiwaneses', en: 'You have: a 1,000-dollar bill' }
     ];
     if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh).join('。'), who: '我' });

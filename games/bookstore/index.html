@@ -390,7 +390,7 @@ const Game = defineGame({
       { zh: `書區：${t.sec.zh}`, es: `Sección: ${t.sec.es}`, en: `Section: ${t.sec.en}` },
       { zh: `書名：《${t.book[0]}》`, es: `Título: «${t.book[0]}»`, en: `Title: "${t.book[0]}"` },
       { zh: '還要：書籤、包裝', es: 'También: marcapáginas y envoltura', en: 'Also: bookmark and gift wrapping' },
-      { zh: '你身上有：一張五百元', es: 'Llevas: un billete de quinientos dólares', en: 'You have: a 500-dollar bill' }
+      { zh: '你身上有：一張五百元', es: 'Llevas: un billete de quinientos dólares taiwaneses', en: 'You have: a 500-dollar bill' }
     ];
     if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
@@ -418,7 +418,7 @@ const Game = defineGame({
       extraWhy: () => M(`店員算錯了：書${t.book[1]}元加${t.card ? '卡片' : '書籤'}${MARK}元是${t.total}元，他把${t.card ? '卡片' : '書籤'}算成兩個（${t.said}元）。`, `El empleado se equivocó: libro ${esM(t.book[1])} + ${t.card ? 'tarjeta' : 'marcapáginas'} ${esM(MARK)} = ${esM(t.total)}; contó dos (${esM(t.said)}).`, `The clerk got it wrong: book ${enM(t.book[1])} + ${t.card ? 'card' : 'bookmark'} ${enM(MARK)} = ${enM(t.total)}; he counted two (${enM(t.said)}).`),
       finish: () => { Game.state = 'FAREWELL'; }
     });
-    pays.PAY.dialogue = () => [Game.priceLine(), L('（你只有一張五百元。）', '(Solo tienes un billete de quinientos dólares.)', '(You only have a 500-dollar bill.)')];
+    pays.PAY.dialogue = () => [Game.priceLine(), L('（你只有一張五百元。）', '(Solo tienes un billete de quinientos dólares taiwaneses.)', '(You only have a 500-dollar bill.)')];
     const bookPrice = () => L(`（書上的標價是${zhNum(t.book[1])}元。）`, `(La etiqueta del libro dice ${esM(t.book[1])}.)`, `(The price tag on the book says ${enM(t.book[1])}.)`);
     // 抓到店員算錯時：不另外跳過場卡，直接進到店員尷尬道歉的畫面（說明併進旁白）
     const payNext = pays.PAY.next;

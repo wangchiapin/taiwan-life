@@ -328,7 +328,7 @@ const Game = defineGame({
     const rows = [
       { zh: `Ami 的症狀：${s.zh}，沒有發燒`, es: `Síntomas de Ami: ${s.es}, sin fiebre`, en: `Ami's symptoms: ${s.en}, no fever` },
       { zh: '要買：綜合感冒藥、一盒喉糖（Ami 沒有過敏）', es: 'Comprar: un medicamento combinado para el resfriado y una caja de pastillas para la garganta (Ami no tiene alergias)', en: 'To buy: a combination cold medicine and a box of throat lozenges (Ami has no allergies)' },
-      { zh: '你身上有：一百元、兩百元和五百元的鈔票，還有零錢', es: 'Llevas: billetes de cien, doscientos y quinientos dólares, y algo de cambio', en: 'You have: 100, 200 and 500-dollar bills, plus some small change' }
+      { zh: '你身上有：一百元、兩百元和五百元的鈔票，還有零錢', es: 'Llevas: billetes de cien, doscientos y quinientos dólares taiwaneses, y algo de cambio', en: 'You have: 100, 200 and 500-dollar bills, plus some small change' }
     ];
     if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });

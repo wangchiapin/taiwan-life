@@ -398,7 +398,7 @@ const Game = defineGame({
       { zh: `辣度：${t.spicy.zh}；蔥：${t.scal ? '要' : '不要'}`, es: `Picante: ${t.spicy.es}; cebollín: ${t.scal ? 'sí' : 'no'}`, en: `Spice: ${t.spicy.en}; scallions: ${t.scal ? 'yes' : 'no'}` },
       { zh: t.sides.length ? `小菜：${sideNames(t.sides, 'zh')}` : '小菜：不用', es: t.sides.length ? `Guarniciones: ${sideNames(t.sides, 'es')}` : 'Guarniciones: ninguna', en: t.sides.length ? `Sides: ${sideNames(t.sides, 'en')}` : 'Sides: none' },
       { zh: EATS[t.eat].zh, es: EATS[t.eat].es, en: EATS[t.eat].en },
-      { zh: '你身上有：一百元、兩百元、五百元的鈔票，還有零錢', es: 'Llevas: billetes de cien, doscientos y quinientos dólares, y algo de cambio', en: 'You have: 100-, 200- and 500-dollar bills, plus some small change' }
+      { zh: '你身上有：一百元、兩百元、五百元的鈔票，還有零錢', es: 'Llevas: billetes de cien, doscientos y quinientos dólares taiwaneses, y algo de cambio', en: 'You have: 100-, 200- and 500-dollar bills, plus some small change' }
     ];
     if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });

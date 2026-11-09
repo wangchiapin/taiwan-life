@@ -292,7 +292,7 @@ const OFFER_OK = { s60: p => p % 5 === 0, half: p => p % 10 === 0, d85: p => p %
 const mkOffer = (k, p) => k === 's60' ? { k, zh: '第二件6折', es: 'el 2.º al 60 % del precio', en: '2nd one at 60% of the price', tot: p + p * 6 / 10 }
   : k === 'half' ? { k, zh: '第二件半價', es: 'el 2.º a mitad de precio', en: '2nd one half price', tot: p + p / 2 }
   : k === 'd85' ? { k, zh: '兩件85折', es: '2 piezas al 85 % del precio', en: '2 for 85% of the price', tot: p * 170 / 100 }
-  : k === 'sp' ? (() => { const x = 2 * p - pick([6, 8, 10, 12]); return { k, zh: `兩件特價${x}元`, es: `2 por ${x} dólares`, en: `2 for ${enM(x)}`, tot: x }; })()
+  : k === 'sp' ? (() => { const x = 2 * p - pick([6, 8, 10, 12]); return { k, zh: `兩件特價${x}元`, es: `2 por NT$${x}`, en: `2 for ${enM(x)}`, tot: x }; })()
   : { k, zh: '沒有優惠', es: 'sin promoción', en: 'no promotion', tot: 2 * p };
 const DRAWS = { 100: ['沒抽中，原價', 'no ganaste; precio normal', "no win — regular price"], 90: ['9折', '90 % del precio', '90% of the price'], 85: ['85折', '85 % del precio', '85% of the price'], 80: ['8折', '80 % del precio', '80% of the price'] };
 const PRODUCTS = [
@@ -390,7 +390,7 @@ const Game = defineGame({
       { zh: '泡麵：兩份，買一樣的，哪個便宜買哪個', es: 'Fideos instantáneos: 2 iguales, el más barato', en: 'Instant noodles: 2 of the same, the cheaper one' },
       { zh: `載具條碼：${t.code}`, es: `Código de móvil: ${t.code}`, en: `Carrier barcode: ${t.code}` },
       { zh: '店員問要不要抽折扣：要抽', es: 'Si preguntan por el sorteo de descuento: sí', en: 'If asked about the discount draw: yes' },
-      { zh: '你身上有：一百元、兩百元、五百元的鈔票，還有零錢和身分證件', es: 'Llevas: billetes de cien, doscientos y quinientos dólares, cambio suelto y tu identificación', en: 'You have: 100-, 200- and 500-dollar bills, small change and your ID' }
+      { zh: '你身上有：一百元、兩百元、五百元的鈔票，還有零錢和身分證件', es: 'Llevas: billetes de cien, doscientos y quinientos dólares taiwaneses, cambio suelto y tu identificación', en: 'You have: 100-, 200- and 500-dollar bills, small change and your ID' }
     ];
     if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });

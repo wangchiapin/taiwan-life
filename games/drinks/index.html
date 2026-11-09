@@ -630,19 +630,19 @@ const Game = defineGame({
 
       /* ── 付錢、找錢 ── */
       PAYMENT: {
-        dialogue: () => ask(`兩杯一共${Game.total}元。`, `Las dos son ${Game.total} dólares en total.`, `That's NT$${Game.total} for both.`),
+        dialogue: () => ask(`兩杯一共${Game.total}元。`, `Las dos son NT$${Game.total} en total.`, `That's NT$${Game.total} for both.`),
         options: () => (Game._payOpts ||= shuffle([`拿出${Game.bill}元`, '拿出50元'])),
         next: c => {
           if (c === '拿出50元') {
-            Game.addMistake(M(`錢不夠，一共要付${Game.total}元。`, `No te alcanzó: el total era ${Game.total} dólares.`, `Not enough money: the total was NT$${Game.total}.`),
-              [L(`Benjamin：不好意思，錢不夠喔，還差${Game.total - 50}元。`, `Perdón, no alcanza: faltan ${Game.total - 50} dólares.`, `Sorry, that's not enough: you're NT$${Game.total - 50} short.`)]);
+            Game.addMistake(M(`錢不夠，一共要付${Game.total}元。`, `No te alcanzó: el total era NT$${Game.total}.`, `Not enough money: the total was NT$${Game.total}.`),
+              [L(`Benjamin：不好意思，錢不夠喔，還差${Game.total - 50}元。`, `Perdón, no alcanza: faltan NT$${Game.total - 50}.`, `Sorry, that's not enough: you're NT$${Game.total - 50} short.`)]);
             return;
           }
           Game.state = 'CHANGE';
         }
       },
       CHANGE: {
-        dialogue: () => ask(`好的，收您${Game.bill}元，找您${Game.given}元。`, `Recibo ${Game.bill} dólares; tu cambio son ${Game.given}.`, `OK, that's NT$${Game.bill}; here's NT$${Game.given} change.`),
+        dialogue: () => ask(`好的，收您${Game.bill}元，找您${Game.given}元。`, `Recibo NT$${Game.bill}; tu cambio son ${Game.given}.`, `OK, that's NT$${Game.bill}; here's NT$${Game.given} change.`),
         options: ['好，謝謝。', '不好意思，你找錯了。'],
         next: c => {
           const right = Game.bill - Game.total, wrong = Game.given !== right;

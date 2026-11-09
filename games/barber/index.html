@@ -232,7 +232,7 @@ const VOCAB = {
   STYLE_BANG: [['瀏海', 'flequillo', 'bangs / fringe'], ['修一下', 'retocar un poco', 'trim a little'], ['不用剪', 'no hace falta cortar', 'no need to cut']],
   WASH: [['有點', 'un poco', 'a bit'], ['燙', 'muy caliente', 'scalding hot'], ['沒關係', 'no importa', "it's fine"], ['水', 'agua', 'water'], ['不好意思', 'disculpe', 'excuse me']],
   MIRROR: [['鏡子', 'espejo', 'mirror'], ['後面', 'atrás', 'the back'], ['短一點', 'un poco más corto', 'a bit shorter'], ['剪好', 'ya cortado', 'finished cutting']],
-  PAY: [['一共', 'en total', 'in total'], ['元', 'dólares taiwaneses', 'NT dollars'], ['付錢', 'pagar', 'pay'], ['五百元', '500 dólares', '500 NT dollars'], ['找錢', 'dar el cambio', 'give change']],
+  PAY: [['一共', 'en total', 'in total'], ['元', 'dólares taiwaneses', 'NT dollars'], ['付錢', 'pagar', 'pay'], ['五百元', 'NT$500', '500 NT dollars'], ['找錢', 'dar el cambio', 'give change']],
   CHANGE_FIX: [['補', 'completar / dar lo que falta', 'make up the difference'], ['剩下', 'lo que queda / falta', 'the rest'], ['算錯', 'calcular mal', 'miscalculate']],
   CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give the wrong change'], ['好像', 'parece que', 'it seems'], ['應該', 'debería', 'should'], ['媽的', 'grosería: «¡mierda!» (no lo digas al dueño)', 'vulgar swearing: "damn!" (never say it to the owner)']],
   END: [['好看', 'bonito', 'good-looking'], ['辛苦了', 'gracias por el esfuerzo', 'thanks for your effort']],
@@ -566,7 +566,7 @@ const Game = defineGame({
       PAY: {
         place: 'counter',
         html: () => Game.billHTML(),
-        dialogue: () => [boss(`謝謝，一共${HZ(t.price)}元。`, `Gracias, son ${t.price} dólares en total.`, `Thank you — that's ${t.price} dollars in total.`), L('（你的錢包裡只有一張五百元。）', '(En tu cartera solo hay un billete de quinientos.)', '(You only have one 500-dollar bill in your wallet.)')],
+        dialogue: () => [boss(`謝謝，一共${HZ(t.price)}元。`, `Gracias, son NT$${t.price} en total.`, `Thank you — that's ${t.price} dollars in total.`), L('（你的錢包裡只有一張五百元。）', '(En tu cartera solo hay un billete de quinientos.)', '(You only have one 500-dollar bill in your wallet.)')],
         options: () => rot(['給老闆五百元，請他找錢', '給老闆一百元', '給老闆一千元']),
         next: c => {
           if (!c.startsWith('給老闆五百')) {

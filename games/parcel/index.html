@@ -664,7 +664,7 @@ const Game = defineGame({
       },
       M_CHANGE: {
         place: 'store',
-        dialogue: () => [L(`店員：收您一千元，找您${money(Game._changeGiven)}。`, `Recibo mil dólares; le doy ${esM(Game._changeGiven)} de cambio.`, `Out of NT$1,000, here's ${enM(Game._changeGiven)} in change.`)],
+        dialogue: () => [L(`店員：收您一千元，找您${money(Game._changeGiven)}。`, `Recibo mil dólares taiwaneses; le doy ${esM(Game._changeGiven)} de cambio.`, `Out of NT$1,000, here's ${enM(Game._changeGiven)} in change.`)],
         options: ['好，謝謝。', '不好意思，好像少找了。'],
         next: c => {
           const right = Game._changeGiven === Game._change;
@@ -800,7 +800,7 @@ const Game = defineGame({
               [L('（等等，房東太太還有說一件事……）', '(Espera, la casera te encargó una cosa más…)', '(Wait, the landlady asked for one more thing…)')]);
           else
             Game.addMistake(M('不用買新的，是幫房東太太的卡加值。', 'No hace falta una tarjeta nueva; hay que recargar la de la casera.', "No need for a new card; top up the landlady's card."),
-              [L('店員：新卡一張一百元喔。', 'Una tarjeta nueva cuesta cien dólares.', 'A new card costs 100 dollars.'),
+              [L('店員：新卡一張一百元喔。', 'Una tarjeta nueva cuesta cien dólares taiwaneses.', 'A new card costs 100 dollars.'),
                L('我：啊不是，我是要加值！', 'Ay no, ¡quiero recargar!', "Oh no, I want to top up!")]);
         }
       },
@@ -832,7 +832,7 @@ const Game = defineGame({
       },
       BAG: {
         place: 'store',
-        dialogue: () => [L('店員：東西有點多，需要袋子嗎？一個兩塊。', 'Son varias cosas; ¿necesita una bolsa? Cuesta dos dólares.', "You have quite a few things. Need a bag? It's 2 dollars.")],
+        dialogue: () => [L('店員：東西有點多，需要袋子嗎？一個兩塊。', 'Son varias cosas; ¿necesita una bolsa? Cuesta dos dólares taiwaneses.', "You have quite a few things. Need a bag? It's 2 dollars.")],
         options: ['要，買一個袋子。', '不用，我自己拿就好，謝謝。'],
         next: c => {
           if (c.startsWith('要')) {

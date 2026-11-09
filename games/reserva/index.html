@@ -883,7 +883,7 @@ const Game = defineGame({
       C1_ROOM: {
         call: 'shop',
         dialogue: () => [L(`店員：${zhNum(t.people)}位的話，我們有包廂，可是包廂每個人低消五百元。要坐包廂嗎？`,
-          `Para ${t.people} personas tenemos salón privado, pero el consumo mínimo es de 500 dólares por persona. ¿Quiere el salón privado?`,
+          `Para ${t.people} personas tenemos salón privado, pero el consumo mínimo es de NT$500 por persona. ¿Quiere el salón privado?`,
           `For ${t.people} people we have a private room, but there's a minimum charge of NT$500 per person. Would you like it?`)],
         options: ['好，坐包廂。', '不用，一般座位就好。', '等一下喔……我確認一下。'],
         next: c => {

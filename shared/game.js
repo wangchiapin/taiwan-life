@@ -274,9 +274,9 @@ function toPinyin(seg, asArray, full, pos) {
 const CN = ['零','一','二','三','四','五','六','七','八','九','十'];
 const L = (zh, es, en) => ({ zh, es, en });                 // 一行台詞＋翻譯
 const M = (zh, es, en) => ({ zh, es, en });                 // 扣分原因
-/* 價錢的文字：50 → 50元／50 dólares／NT$50（每個有價錢的遊戲都用） */
+/* 價錢的文字：50 → 50元／NT$50／NT$50（每個有價錢的遊戲都用） */
 const money = n => n + '元';
-const esM = n => `${n} dólares`;
+const esM = n => `NT$${n}`;
 const enM = n => `NT$${n}`;
 /* 念數字（金額、數量、年份以外的一般數字）
    zhNum(850) → 八百五十；zhNum(2) → 二；200 → 兩百；2000 → 兩千；20000 → 兩萬；2002 → 兩千零二；兩億

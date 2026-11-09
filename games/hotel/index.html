@@ -369,7 +369,7 @@ const Game = defineGame({
       { zh: t.drank ? '迷你吧：你喝了一瓶礦泉水' : '迷你吧：你什麼都沒有動', es: t.drank ? 'Minibar: bebiste una botella de agua mineral' : 'Minibar: no tocaste nada', en: t.drank ? 'Minibar: you drank one bottle of mineral water' : "Minibar: you didn't touch anything" }
     ];
     if (at('ROOM')) rows.splice(2, 0, { zh: `房間的問題：${t.probs.map(p => p.issue).join('、')}`, es: `Problemas de la habitación: ${t.probs.map(p => p.issueEs).join('; ')}`, en: `Room problems: ${t.probs.map(p => p.issueEn).join('; ')}` });
-    rows.push({ zh: '你身上有：一千元的鈔票，還有零錢', es: 'Llevas: un billete de mil dólares y algo de cambio', en: 'You have: a 1000-dollar bill, plus some small change' });
+    rows.push({ zh: '你身上有：一千元的鈔票，還有零錢', es: 'Llevas: un billete de mil dólares taiwaneses y algo de cambio', en: 'You have: a 1000-dollar bill, plus some small change' });
     if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
     const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));

@@ -316,7 +316,7 @@ const Game = defineGame({
     const t = this.task, r = s => this.ruby(s), d = t.dest;
     const rows = [
       { zh: `目的地：${d.zh}（現在是下午）`, es: `Destino: ${d.es} (ahora es por la tarde)`, en: `Destination: ${d.en} (it is afternoon now)` },
-      { zh: '你身上有：一百元、兩百元和五百元的鈔票，還有零錢', es: 'Llevas: billetes de cien, doscientos y quinientos dólares, y algo de cambio', en: 'You have: 100, 200 and 500-dollar bills, plus some small change' }
+      { zh: '你身上有：一百元、兩百元和五百元的鈔票，還有零錢', es: 'Llevas: billetes de cien, doscientos y quinientos dólares taiwaneses, y algo de cambio', en: 'You have: 100, 200 and 500-dollar bills, plus some small change' }
     ];
     if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
@@ -341,7 +341,7 @@ const Game = defineGame({
       finish: () => { Game.state = 'EXIT'; },
       extraWhy: () => t.extra.zh === '夜間加成'
         ? M(`司機多算了：計費表是${t.total}元，他多加了夜間加成。夜間加成只有晚上十一點到早上六點才有，現在是下午。`, `El conductor cobró de más: el taxímetro marca ${esM(t.total)} y añadió el recargo nocturno, que solo se aplica de las 23:00 a las 6:00; ahora es por la tarde.`, `The driver overcharged: the meter says ${enM(t.total)} and he added the night surcharge, which only applies from 11 pm to 6 am. It is afternoon now.`)
-        : M(`司機多算了：計費表是${t.total}元，他多收了二十元小費。在台灣坐計程車不用給小費。`, `El conductor cobró de más: el taxímetro marca ${esM(t.total)} y pidió veinte dólares de propina. En Taiwán no hace falta dar propina en el taxi.`, `The driver overcharged: the meter says ${enM(t.total)} and he asked for a 20-dollar tip. You don't need to tip taxi drivers in Taiwan.`)
+        : M(`司機多算了：計費表是${t.total}元，他多收了二十元小費。在台灣坐計程車不用給小費。`, `El conductor cobró de más: el taxímetro marca ${esM(t.total)} y pidió veinte dólares taiwaneses de propina. En Taiwán no hace falta dar propina en el taxi.`, `The driver overcharged: the meter says ${enM(t.total)} and he asked for a 20-dollar tip. You don't need to tip taxi drivers in Taiwan.`)
     });
 
     return {

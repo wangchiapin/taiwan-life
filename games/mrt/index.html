@@ -531,7 +531,7 @@ const Game = defineGame({
           const amt = +c.match(/(\d+)/)[1];
           if (Game.balance + amt < 20) {
             Game.addMistake(M(`加${amt}元，餘額只有${Game.balance + amt}元，還是不夠搭車。`, `Con ${esM(amt)} el saldo sería ${esM(Game.balance + amt)}: todavía no alcanza para el viaje.`, `Adding ${enM(amt)} only brings it to ${enM(Game.balance + amt)} — still not enough for the ride.`),
-              [L(`（${Game.balance}元加${amt}元，票價大概二十多元……還是不夠。）`, `(${Game.balance} más ${amt}… el pasaje cuesta veintitantos dólares: todavía no alcanza.)`, `(${Game.balance} plus ${amt}… the fare is twenty-something dollars: still not enough.)`)]); return;
+              [L(`（${Game.balance}元加${amt}元，票價大概二十多元……還是不夠。）`, `(${Game.balance} más ${amt}… el pasaje cuesta veintitantos dólares taiwaneses: todavía no alcanza.)`, `(${Game.balance} plus ${amt}… the fare is twenty-something dollars: still not enough.)`)]); return;
           }
           Game.balance += amt; Game.updateCash();
           goodFirst('G_TOP', '有先見之明喔！你加的錢夠搭好幾趟了。', '¡Qué previsor! Recargaste lo suficiente para varios viajes.', 'Smart thinking ahead! You added enough for several rides.');
