@@ -345,6 +345,10 @@ with sync_playwright() as p:
     check('魚攤不賣了：過場畫面是老闆娘生氣圖', state(page) == '_TRANS' and 'stall_fish_angry' in ev(page, "document.getElementById('npc-avatar').src"))
     page.locator('#options-area .opt').first.click(); page.wait_for_timeout(100)
     new_game(page); setreq(page, [['pork', 1], ['fish', 1], ['cabbage', 1], ['egg', 1]])
+    tap(page, '去魚攤'); buy(page, 'fish', 1); tap(page, '買好了'); ev(page, 'Game.st.floor = 99')
+    tap(page, '好，')
+    check('魚攤付錢畫面用魚攤的付錢圖', state(page) == 'PAY' and 'stall_fish_pay' in ev(page, "document.getElementById('npc-avatar').src"), (state(page), ev(page, "document.getElementById('npc-avatar').src")))
+    new_game(page); setreq(page, [['pork', 1], ['fish', 1], ['cabbage', 1], ['egg', 1]])
     tap(page, '去菜攤'); buy(page, 'cabbage', 1); tap(page, '買好了'); ev(page, 'Game.st.floor = 100')
     for _ in range(3):
         o = opts(page); i = next(k for k, t_ in enumerate(o) if t_.endswith('元可以嗎？'))
