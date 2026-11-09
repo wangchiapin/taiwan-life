@@ -90,6 +90,11 @@
   .basket .empty { color: var(--muted); }
   .basket .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .basket .put { border: 1.5px solid #b98a52; background: #fffaf0; color: var(--red-dark); border-radius: 999px; padding: 0 12px; font: inherit; font-size: 13px; line-height: 26px; cursor: pointer; }
+  .basket .adj { display: inline-flex; align-items: center; gap: 8px; }
+  .basket .adj b { min-width: 1.6em; text-align: center; font-size: 17px; }
+  .basket .adj button { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #b98a52; background: #fffaf0; color: var(--red-dark); font: inherit; font-size: 20px; line-height: 1; cursor: pointer; padding: 0; }
+  .basket .adj button:disabled { opacity: .35; cursor: default; }
+  .basket .sum { margin-top: 4px; border-top: 1.5px dashed #c99a62; padding-top: 4px; }
   @media (max-width: 600px) { .shelf { grid-template-columns: repeat(3, 1fr); gap: 6px; } .food { font-size: 13px; } .food .pr { font-size: 12px; } }
   .bag { margin: 6px 0 10px; padding: 12px 14px; border-radius: 14px; background: #fffaf0; border: 2px solid #ecd0a8; }
   .bag .bi { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
@@ -448,6 +453,16 @@ const Game = defineGame({
     this.thought = null; this.feedback = []; this.thoughtFirst = false;
     this.render();
   },
+  /* 錢不夠：在「哪些不要」這一關調整數量（最多只能調回原本點的數量，一樣不能多買新的） */
+  adjQty(zh, d) {
+    const max = (this.adjMax || {})[zh] || 0, q = (this.basket[zh] || 0) + d;
+    if (q < 0 || q > max) return;
+    if (q) this.basket[zh] = q; else delete this.basket[zh];
+    Tr.closeAll(); Speech.stop();
+    this.thought = null; this.feedback = []; this.thoughtFirst = false;
+    this.render();
+  },
+  removed() { return ITEMS.filter(x => (this.adjMax || {})[x.zh] > (this.basket[x.zh] || 0)).map(it => ({ it, q: this.adjMax[it.zh] - (this.basket[it.zh] || 0) })); },
   testPrep(use) {   // 自動測試用：亂玩時隨機夾幾樣進籃子（錢不夠的情況由亂玩自己碰到）
     if (this.state !== 'ITEM') return;
     if (this.orderList().length > 6) this.basket = {};
@@ -508,6 +523,13 @@ const Game = defineGame({
     const r = s => this.ruby(s), t = this.task;
     return `<div class="menu"><div class="mh">🧾 ${r('你點的東西')}</div><div class="mflav">${this.orderList().map(x => `<span>${r(x.it.zh)} ${x.it.p}${r('元')} × ${x.q}</span>`).join('')}</div><div class="cash">${r('你身上有')} ${t.cash}${r('元')}</div></div>`;
   },
+  /* 「哪些不要」畫面：每一樣有 − ＋ 可以調數量（最多調回原本點的）；下面是一共多少、你身上有多少 */
+  removeHTML() {
+    const r = s => this.ruby(s), t = this.task, mx = this.adjMax || {};
+    const rows = ITEMS.filter(x => mx[x.zh]).map(x => { const q = this.basket[x.zh] || 0;
+      return `<div class="row"><span>${r(x.zh)} ${x.p}${r('元')}</span><span class="adj"><button type="button" data-adj="-1" data-z="${x.zh}" aria-label="−"${q <= 0 ? ' disabled' : ''}>−</button><b>${q}</b><button type="button" data-adj="1" data-z="${x.zh}" aria-label="＋"${q >= mx[x.zh] ? ' disabled' : ''}>＋</button></span></div>`; }).join('');
+    return `<div class="basket"><div class="th">🧾 ${r('你點的東西')}<small>${r('按 − 減少，按 ＋ 加回來')}</small></div>${rows}<div class="sum">${r('一共')} ${this.orderTotal()}${r('元')}　${r('你身上有')} ${t.cash}${r('元')}</div></div>`;
+  },
   /* 袋子打開：用食物照片看裡面有什麼（份數）、雞排切法、辣度、蔥蒜洋蔥打勾 */
   bagHTML(o) {
     const r = s => this.ruby(s);
@@ -528,7 +550,7 @@ const Game = defineGame({
       finish: () => { t.cash -= t.total; Game.state = Game.hasCutlet() ? 'CUT' : 'SPICY'; }
     });
     const ocK = t.ocKind, hoK = t.hoKind;
-    const SHORT = '不好意思，我的錢不夠，有一樣不要了。';
+    const SHORT = '不好意思，我的錢不夠，有幾樣不要了。';
     const payOk = `給你${zhNum(t.payWrong ? billFor(t.said) : t.bill)}元。`;   // 阿姨多算時，這個選項是「沒發現就照多算的付」，所以是錯的
     const claim = t.payWrong ? t.total : t.total + (t.extra ? t.extra.price : 0);
     const fixTotal = `不好意思，好像算錯了，應該是${zhNum(claim)}元吧？`;
@@ -592,26 +614,27 @@ const Game = defineGame({
             return;
           }
           if (t.payTry === 1) {
-            if (c === SHORT) Game.good('你很細心！錢不夠的時候，要馬上跟阿姨說，拿掉一樣。', '¡Qué atento! Si no te alcanza el dinero, díselo a la señora y quita algo.', "Well spotted! When you can't afford it, tell the lady and drop something.");
+            if (c === SHORT) Game.good('你很細心！錢不夠的時候，要馬上跟阿姨說，有幾樣不要了。', '¡Qué atento! Si no te alcanza el dinero, díselo a la señora y quita algunas cosas.', "Well spotted! When you can't afford it, tell the lady and drop something.");
             else if (c === fixTotal) Game.good('你很細心！付錢以前，要先對一下單價和自己點的東西。', '¡Qué atento! Antes de pagar, compara los precios con lo que pediste.', 'Well spotted! Before you pay, check the unit prices against what you ordered.');
             else Game.good('沒錯！付錢以前，要先自己算一下。', '¡Exacto! Antes de pagar, calcula tú también.', 'Right! Do the math yourself before you pay.');
           }
-          if (c === SHORT) { Game.state = 'REMOVE'; return; }
+          if (c === SHORT) { Game.adjMax = { ...Game.basket }; Game.state = 'REMOVE'; return; }
           if (c === fixTotal) { Game.state = 'PAY_FIX'; return; }
           if (t.change > 0) Game.state = 'CHANGE'; else { t.cash -= t.total; Game.state = Game.hasCutlet() ? 'CUT' : 'SPICY'; }
         }
       },
-      /* 錢不夠：告訴阿姨哪一樣不要了（那一樣整個拿掉），阿姨重新報價 */
+      /* 錢不夠：告訴阿姨有幾樣不要。阿姨問哪些不要，在這一關自己調整數量，阿姨重新報價 */
       REMOVE: {
-        place: 'shop', html: () => Game.payHTML(),
-        dialogue: () => [staff('好，哪一樣不要？', 'Bien, ¿cuál ya no quiere?', 'OK, which one do you not want?')],
-        options: () => rotOf(t, Game.orderList().map(x => `${x.it.zh}不要了。`)),
-        next: c => {
-          const x = ITEM_BY[c.replace('不要了。', '')];
-          delete Game.basket[x.zh];
-          if (!Game.orderList().length) { Game.thought = [L(`（阿姨把${x.zh}拿出來。籃子空了，你得重新夾。）`, `(La señora saca ${x.es}. La canasta quedó vacía; vuelve a elegir.)`, `(The lady takes out the ${x.en}. The basket is empty — pick again.)`)]; Game.state = 'ITEM'; return; }
+        place: 'shop', single: true, html: () => Game.removeHTML(),
+        mount: box => { box.querySelectorAll('[data-adj]').forEach(b => { b.onclick = () => Game.adjQty(b.dataset.z, +b.dataset.adj); }); },
+        dialogue: () => [staff('好，哪些不要？數量你自己調整。', 'Bien, ¿cuáles ya no quiere? Ajusta tú las cantidades.', 'OK, which ones do you not want? Adjust the amounts yourself.')],
+        options: ['就這樣，請重新算。'],
+        next: () => {
+          const rem = Game.removed();
+          if (!rem.length) { Game.thought = [L('（你還沒有減少任何東西。用 − 減少數量。）', '(Todavía no quitaste nada. Usa − para bajar las cantidades.)', '(You haven\'t removed anything yet. Use − to lower the amounts.)')]; return; }
+          if (!Game.orderList().length) { Game.thought = [L(`（阿姨把${itemsText(rem, 'zh')}都拿出來。籃子空了，你得重新夾。）`, `(La señora saca ${itemsText(rem, 'es')}. La canasta quedó vacía; vuelve a elegir.)`, `(The lady takes out ${itemsText(rem, 'en')}. The basket is empty — pick again.)`)]; Game.state = 'ITEM'; return; }
           Game.requote();
-          Game.thought = [L(`（阿姨把${x.zh}拿出來，重新算了一下。）`, `(La señora saca ${x.es} y vuelve a calcular.)`, `(The lady takes out the ${x.en} and adds it up again.)`)];
+          Game.thought = [L(`（阿姨把${itemsText(rem, 'zh')}拿出來，重新算了一下。）`, `(La señora saca ${itemsText(rem, 'es')} y vuelve a calcular.)`, `(The lady takes out ${itemsText(rem, 'en')} and adds it up again.)`)];
           Game.state = 'PAY';
         }
       },

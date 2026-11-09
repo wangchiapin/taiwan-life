@@ -78,7 +78,7 @@ def run(b):
             texts = opts(p); check(f'PAY四個選項 wrong={wrong}', len(texts) == 4, texts)
             payOk = f"給你{p.evaluate('zhNum(Game.task.payWrong?billFor(Game.task.said):Game.task.bill)')}元。"
             fixT = '不好意思，好像算錯了，應該是' + p.evaluate('zhNum(Game.task.payWrong?Game.task.total:Game.task.total+Game.task.extra.price)') + '元吧？'
-            SHORT = '不好意思，我的錢不夠，有一樣不要了。'; RUDE = '你是不是想騙我的錢啊？'
+            SHORT = '不好意思，我的錢不夠，有幾樣不要了。'; RUDE = '你是不是想騙我的錢啊？'
             choice = {'pay': payOk, 'fix': fixT, 'short': SHORT, 'rude': RUDE}[pick_]
             right = {'pay': not wrong, 'fix': wrong, 'short': False, 'rude': False}[pick_]
             m0 = mis(p); press(p, choice)
@@ -100,7 +100,7 @@ def run(b):
     else: check('付的錢永遠是真總價湊50（含阿姨多算時）', True)
     p.close()
     # 錢夠卻說「錢不夠」的原因文字
-    p = new_page(b); to_pay(p, {'雞排': 1}, cash=300, wrong=False); press(p, '不好意思，我的錢不夠，有一樣不要了。')
+    p = new_page(b); to_pay(p, {'雞排': 1}, cash=300, wrong=False); press(p, '不好意思，我的錢不夠，有幾樣不要了。')
     check('錢夠卻說不夠：說明錢是夠的', '錢是夠的' in p.evaluate('Game.log[Game.log.length-1].zh')); p.close()
 
     # ── 3. 錢不夠：自己發現 → 說錢不夠 → 拿掉哪一樣 ──
@@ -110,36 +110,54 @@ def run(b):
         check('錢不夠：阿姨沒有說錢不夠', '不夠' not in p.locator('#npc-dialogue').inner_text())
         payOk = f"給你{p.evaluate('zhNum(Game.task.bill)')}元。"
         fixT = '不好意思，好像算錯了，應該是' + p.evaluate('zhNum(Game.task.total+Game.task.extra.price)') + '元吧？'
-        choice = {'pay': payOk, 'fix': fixT, 'short': '不好意思，我的錢不夠，有一樣不要了。', 'rude': '你是不是想騙我的錢啊？'}[pick_]
+        choice = {'pay': payOk, 'fix': fixT, 'short': '不好意思，我的錢不夠，有幾樣不要了。', 'rude': '你是不是想騙我的錢啊？'}[pick_]
         m0 = mis(p); press(p, choice)
         if pick_ == 'short':
             check('錢不夠說對了：不扣分、進REMOVE', mis(p) == m0 and st(p) in ('REMOVE', '_TRANS'), st(p)); leave_trans(p)
-            check('REMOVE 選項＝籃子裡每一樣', sorted(opts(p)) == sorted(['雞排不要了。', '鹽酥雞不要了。', '魷魚不要了。']), opts(p))
+            check('REMOVE：每一樣都有 −＋、只有一個「就這樣」按鈕', p.locator('[data-adj]').count() == 6 and opts(p) == ['就這樣，請重新算。'], opts(p))
         else:
             check(f'錢不夠 {pick_}：扣10分留在PAY', mis(p) == m0 + 1 and st(p) == 'PAY', (mis(p), st(p)))
         p.close()
-    # 拿掉自己的魷魚 → 剛好夠 → 付錢 → 找錢 → 切 → 辣 → 蔥蒜 → 複誦 → 袋子 → 結局（Ami 要的都在）
-    p = new_page(b); to_pay(p, {'雞排': 1, '鹽酥雞': 1, '魷魚': 1}, cash=200)   # 195 ≤ 200 其實夠；改成不夠
+    def adj(p, zh, d):
+        p.locator(f'[data-adj="{d}"][data-z="{zh}"]').click()
+    def qty(p, zh): return p.evaluate('z=>Game.basket[z]||0', zh)
+    # 減少魷魚 → 剛好夠 → 重新報價
+    p = new_page(b); to_pay(p, {'雞排': 1, '鹽酥雞': 1, '魷魚': 1}, cash=200)
     p.evaluate("Game.task.cash=150; Game.requote(); Game.render()")
     check('改成150：不夠', p.evaluate('Game.task.total>Game.task.cash'))
-    press(p, '不好意思，我的錢不夠，有一樣不要了。'); leave_trans(p)
-    press(p, '魷魚不要了。'); leave_trans(p)
-    check('拿掉後重新報價（135）', st(p) == 'PAY' and p.evaluate('Game.task.total') == 135 and '魷魚' not in p.evaluate('Object.keys(Game.basket)'), p.evaluate('Game.task.total'))
-    check('拿掉後135≤150 就可以付', p.evaluate('Game.task.total<=Game.task.cash'))
+    press(p, '不好意思，我的錢不夠，有幾樣不要了。'); leave_trans(p)
+    m0 = mis(p); press(p, '就這樣，請重新算。')
+    check('沒減少就按：留在REMOVE、不扣分、有提示', st(p) == 'REMOVE' and mis(p) == m0 and '還沒有減少' in p.evaluate('JSON.stringify(Game.thought)'), (st(p), mis(p), m0))
+    adj(p, '魷魚', -1)
+    check('− 之後魷魚變 0、一共變 135', qty(p, '魷魚') == 0 and '135' in p.locator('.basket .sum').inner_text(), p.locator('.basket .sum').inner_text())
+    check('魷魚 0：− 不能再按、＋ 可以', p.locator('[data-adj="-1"][data-z="魷魚"]').is_disabled() and not p.locator('[data-adj="1"][data-z="魷魚"]').is_disabled())
+    adj(p, '魷魚', 1)
+    check('＋ 可以加回原本的數量', qty(p, '魷魚') == 1 and p.locator('[data-adj="1"][data-z="魷魚"]').is_disabled())
+    adj(p, '魷魚', -1)
+    press(p, '就這樣，請重新算。'); leave_trans(p)
+    check('重新報價（135）', st(p) == 'PAY' and p.evaluate('Game.task.total') == 135 and '魷魚' not in p.evaluate('Object.keys(Game.basket)'), p.evaluate('Game.task.total'))
+    check('135≤150 就可以付', p.evaluate('Game.task.total<=Game.task.cash'))
     p.close()
-    # 拿了一樣還是不夠 → 再來一次
+    # 跟 Ami 點一樣的（雞排 ×2）：只減一份，另一份還在
+    p = new_page(b); to_pay(p, {'雞排': 2}, cash=100)   # 150 > 100
+    press(p, '不好意思，我的錢不夠，有幾樣不要了。'); leave_trans(p)
+    adj(p, '雞排', -1); press(p, '就這樣，請重新算。'); leave_trans(p)
+    check('雞排 ×2 只減一份：還剩 1 份、報價 75', st(p) == 'PAY' and qty(p, '雞排') == 1 and p.evaluate('Game.task.total') == 75, (st(p), qty(p, '雞排')))
+    p.close()
+    # 減了還是不夠 → 再來一次（這次最多只能調到目前的數量）
     p = new_page(b); to_pay(p, {'雞排': 1, '鹽酥雞': 1, '魷魚': 1, '雞塊': 1}, cash=200)   # 240
-    press(p, '不好意思，我的錢不夠，有一樣不要了。'); leave_trans(p); press(p, '雞塊不要了。'); leave_trans(p)   # 195 ≤ 200 夠
+    press(p, '不好意思，我的錢不夠，有幾樣不要了。'); leave_trans(p); adj(p, '雞塊', -1); press(p, '就這樣，請重新算。'); leave_trans(p)   # 195 ≤ 200 夠
     p.evaluate("Game.task.cash=100; Game.requote(); Game.render()")
     check('還是不夠：還在PAY、可以再說一次', st(p) == 'PAY' and p.evaluate('Game.task.total>Game.task.cash'))
-    press(p, '不好意思，我的錢不夠，有一樣不要了。'); leave_trans(p)
-    press(p, '魷魚不要了。'); leave_trans(p)
-    check('第二次拿掉後重新報價', st(p) == 'PAY' and p.evaluate('Game.task.total') == 135)
+    press(p, '不好意思，我的錢不夠，有幾樣不要了。'); leave_trans(p)
+    check('第二次：拿掉的雞塊不在清單、不能加回來', p.locator('[data-z="雞塊"]').count() == 0)
+    adj(p, '魷魚', -1); press(p, '就這樣，請重新算。'); leave_trans(p)
+    check('第二次減少後重新報價', st(p) == 'PAY' and p.evaluate('Game.task.total') == 135)
     p.close()
-    # 全部拿光 → 回點菜
+    # 全部減到 0 → 回點菜
     p = new_page(b); to_pay(p, {'雞排': 1}, cash=50)
-    press(p, '不好意思，我的錢不夠，有一樣不要了。'); leave_trans(p); press(p, '雞排不要了。'); leave_trans(p)
-    check('全部拿掉→回到點菜', st(p) == 'ITEM' and p.evaluate('Game.orderList().length') == 0)
+    press(p, '不好意思，我的錢不夠，有幾樣不要了。'); leave_trans(p); adj(p, '雞排', -1); press(p, '就這樣，請重新算。'); leave_trans(p)
+    check('全部減到 0→回到點菜', st(p) == 'ITEM' and p.evaluate('Game.orderList().length') == 0)
     p.close()
 
     # ── 4. 付完錢之後：沒點雞排跳過 CUT；有雞排有 CUT；兩個切法 ──
