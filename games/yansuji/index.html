@@ -71,9 +71,26 @@
   /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
   /* ── 即時回饋卡（停留到下一次選擇） ── */
 
-  /* 價目表、袋子 */
+  /* 照片卡片、籃子、點的東西清單、袋子 */
   .menu { margin: 8px 0 12px; background: #fffaf0; border: 2px solid #ecd0a8; border-radius: 12px; padding: 10px 14px; }
   .menu .mflav { display: flex; gap: 6px 16px; flex-wrap: wrap; font-size: 17px; }
+  .menu .cash, .basket .cash { margin-top: 6px; font-weight: 700; color: var(--red-dark); font-size: 16px; }
+  .shelf { margin: 8px 0 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .food { position: relative; background: #fffaf0; border: 1px solid var(--line); border-bottom: 5px solid var(--kraft); border-radius: 10px; padding: 6px 4px 8px; text-align: center; font-size: 15px; line-height: 1.5; cursor: pointer; user-select: none; }
+  .food:active { transform: translateY(1px); }
+  .food img { width: 100%; max-width: 120px; aspect-ratio: 1; object-fit: cover; border-radius: 8px; display: block; margin: 0 auto 2px; }
+  .food .nm { font-weight: 700; }
+  .food .pr { color: var(--red-dark); font-weight: 700; font-size: 14px; }
+  .food .cnt { position: absolute; top: 4px; right: 4px; background: var(--red); color: #fff; border-radius: 999px; padding: 0 8px; font-weight: 700; font-size: 14px; }
+  .basket { margin: 8px 0 12px; border-radius: 10px; background: #f6dcc0; padding: 10px 14px; box-shadow: inset 0 0 0 3px #d9a56a; font-size: 16px; line-height: 1.9; }
+  .basket .th { font-weight: 700; font-size: 14px; color: var(--red-dark); }
+  .basket .th small { font-weight: 400; color: var(--muted); margin-left: 8px; font-size: 12px; }
+  .basket .act { margin: 2px 0 4px; font-size: 14px; }
+  .basket .act small { display: block; color: var(--muted); font-size: 12px; line-height: 1.4; }
+  .basket .empty { color: var(--muted); }
+  .basket .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .basket .put { border: 1.5px solid #b98a52; background: #fffaf0; color: var(--red-dark); border-radius: 999px; padding: 0 12px; font: inherit; font-size: 13px; line-height: 26px; cursor: pointer; }
+  @media (max-width: 600px) { .shelf { grid-template-columns: repeat(3, 1fr); gap: 6px; } .food { font-size: 13px; } .food .pr { font-size: 12px; } }
   .bag { margin: 6px 0 10px; padding: 12px 14px; border-radius: 14px; background: #fffaf0; border: 2px solid #ecd0a8; text-align: center; }
   .bag .be { font-size: 58px; line-height: 1.1; }
   .bag .bc { display: flex; gap: 6px 8px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
@@ -104,8 +121,8 @@
   </div>
   <button class="btn-primary" onclick="startGame()">開始遊戲</button>
   <p class="flavor-text">
-    Ami 想吃鹽酥雞！雞排要不要切、辣不辣、蔥蒜洋蔥要不要加，她都交代好了。老闆一邊炸一邊問，有時候會聽錯、放錯，要自己多注意喔！<br>
-    <span data-es="¡Ami se antoja de pollo frito crujiente! Ya te dijo todo: si cortan el filete, qué tan picante y si lleva cebollín, ajo o cebolla. El dueño pregunta mientras fríe y a veces entiende o pone mal las cosas, ¡presta atención!" data-en="Ami is craving fried chicken! She told you everything: whether to cut the chicken cutlet, how spicy, and whether to add scallions, garlic or onion. The owner asks while frying and sometimes mishears or mixes things up, so stay alert!">¡Ami se antoja de pollo frito crujiente! Ya te dijo todo: si cortan el filete, qué tan picante y si lleva cebollín, ajo o cebolla. El dueño pregunta mientras fríe y a veces entiende o pone mal las cosas, ¡presta atención!</span>
+    Ami 想吃鹽酥雞！請你去幫她買，她點了很多東西，要記清楚喔！<br>
+    <span data-es="¡Ami se antoja de pollo frito crujiente! Por favor, ve a comprárselo. Pidió muchas cosas, ¡memorízalas bien!" data-en="Ami is craving fried chicken! Please go buy some for her. She ordered a lot of things, so remember them well!">¡Ami se antoja de pollo frito crujiente! Por favor, ve a comprárselo. Pidió muchas cosas, ¡memorízalas bien!</span>
   </p>
 </div>
 
@@ -208,7 +225,7 @@ pinyinPro.customPinyin({
 pinyinPro.customPinyin({
   '鹽酥雞': 'yán sū jī', '雞排': 'jī pái', '甜不辣': 'tián bù là', '四季豆': 'sì jì dòu', '米血': 'mǐ xiě', '杏鮑菇': 'xìng bào gū', '薯條': 'shǔ tiáo', '攤位': 'tān wèi', '攤': 'tān',
   '蒜': 'suàn', '洋蔥': 'yáng cōng', '蔥': 'cōng', '切': 'qiē', '切好': 'qiē hǎo', '整片': 'zhěng piàn', '一片': 'yí piàn', '兩片': 'liǎng piàn', '一份': 'yí fèn', '兩份': 'liǎng fèn',
-  '小辣': 'xiǎo là', '大辣': 'dà là', '不辣': 'bú là', '要辣': 'yào là', '辣粉': 'là fěn', '都要': 'dōu yào', '都不要': 'dōu bú yào', '複誦': 'fù sòng', '重炸': 'chóng zhá', '炸': 'zhá',
+  '雞塊': 'jī kuài', '魷魚': 'yóu yú', '青椒': 'qīng jiāo', '百頁豆腐': 'bǎi yè dòu fǔ', '花枝丸': 'huā zhī wán', '熱狗': 'rè gǒu', '地瓜': 'dì guā', '糯米腸': 'nuò mǐ cháng', '芋頭粿': 'yù tou guǒ', '籃子': 'lán zi', '夾子': 'jiá zi', '夾': 'jiá', '放回去': 'fàng huí qù', '不要了': 'bú yào le', '錢不夠': 'qián bú gòu', '拿掉': 'ná diào', '點好了': 'diǎn hǎo le', '單價': 'dān jià', '小辣': 'xiǎo là', '大辣': 'dà là', '不辣': 'bú là', '要辣': 'yào là', '辣粉': 'là fěn', '都要': 'dōu yào', '都不要': 'dōu bú yào', '複誦': 'fù sòng', '重炸': 'chóng zhá', '炸': 'zhá',
   '價目表': 'jià mù biǎo', '算錯': 'suàn cuò', '找錯': 'zhǎo cuò', '應該': 'yīng gāi', '一共': 'yí gòng', '零錢': 'líng qián', '老闆': 'lǎo bǎn', '外帶': 'wài dài', '袋子': 'dài zi', '歡迎光臨': 'huān yíng guāng lín', '涼': 'liáng', '酥脆': 'sū cuì'
 });
 // 台灣讀音修正：連接詞「和」念 hàn、「嗯」念 ēn
@@ -227,21 +244,24 @@ const SPEAKER_RE = /^(Ami|老闆|我)：/;
    本遊戲的付錢小工具（POLITE、rotOf、catchState、payStates 已搬到 shared/game.js）
    2026-10-27 新遊戲（麵店、超商、鹽酥雞）共用同一套寫法
 ══════════════════════════════════════ */
-const billFor = n => n <= 100 ? 100 : n <= 200 ? 200 : n <= 500 ? 500 : 1000;           // 你給的鈔票
+const billFor = n => Math.ceil(n / 50) * 50;           // 你給的錢：湊成 50 的倍數（身上的錢也都是 50 的倍數，付得出來）
 
 
 /* ══════════════════════════════════════
    每一關的單字（中文、西文、英文；拼音自動產生）
 ══════════════════════════════════════ */
 const VOCAB = {
-  START: [['鹽酥雞', 'pollo frito crujiente en trozos', 'popcorn chicken'], ['雞排', 'filete de pollo frito', 'fried chicken cutlet'], ['辣', 'picante', 'spicy'], ['蔥', 'cebollín', 'scallion'], ['蒜', 'ajo', 'garlic'], ['洋蔥', 'cebolla', 'onion'], ['外帶', 'para llevar', 'to go']],
-  ITEM: [['歡迎光臨', 'bienvenido(a)', 'welcome'], ['甜不辣', 'tempura taiwanesa de pescado', 'tianbula (fried fish cake)'], ['四季豆', 'judías verdes', 'green beans'], ['米血', 'pastel de arroz con sangre', 'pig blood rice cake'], ['杏鮑菇', 'hongo ostra real', 'king oyster mushroom'], ['薯條', 'papas fritas', 'french fries'], ['一份', 'una porción', 'one portion'], ['一片', 'una pieza (plana)', 'one piece (flat)']],
+  START: [['鹽酥雞', 'pollo frito crujiente en trozos', 'popcorn chicken'], ['雞排', 'filete de pollo frito', 'fried chicken cutlet'], ['辣', 'picante', 'spicy'], ['蔥', 'cebollín', 'scallion'], ['蒜', 'ajo', 'garlic'], ['洋蔥', 'cebolla', 'onion']],
+  ITEM: [['歡迎光臨', 'bienvenido(a)', 'welcome'], ['夾子', 'pinzas', 'tongs'], ['籃子', 'canasta', 'basket'], ['放回去', 'devolver', 'put back'], ['點好了', 'ya terminé de pedir', "I'm done ordering"], ['一份', 'una porción', 'one portion'], ['一片', 'una pieza (plana)', 'one piece (flat)'],
+    ['甜不辣', 'tempura taiwanesa de pescado', 'tianbula (fried fish cake)'], ['四季豆', 'judías verdes', 'green beans'], ['米血', 'pastel de arroz con sangre', 'pig blood rice cake'], ['杏鮑菇', 'hongo ostra real', 'king oyster mushroom'],
+    ['百頁豆腐', 'tofu prensado', 'pressed tofu'], ['花枝丸', 'bolas de calamar', 'cuttlefish balls'], ['糯米腸', 'salchicha de arroz glutinoso', 'sticky rice sausage'], ['芋頭粿', 'pastel de taro', 'taro cake'], ['蘿蔔糕', 'pastel de rábano', 'radish cake']],
   CUT: [['切', 'cortar', 'cut'], ['不用切', 'no hace falta cortar', "no need to cut"], ['整片', 'entero (una pieza)', 'whole piece']],
   SPICY: [['辣', 'picante', 'spicy'], ['不辣', 'nada picante', 'not spicy'], ['小辣', 'poco picante', 'a little spicy'], ['大辣', 'muy picante', 'very spicy'], ['辣粉', 'polvo de chile', 'chili powder']],
   TOPS: [['蔥', 'cebollín', 'scallion'], ['蒜', 'ajo', 'garlic'], ['洋蔥', 'cebolla', 'onion'], ['都要', 'todo, sí a todo', 'all of them'], ['都不要', 'nada, no a todo', 'none of them']],
   ORDER_CHECK: [['複誦', 'repetir el pedido', 'repeat the order'], ['對嗎', '¿es correcto?', 'is that right?'], ['我要的是', 'lo que quiero es', 'what I want is'], ['不好意思', 'disculpe', 'excuse me']],
   HANDOVER: [['袋子', 'bolsa', 'bag'], ['重炸', 'volver a freír', 'fry again'], ['不好意思', 'disculpe', 'excuse me']],
-  PAY: [['價目表', 'lista de precios', 'price list'], ['一共', 'en total', 'in total'], ['算錯', 'calcular mal', 'miscalculate'], ['應該', 'debería', 'should'], ['零錢', 'monedas, cambio suelto', 'small change']],
+  PAY: [['單價', 'precio por unidad', 'unit price'], ['錢不夠', 'no alcanzar el dinero', 'not have enough money'], ['不要了', 'ya no lo quiero', "don't want it anymore"], ['一共', 'en total', 'in total'], ['算錯', 'calcular mal', 'miscalculate'], ['應該', 'debería', 'should'], ['零錢', 'monedas, cambio suelto', 'small change']],
+  REMOVE: [['不要了', 'ya no lo quiero', "don't want it anymore"], ['拿掉', 'quitar', 'take out'], ['重新算', 'volver a calcular', 'recalculate']],
   PAY_FIX: [['夠', 'alcanzar, ser suficiente', 'be enough'], ['當場', 'en el momento', 'on the spot'], ['下次再付', 'pagar la próxima vez', 'pay next time']],
   CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give wrong change'], ['應該找', 'debería darme de cambio', 'should give back']],
   END: [['酥脆', 'crujiente', 'crispy'], ['涼', 'frío', 'cold'], ['下次', 'la próxima vez', 'next time']],
@@ -251,12 +271,12 @@ const VOCAB = {
 /* 關卡名稱（錯誤紀錄用） */
 const STAGE = {
   ITEM: ['點餐', 'pedir', 'ordering'], CUT: ['雞排切不切', 'cortar el filete o no', 'cut or not'], SPICY: ['辣不辣', 'picante o no', 'spice level'], TOPS: ['蔥蒜洋蔥', 'cebollín, ajo, cebolla', 'scallion, garlic, onion'],
-  ORDER_CHECK: ['核對點的餐', 'revisar el pedido', 'checking the order'], HANDOVER: ['核對袋子', 'revisar la bolsa', 'checking the bag'], PAY: ['付錢', 'pagar', 'paying'], PAY_FIX: ['付錢', 'pagar', 'paying'], CHANGE: ['找錢', 'el cambio', 'the change']
+  ORDER_CHECK: ['核對點的餐', 'revisar el pedido', 'checking the order'], HANDOVER: ['核對袋子', 'revisar la bolsa', 'checking the bag'], PAY: ['付錢', 'pagar', 'paying'], REMOVE: ['錢不夠，拿掉一樣', 'sin dinero suficiente: quitar algo', 'not enough money: remove one'], END: ['對照Ami的要求', 'comparar con lo que pidió Ami', "checking against Ami's order"], PAY_FIX: ['付錢', 'pagar', 'paying'], CHANGE: ['找錢', 'el cambio', 'the change']
 };
 
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
-  ITEM: '走到攤位前', CUT: '回答老闆', SPICY: '回答老闆', TOPS: '回答老闆', ORDER_CHECK: '聽老闆確認', HANDOVER: '等老闆炸好', PAY: '付錢', PAY_FIX: '聽老闆重算', CHANGE: '等找錢', END: '拿袋子'
+  ITEM: '走到攤位前', CUT: '回答老闆', SPICY: '回答老闆', TOPS: '回答老闆', ORDER_CHECK: '聽老闆確認', HANDOVER: '等老闆炸好', PAY: f => f === 'REMOVE' ? '聽老闆重新報價' : '付錢', REMOVE: '告訴老闆', PAY_FIX: '聽老闆重算', CHANGE: '等找錢', END: '拿袋子'
 };
 
 /* ══════════════════════════════════════
@@ -267,14 +287,26 @@ const PLACES = {
   shop: ['🍗', '鹽酥雞攤', 'Puesto de pollo frito', 'Fried chicken stall', '']
 };
 const ITEMS = [
-  { zh: '鹽酥雞', es: 'pollo frito crujiente', en: 'popcorn chicken', p: 65, mw: '份' },
-  { zh: '雞排', es: 'filete de pollo frito', en: 'fried chicken cutlet', p: 80, mw: '片' },
-  { zh: '甜不辣', es: 'tianbula', en: 'tianbula', p: 50, mw: '份' },
-  { zh: '四季豆', es: 'judías verdes fritas', en: 'fried green beans', p: 50, mw: '份' },
-  { zh: '米血', es: 'pastel de arroz con sangre', en: 'pig blood rice cake', p: 35, mw: '份' },
-  { zh: '杏鮑菇', es: 'hongo ostra real frito', en: 'fried king oyster mushroom', p: 60, mw: '份' },
-  { zh: '薯條', es: 'papas fritas', en: 'french fries', p: 45, mw: '份' }
+  { zh: '鹽酥雞', es: 'pollo frito crujiente', en: 'popcorn chicken', p: 60, mw: '份', img: 'popcorn' },
+  { zh: '雞排', es: 'filete de pollo frito', en: 'fried chicken cutlet', p: 75, mw: '片', img: 'cutlet' },
+  { zh: '雞塊', es: 'nuggets de pollo', en: 'chicken nuggets', p: 45, mw: '份', img: 'nugget' },
+  { zh: '魷魚', es: 'calamar frito', en: 'fried squid', p: 60, mw: '份', img: 'squid' },
+  { zh: '四季豆', es: 'judías verdes fritas', en: 'fried green beans', p: 30, mw: '份', img: 'greenbean' },
+  { zh: '杏鮑菇', es: 'hongo ostra real frito', en: 'fried king oyster mushroom', p: 35, mw: '份', img: 'mushroom' },
+  { zh: '青椒', es: 'pimiento verde frito', en: 'fried green pepper', p: 30, mw: '份', img: 'pepper' },
+  { zh: '百頁豆腐', es: 'tofu prensado frito', en: 'fried pressed tofu', p: 25, mw: '份', img: 'tofu' },
+  { zh: '甜不辣', es: 'tianbula (pasta de pescado frita)', en: 'tianbula (fried fish cake)', p: 30, mw: '份', img: 'tianbula' },
+  { zh: '花枝丸', es: 'bolas de calamar', en: 'cuttlefish balls', p: 45, mw: '份', img: 'cuttlefishball' },
+  { zh: '熱狗', es: 'salchicha frita', en: 'fried hot dog', p: 20, mw: '份', img: 'hotdog' },
+  { zh: '米血', es: 'pastel de arroz con sangre', en: 'pig blood rice cake', p: 15, mw: '份', img: 'blood' },
+  { zh: '地瓜', es: 'batata frita', en: 'fried sweet potato', p: 40, mw: '份', img: 'sweetpotato' },
+  { zh: '糯米腸', es: 'salchicha de arroz glutinoso', en: 'sticky rice sausage', p: 25, mw: '份', img: 'sausage' },
+  { zh: '芋頭粿', es: 'pastel de taro', en: 'fried taro cake', p: 25, mw: '份', img: 'taro' },
+  { zh: '蘿蔔糕', es: 'pastel de rábano', en: 'fried radish cake', p: 35, mw: '份', img: 'radish' }
 ];
+const ITEM_BY = Object.fromEntries(ITEMS.map(x => [x.zh, x]));
+const MW = { '份': ['porción', 'portion'], '片': ['pieza', 'piece'] };
+const TOP_COMBOS = [0, 1, 2, 3, 4, 5, 6, 7].map(n => [!!(n & 1), !!(n & 2), !!(n & 4)]);
 const STEAK = ITEMS[1];
 const SPICY = [
   { zh: '不辣', es: 'nada picante', en: 'not spicy', opt: '不要辣。', say: '不要辣', fix: '不好意思，我不要辣。' },
@@ -287,7 +319,6 @@ const itemsText = (v, l) => v.map(x => l === 'zh' ? qtyZh(x) : `${x.q} ${x.it[l]
 const topsZh = v => { const y = TOPN.filter((_, i) => v[i]).map(x => x[0]), n = TOPN.filter((_, i) => !v[i]).map(x => x[0]); return !y.length ? '蔥蒜洋蔥都不要' : !n.length ? '蔥蒜洋蔥都要' : `要${y.join('、')}，不要${n.join('、')}`; };
 const topsL = (v, l) => { const i = l === 'es' ? 1 : 2, y = TOPN.filter((_, j) => v[j]).map(x => x[i]), n = TOPN.filter((_, j) => !v[j]).map(x => x[i]), w = l === 'es' ? ['con', 'sin', ' y '] : ['with', 'no', ' or ']; return !y.length ? `${w[1]} ${n.join(l === 'es' ? ', ' : ', ')}` : !n.length ? `${w[0]} ${y.join(', ')}` : `${w[0]} ${y.join(', ')}, ${w[1]} ${n.join(', ')}`; };
 const topsOpt = v => { const y = TOPN.filter((_, i) => v[i]).map(x => x[0]), n = TOPN.filter((_, i) => !v[i]).map(x => x[0]); return !y.length ? '都不要。' : !n.length ? '都要。' : `要${y.join('、')}，不要${n.join('、')}。`; };
-const KEYS = ['items', 'cut', 'spicy', 'tops'];
 
 /* 老闆複誦（ORDER_CHECK）與袋子裡的東西（HANDOVER）：一次只會錯一項。
    items：數量（其中一樣多了或少了）；cut：雞排切不切；spicy：辣度；tops：蔥蒜洋蔥 */
@@ -296,11 +327,11 @@ const OC = {
   es: (k, v) => k === 'items' ? itemsText(v, 'es') : k === 'cut' ? (v ? 'el filete cortado' : 'el filete entero') : k === 'spicy' ? v.es : topsL(v, 'es'),
   en: (k, v) => k === 'items' ? itemsText(v, 'en') : k === 'cut' ? (v ? 'cutlet cut up' : 'cutlet whole') : k === 'spicy' ? v.en : topsL(v, 'en'),
   fix: (k, v, idx) => k === 'items' ? `不好意思，${v[idx].it.zh}我要的是${NZ(v[idx].q)}${v[idx].it.mw}。` : k === 'cut' ? (v ? '不好意思，雞排我要切。' : '不好意思，雞排我不要切。') : k === 'spicy' ? v.fix : `不好意思，我${topsZh(v)}。`,
-  full: (o, f) => KEYS.map(k => OC[f](k, o[k])).join(f === 'zh' ? '，' : '; ')
+  full: (o, f, ks) => ks.map(k => OC[f](k, o[k])).join(f === 'zh' ? '，' : '; ')
 };
 const diffIdx = (a, b) => a.findIndex((x, i) => x.q !== b[i].q);
-const flipOf = (t, k) => k === 'items' ? (() => { const i = Math.floor(Math.random() * t.items.length); return t.items.map((x, j) => j === i ? { ...x, q: x.q === 1 ? 2 : 1 } : x); })()
-  : k === 'cut' ? !t.cut : k === 'spicy' ? pick(SPICY.filter(s => s !== t.spicy)) : (() => { const i = Math.floor(Math.random() * 3); return t.tops.map((v, j) => j === i ? !v : v); })();
+const flipOf = (T, k) => k === 'items' ? (() => { const i = Math.floor(Math.random() * T.items.length); return T.items.map((x, j) => j === i ? { ...x, q: x.q === 1 ? 2 : x.q - 1 } : x); })()
+  : k === 'cut' ? !T.cut : k === 'spicy' ? pick(SPICY.filter(s => s !== T.spicy)) : (() => { const i = Math.floor(Math.random() * 3); return T.tops.map((v, j) => j === i ? !v : v); })();
 
 /* ══════════════════════════════════════
    任務提示：只列出 NPC 交代過的原話；不扣分，結果頁顯示看了幾次
@@ -326,7 +357,6 @@ const Game = defineGame({
   hintViews: 0, log: [], feedback: [], visit: 0, att: {},
   cash: null,
   onStart() { this.updateCash(); },
-  updateCash() { document.getElementById('cash-badge').textContent = ''; },
   setPlace(mode) {
     const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
     document.getElementById('place-bar').className = cls || '';
@@ -336,28 +366,80 @@ const Game = defineGame({
   },
 
   IMAGES: {
-    START: ['images/start.jpg', '🍗'], ITEM: ['images/stall.jpg', '🍗'], CUT: ['images/stall.jpg', '🔪'], SPICY: ['images/stall.jpg', '🌶️'], TOPS: ['images/stall.jpg', '🧄'],
-    ORDER_CHECK: ['images/stall.jpg', '🍗'], HANDOVER: ['images/bag.jpg', '🛍️'], PAY: ['images/pay.jpg', '💵'], PAY_FIX: ['images/pay.jpg', '💵'], CHANGE: ['images/pay.jpg', '💵'],
+    START: ['images/start.jpg', '🍗'], ITEM: ['images/pick.jpg', '🧺'], CUT: ['images/stall.jpg', '🔪'], SPICY: ['images/stall.jpg', '🌶️'], TOPS: ['images/stall.jpg', '🧄'],
+    ORDER_CHECK: ['images/stall.jpg', '🍗'], HANDOVER: ['images/bag.jpg', '🛍️'], PAY: ['images/pay.jpg', '💵'], REMOVE: ['images/pay.jpg', '💵'], PAY_FIX: ['images/pay.jpg', '💵'], CHANGE: ['images/pay.jpg', '💵'],
     END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
-  k: 0,            // 現在在點第幾樣（0 開始）
+  basket: {},       // 籃子：{ 食物名: 幾份 }
+  _flash: false,    // 夾一下：換成夾子合起來的那張圖，約 0.4 秒
+  lastAct: null,
 
   setup() {
-    const others = shuffle(ITEMS.filter(x => x !== STEAK)).slice(0, pick([1, 2]));
-    const items = [{ it: STEAK, q: 1 }, ...others.map(it => ({ it, q: pick([1, 2]) }))];
-    const t = this.task = { rot: Math.floor(Math.random() * 3), items, cut: Math.random() < 0.5, spicy: pick(SPICY), tops: [Math.random() < 0.5, Math.random() < 0.5, Math.random() < 0.5] };
-    const total = sum(items.map(x => x.it.p * x.q));
-    initPay(t, total, ITEMS.filter(x => !items.some(y => y.it === x)).map(x => ({ zh: x.zh, es: x.es, en: x.en, price: x.p })));
-    const truth = t.truth = { items, cut: t.cut, spicy: t.spicy, tops: t.tops };
-    /* 老闆複誦：45% 機率有一項說錯 */
-    t.ocWrong = Math.random() < 0.45; t.ocKind = pick(KEYS); t.ocFlip = flipOf(t, t.ocKind);
+    /* Ami 的要求：雞排 + 2～3 樣別的；總價不超過 200 元（身上的錢至少 200，一定付得起） */
+    let items, total;
+    do {
+      const others = shuffle(ITEMS.filter(x => x !== STEAK)).slice(0, pick([2, 3]));
+      items = [{ it: STEAK, q: 1 }, ...others.map(it => ({ it, q: pick([1, 1, 2]) }))];
+      total = sum(items.map(x => x.it.p * x.q));
+    } while (total > 200);
+    const cash = pick([200, 250, 300]);
+    const t = this.task = { rot: Math.floor(Math.random() * 3), items, cut: Math.random() < 0.5, spicy: pick(SPICY), tops: [Math.random() < 0.5, Math.random() < 0.5, Math.random() < 0.5], cash, cash0: cash };
+    /* 蔥蒜洋蔥的選項：Ami 說的那一種 + 另外三種，位置固定 */
+    t.topOpts = shuffle([t.tops, ...shuffle(TOP_COMBOS.filter(v => v.some((x, i) => x !== t.tops[i]))).slice(0, 3)]).map(topsOpt);
+    Object.assign(t, { total: 0, said: 0, bill: 0, change: 0, given: 0, payWrong: false, changeWrong: false, payTry: 0, extra: { zh: '', es: '', en: '', price: 0 } });   // 先放空值（付錢那幾關的設定在開始前就會讀到）
+    this.basket = {}; this.lastAct = null; this._flash = false;
+    try { new Image().src = 'images/pick_click.jpg'; } catch (e) {}
+  },
+  orderList() { return ITEMS.filter(x => this.basket[x.zh]).map(it => ({ it, q: this.basket[it.zh] })); },
+  orderTotal() { return sum(this.orderList().map(x => x.it.p * x.q)); },
+  hasCutlet() { return !!this.basket[STEAK.zh]; },
+  updateCash() {
+    const t = this.task, show = t && !['START', 'END', 'RESULT'].includes(this.state === '_TRANS' && this._trans ? this._trans.to : this.state);
+    document.getElementById('cash-badge').textContent = show ? `💰 ${t.cash} 元` : '';
+  },
+  /* 老闆報價（每次籃子變了都重算）：錢夠的時候，老闆才可能多算 */
+  requote() {
+    const t = this.task, total = this.orderTotal(), left = ITEMS.filter(x => !this.basket[x.zh]), x = pick(left.length ? left : ITEMS);
+    t.total = total; t.extra = { zh: x.zh, es: x.es, en: x.en, price: x.p };
+    t.payWrong = total <= t.cash && total + x.p <= t.cash && Math.random() < 0.45;
+    t.said = t.payWrong ? total + x.p : total;
+    t.bill = billFor(Math.max(total, t.said)); t.change = t.bill - total;
+    t.changeWrong = t.change > 0 && Math.random() < 0.4;
+    const ds = [-20, -10, 10, 20].filter(d => t.change + d >= 0);
+    t.given = t.changeWrong ? t.change + pick(ds) : t.change;
+    t.payTry = 0;
+  },
+  /* 付完錢、選完口味之後：老闆複誦、袋子裡的東西，都是照「你點的」來核對（不是照 Ami 的） */
+  buildChecks() {
+    const t = this.task, items = this.orderList();
+    t.keys = ['items', ...(this.hasCutlet() ? ['cut'] : []), 'spicy', 'tops'];
+    const truth = t.truth = { items, cut: !!t.pCut, spicy: t.pSpicy, tops: t.pTops };
+    t.ocWrong = Math.random() < 0.45; t.ocKind = pick(t.keys); t.ocFlip = flipOf(truth, t.ocKind);
     t.ocIdx = t.ocKind === 'items' ? diffIdx(items, t.ocFlip) : 0;
     t.ocSaid = { ...truth, ...(t.ocWrong ? { [t.ocKind]: t.ocFlip } : {}) };
-    /* 袋子打開：45% 機率有一項不對 */
-    t.hoWrong = Math.random() < 0.45; t.hoKind = pick(KEYS); t.hoFlip = flipOf(t, t.hoKind);
+    t.hoWrong = Math.random() < 0.45; t.hoKind = pick(t.keys); t.hoFlip = flipOf(truth, t.hoKind);
     t.hoIdx = t.hoKind === 'items' ? diffIdx(items, t.hoFlip) : 0;
     t.hoGot = { ...truth, ...(t.hoWrong ? { [t.hoKind]: t.hoFlip } : {}) };
-    this.k = 0; this.itemWrong = false;
+  },
+  /* 點一下照片＝夾一次 */
+  flashTongs() {
+    this._flash = true; clearTimeout(this._ft);
+    this._ft = setTimeout(() => { this._flash = false; if (this.state === 'ITEM') this.setImage('images/pick.jpg', '🧺'); }, 420);
+  },
+  imageFor() { if (this.state === 'ITEM' && this._flash) return ['images/pick_click.jpg', '🧺']; },
+  putBack(zh) {
+    if (!this.basket[zh]) return;
+    if (!--this.basket[zh]) delete this.basket[zh];
+    const x = ITEM_BY[zh];
+    this.lastAct = L(`你把一${x.mw}${zh}放回去。`, `Devuelves una porción de ${x.es}.`, `You put one portion of ${x.en} back.`);
+    Tr.closeAll(); Speech.stop();
+    this.thought = null; this.feedback = []; this.thoughtFirst = false;
+    this.render();
+  },
+  testPrep(use) {   // 自動測試用：亂玩時隨機夾幾樣進籃子（錢不夠的情況由亂玩自己碰到）
+    if (this.state !== 'ITEM') return;
+    if (this.orderList().length > 6) this.basket = {};
+    if (!use) { const n = Math.floor(Math.random() * 3); for (let k = 0; k < n; k++) { const x = pick(ITEMS); this.basket[x.zh] = (this.basket[x.zh] || 0) + 1; } }
   },
 
   amiLines() {
@@ -371,10 +453,16 @@ const Game = defineGame({
     ];
   },
   hintSections() {
-    const ORDER = ['START', 'ITEM', 'CUT', 'SPICY', 'TOPS', 'ORDER_CHECK', 'HANDOVER', 'PAY', 'PAY_FIX', 'CHANGE', 'END', 'RESULT'];
+    const ORDER = ['START', 'ITEM', 'PAY', 'REMOVE', 'PAY_FIX', 'CHANGE', 'CUT', 'SPICY', 'TOPS', 'ORDER_CHECK', 'HANDOVER', 'END', 'RESULT'];
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
-    const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
-    if (at('PAY_FIX')) out.push({ title: '老闆說的話', lines: [L(`老闆：一共是${zhNum(this.task.total)}元。`, `Son ${esM(this.task.total)} en total.`, `${enM(this.task.total)} in total.`)] });
+    const t = this.task, out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
+    const list = this.orderList();
+    if (list.length && at('ITEM')) out.push({ title: '你夾的東西（單價）', lines: list.map(x => L(`${qtyZh(x)}：每${x.it.mw}${x.it.p}元`, `${x.q} ${x.it.es}: ${x.it.p} dólares por ${MW[x.it.mw][0]}`, `${x.q} ${x.it.en}: ${x.it.p} dollars per ${MW[x.it.mw][1]}`)) });
+    if (at('PAY') && t.said) {
+      const ls = [L(`老闆：一共是${zhNum(t.said)}元。`, `Son ${esM(t.said)} en total.`, `${enM(t.said)} in total.`)];
+      if (at('PAY_FIX') && t.payWrong) ls.push(L(`老闆：啊，不好意思！是${zhNum(t.total)}元。`, `¡Ay, disculpe! Son ${esM(t.total)}.`, `Oh, sorry! It's ${enM(t.total)}.`));
+      out.push({ title: '老闆說的話', lines: ls });
+    }
     return out;
   },
 
@@ -385,8 +473,7 @@ const Game = defineGame({
       { zh: `要買：${itemsText(t.items, 'zh')}`, es: `Comprar: ${itemsText(t.items, 'es')}`, en: `Buy: ${itemsText(t.items, 'en')}` },
       { zh: `雞排：${t.cut ? '要切' : '不用切'}；辣度：${t.spicy.zh}`, es: `Filete: ${t.cut ? 'cortado' : 'entero'}; picante: ${t.spicy.es}`, en: `Cutlet: ${t.cut ? 'cut up' : 'whole'}; spice: ${t.spicy.en}` },
       { zh: `蔥蒜洋蔥：${topsZh(t.tops)}`, es: `Cebollín, ajo, cebolla: ${topsL(t.tops, 'es')}`, en: `Scallion, garlic, onion: ${topsL(t.tops, 'en')}` },
-      { zh: '外帶，帶回家吃', es: 'Para llevar, a casa', en: 'To go, to eat at home' },
-      { zh: '你身上有：一百元、兩百元、五百元的鈔票，還有零錢', es: 'Llevas: billetes de cien, doscientos y quinientos dólares, y algo de cambio', en: 'You have: 100-, 200- and 500-dollar bills, plus some small change' }
+      { zh: `你身上有：${t.cash}元`, es: `Llevas: ${t.cash} dólares`, en: `You have: ${t.cash} dollars` }
     ];
     if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
@@ -395,15 +482,25 @@ const Game = defineGame({
     const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
     return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
   },
-  /* 價目表 */
-  menuHTML() {
-    const r = s => this.ruby(s);
-    return `<div class="menu"><div class="mh">🍗 ${r('價目表')}</div><div class="mflav">${ITEMS.map(x => `<span>${r(x.zh)} ${x.p}${r('元')}</span>`).join('')}</div></div>`;
+  /* 點菜畫面：16 張照片卡片 + 籃子（× 幾份、放回去、你身上有多少錢） */
+  shelfHTML() {
+    const r = s => this.ruby(s), t = this.task, b = this.basket;
+    const cards = ITEMS.map(x => `<div class="food" role="button" tabindex="0" data-food="${x.zh}"><img src="images/item_${x.img}.jpg" alt="${x.zh}">` +
+      `<div class="nm">${r(x.zh)}</div><div class="pr">${x.p}${r('元')}／${r(x.mw)}</div>${b[x.zh] ? `<span class="cnt">× ${b[x.zh]}</span>` : ''}</div>`).join('');
+    const rows = this.orderList().map(x => `<div class="row"><span>${r(x.it.zh)} × ${x.q}</span><button type="button" class="put" data-put="${x.it.zh}" title="${esc(X('Devolver', 'Put back'))}">${r('放回去')}</button></div>`).join('') || `<div class="empty">${r('籃子是空的')}</div>`;
+    const act = this.lastAct ? `<div class="act">${r(this.lastAct.zh)}${ONLYZH() ? '' : `<small>${esc(X(this.lastAct.es, this.lastAct.en))}</small>`}</div>` : '';
+    return `<div class="shelf">${cards}</div><div class="basket"><div class="th">🧺 ${r('籃子')}<small>${r('點一下照片，夾一份')}</small></div>${act}${rows}<div class="cash">${r('你身上有')} ${t.cash}${r('元')}</div></div>`;
+  },
+  /* 付錢畫面：你點的東西和單價（不寫總價，自己算）+ 你身上的錢 */
+  payHTML() {
+    const r = s => this.ruby(s), t = this.task;
+    return `<div class="menu"><div class="mh">🧾 ${r('你點的東西')}</div><div class="mflav">${this.orderList().map(x => `<span>${r(x.it.zh)} ${x.it.p}${r('元')} × ${x.q}</span>`).join('')}</div><div class="cash">${r('你身上有')} ${t.cash}${r('元')}</div></div>`;
   },
   /* 袋子打開：看裡面有什麼 */
   bagHTML(o) {
     const r = s => this.ruby(s);
-    const chips = [...o.items.map(qtyZh), o.items.length ? (o.cut ? '雞排切好了' : '雞排是整片') : '', o.spicy.zh === '不辣' ? '不辣' : '🌶 ' + o.spicy.zh, ...TOPN.map((x, i) => o.tops[i] ? `有${x[0]}` : `沒有${x[0]}`)];
+    const hasCut = o.items.some(x => x.it === STEAK);
+    const chips = [...o.items.map(qtyZh), hasCut ? (o.cut ? '雞排切好了' : '雞排是整片') : '', o.spicy.zh === '不辣' ? '不辣' : '🌶 ' + o.spicy.zh, ...TOPN.map((x, i) => o.tops[i] ? `有${x[0]}` : `沒有${x[0]}`)];
     return `<div class="bag"><div class="be">🛍️</div><div class="bc">${chips.filter(Boolean).map(c => `<span>${r(c)}</span>`).join('')}</div></div>`;
   },
 
@@ -411,22 +508,17 @@ const Game = defineGame({
   getConfig() {
     const N = this.N, t = this.task, T = t.truth;
     const staff = (zh, es, en) => L(`老闆：${zh}`, es, en);
-    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
     const pair = o => t.rot % 2 ? [o[1], o[0]] : o;
     const pays = payStates(Game, {
-      who: '老闆', place: 'shop', html: () => Game.menuHTML(),
-      extraWhy: () => M(`老闆算錯了：你們沒有點${t.extra.zh}，他多算了${t.extra.price}元（${t.said}元）。`, `El dueño se equivocó: no pidieron ${t.extra.es} y cobró ${t.extra.price} de más (${esM(t.said)}).`, `The owner got it wrong: you didn't order ${t.extra.en}, but he charged ${t.extra.price} extra (${enM(t.said)}).`)
+      who: '老闆', place: 'shop', html: () => Game.payHTML(),
+      finish: () => { t.cash -= t.total; Game.state = Game.hasCutlet() ? 'CUT' : 'SPICY'; }
     });
     const ocK = t.ocKind, hoK = t.hoKind;
-    const need = () => Game.k < t.items.length;
-    const done = '這樣就好，謝謝。';
-    const phrase = x => `${qtyZh(x)}。`;
-    const itemCorrect = () => need() ? phrase(t.items[Game.k]) : done;
-    const itemOpts = () => {
-      const pool = shuffle(ITEMS.filter(x => !t.items.some(y => y.it === x)));
-      if (need()) { const x = t.items[Game.k]; return rotOf(t, [phrase(x), phrase({ ...x, q: x.q === 1 ? 2 : 1 }), done]); }
-      return rotOf(t, [done, phrase({ it: pool[0], q: 1 }), phrase({ it: pool[1], q: 1 })]);
-    };
+    const SHORT = '不好意思，我的錢不夠，有一樣不要了。';
+    const payOk = `給你${zhNum(t.bill)}元。`;
+    const claim = t.payWrong ? t.total : t.total + (t.extra ? t.extra.price : 0);
+    const fixTotal = `不好意思，好像算錯了，應該是${zhNum(claim)}元吧？`;
+    const broke = () => t.total > t.cash;
 
     return {
       /* ═══ Ami 的 LINE ═══ */
@@ -442,108 +534,163 @@ const Game = defineGame({
         next: () => { Game.startTimer(); Game.state = 'ITEM'; }
       },
 
-      /* ═══ 一樣一樣點 ═══ */
+      /* ═══ 點菜：點一下照片，夾一份（也可以夾自己想吃的） ═══ */
       ITEM: {
-        place: 'shop',
-        html: () => Game.menuHTML(),
-        dialogue: () => [Game.k === 0 ? staff('歡迎光臨！要吃什麼？', '¡Bienvenido(a)! ¿Qué va a llevar?', 'Welcome! What would you like?') : staff('還要別的嗎？', '¿Algo más?', 'Anything else?')],
-        options: () => itemOpts(),
+        place: 'shop', single: true,
+        html: () => Game.shelfHTML(),
+        mount: box => {
+          box.querySelectorAll('[data-food]').forEach(el => {
+            el.onclick = () => Game.handleChoice('夾:' + el.dataset.food);
+            el.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); } };
+          });
+          box.querySelectorAll('[data-put]').forEach(b => { b.onclick = () => Game.putBack(b.dataset.put); });
+        },
+        dialogue: () => [staff('歡迎光臨！想吃什麼，自己夾，夾好了跟我說。', '¡Bienvenido(a)! Elige lo que quieras con las pinzas y avísame cuando termines.', 'Welcome! Pick what you like with the tongs and tell me when you are done.')],
+        options: ['點好了。'],
         next: c => {
-          if (c !== itemCorrect()) {
-            Game.itemWrong = true;
-            Game.addMistake(need()
-              ? (c === done ? M(`Ami還要${qtyZh(t.items[Game.k])}。`, `Ami también quiere ${t.items[Game.k].q} ${t.items[Game.k].it.es}.`, `Ami also wants ${t.items[Game.k].q} ${t.items[Game.k].it.en}.`)
-                : M(`數量不對：Ami要${qtyZh(t.items[Game.k])}。`, `La cantidad no es esa: Ami quiere ${t.items[Game.k].q} ${t.items[Game.k].it.es}.`, `Wrong amount: Ami wants ${t.items[Game.k].q} ${t.items[Game.k].it.en}.`))
-              : M('Ami要的都點完了，不用再加。', 'Ya pediste todo lo de Ami; no hace falta añadir más.', "You've ordered everything Ami wanted — nothing more to add."));
+          if (c.startsWith('夾:')) {
+            const x = ITEM_BY[c.slice(2)];
+            Game.basket[x.zh] = (Game.basket[x.zh] || 0) + 1;
+            Game.lastAct = L(`你用夾子夾了一${x.mw}${x.zh}。`, `Con las pinzas tomas una porción de ${x.es}.`, `You pick up one portion of ${x.en} with the tongs.`);
+            Game.flashTongs();
             return;
           }
-          if (!Game.itemWrong) Game.good(need() ? `${qtyZh(t.items[Game.k])}，沒錯！` : '點完了，沒有多加。', need() ? `¡${t.items[Game.k].q} ${t.items[Game.k].it.es}, correcto!` : 'Terminaste de pedir, sin añadir de más.', need() ? `${t.items[Game.k].q} ${t.items[Game.k].it.en} — correct!` : 'Done ordering, nothing extra added.');
-          Game.itemWrong = false;
-          if (need()) { Game.k += 1; Game.thought = [L(`（老闆把${t.items[Game.k - 1].it.zh}放進籃子裡。）`, `(El dueño pone ${t.items[Game.k - 1].it.es} en la canasta.)`, `(The owner puts ${t.items[Game.k - 1].it.en} in the basket.)`)]; return; }
-          Game.thought = null; Game.state = 'CUT';
+          if (!Game.orderList().length) { Game.thought = [L('（籃子還是空的，先夾一點東西吧。）', '(La canasta sigue vacía; primero toma algo.)', '(The basket is still empty — pick something first.)')]; return; }
+          Game.requote(); Game.state = 'PAY';
         }
       },
 
-      /* ═══ 雞排切不切 ═══ */
+      /* ═══ 付錢：先付錢，再炸。老闆報價；錢夠不夠要自己算 ═══ */
+      PAY: {
+        place: 'shop', html: () => Game.payHTML(),
+        dialogue: () => [staff(`好的，一共是${zhNum(t.said)}元。`, `Muy bien, son ${esM(t.said)} en total.`, `All right, that's ${enM(t.said)} in total.`)],
+        options: () => rotOf(t, [payOk, fixTotal, SHORT, '你是不是想騙我的錢啊？']),
+        next: c => {
+          t.payTry += 1;
+          const right = broke() ? SHORT : t.payWrong ? fixTotal : payOk;
+          if (c !== right) {
+            Game.addMistake(
+              c === '你是不是想騙我的錢啊？' ? POLITE
+              : c === SHORT ? M(`你身上有${t.cash}元，一共${t.total}元，錢是夠的。`, `Llevas ${esM(t.cash)} y el total es ${esM(t.total)}: sí te alcanza.`, `You have ${enM(t.cash)} and the total is ${enM(t.total)} — you can afford it.`)
+              : c === payOk ? (broke() ? M(`你身上只有${t.cash}元，不夠付${t.total}元。要先告訴老闆。`, `Solo llevas ${esM(t.cash)}: no alcanza para ${esM(t.total)}. Hay que decírselo al dueño.`, `You only have ${enM(t.cash)}, which isn't enough for ${enM(t.total)}. Tell the owner first.`)
+                : M(`老闆算錯了：你們沒有點${t.extra.zh}，他多算了${t.extra.price}元（${t.said}元）。`, `El dueño se equivocó: no pediste ${t.extra.es} y cobró ${t.extra.price} de más (${esM(t.said)}).`, `The owner got it wrong: you didn't order ${t.extra.en}, but he charged ${t.extra.price} extra (${enM(t.said)}).`))
+              : M(`老闆算對了：一共是${t.total}元。${broke() ? `你身上只有${t.cash}元，是你的錢不夠。` : ''}`, `Lo calculó bien: son ${esM(t.total)}.${broke() ? ` Lo que pasa es que solo llevas ${esM(t.cash)}.` : ''}`, `The owner was right: ${enM(t.total)} in total.${broke() ? ` The problem is you only have ${enM(t.cash)}.` : ''}`));
+            return;
+          }
+          if (t.payTry === 1) {
+            if (c === SHORT) Game.good('你很細心！錢不夠的時候，要馬上跟老闆說，拿掉一樣。', '¡Qué atento! Si no te alcanza el dinero, díselo al dueño y quita algo.', "Well spotted! When you can't afford it, tell the owner and drop something.");
+            else if (c === fixTotal) Game.good('你很細心！付錢以前，要先對一下單價和自己點的東西。', '¡Qué atento! Antes de pagar, compara los precios con lo que pediste.', 'Well spotted! Before you pay, check the unit prices against what you ordered.');
+            else Game.good('沒錯！付錢以前，要先自己算一下。', '¡Exacto! Antes de pagar, calcula tú también.', 'Right! Do the math yourself before you pay.');
+          }
+          if (c === SHORT) { Game.state = 'REMOVE'; return; }
+          if (c === fixTotal) { Game.state = 'PAY_FIX'; return; }
+          if (t.change > 0) Game.state = 'CHANGE'; else { t.cash -= t.total; Game.state = Game.hasCutlet() ? 'CUT' : 'SPICY'; }
+        }
+      },
+      /* 錢不夠：告訴老闆哪一樣不要了（那一樣整個拿掉），老闆重新報價 */
+      REMOVE: {
+        place: 'shop', html: () => Game.payHTML(),
+        dialogue: () => [staff('好，哪一樣不要？', 'Bien, ¿cuál ya no quiere?', 'OK, which one do you not want?')],
+        options: () => rotOf(t, Game.orderList().map(x => `${x.it.zh}不要了。`)),
+        next: c => {
+          const x = ITEM_BY[c.replace('不要了。', '')];
+          delete Game.basket[x.zh];
+          if (!Game.orderList().length) { Game.thought = [L(`（老闆把${x.zh}拿出來。籃子空了，你得重新夾。）`, `(El dueño saca ${x.es}. La canasta quedó vacía; vuelve a elegir.)`, `(The owner takes out the ${x.en}. The basket is empty — pick again.)`)]; Game.state = 'ITEM'; return; }
+          Game.requote();
+          Game.thought = [L(`（老闆把${x.zh}拿出來，重新算了一下。）`, `(El dueño saca ${x.es} y vuelve a calcular.)`, `(The owner takes out the ${x.en} and adds it up again.)`)];
+          Game.state = 'PAY';
+        }
+      },
+      PAY_FIX: pays.PAY_FIX, CHANGE: pays.CHANGE,
+
+      /* ═══ 雞排切不切、辣度、蔥蒜洋蔥：照自己的意思回答（和 Ami 對不對，最後才比） ═══ */
       CUT: {
         place: 'shop',
         dialogue: () => [staff('雞排要切嗎？', '¿Le corto el filete de pollo?', 'Shall I cut up the chicken cutlet?')],
         options: () => pair(['要切。', '不用切。']),
-        next: c => {
-          if (c !== (t.cut ? '要切。' : '不用切。')) { Game.addMistake(M(`Ami說雞排${t.cut ? '要切' : '不用切，她要整片'}。`, `Ami dijo que el filete ${t.cut ? 'se corta' : 'va entero, sin cortar'}.`, `Ami said the cutlet should ${t.cut ? 'be cut up' : 'stay whole'}.`)); return; }
-          goodFirst('CUT', '你記得Ami說的話，真棒！', '¡Recordaste lo que dijo Ami, genial!', 'You remembered what Ami said — great!');
-          Game.state = 'SPICY';
-        }
+        next: c => { t.pCut = c === '要切。'; Game.state = 'SPICY'; }
       },
       SPICY: {
         place: 'shop',
         dialogue: () => [staff('要辣嗎？', '¿Lo quiere picante?', 'Would you like it spicy?')],
         options: () => rotOf(t, SPICY.map(s => s.opt)),
-        next: c => {
-          if (c !== t.spicy.opt) { Game.addMistake(M(`Ami的辣度是「${t.spicy.zh}」。`, `Ami lo pidió «${t.spicy.es}».`, `Ami asked for it "${t.spicy.en}".`)); return; }
-          goodFirst('SPICY', '很好！辣度要照Ami說的。', '¡Muy bien! El nivel de picante es el que dijo Ami.', 'Good! The spice level is what Ami said.');
-          Game.state = 'TOPS';
-        }
+        next: c => { t.pSpicy = SPICY.find(s => s.opt === c); Game.state = 'TOPS'; }
       },
       TOPS: {
         place: 'shop',
         dialogue: () => [staff('蔥、蒜、洋蔥，要加哪些？', '¿Qué le pongo: cebollín, ajo, cebolla?', 'Which would you like: scallion, garlic, onion?')],
-        options: () => {
-          const flips = shuffle([0, 1, 2]).slice(0, 2).map(i => t.tops.map((v, j) => j === i ? !v : v));
-          return rotOf(t, [topsOpt(t.tops), ...flips.map(topsOpt)]);
-        },
+        options: () => t.topOpts,
         next: c => {
-          if (c !== topsOpt(t.tops)) { Game.addMistake(M(`Ami的說法是：蔥蒜洋蔥，${topsZh(t.tops)}。`, `Ami dijo: ${topsL(t.tops, 'es')}.`, `Ami said: ${topsL(t.tops, 'en')}.`)); return; }
-          goodFirst('TOPS', '沒錯！蔥、蒜、洋蔥，一樣一樣要對。', '¡Exacto! Cebollín, ajo y cebolla: cada uno tiene que coincidir.', 'Right! Scallion, garlic and onion — each one has to match.');
-          Game.thought = [L('（老闆把雞排放進油鍋裡，滋——的一聲。）', '(El dueño echa el filete al aceite: ¡tsss!)', '(The owner drops the cutlet into the oil — sizzle!)')];
+          t.pTops = TOP_COMBOS.find(v => topsOpt(v) === c);
+          Game.buildChecks();
+          Game.thought = [L(Game.hasCutlet() ? '（老闆把雞排放進油鍋裡，滋——的一聲。）' : '（老闆把東西放進油鍋裡，滋——的一聲。）', '(El dueño echa todo al aceite: ¡tsss!)', '(The owner drops everything into the oil — sizzle!)')];
           Game.state = 'ORDER_CHECK';
         }
       },
 
-      /* ═══ 老闆複誦：可能有一項說錯 ═══ */
+      /* ═══ 老闆複誦：照「你點的」核對，可能有一項說錯 ═══ */
       ORDER_CHECK: catchState(Game, {
         key: 'ORDER_CHECK', place: 'shop',
-        dialogue: () => [L(`老闆：好，跟你確認一下：${OC.full(t.ocSaid, 'zh')}，對嗎？`, `Bien, le confirmo: ${OC.full(t.ocSaid, 'es')}. ¿Es correcto?`, `Okay, let me confirm: ${OC.full(t.ocSaid, 'en')}. Is that right?`)],
+        dialogue: () => [L(`老闆：好，跟你確認一下：${OC.full(t.ocSaid, 'zh', t.keys)}，對嗎？`, `Bien, le confirmo: ${OC.full(t.ocSaid, 'es', t.keys)}. ¿Es correcto?`, `Okay, let me confirm: ${OC.full(t.ocSaid, 'en', t.keys)}. Is that right?`)],
         ok: '對，沒錯。', fix: () => OC.fix(ocK, t.ocWrong ? T[ocK] : t.ocFlip, t.ocIdx), rude: '你到底有沒有在聽啊？',
         wrong: () => t.ocWrong,
-        whyWrong: () => M(`老闆說錯了：他說「${OC.zh(ocK, t.ocSaid[ocK])}」，Ami要的是「${OC.zh(ocK, T[ocK])}」。他複誦的時候，要先對一下。`, `El dueño se equivocó: dijo «${OC.es(ocK, t.ocSaid[ocK])}», pero Ami quiere «${OC.es(ocK, T[ocK])}». Compara cuando repita el pedido.`, `The owner got it wrong: he said "${OC.en(ocK, t.ocSaid[ocK])}", but Ami wants "${OC.en(ocK, T[ocK])}". Check when he repeats the order.`),
+        whyWrong: () => M(`老闆說錯了：他說「${OC.zh(ocK, t.ocSaid[ocK])}」，你點的是「${OC.zh(ocK, T[ocK])}」。他複誦的時候，要先對一下。`, `El dueño se equivocó: dijo «${OC.es(ocK, t.ocSaid[ocK])}», pero tú pediste «${OC.es(ocK, T[ocK])}». Compara cuando repita el pedido.`, `The owner got it wrong: he said "${OC.en(ocK, t.ocSaid[ocK])}", but you ordered "${OC.en(ocK, T[ocK])}". Check when he repeats the order.`),
         whyRight: () => M(`老闆說的是對的：「${OC.zh(ocK, T[ocK])}」。`, `Lo que dijo el dueño es correcto: «${OC.es(ocK, T[ocK])}».`, `The owner was right: "${OC.en(ocK, T[ocK])}".`),
         goodWrong: ['你很細心！老闆複誦錯了，要馬上說。', '¡Qué atento! El dueño repitió mal el pedido; hay que decirlo enseguida.', 'Well spotted! The owner repeated the order wrong — speak up right away.'],
-        goodOk: ['老闆複誦的時候，要對一下Ami說的話。', 'Cuando el dueño repita el pedido, compáralo con lo que dijo Ami.', 'When the owner repeats the order, compare it with what Ami said.'],
+        goodOk: ['老闆複誦的時候，要對一下自己點的東西。', 'Cuando el dueño repita el pedido, compáralo con lo que pediste.', 'When the owner repeats the order, compare it with what you ordered.'],
         apology: () => [staff(`啊，不好意思！是${OC.zh(ocK, T[ocK])}。`, `¡Ay, disculpe! Es «${OC.es(ocK, T[ocK])}».`, `Oh, sorry! It's "${OC.en(ocK, T[ocK])}".`),
           staff('好，沒錯了。請稍等，馬上好。', 'Bien, ahora sí. Un momento, ya casi está.', 'Okay, got it now. One moment, almost ready.')],
         go: () => { Game.state = 'HANDOVER'; }
       }),
 
-      /* ═══ 炸好了：打開袋子，核對裡面的東西 ═══ */
+      /* ═══ 炸好了：打開袋子，照「你點的」核對 ═══ */
       HANDOVER: catchState(Game, {
         key: 'HANDOVER', place: 'shop',
         html: () => Game.bagHTML(t.hoGot),
         dialogue: () => [staff('好了，這是您的鹽酥雞，小心燙喔。', 'Listo, aquí tiene su pollo frito; cuidado, está caliente.', "Here's your fried chicken — careful, it's hot.")],
         ok: '好，謝謝。', fix: () => OC.fix(hoK, t.hoWrong ? T[hoK] : t.hoFlip, t.hoIdx), rude: '你是不是耳朵有問題？我說的不是這個！',
         wrong: () => t.hoWrong,
-        whyWrong: () => M(`袋子裡的不對：Ami要的是「${OC.zh(hoK, T[hoK])}」，袋子裡是「${OC.zh(hoK, t.hoGot[hoK])}」。收下以前，要先看清楚。`, `La bolsa está mal: Ami pidió «${OC.es(hoK, T[hoK])}» y trajeron «${OC.es(hoK, t.hoGot[hoK])}». Revisa antes de recibirla.`, `The bag is wrong: Ami asked for "${OC.en(hoK, T[hoK])}" but it has "${OC.en(hoK, t.hoGot[hoK])}". Check before you take it.`),
+        whyWrong: () => M(`袋子裡的不對：你點的是「${OC.zh(hoK, T[hoK])}」，袋子裡是「${OC.zh(hoK, t.hoGot[hoK])}」。收下以前，要先看清楚。`, `La bolsa está mal: pediste «${OC.es(hoK, T[hoK])}» y trajeron «${OC.es(hoK, t.hoGot[hoK])}». Revisa antes de recibirla.`, `The bag is wrong: you ordered "${OC.en(hoK, T[hoK])}" but it has "${OC.en(hoK, t.hoGot[hoK])}". Check before you take it.`),
         whyRight: () => M(`袋子裡是對的：「${OC.zh(hoK, T[hoK])}」。`, `La bolsa está bien: «${OC.es(hoK, T[hoK])}».`, `The bag is right: "${OC.en(hoK, T[hoK])}".`),
         goodWrong: ['你很細心！袋子裡的不對，要馬上說。', '¡Qué atento! Lo que había en la bolsa no era correcto; hay que decirlo enseguida.', 'Well spotted! What was in the bag was wrong — say so right away.'],
         goodOk: ['拿到袋子以後，先看一下裡面對不對。', 'Al recibir la bolsa, mira si lo de adentro es correcto.', 'When you get the bag, check that what is inside is right.'],
         apology: () => [staff('啊，不好意思！我馬上幫你重弄，請稍等。', '¡Ay, disculpe! Se lo arreglo enseguida; un momento.', "Oh, sorry! I'll fix it right away — one moment, please."), L('（老闆重新把東西裝好。這次是對的。）', '(El dueño vuelve a preparar la bolsa. Esta vez sí es correcta.)', '(The owner packs it again. This time it is right.)')],
-        go: () => { Game.state = 'PAY'; }
+        go: () => { Game.stopTimer(); Game.state = 'END'; }
       }),
 
-      /* ═══ 付錢（報價、付錢、找錢） ═══ */
-      PAY: pays.PAY, PAY_FIX: pays.PAY_FIX, CHANGE: pays.CHANGE,
-
-      /* ═══ 結局 ═══ */
+      /* ═══ 結局：這時候才拿 Ami 的要求來比（和飲料店一樣） ═══ */
       END: {
         place: 'phone',
         dialogue: () => {
-          Game._endGood = Game.mistakes <= 2;
+          const bad = [];   // { m: 扣分原因, say: Ami 的話 }
+          t.items.forEach(a => {
+            const q = Game.basket[a.it.zh] || 0;
+            if (q >= a.q) return;
+            bad.push({
+              m: M(`Ami要${qtyZh(a)}，你${q ? '只買了' + NZ(q) + a.it.mw : '沒有買'}。`, `Ami quería ${a.q} ${a.it.es}${q ? ` y compraste solo ${q}` : ' y no lo compraste'}.`, `Ami wanted ${a.q} ${a.it.en}${q ? ` and you got only ${q}` : " and you didn't get any"}.`),
+              say: L(`Ami：我要${qtyZh(a)}，${q ? '你只買了' + NZ(q) + a.it.mw : '你沒有買'}耶！`, `Ami: ¡Quería ${a.q} ${a.it.es}, ${q ? `y solo trajiste ${q}` : 'y no lo trajiste'}!`, `Ami: I wanted ${a.q} ${a.it.en}, ${q ? `but you only got ${q}` : "but you didn't get any"}!`)
+            });
+          });
+          if (Game.hasCutlet() && !!t.pCut !== t.cut) bad.push({
+            m: M(`Ami說雞排${t.cut ? '要切' : '不用切，她要整片'}，你${t.pCut ? '要了切開的' : '要了整片的'}。`, `Ami dijo que el filete ${t.cut ? 'se corta' : 'va entero'}, y lo pediste ${t.pCut ? 'cortado' : 'entero'}.`, `Ami said the cutlet should ${t.cut ? 'be cut up' : 'stay whole'}, but you asked for it ${t.pCut ? 'cut up' : 'whole'}.`),
+            say: L(`Ami：雞排我要${t.cut ? '切的' : '整片的'}耶！`, `Ami: ¡El filete lo quería ${t.cut ? 'cortado' : 'entero'}!`, `Ami: I wanted the cutlet ${t.cut ? 'cut up' : 'whole'}!`)
+          });
+          if (t.pSpicy !== t.spicy) bad.push({
+            m: M(`Ami的辣度是「${t.spicy.zh}」，你選了「${t.pSpicy.zh}」。`, `Ami lo pidió «${t.spicy.es}» y elegiste «${t.pSpicy.es}».`, `Ami asked for it "${t.spicy.en}" but you chose "${t.pSpicy.en}".`),
+            say: L(`Ami：我要的是${t.spicy.zh}，你買成${t.pSpicy.zh}了啦！`, `Ami: ¡Yo lo quería «${t.spicy.es}», y lo pediste «${t.pSpicy.es}»!`, `Ami: I wanted it "${t.spicy.en}", but you got "${t.pSpicy.en}"!`)
+          });
+          if (t.pTops.some((v, i) => v !== t.tops[i])) bad.push({
+            m: M(`Ami的說法是：蔥蒜洋蔥，${topsZh(t.tops)}。你選的是：${topsZh(t.pTops)}。`, `Ami dijo: ${topsL(t.tops, 'es')}. Tú pediste: ${topsL(t.pTops, 'es')}.`, `Ami said: ${topsL(t.tops, 'en')}. You asked for: ${topsL(t.pTops, 'en')}.`),
+            say: L(`Ami：蔥、蒜、洋蔥，我說的是${topsZh(t.tops)}耶！`, `Ami: Cebollín, ajo y cebolla: ¡yo dije ${topsL(t.tops, 'es')}!`, `Ami: Scallion, garlic and onion: I said ${topsL(t.tops, 'en')}!`)
+          });
+          bad.forEach(b => Game.addMistake(b.m));
+          Game._endGood = bad.length === 0;
           track('game_complete', { game: 'yansuji', score: Game.score, elapsed: Game.elapsedTime });
           return [
             staff('謝謝，下次再來！', 'Gracias, ¡vuelva pronto!', 'Thank you — come again!'),
-            Game._endGood
-              ? L(`Ami：哇，好香！又酥脆，又是我要的口味！謝謝你，${N}！`, `¡Guau, qué rico huele! ¡Crujiente y justo como lo quería! ¡Gracias, ${N}!`, `Wow, it smells great! Crispy and exactly how I wanted it! Thanks, ${N}!`)
-              : L('Ami：謝謝你！不過炸雞有一點涼了……下次要快一點喔！', '¡Gracias! Pero el pollo se enfrió un poco… ¡la próxima vez más rápido!', 'Thanks! But the chicken got a bit cold… faster next time!')
+            ...(Game._endGood
+              ? [L(`Ami：哇，好香！又酥脆，又是我要的口味！謝謝你，${N}！`, `¡Guau, qué rico huele! ¡Crujiente y justo como lo quería! ¡Gracias, ${N}!`, `Wow, it smells great! Crispy and exactly how I wanted it! Thanks, ${N}!`)]
+              : [L(`Ami：咦？${N}，這個不太對耶……`, `¿Eh? ${N}, esto no está bien…`, `Huh? ${N}, this isn't quite right…`), ...bad.map(b => b.say)])
           ];
         },
         options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
