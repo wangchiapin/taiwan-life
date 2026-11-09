@@ -719,7 +719,7 @@ const Game = defineGame({
         if (cause === 'money') bad(M(`${it.zh}沒買，因為錢不夠。`, `No compraste ${it.es} porque no te alcanzó el dinero.`, `You didn't buy the ${it.en} because you ran short of money.`),
           L(`Ami：啊，是我給你的錢不夠！${it.zh}下次再買吧。`, `Ami: ¡Ay, fui yo quien no te dio suficiente dinero! ${it.es[0].toUpperCase() + it.es.slice(1)} lo compramos la próxima vez.`, `Ami: Oh, I didn't give you enough money! We'll get the ${it.en} next time.`), true);
         else if (cause === 'refused') bad(M(`${it.zh}沒買到，因為老闆不賣了。`, `No pudiste comprar ${it.es} porque el vendedor ya no quiso venderte.`, `You couldn't buy the ${it.en} because the vendor stopped selling to you.`),
-          L(`Ami：老闆不賣就算了，${it.zh}下次再買吧。`, `Ami: Si no quiere vender, qué le vamos a hacer; ${it.es} lo compramos la próxima vez.`, `Ami: If he won't sell, never mind — we'll get the ${it.en} next time.`), true);
+          L('Ami：你殺價殺太兇吼……', 'Ami: Regateaste demasiado, ¿eh…?', "Ami: You haggled too hard, huh…"), true);
         else bad(M(`Ami要${labZh(it, a.q)}，你沒有買。`, `Ami quería ${labEs(it, a.q)} y no lo compraste.`, `Ami wanted ${labEn(it, a.q)} and you didn't buy it.`),
           L(`Ami：我要${labZh(it, a.q)}，你沒有買耶！`, `Ami: ¡Quería ${labEs(it, a.q)} y no lo trajiste!`, `Ami: I wanted ${labEn(it, a.q)} and you didn't get it!`));
       } else bad(M(`Ami要${labZh(it, a.q)}，你買了${qZh(it, got)}。`, `Ami quería ${labEs(it, a.q)} y compraste ${labEs(it, got)}.`, `Ami wanted ${labEn(it, a.q)} and you bought ${labEn(it, got)}.`),
