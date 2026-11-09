@@ -51,6 +51,17 @@ def buy(page, item, q):
     else:
         for _ in range(int(q)): page.locator(f'[data-veg="{item}"]').click()
     page.wait_for_timeout(50)
+def pay_through(page):
+    """殺價畫面直接成交 → 付錢 → 找錢／袋子／核對（全按對的）"""
+    tap(page, '好，'); P = ev(page, 'Game.payInfo()'); tap(page, P['payOk'])
+    while state(page) in ('CHANGE', 'BAG', 'CHECK'):
+        st = state(page)
+        if st == 'CHANGE':
+            cc = ev(page, 'Game.cc'); tap(page, '老闆，好像找錯了' if cc['sc'] else '好，謝謝')
+        elif st == 'BAG': tap(page, '不用，我有環保袋')
+        else:
+            ck = ev(page, 'Game.ck'); it = ev(page, 'BYID[Game.ck.id]')
+            tap(page, '好，謝謝' if not ck['wrong'] else '老闆，' + it['zh'] + '我要的是')
 def shot(page, name):
     d = os.environ.get('SHOTS')
     if d: os.makedirs(d, exist_ok=True); page.screenshot(path=f'{d}/{name}.png')
@@ -340,6 +351,24 @@ with sync_playwright() as p:
         page.locator('#options-area .opt').nth(i).click(); page.wait_for_timeout(120)
     check('菜攤不賣了：過場畫面是老闆娘生氣圖', state(page) == '_TRANS' and 'stall_veg_angry' in ev(page, "document.getElementById('npc-avatar').src"))
     page.locator('#options-area .opt').first.click(); page.wait_for_timeout(100)
+
+    # 10b. 去過的攤位還可以再去：第一次少買（半斤），回頭補買（再半斤）→ 湊成一斤，不用扣分
+    new_game(page); setreq(page, [['pork', 1]])
+    ev(page, 'Game.checkDone = true; Game.bagDone = true')
+    tap(page, '去肉攤'); buy(page, 'pork', 0.5); tap(page, '買好了'); pay_through(page)
+    check('去過的肉攤，地圖上還能再點', state(page) == 'MAP' and page.locator('button.stall[data-choice="去肉攤"]').count() == 1 and '買過了' in plain(page, '.stalls'))
+    tap(page, '去肉攤'); buy(page, 'pork', 0.5); tap(page, '買好了'); pay_through(page)
+    check('補買後數量加起來是一斤', ev(page, 'Game.bought.pork') == 1, ev(page, 'Game.bought.pork'))
+    tap(page, '東西買好了，回家')
+    check('補買完整 → 好結局、沒有扣分', state(page) == 'END' and ev(page, 'Game._endGood') is True and ev(page, 'Game.mistakes') == 0, (state(page), ev(page, 'Game.mistakes')))
+
+    # 10c. 買錯的（數量不對＋多買）Ami 合成一句
+    new_game(page); setreq(page, [['pork', 1], ['egg', 1]])
+    ev(page, 'Game.bought = {pork: 0.5, egg: 2, onion: 2}; Game.lack = {}')
+    tap(page, '東西買好了，回家')
+    fl = ev(page, 'Game.final.map(x=>x.zh)')
+    wl = [l for l in fl if '你買了' in l or '沒有要' in l]
+    check('買錯的（數量不對、多買）合成同一句', len(wl) == 1 and wl[0].count('Ami：') == 1 and wl[0].count('耶') >= 2, fl)
 
     # 11. 外觀：手機版找錢卡、地圖、殺價
     page.set_viewport_size({'width': 390, 'height': 800})

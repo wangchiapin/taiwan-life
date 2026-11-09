@@ -119,7 +119,7 @@
   #msg-pop .line { margin: 0; } #msg-pop .line.narr { color: var(--muted, #777); font-size: 17px; }
   #msg-pop .speaker { font-weight: 700; color: #b5476a; }
   #msg-pop .msg-opts { display: grid; gap: 10px; padding: 8px 16px 18px; }
-  .stall.done { opacity: .45; }
+  .stall.done { border-top-color: #9ad27a; }
   /* 紙板價目牌 + 老闆心情：這個遊戲的招牌元素 */
   .haggle { margin: 8px 0 12px; display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: stretch; }
   .tag {
@@ -515,7 +515,7 @@ const Game = defineGame({
     const r = s => this.ruby(s);
     return `<div class="stalls">${STALL_KEYS.map(k => {
       const s = STALLS[k], closed = this.closed[k], cl = closed ? 'closed' : this.visited[k] ? 'done' : '';
-      const inner = `<span class="e">${s.icon}</span>${r(s.zh)}${closed ? `<br>${r('收攤了')}` : this.visited[k] ? '<br>✔' : ''}`;
+      const inner = `<span class="e">${s.icon}</span>${r(s.zh)}${closed ? `<br>${r('收攤了')}` : this.visited[k] ? `<br>✔ ${r('買過了')}` : ''}`;
       return closed || !live ? `<div class="stall ${cl}">${inner}</div>` : `<button type="button" class="stall ${cl}" data-choice="去${esc(s.zh)}" aria-label="去${esc(s.zh)}">${inner}</button>`;
     }).join('')}</div>`;
   },
@@ -711,6 +711,8 @@ const Game = defineGame({
     const N = this.N, lines = [], pens = [];
     this.stopTimer();
     const bad = (m, say, light) => { pens.push(light ? { ...m, pen: 5 } : m); lines.push(say); };
+    const wrong = [];       // 數量不對、多買的，Ami 合在同一句說
+    const bad2 = (m, say) => { pens.push(m); wrong.push(say); };
     this.req.forEach(a => {
       const it = BYID[a.id], got = this.bought[a.id] || 0;
       if (got === a.q) return;
@@ -722,14 +724,18 @@ const Game = defineGame({
           L('Ami：你殺價殺太兇吼……', 'Ami: Regateaste demasiado, ¿eh…?', "Ami: You haggled too hard, huh…"), true);
         else bad(M(`Ami要${labZh(it, a.q)}，你沒有買。`, `Ami quería ${labEs(it, a.q)} y no lo compraste.`, `Ami wanted ${labEn(it, a.q)} and you didn't buy it.`),
           L(`Ami：我要${labZh(it, a.q)}，你沒有買耶！`, `Ami: ¡Quería ${labEs(it, a.q)} y no lo trajiste!`, `Ami: I wanted ${labEn(it, a.q)} and you didn't get it!`));
-      } else bad(M(`Ami要${labZh(it, a.q)}，你買了${qZh(it, got)}。`, `Ami quería ${labEs(it, a.q)} y compraste ${labEs(it, got)}.`, `Ami wanted ${labEn(it, a.q)} and you bought ${labEn(it, got)}.`),
+      } else bad2(M(`Ami要${labZh(it, a.q)}，你買了${qZh(it, got)}。`, `Ami quería ${labEs(it, a.q)} y compraste ${labEs(it, got)}.`, `Ami wanted ${labEn(it, a.q)} and you bought ${labEn(it, got)}.`),
         L(`Ami：${it.zh}我要的是${qZh(it, a.q)}，你買了${qZh(it, got)}耶！`, `Ami: ¡De ${it.es} quería ${labEs(it, a.q).replace(/ de .*$/, '')}, y compraste ${labEs(it, got).replace(/ de .*$/, '')}!`, `Ami: I wanted ${labEn(it, a.q)}, but you bought ${labEn(it, got)}!`));
     });
     Object.keys(this.bought).forEach(id => {
       if (this.req.some(a => a.id === id)) return;
       const it = BYID[id];
-      bad(M(`Ami沒有要${it.zh}。`, `Ami no pidió ${it.es}.`, `Ami didn't ask for ${it.en}.`), L(`Ami：我沒有要${it.zh}耶！`, `Ami: ¡Yo no pedí ${it.es}!`, `Ami: I didn't ask for ${it.en}!`));
+      bad2(M(`Ami沒有要${it.zh}。`, `Ami no pidió ${it.es}.`, `Ami didn't ask for ${it.en}.`), L(`Ami：我沒有要${it.zh}耶！`, `Ami: ¡Yo no pedí ${it.es}!`, `Ami: I didn't ask for ${it.en}!`));
     });
+    if (wrong.length) {
+      const cut = (t, re) => String(t).replace(re, '');
+      lines.push(L(wrong.map((w, i) => i ? cut(w.zh, /^Ami：/) : w.zh).join(''), wrong.map((w, i) => i ? cut(w.es, /^Ami: ?/) : w.es).join(' '), wrong.map((w, i) => i ? cut(w.en, /^Ami: ?/) : w.en).join(' ')));
+    }
     this._endGood = pens.length === 0;
     this.state = 'END';
     pens.forEach(m => this.addMistake(m));
@@ -779,7 +785,7 @@ const Game = defineGame({
         place: 'map',
         html: () => Game.mapHTML(),
         dialogue: () => [Object.keys(Game.visited).length || Object.keys(Game.closed).length
-          ? L('（還要去哪一攤？點一下攤位。買好了就回家。）', '(¿A qué puesto vas ahora? Toca un puesto. Si ya terminaste, vuelve a casa.)', '(Which stall next? Tap a stall. If you are done, head home.)')
+          ? L('（還要去哪一攤？點一下攤位。去過的攤位也可以再去，買好了就回家。）', '(¿A qué puesto vas ahora? Toca un puesto; también puedes volver a uno donde ya compraste. Si ya terminaste, vuelve a casa.)', '(Which stall next? Tap a stall — you can go back to one you already visited. If you are done, head home.)')
           : L('（菜市場好熱鬧！有肉攤、魚攤和菜攤，點一下，選要先去哪一攤。）', '(¡El mercado está muy animado! Hay puesto de carne, de pescado y de verduras. Toca el puesto al que vas primero.)', '(The market is lively! There\'s a meat stall, a fish stall and a vegetable stall. Tap the one you want first.)')],
         options: [GO_HOME],
         mount: box => { box.querySelectorAll('.stall[data-choice]').forEach(el => { el.onclick = () => Game.handleChoice(el.dataset.choice); }); },
