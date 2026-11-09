@@ -285,7 +285,7 @@ const STAGE = {
 
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
-  ITEM: '走到攤位前', CUT: '繼續', SPICY: '繼續', TOPS: '繼續', ORDER_CHECK: '阿姨要跟你確認品項了', HANDOVER: '等阿姨炸好', PAY: f => f === 'REMOVE' ? '聽阿姨重新報價' : '付錢', REMOVE: '告訴阿姨', PAY_FIX: '聽阿姨重算', CHANGE: '等找錢', END: '拿鹽酥雞'
+  ITEM: '走到攤位前', CUT: '繼續', SPICY: '繼續', TOPS: '繼續', ORDER_CHECK: '阿姨要跟你確認品項了', HANDOVER: '等阿姨炸好', PAY: f => f === 'REMOVE' ? '聽阿姨重新報價' : '付錢', REMOVE: '告訴阿姨', PAY_FIX: '聽阿姨重算', CHANGE: '等找錢', END: '把鹽酥雞拿回去給Ami'
 };
 
 /* ══════════════════════════════════════
@@ -692,7 +692,10 @@ const Game = defineGame({
         goodWrong: ['你很細心！袋子裡的不對，要馬上說。', '¡Qué atento! Lo que había en la bolsa no era correcto; hay que decirlo enseguida.', 'Well spotted! What was in the bag was wrong — say so right away.'],
         goodOk: ['拿到袋子以後，先看一下裡面對不對。', 'Al recibir la bolsa, mira si lo de adentro es correcto.', 'When you get the bag, check that what is inside is right.'],
         apology: () => [staff('啊，不好意思！我馬上幫你重弄，請稍等。', '¡Ay, disculpe! Se lo arreglo enseguida; un momento.', "Oh, sorry! I'll fix it right away — one moment, please."), L('（阿姨重新把東西裝好。這次是對的。）', '(La señora vuelve a preparar la bolsa. Esta vez sí es correcta.)', '(The lady packs it again. This time it is right.)')],
-        go: () => { Game.stopTimer(); Game.state = 'END'; }
+        go: () => {   // 阿姨說謝謝是過場：按「把鹽酥雞拿回去給Ami」才進結局
+          Game.stopTimer(); Game.state = 'END';
+          Game.thought = [...(Game.thought || []), staff('謝謝，下次再來！', 'Gracias, ¡vuelva pronto!', 'Thank you — come again!')];
+        }
       }),
 
       /* ═══ 結局：這時候才拿 Ami 的要求來比（和飲料店一樣） ═══ */
@@ -726,7 +729,6 @@ const Game = defineGame({
           const own = sum(ITEMS.map(x => Math.max(0, (Game.basket[x.zh] || 0) - ((t.items.find(a => a.it === x) || {}).q || 0))));   // 自己多買的份數
           const noOwn = own === 0 ? [L('Ami：咦，你沒有買自己要吃的喔？', 'Ami: ¿Eh? ¿No compraste nada para ti?', "Ami: Huh? You didn't buy anything for yourself?")] : [];
           return [
-            staff('謝謝，下次再來！', 'Gracias, ¡vuelva pronto!', 'Thank you — come again!'),
             ...(Game._endGood
               ? [L(`Ami：哇，好香！你都買對了欸！都是我想要吃的！謝謝你，${N}！`, `¡Guau, qué rico huele! ¡Compraste todo bien! ¡Es justo lo que quería comer! ¡Gracias, ${N}!`, `Wow, it smells so good! You got everything right! It's all what I wanted to eat! Thanks, ${N}!`)]
               : [L(`Ami：咦？${N}，這個不太對耶……`, `¿Eh? ${N}, esto no está bien…`, `Huh? ${N}, this isn't quite right…`), ...shortSay, ...bad.filter(b => b.say).map(b => b.say)]),

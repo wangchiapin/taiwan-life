@@ -224,6 +224,20 @@ def run(b):
         m0 = mis(p); press(p, fix)
         check(f'複誦錯在{kind}：指出來正確', mis(p) == m0, (said, fix)); p.close()
 
+    # 阿姨說謝謝是過場：按「把鹽酥雞拿回去給Ami」才進結局，結局畫面沒有阿姨的話
+    for wrong in (False, True):
+        p = new_page(b); to_item(p); fill(p, {'雞排': 1, '鹽酥雞': 2})
+        p.evaluate("""wrong=>{const t=Game.task;t.cash=300;t.pCut=true;t.pSpicy=SPICY[1];t.pTops=[true,false,true];Game.buildChecks();
+          t.hoWrong=wrong;t.hoGot={...t.truth,...(wrong?{[t.hoKind]:t.hoFlip}:{})};Game.state='HANDOVER';Game.render();}""", wrong)
+        fix = p.evaluate("OC.fix(Game.task.hoKind,Game.task.hoWrong?Game.task.truth[Game.task.hoKind]:Game.task.hoFlip,Game.task.hoIdx)")
+        press(p, fix if wrong else '好，謝謝。')
+        check(f'HANDOVER wrong={wrong}：先是過場、不是直接結局', st(p) == '_TRANS', st(p))
+        check('過場按鈕＝把鹽酥雞拿回去給Ami', opts(p) == ['把鹽酥雞拿回去給Ami'], opts(p))
+        check('過場有阿姨的「謝謝，下次再來」', '下次再來' in p.evaluate('JSON.stringify(Game.thought)'))
+        leave_trans(p)
+        check('按了之後進結局、結局沒有阿姨的話', st(p) == 'END' and '阿姨' not in p.locator('#npc-dialogue').inner_text() and 'Ami' in p.locator('#npc-dialogue').inner_text())
+        p.close()
+
     # ── 6. 結局比對 ──
     def finish(p, d, cut=None, spicy=None, tops=None, ami=None):
         """直接設定 Ami 的要求和玩家的選擇，走到 END 看結果"""
