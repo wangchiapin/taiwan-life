@@ -15,14 +15,23 @@ def ev(page, js, arg=None): return page.evaluate(js, arg) if arg is not None els
 def plain(page, sel):
     return page.evaluate("s=>{const c=document.querySelector(s).cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.innerText.replace(/\\n/g,'')}", sel)
 def opts(page):
-    return page.evaluate("[...document.querySelectorAll('#options-area .opt')].map(b=>{const c=b.cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.innerText.replace(/\\n/g,'')})")
+    """畫面上看得到的選項文字：下方按鈕＋彈跳視窗裡的按鈕"""
+    return page.evaluate("[...document.querySelectorAll('#options-area .opt, #msg-pop .opt')].filter(b=>b.offsetParent!==null).map(b=>{const c=b.cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.innerText.replace(/\\n/g,'')})")
 def state(page): return ev(page, 'Game.state')
 def tap(page, text):
+    """按選項（文字開頭符合；「老闆，」在老闆娘的攤位自動換成「老闆娘，」）；地圖上的攤位直接點圖示；遇到過場畫面自動按掉"""
+    o = opts(page)
+    if not any(t.startswith(text) for t in o) and text.startswith('老闆，'): text = '老闆娘，' + text[3:]
+    i = next((k for k, t in enumerate(o) if t.startswith(text)), None)
     STEPS.append((text, state(page))); page.evaluate('t=>window.__last=t', text)
-    """按下方選項（文字開頭符合）；遇到過場畫面自動按掉"""
-    o = opts(page); i = next((k for k, t in enumerate(o) if t.startswith(text)), None)
-    assert i is not None, (text, o, state(page))
-    page.locator('#options-area .opt').nth(i).click(); page.wait_for_timeout(80)
+    if i is not None:
+        page.locator('#options-area .opt:visible, #msg-pop .opt:visible').nth(i).click()
+    else:
+        ds = page.evaluate("[...document.querySelectorAll('[data-choice]')].filter(e=>e.offsetParent!==null).map(e=>e.dataset.choice)")
+        j = next((k for k, t in enumerate(ds) if t.startswith(text)), None)
+        assert j is not None, (text, o, ds, state(page))
+        page.locator('[data-choice]:visible').nth(j).click()
+    page.wait_for_timeout(80)
     n = 0
     while state(page) == '_TRANS':
         n += 1; page.locator('#options-area .opt').first.click(); page.wait_for_timeout(80)
@@ -68,7 +77,7 @@ with sync_playwright() as p:
     # 1. 地圖
     new_game(page)
     setreq(page, [['pork', 1], ['fish', 1], ['cabbage', 1], ['egg', 1]])
-    check('地圖有三個攤位 + 回家', plain(page, '.stalls').count('攤') == 3 and opts(page) == ['去肉攤', '去魚攤', '去菜攤', '東西買好了，回家'], opts(page))
+    check('地圖：三個攤位圖示直接點，下方只有「回家」', plain(page, '.stalls').count('攤') == 3 and page.locator('button.stall[data-choice]').count() == 3 and opts(page) == ['東西買好了，回家'], (opts(page), page.locator('button.stall[data-choice]').count()))
     shot(page, 'map')
 
     # 2. 肉攤：6 張卡、5 張要選斤數
@@ -153,6 +162,18 @@ with sync_playwright() as p:
             tap(page, '不用，我有環保袋')
         else: tap(page, '好，謝謝')
     check('付完一攤回到地圖，這攤打勾', state(page) == 'MAP' and ev(page, 'Game.visited.meat') is True)
+
+    # 3b. 魚攤、菜攤是老闆娘：選項跟著改
+    tap(page, '去菜攤'); buy(page, 'cabbage', 1); tap(page, '買好了')
+    check('菜攤的選項是「老闆娘，算便宜一點啦！」', opts(page)[0] == '老闆娘，算便宜一點啦！', opts(page))
+    tap(page, '好，'); P = ev(page, 'Game.payInfo()'); tap(page, P['payOk'])
+    while state(page) in ('CHANGE', 'BAG', 'CHECK'):
+        st = state(page)
+        if st == 'CHANGE':
+            cc = ev(page, 'Game.cc'); tap(page, '老闆，好像找錯了' if cc['sc'] else '好，謝謝')
+        elif st == 'BAG': tap(page, '不用，我有環保袋')
+        else: tap(page, '好，謝謝')
+    ev(page, "Game.visited.veg = false; Game.bought.cabbage = 0")
 
     # 4. 殺過頭：三次太低 → 不賣了
     tap(page, '去魚攤'); buy(page, 'fish', 1); tap(page, '買好了')
@@ -267,10 +288,12 @@ with sync_playwright() as p:
         else: tap(page, '好，謝謝')
     check('改項目、豬肉已買 → 出現三個選項', state(page) == 'MSG' and len(opts(page)) == 3 and any(t.startswith('Ami，一斤豬肉我已經買了') for t in opts(page)), opts(page))
     check('沒有「退貨」字樣', not any('退' in t for t in opts(page)))
+    check('Ami 的訊息是彈跳視窗，下方選項列隱藏', page.locator('#msg-pop').count() == 1 and page.locator('#options-area .opt').count() == 0 and '改買' in plain(page, '#msg-pop'), plain(page, '#msg-pop')[:60])
     shot(page, 'msg_change')
     mm = ev(page, 'Game.mistakes'); tap(page, '好，我再去買'); check('「我再去買」→ 扣分、說明已買好', ev(page, 'Game.mistakes') == mm + 1 and '已經買好' in ev(page, 'Game.log[Game.log.length-1].zh'))
     tap(page, 'Ami，你自己來買'); check('「你自己來買」→ 扣分（不禮貌）', ev(page, 'Game.mistakes') == mm + 2)
     tap(page, 'Ami，一斤豬肉我已經買了')
+    check('答完彈跳視窗消失', page.locator('#msg-pop').count() == 0)
     check('正確選項 → 回地圖、需求仍是豬肉', state(page) == 'MAP' and ev(page, "Game.req.some(a=>a.id==='pork')") and not ev(page, "Game.req.some(a=>a.id==='beef')"))
 
     # 10. Ami 訊息：改項目（X 還沒買）→ 清單換成 Y

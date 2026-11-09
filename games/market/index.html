@@ -109,6 +109,16 @@
     background: var(--night); color: #fff; border-top: 6px solid var(--red);
   }
   .stall .e { font-size: 30px; display: block; }
+  button.stall { font: inherit; border-left: 0; border-right: 0; border-bottom: 0; cursor: pointer; width: 100%; box-shadow: 0 3px 0 rgba(0,0,0,.25); }
+  button.stall:active { transform: translateY(2px); box-shadow: none; }
+  .stall.closed { cursor: default; }
+  #msg-pop { position: fixed; inset: 0; z-index: 1500; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(40, 28, 20, .55); overflow-y: auto; }
+  #msg-pop .msg-card { width: 100%; max-width: 460px; margin: auto; background: #fff; border-radius: 18px; box-shadow: 0 10px 40px rgba(0,0,0,.3); overflow: hidden; }
+  #msg-pop .msg-head { background: #b5476a; color: #fff; padding: 10px 16px; font-weight: 700; font-size: 16px; }
+  #msg-pop .msg-body { padding: 12px 18px 4px; font-size: 20px; line-height: 2.1; }
+  #msg-pop .line { margin: 0; } #msg-pop .line.narr { color: var(--muted, #777); font-size: 17px; }
+  #msg-pop .speaker { font-weight: 700; color: #b5476a; }
+  #msg-pop .msg-opts { display: grid; gap: 10px; padding: 8px 16px 18px; }
   .stall.done { opacity: .45; }
   /* 紙板價目牌 + 老闆心情：這個遊戲的招牌元素 */
   .haggle { margin: 8px 0 12px; display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: stretch; }
@@ -401,7 +411,7 @@ const Game = defineGame({
   IMAGES: {
     START: ['images/start.jpg', '🥬'], MAP: ['images/map.jpg', '🧺'], PICK: ['images/stall.jpg', '🥬'], HAGGLE: ['images/stall.jpg', '💬'],
     REMOVE: ['images/pay.jpg', '💵'], PAY: ['images/pay.jpg', '💵'], CHANGE: ['images/pay.jpg', '🪙'], BAG: ['images/stall.jpg', '🛍️'], CHECK: ['images/stall.jpg', '🛍️'],
-    MSG: ['images/start.jpg', '📱'], EXPLAIN: ['images/end_good.jpg', '🏠'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+    MSG: ['images/map.jpg', '📱'], EXPLAIN: ['images/end_good.jpg', '🏠'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
   /* 在攤位上的那幾關，用這個攤位的圖（STALLS[x].img） */
   imageFor() {
@@ -436,7 +446,7 @@ const Game = defineGame({
     this.cart = {}; this.meatPick = null; this.lastAct = null;
     this.bought = {}; this.lack = {}; this.closed = {}; this.visited = {};
     this.msgShown = false; this.bagDone = false; this.checkDone = false;
-    this.queue = []; this.qi = 0; this.explained = {}; this.final = null; this.wentHome = false; this._bonus = 0;
+    this.closeMsgPop(); this.queue = []; this.qi = 0; this.explained = {}; this.final = null; this.wentHome = false; this._bonus = 0;
   },
   reqLabel(a) { const it = BYID[a.id]; return L(labZh(it, a.q), labEs(it, a.q), labEn(it, a.q)); },
   amiLines() {
@@ -446,6 +456,33 @@ const Game = defineGame({
       L(`Ami：${N}，我今晚煮飯，你來吃吧！幫我去菜市場買：${zh}。`, `${N}, esta noche cocino: ¡ven a cenar! Ve al mercado y cómprame: ${es}.`, `${N}, I'm cooking tonight — come eat with me! Please go to the market and get: ${en}.`),
       L('Ami：記得帶環保袋，也可以問問看能不能算便宜一點喔！', 'Lleva tu bolsa reutilizable, ¡y también puedes preguntar si te hacen un descuento!', "Bring a reusable bag — and you can also ask if they'll give you a discount!")
     ];
+  },
+  msgOpts() {
+        const I = this.msgInfo();
+        if (!I.boughtX) return [ACK];
+        return this.rotate([`Ami，${labZh(I.a, I.a.q)}我已經買了欸！`, `好，我再去買${labZh(I.y, I.y.q)}。`, 'Ami，你自己來買吧！']);
+  },
+  rotate(o) { const t = this.task; return o.map((_, i) => o[(i + t.rot) % o.length]); },
+  closeMsgPop() { const e = document.getElementById('msg-pop'); if (e) e.remove(); },
+  /* Ami 的訊息用彈跳視窗：訊息、選項、答錯的回饋都在視窗裡 */
+  openMsgPop(box) {
+    this.closeMsgPop();
+    const lines = [L('（手機響了一聲，是Ami傳來的LINE。）', '(Tu celular suena: es un LINE de Ami.)', '(Your phone buzzes — a LINE from Ami.)'), this.msgLine()];
+    const fb = this.feedbackHTML();
+    box.querySelectorAll('.fb').forEach(e => e.remove());       // 回饋卡改放在視窗裡，後面的對話框不重複
+    const pop = document.createElement('div');
+    pop.id = 'msg-pop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-modal', 'true');
+    pop.innerHTML = `<div class="msg-card"><div class="msg-head">📱 Ami · LINE</div><div class="msg-body">${this.formatText(lines)}${fb}</div><div class="msg-opts"></div></div>`;
+    pop.querySelectorAll('[data-tr]').forEach(btn => { btn.onclick = () => Tr.open(this._tr[+btn.dataset.tr], btn); });
+    pop.querySelectorAll('[data-spk]').forEach(btn => { btn.onclick = () => { const x = this._spk[+btn.dataset.spk]; Speech.speak(x.text, btn, x.who); }; });
+    const area = pop.querySelector('.msg-opts');
+    this.msgOpts().forEach(opt => {
+      const b = document.createElement('button');
+      b.className = 'opt'; b.dataset.choice = opt; b.innerHTML = this.ruby(opt);
+      b.onclick = () => this.handleChoice(opt);
+      area.appendChild(b);
+    });
+    document.body.appendChild(pop);
   },
   /* Ami 中途傳來的訊息（加買 或 改項目） */
   msgLine() {
@@ -474,11 +511,12 @@ const Game = defineGame({
     return `<div class="list"><div class="t">${r('購物清單')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
   },
   /* 市場地圖：三個攤位 */
-  mapHTML() {
+  mapHTML(live = true) {
     const r = s => this.ruby(s);
     return `<div class="stalls">${STALL_KEYS.map(k => {
-      const s = STALLS[k], cl = this.closed[k] ? 'closed' : this.visited[k] ? 'done' : '';
-      return `<div class="stall ${cl}"><span class="e">${s.icon}</span>${r(s.zh)}${this.closed[k] ? `<br>${r('收攤了')}` : this.visited[k] ? '<br>✔' : ''}</div>`;
+      const s = STALLS[k], closed = this.closed[k], cl = closed ? 'closed' : this.visited[k] ? 'done' : '';
+      const inner = `<span class="e">${s.icon}</span>${r(s.zh)}${closed ? `<br>${r('收攤了')}` : this.visited[k] ? '<br>✔' : ''}`;
+      return closed || !live ? `<div class="stall ${cl}">${inner}</div>` : `<button type="button" class="stall ${cl}" data-choice="去${esc(s.zh)}" aria-label="去${esc(s.zh)}">${inner}</button>`;
     }).join('')}</div>`;
   },
   /* 殺價畫面：紙板價目牌 + 老闆的心情（三格；三次出價太低，老闆就不賣了） */
@@ -545,7 +583,7 @@ const Game = defineGame({
   },
   haggleOptions(st) {
     const opts = [];
-    if (!st.soft && st.mood > 0) opts.push('老闆，算便宜一點啦！');
+    if (!st.soft && st.mood > 0) opts.push(`${this.boss()}，算便宜一點啦！`);
     if (st.mood > 0) {
       const raw = [r10(st.ask * 0.5), r10(st.ask * 0.72), r10(st.ask * 0.88)].filter(n => n < st.ask && n > 0);
       [...new Set(raw)].forEach(n => opts.push(`${n}元可以嗎？`));
@@ -557,7 +595,7 @@ const Game = defineGame({
   haggleChoose(st, c) {
     const say = (zh, es, en) => L(`${this.boss()}：${zh}`, es, en);
     if (c.startsWith('好，')) { this.state = 'PAY'; return; }
-    if (c.startsWith('老闆，算便宜')) {
+    if (c.startsWith(`${this.boss()}，算便宜`)) {
       st.soft = true;
       const p = Math.max(st.floor, r10(st.ask * 0.9));
       if (p < st.ask) {
@@ -572,7 +610,7 @@ const Game = defineGame({
       if (st.ask > st.floor && Math.random() < 0.35) {
         this.thought = [L('（你轉身要走……）', '(Te das la vuelta para irte…)', '(You turn to leave…)'),
           say('好啊，慢慢看，喜歡再回來喔！', '¡Claro, mira con calma! Si te gusta, vuelve.', 'Sure, take your time! Come back if you like it!'),
-          L('（老闆沒有叫住你。你走了幾步，又走回來。）', '(El vendedor no te detiene. Das unos pasos y vuelves.)', "(The vendor doesn't stop you. You take a few steps and come back.)")];
+          L(`（${this.boss()}沒有叫住你。你走了幾步，又走回來。）`, '(El vendedor no te detiene. Das unos pasos y vuelves.)', "(The vendor doesn't stop you. You take a few steps and come back.)")];
         return;
       }
       if (st.ask > st.floor) {
@@ -580,7 +618,7 @@ const Game = defineGame({
         this.setAsk(st, p);
         this.thought = [L('（你轉身要走……）', '(Te das la vuelta para irte…)', '(You turn to leave…)'),
           say(`欸欸欸，等一下！${p}元賣你啦！`, `¡Eh, eh, espera! ¡Te lo vendo por ${esM(p)}!`, `Hey, hey, wait! I'll sell it to you for ${enM(p)}!`)];
-        this.good('聰明喔！你說了「再看看」，老闆就降價了！', '¡Qué buena idea! Dijiste «mirar un poco más» y el vendedor bajó el precio.', 'Smart! You said you\'d look around some more, and the vendor dropped the price!');
+        this.good(`聰明喔！你說了「再看看」，${this.boss()}就降價了！`, '¡Qué buena idea! Dijiste «mirar un poco más» y el vendedor bajó el precio.', 'Smart! You said you\'d look around some more, and the vendor dropped the price!');
       } else this.thought = [say('這已經是最低價了，不買就算了。', 'Este ya es el precio más bajo; si no compras, no importa.', "That's already my lowest price. If you don't want it, never mind.")];
       return;
     }
@@ -598,9 +636,9 @@ const Game = defineGame({
     }
     st.mood -= 1;
     if (st.mood === 0) {          // 第三次出價太低：老闆生氣，不賣了，這個攤位收攤
-      this.addMistake(M('殺價殺太兇，老闆生氣了，不賣了。', 'Regateaste demasiado y el vendedor se enojó: ya no te vende nada.', 'You haggled too aggressively and the vendor got angry: no more sales.'),
+      this.addMistake(M(`殺價殺太兇，${this.boss()}生氣了，不賣了。`, 'Regateaste demasiado y el vendedor se enojó: ya no te vende nada.', 'You haggled too aggressively and the vendor got angry: no more sales.'),
         [say(`${o}元？你在開玩笑嗎？不賣了！不賣了！`, `¿${esM(o)}? ¿Estás bromeando? ¡No te vendo nada!`, `${enM(o)}? Are you kidding? I'm not selling to you!`),
-         L('（老闆生氣地把東西收起來，你只好走開。）', '(El vendedor, enojado, guarda su mercancía y no te queda más que irte.)', '(The vendor angrily puts the goods away, and you have to walk off.)')]);
+         L(`（${this.boss()}生氣地把東西收起來，你只好走開。）`, '(El vendedor, enojado, guarda su mercancía y no te queda más que irte.)', '(The vendor angrily puts the goods away, and you have to walk off.)')]);
       Object.keys(this.cart).forEach(id => { this.lack[id] = 'refused'; });
       this.closed[this.cur] = true; this.cart = {}; this.meatPick = null; this.st = null;
       this.state = 'MAP';
@@ -716,8 +754,8 @@ const Game = defineGame({
     const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
     const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
     const needStalls = () => STALL_KEYS.filter(k => !Game.closed[k] && Game.req.some(a => !Game.bought[a.id] && BYID[a.id].stall === k));
-    const chFix = () => `老闆，好像找錯了，應該找${zhNum(Game.cc.want)}元吧？`;
-    const bgFix = () => { const it = BYID[Game.ck.id]; return `老闆，${it.zh}我要的是${qZh(it, Game.ck.q)}，不是${qZh(it, Game.ck.wq)}。`; };
+    const chFix = () => `${Game.boss()}，好像找錯了，應該找${zhNum(Game.cc.want)}元吧？`;
+    const bgFix = () => { const it = BYID[Game.ck.id]; return `${Game.boss()}，${it.zh}我要的是${qZh(it, Game.ck.q)}，不是${qZh(it, Game.ck.wq)}。`; };
     const greet = {
       meat: () => vend('歡迎光臨！肉都是今天早上才送來的，自己看，要什麼跟我說。', '¡Bienvenido(a)! La carne llegó esta mañana. Mire con calma y dígame qué quiere.', 'Welcome! The meat came in this morning. Take a look and tell me what you want.'),
       fish: () => vend('歡迎光臨！魚和蝦都很新鮮，自己看，要什麼跟我說。', '¡Bienvenido(a)! El pescado y los camarones están muy frescos. Mire y dígame qué quiere.', 'Welcome! The fish and shrimp are very fresh. Take a look and tell me what you want.'),
@@ -741,9 +779,10 @@ const Game = defineGame({
         place: 'map',
         html: () => Game.mapHTML(),
         dialogue: () => [Object.keys(Game.visited).length || Object.keys(Game.closed).length
-          ? L('（還要去哪一攤？買好了就回家。）', '(¿A qué puesto vas ahora? Si ya terminaste, vuelve a casa.)', '(Which stall next? If you are done, head home.)')
-          : L('（菜市場好熱鬧！有肉攤、魚攤和菜攤，要先去哪一攤？）', '(¡El mercado está muy animado! Hay puesto de carne, de pescado y de verduras. ¿A cuál vas primero?)', '(The market is lively! There\'s a meat stall, a fish stall and a vegetable stall. Which one first?)')],
-        options: () => [...STALL_KEYS.filter(k => !Game.closed[k]).map(k => '去' + STALLS[k].zh), GO_HOME],
+          ? L('（還要去哪一攤？點一下攤位。買好了就回家。）', '(¿A qué puesto vas ahora? Toca un puesto. Si ya terminaste, vuelve a casa.)', '(Which stall next? Tap a stall. If you are done, head home.)')
+          : L('（菜市場好熱鬧！有肉攤、魚攤和菜攤，點一下，選要先去哪一攤。）', '(¡El mercado está muy animado! Hay puesto de carne, de pescado y de verduras. Toca el puesto al que vas primero.)', '(The market is lively! There\'s a meat stall, a fish stall and a vegetable stall. Tap the one you want first.)')],
+        options: [GO_HOME],
+        mount: box => { box.querySelectorAll('.stall[data-choice]').forEach(el => { el.onclick = () => Game.handleChoice(el.dataset.choice); }); },
         ok: () => { const n = needStalls(); return n.length ? '去' + STALLS[n[0]].zh : GO_HOME; },
         next: c => {
           if (c === GO_HOME) { Game.goHome(); return; }
@@ -787,7 +826,7 @@ const Game = defineGame({
           const it = a.it;
           if (a.set) {
             Game.cart[it.id] = a.q;
-            Game.lastAct = L(`老闆幫你秤了${qZh(it, a.q)}${it.zh}，放進籃子。`, `El vendedor le pesa ${qEs(it, a.q)} y lo pone en su cesta.`, `The vendor weighs out ${qEn(it, a.q)} and puts it in your basket.`);
+            Game.lastAct = L(`${Game.boss()}幫你秤了${qZh(it, a.q)}${it.zh}，放進籃子。`, `El vendedor le pesa ${qEs(it, a.q)} y lo pone en su cesta.`, `The vendor weighs out ${qEn(it, a.q)} and puts it in your basket.`);
           } else {
             Game.cart[it.id] = Math.min(9, (Game.cart[it.id] || 0) + 1);
             Game.lastAct = L(`你把${it.zh}放進籃子。`, `Pones ${it.es} en la cesta.`, `You put the ${it.en} in your basket.`);
@@ -822,11 +861,11 @@ const Game = defineGame({
           const P = Game.payInfo();
           if (c === SHORT) {
             if (!P.short) { Game.addMistake(M(`你身上有${P.cash}元，一共${P.ask}元，錢是夠的。`, `Llevas ${esM(P.cash)} y son ${esM(P.ask)}: sí te alcanza.`, `You have ${enM(P.cash)} and it's ${enM(P.ask)}: you have enough.`)); return; }
-            goodFirst('PAY', '你很細心！錢不夠的時候，要馬上跟老闆說，拿掉一樣。', '¡Qué atento! Si no te alcanza el dinero, díselo al vendedor y quita algo.', 'Well spotted! If you are short of money, tell the vendor and take something out.');
+            goodFirst('PAY', `你很細心！錢不夠的時候，要馬上跟${Game.boss()}說，拿掉一樣。`, '¡Qué atento! Si no te alcanza el dinero, díselo al vendedor y quita algo.', 'Well spotted! If you are short of money, tell the vendor and take something out.');
             Game.thought = null; Game.state = 'REMOVE'; return;
           }
           if (c === P.payOk) {
-            if (P.short) { Game.addMistake(M(`你身上只有${P.cash}元，不夠付${P.ask}元。要先告訴老闆。`, `Solo llevas ${esM(P.cash)}: no alcanza para ${esM(P.ask)}. Hay que decírselo al vendedor.`, `You only have ${enM(P.cash)}, not enough for ${enM(P.ask)}. Tell the vendor first.`)); return; }
+            if (P.short) { Game.addMistake(M(`你身上只有${P.cash}元，不夠付${P.ask}元。要先告訴${Game.boss()}。`, `Solo llevas ${esM(P.cash)}: no alcanza para ${esM(P.ask)}. Hay que decírselo al vendedor.`, `You only have ${enM(P.cash)}, not enough for ${enM(P.ask)}. Tell the vendor first.`)); return; }
             goodFirst('PAY', '沒錯！付錢以前，要先自己算一下。', '¡Exacto! Antes de pagar, calcula tú también.', 'Right! Do the math yourself before you pay.');
             Game.thought = null; Game.finishPay(P); return;
           }
@@ -845,13 +884,13 @@ const Game = defineGame({
           const oldStart = st.start;
           delete Game.cart[it.id]; Game.lack[it.id] = 'money';
           if (!Object.keys(Game.cart).length) {
-            Game.thought = [L(`（老闆把${it.zh}拿出來。籃子空了，你先離開了。）`, `(El vendedor saca ${it.es}. La cesta quedó vacía y te marchas.)`, `(The vendor takes out the ${it.en}. The basket is empty, so you leave.)`)];
+            Game.thought = [L(`（${Game.boss()}把${it.zh}拿出來。籃子空了，你先離開了。）`, `(El vendedor saca ${it.es}. La cesta quedó vacía y te marchas.)`, `(The vendor takes out the ${it.en}. The basket is empty, so you leave.)`)];
             Game.st = null; Game.state = 'MAP'; return;
           }
           const start = Game.cartTotal(), ratio = st.ask / oldStart;
           st.start = start; st.floor = r10(st.floor * start / oldStart); st.ask = Math.max(10, r10(start * ratio)); st.history = [];
           Game.thought = null; st.acc = null;
-          st.note = L(`（老闆把${it.zh}拿出來，重新算了一下。）`, `(El vendedor saca ${it.es} y vuelve a calcular.)`, `(The vendor takes out the ${it.en} and adds it up again.)`);
+          st.note = L(`（${Game.boss()}把${it.zh}拿出來，重新算了一下。）`, `(El vendedor saca ${it.es} y vuelve a calcular.)`, `(The vendor takes out the ${it.en} and adds it up again.)`);
           Game.state = 'PAY';
         }
       },
@@ -866,10 +905,10 @@ const Game = defineGame({
           const cc = Game.cc, right = cc.sc ? chFix() : '好，謝謝。';
           if (c !== right) {
             Game.addMistake(c === '好，謝謝。'
-              ? M(`老闆少找了：${cc.bill} − ${cc.ask} = ${cc.want}元，他只找了${cc.given}元。`, `Se equivocó: ${cc.bill} − ${cc.ask} = ${cc.want}; solo le dio ${esM(cc.given)}.`, `He short-changed you: ${cc.bill} − ${cc.ask} = ${cc.want}, but he gave ${enM(cc.given)}.`)
+              ? M(`${Game.boss()}少找了：${cc.bill} − ${cc.ask} = ${cc.want}元，${Game.boss() === '老闆娘' ? '她' : '他'}只找了${cc.given}元。`, `Se equivocó: ${cc.bill} − ${cc.ask} = ${cc.want}; solo le dio ${esM(cc.given)}.`, `He short-changed you: ${cc.bill} − ${cc.ask} = ${cc.want}, but he gave ${enM(cc.given)}.`)
               : c === chFix()
                 ? M(`找的錢是對的：${cc.bill} − ${cc.ask} = ${cc.want}元。`, `El cambio está bien: ${cc.bill} − ${cc.ask} = ${cc.want}.`, `The change is correct: ${cc.bill} − ${cc.ask} = ${cc.want}.`)
-                : M('要有禮貌，說「老闆，好像找錯了」就好。', 'Hay que ser cortés: di «jefe, creo que se equivocó con el cambio».', 'Be polite: just say "boss, I think the change is off".'));
+                : M(`要有禮貌，說「${Game.boss()}，好像找錯了」就好。`, 'Hay que ser cortés: di «jefe, creo que se equivocó con el cambio».', 'Be polite: just say "boss, I think the change is off".'));
             return;
           }
           goodFirst('CHANGE', cc.sc ? '你很細心！找的錢不對，要馬上說。' : '你會算！收下找的錢以前，先算一算。', cc.sc ? '¡Qué atento! Si el cambio está mal, díselo enseguida.' : '¡Sabes calcular! Antes de guardar el cambio, cuéntalo.', cc.sc ? 'Well spotted! If the change is wrong, speak up right away.' : 'You can count! Check the change before you pocket it.');
@@ -895,13 +934,13 @@ const Game = defineGame({
         place: () => Game.cur,
         html: () => `<div class="basket" style="flex-direction:column;align-items:flex-start;gap:4px;font-size:22px">${Game.tx.map(g => { const it = BYID[g.id], q = Game.ck.wrong && g.id === Game.ck.id ? Game.ck.wq : g.q; return `<div>${it.icon} ${Game.ruby(it.zh)}　${Game.ruby(qZh(it, q))}</div>`; }).join('')}</div>`,
         dialogue: () => [vend('這是你的菜，請拿好。', 'Aquí tiene sus compras, tome.', "Here are your groceries — take them.")],
-        options: () => rot(['好，謝謝。', bgFix(), '老闆，你是不是故意的啊？']),
+        options: () => rot(['好，謝謝。', bgFix(), `${Game.boss()}，你是不是故意的啊？`]),
         ok: () => Game.ck.wrong ? bgFix() : '好，謝謝。',
         next: c => {
           const ck = Game.ck, it = BYID[ck.id], right = ck.wrong ? bgFix() : '好，謝謝。';
           if (c !== right) {
             Game.addMistake(c === '好，謝謝。'
-              ? M(`數量不對：你買了${qZh(it, ck.q)}${it.zh}，老闆放了${qZh(it, ck.wq)}。拿東西以前，要先看一看。`, `Cantidad equivocada: compraste ${qEs(it, ck.q)} y pusieron ${qEs(it, ck.wq)}. Revisa antes de llevártelo.`, `Wrong amount: you bought ${qEn(it, ck.q)} and he put in ${qEn(it, ck.wq)}. Check before you take it.`)
+              ? M(`數量不對：你買了${qZh(it, ck.q)}${it.zh}，${Game.boss()}放了${qZh(it, ck.wq)}。拿東西以前，要先看一看。`, `Cantidad equivocada: compraste ${qEs(it, ck.q)} y pusieron ${qEs(it, ck.wq)}. Revisa antes de llevártelo.`, `Wrong amount: you bought ${qEn(it, ck.q)} and he put in ${qEn(it, ck.wq)}. Check before you take it.`)
               : c === bgFix()
                 ? M(`數量是對的：${it.zh}就是${qZh(it, ck.q)}。`, `La cantidad está bien: ${qEs(it, ck.q)}.`, `The amount is right: ${qEn(it, ck.q)}.`)
                 : M('要有禮貌，說清楚你要的數量就好。', 'Hay que ser cortés: di claramente la cantidad que querías.', 'Be polite: just state clearly the amount you wanted.'));
@@ -915,14 +954,14 @@ const Game = defineGame({
       /* ═══ Ami 中途傳訊息：加買新東西，或改項目（已經買完的不能退換，要跟 Ami 說） ═══ */
       MSG: {
         place: 'phone',
-        dialogue: () => [L('（手機響了一聲，是Ami傳來的LINE。）', '(Tu celular suena: es un LINE de Ami.)', '(Your phone buzzes — a LINE from Ami.)'), Game.msgLine()],
-        options: () => {
-          const I = Game.msgInfo();
-          if (!I.boughtX) return [ACK];
-          return rot([`Ami，${labZh(I.a, I.a.q)}我已經買了欸！`, `好，我再去買${labZh(I.y, I.y.q)}。`, 'Ami，你自己來買吧！']);
-        },
+        html: () => Game.mapHTML(false),
+        dialogue: () => [],
+        single: true,
+        mount: box => Game.openMsgPop(box),
+        options: [],                    // 選項放在彈跳視窗裡（Game.msgOpts）
         ok: () => { const I = Game.msgInfo(); return I.boughtX ? `Ami，${labZh(I.a, I.a.q)}我已經買了欸！` : ACK; },
         next: c => {
+          Game.closeMsgPop();
           const I = Game.msgInfo();
           if (I.boughtX) {
             const right = `Ami，${labZh(I.a, I.a.q)}我已經買了欸！`;
