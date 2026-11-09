@@ -31,6 +31,7 @@ def run(b, script, lang, vp):
         # 把玩家放到路人旁邊（同一行、隔一格），鏡頭跟過去
         p.evaluate("""i => { const w = WALKERS[i]; w.pause = 99; const cx = Math.round(w.x);
           const cands = [cx + 1, cx - 1, cx + 2, cx - 2].filter(x => x >= 0 && x < COLS && sidewalkOk(x, w.row));   // 避開門口，不然會走進建築物
+          EV.x = EV.y = -99; EV.pause = 99;   // 隨機突發事件離遠一點，不然站在旁邊會自動進入「走在路上」遊戲
           P.x = cands[0] ?? cx; P.y = w.row; P.moving = null; P.path = []; camSnap = true; }""", i)
         p.wait_for_timeout(400)
         info = p.evaluate("""i => { updateBubble(); const w = WALKERS[i]; const b = document.getElementById('bubble');
@@ -52,7 +53,7 @@ def run(b, script, lang, vp):
         else:
             check(f'{tag} 路人{i}（{info["line"]}）：沒有連結按鈕', not card['linkShown'] and card['href'] is None, str(card))
         if info['line'] in NEW and script == 'trad': check(f'{tag} {info["line"]} 繁體台詞', card['zh'] == NEW[info['line']], card['zh'])
-        if info['line'] == 'nice' and lang != 'zh': check(f'{tag} nice 拼音有 éi', 'éi' in card['py'], card['py'])
+        if info['line'] == 'nice' and lang != 'zh': check(f'{tag} nice 拼音有 èi', 'èi' in card['py'], card['py'])
         p.click('#card .c-close')
     for k in NEW: check(f'{tag} 「{k}」有人說', k in seen, str(seen))
     check(f'{tag} 沒有網頁錯誤', not errs, str(errs[:2]))
