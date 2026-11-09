@@ -217,12 +217,12 @@ Edit the attached image. Keep everything identical — the same place, the same 
 
 ## 鹽酥雞（yansuji）　→ `games/yansuji/images/`
 
-**劇情**：Ami 用 LINE 交代要買什麼（鹽酥雞、雞排、甜不辣、四季豆、米血、杏鮑菇、薯條，各幾份）、雞排切不切、辣不辣、蔥蒜洋蔥要不要。你在鹽酥雞攤一樣一樣點，老闆複誦、現炸、裝袋，最後結帳找錢。
+**劇情**：Ami 用 LINE 交代要買什麼（鹽酥雞、雞排、甜不辣、四季豆、米血、杏鮑菇、薯條，各幾份）、雞排切不切、辣不辣、蔥蒜洋蔥要不要。你在鹽酥雞攤一樣一樣點，阿姨複誦、現炸、裝袋，最後結帳找錢。
 
 | 順序 | 檔名 | 用在哪一關 | 底圖 |
 |---|---|---|---|
 | 1 | `stall.jpg` | ITEM、CUT、SPICY、TOPS、ORDER_CHECK（點餐、複誦的主畫面） | 無（文字生圖，這個遊戲先做這張） |
-| 2 | `bag.jpg` | HANDOVER（老闆把裝好的袋子遞給你，你要核對） | 上傳已確認的 stall.jpg（編輯式） |
+| 2 | `bag.jpg` | HANDOVER（阿姨把裝好的袋子遞給你，你要核對） | 上傳已確認的 stall.jpg（編輯式） |
 | 3 | `pay.jpg` | PAY、PAY_FIX、CHANGE（報價、付錢、找錢） | 上傳已確認的 stall.jpg（編輯式） |
 | 4 | `start.jpg` | START（走到鹽酥雞攤前，手機收到 Ami 的 LINE） | 無（文字生圖）；Ami 的臉用「Ami 參考圖」 |
 | 5 | `result.jpg` | RESULT（成績頁） | 上傳已確認的 start.jpg（編輯式） |
@@ -233,7 +233,7 @@ Edit the attached image. Keep everything identical — the same place, the same 
 
 - 用在：ITEM、CUT、SPICY、TOPS、ORDER_CHECK（點餐、複誦的主畫面）
 - 底圖：無（文字生圖，這個遊戲先做這張）
-- 檢查重點：老闆在正中央；玻璃櫃裡的料看得出七種之中的幾種；一排小碗（蔥、蒜、洋蔥）和辣椒粉罐在櫃台上；沒有可讀文字。
+- 檢查重點：阿姨在正中央；玻璃櫃裡的料看得出七種之中的幾種；一排小碗（蔥、蒜、洋蔥）和辣椒粉罐在櫃台上；沒有可讀文字。
 
 ```
 Cozy 16-bit pixel art illustration, square 1:1 image, clean chunky pixel outlines, soft warm color palette, warm gentle lighting, the look of a charming Taiwan-life pixel-art game. Scene: a Taiwanese fried-chicken street stall (yansuji) under a covered sidewalk at dusk, seen from the customer's side of the counter, with warm hanging bulbs and a dim blue evening street far in the background. Camera: first-person, standing at the counter at eye level (about 150 cm above the floor), looking straight ahead at the owner who stands about 1.3 meters away behind the counter; the camera is perfectly level (no tilt), the owner is centered, and the top edge of the glass display counter runs across the lower third of the frame. The owner: a friendly middle-aged woman wearing a cap, a dark apron, long arm sleeves and thin disposable gloves, smiling, holding a pair of tongs. The glass display counter in front holds metal baskets of raw ingredients: flat chicken cutlets, small pieces of chicken, tan tianbula pieces, green beans, brownish rice-cake cubes, sliced king oyster mushrooms and french fries. On top of the counter, on the owner's side: a row of small bowls holding chopped scallions, minced garlic and diced onion, two stainless shakers of pepper salt and chili powder, a pair of kitchen scissors, and a stack of white paper bags. Behind the owner: a big round deep fryer with bubbling oil and a wire strainer basket hanging beside it, and a blank signboard. The view is the player's own first-person point of view: the player's two plain bare hands are visible at the bottom of the frame (neutral skin tone, no rings, no watch, no bracelet, no nail polish, no sleeves). The player's face and body are never shown. No readable text anywhere: every sign, menu board, price tag and label is blank or shows only unreadable squiggle lines; no real brand logos.
@@ -241,7 +241,7 @@ Cozy 16-bit pixel art illustration, square 1:1 image, clean chunky pixel outline
 
 ### yansuji 2. `bag.jpg`
 
-- 用在：HANDOVER（老闆把裝好的袋子遞給你，你要核對）
+- 用在：HANDOVER（阿姨把裝好的袋子遞給你，你要核對）
 - 底圖：上傳已確認的 stall.jpg（編輯式）
 - 檢查重點：袋子是白色紙袋（有一點油漬）、外面套紅色塑膠袋；看不到裡面的東西（遊戲會另外用文字卡片顯示袋子內容）。
 
@@ -253,7 +253,7 @@ Edit the attached image. Keep everything identical — the same place, the same 
 
 - 用在：PAY、PAY_FIX、CHANGE（報價、付錢、找錢）
 - 底圖：上傳已確認的 stall.jpg（編輯式）
-- 檢查重點：鈔票只有顏色，沒有可讀數字；老闆手掌向上伸出。
+- 檢查重點：鈔票只有顏色，沒有可讀數字；阿姨手掌向上伸出。
 
 ```
 Edit the attached image. Keep everything identical — the same place, the same layout, the same characters (face, hair, clothes), the same lighting, the same pixel-art style, the same camera angle and framing — and change ONLY the following: the owner now holds out one open palm over the counter toward the player, as if asking for payment, still smiling, with the tongs put down. The player's right hand holds out two or three paper banknotes fanned slightly (red, green and brown tones like Taiwan's banknotes, with no readable numbers and no portraits), and the player's left hand rests on the counter. Both hands are plain and bare (no rings, no watch, no nail polish, no sleeves). No readable text.
