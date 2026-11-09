@@ -732,7 +732,8 @@ const Game = defineGame({
             ...(Game._endGood
               ? [L(`Ami：哇，好香！你都買對了欸！都是我想要吃的！謝謝你，${N}！`, `¡Guau, qué rico huele! ¡Compraste todo bien! ¡Es justo lo que quería comer! ¡Gracias, ${N}!`, `Wow, it smells so good! You got everything right! It's all what I wanted to eat! Thanks, ${N}!`)]
               : [L(`Ami：咦？${N}，這個不太對耶……`, `¿Eh? ${N}, esto no está bien…`, `Huh? ${N}, this isn't quite right…`), ...shortSay, ...bad.filter(b => b.say).map(b => b.say)]),
-            ...noOwn
+            ...noOwn,
+            ...(Game._endGood ? [L('Ami：來，我們一起吃吧！', 'Ami: ¡Ven, comamos juntos!', "Ami: Come on, let's eat together!")] : [L('Ami：算了，我們一起來吃吧。', 'Ami: Bueno, ya qué. ¡Comamos juntos!', "Ami: Oh well, let's just eat it together.")])
           ];
         },
         options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
