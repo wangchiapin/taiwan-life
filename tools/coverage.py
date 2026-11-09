@@ -213,5 +213,10 @@ if __name__ == '__main__':
         return d
     mx, mn, out = opt('--max', 40), opt('--min', 10), opt('--out', '/tmp/coverage')
     tl = opt('--time', 900)   # 單一遊戲最多跑幾秒（預設 900）
+    a = [x for x in a if x != '--no-panels']
     games = a or ['school', 'bookstore', 'reserva']
     for g in games: run_game(g, mx, mn, out, time_limit=tl)
+    if '--no-panels' not in sys.argv:   # 共用檢查（語言／面板／單字）：跑這幾個遊戲的一組設定
+        sys.path.insert(0, HERE); import panels_test
+        _n, _f, _w = panels_test.check_games(games, quick=True, verbose=False)
+        print(f'## 共用檢查（panels_test）：{_n - len(_f)} 項通過，{len(_f)} 項失敗，{len(_w)} 則提醒')

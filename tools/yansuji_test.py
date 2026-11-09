@@ -311,6 +311,11 @@ def run(b):
 
 with sync_playwright() as pw:
     b = pw.chromium.launch(); run(b); b.close()
+# 共用檢查（語言／字體／拼音、任務提示、本關單字、錯誤紀錄面板）：每個遊戲的測試都順便跑自己這一個
+sys.path.insert(0, HERE); import panels_test
+_n, _f, _w = panels_test.check_games(['yansuji'], verbose=False)
+PASS[0] += _n - len(_f); FAILS.extend(_f)
+for _x in _w: print('提醒（不算失敗）：', _x)
 print(f'通過 {PASS[0]} 項，失敗 {len(FAILS)} 項')
 for f in FAILS: print(f)
 sys.exit(1 if FAILS else 0)

@@ -45,6 +45,7 @@ EXTRA={'drinks': '''() => {
   const v = m[s]; return typeof v === 'function' ? v() : (v ?? null);
 }'''}
 TRANS=set()  # 每個遊戲額外的 oracle（覆蓋）
+PROBE=None   # 每到一關（含過場 '_TRANS'）就呼叫 PROBE(page, 關卡)；panels_test.py 用它檢查語言、面板
 def texts(page):
     # 拼音預設開啟時選項裡有 <rt>，先拿掉才對得上正解文字
     return page.evaluate("[...document.querySelectorAll('#options-area .opt')].map(b=>{if(b.dataset.raw)return b.dataset.raw;const c=b.cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.innerText.replace(/\\n/g,'')})")
@@ -71,6 +72,7 @@ def play(page,g,mode,log):
         if page.locator('#ami-pop').count():   # Ami 的懸浮視窗：打開來看，再按「回覆：知道了」
             page.click('#ami-pop [data-act="open"]' if page.locator('#ami-pop [data-act="open"]').count() else '#ami-pop [data-act="reply"]'); continue
         st=page.evaluate('Game.state')
+        if PROBE: PROBE(page,st)
         if page.evaluate('Game.mistakes')>=8: page.evaluate('Game.mistakes=0')
         if st=='_TRANS':
             trans+=1; lab=texts(page); TRANS.add(page.evaluate('Game._trans.from+">"+Game._trans.to'))
@@ -111,12 +113,14 @@ def fbcheck(page,g,embed):
         sc=page.evaluate('window.__sc||null')
         if not sc or sc.get('score')!=gs[0]: bad.append(f'scene-complete={sc}')
     return 'FB✓ '+r['playerId'] if not bad else 'FB✗ '+','.join(bad)
-def run(g,mode='mixed',runs=3,embed=False,vp=None):
+def run(g,mode='mixed',runs=3,embed=False,vp=None,init=None):
     out=[]
     with sync_playwright() as p:
         b=p.chromium.launch()
         for k in range(runs):
-            ctx=b.new_context(viewport=vp or {'width':1000,'height':900}); ctx.route('**/*',route); ctx.add_init_script("addEventListener('message',e=>{if(e.data&&e.data.type==='scene-complete')window.__sc=e.data})"); page=ctx.new_page()
+            ctx=b.new_context(viewport=vp or {'width':1000,'height':900}); ctx.route('**/*',route)
+            if init: ctx.add_init_script(init)
+            ctx.add_init_script("addEventListener('message',e=>{if(e.data&&e.data.type==='scene-complete')window.__sc=e.data})"); page=ctx.new_page()
             errs=[]; page.on('pageerror',lambda e:errs.append(str(e))); page.on('dialog',lambda d:d.accept())
             url=f'http://127.0.0.1:{PORT}/games/{g}/index.html'+('?embed=1&name=Ana' if embed else '')
             page.goto(url); page.wait_for_timeout(400)
