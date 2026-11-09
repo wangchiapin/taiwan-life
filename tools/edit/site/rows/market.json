@@ -577,6 +577,14 @@
    "stageName": "EXPLAIN",
    "who": "Ami",
    "zh": "可是你的錢是夠的啊！"
+  },
+  {
+   "id": "market-073",
+   "kind": "台詞",
+   "stage": "EXPLAIN",
+   "stageName": "EXPLAIN",
+   "who": "Ami",
+   "zh": "你應該沒有騙我吧！"
   }
  ]
 }

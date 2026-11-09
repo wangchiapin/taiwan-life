@@ -255,6 +255,13 @@ with sync_playwright() as p:
     check('全對 → 好結局、沒有扣分', state(page) == 'END' and ev(page, 'Game._endGood') is True and ev(page, 'Game.mistakes') == 0, (state(page), ev(page, 'Game.mistakes')))
     shot(page, 'end_good')
 
+    # 7b. 沒買是因為忘記，卻說「老闆不賣給我」→ 扣分、Ami 說「你應該沒有騙我吧！」
+    new_game(page); setreq(page, [['pork', 1], ['fish', 1], ['cabbage', 1], ['egg', 1]])
+    tap(page, '東西買好了，回家')
+    mm = ev(page, 'Game.mistakes'); tap(page, CAUSE_REF := '老闆不賣給我')
+    check('忘記卻說老闆不賣 → 扣分', ev(page, 'Game.mistakes') == mm + 1)
+    check('Ami：你應該沒有騙我吧！', '你應該沒有騙我吧' in plain(page, '#npc-dialogue'), plain(page, '#npc-dialogue')[:80])
+
     # 8. Ami 訊息：加買
     new_game(page)
     setreq(page, [['pork', 1], ['mince', 1], ['leg', 1], ['rib', 1]], {'type': 'add', 'y': ['onion', 2]})

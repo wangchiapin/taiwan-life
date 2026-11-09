@@ -995,7 +995,8 @@ const Game = defineGame({
               refused: { money: M('老闆沒有不賣，是你的錢不夠。', 'El vendedor sí quería vender: lo que pasó es que no te alcanzó el dinero.', 'The vendor was willing to sell — you ran short of money.'), forgot: M('老闆沒有不賣，你是忘記買了。', 'El vendedor sí quería vender: se te olvidó comprarlo.', 'The vendor was willing to sell — you forgot to buy it.') },
               forgot: { money: M('你不是忘記，是錢不夠，要說清楚。', 'No lo olvidaste: no te alcanzó el dinero. Dilo claramente.', "You didn't forget: you ran short of money. Say it clearly."), refused: M('你不是忘記，是老闆不賣給你。', 'No lo olvidaste: el vendedor no quiso venderte.', "You didn't forget: the vendor wouldn't sell to you.") }
             };
-            Game.addMistake(why[said][real], said === 'money' && real === 'forgot' ? [L('Ami：可是你的錢是夠的啊！', 'Ami: ¡Pero si tenías dinero de sobra!', 'Ami: But you had plenty of money!')] : null);
+            Game.addMistake(why[said][real], said === 'money' && real === 'forgot' ? [L('Ami：可是你的錢是夠的啊！', 'Ami: ¡Pero si tenías dinero de sobra!', 'Ami: But you had plenty of money!')]
+              : said === 'refused' ? [L('Ami：你應該沒有騙我吧！', 'Ami: ¡No me estarás mintiendo, ¿verdad?!', "Ami: You're not lying to me, are you?!")] : null);   // 老闆有沒有賣，Ami 不會知道；她只會懷疑你
             return;
           }
           Game.explained[a.id] = real;
