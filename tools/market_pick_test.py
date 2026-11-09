@@ -287,6 +287,24 @@ with sync_playwright() as p:
     tap(page, '好，我知道了')
     check('雞蛋換成洋蔥', ev(page, "Game.req.some(a=>a.id==='onion')") and not ev(page, "Game.req.some(a=>a.id==='egg')"))
 
+    # 4b. 肉攤被「不賣了」：過場畫面用生氣圖
+    new_game(page); setreq(page, [['pork', 1], ['fish', 1], ['cabbage', 1], ['egg', 1]])
+    tap(page, '去肉攤'); buy(page, 'pork', 1); tap(page, '買好了'); ev(page, 'Game.st.floor = 280')
+    for _ in range(3):
+        o = opts(page); i = next(k for k, t_ in enumerate(o) if t_.endswith('元可以嗎？'))
+        page.locator('#options-area .opt').nth(i).click(); page.wait_for_timeout(120)
+    check('肉攤不賣了：過場畫面是老闆生氣圖', state(page) == '_TRANS' and 'stall_meat_angry' in ev(page, "document.getElementById('npc-avatar').src"), (state(page), ev(page, "document.getElementById('npc-avatar').src")))
+    page.locator('#options-area .opt').first.click(); page.wait_for_timeout(100)
+    check('離開過場後回地圖，圖片恢復', state(page) == 'MAP' and 'angry' not in ev(page, "document.getElementById('npc-avatar').src"))
+    new_game(page); setreq(page, [['pork', 1], ['fish', 1], ['cabbage', 1], ['egg', 1]])
+    tap(page, '去魚攤'); buy(page, 'fish', 1); tap(page, '買好了')
+    for _ in range(3):
+        o = opts(page); i = next(k for k, t_ in enumerate(o) if t_.endswith('元可以嗎？'))
+        page.locator('#options-area .opt').nth(i).click(); page.wait_for_timeout(120)
+    # 魚攤、菜攤的生氣圖還沒做：沒圖時用平常的攤位圖
+    check('魚攤（還沒有生氣圖）過場仍正常', state(page) == '_TRANS')
+    page.locator('#options-area .opt').first.click(); page.wait_for_timeout(100)
+
     # 11. 外觀：手機版找錢卡、地圖、殺價
     page.set_viewport_size({'width': 390, 'height': 800})
     new_game(page); setreq(page, [['pork', 1], ['fish', 1], ['cabbage', 1], ['egg', 1]]); shot(page, 'mobile_map')
