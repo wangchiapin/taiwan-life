@@ -322,7 +322,7 @@ const PLACES = {
 };
 /* 三個攤位（傳統市場各賣各的）。攤位圖：先都用 stall.jpg，做好 stall_meat.jpg、stall_fish.jpg 以後改這裡 */
 const STALLS = {
-  meat: { zh: '肉攤', es: 'puesto de carne',     en: 'meat stall',      icon: '🥩', boss: '老闆',   img: 'images/stall_meat.jpg', angry: 'images/stall_meat_angry.jpg', sorry: 'images/stall_meat_sorry.jpg' },
+  meat: { zh: '肉攤', es: 'puesto de carne',     en: 'meat stall',      icon: '🥩', boss: '老闆',   img: 'images/stall_meat.jpg', angry: 'images/stall_meat_angry.jpg', sorry: 'images/stall_meat_sorry.jpg', pay: 'images/stall_meat_pay.jpg' },
   fish: { zh: '魚攤', es: 'puesto de pescado',   en: 'fish stall',      icon: '🐟', boss: '老闆娘', img: 'images/stall_fish.jpg', angry: 'images/stall_fish_angry.jpg', sorry: 'images/stall_fish_sorry.jpg' },
   veg:  { zh: '菜攤', es: 'puesto de verduras',  en: 'vegetable stall', icon: '🥬', boss: '老闆娘', img: 'images/stall.jpg', angry: 'images/stall_veg_angry.jpg', sorry: 'images/stall_veg_sorry.jpg' }
 };
@@ -418,7 +418,7 @@ const Game = defineGame({
     // 老闆自己弄錯（少找錢、放錯數量），玩家指出來以後的過場畫面：老闆不好意思（尷尬臉）
     if (this._transMode && STALLS[this.cur] && STALLS[this.cur].sorry && ((this.state === 'CHANGE' && this.cc && this.cc.sc) || (this.state === 'CHECK' && this.ck && this.ck.wrong))) return [STALLS[this.cur].sorry, '😅'];
     if (['PICK', 'HAGGLE', 'BAG', 'CHECK'].includes(this.state) && STALLS[this.cur]) return [STALLS[this.cur].img, STALLS[this.cur].icon];
-    if (['PAY', 'REMOVE', 'CHANGE'].includes(this.state) && STALLS[this.cur] && this.cur !== 'veg') return [STALLS[this.cur].img, STALLS[this.cur].icon];   // images/pay.jpg 是菜攤的，肉攤、魚攤用自己的圖
+    if (['PAY', 'REMOVE', 'CHANGE'].includes(this.state) && STALLS[this.cur] && this.cur !== 'veg') return [STALLS[this.cur].pay || STALLS[this.cur].img, STALLS[this.cur].icon];   // images/pay.jpg 是菜攤的；肉攤、魚攤用自己的付錢圖（還沒有就用平常的攤位圖）
     return null;
   },
   boss() { return STALLS[this.cur] ? STALLS[this.cur].boss : '老闆'; },

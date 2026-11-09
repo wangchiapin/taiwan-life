@@ -153,7 +153,7 @@ with sync_playwright() as p:
     tap(page, '我下次再付')
     check('賒帳 → 扣分', ev(page, 'Game.mistakes') == m0 + 2)
     pay = [t for t in opts(page) if t.startswith('給你') ]
-    check('肉攤付錢畫面用肉攤的圖', 'stall_meat' in ev(page, "document.getElementById('npc-avatar').src"))
+    check('肉攤付錢畫面用肉攤的付錢圖', 'stall_meat_pay' in ev(page, "document.getElementById('npc-avatar').src"), ev(page, "document.getElementById('npc-avatar').src"))
     P = ev(page, 'Game.payInfo()')
     tap(page, P['payOk'])
     check('付錢後現金減少', ev(page, 'Game.cash') == 1000 - P['ask'], ev(page, 'Game.cash'))
