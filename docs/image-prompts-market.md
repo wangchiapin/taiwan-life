@@ -8,20 +8,20 @@
 - 沒有人、沒有手、沒有文字、沒有標籤、沒有價格牌、沒有商標。
 - 拍攝方向（8 張都一樣，畫面才一致）：相機在食物前方約 40 公分、高度約 30 公分，往下約 45 度，食物置中。
 
-## 順序
-| 順序 | 檔名 | 內容 |
+## 做法（2026-11-09 改成九宮格一次出圖，Claude 自己切）
+一張 3×3 九宮格，每格一種菜，Claude 切開、縮成 480×480 放進 `games/market/images/`。
+格子順序（由左到右、由上到下）：
+
+| 格 | 檔名 | 內容 |
 |---|---|---|
-| 1 | `item_pork.jpg` | 豬肉（梅花肉厚片，約一斤）|
+| 1 | `item_pork.jpg` | 豬肉（梅花肉厚片）|
 | 2 | `item_beef.jpg` | 牛肉 |
-| 3 | `item_chicken.jpg` | 雞肉 |
+| 3 | `item_chicken.jpg` | 雞肉（雞腿）|
 | 4 | `item_egg.jpg` | 雞蛋（一盒）|
 | 5 | `item_fish.jpg` | 魚（一條）|
 | 6 | `item_cabbage.jpg` | 高麗菜（一顆）|
 | 7 | `item_bokchoy.jpg` | 小白菜（一把）|
-| 8 | `item_tomato.jpg` | 番茄 |
+| 8 | `item_tomato.jpg` | 番茄（三顆）|
+| 9 | `basket.jpg` | 空的菜籃（備用，之後可當「籃子」圖）|
 
-## 1. `item_pork.jpg`（豬肉）
-
-```
-Create a square (1:1) photorealistic food photograph, in the style of a bakery product photo: one single food item shown large, filling most of the frame, with soft natural window light coming from the left, shallow depth of field, a softly blurred warm background, slightly warm color tone, appetizing, sharp focus on the food. Subject: a thick slice of fresh raw Taiwanese pork shoulder (梅花肉), pink-red with thin white fat marbling, about 600 grams, lying on a clean, slightly worn round wooden chopping block at a traditional Taiwanese market stall. Camera: about 40 cm in front of the meat and about 30 cm above it, looking down at roughly 45 degrees, the meat centered in the frame. Background: a blurred traditional market stall with a warm hanging light bulb, nothing recognizable. No people, no hands, no text, no labels, no price tags, no logos, no watermark. Real photograph, not an illustration, not pixel art.
-```
+提示詞見對話；如果某一格畫得不好，再單獨重畫那一格。
