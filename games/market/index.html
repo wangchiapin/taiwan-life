@@ -692,7 +692,7 @@ const Game = defineGame({
     });
     this._endGood = pens.length === 0;
     this.state = 'END';
-    pens.forEach(m => { this.addMistake(m); if (m.pen) { this.score += 10 - m.pen; } });
+    pens.forEach(m => this.addMistake(m));
     const bonus = Math.min(20, Math.floor(this.saved / 10));
     this._bonus = bonus; this.score += bonus;
     document.getElementById('score-badge').textContent = this.score + ' 分';

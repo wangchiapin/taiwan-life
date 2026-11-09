@@ -199,6 +199,8 @@ with sync_playwright() as p:
     sc = ev(page, 'Game.score'); mk = ev(page, 'Game.mistakes')
     check('少買但原因正確 → 壞結局（只有好壞兩種）', ev(page, 'Game._endGood') is False)
     check('結局句子包含體諒', any('下次' in l for l in ev(page, 'Game.final.map(x=>x.zh)')), ev(page, 'Game.final.map(x=>x.zh)'))
+    check('輕扣的兩筆記錄是 −5（錯誤紀錄與回饋卡都顯示 −5）', ev(page, 'Game.log.filter(m=>m.pen===5).length') == 2 and '−5' in ev(page, "document.getElementById('log-body').innerText"), ev(page, 'Game.log.map(m=>m.pen)'))
+    check('分數：輕扣只扣 5', ev(page, 'Game.score') == 100 - 10 * (ev(page, 'Game.mistakes') - 2) - 10 + ev(page, 'Game._bonus') , (ev(page, 'Game.score'), ev(page, 'Game.mistakes')))
     shot(page, 'end_bad')
     tap(page, '查看結果'); check('結果頁', state(page) == 'RESULT')
 

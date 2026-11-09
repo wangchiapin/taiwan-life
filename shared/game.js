@@ -370,7 +370,7 @@ const stdResultCfg = place => ({
       `${w('錯誤次數', 'Errores', 'Mistakes')}：${Game.mistakes} 次\n${w('時間', 'Tiempo', 'Time')}：${Game.elapsedTime} 秒\n` +
       `${w('看任務提示', 'Pistas consultadas', 'Hints viewed')}：${Game.hintViews} 次\n\n${w('扣分原因', 'Penalizaciones', 'Penalties')}：`;
     if (!Game.log.length) msg += '\n沒有扣分！' + X('¡Sin errores!', 'No mistakes!') + ' 🎉';
-    else Game.log.forEach((m, i) => { msg += `\n${i + 1}. ${m.zh} ${X(m.es, m.en)}（−10）`; });
+    else Game.log.forEach((m, i) => { msg += `\n${i + 1}. ${m.zh} ${X(m.es, m.en)}（−${m.pen || 10}）`; });
     return msg.split('\n').map(zh => ({ zh }));
   },
   options: () => ['查看排行榜 ' + X('Ver clasificación', 'See leaderboard')],
@@ -1019,7 +1019,7 @@ const Log = {
     body.innerHTML = list.slice().reverse().map(m => {
       const st = m.stage || ['', '', ''];
       return `<div class="l-item${m.visit === Game.visit ? ' now' : ''}">
-        <div class="l-stage">−10 · ${esc(st[0])}｜${esc(X(st[1], st[2]))}</div>
+        <div class="l-stage">−${m.pen || 10} · ${esc(st[0])}｜${esc(X(st[1], st[2]))}</div>
         <div class="l-es">${esc(X(m.es, m.en))}</div><div class="l-zh">${Game.ruby(m.zh)}</div></div>`;
     }).join('');
   }
@@ -1214,7 +1214,7 @@ const GameCore = {
   },
   stopTimer() { clearInterval(this.timerInterval); },
   addMistake(r, thought) {
-    this.score -= 10; this.mistakes += 1; this.mistakeLog.push(r.zh + ' ' + r.es);
+    this.score -= (r.pen || 10); this.mistakes += 1;   // r.pen：這一筆只扣幾分（預設 10；菜市場「錢不夠／老闆不賣」只扣 5） this.mistakeLog.push(r.zh + ' ' + r.es);
     (this._mistakeSt = this._mistakeSt || new Set()).add(this.state);   // 單字小考：答錯過的關卡的單字優先
     this.log.push({ ...r, stage: stageOf(), visit: this.visit });
     if (this.state !== 'END') this.feedback.push({ type: 'bad', ...r });
@@ -1229,7 +1229,7 @@ const GameCore = {
   good(zh, es, en) { this.feedback.push({ type: 'good', zh, es, en }); },
   feedbackHTML() {
     return this.feedback.map(f => `<div class="fb ${f.type}">
-      <div class="fb-head">${f.type === 'bad' ? '✗ −10 分' : '✓ ' + X('¡Bien!', 'Nice!') + ' 做得好'}</div>
+      <div class="fb-head">${f.type === 'bad' ? '✗ −' + (f.pen || 10) + ' 分' : '✓ ' + X('¡Bien!', 'Nice!') + ' 做得好'}</div>
       <div class="fb-es">${esc(X(f.es, f.en))}</div><div class="fb-zh">${this.ruby(f.zh)}</div></div>`).join('');
   },
   toast(msg) {
