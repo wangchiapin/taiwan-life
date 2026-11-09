@@ -280,7 +280,7 @@ const STAGE = {
 
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
-  ITEM: '走到攤位前', CUT: '回答老闆', SPICY: '回答老闆', TOPS: '回答老闆', ORDER_CHECK: '聽老闆確認', HANDOVER: '等老闆炸好', PAY: f => f === 'REMOVE' ? '聽老闆重新報價' : '付錢', REMOVE: '告訴老闆', PAY_FIX: '聽老闆重算', CHANGE: '等找錢', END: '拿袋子'
+  ITEM: '走到攤位前', CUT: '繼續', SPICY: '繼續', TOPS: '繼續', ORDER_CHECK: '老闆要跟你確認品項了', HANDOVER: '等老闆炸好', PAY: f => f === 'REMOVE' ? '聽老闆重新報價' : '付錢', REMOVE: '告訴老闆', PAY_FIX: '聽老闆重算', CHANGE: '等找錢', END: '拿鹽酥雞'
 };
 
 /* ══════════════════════════════════════
@@ -327,10 +327,10 @@ const topsOpt = v => { const y = TOPN.filter((_, i) => v[i]).map(x => x[0]), n =
 /* 老闆複誦（ORDER_CHECK）與袋子裡的東西（HANDOVER）：一次只會錯一項。
    items：數量（其中一樣多了或少了）；cut：雞排切不切；spicy：辣度；tops：蔥蒜洋蔥 */
 const OC = {
-  zh: (k, v) => k === 'items' ? itemsText(v, 'zh') : k === 'cut' ? (v ? '雞排要切' : '雞排不切') : k === 'spicy' ? v.say : topsZh(v),
+  zh: (k, v) => k === 'items' ? itemsText(v, 'zh') : k === 'cut' ? (v ? '雞排要切' : '雞排不用切') : k === 'spicy' ? v.say : topsZh(v),
   es: (k, v) => k === 'items' ? itemsText(v, 'es') : k === 'cut' ? (v ? 'el filete cortado' : 'el filete entero') : k === 'spicy' ? v.es : topsL(v, 'es'),
   en: (k, v) => k === 'items' ? itemsText(v, 'en') : k === 'cut' ? (v ? 'cutlet cut up' : 'cutlet whole') : k === 'spicy' ? v.en : topsL(v, 'en'),
-  fix: (k, v, idx) => k === 'items' ? `不好意思，${v[idx].it.zh}我要的是${NZ(v[idx].q)}${v[idx].it.mw}。` : k === 'cut' ? (v ? '不好意思，雞排我要切。' : '不好意思，雞排我不要切。') : k === 'spicy' ? v.fix : `不好意思，我${topsZh(v)}。`,
+  fix: (k, v, idx) => k === 'items' ? `不好意思，${v[idx].it.zh}我要的是${NZ(v[idx].q)}${v[idx].it.mw}。` : k === 'cut' ? (v ? '不好意思，雞排要切。' : '不好意思，雞排不用切。') : k === 'spicy' ? v.fix : `不好意思，我${topsZh(v)}。`,
   full: (o, f, ks) => ks.map(k => OC[f](k, o[k])).join(f === 'zh' ? '，' : '; ')
 };
 const diffIdx = (a, b) => a.findIndex((x, i) => x.q !== b[i].q);
@@ -407,7 +407,7 @@ const Game = defineGame({
     t.total = total; t.extra = { zh: x.zh, es: x.es, en: x.en, price: x.p };
     t.payWrong = total <= t.cash && total + x.p <= t.cash && Math.random() < 0.45;
     t.said = t.payWrong ? total + x.p : total;
-    t.bill = billFor(Math.max(total, t.said)); t.change = t.bill - total;
+    t.bill = billFor(total); t.change = t.bill - total;   // 要付的錢只看真正的總價（270 元付 300，不會因為老闆多算就多付）
     t.changeWrong = t.change > 0 && Math.random() < 0.4;
     const ds = [-20, -10, 10, 20].filter(d => t.change + d >= 0);
     t.given = t.changeWrong ? t.change + pick(ds) : t.change;
@@ -505,7 +505,7 @@ const Game = defineGame({
     const r = s => this.ruby(s);
     const hasCut = o.items.some(x => x.it === STEAK);
     const pics = o.items.map(x => `<figure><img src="images/item_${x.it.img}.jpg" alt="${x.it.zh}"><span class="cnt">× ${x.q}</span><figcaption>${r(x.it.zh)}</figcaption></figure>`).join('');
-    const lines = [hasCut ? `<span>${r(o.cut ? '雞排切好了' : '雞排是整片')}</span>` : '', `<span>${o.spicy.zh === '不辣' ? r('不辣') : '🌶 ' + r(o.spicy.zh)}</span>`,
+    const lines = [hasCut ? `<span>${r(OC.zh('cut', o.cut))}</span>` : '', `<span>${o.spicy.zh === '不辣' ? r('不辣') : '🌶 ' + r(o.spicy.zh)}</span>`,
       ...TOPN.map((x, i) => `<span class="ck${o.tops[i] ? ' on' : ''}">${r(x[0])}</span>`)].filter(Boolean).join('');
     return `<div class="bag"><div class="bi">${pics}</div><div class="bl">${lines}</div></div>`;
   },
@@ -521,7 +521,7 @@ const Game = defineGame({
     });
     const ocK = t.ocKind, hoK = t.hoKind;
     const SHORT = '不好意思，我的錢不夠，有一樣不要了。';
-    const payOk = `給你${zhNum(t.bill)}元。`;
+    const payOk = `給你${zhNum(t.payWrong ? billFor(t.said) : t.bill)}元。`;   // 老闆多算時，這個選項是「沒發現就照多算的付」，所以是錯的
     const claim = t.payWrong ? t.total : t.total + (t.extra ? t.extra.price : 0);
     const fixTotal = `不好意思，好像算錯了，應該是${zhNum(claim)}元吧？`;
     const broke = () => t.total > t.cash;
@@ -678,8 +678,8 @@ const Game = defineGame({
           });
           const shortSay = short.length ? [L(`Ami：我要${itemsText(short, 'zh')}，你沒有買齊耶！`, `Ami: ¡Yo quería ${itemsText(short, 'es')} y no trajiste todo!`, `Ami: I wanted ${itemsText(short, 'en')}, but you didn't get everything!`)] : [];
           if (Game.hasCutlet() && !!t.pCut !== t.cut) bad.push({
-            m: M(`Ami說雞排${t.cut ? '要切' : '不用切，她要整片'}，你${t.pCut ? '要了切開的' : '要了整片的'}。`, `Ami dijo que el filete ${t.cut ? 'se corta' : 'va entero'}, y lo pediste ${t.pCut ? 'cortado' : 'entero'}.`, `Ami said the cutlet should ${t.cut ? 'be cut up' : 'stay whole'}, but you asked for it ${t.pCut ? 'cut up' : 'whole'}.`),
-            say: L(`Ami：雞排我要${t.cut ? '切的' : '整片的'}耶！`, `Ami: ¡El filete lo quería ${t.cut ? 'cortado' : 'entero'}!`, `Ami: I wanted the cutlet ${t.cut ? 'cut up' : 'whole'}!`)
+            m: M(`Ami說雞排${t.cut ? '要切' : '不用切'}，你說${t.pCut ? '要切' : '不用切'}。`, `Ami dijo que el filete ${t.cut ? 'se corta' : 'va entero'}, y lo pediste ${t.pCut ? 'cortado' : 'entero'}.`, `Ami said the cutlet should ${t.cut ? 'be cut up' : 'stay whole'}, but you asked for it ${t.pCut ? 'cut up' : 'whole'}.`),
+            say: L(`Ami：雞排我說${t.cut ? '要切' : '不用切'}耶！`, `Ami: ¡El filete lo quería ${t.cut ? 'cortado' : 'entero'}!`, `Ami: I wanted the cutlet ${t.cut ? 'cut up' : 'whole'}!`)
           });
           if (t.pSpicy !== t.spicy) bad.push({
             m: M(`Ami的辣度是「${t.spicy.zh}」，你選了「${t.pSpicy.zh}」。`, `Ami lo pidió «${t.spicy.es}» y elegiste «${t.pSpicy.es}».`, `Ami asked for it "${t.spicy.en}" but you chose "${t.pSpicy.en}".`),
@@ -697,7 +697,7 @@ const Game = defineGame({
           return [
             staff('謝謝，下次再來！', 'Gracias, ¡vuelva pronto!', 'Thank you — come again!'),
             ...(Game._endGood
-              ? [L(`Ami：哇，好香！又酥脆，又是我要的口味！謝謝你，${N}！`, `¡Guau, qué rico huele! ¡Crujiente y justo como lo quería! ¡Gracias, ${N}!`, `Wow, it smells great! Crispy and exactly how I wanted it! Thanks, ${N}!`)]
+              ? [L(`Ami：哇，好香！你都買對了欸！都是我想要吃的！謝謝你，${N}！`, `¡Guau, qué rico huele! ¡Compraste todo bien! ¡Es justo lo que quería comer! ¡Gracias, ${N}!`, `Wow, it smells so good! You got everything right! It's all what I wanted to eat! Thanks, ${N}!`)]
               : [L(`Ami：咦？${N}，這個不太對耶……`, `¿Eh? ${N}, esto no está bien…`, `Huh? ${N}, this isn't quite right…`), ...shortSay, ...bad.filter(b => b.say).map(b => b.say)]),
             ...noOwn
           ];

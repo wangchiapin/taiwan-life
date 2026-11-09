@@ -39,7 +39,7 @@ def to_pay(page, d, cash=None, wrong=None):
     if cash is not None: page.evaluate('c=>{Game.task.cash=c}', cash)
     press(page, '點好了。'); assert st(page) == 'PAY', st(page)
     if wrong is not None:   # 指定老闆這次有沒有多算（錢夠才會多算）
-        page.evaluate("""w=>{const t=Game.task;t.payWrong=w;t.said=w?t.total+t.extra.price:t.total;t.bill=billFor(Math.max(t.total,t.said));t.change=t.bill-t.total;t.changeWrong=false;t.given=t.change;Game.render()}""", wrong)
+        page.evaluate("""w=>{const t=Game.task;t.payWrong=w;t.said=w?t.total+t.extra.price:t.total;t.bill=billFor(t.total);t.change=t.bill-t.total;t.changeWrong=false;t.given=t.change;Game.render()}""", wrong)
 def pay_opts(page):
     t = page.evaluate('({total:Game.task.total,said:Game.task.said,cash:Game.task.cash,bill:Game.task.bill,extra:Game.task.extra.price})'); return t
 
@@ -76,7 +76,7 @@ def run(b):
             p = new_page(b); to_pay(p, {'雞排': 1, '四季豆': 1}, cash=300, wrong=wrong)
             i = pay_opts(p); t = i['total']
             texts = opts(p); check(f'PAY四個選項 wrong={wrong}', len(texts) == 4, texts)
-            payOk = f"給你{p.evaluate('zhNum(Game.task.bill)')}元。"
+            payOk = f"給你{p.evaluate('zhNum(Game.task.payWrong?billFor(Game.task.said):Game.task.bill)')}元。"
             fixT = '不好意思，好像算錯了，應該是' + p.evaluate('zhNum(Game.task.payWrong?Game.task.total:Game.task.total+Game.task.extra.price)') + '元吧？'
             SHORT = '不好意思，我的錢不夠，有一樣不要了。'; RUDE = '你是不是想騙我的錢啊？'
             choice = {'pay': payOk, 'fix': fixT, 'short': SHORT, 'rude': RUDE}[pick_]
@@ -88,6 +88,17 @@ def run(b):
             else:
                 check(f'PAY 錯誤 {pick_} wrong={wrong} 扣10分並留在PAY', mis(p) == m0 + 1 and st(p) == 'PAY', (mis(p), st(p)))
             p.close()
+    # 實際例子：點了270元，付的錢是300（不會因為老闆多算就變成350）
+    p = new_page(b); to_pay(p, {'雞排': 1, '鹽酥雞': 1, '魷魚': 1, '雞塊': 1}, cash=350)   # 75+60+60+45=240
+    p.evaluate("Game.basket={'雞排':1,'鹽酥雞':1,'魷魚':1,'地瓜':1};Game.requote();Game.task.payWrong=false;Game.task.said=Game.task.total;Game.render()")   # 75+60+60+40=235
+    t = p.evaluate('({total:Game.task.total,bill:Game.task.bill})'); check('235元付250', t['total'] == 235 and t['bill'] == 250, t); p.close()
+    p = new_page(b); to_pay(p, {'雞排': 1, '鹽酥雞': 1, '魷魚': 1, '米血': 1, '熱狗': 1, '蘿蔔糕': 1}, cash=400)   # 75+60+60+15+20+35=265
+    for _ in range(60):
+        p.evaluate("Game.requote();Game.render()")
+        t = p.evaluate('({total:Game.task.total,bill:Game.task.bill,said:Game.task.said,w:Game.task.payWrong})')
+        if not (t['bill'] == -(-t['total'] // 50) * 50): check('付的錢永遠是真總價湊50', False, t); break
+    else: check('付的錢永遠是真總價湊50（含老闆多算時）', True)
+    p.close()
     # 錢夠卻說「錢不夠」的原因文字
     p = new_page(b); to_pay(p, {'雞排': 1}, cash=300, wrong=False); press(p, '不好意思，我的錢不夠，有一樣不要了。')
     check('錢夠卻說不夠：說明錢是夠的', '錢是夠的' in p.evaluate('Game.log[Game.log.length-1].zh')); p.close()
@@ -234,7 +245,7 @@ def run(b):
     check('壞結局：每項仍各扣分', p.evaluate('Game.mistakes') == 2, p.evaluate('Game.mistakes'))
     check('壞結局＋沒買自己的：也會問', '你沒有買自己要吃的喔' in tx); p.close()
     p = new_page(b); finish(p, {'雞排': 1, '四季豆': 1, '杏鮑菇': 2}, [True, False], [1, 1], [[True, True, False]] * 2, A)
-    tx = dtext(p); check('只錯切法：沒有「沒買齊」那句', '沒有買齊' not in tx and '雞排我要' in tx, tx); p.close()
+    tx = dtext(p); check('只錯切法：沒有「沒買齊」那句', '沒有買齊' not in tx and '雞排我說' in tx, tx); p.close()
     # 袋子畫面：食物照片＋份數、雞排切法、辣度、蔥蒜洋蔥打勾
     p = new_page(b); to_item(p); fill(p, {'雞排': 1, '鹽酥雞': 2})
     p.evaluate("""()=>{const t=Game.task;t.cash=300;t.pCut=true;t.pSpicy=SPICY[2];t.pTops=[true,false,true];Game.buildChecks();t.hoWrong=false;t.hoGot={...t.truth};Game.state='HANDOVER';Game.render()}""")
