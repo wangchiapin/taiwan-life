@@ -430,7 +430,15 @@ const Game = defineGame({
     this._flash = true; clearTimeout(this._ft);
     this._ft = setTimeout(() => { this._flash = false; if (this.state === 'ITEM') this.setImage('images/pick.jpg', '🧺'); }, 420);
   },
-  imageFor() { if (this.state === 'ITEM' && this._flash) return ['images/pick_click.jpg', '🧺']; },
+  EXTRA_IMAGES: ['images/pick_click.jpg', 'images/pay_sorry.jpg', 'images/stall_sorry.jpg', 'images/bag_sorry.jpg'],   // imageFor() 才會用到的圖，也先載好
+  /* 阿姨說「啊，不好意思！」的畫面，用尷尬臉那張：算錯錢（PAY_FIX）、找錯錢／複誦說錯／袋子裝錯被抓到後的道歉過場 */
+  imageFor() {
+    const t = this.task, from = this.state;
+    if (from === 'ITEM' && this._flash) return ['images/pick_click.jpg', '🧺'];
+    if (from === 'PAY_FIX' || (from === 'CHANGE' && this._transMode && t.changeWrong)) return ['images/pay_sorry.jpg', '😅'];
+    if (from === 'ORDER_CHECK' && this._transMode && t.ocWrong) return ['images/stall_sorry.jpg', '😅'];
+    if (from === 'HANDOVER' && this._transMode && t.hoWrong) return ['images/bag_sorry.jpg', '😅'];
+  },
   putBack(zh) {
     if (!this.basket[zh]) return;
     if (!--this.basket[zh]) delete this.basket[zh];

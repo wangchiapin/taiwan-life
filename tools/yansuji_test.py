@@ -164,6 +164,17 @@ def run(b):
         check('選完蔥蒜洋蔥→複誦', st(p) == 'ORDER_CHECK')
         p.close()
 
+    # ── 4b. 阿姨道歉的畫面用尷尬臉 ──
+    p = new_page(b); to_item(p); fill(p, {'雞排': 1, '鹽酥雞': 2})
+    av = lambda: p.evaluate("document.getElementById('npc-avatar').getAttribute('src')")
+    p.evaluate("()=>{Game.state='PAY_FIX';Game.render()}")
+    check('PAY_FIX（阿姨算錯）用 pay_sorry', av() == 'images/pay_sorry.jpg', av())
+    p.evaluate("()=>{const t=Game.task;t.changeWrong=true;Game.state='CHANGE';Game.render()}")
+    check('CHANGE 還沒抓到：用一般 pay', av() == 'images/pay.jpg', av())
+    p.evaluate("()=>{Game.task.changeWrong=false;Game.state='CHANGE';Game.render()}")
+    check('CHANGE 找對：用一般 pay', av() == 'images/pay.jpg', av())
+    p.close()
+
     # ── 5. 複誦、袋子：對／錯 × 三個選項（照「你點的」核對） ──
     for where in ('ORDER_CHECK', 'HANDOVER'):
         for wrong in (False, True):
@@ -180,6 +191,10 @@ def run(b):
                 right = (ch == 'fix') if wrong else (ch == 'ok')
                 m0 = mis(p); press(p, choice)
                 check(f'{where} wrong={wrong} {ch} ({kind})', (mis(p) == m0) if right else (mis(p) == m0 + 1 and st(p) == where), (mis(p), st(p)))
+                src = p.evaluate("document.getElementById('npc-avatar').getAttribute('src')")
+                want = ('images/stall_sorry.jpg' if where == 'ORDER_CHECK' else 'images/bag_sorry.jpg') if (wrong and ch == 'fix') else \
+                       ('images/stall.jpg' if where == 'ORDER_CHECK' else 'images/bag.jpg')
+                check(f'{where} wrong={wrong} {ch} 圖片：{want}', src == want, src)
                 p.close()
     # 複誦的每一種錯法都要能指出來：數量／切法／辣度／蔥蒜洋蔥
     for kind in ('items', 'cut', 'spicy', 'tops'):
