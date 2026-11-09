@@ -91,10 +91,14 @@
   .basket .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .basket .put { border: 1.5px solid #b98a52; background: #fffaf0; color: var(--red-dark); border-radius: 999px; padding: 0 12px; font: inherit; font-size: 13px; line-height: 26px; cursor: pointer; }
   @media (max-width: 600px) { .shelf { grid-template-columns: repeat(3, 1fr); gap: 6px; } .food { font-size: 13px; } .food .pr { font-size: 12px; } }
-  .bag { margin: 6px 0 10px; padding: 12px 14px; border-radius: 14px; background: #fffaf0; border: 2px solid #ecd0a8; text-align: center; }
-  .bag .be { font-size: 58px; line-height: 1.1; }
-  .bag .bc { display: flex; gap: 6px 8px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
-  .bag .bc span { background: #fff; border: 1.5px solid #ecd0a8; border-radius: 999px; padding: 3px 11px; font-size: 16px; }
+  .bag { margin: 6px 0 10px; padding: 12px 14px; border-radius: 14px; background: #fffaf0; border: 2px solid #ecd0a8; }
+  .bag .bi { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .bag .bi figure { margin: 0; position: relative; width: 78px; text-align: center; font-size: 13px; line-height: 1.4; }
+  .bag .bi img { width: 78px; height: 78px; object-fit: cover; border-radius: 8px; display: block; }
+  .bag .bi .cnt { position: absolute; top: 3px; right: 3px; background: var(--red); color: #fff; border-radius: 999px; padding: 0 7px; font-weight: 700; font-size: 13px; }
+  .bag .bl { display: flex; gap: 6px 14px; flex-wrap: wrap; justify-content: center; margin-top: 10px; padding-top: 8px; border-top: 1.5px dashed #ecd0a8; font-size: 16px; }
+  .bag .ck::before { content: ''; display: inline-block; width: 15px; height: 15px; margin-right: 5px; vertical-align: -2px; border: 2px solid #8a6a3f; border-radius: 3px; background: #fff; text-align: center; font-size: 13px; line-height: 13px; }
+  .bag .ck.on::before { content: '✓'; color: #fff; background: var(--red); border-color: var(--red); font-weight: 700; }
 
 </style></head>
 <body>
@@ -375,14 +379,14 @@ const Game = defineGame({
   lastAct: null,
 
   setup() {
-    /* Ami 的要求：雞排 + 2～3 樣別的；總價不超過 200 元（身上的錢至少 200，一定付得起） */
+    /* Ami 的要求：雞排 + 3～4 樣別的（共 4～5 項）；總價不超過 250 元。身上的錢＝Ami 的總價湊成 50 的倍數，再多 50 或 100（一定付得起，多的錢才夠買自己的） */
     let items, total;
     do {
-      const others = shuffle(ITEMS.filter(x => x !== STEAK)).slice(0, pick([2, 3]));
-      items = [{ it: STEAK, q: 1 }, ...others.map(it => ({ it, q: pick([1, 1, 2]) }))];
+      const others = shuffle(ITEMS.filter(x => x !== STEAK)).slice(0, pick([3, 4]));
+      items = [{ it: STEAK, q: 1 }, ...others.map(it => ({ it, q: pick([1, 1, 1, 2]) }))];
       total = sum(items.map(x => x.it.p * x.q));
-    } while (total > 200);
-    const cash = pick([200, 250, 300]);
+    } while (total > 250);
+    const cash = billFor(total) + pick([50, 100]);
     const t = this.task = { rot: Math.floor(Math.random() * 3), items, cut: Math.random() < 0.5, spicy: pick(SPICY), tops: [Math.random() < 0.5, Math.random() < 0.5, Math.random() < 0.5], cash, cash0: cash };
     /* 蔥蒜洋蔥的選項：Ami 說的那一種 + 另外三種，位置固定 */
     t.topOpts = shuffle([t.tops, ...shuffle(TOP_COMBOS.filter(v => v.some((x, i) => x !== t.tops[i]))).slice(0, 3)]).map(topsOpt);
@@ -446,7 +450,7 @@ const Game = defineGame({
     const N = this.N, t = this.task, sp = t.spicy;
     const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
     return [
-      L(`Ami：${N}，幫我買一下鹽酥雞可以嗎？`, `${N}, ¿me compras un poco de pollo frito crujiente?`, `${N}, could you buy me some fried chicken?`),
+      L(`Ami：${N}，幫我買一下鹽酥雞可以嗎？你看你要吃什麼，再自己點。`, `${N}, ¿me compras un poco de pollo frito crujiente? Mira qué quieres comer tú y pídelo por tu cuenta.`, `${N}, could you buy me some fried chicken? See what you'd like to eat yourself and order it.`),
       L(`Ami：我要${itemsText(t.items, 'zh')}。雞排${t.cut ? '要切' : '不用切'}，${sp.say.replace(/^要/, '')}。${topsZh(t.tops)}。`,
         `Quiero: ${itemsText(t.items, 'es')}. ${t.cut ? 'El filete, cortado' : 'El filete, entero, sin cortar'}. ${cap(sp.es)}. Cebollín, ajo y cebolla: ${topsL(t.tops, 'es')}.`,
         `I want: ${itemsText(t.items, 'en')}. ${t.cut ? 'Cut the cutlet up' : 'Leave the cutlet whole'}. ${cap(sp.en)}. Scallion, garlic and onion: ${topsL(t.tops, 'en')}.`)
@@ -496,12 +500,14 @@ const Game = defineGame({
     const r = s => this.ruby(s), t = this.task;
     return `<div class="menu"><div class="mh">🧾 ${r('你點的東西')}</div><div class="mflav">${this.orderList().map(x => `<span>${r(x.it.zh)} ${x.it.p}${r('元')} × ${x.q}</span>`).join('')}</div><div class="cash">${r('你身上有')} ${t.cash}${r('元')}</div></div>`;
   },
-  /* 袋子打開：看裡面有什麼 */
+  /* 袋子打開：用食物照片看裡面有什麼（份數）、雞排切法、辣度、蔥蒜洋蔥打勾 */
   bagHTML(o) {
     const r = s => this.ruby(s);
     const hasCut = o.items.some(x => x.it === STEAK);
-    const chips = [...o.items.map(qtyZh), hasCut ? (o.cut ? '雞排切好了' : '雞排是整片') : '', o.spicy.zh === '不辣' ? '不辣' : '🌶 ' + o.spicy.zh, ...TOPN.map((x, i) => o.tops[i] ? `有${x[0]}` : `沒有${x[0]}`)];
-    return `<div class="bag"><div class="be">🛍️</div><div class="bc">${chips.filter(Boolean).map(c => `<span>${r(c)}</span>`).join('')}</div></div>`;
+    const pics = o.items.map(x => `<figure><img src="images/item_${x.it.img}.jpg" alt="${x.it.zh}"><span class="cnt">× ${x.q}</span><figcaption>${r(x.it.zh)}</figcaption></figure>`).join('');
+    const lines = [hasCut ? `<span>${r(o.cut ? '雞排切好了' : '雞排是整片')}</span>` : '', `<span>${o.spicy.zh === '不辣' ? r('不辣') : '🌶 ' + r(o.spicy.zh)}</span>`,
+      ...TOPN.map((x, i) => `<span class="ck${o.tops[i] ? ' on' : ''}">${r(x[0])}</span>`)].filter(Boolean).join('');
+    return `<div class="bag"><div class="bi">${pics}</div><div class="bl">${lines}</div></div>`;
   },
 
   /* ── 狀態設定 ── */
@@ -662,15 +668,15 @@ const Game = defineGame({
       END: {
         place: 'phone',
         dialogue: () => {
-          const bad = [];   // { m: 扣分原因, say: Ami 的話 }
+          const bad = [];   // { m: 扣分原因, say: Ami 的話（沒買齊的東西併成一句，另外放） }
+          const short = [];
           t.items.forEach(a => {
             const q = Game.basket[a.it.zh] || 0;
             if (q >= a.q) return;
-            bad.push({
-              m: M(`Ami要${qtyZh(a)}，你${q ? '只買了' + NZ(q) + a.it.mw : '沒有買'}。`, `Ami quería ${a.q} ${a.it.es}${q ? ` y compraste solo ${q}` : ' y no lo compraste'}.`, `Ami wanted ${a.q} ${a.it.en}${q ? ` and you got only ${q}` : " and you didn't get any"}.`),
-              say: L(`Ami：我要${qtyZh(a)}，${q ? '你只買了' + NZ(q) + a.it.mw : '你沒有買'}耶！`, `Ami: ¡Quería ${a.q} ${a.it.es}, ${q ? `y solo trajiste ${q}` : 'y no lo trajiste'}!`, `Ami: I wanted ${a.q} ${a.it.en}, ${q ? `but you only got ${q}` : "but you didn't get any"}!`)
-            });
+            short.push(a);
+            bad.push({ m: M(`Ami要${qtyZh(a)}，你${q ? '只買了' + NZ(q) + a.it.mw : '沒有買'}。`, `Ami quería ${a.q} ${a.it.es}${q ? ` y compraste solo ${q}` : ' y no lo compraste'}.`, `Ami wanted ${a.q} ${a.it.en}${q ? ` and you got only ${q}` : " and you didn't get any"}.`) });
           });
+          const shortSay = short.length ? [L(`Ami：我要${itemsText(short, 'zh')}，你沒有買齊耶！`, `Ami: ¡Yo quería ${itemsText(short, 'es')} y no trajiste todo!`, `Ami: I wanted ${itemsText(short, 'en')}, but you didn't get everything!`)] : [];
           if (Game.hasCutlet() && !!t.pCut !== t.cut) bad.push({
             m: M(`Ami說雞排${t.cut ? '要切' : '不用切，她要整片'}，你${t.pCut ? '要了切開的' : '要了整片的'}。`, `Ami dijo que el filete ${t.cut ? 'se corta' : 'va entero'}, y lo pediste ${t.pCut ? 'cortado' : 'entero'}.`, `Ami said the cutlet should ${t.cut ? 'be cut up' : 'stay whole'}, but you asked for it ${t.pCut ? 'cut up' : 'whole'}.`),
             say: L(`Ami：雞排我要${t.cut ? '切的' : '整片的'}耶！`, `Ami: ¡El filete lo quería ${t.cut ? 'cortado' : 'entero'}!`, `Ami: I wanted the cutlet ${t.cut ? 'cut up' : 'whole'}!`)
@@ -686,11 +692,14 @@ const Game = defineGame({
           bad.forEach(b => Game.addMistake(b.m));
           Game._endGood = bad.length === 0;
           track('game_complete', { game: 'yansuji', score: Game.score, elapsed: Game.elapsedTime });
+          const own = sum(ITEMS.map(x => Math.max(0, (Game.basket[x.zh] || 0) - ((t.items.find(a => a.it === x) || {}).q || 0))));   // 自己多買的份數
+          const noOwn = own === 0 ? [L('Ami：咦，你沒有買自己要吃的喔？', 'Ami: ¿Eh? ¿No compraste nada para ti?', "Ami: Huh? You didn't buy anything for yourself?")] : [];
           return [
             staff('謝謝，下次再來！', 'Gracias, ¡vuelva pronto!', 'Thank you — come again!'),
             ...(Game._endGood
               ? [L(`Ami：哇，好香！又酥脆，又是我要的口味！謝謝你，${N}！`, `¡Guau, qué rico huele! ¡Crujiente y justo como lo quería! ¡Gracias, ${N}!`, `Wow, it smells great! Crispy and exactly how I wanted it! Thanks, ${N}!`)]
-              : [L(`Ami：咦？${N}，這個不太對耶……`, `¿Eh? ${N}, esto no está bien…`, `Huh? ${N}, this isn't quite right…`), ...bad.map(b => b.say)])
+              : [L(`Ami：咦？${N}，這個不太對耶……`, `¿Eh? ${N}, esto no está bien…`, `Huh? ${N}, this isn't quite right…`), ...shortSay, ...bad.filter(b => b.say).map(b => b.say)]),
+            ...noOwn
           ];
         },
         options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
