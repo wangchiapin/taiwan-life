@@ -1072,6 +1072,25 @@ function preloadImages() {
     [...new Set(list)].forEach(u => { const i = new Image(); i.src = u; });
   } catch (e) {}
 }
+/* 地圖模式的介紹視窗：標題、說明、遊戲介紹（和開始畫面同一份文字），按「出發吧！」才開始。
+   重新開始（網址有 r=1）不會再跳出來。 */
+let _introDone = false;
+function showIntro() {
+  const login = document.getElementById('login-screen');
+  const title = (login.querySelector('h1') || {}).textContent || document.title;
+  const sub = login.querySelector('.subtitle');
+  const paras = [...login.querySelectorAll('.flavor-text')].map(p => `<p class="intro-text${p.style.fontSize ? ' small' : ''}">` + [...p.childNodes].map(n =>
+    n.nodeType === 3 ? (n.textContent.trim() ? Game.ruby(n.textContent.trim()) : '') : n.nodeName === 'BR' ? '<br>' : n.outerHTML).join('') + '</p>').join('');
+  const pop = document.createElement('div');
+  pop.id = 'intro-pop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-modal', 'true');
+  pop.innerHTML = `<div class="intro-card"><h2>${Game.ruby(title)}</h2>${sub ? `<div class="intro-sub" data-es="${esc(sub.dataset.es || '')}" data-en="${esc(sub.dataset.en || '')}">${esc(sub.textContent)}</div>` : ''}${paras}` +
+    `<button type="button" class="btn-primary" id="intro-go"><span>${Game.ruby('出發吧！')}</span>${ONLYZH() ? '' : `<small>${esc(X('¡Vamos!', "Let's go!"))}</small>`}</button></div>`;
+  document.body.appendChild(pop);
+  applyLang();
+  const go = pop.querySelector('#intro-go');
+  go.onclick = () => { _introDone = true; pop.remove(); startGame(); };
+  go.focus();
+}
 function startGame() {
   const input = document.getElementById('player-name-input');
   const name = input.value.trim();
@@ -1082,6 +1101,7 @@ function startGame() {
   if (Settings.script === 'simp' && !_t2s) { loadT2S().then(() => { if (!_t2s) Settings.script = 'trad'; startGame(); }); return; }
   saveSettings(); applyLang();
   simpObserver.observe(document.body, { childList: true, subtree: true, characterData: true }); convertNode(document.body); cleanZh(document.body);
+  if (EMBED && !_introDone && QS.get('r') !== '1' && document.querySelector('#login-screen .flavor-text')) { showIntro(); return; }   // 地圖模式：先跳出介紹視窗，按「出發吧！」才進遊戲
   Game.playerName = name;
   try { localStorage.setItem(NAME_KEY, name); } catch (e) {}   // 記住暱稱：下次打開自動填進名字欄
   Game.setup();
@@ -1104,7 +1124,7 @@ function restartGame(skipConfirm) {
   if (!skipConfirm && !confirm(Z('確定要重新開始嗎？這一局的分數不會保留。') + '\n' + X('¿Seguro que quieres empezar de nuevo? Perderás el puntaje de esta partida.', 'Start over? Your score for this round will be lost.'))) return;
   track('game_restart', { game: GAME.track, state: Game.state });
   const p = new URLSearchParams();
-  if (EMBED) { p.set('embed', '1'); p.set('name', Game.playerName); if (QS.get('code')) p.set('code', QS.get('code')); }
+  if (EMBED) { p.set('embed', '1'); p.set('name', Game.playerName); p.set('r', '1'); if (QS.get('code')) p.set('code', QS.get('code')); }   // r=1：重新開始，不再跳出介紹視窗
   else p.set('again', Game.playerName);
   p.set('s', Settings.script); p.set('l', Settings.lang);
   if (GAME.restartParams) GAME.restartParams(p);

@@ -121,6 +121,9 @@ def run(g,mode='mixed',runs=3,embed=False,vp=None):
             url=f'http://127.0.0.1:{PORT}/games/{g}/index.html'+('?embed=1&name=Ana' if embed else '')
             page.goto(url); page.wait_for_timeout(400)
             if not embed: page.fill('#player-name-input','María'); page.click('.btn-primary')
+            if embed:   # 地圖模式：先跳出介紹視窗，按「出發吧！」才進遊戲
+                assert page.locator('#intro-pop #intro-go').count()==1 and page.evaluate("!document.getElementById('game-window').classList.contains('active')"), '地圖模式沒有跳出介紹視窗'
+                page.click('#intro-go'); page.wait_for_timeout(200)
             page.wait_for_timeout(300); log=[]
             end,tr=play(page,g,mode,log)
             page.wait_for_timeout(300)

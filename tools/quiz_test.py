@@ -111,6 +111,7 @@ def check_embed(p, g):
     b = p.chromium.launch(); ctx = b.new_context(viewport={'width': 390, 'height': 844}); ctx.route('**/*', route)
     ctx.add_init_script("window.__m=[];addEventListener('message',e=>{if(e.data&&e.data.type)window.__m.push(e.data.type)})")
     page = ctx.new_page(); page.goto(f'http://127.0.0.1:{PORT}/games/{g}/index.html?embed=1&name=Ana'); page.wait_for_timeout(600)
+    if page.locator('#intro-go').count(): page.click('#intro-go'); page.wait_for_timeout(300)   # 地圖模式的介紹視窗
     fails = []
     if not play_to_result(page, g, wrong_once=False): b.close(); return ['地圖模式玩不到結果頁']
     page.wait_for_timeout(300)
