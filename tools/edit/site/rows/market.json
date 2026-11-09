@@ -24,7 +24,7 @@
    "stage": "開始畫面",
    "stageName": "開始畫面",
    "who": "",
-   "zh": "Ami 想在家煮晚餐，請你去傳統市場買菜。每種東西的量詞不一樣，還可以試試看殺價。"
+   "zh": "Ami 說今天想要自己煮晚餐，請你去傳統市場買菜，體驗一下在市場殺價的快感吧！"
   },
   {
    "id": "market-004",
@@ -56,7 +56,7 @@
    "stage": "過場按鈕",
    "stageName": "過場按鈕",
    "who": "",
-   "zh": "拿東西"
+   "zh": "數找的錢"
   },
   {
    "id": "market-008",
@@ -64,7 +64,7 @@
    "stage": "過場按鈕",
    "stageName": "過場按鈕",
    "who": "",
-   "zh": "回家"
+   "zh": "拿東西"
   },
   {
    "id": "market-009",
@@ -72,23 +72,23 @@
    "stage": "過場按鈕",
    "stageName": "過場按鈕",
    "who": "",
-   "zh": "菜市場"
+   "zh": "拿菜"
   },
   {
    "id": "market-010",
-   "kind": "台詞",
-   "stage": "Ami 的 LINE 訊息",
-   "stageName": "Ami 的 LINE 訊息",
-   "who": "Ami",
-   "zh": "〔名字〕，我今天晚上要在家煮飯，你可以幫我去菜市場買菜嗎？"
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "回家"
   },
   {
    "id": "market-011",
-   "kind": "台詞",
-   "stage": "Ami 的 LINE 訊息",
-   "stageName": "Ami 的 LINE 訊息",
-   "who": "Ami",
-   "zh": "我要買："
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "菜市場"
   },
   {
    "id": "market-012",
@@ -96,10 +96,26 @@
    "stage": "Ami 的 LINE 訊息",
    "stageName": "Ami 的 LINE 訊息",
    "who": "Ami",
-   "zh": "記得帶我的環保袋，不要拿塑膠袋。還有，可以問問看能不能算便宜一點喔！"
+   "zh": "〔名字〕，我今天晚上要在家煮飯，你來我家一起吃吧！不過，你可以幫我去菜市場買菜嗎？"
   },
   {
    "id": "market-013",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "我要買："
+  },
+  {
+   "id": "market-014",
+   "kind": "台詞",
+   "stage": "Ami 的 LINE 訊息",
+   "stageName": "Ami 的 LINE 訊息",
+   "who": "Ami",
+   "zh": "記得帶環保袋，不要拿塑膠袋。還有，可以問問看能不能算便宜一點喔！"
+  },
+  {
+   "id": "market-015",
    "kind": "旁白",
    "stage": "START",
    "stageName": "START",
@@ -107,7 +123,7 @@
    "zh": "（你走到菜市場。手機響了一聲，是Ami傳來的LINE。）"
   },
   {
-   "id": "market-014",
+   "id": "market-016",
    "kind": "台詞",
    "stage": "START",
    "stageName": "START",
@@ -115,7 +131,7 @@
    "zh": "好，我去買！"
   },
   {
-   "id": "market-015",
+   "id": "market-017",
    "kind": "選項",
    "stage": "START",
    "stageName": "START",
@@ -123,63 +139,79 @@
    "zh": "走進菜市場"
   },
   {
-   "id": "market-016",
-   "kind": "台詞",
-   "stage": "ITEM",
-   "stageName": "ITEM",
-   "who": "老闆",
-   "zh": "歡迎光臨！要買什麼？"
-  },
-  {
-   "id": "market-017",
-   "kind": "旁白",
-   "stage": "ITEM",
-   "stageName": "ITEM",
-   "who": "",
-   "zh": "（你要買〔菜的圖示〕〔菜名〕。）"
-  },
-  {
    "id": "market-018",
-   "kind": "選項",
-   "stage": "ITEM",
-   "stageName": "ITEM",
-   "who": "",
-   "zh": "我要〔數量〕〔量詞〕〔菜名〕。"
+   "kind": "台詞",
+   "stage": "PICK",
+   "stageName": "PICK",
+   "who": "老闆",
+   "zh": "歡迎光臨！自己看，要什麼跟我說。"
   },
   {
    "id": "market-019",
    "kind": "錯誤說明",
-   "stage": "ITEM",
-   "stageName": "ITEM",
+   "stage": "PICK",
+   "stageName": "PICK",
    "who": "",
-   "zh": "〔菜名〕的量詞是「〔量詞〕」。"
+   "zh": "Ami沒有要〔多買的菜名〕。"
   },
   {
    "id": "market-020",
-   "kind": "台詞",
-   "stage": "ITEM",
-   "stageName": "ITEM",
-   "who": "老闆",
-   "zh": "好，還要什麼？"
+   "kind": "錯誤說明",
+   "stage": "PICK",
+   "stageName": "PICK",
+   "who": "",
+   "zh": "Ami還要〔數量（中文）〕〔漏買的菜名〕。"
   },
   {
    "id": "market-021",
+   "kind": "錯誤說明",
+   "stage": "PICK",
+   "stageName": "PICK",
+   "who": "",
+   "zh": "Ami要〔該買的數量（中文）〕〔數量不對的菜名〕，你買了〔你買的數量（中文）〕。"
+  },
+  {
+   "id": "market-022",
+   "kind": "綠卡說明",
+   "stage": "PICK",
+   "stageName": "PICK",
+   "who": "",
+   "zh": "很棒！你記得Ami要買的東西和數量。"
+  },
+  {
+   "id": "market-023",
    "kind": "台詞",
-   "stage": "ITEM",
-   "stageName": "ITEM",
+   "stage": "PICK",
+   "stageName": "PICK",
    "who": "老闆",
    "zh": "好，我幫你算一下。"
   },
   {
-   "id": "market-022",
+   "id": "market-024",
+   "kind": "台詞",
+   "stage": "PICK",
+   "stageName": "PICK",
+   "who": "",
+   "zh": "老闆幫你秤了〔秤的數量（中文）〕〔菜名〕，放進籃子。"
+  },
+  {
+   "id": "market-025",
+   "kind": "台詞",
+   "stage": "PICK",
+   "stageName": "PICK",
+   "who": "",
+   "zh": "你把〔菜名〕放進籃子。"
+  },
+  {
+   "id": "market-026",
    "kind": "台詞",
    "stage": "BARGAIN",
    "stageName": "BARGAIN",
-   "who": "我",
-   "zh": "Ami說可以問問看……"
+   "who": "老闆",
+   "zh": "你要的是："
   },
   {
-   "id": "market-023",
+   "id": "market-027",
    "kind": "選項",
    "stage": "BARGAIN",
    "stageName": "BARGAIN",
@@ -187,7 +219,7 @@
    "zh": "可以算便宜一點嗎？"
   },
   {
-   "id": "market-024",
+   "id": "market-028",
    "kind": "選項",
    "stage": "BARGAIN",
    "stageName": "BARGAIN",
@@ -195,7 +227,7 @@
    "zh": "太貴了，我不買了！"
   },
   {
-   "id": "market-025",
+   "id": "market-029",
    "kind": "選項",
    "stage": "BARGAIN",
    "stageName": "BARGAIN",
@@ -203,55 +235,47 @@
    "zh": "我只付一半。"
   },
   {
-   "id": "market-026",
+   "id": "market-030",
    "kind": "錯誤說明",
    "stage": "BARGAIN",
    "stageName": "BARGAIN",
    "who": "",
-   "zh": "客氣地問「可以算便宜一點嗎？」。"
+   "zh": "客氣一點問「可以算便宜一點嗎？」，會比較有禮貌喔！"
   },
   {
-   "id": "market-027",
+   "id": "market-031",
    "kind": "綠卡說明",
    "stage": "BARGAIN",
    "stageName": "BARGAIN",
    "who": "",
-   "zh": "問得很客氣！在菜市場常常可以這樣問。"
+   "zh": "不錯喔！問得很客氣！"
   },
   {
-   "id": "market-028",
+   "id": "market-032",
    "kind": "台詞",
    "stage": "BARGAIN",
    "stageName": "BARGAIN",
    "who": "老闆",
+   "zh": "不行啦，這已經是最便宜的了。"
+  },
+  {
+   "id": "market-033",
+   "kind": "台詞",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "老闆",
+   "zh": "那就〔最後價錢（中文）〕元。"
+  },
+  {
+   "id": "market-034",
+   "kind": "台詞",
+   "stage": "PAY",
+   "stageName": "PAY",
+   "who": "老闆",
    "zh": "好啦，算你〔最後價錢（中文）〕元。"
   },
   {
-   "id": "market-029",
-   "kind": "旁白",
-   "stage": "PAY",
-   "stageName": "PAY",
-   "who": "",
-   "zh": "（你只有一張五百元。）"
-  },
-  {
-   "id": "market-030",
-   "kind": "選項",
-   "stage": "PAY",
-   "stageName": "PAY",
-   "who": "",
-   "zh": "給你五百元。"
-  },
-  {
-   "id": "market-031",
-   "kind": "選項",
-   "stage": "PAY",
-   "stageName": "PAY",
-   "who": "",
-   "zh": "給你兩百元。"
-  },
-  {
-   "id": "market-032",
+   "id": "market-035",
    "kind": "選項",
    "stage": "PAY",
    "stageName": "PAY",
@@ -259,47 +283,87 @@
    "zh": "我下次再付，可以嗎？"
   },
   {
-   "id": "market-033",
+   "id": "market-036",
    "kind": "錯誤說明",
    "stage": "PAY",
    "stageName": "PAY",
    "who": "",
-   "zh": "要〔最後價錢〕元，兩百元不夠。"
+   "zh": "要〔最後價錢〕元，〔你付的錢〕元不夠。"
   },
   {
-   "id": "market-034",
+   "id": "market-037",
    "kind": "錯誤說明",
    "stage": "PAY",
    "stageName": "PAY",
    "who": "",
-   "zh": "買東西要先付錢，不能賒帳。"
+   "zh": "不行啦！買東西要先付錢，不能賒帳。"
   },
   {
-   "id": "market-035",
+   "id": "market-038",
    "kind": "綠卡說明",
    "stage": "PAY",
    "stageName": "PAY",
    "who": "",
-   "zh": "沒錯！五百元夠了。"
+   "zh": "沒錯！一千元就夠了。"
   },
   {
-   "id": "market-036",
+   "id": "market-039",
    "kind": "台詞",
-   "stage": "PAY",
-   "stageName": "PAY",
+   "stage": "CHANGE",
+   "stageName": "CHANGE",
    "who": "老闆",
-   "zh": "收你五百元，找你〔找的錢（中文）〕元。"
+   "zh": "收你一千元，找你〔店員找的錢〕元。"
   },
   {
-   "id": "market-037",
+   "id": "market-040",
+   "kind": "選項",
+   "stage": "CHANGE",
+   "stageName": "CHANGE",
+   "who": "",
+   "zh": "好，謝謝。"
+  },
+  {
+   "id": "market-041",
+   "kind": "選項",
+   "stage": "CHANGE",
+   "stageName": "CHANGE",
+   "who": "",
+   "zh": "靠北！你找錯錢了吧！"
+  },
+  {
+   "id": "market-042",
+   "kind": "錯誤說明",
+   "stage": "CHANGE",
+   "stageName": "CHANGE",
+   "who": "",
+   "zh": "老闆少找了：1000 − 〔最後價錢〕 = 〔應該找的錢〕元，他只找了〔店員找的錢〕元。"
+  },
+  {
+   "id": "market-043",
+   "kind": "錯誤說明",
+   "stage": "CHANGE",
+   "stageName": "CHANGE",
+   "who": "",
+   "zh": "找的錢是對的：1000 − 〔最後價錢〕 = 〔應該找的錢〕元。"
+  },
+  {
+   "id": "market-044",
+   "kind": "錯誤說明",
+   "stage": "CHANGE",
+   "stageName": "CHANGE",
+   "who": "",
+   "zh": "要有禮貌，說「老闆，好像找錯了」就好。"
+  },
+  {
+   "id": "market-045",
    "kind": "台詞",
-   "stage": "PAY",
-   "stageName": "PAY",
+   "stage": "CHANGE",
+   "stageName": "CHANGE",
    "who": "老闆",
-   "zh": "要袋子嗎？"
+   "zh": "啊，不好意思！這裡是〔應該找的錢（中文）〕元。"
   },
   {
-   "id": "market-038",
+   "id": "market-046",
    "kind": "台詞",
    "stage": "BAG",
    "stageName": "BAG",
@@ -307,7 +371,7 @@
    "zh": "要塑膠袋嗎？"
   },
   {
-   "id": "market-039",
+   "id": "market-047",
    "kind": "選項",
    "stage": "BAG",
    "stageName": "BAG",
@@ -315,7 +379,7 @@
    "zh": "不用，我有環保袋。"
   },
   {
-   "id": "market-040",
+   "id": "market-048",
    "kind": "選項",
    "stage": "BAG",
    "stageName": "BAG",
@@ -323,7 +387,7 @@
    "zh": "要，給我五個塑膠袋。"
   },
   {
-   "id": "market-041",
+   "id": "market-049",
    "kind": "選項",
    "stage": "BAG",
    "stageName": "BAG",
@@ -331,23 +395,87 @@
    "zh": "我不要菜了。"
   },
   {
-   "id": "market-042",
+   "id": "market-050",
    "kind": "錯誤說明",
    "stage": "BAG",
    "stageName": "BAG",
    "who": "",
-   "zh": "Ami說不要拿塑膠袋，要用環保袋。"
+   "zh": "Ami說不要拿塑膠袋，要用環保袋。保護地球！"
   },
   {
-   "id": "market-043",
+   "id": "market-051",
    "kind": "綠卡說明",
    "stage": "BAG",
    "stageName": "BAG",
    "who": "",
-   "zh": "很好！「不用，我有……」可以客氣地拒絕。"
+   "zh": "很好！「不用，我有……」可以很客氣地拒絕。"
   },
   {
-   "id": "market-044",
+   "id": "market-052",
+   "kind": "台詞",
+   "stage": "BAG",
+   "stageName": "BAG",
+   "who": "老闆",
+   "zh": "好，東西都幫你裝好了。"
+  },
+  {
+   "id": "market-053",
+   "kind": "台詞",
+   "stage": "CHECK",
+   "stageName": "CHECK",
+   "who": "老闆",
+   "zh": "這是你的菜，請拿好。"
+  },
+  {
+   "id": "market-054",
+   "kind": "選項",
+   "stage": "CHECK",
+   "stageName": "CHECK",
+   "who": "",
+   "zh": "好，謝謝。"
+  },
+  {
+   "id": "market-055",
+   "kind": "選項",
+   "stage": "CHECK",
+   "stageName": "CHECK",
+   "who": "",
+   "zh": "老闆，你是不是故意的啊？"
+  },
+  {
+   "id": "market-056",
+   "kind": "錯誤說明",
+   "stage": "CHECK",
+   "stageName": "CHECK",
+   "who": "",
+   "zh": "數量不對：Ami要〔該買的數量（中文）〕〔菜名〕，老闆放了〔老闆放的數量（中文）〕。拿東西以前，要先看一看。"
+  },
+  {
+   "id": "market-057",
+   "kind": "錯誤說明",
+   "stage": "CHECK",
+   "stageName": "CHECK",
+   "who": "",
+   "zh": "數量是對的：〔菜名〕就是〔該買的數量（中文）〕。"
+  },
+  {
+   "id": "market-058",
+   "kind": "錯誤說明",
+   "stage": "CHECK",
+   "stageName": "CHECK",
+   "who": "",
+   "zh": "要有禮貌，說清楚你要的數量就好。"
+  },
+  {
+   "id": "market-059",
+   "kind": "台詞",
+   "stage": "CHECK",
+   "stageName": "CHECK",
+   "who": "老闆",
+   "zh": "啊，我看錯了！我幫你換成〔該買的數量（中文）〕。"
+  },
+  {
+   "id": "market-060",
    "kind": "台詞",
    "stage": "END",
    "stageName": "END",
@@ -355,28 +483,20 @@
    "zh": "東西都在這裡，小心拿喔！謝謝！"
   },
   {
-   "id": "market-045",
-   "kind": "旁白",
-   "stage": "END",
-   "stageName": "END",
-   "who": "",
-   "zh": "（你提著環保袋回家，把菜拿給Ami。）"
-  },
-  {
-   "id": "market-046",
+   "id": "market-061",
    "kind": "台詞",
    "stage": "END",
    "stageName": "END",
    "who": "Ami",
-   "zh": "哇，菜都好新鮮，還省了錢！謝謝你，〔名字〕！今天晚餐會很好吃。"
+   "zh": "哇，菜都好新鮮唷，還省了不少錢！謝謝你，〔名字〕！我來煮好吃的給你吃。"
   },
   {
-   "id": "market-047",
+   "id": "market-062",
    "kind": "台詞",
    "stage": "END",
    "stageName": "END",
    "who": "Ami",
-   "zh": "謝謝你！不過好像買錯了一些東西……下次要看清楚喔！"
+   "zh": "謝謝你！不過好像有一些東西買錯了……下次要看清楚喔！"
   }
  ]
 }

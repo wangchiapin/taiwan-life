@@ -54,7 +54,8 @@ for m in re.finditer(r'>([^<>]*[一-鿿][^<>]*)<', lg):
 gi = s.index('  getConfig() {')
 def region(a_, b_, dk):
     a = s.index(a_); b = s.index(b_, a); return (a, b, dk)
-nl = s.index('const NEXT_LABEL'); regs = [(nl, s.index('\n};', nl), '過場按鈕'), region('const Hints = {', '\n};\n', '任務提示')]
+nl = s.index('const NEXT_LABEL'); regs = [(nl, s.index('\n};', nl), '過場按鈕')]
+if 'const Hints = {' in s: regs.append(region('const Hints = {', '\n};\n', '任務提示'))   # 新版遊戲用 makeHints（提示文字在共用程式裡）就沒有這一段
 st0 = s.index('  setPlace('); regs.append((st0, s.index('\n  },\n', st0), '位置名稱'))
 # Game 裡其他放台詞的函式（amiLines、driverLine…）和 getConfig
 gm = s.index('const Game = defineGame({')

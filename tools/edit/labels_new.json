@@ -97,5 +97,17 @@
  "elevator:n": "幾樓",
  "elevator:t.n": "幾樓",
  "cinema:nw(t.people, '全票')": "全票幾張（例：兩張全票）",
- "cinema:nw(t.people, '學生票')": "學生票幾張"
+ "cinema:nw(t.people, '學生票')": "學生票幾張",
+ "market:e.zh": "多買的菜名",
+ "market:miss.zh": "漏買的菜名",
+ "market:bad.zh": "數量不對的菜名",
+ "market:qZh(miss, miss.q)": "數量（中文）",
+ "market:qZh(bad, bad.q)": "該買的數量（中文）",
+ "market:qZh(bad, h)": "你買的數量（中文）",
+ "market:qZh(it, a.q)": "秤的數量（中文）",
+ "market:qZh(it, it.q)": "該買的數量（中文）",
+ "market:qZh(it, t.wq)": "老闆放的數量（中文）",
+ "market:shortB": "你付的錢",
+ "market:want": "應該找的錢",
+ "market:zhNum(1000 - t.final)": "應該找的錢（中文）"
 }
