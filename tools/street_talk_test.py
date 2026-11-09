@@ -64,6 +64,9 @@ with sync_playwright() as pw:
         for vp in [{'width': 1000, 'height': 900}, {'width': 390, 'height': 780}]:
             run(b, script, lang, vp)
     b.close()
+# 共用檢查（語言／字體／拼音、任務提示、本關單字、錯誤紀錄面板）：順便跑走在路上這一個
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import panels_test
+_n, _f, _w = panels_test.check_games(['street'], verbose=False); N[0] += _n; FAILS.extend(_f)
 print(f'{N[0]} 項檢查，{len(FAILS)} 項失敗')
 if FAILS: print('\n'.join(FAILS)); sys.exit(1)
 print('全部通過')

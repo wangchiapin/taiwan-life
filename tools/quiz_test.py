@@ -155,6 +155,10 @@ def main():
             print('✓' if not f else '✗', g, '（地圖模式）', f); bad += bool(f)
         for g in ['bakery']:   # 旗標關掉就不能出現邀請卡
             f = check_disabled(p, g); print('✓' if not f else '✗', g, '（沒開小考）', f); bad += bool(f)
+    # 共用檢查（語言／字體／拼音、任務提示、本關單字、錯誤紀錄面板）：這些遊戲各跑一組設定
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import panels_test
+    _n, _f, _w = panels_test.check_games(games, quick=True, verbose=False); bad += len(_f)
+    print(f'共用檢查：{_n - len(_f)} 項通過，{len(_f)} 項失敗')
     sys.exit(1 if bad else 0)
 
 if __name__ == '__main__': main()

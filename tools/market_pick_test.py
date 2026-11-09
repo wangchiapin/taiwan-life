@@ -405,5 +405,8 @@ with sync_playwright() as p:
     check('找錢卡高度正常（不是直排被擠）', w < 110, w)
     check('沒有 JS 錯誤', errs == [], (errs[:1], ev(page,'window.__es'), STEPS[-3:]))
     b.close()
+# 共用檢查（語言／字體／拼音、任務提示、本關單字、錯誤紀錄面板）：順便跑菜市場這一個
+import panels_test
+_n, _f, _w = panels_test.check_games(['market'], verbose=False); fails.extend(_f)
 print('\n失敗：', fails) if fails else print('\n全部通過')
 sys.exit(1 if fails else 0)
