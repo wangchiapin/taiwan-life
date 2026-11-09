@@ -406,6 +406,7 @@ const Game = defineGame({
   /* 在攤位上的那幾關，用這個攤位的圖（STALLS[x].img） */
   imageFor() {
     if (['PICK', 'HAGGLE', 'BAG', 'CHECK'].includes(this.state) && STALLS[this.cur]) return [STALLS[this.cur].img, STALLS[this.cur].icon];
+    if (['PAY', 'REMOVE', 'CHANGE'].includes(this.state) && STALLS[this.cur] && this.cur !== 'veg') return [STALLS[this.cur].img, STALLS[this.cur].icon];   // images/pay.jpg 是菜攤的，肉攤、魚攤用自己的圖
     return null;
   },
   boss() { return STALLS[this.cur] ? STALLS[this.cur].boss : '老闆'; },
@@ -460,12 +461,12 @@ const Game = defineGame({
   listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s);
     const rows = [
-      ...t.items.map(it => ({ zh: `${it.icon} ${labZh(it, it.q)}`, es: labEs(it, it.q), en: labEn(it, it.q) })),
+      ...t.items.map(it => ({ zh: labZh(it, it.q), es: labEs(it, it.q), en: labEn(it, it.q) })),
       { zh: '要帶環保袋', es: 'Lleva la bolsa reutilizable', en: 'Use the reusable bag' },
       { zh: '你身上有：一張一千元', es: 'Llevas: un billete de mil dólares', en: 'You have: a 1,000-dollar bill' }
     ];
     if (rowsOnly) return rows;
-    this._spk.push({ text: rows.map(x => x.zh.replace(/^\S+ /, '')).join('。'), who: '我' });
+    this._spk.push({ text: rows.map(x => x.zh).join('。'), who: '我' });
     const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
     this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
     const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
@@ -585,7 +586,7 @@ const Game = defineGame({
     const o = +c.match(/^(\d+)/)[1];
     if (o >= st.floor) {
       this.setAsk(st, o);
-      this.thought = [say(`唉，好啦好啦，算你${o}元！`, `Ay, está bien, está bien: ¡te lo dejo en ${esM(o)}!`, `Ugh, fine, fine — ${enM(o)} for you!`)];
+      st.acc = { zh: `唉，好啦好啦，算你${o}元！`, es: `Ay, está bien, está bien: ¡te lo dejo en ${esM(o)}!`, en: `Ugh, fine, fine — ${enM(o)} for you!` };
       this.state = 'PAY'; return;
     }
     if (o >= st.floor * 0.8) {
@@ -621,7 +622,7 @@ const Game = defineGame({
   /* 付完錢：菜從籃子變成「買到的」；少找、核對東西都在後面 */
   finishPay(P) {
     const st = this.st;
-    this.cash -= P.ask; this.saved += st.start - st.ask;
+    st.note = null; this.cash -= P.ask; this.saved += st.start - st.ask;
     this.tx = [];
     Object.entries(this.cart).forEach(([id, q]) => { this.bought[id] = (this.bought[id] || 0) + q; delete this.lack[id]; this.tx.push({ id, q }); });
     this.visited[this.cur] = true; this.cart = {}; this.meatPick = null;
@@ -747,7 +748,7 @@ const Game = defineGame({
           if (c === GO_HOME) { Game.goHome(); return; }
           const k = STALL_KEYS.find(x => '去' + STALLS[x].zh === c);
           Game.cur = k; Game.cart = {}; Game.meatPick = null; Game.lastAct = null;
-          Game.thought = [greet[k]()];
+          Game.thought = null;
           Game.state = 'PICK';
         }
       },
@@ -778,7 +779,7 @@ const Game = defineGame({
           }
           if (c === PICK_DONE) {
             Game.meatPick = null; Game.startHaggle();
-            Game.thought = [vend('好，我幫你算一下。', 'Bien, le hago la cuenta.', "OK, let me add it up.")];
+            Game.thought = null;
             Game.state = 'HAGGLE'; return;
           }
           const a = CHOICES[c]; if (!a || BYID[a.it.id].stall !== Game.cur) return;
@@ -799,10 +800,9 @@ const Game = defineGame({
         html: () => Game.haggleHTML(Game.st),
         dialogue: () => {
           const st = Game.st, rows = Object.entries(Game.cart);
-          const out = [];
-          if (!st.history.length && !st.walked) out.push(vend('你要的是：' + rows.map(([id, q]) => labZh(BYID[id], q)).join('、') + '。', 'Lleva: ' + rows.map(([id, q]) => labEs(BYID[id], q)).join(', ') + '.', "You're getting: " + rows.map(([id, q]) => labEn(BYID[id], q)).join(', ') + '.'));
-          out.push(vend(`一共是${zhNum(st.ask)}元。`, `Son ${esM(st.ask)} en total.`, `That's ${enM(st.ask)} in total.`));
-          return out;
+          if (!st.history.length && !st.walked)       // 第一次：老闆複誦＋報價，合成一句
+            return [vend(`好，你要的是：${rows.map(([id, q]) => labZh(BYID[id], q)).join('、')}，一共是${zhNum(st.ask)}元。`, `Bien, lleva: ${rows.map(([id, q]) => labEs(BYID[id], q)).join(', ')}. Son ${esM(st.ask)} en total.`, `OK, you're getting: ${rows.map(([id, q]) => labEn(BYID[id], q)).join(', ')}. That's ${enM(st.ask)} in total.`)];
+          return [vend(`一共是${zhNum(st.ask)}元。`, `Son ${esM(st.ask)} en total.`, `That's ${enM(st.ask)} in total.`)];
         },
         options: () => Game.haggleOptions(Game.st),
         ok: () => `好，${Game.st.ask}元，我買了。`,
@@ -812,7 +812,9 @@ const Game = defineGame({
       PAY: {
         place: () => Game.cur,
         html: () => Game.haggleHTML(Game.st),
-        dialogue: () => [vend(`好，${zhNum(Game.st.ask)}元，謝謝！`, `Bien, ${esM(Game.st.ask)}, ¡gracias!`, `OK, ${enM(Game.st.ask)}, thank you!`)],
+        dialogue: () => { const st = Game.st, a = st.acc;
+          const line = a ? vend(a.zh + '謝謝！', a.es + ' ¡Gracias!', a.en + ' Thank you!') : vend(`好，${zhNum(st.ask)}元，謝謝！`, `Bien, ${esM(st.ask)}, ¡gracias!`, `OK, ${enM(st.ask)}, thank you!`);
+          return st.note ? [st.note, line] : [line]; },
         options: () => { const P = Game.payInfo(); return rot([P.payOk, P.shortOpt, SHORT, CREDIT]); },
         ok: () => { const P = Game.payInfo(); return P.short ? SHORT : P.payOk; },
         next: c => {
@@ -847,7 +849,8 @@ const Game = defineGame({
           }
           const start = Game.cartTotal(), ratio = st.ask / oldStart;
           st.start = start; st.floor = r10(st.floor * start / oldStart); st.ask = Math.max(10, r10(start * ratio)); st.history = [];
-          Game.thought = [L(`（老闆把${it.zh}拿出來，重新算了一下。）`, `(El vendedor saca ${it.es} y vuelve a calcular.)`, `(The vendor takes out the ${it.en} and adds it up again.)`)];
+          Game.thought = null; st.acc = null;
+          st.note = L(`（老闆把${it.zh}拿出來，重新算了一下。）`, `(El vendedor saca ${it.es} y vuelve a calcular.)`, `(The vendor takes out the ${it.en} and adds it up again.)`);
           Game.state = 'PAY';
         }
       },
@@ -883,6 +886,7 @@ const Game = defineGame({
           goodFirst('BAG', '很好！「不用，我有……」可以很客氣地拒絕。', '¡Muy bien! «不用，我有…» es una forma muy amable de rechazar.', 'Good! "不用，我有…" is a very polite way to decline.');
           Game.thought = [vend('好，東西都幫你裝好了。', 'Bien, ya le puse todo en la bolsa.', "OK, everything's in the bag.")];
           Game.flowNext();
+          if (Game.state === 'CHECK') Game.thought = null;   // 接著就是「這是你的菜」，不用再多一個畫面
         }
       },
       /* ═══ 拿到東西：老闆可能裝錯數量（只在其中一個攤位） ═══ */

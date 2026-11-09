@@ -23,8 +23,10 @@ def tap(page, text):
     o = opts(page); i = next((k for k, t in enumerate(o) if t.startswith(text)), None)
     assert i is not None, (text, o, state(page))
     page.locator('#options-area .opt').nth(i).click(); page.wait_for_timeout(80)
+    n = 0
     while state(page) == '_TRANS':
-        page.locator('#options-area .opt').first.click(); page.wait_for_timeout(80)
+        n += 1; page.locator('#options-area .opt').first.click(); page.wait_for_timeout(80)
+    return n      # 中間按掉幾個過場畫面
 def new_game(page):
     page.goto(f'http://127.0.0.1:{PORT}/games/market/index.html'); page.wait_for_timeout(400)
     page.fill('#player-name-input', 'María'); page.click('.btn-primary'); page.wait_for_timeout(300)
@@ -97,7 +99,13 @@ with sync_playwright() as p:
     check('籃子空的按「買好了」→ 回地圖', state(page) == 'MAP')
 
     # 3. 殺價每個選項（肉攤，豬肉一斤）
-    tap(page, '去肉攤'); buy(page, 'pork', 1); tap(page, '買好了')
+    check('購物清單沒有表情符號', not any(ch in plain(page, '.list') for ch in '🥩🍖🍗🐟🦐🦑🐚🦀🥬🌿🍅🌽🧅🥚') if page.locator('.list').count() else True)
+    n = tap(page, '去肉攤')
+    check('進肉攤直接是挑菜畫面（沒有多一個過場）', state(page) == 'PICK' and n == 0, (state(page), n))
+    buy(page, 'pork', 1)
+    n = tap(page, '買好了')
+    check('按「買好了」直接進殺價（沒有多一個過場）', state(page) == 'HAGGLE' and n == 0, (state(page), n))
+    check('老闆複誦和報價是同一句', plain(page, '#npc-dialogue').count('老闆：') == 1 and '一共是' in plain(page, '#npc-dialogue') and '你要的是' in plain(page, '#npc-dialogue'), plain(page, '#npc-dialogue'))
     check('進入殺價、報價 300', state(page) == 'HAGGLE' and ev(page, 'Game.st.ask') == 300)
     o = opts(page)
     check('殺價選項：算便宜一點、三個出價、再看看、我買了', o[0].startswith('老闆，算便宜') and sum(1 for t in o if t.endswith('元可以嗎？')) == 3 and any(t.startswith('我再看看') for t in o) and o[-1] == '好，300元，我買了。', o)
@@ -125,6 +133,7 @@ with sync_playwright() as p:
     tap(page, '我下次再付')
     check('賒帳 → 扣分', ev(page, 'Game.mistakes') == m0 + 2)
     pay = [t for t in opts(page) if t.startswith('給你') ]
+    check('肉攤付錢畫面用肉攤的圖', 'stall_meat' in ev(page, "document.getElementById('npc-avatar').src"))
     P = ev(page, 'Game.payInfo()')
     tap(page, P['payOk'])
     check('付錢後現金減少', ev(page, 'Game.cash') == 1000 - P['ask'], ev(page, 'Game.cash'))
