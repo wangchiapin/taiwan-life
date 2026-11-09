@@ -301,8 +301,7 @@ with sync_playwright() as p:
     for _ in range(3):
         o = opts(page); i = next(k for k, t_ in enumerate(o) if t_.endswith('元可以嗎？'))
         page.locator('#options-area .opt').nth(i).click(); page.wait_for_timeout(120)
-    # 魚攤、菜攤的生氣圖還沒做：沒圖時用平常的攤位圖
-    check('魚攤（還沒有生氣圖）過場仍正常', state(page) == '_TRANS')
+    check('魚攤不賣了：過場畫面是老闆娘生氣圖', state(page) == '_TRANS' and 'stall_fish_angry' in ev(page, "document.getElementById('npc-avatar').src"))
     page.locator('#options-area .opt').first.click(); page.wait_for_timeout(100)
 
     # 11. 外觀：手機版找錢卡、地圖、殺價
