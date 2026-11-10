@@ -170,7 +170,10 @@ def run(b):
     check('全部一起：EARLY 在 6~8 樓之間', st(p) == 'EARLY' and 6 <= p.evaluate('Game.cur') <= 8, (st(p), p.evaluate('Game.cur')))
     press(p, '不出去，這裡不是9樓。'); leave_trans(p); press(p, '不好意思，借過一下。'); leave_trans(p)
     check('全部一起：END、100 分、0 錯誤', st(p) == 'END' and p.evaluate('Game.score') == 100 and mis(p) == 0, (st(p), p.evaluate('Game.score')))
+    check('這一局用到的圖都載得到（沒有缺圖）', p.evaluate('Game.missing.size') == 0, p.evaluate('[...Game.missing]'))
     p.close()
+    for f in ('dir.jpg', 'dir_sorry.jpg', 'neighbor_sorry.jpg'):
+        check(f'新圖檔存在：{f}', os.path.exists(os.path.join(HERE, '..', 'games', 'elevator', 'images', f)))
     # 邊界：n=6, m=4, misspoke → e=5，後面沒有樓層可以早停
     p = new_page(b); set_task(p, n=6, m=4, misspoke=True, early=True)
     check('n=6,m=4,misspoke：沒有早停', p.evaluate('Game.task.early') is False and p.evaluate('Game.task.x') is None)
