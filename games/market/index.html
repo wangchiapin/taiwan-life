@@ -319,6 +319,7 @@ const VOCAB = {
   REMOVE: [['不要', 'no querer', "don't want"], ['錢不夠', 'no alcanza el dinero', 'not enough money']],
   REDUCE_Q: [['改成', 'cambiar a', 'change to'], ['不要了', 'ya no lo quiero', "I don't want it anymore"]],
   REDUCE: [['買多了', 'comprar de más', 'buy too much'], ['改', 'cambiar', 'change'], ['沒事', 'no pasa nada', 'never mind']],
+  PHONE: [['傳訊息', 'mandar un mensaje', 'send a message'], ['不要理她', 'ignorarla', 'ignore her'], ['看訊息', 'leer el mensaje', 'read the message']],
   MSG: [['突然想到', 'se me ocurrió de repente', 'just thought of'], ['加買', 'comprar además', 'buy in addition'], ['改買', 'comprar otra cosa en vez', 'buy something else instead'], ['已經', 'ya', 'already']],
   EXPLAIN: [['忘記', 'olvidar', 'forget'], ['不賣', 'no vender', "won't sell"], ['原因', 'motivo', 'reason']],
   PAY: [['付', 'pagar', 'pay'], ['不好意思', 'perdón, disculpe', 'excuse me, sorry'], ['夠', 'alcanzar', 'be enough'], ['下次', 'la próxima vez', 'next time'], ['再付', 'pagar después', 'pay later']],
@@ -330,8 +331,8 @@ const VOCAB = {
     : [['買錯', 'comprar mal', 'buy the wrong thing'], ['看清楚', 'fíjate bien', 'look carefully'], ['殺價', 'regatear', 'bargain']]; },
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
-const STAGE = { MAP: ['逛市場', 'recorrer el mercado', 'browsing the market'], PICK: ['買菜', 'comprar', 'buying'], HAGGLE: ['殺價', 'regatear', 'bargaining'], PAY: ['付錢', 'pagar', 'paying'], REMOVE: ['少買一樣', 'quitar algo', 'taking one out'], REDUCE: ['改數量', 'cambiar la cantidad', 'changing the amount'], REDUCE_Q: ['改數量', 'cambiar la cantidad', 'changing the amount'], CHANGE: ['找錢', 'cambio', 'change'], CHECK: ['核對東西', 'revisar las compras', 'checking the goods'], BAG: ['袋子', 'bolsa', 'bag'], MSG: ['Ami的訊息', 'mensaje de Ami', "Ami's message"], EXPLAIN: ['說明原因', 'explicar el motivo', 'explaining'], END: ['回家', 'volver a casa', 'going home'] };
-const NEXT_LABEL = { MAP: '走進市場', PICK: '走到攤位', HAGGLE: '算錢', PAY: '付錢', REMOVE: '重新算錢', REDUCE: '重新算錢', REDUCE_Q: '重新算錢', CHANGE: '數找的錢', BAG: '拿東西', CHECK: '拿菜', MSG: '看手機', EXPLAIN: '回答Ami', END: '回家' };
+const STAGE = { MAP: ['逛市場', 'recorrer el mercado', 'browsing the market'], PICK: ['買菜', 'comprar', 'buying'], HAGGLE: ['殺價', 'regatear', 'bargaining'], PAY: ['付錢', 'pagar', 'paying'], REMOVE: ['少買一樣', 'quitar algo', 'taking one out'], REDUCE: ['改數量', 'cambiar la cantidad', 'changing the amount'], REDUCE_Q: ['改數量', 'cambiar la cantidad', 'changing the amount'], CHANGE: ['找錢', 'cambio', 'change'], CHECK: ['核對東西', 'revisar las compras', 'checking the goods'], BAG: ['袋子', 'bolsa', 'bag'], PHONE: ['Ami傳訊息', 'Ami te escribe', 'Ami texts you'], MSG: ['Ami的訊息', 'mensaje de Ami', "Ami's message"], EXPLAIN: ['說明原因', 'explicar el motivo', 'explaining'], END: ['回家', 'volver a casa', 'going home'] };
+const NEXT_LABEL = { MAP: '走進市場', PICK: '走到攤位', HAGGLE: '算錢', PAY: '付錢', REMOVE: '重新算錢', REDUCE: '重新算錢', REDUCE_Q: '重新算錢', CHANGE: '數找的錢', BAG: '拿東西', CHECK: '拿菜', PHONE: '繼續', MSG: '繼續', EXPLAIN: '回答Ami', END: '回家' };
 
 const PLACES = {
   phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
@@ -430,7 +431,7 @@ const Game = defineGame({
   IMAGES: {
     START: ['images/start.jpg', '🥬'], MAP: ['images/map.jpg', '🧺'], PICK: ['images/stall.jpg', '🥬'], HAGGLE: ['images/stall.jpg', '💬'],
     REMOVE: ['images/pay.jpg', '💵'], REDUCE: ['images/pay.jpg', '💵'], REDUCE_Q: ['images/pay.jpg', '💵'], PAY: ['images/pay.jpg', '💵'], CHANGE: ['images/pay.jpg', '🪙'], BAG: ['images/stall.jpg', '🛍️'], CHECK: ['images/stall.jpg', '🛍️'],
-    MSG: ['images/map.jpg', '📱'], EXPLAIN: ['images/end_good.jpg', '🏠'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+    PHONE: ['images/map.jpg', '📱'], MSG: ['images/map.jpg', '📱'], EXPLAIN: ['images/end_good.jpg', '🏠'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
   /* 在攤位上的那幾關，用這個攤位的圖（STALLS[x].img） */
   imageFor() {
@@ -469,7 +470,7 @@ const Game = defineGame({
     this.cash = 1000; this.saved = 0; this.cur = null; this.st = null; this.tx = []; this.cc = null; this.ck = null;
     this.cart = {}; this.meatPick = null; this.lastAct = null;
     this.bought = {}; this.lack = {}; this.closed = {}; this.visited = {};
-    this.msgShown = false; this.bagDone = false; this.checkDone = false;
+    this.msgShown = false; this.msgHandled = false; this.ignoredMsg = false; this.bagDone = false; this.checkDone = false;
     this.closeMsgPop(); this.queue = []; this.qi = 0; this.explained = {}; this.final = null; this.wentHome = false; this._bonus = 0;
   },
   reqLabel(a) { const it = BYID[a.id]; return L(labZh(it, a.q), labEs(it, a.q), labEn(it, a.q)); },
@@ -723,7 +724,7 @@ const Game = defineGame({
   },
   afterStall() {
     this.st = null;
-    if (this.task.msg && !this.msgShown) { this.msgShown = true; this.state = 'MSG'; return; }
+    if (this.task.msg && !this.msgHandled) { this.msgHandled = true; this.state = 'PHONE'; return; }   // 手機響了：要不要看，玩家自己選
     this.state = 'MAP';
   },
   /* Ami 的訊息要求加買或改項目；已經買完的東西，不能退換，要跟 Ami 說 */
@@ -731,14 +732,19 @@ const Game = defineGame({
     const m = this.task.msg, y = m.y, a = m.type === 'change' ? this.task.items.find(it => it.id === m.xid) : null;
     return { m, y, a, boughtX: !!(a && this.bought[a.id]) };
   },
-  applyMsg() {
+  applyMsg(ignored) {   // ignored＝玩家沒看訊息：Ami 要的清單照樣改，不管那樣有沒有買過
     const { m, y, a, boughtX } = this.msgInfo();
     if (m.type === 'add') this.req.push({ id: y.id, q: y.q });
-    else if (!boughtX) this.req = this.req.map(r => r.id === a.id ? { id: y.id, q: y.q } : r);
+    else if (ignored || !boughtX) this.req = this.req.map(r => r.id === a.id ? { id: y.id, q: y.q } : r);
+  },
+  /* 沒看訊息而受影響的東西：Ami 後來要的那樣（y），和 Ami 說不要的那樣（x） */
+  ignoredIds() {
+    if (!this.ignoredMsg) return null;
+    const m = this.task.msg; return { y: m.y.id, x: m.type === 'change' ? m.xid : null };
   },
   /* 回家：先看少買的東西（最多問兩樣原因），再結算 */
   goHome() {
-    const miss = this.req.filter(a => !this.bought[a.id]);
+    const ig = this.ignoredIds(), miss = this.req.filter(a => !this.bought[a.id] && !(ig && a.id === ig.y));   // 因為沒看訊息才漏買的，Ami 自己知道原因，不用問
     this.wentHome = true; this.queue = miss.slice(0, 2); this.qi = 0;
     if (this.queue.length) { this.state = 'EXPLAIN'; return; }
     this.state = 'END'; this.settle();
@@ -751,9 +757,11 @@ const Game = defineGame({
     const bad = (m, say, light) => { pens.push(light ? { ...m, pen: 5 } : m); lines.push(say); };
     const wrong = [];       // 數量不對、多買的，Ami 合在同一句說
     const bad2 = (m, say) => { pens.push(m); wrong.push(say); };
+    const ig = this.ignoredIds();
     this.req.forEach(a => {
       const it = BYID[a.id], got = this.bought[a.id] || 0;
       if (got === a.q) return;
+      if (ig && a.id === ig.y) return;     // 沒看訊息造成的，下面合成一句
       if (got === 0) {
         const cause = this.explained[a.id];
         if (cause === 'money') bad(M(`${it.zh}沒買，因為錢不夠。`, `No compraste ${it.es} porque no te alcanzó el dinero.`, `You didn't buy the ${it.en} because you ran short of money.`),
@@ -773,9 +781,18 @@ const Game = defineGame({
     });
     Object.keys(this.bought).forEach(id => {
       if (this.req.some(a => a.id === id)) return;
+      if (ig && id === ig.x) return;       // Ami 說不要的那樣，也在下面合成一句
       const it = BYID[id];
       bad2(M(`Ami沒有要${it.zh}。`, `Ami no pidió ${it.es}.`, `Ami didn't ask for ${it.en}.`), { k: 'extra', zs: `${it.zh}我沒有要`, es2: `no pedí ${it.es}`, en2: `I didn't ask for ${it.en}`, zh: `我沒有要${it.zh}`, es: `yo no pedí ${it.es}`, en: `I didn't ask for ${it.en}` });
     });
+    if (ig) {   // 沒看 Ami 的訊息：只要她後來要的有沒買對、或她說不要的買了，就一次扣分、Ami 說一句
+      const { y, a } = this.msgInfo(), yq = this.req.find(r => r.id === y.id).q;
+      if ((this.bought[y.id] || 0) !== yq || (a && this.bought[a.id])) {
+        pens.push(M('Ami傳了訊息給你，你沒有看。', 'Ami te mandó un mensaje y no lo leíste.', 'Ami sent you a message and you did not read it.'));
+        lines.push(a ? L(`Ami：我有傳訊息給你，說不要${a.zh}、改買${labZh(y, yq)}欸！你都不看訊息！`, `Ami: ¡Te mandé un mensaje diciendo que no quería ${a.es}, que comprases ${labEs(y, yq)}! ¡Ni lo lees!`, `Ami: I texted you that I didn't want the ${a.en} — get ${labEn(y, yq)} instead! You never read my messages!`)
+                      : L(`Ami：我有傳訊息給你，要加買${labZh(y, yq)}欸！你都不看訊息！`, `Ami: ¡Te mandé un mensaje pidiéndote también ${labEs(y, yq)}! ¡Ni lo lees!`, `Ami: I texted you to also get ${labEn(y, yq)}! You never read my messages!`));
+      }
+    }
     if (wrong.length === 1) lines.push(L('Ami：' + wrong[0].zh + '。', 'Ami: ' + wrong[0].es + '.', 'Ami: ' + wrong[0].en + '.'));
     else if (wrong.length) {   // 好幾樣不對：開頭說一次「買太多／太少了」，後面只列每樣要多少，不再每樣都重複一遍
       const ks = new Set(wrong.map(w => w.k)), kind = ks.size === 1 && ks.has('more') ? 'more' : ks.size === 1 && ks.has('less') ? 'less' : 'mix';
@@ -1039,6 +1056,18 @@ const Game = defineGame({
           goodFirst('CHECK', ck.wrong ? '你很細心！數量放錯了，要馬上說。' : '拿到東西以後，先看一下數量對不對。', ck.wrong ? '¡Qué atento! Pusieron mal la cantidad; hay que decirlo enseguida.' : 'Al recibir las compras, revisa que las cantidades sean correctas.', ck.wrong ? 'Well spotted! The amount was wrong — say so right away.' : 'When you get your groceries, check the amounts.');
           Game.thought = ck.wrong ? [vend(`啊，我看錯了！我幫你換成${qZh(it, ck.q)}。`, `¡Ay, me confundí! Se lo cambio a ${qEs(it, ck.q)}.`, `Oh, my mistake! I'll change it to ${qEn(it, ck.q)}.`)] : null;
           Game.afterStall();
+        }
+      },
+      /* ═══ 手機響了：Ami 傳訊息來。要看，還是不理她？（不理她：她後來要的清單照樣生效，只是玩家不知道，最後結局再判斷） ═══ */
+      PHONE: {
+        place: 'phone',
+        html: () => Game.mapHTML(false),
+        dialogue: () => [L('（手機響了，是Ami傳來的LINE。）', '(Suena tu móvil: es un LINE de Ami.)', '(Your phone buzzes: it\'s a LINE message from Ami.)')],
+        options: () => rot(['不要理她。', '看訊息。']),
+        ok: () => '看訊息。',
+        next: c => {
+          if (c === '看訊息。') { Game.msgShown = true; Game.thought = null; Game.state = 'MSG'; return; }
+          Game.ignoredMsg = true; Game.applyMsg(true); Game.thought = null; Game.state = 'MAP';
         }
       },
       /* ═══ Ami 中途傳訊息：加買新東西，或改項目（已經買完的不能退換，要跟 Ami 說） ═══ */

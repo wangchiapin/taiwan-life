@@ -281,11 +281,13 @@ with sync_playwright() as p:
     tap(page, '去肉攤')
     for i, q in [('pork', 1), ('mince', 1), ('leg', 1), ('rib', 1)]: buy(page, i, q)
     tap(page, '買好了'); tap(page, '好，'); P = ev(page, 'Game.payInfo()'); tap(page, P['payOk'])
-    while state(page) in ('CHANGE', 'BAG', 'CHECK', 'MSG'):
+    while state(page) in ('CHANGE', 'BAG', 'CHECK', 'PHONE', 'MSG'):
         st = state(page)
         if st == 'CHANGE':
             cc = ev(page, 'Game.cc'); tap(page, '老闆，好像找錯了' if cc['sc'] else '好，謝謝')
         elif st == 'BAG': tap(page, '不用，我有環保袋')
+        elif st == 'PHONE':
+            check('手機響了 → 選項是「不要理她」「看訊息」', sorted(opts(page)) == sorted(['不要理她。', '看訊息。']), opts(page)); tap(page, '看訊息')
         elif st == 'MSG':
             shot(page, 'msg_add'); tap(page, '好，我知道了')
         else: tap(page, '好，謝謝')
@@ -306,6 +308,7 @@ with sync_playwright() as p:
             cc = ev(page, 'Game.cc'); tap(page, '老闆，好像找錯了' if cc['sc'] else '好，謝謝')
         elif st == 'BAG': tap(page, '不用，我有環保袋')
         else: tap(page, '好，謝謝')
+    check('第一攤之後手機響了', state(page) == 'PHONE', state(page)); tap(page, '看訊息')
     check('改項目、豬肉已買 → 出現三個選項', state(page) == 'MSG' and len(opts(page)) == 3 and any(t.startswith('Ami，一斤豬肉我已經買了') for t in opts(page)), opts(page))
     check('沒有「退貨」字樣', not any('退' in t for t in opts(page)))
     check('Ami 的訊息是彈跳視窗，下方選項列隱藏', page.locator('#msg-pop').count() == 1 and page.locator('#options-area .opt').count() == 0 and '改買' in plain(page, '#msg-pop'), plain(page, '#msg-pop')[:60])
@@ -326,9 +329,46 @@ with sync_playwright() as p:
             cc = ev(page, 'Game.cc'); tap(page, '老闆，好像找錯了' if cc['sc'] else '好，謝謝')
         elif st == 'BAG': tap(page, '不用，我有環保袋')
         else: tap(page, '好，謝謝')
+    tap(page, '看訊息')
     check('X 還沒買 → 只有一個「知道了」選項', state(page) == 'MSG' and opts(page) == ['好，我知道了。'], opts(page))
     tap(page, '好，我知道了')
     check('雞蛋換成洋蔥', ev(page, "Game.req.some(a=>a.id==='onion')") and not ev(page, "Game.req.some(a=>a.id==='egg')"))
+
+    # 9b. 不理她：加買 → 清單照樣多一樣、提示裡沒有訊息、不問原因、一次扣分、壞結局、Ami 說「你都不看訊息」
+    new_game(page)
+    setreq(page, [['pork', 1], ['fish', 1], ['cabbage', 1], ['egg', 1]], {'type': 'add', 'y': ['onion', 2]})
+    tap(page, '去肉攤'); buy(page, 'pork', 1); tap(page, '買好了'); tap(page, '好，'); P = ev(page, 'Game.payInfo()'); tap(page, P['payOk'])
+    while state(page) in ('CHANGE', 'BAG', 'CHECK'):
+        st = state(page)
+        if st == 'CHANGE':
+            cc = ev(page, 'Game.cc'); tap(page, '老闆，好像找錯了' if cc['sc'] else '好，謝謝')
+        elif st == 'BAG': tap(page, '不用，我有環保袋')
+        else: tap(page, '好，謝謝')
+    check('手機響了', state(page) == 'PHONE', state(page))
+    tap(page, '不要理她')
+    check('不理她 → 回地圖、當場不扣分、清單照樣多一樣', state(page) == 'MAP' and ev(page, 'Game.mistakes') == 0 and ev(page, "Game.req.some(a=>a.id==='onion')") and ev(page, 'Game.ignoredMsg'), (state(page), ev(page, 'Game.req')))
+    ev(page, "Hints.toggle(true)"); hh = ev(page, "document.getElementById('hint-body').textContent"); ev(page, "Hints.toggle(false)")
+    check('沒看訊息 → 任務提示裡沒有那則訊息', 'Ami 後來傳的訊息' not in hh and '洋蔥' not in hh, hh[:80])
+    ev(page, "Game.bought = {pork: 1, fish: 1, cabbage: 1, egg: 1}"); tap(page, '東西買好了，回家')
+    log_ = ev(page, "Game.log.map(x=>x.zh)"); fin_ = ev(page, "Game.final.map(x=>x.zh)")
+    check('不理她：不問原因，直接結局', state(page) == 'END', state(page))
+    check('不理她：壞結局、只扣一次 −10（說明沒看訊息）', ev(page, 'Game._endGood') is False and ev(page, 'Game.mistakes') == 1 and any('沒有看' in l for l in log_), (ev(page, 'Game.mistakes'), log_))
+    check('Ami：我有傳訊息給你要加買…欸！你都不看訊息！', any('我有傳訊息給你，要加買兩顆洋蔥欸！你都不看訊息！' in l for l in fin_), fin_)
+    # 9c. 不理她：改項目，剛好已經買了 Ami 說不要的那樣 → 也是壞結局
+    new_game(page)
+    setreq(page, [['pork', 1], ['fish', 1], ['cabbage', 1], ['egg', 1]], {'type': 'change', 'x': 'pork', 'y': ['beef', 1]})
+    ev(page, "Game.bagDone = true; Game.checkDone = true")
+    tap(page, '去肉攤'); buy(page, 'pork', 1); tap(page, '買好了'); tap(page, '好，'); P = ev(page, 'Game.payInfo()'); tap(page, P['payOk'])
+    while state(page) in ('CHANGE', 'BAG', 'CHECK'):
+        st = state(page)
+        if st == 'CHANGE':
+            cc = ev(page, 'Game.cc'); tap(page, '老闆，好像找錯了' if cc['sc'] else '好，謝謝')
+        else: tap(page, '好，謝謝')
+    tap(page, '不要理她')
+    check('不理她（改項目）：清單照樣換成牛肉', ev(page, "Game.req.some(a=>a.id==='beef')") and not ev(page, "Game.req.some(a=>a.id==='pork')"))
+    ev(page, "Game.bought = {pork: 1, fish: 1, cabbage: 1, egg: 1}"); tap(page, '東西買好了，回家')
+    fin_ = ev(page, "Game.final.map(x=>x.zh)")
+    check('不理她（改項目）：不問原因、壞結局、只扣一次、Ami 說「不要豬肉、改買牛肉」', state(page) == 'END' and ev(page, 'Game._endGood') is False and ev(page, 'Game.mistakes') == 1 and any('說不要豬肉、改買一斤牛肉欸！你都不看訊息' in l for l in fin_), (state(page), ev(page, 'Game.mistakes'), fin_))
 
     # 4b. 肉攤被「不賣了」：過場畫面用生氣圖
     new_game(page); setreq(page, [['pork', 1], ['fish', 1], ['cabbage', 1], ['egg', 1]])
