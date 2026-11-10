@@ -122,6 +122,21 @@ def run(b):
     check('misspoke 時燈不會亮', '面板上' not in screen(p) and p.evaluate('Game.task.lit') is False, screen(p))
     p.close()
 
+    # ── 電梯按鍵面板：WAIT 只能按開關門、FLOOR 只能按樓層（共 16 顆）──
+    p = new_page(b); set_task(p, n=12, m=3); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p)
+    check('WAIT：面板有 16 顆按鍵、只有開門／關門能按', p.locator('.ppanel .pb').count() == 16 and sorted(x.strip() for x in opts(p)) == sorted(['按「開門」，等他。', '按「關門」。']), opts(p))
+    m0 = mis(p); press(p, '按「關門」。'); check('WAIT 按關門：扣分、留在 WAIT', mis(p) == m0 + 1 and st(p) == 'WAIT')
+    press(p, '按「開門」，等他。'); check('WAIT 按開門：過場，按鈕是「鄰居走進電梯」', st(p) == '_TRANS' and '鄰居走進電梯' in txt(p, '#options-area')); leave_trans(p)
+    exp = ['按地下2樓。', '按地下1樓。'] + [f'按{k}樓。' for k in range(1, 13)]
+    check('FLOOR：14 個樓層鍵（地下2到12樓）都能按、開關門不能按', sorted(opts(p)) == sorted(exp) and p.locator('.ppanel .pb').count() == 16, opts(p))
+    check('FLOOR：面板上有「按樓層」', '按樓層' in txt(p, '.pcap'))
+    for k in ['按地下2樓。', '按地下1樓。', '按1樓。', '按11樓。', '按13樓。'] if False else ['按地下2樓。', '按地下1樓。', '按1樓。', '按11樓。']:
+        m1 = mis(p); press(p, k); check(f'FLOOR 按錯「{k}」：扣分、留在 FLOOR', mis(p) == m1 + 1 and st(p) == 'FLOOR')
+    p.screenshot(path='/tmp/panel_floor.png')
+    press(p, '按12樓。'); check('FLOOR 按對 12 樓：進 HELP', st(p) == 'HELP')
+    p.close()
+    p = new_page(b); set_task(p, n=12, m=3); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); p.screenshot(path='/tmp/panel_wait.png'); p.evaluate("Game.showList=true;Game.render()"); p.locator('.list').screenshot(path='/tmp/list.png'); p.close()
+
     # ── 圖2.3 合併：FLOOR 答對後不跳過場，綠卡＋鄰居的話＋選項在同一頁 ──
     p = new_page(b); set_task(p, n=8, m=3, lit=True); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p)
     press(p, '按「開門」，等他。'); leave_trans(p); press(p, '按8樓。')

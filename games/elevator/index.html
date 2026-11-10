@@ -69,6 +69,20 @@
   .elev { display: flex; flex-direction: column; align-items: center; margin: 10px 0 14px; }
   .elev .disp { background: #1c1f2a; color: #ff7b3a; font: 700 44px/1 monospace; padding: 12px 28px; border-radius: 8px; border: 4px solid #8a93a8; letter-spacing: 4px; text-shadow: 0 0 8px rgba(255,123,58,.7); }
   .elev .cap { margin-top: 6px; font-size: 16px; color: var(--muted); }
+  /* ── 電梯按鍵面板（按樓層、開關門用） ── */
+  #options-area.panelmode { display: flex; flex-direction: column; align-items: center; }
+  .ppanel { background: linear-gradient(90deg, #c4c9d1, #e6e9ee 45%, #c9ced6); border: 3px solid #9aa1ad; border-radius: 16px; padding: 14px 30px 16px; box-shadow: inset 0 0 0 2px #f4f6f9, 0 3px 8px rgba(0,0,0,.25); }
+  .ppanel .pcap { text-align: center; color: #3b4150; font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .ppanel .pgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 40px; justify-items: center; }
+  .ppanel .pdoor { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 40px; justify-items: center; margin-top: 14px; padding-top: 12px; border-top: 2px solid #aab0bb; }
+  #options-area.panelmode .pb { font: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; color: #2e3340; line-height: 1.2; user-select: none; -webkit-tap-highlight-color: transparent; }
+  #options-area.panelmode .pb .c { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font: 700 20px/1 system-ui, sans-serif; background: radial-gradient(circle at 35% 30%, #fafbfc, #c3c8d0 70%, #a9afb9); border: 3px solid #8d94a1; box-shadow: 0 2px 3px rgba(0,0,0,.35), inset 0 0 0 2px #e9ecf0; transition: box-shadow .12s, background .12s; }
+  #options-area.panelmode .pb .c svg { width: 26px; height: 17px; fill: #3a3f4b; }
+  #options-area.panelmode .pb .lab { margin-top: 2px; font-size: 14px; font-weight: 700; color: #3b4150; }
+  #options-area.panelmode .pb.off { opacity: .35; cursor: default; }
+  #options-area.panelmode button.pb:hover { background: none; color: #2e3340; }
+  #options-area.panelmode button.pb:hover .c { box-shadow: 0 0 0 3px #ffb067, 0 2px 3px rgba(0,0,0,.35), inset 0 0 0 2px #e9ecf0; }
+  #options-area.panelmode button.pb:active .c { background: radial-gradient(circle at 35% 30%, #ffe2bd, #ff9b3d 70%, #e07a14); }
 
 </style></head>
 <body>
@@ -231,7 +245,7 @@ const VOCAB = {
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 const STAGE = { LOBBY: ['大廳', 'vestíbulo', 'lobby'], DIR: ['看箭頭', 'mirar la flecha', 'checking the arrow'], WAIT: ['等人', 'esperar', 'waiting'], FLOOR: ['按樓層', 'elegir piso', 'choosing a floor'], HELP: ['幫忙', 'ayudar', 'helping'], HELP2: ['鄰居改口', 'el vecino se corrige', 'neighbor corrects himself'], EARLY: ['看樓層', 'mirar el piso', 'checking the floor'], STOP: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], STOP_FIX: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], ARRIVE: ['出電梯', 'salir', 'exiting'] };
-const NEXT_LABEL = { LOBBY: '走到電梯前', DIR: '兩部電梯來了', WAIT: '電梯來了', FLOOR: '走進電梯', HELP: '電梯往上', HELP2: '電梯往上', STOP: '電梯停了', STOP_FIX: '電梯繼續往上', EARLY: '電梯又停了', ARRIVE: '繼續往上', END: '到Ami家' };
+const NEXT_LABEL = { LOBBY: '走到電梯前', DIR: '兩部電梯來了', WAIT: '電梯來了', FLOOR: '鄰居走進電梯', HELP: '電梯往上', HELP2: '電梯往上', STOP: '電梯停了', STOP_FIX: '電梯繼續往上', EARLY: '電梯又停了', ARRIVE: '繼續往上', END: '到Ami家' };
 
 const PLACES = {
   phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
@@ -301,6 +315,33 @@ const Game = defineGame({
      dirDown＝大廳先來的那部電梯是往下的（阿姨問「是往上的嗎？」）
      stopWrong＝電梯先停在比 e 低一層，鄰居看錯說「到了」想出去
      early＝中途 x 樓又停了一次 */
+  /* 樓層按鍵：地下2、地下1、1～12 樓（由上往下兩個一排） */
+  floorOpt(k) { return k > 0 ? `按${k}樓。` : `按地下${-k}樓。`; },
+  FLOORS: [-2, -1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+  render() {
+    GameCore.render.call(this);
+    if (!this._transMode && (this.state === 'WAIT' || this.state === 'FLOOR')) this.mountPanel();
+  },
+  /* 把下方的選項換成電梯按鍵面板：FLOOR 只能按樓層，WAIT 只能按開門／關門 */
+  mountPanel() {
+    const area = document.getElementById('options-area');
+    const onFloor = this.state === 'FLOOR';
+    const num = k => k > 0 ? String(k) : 'B' + (-k);
+    const btn = (raw, inner, lab, on) => on
+      ? `<button class="opt pb" data-raw="${raw}" aria-label="${raw}"><span class="c">${inner}</span>${lab}</button>`
+      : `<span class="pb off"><span class="c">${inner}</span>${lab}</span>`;
+    const ks = this.FLOORS, rows = [];
+    for (let i = ks.length - 2; i >= 0; i -= 2) rows.push(ks[i], ks[i + 1]);   // 11 12 在最上面，B2 B1 在最下面
+    const OPEN = '<svg viewBox="0 0 28 18"><path d="M12 2L3 9l9 7zM16 2l9 7-9 7z"/></svg>';
+    const CLOSE = '<svg viewBox="0 0 28 18"><path d="M3 2l9 7-9 7zM25 2l-9 7 9 7z"/></svg>';
+    const lab = z => `<span class="lab">${this.ruby(z)}</span>`;
+    area.className = 'panelmode';
+    area.innerHTML = `<div class="ppanel">`
+      + (onFloor ? `<div class="pcap">${this.ruby('按樓層')}</div>` : '')
+      + `<div class="pgrid">${rows.map(k => btn(this.floorOpt(k), num(k), '', onFloor)).join('')}</div>`
+      + `<div class="pdoor">${btn('按「開門」，等他。', OPEN, lab('開門'), !onFloor)}${btn('按「關門」。', CLOSE, lab('關門'), !onFloor)}</div></div>`;
+    area.querySelectorAll('button.opt').forEach(b => { b.onclick = () => this.handleChoice(b.dataset.raw); });
+  },
   /* 按對樓層後，不另外跳過場：綠卡直接放在鄰居拜託按樓層的那一頁 */
   maybeTrans(before, extra) {
     if (before === 'FLOOR' && this.state === 'HELP') { this.closePanels(); return; }
@@ -335,7 +376,7 @@ const Game = defineGame({
     const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
     this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
     const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
-    return `<div class="list"><div class="t">${r(`搭電梯上${t.n}樓找Ami`)}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+    return `<div class="list"><div class="t"><span>${r(`搭電梯上${t.n}樓找Ami`)}</span><span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
   },
   /* 招牌元素：樓層顯示器 */
   displayHTML(arrow = '▲') {
@@ -413,7 +454,7 @@ const Game = defineGame({
         place: 'shop',
         html: () => Game.displayHTML(),
         dialogue: () => [L('（門快要關了。這時候，一位鄰居跑過來。）', '(La puerta casi se cierra cuando un vecino viene corriendo.)', '(The door is about to close when a neighbor runs over.)'), nb('等一下！等一下！', '¡Espere, espere!', 'Wait! Wait!')],
-        options: () => rot(['按「開門」，等他。', '按「關門」。', '不要動，假裝沒看到。']),
+        options: () => ['按「開門」，等他。', '按「關門」。'],
         next: c => {
           if (c !== '按「開門」，等他。') { Game.addMistake(M('鄰居要來了，要好心一點幫他按著「開」。', 'El vecino ya viene: sé amable y mantén presionado el botón «abrir» para él.', 'The neighbor is coming — be kind and hold the "open" button for them.')); return; }
           goodFirst('WAIT', '很有禮貌！在台灣，幫別人按開門鍵很常見。', '¡Muy cortés! En Taiwán es común sostener la puerta para otros.', 'Very polite! In Taiwan it is common to hold the door for others.');
@@ -425,7 +466,7 @@ const Game = defineGame({
         place: 'shop',
         html: () => Game.displayHTML(),
         dialogue: () => [L(`我：Ami住在${t.n}樓。`, `Ami vive en el piso ${t.n}.`, `Ami lives on floor ${t.n}.`)],
-        options: () => rot([t.n, t.n + 1, t.n - 1]).map(n => `按${n}樓。`),
+        options: () => Game.FLOORS.map(k => Game.floorOpt(k)),
         next: c => {
           if (c !== `按${t.n}樓。`) { Game.addMistake(M(`你記錯了喔！Ami住在${t.n}樓。`, `¡Te equivocaste! Ami vive en el piso ${t.n}.`, `You got it wrong! Ami lives on floor ${t.n}.`)); return; }
           goodFirst('FLOOR', `對了！按${t.n}樓。`, `¡Correcto! Presiona el ${t.n}.`, `Right! Press ${t.n}.`);
