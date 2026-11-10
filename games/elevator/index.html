@@ -224,14 +224,14 @@ const VOCAB = {
   HELP: [['麻煩', 'por favor, molestar', 'please / trouble'], ['幫我', 'ayúdame a', 'help me'], ['不好意思', 'disculpa', 'sorry / excuse me']],
   HELP2: [['說錯', 'decir algo equivocado', 'say it wrong'], ['沒關係', 'no pasa nada', "it's OK"], ['明明', 'claramente (si lo dijiste)', 'clearly (you did say)'], ['自己', 'uno mismo', 'yourself']],
   EARLY: [['樓層', 'piso', 'floor'], ['出去', 'salir', 'go out'], ['這裡不是', 'aquí no es', 'this is not']],
-  STOP: [['到了', 'ya llegó', 'arrived'], ['慢走', 'que le vaya bien', 'take care (to someone leaving)'], ['您', 'usted', 'you (polite)']],
+  STOP: [['靠杯', '¡caray! (vulgar)', 'damn (vulgar slang)'], ['到了', 'ya llegó', 'arrived'], ['慢走', 'que le vaya bien', 'take care (to someone leaving)'], ['您', 'usted', 'you (polite)']],
   STOP_FIX: [['到了', 'ya llegó', 'arrived'], ['慢走', 'que le vaya bien', 'take care (to someone leaving)'], ['再見', 'adiós', 'goodbye']],
   ARRIVE: [['借過', 'con permiso', 'excuse me (let me pass)'], ['不好意思', 'disculpa', 'excuse me'], ['到了', 'ya llegó', 'arrived']],
   END: [['電鈴', 'timbre', 'doorbell'], ['歡迎', 'bienvenido', 'welcome']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 const STAGE = { LOBBY: ['大廳', 'vestíbulo', 'lobby'], DIR: ['看箭頭', 'mirar la flecha', 'checking the arrow'], WAIT: ['等人', 'esperar', 'waiting'], FLOOR: ['按樓層', 'elegir piso', 'choosing a floor'], HELP: ['幫忙', 'ayudar', 'helping'], HELP2: ['鄰居改口', 'el vecino se corrige', 'neighbor corrects himself'], EARLY: ['看樓層', 'mirar el piso', 'checking the floor'], STOP: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], STOP_FIX: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], ARRIVE: ['出電梯', 'salir', 'exiting'] };
-const NEXT_LABEL = { LOBBY: '走到電梯前', DIR: '兩部電梯來了', WAIT: '電梯來了', FLOOR: '走進電梯', HELP: '電梯往上', HELP2: '電梯往上', STOP: '電梯停了', STOP_FIX: '電梯又往上', EARLY: '電梯又停了', ARRIVE: '繼續往上', END: '到Ami家' };
+const NEXT_LABEL = { LOBBY: '走到電梯前', DIR: '兩部電梯來了', WAIT: '電梯來了', FLOOR: '走進電梯', HELP: '電梯往上', HELP2: '電梯往上', STOP: '電梯停了', STOP_FIX: '電梯繼續往上', EARLY: '電梯又停了', ARRIVE: '繼續往上', END: '到Ami家' };
 
 const PLACES = {
   phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
@@ -301,6 +301,11 @@ const Game = defineGame({
      dirDown＝大廳先來的那部電梯是往下的（阿姨問「是往上的嗎？」）
      stopWrong＝電梯先停在比 e 低一層，鄰居看錯說「到了」想出去
      early＝中途 x 樓又停了一次 */
+  /* 按對樓層後，不另外跳過場：綠卡直接放在鄰居拜託按樓層的那一頁 */
+  maybeTrans(before, extra) {
+    if (before === 'FLOOR' && this.state === 'HELP') { this.closePanels(); return; }
+    GameCore.maybeTrans.call(this, before, extra);
+  },
   setup() {
     const n = pick([6, 7, 8, 9, 10, 12]), m = pick([3, 4].filter(x => x < n));
     const misspoke = Math.random() < 0.3, e = misspoke ? m + 1 : m;
@@ -330,7 +335,7 @@ const Game = defineGame({
     const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
     this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
     const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
-    return `<div class="list"><div class="t">${r('今天要做的事')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+    return `<div class="list"><div class="t">${r(`搭電梯上${t.n}樓找Ami`)}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
   },
   /* 招牌元素：樓層顯示器 */
   displayHTML(arrow = '▲') {
@@ -424,8 +429,7 @@ const Game = defineGame({
         next: c => {
           if (c !== `按${t.n}樓。`) { Game.addMistake(M(`你記錯了喔！Ami住在${t.n}樓。`, `¡Te equivocaste! Ami vive en el piso ${t.n}.`, `You got it wrong! Ami lives on floor ${t.n}.`)); return; }
           goodFirst('FLOOR', `對了！按${t.n}樓。`, `¡Correcto! Presiona el ${t.n}.`, `Right! Press ${t.n}.`);
-          Game.thought = [nb(`不好意思，我要到${t.m}樓，麻煩你幫我按一下。`, `Disculpe, voy al piso ${t.m}. ¿Me hace el favor de presionarlo?`, `Excuse me, I'm going to floor ${t.m}. Could you press it for me?`)];
-          Game.state = 'HELP';
+          Game.state = 'HELP';   // 鄰居的話就是 HELP 的對話，綠卡和 HELP 合成同一頁（見 maybeTrans）
         }
       },
       HELP: {
@@ -468,7 +472,7 @@ const Game = defineGame({
       STOP: catchState(Game, {
         key: 'STOP', place: 'shop', html: () => Game.displayHTML(),
         dialogue: () => [nb('到了，謝謝你！再見！', 'Ya llegamos, ¡gracias! ¡Adiós!', 'Here we are — thanks! Bye!')],
-        ok: '不客氣，慢走！', fix: () => `不好意思，這裡是${t.e - 1}樓，您是不是要到${t.e}樓？`, rude: '你走錯了！',
+        ok: '不客氣，慢走！', fix: () => `不好意思，這裡是${t.e - 1}樓，您是不是要到${t.e}樓？`, rude: `靠杯！你不是要去${t.e}樓？`,
         wrong: () => t.stopWrong,
         whyWrong: () => M(`這裡是${t.e - 1}樓，鄰居要到${t.e}樓。他看錯了，要客氣地提醒他。`, `Aquí es el piso ${t.e - 1}; el vecino va al ${t.e}. Se confundió: avísale con cortesía.`, `This is floor ${t.e - 1}; the neighbor is going to ${t.e}. He misread — remind him politely.`),
         whyRight: () => M(`這裡就是${t.e}樓，鄰居沒有看錯，不用提醒他。`, `Aquí es justo el piso ${t.e}; el vecino no se equivocó, no hace falta avisarle.`, `This is exactly floor ${t.e}; the neighbor wasn't wrong, no need to remind him.`),

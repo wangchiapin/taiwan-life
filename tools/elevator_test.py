@@ -122,14 +122,25 @@ def run(b):
     check('misspoke 時燈不會亮', '面板上' not in screen(p) and p.evaluate('Game.task.lit') is False, screen(p))
     p.close()
 
+    # ── 圖2.3 合併：FLOOR 答對後不跳過場，綠卡＋鄰居的話＋選項在同一頁 ──
+    p = new_page(b); set_task(p, n=8, m=3, lit=True); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p)
+    press(p, '按「開門」，等他。'); leave_trans(p); press(p, '按8樓。')
+    tx = txt(p, '#npc-dialogue')
+    check('FLOOR 答對：直接是 HELP（沒有過場）', st(p) == 'HELP', st(p))
+    check('合併頁：有綠卡、鄰居的話只出現一次、有選項', p.locator('.fb.good').count() == 1 and tx.count('麻煩你幫我按一下') == 1 and len(opts(p)) == 3, tx)
+    check('合併頁：先綠卡之外還有「面板上」旁白', '面板上' in tx, tx)
+    check('任務卡標題：搭電梯上8樓找Ami', '搭電梯上8樓找Ami' in p.evaluate("(()=>{Game.showList=true;Game.render();const e=document.querySelector('.list .t');const c=e.cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.textContent})()"))
+    check('NEXT_LABEL STOP_FIX 是「電梯繼續往上」', p.evaluate("NEXT_LABEL.STOP_FIX") == '電梯繼續往上')
+    p.close()
+
     # ── 4. STOP：鄰居看錯樓層（stopWrong）──
     for first in ('ok', 'rude', 'fix'):
         p = new_page(b); set_task(p, stopWrong=True, early=(first == 'fix')); to_lobby(p); to_help(p); help_right(p); leave_trans(p)
         check('STOP 停在低一層（2樓）', st(p) == 'STOP' and p.evaluate('Game.cur') == 2 and '2' in disp(p), (st(p), disp(p)))
-        check('STOP 三個選項', sorted(o.strip() for o in opts(p)) == sorted(['不客氣，慢走！', '不好意思，這裡是2樓，您是不是要到3樓？', '你走錯了！']), opts(p))
+        check('STOP 三個選項', sorted(o.strip() for o in opts(p)) == sorted(['不客氣，慢走！', '不好意思，這裡是2樓，您是不是要到3樓？', '靠杯！你不是要去3樓？']), opts(p))
         m0 = mis(p)
         if first != 'fix':
-            press(p, '不客氣，慢走！' if first == 'ok' else '你走錯了！')
+            press(p, '不客氣，慢走！' if first == 'ok' else '靠杯！你不是要去3樓？')
             check(f'STOP 選「{first}」：扣分、留在 STOP', mis(p) == m0 + 1 and st(p) == 'STOP', (mis(p), st(p)))
             check('STOP 錯誤紀錄有關卡名稱', p.evaluate('Game.log[Game.log.length-1].stage[0]') == '鄰居下樓')
         press(p, '不好意思，這裡是2樓，您是不是要到3樓？')
@@ -153,7 +164,7 @@ def run(b):
     m0 = mis(p); press(p, '不好意思，這裡是2樓，您是不是要到3樓？')
     check('沒看錯時亂提醒：扣分、留在 STOP', mis(p) == m0 + 1 and st(p) == 'STOP')
     check('亂提醒的提示：這裡就是3樓', '這裡就是3樓' in txt(p, '.fb.bad'), txt(p, '.fb.bad'))
-    press(p, '你走錯了！'); check('沒看錯時說「你走錯了」：扣分', mis(p) == m0 + 2)
+    press(p, '靠杯！你不是要去3樓？'); check('沒看錯時說「靠杯」：扣分', mis(p) == m0 + 2)
     press(p, '不客氣，慢走！')
     check('沒看錯時慢走：不進 STOP_FIX', st(p) in ('_TRANS', 'ARRIVE', 'EARLY') and trans_from(p) in (None, 'STOP')); leave_trans(p)
     check('沒看錯時慢走：直接 ARRIVE', st(p) == 'ARRIVE', st(p))
