@@ -371,8 +371,15 @@ with sync_playwright() as p:
     ev(page, 'Game.bought = {pork: 0.5, egg: 2, onion: 2}; Game.lack = {}')
     tap(page, '東西買好了，回家')
     fl = ev(page, 'Game.final.map(x=>x.zh)')
-    wl = [l for l in fl if '買太' in l or '沒有要' in l]
-    check('買錯的（數量不對、多買）合成同一句、口語', len(wl) == 1 and wl[0].count('Ami：') == 1 and '買太少了，我要一斤' in wl[0] and '買太多了，我只要' in wl[0] and '我沒有要洋蔥' in wl[0] and '！' not in wl[0], fl)
+    wl = [l for l in fl if '買錯了啦' in l or '買太' in l or '沒有要' in l]
+    check('買錯的（有少有多有多買）合成同一句、只說一次「買錯了」', len(wl) == 1 and wl[0].count('Ami：') == 1 and wl[0].count('買錯了啦') == 1 and '豬肉要一斤' in wl[0] and '雞蛋只要' in wl[0] and '洋蔥我沒有要' in wl[0], fl)
+    # 全部都買太多：開頭說一次「買太多了」，後面只列要多少，不重複
+    new_game(page); setreq(page, [['pork', 1], ['egg', 1], ['onion', 1]])
+    ev(page, 'Game.bought = {pork: 2, egg: 2, onion: 2}; Game.lack = {}')
+    tap(page, '東西買好了，回家')
+    fl = ev(page, 'Game.final.map(x=>x.zh)')
+    wl = [l for l in fl if '買太' in l]
+    check('買太多：只說一次「買太多了」，後面列每樣要多少', len(wl) == 1 and wl[0].count('買太多了') == 1 and wl[0].count('只要') == 3, fl)
 
     # 10d. 老闆弄錯（少找錢／放錯數量）玩家指出來 → 過場畫面是老闆尷尬臉（肉攤）
     new_game(page); setreq(page, [['pork', 1]]); ev(page, 'Game.bagDone = true; Game.checkDone = true')
@@ -386,6 +393,41 @@ with sync_playwright() as p:
     ev(page, "Game.state = 'CHECK'; Game.tx = [{id:'pork', q:1}]; Game.ck = {id:'pork', q:1, wrong:true, wq:2}; Game.render()")
     o = opts(page); page.locator('#options-area .opt').nth(next(k for k, t_ in enumerate(o) if '我要的是' in t_)).click(); page.wait_for_timeout(120)
     check('放錯數量被指出來 → 過場畫面也是尷尬臉', state(page) == '_TRANS' and 'stall_meat_sorry' in ev(page, "document.getElementById('npc-avatar').src"), state(page))
+
+    # 10e. 老闆沒弄錯時，「亂說他弄錯」的那個選項，講的數字不能跟畫面上實際的一樣
+    new_game(page); setreq(page, [['pork', 1]]); ev(page, 'Game.bagDone = true; Game.checkDone = true')
+    tap(page, '去肉攤'); buy(page, 'pork', 1); tap(page, '買好了'); tap(page, '好，'); P = ev(page, 'Game.payInfo()'); tap(page, P['payOk'])
+    ev(page, "Game.cc = {bill: 1000, ask: 300, want: 700, given: 700, sc: false}; Game.render()")
+    o = [t_ for t_ in opts(page) if '好像找錯了' in t_]
+    check('找對錢時，「應該找X元」的X不能等於實際找的錢', len(o) == 1 and '七百五十元' in o[0] and '七百元' not in o[0].replace('七百五十元', ''), o)
+    ev(page, "Game.state = 'CHECK'; Game.tx = [{id:'pork', q:1}]; Game.ck = {id:'pork', q:1, wrong:false, wq:2}; Game.render()")
+    o = [t_ for t_ in opts(page) if '我要的是' in t_]
+    shown = ev(page, "document.querySelector('.basket').innerText")
+    check('數量放對時，「我要的是」的數量要和畫面上看到的相反', len(o) == 1 and o[0].index('我要的是') < o[0].index('不是') and '我要的是一斤' not in o[0], (o, shown))
+
+    # 10f. 買多了：付錢前跟老闆說「我買多了」→ 改成 Ami 要的數量，不是「錢不夠」
+    new_game(page); setreq(page, [['pork', 1], ['egg', 1]]); ev(page, 'Game.bagDone = true; Game.checkDone = true')
+    tap(page, '去肉攤'); buy(page, 'pork', 2); tap(page, '買好了'); ev(page, 'Game.st.floor = 99'); tap(page, '好，')
+    check('付錢畫面有「我買多了」選項', state(page) == 'PAY' and '不好意思，我買多了，有一樣要改。' in opts(page), opts(page))
+    ask0 = ev(page, 'Game.st.ask'); m0 = ev(page, 'Game.mistakes')
+    tap(page, '不好意思，我買多了')
+    check('買多了 → 進入選要改哪一樣，不扣分', state(page) == 'REDUCE' and opts(page) == ['豬肉我買多了。'] and ev(page, 'Game.mistakes') == m0, (state(page), opts(page)))
+    tap(page, '豬肉我買多了')
+    check('改成Ami要的一斤、價錢變低、不記「錢不夠」', state(page) == 'PAY' and ev(page, 'Game.cart.pork') == 1 and ev(page, 'Game.st.ask') < ask0 and ev(page, 'Game.lack.pork') is None and ev(page, 'Game.mistakes') == m0, (ev(page, 'Game.cart'), ev(page, 'Game.st.ask'), ask0))
+    tap(page, '不好意思，我買多了')
+    check('數量已經對了還說買多了 → 扣分、不進入改數量', state(page) == 'PAY' and ev(page, 'Game.mistakes') == m0 + 1, state(page))
+    # 兩樣一多一對：選到數量對的那樣 → 扣分，回付錢
+    new_game(page); setreq(page, [['cabbage', 1], ['egg', 1]]); ev(page, 'Game.bagDone = true; Game.checkDone = true')
+    tap(page, '去菜攤'); buy(page, 'cabbage', 2); buy(page, 'egg', 1); tap(page, '買好了'); ev(page, 'Game.st.floor = 99'); tap(page, '好，')
+    m0 = ev(page, 'Game.mistakes'); tap(page, '不好意思，我買多了'); tap(page, '雞蛋我買多了')
+    check('選到數量對的那樣 → 扣分、回付錢、沒改', state(page) == 'PAY' and ev(page, 'Game.mistakes') == m0 + 1 and ev(page, 'Game.cart.cabbage') == 2, state(page))
+    tap(page, '不好意思，我買多了'); tap(page, '高麗菜我買多了')
+    check('買多了的那樣改成一顆', state(page) == 'PAY' and ev(page, 'Game.cart.cabbage') == 1 and ev(page, 'Game.mistakes') == m0 + 1)
+    # Ami 沒要的東西買了 → 整樣拿掉
+    new_game(page); setreq(page, [['cabbage', 1], ['egg', 1]]); ev(page, 'Game.bagDone = true; Game.checkDone = true')
+    tap(page, '去菜攤'); buy(page, 'cabbage', 1); buy(page, 'egg', 1); buy(page, 'tomato', 1); tap(page, '買好了'); ev(page, 'Game.st.floor = 99'); tap(page, '好，')
+    tap(page, '不好意思，我買多了'); tap(page, '番茄我買多了')
+    check('Ami沒要的番茄 → 整樣拿掉', state(page) == 'PAY' and 'tomato' not in ev(page, 'Game.cart') and ev(page, 'Game.lack.tomato') is None)
 
     for stall_, item_, key_ in (('魚攤', 'fish', 'fish'), ('菜攤', 'cabbage', 'veg')):
         new_game(page); setreq(page, [[item_, 1]]); ev(page, 'Game.bagDone = true; Game.checkDone = true')
