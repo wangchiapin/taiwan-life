@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<title>加油站 · La gasolinera</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：gasstationgame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "gasstationgame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #33261f;
+    --red: #d2381e;
+    --red-dark: #8f3513;
+    --yolk: #e0a43a;
+    --night: #2e2630;
+    --kraft: #f3e4d3;
+    --wall: #fbf3ea;
+    --paper: #ffffff;
+    --line: #e5d2bd;
+    --muted: #7a6454;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    background: #eef3e6;
+  }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  /* ── 登入：店招牌 ── */
+  /* ── 遊戲 ── */
+  /* 購物清單 */
+  @media (hover: hover) {
+    .opt:hover rt { color: #ffe0d2; }
+  }
+  /* ── 排行榜 ── */
+  #lb-table tr.highlight-row { background: #f7dccb; font-weight: 700; }
+  /* ── 句子翻譯 ── */
+  .tr-btn:hover { background: #f7dccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  /* ── 本關單字（右側抽屜） ── */
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+
+
+
+  /* 號碼牌、匯款單、鈔票 */
+  .pbox { margin: 8px 0 12px; background: #fff; border: 2px solid #2f8f83; border-radius: 10px; padding: 8px 14px; }
+  .pbox .ph { color: #2f8f83; font-weight: 700; font-size: 15px; }
+  .pbox .pv { font-size: 22px; font-weight: 700; color: var(--ink); margin-top: 2px; }
+  .pbox .pl { font-size: 15px; color: var(--ink); margin-top: 2px; }
+  .pbox.bill { border-color: var(--red); }
+  .pbox.bill .pv { font-size: 18px; }
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">加油站</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">加油站</h1>
+  <p class="subtitle" data-es="La gasolinera" data-en="At the gas station">La gasolinera</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    Ami 的機車沒油了，請你騎去加油站幫忙加油。你要說清楚加哪一種油、加多少錢，店員會複誦，付錢、找錢、拿發票，每一步都有可能出錯，要自己核對喔！<br>
+    <span data-es="La moto de Ami se quedó sin gasolina y te pide que vayas a la gasolinera. Tienes que decir qué tipo de gasolina y cuánto dinero quieres, el empleado lo repite, y luego pagas, recibes el cambio y la factura. ¡En cada paso puede haber un error, así que revisa todo tú mismo!" data-en="Ami's scooter is out of gas and asks you to fill it up at a gas station. You must say which fuel and how much money's worth you want; the attendant repeats it, then you pay, get change and receive the receipt. Mistakes can happen at every step, so check everything yourself!">Ami 的機車沒油了，請你騎去加油站幫忙加油。你要說清楚加哪一種油、加多少錢，店員會複誦，付錢、找錢、拿發票，每一步都有可能出錯，要自己核對喔！</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">⛽</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 10 名 · Top 10</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'gasstation', track: 'gasstation', vocabQuiz: true, settingsKey: 'gasstation_settings',
+  defaultPlace: 'shop', defaultEmoji: '⛽',
+  roles: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '加油員': { pitch: 1.05 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+   第一版草稿：本次沒有對照 game-kit（讀不到），只用共用檔內建的 GoodTeacher 規則
+══════════════════════════════════════ */
+pinyinPro.customPinyin({
+  '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan',
+  '時間': 'shí jiān', '時候': 'shí hou', '東西': 'dōng xi', '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '著': 'zhe', '囉': 'luo', '啦': 'la', '耶': 'ye',
+  '不好意思': 'bù hǎo yì si', '這個': 'zhè ge', '那個': 'nà ge', '好像': 'hǎo xiàng', '欸': 'èi', '應該': 'yīng gāi', '怎麼': 'zěn me', '舒服': 'shū fu'
+});
+pinyinPro.customPinyin({
+  '加油站': 'jiā yóu zhàn', '加油': 'jiā yóu', '機車': 'jī chē', '無鉛': 'wú qiān', '汽油': 'qì yóu', '油箱蓋': 'yóu xiāng gài', '油箱': 'yóu xiāng', '蓋好': 'gài hǎo', '蓋': 'gài',
+  '熄火': 'xī huǒ', '發動': 'fā dòng', '發票': 'fā piào', '油槍': 'yóu qiāng', '複誦': 'fù sòng', '公升': 'gōng shēng', '加油員': 'jiā yóu yuán', '螢幕': 'yíng mù',
+  '一共': 'yí gòng', '找': 'zhǎo', '收': 'shōu', '金額': 'jīn é', '種類': 'zhǒng lèi', '重印': 'chóng yìn', '鈔票': 'chāo piào', '櫃檯': 'guì tái', '收好': 'shōu hǎo', '剛剛': 'gāng gāng', '還在': 'hái zài'
+});
+// 台灣讀音修正：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '加油員': ['El empleado de la gasolinera', 'The gas station attendant'] };
+const SPEAKER_RE = /^(Ami|加油員|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['加油站', 'gasolinera', 'gas station'], ['機車', 'moto, scooter', 'scooter'], ['無鉛汽油', 'gasolina sin plomo', 'unleaded gasoline'], ['沒油', 'sin gasolina', 'out of gas']],
+  ARRIVE: [['熄火', 'apagar el motor', 'turn off the engine'], ['油箱蓋', 'tapa del depósito', 'fuel tank cap']],
+  ORDER: [['加油', 'echar gasolina', 'fill up (with fuel)'], ['金額', 'monto, importe', 'amount']],
+  CONFIRM: [['複誦', 'repetir para confirmar', 'repeat back'], ['對嗎', '¿es correcto?', 'is that right?']],
+  FILL: [['油槍', 'pistola de la manguera', 'fuel nozzle'], ['等', 'esperar', 'to wait']],
+  PAY: [['一共', 'en total', 'in total'], ['螢幕', 'pantalla', 'screen']],
+  CHANGE: [['找', 'dar el cambio', 'give change'], ['收', 'recibir, cobrar', 'receive, take payment']],
+  INVOICE: [['發票', 'factura, recibo', 'receipt (uniform invoice)'], ['重印', 'imprimir otra vez', 'reprint']],
+  CLOSE: [['蓋好', 'cerrar bien', 'close properly'], ['發動', 'arrancar', 'start (the engine)']],
+  get END() { return Game._endGood ? [['剛剛好', 'justo bien', 'just right']] : [['下次', 'la próxima vez', 'next time']]; },
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = (() => {
+  const p = ['付錢', 'pagar', 'paying'];
+  return { ARRIVE: ['停車熄火', 'estacionar y apagar', 'parking and engine off'], ORDER: ['說油種和金額', 'decir tipo y monto', 'saying fuel and amount'], CONFIRM: ['核對複誦', 'revisar lo repetido', 'checking the repeat-back'],
+    FILL: ['等加油', 'esperar el llenado', 'waiting for the fill-up'], PAY: p, PAY_FIX: p, CHANGE: ['找錢', 'el cambio', 'the change'], INVOICE: ['核對發票', 'revisar la factura', 'checking the receipt'], CLOSE: ['收好離開', 'guardar y salir', 'packing up and leaving'] };
+})();
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = { ARRIVE: '騎進加油站', ORDER: '跟加油員說話', CONFIRM: '聽加油員複誦', FILL: '等加油員加油', PAY: '聽加油員報價', INVOICE: '等發票印出來', CLOSE: '收好東西', END: '騎車離開' };
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const PLACES = {
+  phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
+  shop: ['⛽', '加油站', 'Gasolinera', 'Gas station', '']
+};
+/* 每公升價錢（2026-11-02～11-08 中油牌價：92 無鉛 31.2、95 無鉛 32.7；只用來顯示公升數，待確認） */
+const PRICE = { 92: 31.2, 95: 32.7 };
+const FUELS = [92, 95];
+const AMTS = [150, 200, 250, 300];
+const other = f => (f === 92 ? 95 : 92);
+const liters = (f, a) => (a / PRICE[f]).toFixed(2);
+const billFor = n => (n <= 500 ? 500 : 1000);           // 你給的鈔票（身上只有一張五百元）
+
+/* ══════════════════════════════════════
+   任務提示
+══════════════════════════════════════ */
+const Hints = makeHints({ render: stdHintsRender });
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+const ORDER = ['START', 'ARRIVE', 'ORDER', 'CONFIRM', 'FILL', 'PAY', 'PAY_FIX', 'CHANGE', 'INVOICE', 'CLOSE', 'END', 'RESULT'];
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,
+  hintViews: 0, log: [], feedback: [], visit: 0, att: {}, cash: null,
+  onStart() { this.updateCash(); },
+  updateCash() { document.getElementById('cash-badge').textContent = ''; },
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+  IMAGES: {
+    START: ['images/start.jpg', '📱'], ARRIVE: ['images/arrive.jpg', '🛵'], ORDER: ['images/order.jpg', '⛽'], CONFIRM: ['images/order.jpg', '⛽'], FILL: ['images/fill.jpg', '⛽'],
+    PAY: ['images/pay.jpg', '💵'], PAY_FIX: ['images/pay.jpg', '💵'], CHANGE: ['images/pay.jpg', '💵'], INVOICE: ['images/invoice.jpg', '🧾'], CLOSE: ['images/leave.jpg', '🛵'],
+    END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+  },
+
+  setup() {
+    const t = this.task = { rot: Math.floor(Math.random() * 3) };
+    t.fuel = pick(FUELS); t.amt = pick(AMTS);            // Ami 要的
+    t.oFuel = t.fuel; t.oAmt = t.amt;                    // 玩家實際說的（ORDER 關會改）
+    t.cfWrong = false; t.cfFuel = t.fuel; t.cfAmt = t.amt;
+    t.invWrong = false; t.invSaid = t.amt;
+    initPay(t, t.amt, [{ zh: '多報了五十元', price: 50 }, { zh: '多報了三十元', price: 30 }]);   // 先預設，CONFIRM 結束後依實際加的金額重算
+  },
+
+  amiLines() {
+    const N = this.N, t = this.task;
+    return [
+      L(`Ami：${N}，我的機車沒油了，可以幫我騎去加油站加油嗎？我的車要加「${zhNum(t.fuel)}無鉛汽油」。`, `${N}, mi moto se quedó sin gasolina. ¿Puedes llevarla a la gasolinera? Lleva gasolina sin plomo de ${t.fuel} octanos.`, `${N}, my scooter is out of gas. Could you ride it to a gas station? It takes ${t.fuel} unleaded.`),
+      L(`Ami：加${zhNum(t.amt)}元就好。你身上有一張五百元，付錢以後要收好發票。`, `Échale ${esM(t.amt)} de gasolina. Llevas un billete de quinientos; al pagar, guarda la factura.`, `Fill it with ${enM(t.amt)} worth. You have a 500-dollar bill; keep the receipt after paying.`),
+      L('Ami：加油員說的油種、金額、價錢和找的錢，還有發票上的金額，都要自己對一下喔！', '¡Compara tú mismo lo que diga el empleado: tipo de gasolina, monto, precio, cambio y el importe de la factura!', 'Check for yourself what the attendant says: fuel type, amount, price, change and the amount on the receipt!')
+    ];
+  },
+  hintSections() { return [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }]; },
+
+  listHTML(rowsOnly) {
+    const t = this.task, r = x => this.ruby(x);
+    const rows = [
+      { zh: `機車要加：${zhNum(t.fuel)}無鉛汽油，加${zhNum(t.amt)}元`, es: `La moto lleva gasolina sin plomo de ${t.fuel}; échale ${esM(t.amt)}`, en: `The scooter takes ${t.fuel} unleaded; fill ${enM(t.amt)} worth` },
+      { zh: '身上有：一張五百元鈔票', es: 'Tienes un billete de quinientos dólares taiwaneses', en: 'You have one NT$500 bill' }
+    ];
+    if (rowsOnly) return rows;
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 加油機螢幕：油種、金額、公升 */
+  pumpBox(f, a) {
+    const r = x => this.ruby(x);
+    return `<div class="pbox bill"><div class="ph">⛽ ${r('加油')} ${r('螢幕')}</div><div class="pl">${r('種類')}：${zhNum(f)}${r('無鉛')}</div><div class="pv">NT$ ${a}</div><div class="pl">${liters(f, a)} ${r('公升')}</div></div>`;
+  },
+  invoiceBox(a) {
+    const r = x => this.ruby(x);
+    return `<div class="pbox"><div class="ph">🧾 ${r('發票')}</div><div class="pl">${r('金額')}：NT$ ${a}</div></div>`;
+  },
+
+  getConfig() {
+    const N = this.N, t = this.task;
+    const att = (zh, es, en) => L(`加油員：${zh}`, es, en);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const fuelZh = f => `${zhNum(f)}無鉛`;
+    const pays = payStates(Game, {
+      who: '加油員', place: 'shop', html: () => Game.pumpBox(t.oFuel, t.total),
+      rudePay: '你是不是想多收我的錢啊？',
+      finish: () => { Game.state = 'INVOICE'; },
+      extraWhy: () => M(`加油員多報了：加油機螢幕上是${t.total}元，他說${t.said}元。付錢要以螢幕上的金額為準。`, `El empleado cobró de más: la pantalla marca ${esM(t.total)} y dijo ${esM(t.said)}. Paga lo que marca la pantalla.`, `The attendant overcharged: the screen shows ${enM(t.total)} but he said ${enM(t.said)}. Pay what the screen shows.`)
+    });
+
+    return {
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你在 Ami 家門口，手上拿著她的機車鑰匙。手機響了一聲，是Ami傳來的LINE。）', '(Estás en la puerta de la casa de Ami con las llaves de su moto. Tu celular suena: es un LINE de Ami.)', '(You are at Ami\'s door holding her scooter key. Your phone buzzes — a LINE from Ami.)'),
+          ...Game.amiLines(),
+          L('我：好，我現在去加油站！', '¡Bien, voy a la gasolinera ahora!', "OK, I'm heading to the gas station now!")
+        ],
+        options: ['騎進加油站'],
+        next: () => { Game.startTimer(); Game.state = 'ARRIVE'; }
+      },
+
+      /* ═══ 騎進加油站：熄火、開油箱蓋 ═══ */
+      ARRIVE: {
+        place: 'shop',
+        dialogue: () => [L('（你把機車騎進加油站，停在一台加油機旁邊。加油員穿著制服走過來。）', '(Entras en moto a la gasolinera y te detienes junto a un surtidor. Un empleado de uniforme se acerca.)', '(You ride into the gas station and stop beside a pump. An attendant in uniform walks over.)'), att('你好，歡迎光臨。', '¡Hola, buenas!', 'Welcome!')],
+        options: () => rotOf(t, ['把機車熄火、停好，再打開油箱蓋。', '引擎不用關，反正很快就好。', '一邊講電話，一邊把油箱蓋打開。']),
+        next: c => {
+          if (c !== '把機車熄火、停好，再打開油箱蓋。') {
+            Game.addMistake(c.startsWith('引擎')
+              ? M('加油的時候一定要先熄火，引擎還在動很危險。', 'Al echar gasolina hay que apagar el motor: con el motor en marcha es peligroso.', 'Always turn the engine off before fueling — a running engine is dangerous.')
+              : M('加油站不要講電話、用手機，油氣容易著火；要先熄火。', 'En la gasolinera no uses el celular: los vapores pueden incendiarse. Y apaga el motor primero.', "Don't use your phone at a gas station — the fumes can ignite. Turn the engine off first."));
+            return;
+          }
+          goodFirst('ARRIVE', '沒錯！先熄火、停好，再開油箱蓋。', '¡Exacto! Primero apaga el motor, estaciona y luego abre la tapa.', 'Right! Engine off, park, then open the tank cap.');
+          Game.state = 'ORDER';
+        }
+      },
+
+      /* ═══ 說油種和金額：實際說的先記下來（說錯也照樣往下走，錯誤扣分、結局統一看拿到的油） ═══ */
+      ORDER: {
+        place: 'shop',
+        dialogue: () => [L('（你坐在機車上。）', '(Te quedas sentado en la moto.)', '(You stay seated on the scooter.)'), att('要加哪一種？加多少？', '¿Qué tipo de gasolina y cuánto?', 'Which fuel, and how much?')],
+        options: () => {
+          const alt = pick(AMTS.filter(a => a !== t.amt));
+          t._altAmt = t._altAmt || alt;
+          return rotOf(t, [`麻煩加${fuelZh(t.fuel)}，加${zhNum(t.amt)}元。`, `麻煩加${fuelZh(other(t.fuel))}，加${zhNum(t.amt)}元。`, `麻煩加${fuelZh(t.fuel)}，加${zhNum(t._altAmt)}元。`]);
+        },
+        next: c => {
+          const good = `麻煩加${fuelZh(t.fuel)}，加${zhNum(t.amt)}元。`;
+          if (c === good) { t.oFuel = t.fuel; t.oAmt = t.amt; goodFirst('ORDER', '沒錯！油的種類和金額都要說清楚。', '¡Exacto! Di claro el tipo de gasolina y el monto.', 'Right! Say the fuel type and the amount clearly.'); }
+          else if (c.includes(fuelZh(other(t.fuel)))) {
+            t.oFuel = other(t.fuel); t.oAmt = t.amt;
+            Game.addMistake(M(`Ami 的車要加${t.fuel}無鉛，你說成${t.oFuel}無鉛。`, `La moto de Ami lleva ${t.fuel}, pero dijiste ${t.oFuel}.`, `Ami's scooter takes ${t.fuel} unleaded, but you said ${t.oFuel}.`));
+          } else {
+            t.oFuel = t.fuel; t.oAmt = t._altAmt;
+            Game.addMistake(M(`Ami 要你加${t.amt}元，你說成${t.oAmt}元。`, `Ami pidió ${esM(t.amt)} y dijiste ${esM(t.oAmt)}.`, `Ami asked for ${enM(t.amt)} but you said ${enM(t.oAmt)}.`));
+          }
+          /* 加油員複誦：45% 聽錯油種或金額 */
+          t.cfWrong = Math.random() < 0.45; t.cfFuel = t.oFuel; t.cfAmt = t.oAmt;
+          if (t.cfWrong) { if (Math.random() < 0.5) t.cfFuel = other(t.oFuel); else t.cfAmt = pick(AMTS.filter(a => a !== t.oAmt)); }
+          Game.state = 'CONFIRM';
+        }
+      },
+
+      /* ═══ 加油員複誦：45% 聽錯（以你「實際說的」為準） ═══ */
+      CONFIRM: catchState(Game, {
+        key: 'CONFIRM', place: 'shop',
+        html: () => Game.pumpBox(t.cfFuel, t.cfAmt),
+        dialogue: () => [att(`好，${fuelZh(t.cfFuel)}，加${zhNum(t.cfAmt)}元，對嗎？`, `Bien, ${t.cfFuel} sin plomo, ${esM(t.cfAmt)}, ¿correcto?`, `Okay, ${t.cfFuel} unleaded, ${enM(t.cfAmt)} — is that right?`)],
+        ok: '對，沒錯，謝謝。',
+        fix: () => t.cfWrong ? `不好意思，我要的是${fuelZh(t.oFuel)}，加${zhNum(t.oAmt)}元。` : `不好意思，我要的是${fuelZh(other(t.oFuel))}，加${zhNum(t.oAmt)}元。`,
+        rude: '你到底有沒有在聽啊？',
+        wrong: () => t.cfWrong,
+        whyWrong: () => M(`加油員聽錯了：他說「${t.cfFuel}無鉛、${t.cfAmt}元」，你說的是「${t.oFuel}無鉛、${t.oAmt}元」。`, `El empleado entendió mal: dijo «${t.cfFuel}, ${esM(t.cfAmt)}», pero tú dijiste «${t.oFuel}, ${esM(t.oAmt)}».`, `The attendant misheard: he said "${t.cfFuel}, ${enM(t.cfAmt)}" but you said "${t.oFuel}, ${enM(t.oAmt)}".`),
+        whyRight: () => M(`加油員說對了：就是「${t.oFuel}無鉛、${t.oAmt}元」。`, `Lo repitió bien: «${t.oFuel}, ${esM(t.oAmt)}».`, `He had it right: "${t.oFuel}, ${enM(t.oAmt)}".`),
+        goodWrong: ['你很細心！加油員複誦錯了，要馬上說，不然加錯油就收不回來了。', '¡Qué atento! El empleado repitió mal; habla enseguida, porque la gasolina echada no se puede sacar.', 'Well spotted! The attendant repeated it wrong — speak up right away, fuel can\'t be taken back out.'],
+        goodOk: ['加油員複誦的時候，要對一下油種和金額。', 'Cuando el empleado repita, compara el tipo de gasolina y el monto.', 'When the attendant repeats it, check the fuel type and the amount.'],
+        apology: () => [att(`啊，不好意思！是${fuelZh(t.oFuel)}，加${zhNum(t.oAmt)}元。`, `¡Ay, disculpe! Son ${t.oFuel} sin plomo y ${esM(t.oAmt)}.`, `Oh, sorry! ${t.oFuel} unleaded, ${enM(t.oAmt)}.`)],
+        go: () => {
+          /* 以實際說的為準：重算總價、發票 */
+          initPay(t, t.oAmt, [{ zh: '多報了五十元', price: 50 }, { zh: '多報了三十元', price: 30 }]);
+          t.invWrong = Math.random() < 0.4; t.invSaid = t.invWrong ? t.total + pick([50, -50]) : t.total;
+          Game.state = 'FILL';
+        }
+      }),
+
+      /* ═══ 加油中 ═══ */
+      FILL: {
+        place: 'shop',
+        html: () => Game.pumpBox(t.oFuel, t.total),
+        dialogue: () => [L(`（加油員拿起油槍，伸進你的油箱。加油機的螢幕數字一直跳，到${zhNum(t.total)}元就停了。）`, `(El empleado toma la pistola y la mete en tu depósito. Los números de la pantalla suben hasta ${esM(t.total)} y se detienen.)`, `(The attendant lifts the nozzle and puts it in your tank. The numbers on the pump screen climb and stop at ${enM(t.total)}.)`)],
+        options: () => rotOf(t, ['坐在車上等，不碰油槍。', '趁這個時候先把機車發動。', '自己拿起另一支油槍幫忙加。']),
+        next: c => {
+          if (c !== '坐在車上等，不碰油槍。') {
+            Game.addMistake(c.startsWith('趁這個')
+              ? M('加油的時候不可以發動機車，很危險，要等加完、蓋好油箱蓋。', 'No arranques la moto mientras echan gasolina: es peligroso. Espera a que terminen y cierren la tapa.', "Don't start the scooter while it is being fueled — it's dangerous. Wait until it's done and the cap is closed.")
+              : M('油槍要交給加油員，客人不要自己碰。', 'Deja la pistola al empleado; el cliente no debe tocarla.', 'Leave the nozzle to the attendant — customers should not touch it.'));
+            return;
+          }
+          goodFirst('FILL', '沒錯！加油的時候坐在車上等，不要碰油槍。', '¡Exacto! Espera en la moto y no toques la pistola.', 'Right! Wait on the scooter and don\'t touch the nozzle.');
+          Game.state = 'PAY';
+        }
+      },
+
+      PAY: pays.PAY,
+      PAY_FIX: pays.PAY_FIX,
+      CHANGE: pays.CHANGE,
+
+      /* ═══ 核對發票：40% 發票金額印錯 ═══ */
+      INVOICE: catchState(Game, {
+        key: 'INVOICE', place: 'shop',
+        html: () => Game.invoiceBox(t.invSaid),
+        dialogue: () => [L('（加油員把發票印出來，遞給你。）', '(El empleado imprime la factura y te la entrega.)', '(The attendant prints the receipt and hands it to you.)'), att('這是你的發票。', 'Aquí tiene su factura.', 'Here is your receipt.')],
+        ok: '好，謝謝。',
+        fix: () => `不好意思，發票上的金額好像不對，應該是${zhNum(t.invWrong ? t.total : t.total + 50)}元吧？`,
+        rude: '你們是不是想少開發票給我？',
+        wrong: () => t.invWrong,
+        whyWrong: () => M(`發票印錯了：你付了${t.total}元，發票上寫${t.invSaid}元，要請他重印。`, `La factura salió mal: pagaste ${esM(t.total)} y dice ${esM(t.invSaid)}; pide que la reimprima.`, `The receipt is wrong: you paid ${enM(t.total)} but it says ${enM(t.invSaid)}; ask for a reprint.`),
+        whyRight: () => M(`發票是對的：金額就是${t.total}元。`, `La factura estaba bien: ${esM(t.total)}.`, `The receipt was right: ${enM(t.total)}.`),
+        goodWrong: ['你很細心！發票金額要和付的錢對一下。', '¡Qué atento! Compara el importe de la factura con lo que pagaste.', 'Well spotted! Compare the receipt amount with what you paid.'],
+        goodOk: ['拿到發票要看一下金額是不是和付的錢一樣。', 'Al recibir la factura, mira si el importe coincide con lo que pagaste.', 'When you get the receipt, check the amount matches what you paid.'],
+        apology: () => [att(`啊，不好意思，我印錯了，我重印一張，是${zhNum(t.total)}元。`, `¡Ay, perdón, la imprimí mal! La reimprimo: son ${esM(t.total)}.`, `Oh, sorry, I printed it wrong. Reprinting: ${enM(t.total)}.`)],
+        go: () => { Game.state = 'CLOSE'; }
+      }),
+
+      /* ═══ 蓋好油箱蓋、收好發票，再發動 ═══ */
+      CLOSE: {
+        place: 'shop',
+        dialogue: () => [L('（加油員把油槍放回去了。你的機車已經加好油。）', '(El empleado devuelve la pistola. Tu moto ya tiene gasolina.)', '(The attendant puts the nozzle back. Your scooter is fueled up.)')],
+        options: () => rotOf(t, ['把油箱蓋蓋好、發票收好，再發動機車離開。', '先發動機車，油箱蓋等一下再蓋。', '發票不要了，丟在地上就好。']),
+        next: c => {
+          if (c !== '把油箱蓋蓋好、發票收好，再發動機車離開。') {
+            Game.addMistake(c.startsWith('先發動')
+              ? M('要先把油箱蓋蓋好才可以發動機車離開，油箱蓋不見或沒蓋好都很危險。', 'Cierra bien la tapa del depósito antes de arrancar; una tapa perdida o floja es peligrosa.', 'Close the tank cap before starting the scooter — a missing or loose cap is dangerous.')
+              : M('發票不要亂丟，要收好；對中獎或報帳都有用。', 'No tires la factura: guárdala; sirve para el sorteo o para reembolsos.', "Don't throw the receipt away — keep it; it may win the receipt lottery or be needed for reimbursement."));
+            return;
+          }
+          goodFirst('CLOSE', '沒錯！蓋好油箱蓋、收好發票，再發動。', '¡Exacto! Cierra la tapa, guarda la factura y luego arranca.', 'Right! Close the cap, keep the receipt, then start the engine.');
+          Game.stopTimer(); Game.state = 'END';
+        }
+      },
+
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2 && t.oFuel === t.fuel && t.oAmt === t.amt;
+          track('game_complete', { game: 'gasstation', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            L('（你把機車騎回 Ami 家門口，打開手機，傳訊息給Ami。）', '(Regresas en la moto a la puerta de Ami, abres el celular y le escribes.)', '(You ride back to Ami\'s door, open your phone and message her.)'),
+            Game._endGood
+              ? L(`Ami：太好了，${N}，謝謝你！油種和金額剛剛好，發票也收好了。`, `¡Qué bien, ${N}, gracias! El tipo de gasolina y el monto son justo lo que quería, y guardaste la factura.`, `Great, ${N}, thank you! The fuel and the amount are just right, and you kept the receipt.`)
+              : (t.oFuel !== t.fuel || t.oAmt !== t.amt
+                ? L(`Ami：欸，我要的是${zhNum(t.fuel)}無鉛、${zhNum(t.amt)}元，怎麼加成${zhNum(t.oFuel)}無鉛、${zhNum(t.oAmt)}元了……下次要說清楚喔！`, `Oye, yo quería ${t.fuel} sin plomo y ${esM(t.amt)}, y le echaste ${t.oFuel} y ${esM(t.oAmt)}… ¡la próxima vez dilo claro!`, `Hey, I wanted ${t.fuel} unleaded and ${enM(t.amt)}, but you put in ${t.oFuel} and ${enM(t.oAmt)}… say it clearly next time!`)
+                : L('Ami：欸，聽起來有點不順利……下次要對加油員說的油種、金額、價錢、找的錢和發票喔！', 'Parece que hubo problemas… la próxima vez revisa el tipo de gasolina, el monto, el precio, el cambio y la factura.', "Hmm, sounds like it didn't go smoothly… next time check the fuel, amount, price, change and receipt."))
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: stdResultCfg('phone')
+    };
+  }
+});
+
+GameBoot();
+Music.init({ bpm: 126, tracks: [
+  { wave: 'square', vol: 0.2, notes: 'D5 . F5 A5 . G5 F5 . | E5 . G5 B5 . A5 G5 . | F5 . A5 C6 . B5 A5 . | G5 - E5 - D5 - . .' },
+  { wave: 'triangle', vol: 0.5, notes: 'D3 . A3 . D3 . A3 . | E3 . B3 . E3 . B3 . | F3 . C4 . F3 . C4 . | G3 . D4 . A2 . . .' },
+  { vol: 0.2, notes: 'k . h s k . h s' }] });
+</script>
+</body>
+</html>
