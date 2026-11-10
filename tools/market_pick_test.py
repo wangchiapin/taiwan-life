@@ -398,6 +398,17 @@ with sync_playwright() as p:
     check('菜攤不賣了：過場畫面是老闆娘生氣圖', state(page) == '_TRANS' and 'stall_veg_angry' in ev(page, "document.getElementById('npc-avatar').src"))
     page.locator('#options-area .opt').first.click(); page.wait_for_timeout(100)
 
+    # 10c2. 忘記買的（兩樣以上）Ami 合成一句；只有一樣時照原本的句子
+    new_game(page); setreq(page, [['pork', 1], ['egg', 1], ['onion', 1]])
+    ev(page, 'Game.bought = {}; Game.lack = {}; Game.explained = {}; Game.queue = []; Game.settle()')
+    fl = ev(page, 'Game.final.map(x=>x.zh)')
+    wl = [l for l in fl if '沒有買' in l]
+    check('忘記買三樣：Ami 合成一句、每樣仍各扣分', len(wl) == 1 and wl[0].count('Ami：') == 1 and wl[0].count('沒有買') == 1 and '豬肉' in wl[0] and '雞蛋' in wl[0] and '洋蔥' in wl[0] and ev(page, 'Game.mistakes') == 3, (fl, ev(page, 'Game.mistakes')))
+    new_game(page); setreq(page, [['pork', 1], ['egg', 1]])
+    ev(page, 'Game.bought = {egg: 1}; Game.lack = {}; Game.explained = {}; Game.queue = []; Game.settle()')
+    fl = ev(page, 'Game.final.map(x=>x.zh)')
+    check('只忘記一樣：照原本的句子', any('我要' in l and '你沒有買耶' in l for l in fl), fl)
+
     # 10b. 去過的攤位還可以再去：第一次少買（半斤），回頭補買（再半斤）→ 湊成一斤，不用扣分
     new_game(page); setreq(page, [['pork', 1]])
     ev(page, 'Game.checkDone = true; Game.bagDone = true')

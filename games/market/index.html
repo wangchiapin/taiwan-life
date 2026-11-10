@@ -431,7 +431,7 @@ const Game = defineGame({
   IMAGES: {
     START: ['images/start.jpg', '🥬'], MAP: ['images/map.jpg', '🧺'], PICK: ['images/stall.jpg', '🥬'], HAGGLE: ['images/stall.jpg', '💬'],
     REMOVE: ['images/pay.jpg', '💵'], REDUCE: ['images/pay.jpg', '💵'], REDUCE_Q: ['images/pay.jpg', '💵'], PAY: ['images/pay.jpg', '💵'], CHANGE: ['images/pay.jpg', '🪙'], BAG: ['images/stall.jpg', '🛍️'], CHECK: ['images/stall.jpg', '🛍️'],
-    PHONE: ['images/map.jpg', '📱'], MSG: ['images/map.jpg', '📱'], EXPLAIN: ['images/end_good.jpg', '🏠'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+    PHONE: ['images/map.jpg', '📱'], MSG: ['images/map.jpg', '📱'], EXPLAIN: ['images/end_bad.jpg', '😅'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
   /* 在攤位上的那幾關，用這個攤位的圖（STALLS[x].img） */
   imageFor() {
@@ -755,6 +755,7 @@ const Game = defineGame({
     const N = this.N, lines = [], pens = [];
     this.stopTimer();
     const bad = (m, say, light) => { pens.push(light ? { ...m, pen: 5 } : m); lines.push(say); };
+    const none = [];        // 忘記買的，Ami 合在同一句說
     const wrong = [];       // 數量不對、多買的，Ami 合在同一句說
     const bad2 = (m, say) => { pens.push(m); wrong.push(say); };
     const ig = this.ignoredIds();
@@ -768,8 +769,7 @@ const Game = defineGame({
           L(`Ami：啊，是我給你的錢不夠！${it.zh}下次再買吧。`, `Ami: ¡Ay, fui yo quien no te dio suficiente dinero! ${it.es[0].toUpperCase() + it.es.slice(1)} lo compramos la próxima vez.`, `Ami: Oh, I didn't give you enough money! We'll get the ${it.en} next time.`), true);
         else if (cause === 'refused') bad(M(`${it.zh}沒買到，因為老闆不賣了。`, `No pudiste comprar ${it.es} porque el vendedor ya no quiso venderte.`, `You couldn't buy the ${it.en} because the vendor stopped selling to you.`),
           L('Ami：你殺價殺太兇吼……', 'Ami: Regateaste demasiado, ¿eh…?', "Ami: You haggled too hard, huh…"), true);
-        else bad(M(`Ami要${labZh(it, a.q)}，你沒有買。`, `Ami quería ${labEs(it, a.q)} y no lo compraste.`, `Ami wanted ${labEn(it, a.q)} and you didn't buy it.`),
-          L(`Ami：我要${labZh(it, a.q)}，你沒有買耶！`, `Ami: ¡Quería ${labEs(it, a.q)} y no lo trajiste!`, `Ami: I wanted ${labEn(it, a.q)} and you didn't get it!`));
+        else { pens.push(M(`Ami要${labZh(it, a.q)}，你沒有買。`, `Ami quería ${labEs(it, a.q)} y no lo compraste.`, `Ami wanted ${labEn(it, a.q)} and you didn't buy it.`)); none.push({ it, q: a.q }); }   // 忘記買的：扣分各算各的，Ami 合成一句話說
       } else {
         const more = got > a.q;
         bad2(M(`Ami要${labZh(it, a.q)}，你買了${qZh(it, got)}。`, `Ami quería ${labEs(it, a.q)} y compraste ${labEs(it, got)}.`, `Ami wanted ${labEn(it, a.q)} and you bought ${labEn(it, got)}.`),
@@ -785,6 +785,11 @@ const Game = defineGame({
       const it = BYID[id];
       bad2(M(`Ami沒有要${it.zh}。`, `Ami no pidió ${it.es}.`, `Ami didn't ask for ${it.en}.`), { k: 'extra', zs: `${it.zh}我沒有要`, es2: `no pedí ${it.es}`, en2: `I didn't ask for ${it.en}`, zh: `我沒有要${it.zh}`, es: `yo no pedí ${it.es}`, en: `I didn't ask for ${it.en}` });
     });
+    if (none.length === 1) { const { it, q } = none[0]; lines.push(L(`Ami：我要${labZh(it, q)}，你沒有買耶！`, `Ami: ¡Quería ${labEs(it, q)} y no lo trajiste!`, `Ami: I wanted ${labEn(it, q)} and you didn't get it!`)); }
+    else if (none.length) {
+      const jn = (a, w) => a.slice(0, -1).join(', ') + ' ' + w + ' ' + a[a.length - 1];
+      lines.push(L(`Ami：我要${none.map(n => labZh(n.it, n.q)).join('、')}，你都沒有買耶！`, `Ami: ¡Quería ${jn(none.map(n => labEs(n.it, n.q)), 'y')} y no trajiste nada de eso!`, `Ami: I wanted ${jn(none.map(n => labEn(n.it, n.q)), 'and')} and you didn't get any of it!`));
+    }
     if (ig) {   // 沒看 Ami 的訊息：只要她後來要的有沒買對、或她說不要的買了，就一次扣分、Ami 說一句
       const { y, a } = this.msgInfo(), yq = this.req.find(r => r.id === y.id).q;
       if ((this.bought[y.id] || 0) !== yq || (a && this.bought[a.id])) {
