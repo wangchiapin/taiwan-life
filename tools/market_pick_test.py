@@ -1,5 +1,6 @@
 # 菜市場專用測試：地圖、三個攤位、斤數、殺價每個選項、三次太低「不賣了」、錢不夠、加買／改項目、結局好壞與說明、3000 局總價
-# 用法：NPM=<有 pinyin-pro 和 opencc-js 的 node_modules> [SHOTS=<截圖資料夾>] python3 tools/market_pick_test.py
+# 用法：NPM=<有 pinyin-pro 和 opencc-js 的 node_modules> [SHOTS=<截圖資料夾>] python3 tools/market_pick_test.py（約 5 分鐘）
+# 最後一段 run_options：每一關的每個選項（對的、錯的）都指定情境按一遍（約 460 項檢查）
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import smoke
@@ -65,6 +66,326 @@ def pay_through(page):
 def shot(page, name):
     d = os.environ.get('SHOTS')
     if d: os.makedirs(d, exist_ok=True); page.screenshot(path=f'{d}/{name}.png')
+
+COUNT = {}
+def chk(group, name, ok, info=''):
+    COUNT[group] = COUNT.get(group, 0) + 1
+    if not ok:
+        print('✗ [%s] %s  %s' % (group, name, info)); fails.append('[%s] %s' % (group, name))
+def click_i(page, i):
+    page.locator('#options-area .opt:visible, #msg-pop .opt:visible').nth(i).click(); page.wait_for_timeout(40)
+    while state(page) == '_TRANS':
+        page.locator('#options-area .opt').first.click(); page.wait_for_timeout(40)
+def card(page):
+    """最近一次的回饋卡／錯誤說明文字（錯誤紀錄最後一筆）"""
+    return ev(page, "(Game.log[Game.log.length-1]||{}).zh || ''")
+def snap(page): return ev(page, '({m: Game.mistakes, s: Game.state, cash: Game.cash, cart: {...Game.cart}, lack: {...Game.lack}})')
+
+def reset(page, req, msg=None):
+    ev(page, """()=>{ window.__rnd = window.__rnd || Math.random; Math.random = window.__rnd;
+      Game.setup(); Object.assign(Game, {mistakes: 0, score: 100, mistakeLog: [], log: [], att: {}, feedback: [], thought: null, thoughtFirst: false, visit: 0, explained: {}, queue: [], qi: 0, tx: [], cc: null, ck: null}); Game.closeMsgPop(); }""")
+    ev(page, "([it,msg])=>{const t=Game.task;t.items=it.map(([id,q])=>({...BYID[id],q}));t.msg=msg?{type:msg.type,y:{...BYID[msg.y[0]],q:msg.y[1]},xid:msg.x||null}:null;t.total=0;t.rot=0;Game.req=it.map(([id,q])=>({id,q}));Game.checkDone=true;Game.bagDone=true;}", [req, msg])
+def go(page, js):
+    ev(page, "()=>{" + js + "; Game.updateCash(); Game.render();}"); page.wait_for_timeout(30)
+def haggle_at(page, cur, cart, floor=None, cash=1000):
+    """放到殺價前：在 cur 攤位，籃子是 cart，報價＝合計"""
+    go(page, f"Game.cur='{cur}'; Game.cart={cart}; Game.startHaggle(); Game.cash={cash}; " + (f"Game.st.floor={floor}; " if floor else '') + "Game.thought=null; Game.state='HAGGLE'")
+def pay_at(page, cur, cart, cash=1000):
+    haggle_at(page, cur, cart, None, cash); go(page, "Game.state='PAY'")
+
+def each(page, group, setup, judge, expect_n=None):
+    """setup(page) 把遊戲放到這一關；每個選項各按一次（每次重來），judge(text, before, after, ctx) 回傳 (對不對, 說明)"""
+    setup(page); o = opts(page)
+    if expect_n is not None: chk(group, '選項數量', len(o) == expect_n, o)
+    chk(group, '選項不重複', len(set(o)) == len(o), o)
+    for i, t in enumerate(o):
+        setup(page); ctx = ev(page, 'Game.payInfo ? (Game.st ? Game.payInfo() : null) : null') if state(page) == 'PAY' else None
+        b = snap(page); click_i(page, i); a = snap(page)
+        ok, why = judge(t, b, a, ctx)
+        chk(group, f'「{t}」', ok, f'{why} before={b["m"]},{b["s"]} after={a["m"]},{a["s"]}')
+
+W = lambda b, a: a['m'] == b['m'] + 1 and a['s'] == b['s']      # 選錯：扣一次分、留在原地
+R = lambda b, a: a['m'] == b['m'] and a['s'] != b['s']          # 選對：沒扣分、往下走
+
+
+
+def run_options(page):
+    """每一關的每個選項（對的、錯的）都指定情境按一遍"""
+    # ═══ MAP：三個攤位＋回家 ═══
+    for k, zh in (('meat', '肉攤'), ('fish', '魚攤'), ('veg', '菜攤')):
+        reset(page, [['pork', 1], ['fish', 1], ['egg', 1], ['onion', 2]]); go(page, "Game.state='MAP'")
+        page.locator(f'button.stall[data-choice="去{zh}"]').click(); page.wait_for_timeout(60)
+        chk('MAP', f'去{zh} → 進 PICK', state(page) == 'PICK' and ev(page, 'Game.cur') == k, (state(page), ev(page, 'Game.cur')))
+    reset(page, [['pork', 1]]); go(page, "Game.state='MAP'")
+    page.locator('#options-area .opt').first.click(); page.wait_for_timeout(60)
+    chk('MAP', '回家（還有沒買的）→ 問原因', state(page) == 'EXPLAIN', state(page))
+    reset(page, [['pork', 1]]); go(page, "Game.bought={pork:1}; Game.state='MAP'")
+    page.locator('#options-area .opt').first.click(); page.wait_for_timeout(60)
+    chk('MAP', '回家（都買對了）→ 好結局', state(page) == 'END' and ev(page, 'Game._endGood') is True, state(page))
+    reset(page, [['pork', 1]]); go(page, "Game.closed={fish:true}; Game.state='MAP'")
+    chk('MAP', '收攤的魚攤不能點', page.locator('button.stall[data-choice="去魚攤"]').count() == 0 and page.locator('button.stall[data-choice="去肉攤"]').count() == 1)
+
+    # ═══ PICK：17 種菜、每個數量、＋／－、✕、買好了、先不買了 ═══
+    for k in ('meat', 'fish', 'veg'):
+        for it in [x for x in ev(page, 'ITEMS') if x['stall'] == k]:
+            reset(page, [['pork', 1]]); go(page, f"Game.cur='{k}'; Game.cart={{}}; Game.state='PICK'")
+            id_ = it['id']
+            if it.get('jin'):
+                for q in (0.5, 1, 2):
+                    page.locator(f'[data-jin="{id_}"]').click(); page.wait_for_timeout(30)
+                    chk('PICK', f'{it["zh"]}：點圖片出現斤數選擇', page.locator('.amt .amtb').count() == 3, page.locator('.amt .amtb').count())
+                    page.locator('.amt .amtb').nth([0.5, 1, 2].index(q)).click(); page.wait_for_timeout(30)
+                    chk('PICK', f'{it["zh"]}：選{q}斤 → 籃子裡是{q}', ev(page, f"Game.cart['{id_}']") == q, ev(page, 'Game.cart'))
+                page.locator(f'[data-jin="{id_}"]').click(); page.wait_for_timeout(30); page.locator('.amt .amtx').click(); page.wait_for_timeout(30)
+                chk('PICK', f'{it["zh"]}：✕ 收起斤數', page.locator('.amt').count() == 0)
+                page.locator(f'[data-adj="{id_}"][data-d="-1"]').click(); page.wait_for_timeout(30)
+                chk('PICK', f'{it["zh"]}：－ 整份放回去', ev(page, f"'{id_}' in Game.cart") is False)
+            else:
+                for n in (1, 2, 3):
+                    page.locator(f'[data-veg="{id_}"]').click(); page.wait_for_timeout(30)
+                    chk('PICK', f'{it["zh"]}：點第{n}下 → {n}', ev(page, f"Game.cart['{id_}']") == n, ev(page, 'Game.cart'))
+                page.locator(f'[data-adj="{id_}"][data-d="1"]').click(); page.wait_for_timeout(30)
+                chk('PICK', f'{it["zh"]}：＋ → 4', ev(page, f"Game.cart['{id_}']") == 4, ev(page, 'Game.cart'))
+                for n in (3, 2, 1):
+                    page.locator(f'[data-adj="{id_}"][data-d="-1"]').click(); page.wait_for_timeout(30)
+                    chk('PICK', f'{it["zh"]}：－ → {n}', ev(page, f"Game.cart['{id_}']") == n, ev(page, 'Game.cart'))
+                page.locator(f'[data-adj="{id_}"][data-d="-1"]').click(); page.wait_for_timeout(30)
+                chk('PICK', f'{it["zh"]}：－ 到 0 整列消失', ev(page, f"'{id_}' in Game.cart") is False)
+        # 買好了／先不買了
+        reset(page, [['pork', 1]]); go(page, f"Game.cur='{k}'; Game.cart={{}}; Game.state='PICK'")
+        o = opts(page); chk('PICK', f'{k}：兩個下方選項', len(o) == 2 and o[0].startswith('買好了') and o[1].startswith('先不買了'), o)
+        click_i(page, 0); chk('PICK', f'{k}：籃子空的按買好了 → 回地圖', state(page) == 'MAP' and ev(page, 'Game.mistakes') == 0, state(page))
+        go(page, f"Game.cur='{k}'; Game.cart={{}}; Game.state='PICK'")
+        click_i(page, 1); chk('PICK', f'{k}：先不買了 → 回地圖', state(page) == 'MAP' and ev(page, 'Game.mistakes') == 0)
+        it0 = [x for x in ev(page, 'ITEMS') if x['stall'] == k][-1]['id']
+        go(page, f"Game.cur='{k}'; Game.cart={{{it0}:1}}; Game.state='PICK'".replace(f'{{{it0}:1}}', "{'%s':1}" % it0))
+        click_i(page, 0); chk('PICK', f'{k}：有東西按買好了 → 殺價', state(page) == 'HAGGLE' and ev(page, 'Game.st.ask') > 0, state(page))
+        go(page, f"Game.cur='{k}'; Game.cart={{'{it0}':1}}; Game.state='PICK'")
+        click_i(page, 1); chk('PICK', f'{k}：有東西按先不買了 → 回地圖、籃子清空', state(page) == 'MAP' and ev(page, 'Object.keys(Game.cart).length') == 0)
+
+    # ═══ HAGGLE：算便宜、三種出價（三種結果）、再看看（三種結果）、成交 ═══
+    def hg(floor, ask_override=None, mood=None, soft=None, walked=None, rnd=None):
+        def f(pg):
+            reset(pg, [['pork', 1]]); haggle_at(pg, 'meat', "{'pork':1}", floor)
+            js = ''
+            if ask_override: js += f"Game.st.ask={ask_override}; "
+            if mood is not None: js += f"Game.st.mood={mood}; "
+            if soft is not None: js += f"Game.st.soft={str(soft).lower()}; "
+            if walked is not None: js += f"Game.st.walked={str(walked).lower()}; "
+            if js: go(pg, js)
+            if rnd is not None: ev(pg, f"Math.random = () => {rnd}")
+        return f
+    def judge_haggle(t, b, a, ctx):
+        st0 = HST['st']; fl, ask, mood = st0['floor'], st0['ask'], st0['mood']
+        st1 = ev(page, 'Game.st && {ask: Game.st.ask, mood: Game.st.mood, soft: Game.st.soft, walked: Game.st.walked, acc: !!Game.st.acc}')
+        th = ev(page, "(Game.thought||[]).map(x=>x.zh).join('|')")
+        if '算便宜' in t:
+            p_ = max(fl, int(round(ask * 0.9 / 10)) * 10)
+            if p_ < ask: return (a['s'] == 'HAGGLE' and st1['ask'] == p_ and st1['soft'] and '好啦好啦' in th and a['m'] == b['m'], (st1, th))
+            return (a['s'] == 'HAGGLE' and st1['ask'] == ask and '最便宜' in th and a['m'] == b['m'], (st1, th))
+        if t.startswith('我再看看'):
+            if not (a['m'] == b['m'] and st1 and st1['walked'] and a['s'] == 'HAGGLE'): return (False, (st1, th))
+            if ask <= fl: return ('最低價' in th and st1['ask'] == ask, (st1, th))
+            if HST['rnd'] < 0.35: return ('慢慢看' in th and st1['ask'] == ask, (st1, th))
+            return ('等一下' in th and st1['ask'] < ask and st1['ask'] >= fl, (st1, th))
+        if t.startswith('好，'):
+            return (a['s'] == 'PAY' and a['m'] == b['m'] and a['cash'] == b['cash'], (a, b))
+        o = int(t.split('元')[0])
+        if o >= fl: return (a['s'] == 'PAY' and a['m'] == b['m'], (a, st1))
+        if o >= fl * 0.8:
+            p_ = max(fl, int(round((o + ask) / 2 / 10)) * 10)
+            return (a['s'] == 'HAGGLE' and st1['ask'] == p_ and st1['mood'] == mood and a['m'] == b['m'] and '不能再少' in th, (st1, th))
+        if mood == 1: return (a['s'] == 'MAP' and a['m'] == b['m'] + 1 and ev(page, 'Game.closed.meat') is True, (a, th))
+        return (a['s'] == 'HAGGLE' and st1['mood'] == mood - 1 and a['m'] == b['m'] and ('虧本' in th or '不賣' in th), (st1, th))
+    HST = {}
+    def run_haggle(name, setup, rnd=0.9):
+        def s2(pg): setup(pg); ev(pg, f"Math.random = () => {rnd}"); HST['st'] = ev(pg, '({...Game.st})'); HST['rnd'] = rnd
+        each(page, 'HAGGLE', s2, judge_haggle)
+    run_haggle('底價210（出價：太低／可成交／可成交）', hg(210))
+    run_haggle('底價240（出價：太低／還價／可成交）', hg(240))
+    run_haggle('底價=報價（沒有降價空間）', hg(300, mood=3))
+    run_haggle('心情剩 2（太低 → 心情 1）', hg(210, mood=2))
+    run_haggle('心情剩 1（太低 → 不賣了）', hg(210, mood=1))
+    run_haggle('已經用過算便宜', hg(210, soft=True))
+    run_haggle('再看看：老闆不留人（不降價）', hg(210), 0.1)
+    ev(page, "Math.random = window.__rnd")
+    # 再看看三種結果的細節：降價＋綠卡、不降價、已經最低價
+    hg(210)(page); ev(page, "Math.random = () => 0.9"); click_i(page, len(opts(page)) - 2)
+    chk('HAGGLE', '再看看（不是最低價）→ 降價、「欸欸欸等一下」', ev(page, 'Game.st.ask') < 300 and '等一下' in ev(page, "(Game.thought||[]).map(x=>x.zh).join('|')"), ev(page, 'Game.st.ask'))
+    chk('HAGGLE', '再看看之後這個選項不見', not any(t.startswith('我再看看') for t in opts(page)), opts(page))
+    hg(300)(page); ev(page, "Math.random = () => 0.9"); click_i(page, len(opts(page)) - 2)
+    chk('HAGGLE', '再看看（已經最低價）→ 「這已經是最低價了」', ev(page, 'Game.st.ask') == 300 and '最低價' in ev(page, "(Game.thought||[]).map(x=>x.zh).join('|')"))
+    hg(210)(page); ev(page, "Math.random = () => 0.1"); click_i(page, len(opts(page)) - 2)
+    chk('HAGGLE', '再看看（老闆不留人）→ 價錢不變、「慢慢看」', ev(page, 'Game.st.ask') == 300 and '慢慢看' in ev(page, "(Game.thought||[]).map(x=>x.zh).join('|')"))
+    ev(page, "Math.random = window.__rnd")
+    # 魚攤、菜攤的老闆娘：選項文字也是「老闆娘，算便宜一點啦！」，算便宜能按
+    for k, cart in (('fish', "{'fish':1}"), ('veg', "{'egg':1}")):
+        reset(page, [['pork', 1]]); haggle_at(page, k, cart, 40)
+        o = opts(page); chk('HAGGLE', f'{k}攤選項', o[0] == '老闆娘，算便宜一點啦！', o)
+        click_i(page, 0); chk('HAGGLE', f'{k}攤算便宜 → 降價', ev(page, 'Game.st.ask') < ev(page, 'Game.st.start') and state(page) == 'HAGGLE')
+
+    # ═══ PAY：五個選項 × 錢夠／錢不夠 ═══
+    def judge_pay(t, b, a, P):
+        if t.startswith('不好意思，我買多了'): return (a['s'] == 'REDUCE' and a['m'] == b['m'], a)
+        if t.startswith('不好意思，我的錢不夠'):
+            return (a['s'] == 'REMOVE' and a['m'] == b['m'], a) if P['short'] else (W(b, a), a)
+        if t == P['payOk']:
+            return (W(b, a), a) if P['short'] else (a['s'] != 'PAY' and a['m'] == b['m'] and a['cash'] == b['cash'] - P['ask'], (a, P))
+        return (W(b, a), a)          # 給的錢不夠付／賒帳
+    for k, cart, cash in (('meat', "{'pork':1}", 1000), ('meat', "{'pork':1,'beef':1}", 1000), ('meat', "{'pork':1}", 100), ('meat', "{'pork':1,'beef':1}", 600),
+                          ('fish', "{'fish':2}", 1000), ('fish', "{'crab':1,'shrimp':1}", 300), ('veg', "{'egg':1}", 1000), ('veg', "{'cabbage':1,'egg':1}", 50)):
+        each(page, 'PAY', lambda pg, k=k, cart=cart, cash=cash: (reset(pg, [['pork', 1], ['beef', 1], ['fish', 2], ['crab', 1], ['shrimp', 1], ['egg', 1], ['cabbage', 1]]), pay_at(pg, k, cart, cash)), judge_pay, 5)
+
+    # ═══ REMOVE：錢不夠，每一樣都能拿掉 ═══
+    def rm_setup(cart):
+        return lambda pg: (reset(pg, [['pork', 1], ['beef', 1], ['rib', 1]]), haggle_at(pg, 'meat', cart), go(pg, "Game.state='REMOVE'"))
+    for cart in ("{'pork':1,'beef':1}", "{'pork':1,'beef':1,'rib':1}"):
+        ids = eval(cart.replace("{", "[").replace("}", "]").replace(":1", "").replace("'", '"')) if False else [x.strip("'") for x in cart.strip('{}').replace(':1', '').split(',')]
+        def jr(t, b, a, ctx, ids=ids):
+            zh = t.replace('不要了。', ''); id_ = next(i for i in ids if ev(page, f"BYID['{i}'].zh") == zh)
+            return (a['s'] == 'PAY' and id_ not in a['cart'] and a['lack'].get(id_) == 'money' and a['m'] == b['m'] and len(a['cart']) == len(ids) - 1, (a, b))
+        each(page, 'REMOVE', rm_setup(cart), jr, len(ids))
+    each(page, 'REMOVE', rm_setup("{'pork':1}"), lambda t, b, a, c: (a['s'] == 'MAP' and a['m'] == b['m'] and a['lack'].get('pork') == 'money', (a, b)), 1)
+
+    # ═══ REDUCE：買多了，選哪一樣；沒事不用改了 ═══
+    def rd_setup(pg):
+        reset(pg, [['pork', 1], ['egg', 1]]); haggle_at(pg, 'meat', "{'pork':2,'beef':1}"); go(pg, "Game.state='REDUCE'")
+    def jr2(t, b, a, c):
+        if t.startswith('啊，沒事'): return (a['s'] == 'PAY' and a['m'] == b['m'] and a['cart'] == b['cart'], a)
+        id_ = 'pork' if t.startswith('豬肉') else 'beef'
+        return (a['s'] == 'REDUCE_Q' and ev(page, 'Game.redId') == id_ and a['m'] == b['m'], (a, t))
+    each(page, 'REDUCE', rd_setup, jr2, 3)
+
+    # ═══ REDUCE_Q：改成多少（每個數量）／我不要了 ═══
+    def rq_setup(cart, red, req=None):
+        def f(pg):
+            reset(pg, req or [['pork', 1], ['egg', 1]]); haggle_at(pg, 'meat' if red in ('pork', 'beef', 'leg') else 'veg', cart); go(pg, f"Game.redId='{red}'; Game.state='REDUCE_Q'")
+        return f
+    def jq(red, cart_total_before):
+        def j(t, b, a, c):
+            zh = ev(page, f"BYID['{red}'].zh")
+            if t == f'{zh}我不要了。': return (a['m'] == b['m'] and red not in a['cart'] and (a['s'] == 'PAY' or (a['s'] == 'MAP' and not a['cart'])), (a, b))
+            qs = [q for q in ([0.5, 1, 2] if ev(page, f"BYID['{red}'].jin") else [1, 2, 3, 4, 5, 6]) if ev(page, f"qZh(BYID['{red}'], {q})") + '' and t == f'{zh}改成' + ev(page, f"qZh(BYID['{red}'], {q})") + '。']
+            return (len(qs) == 1 and a['s'] == 'PAY' and a['cart'].get(red) == qs[0] and a['m'] == b['m'], (a, t))
+        return j
+    each(page, 'REDUCE_Q', rq_setup("{'pork':2,'beef':1}", 'pork'), jq('pork', 0), 3)                 # 兩斤 → 半斤／一斤／不要了
+    each(page, 'REDUCE_Q', rq_setup("{'pork':1,'beef':1}", 'pork'), jq('pork', 0), 2)                 # 一斤 → 半斤／不要了
+    each(page, 'REDUCE_Q', rq_setup("{'pork':1}", 'pork'), jq('pork', 0), 2)                          # 只有這一樣：不要了 → 回地圖
+    each(page, 'REDUCE_Q', rq_setup("{'egg':3}", 'egg', [['egg', 1]]), jq('egg', 0), 3)               # 三盒 → 一盒／兩盒／不要了
+    each(page, 'REDUCE_Q', rq_setup("{'corn':3,'tomato':1}", 'corn', [['corn', 2]]), jq('corn', 0), 3)  # 三根 → 一根／兩根／不要了
+
+    # ═══ CHANGE：好謝謝／亂說找錯了／靠北，少找錢＝對 ═══
+    for k in ('meat', 'fish', 'veg'):
+        for sc in (False, True):
+            cc = "{bill:500,ask:270,want:230,given:%d,sc:%s}" % (180 if sc else 230, 'true' if sc else 'false')
+            def cs(pg, k=k, cc=cc):
+                reset(pg, [['pork', 1]]); go(pg, f"Game.cur='{k}'; Game.tx=[{{id:'pork',q:1}}]; Game.st=null; Game.cc={cc}; Game.bagDone=true; Game.checkDone=true; Game.state='CHANGE'")
+            def jc(t, b, a, c, sc=sc, k=k):
+                fix = t.startswith('老闆') and '好像找錯了' in t
+                if sc: return ((R(b, a) if fix else W(b, a)) and (not fix or True), (a, t))
+                return ((R(b, a) if t == '好，謝謝。' else W(b, a)), (a, t))
+            each(page, 'CHANGE', cs, jc, 3)
+            # 說明文字
+            cs(page); o = opts(page)
+            for i, t in enumerate(o):
+                cs(page); click_i(page, i); cd = card(page)
+                if t == '好，謝謝。' and sc: chk('CHANGE', f'{k}少找、說好謝謝 → 說明是「少找了」', '少找了' in cd, cd)
+                if t.startswith('靠北'): chk('CHANGE', f'{k}{"少找" if sc else "對"}、說靠北 → 說明', ('要有禮貌' in cd) if sc else ('找的錢是對的' in cd), cd)
+                if (t.startswith('老闆') and not sc): chk('CHANGE', f'{k}沒少找、亂說 → 「找的錢是對的」', '找的錢是對的' in cd, cd)
+
+    # ═══ BAG：三個選項 ═══
+    def bag_setup(pg):
+        reset(pg, [['pork', 1]]); go(pg, "Game.cur='meat'; Game.bagDone=true; Game.checkDone=true; Game.st=null; Game.tx=[{id:'pork',q:1}]; Game.state='BAG'")
+    def jb(t, b, a, c): return (R(b, a), a) if t.startswith('不用') else (W(b, a), a)
+    each(page, 'BAG', bag_setup, jb, 3)
+    bag_setup(page)
+    for i, t in enumerate(opts(page)):
+        bag_setup(page); click_i(page, i); cd = card(page)
+        if t == '我不要了。': chk('BAG', '我不要了 → 「你都已經付錢了，突然說不要了很奇怪欸。」', cd == '你都已經付錢了，突然說不要了很奇怪欸。', cd)
+        if t.startswith('要，'): chk('BAG', '要塑膠袋 → 說明有環保袋', '環保袋' in cd, cd)
+
+    # ═══ CHECK：核對東西，老闆放錯／沒放錯 × 三個選項 ═══
+    for k, it_ in (('meat', 'pork'), ('fish', 'fish'), ('veg', 'egg')):
+        for wrong in (False, True):
+            def ck_setup(pg, k=k, it_=it_, wrong=wrong):
+                reset(pg, [[it_, 1]]); go(pg, f"Game.cur='{k}'; Game.bagDone=true; Game.checkDone=true; Game.st=null; Game.tx=[{{id:'{it_}',q:1}}]; Game.ck={{id:'{it_}',q:1,wrong:{str(wrong).lower()},wq:2}}; Game.state='CHECK'")
+            def jk(t, b, a, c, wrong=wrong):
+                right = ('我要的是' in t) if wrong else (t == '好，謝謝。')
+                return ((R(b, a) if right else W(b, a)), (a, t))
+            each(page, 'CHECK', ck_setup, jk, 3)
+            ck_setup(page); o = opts(page)
+            chk('CHECK', f'{k} 第三個選項：{"故意的" if wrong else "你裝錯了"}', any(('故意' in t) if wrong else t.startswith('靠北！你裝錯') for t in o), o)
+            for i, t in enumerate(o):
+                ck_setup(page); click_i(page, i); cd = card(page)
+                if t == '好，謝謝。' and wrong: chk('CHECK', f'{k}放錯、說好謝謝 → 說明「數量不對」', '數量不對' in cd, cd)
+                if '我要的是' in t and not wrong: chk('CHECK', f'{k}沒放錯、亂說 → 說明「數量是對的」', '數量是對的' in cd, cd)
+                if t.startswith('靠北'): chk('CHECK', f'{k}沒放錯、說靠北 → 說明「數量是對的」', '數量是對的' in cd, cd)
+                if '故意' in t: chk('CHECK', f'{k}放錯、問是不是故意 → 說明「要有禮貌」', '禮貌' in cd, cd)
+
+    # ═══ PHONE：不要理她／看訊息 ═══
+    for ty in ('add', 'change'):
+        def ph(pg, ty=ty):
+            reset(pg, [['pork', 1], ['egg', 1]], {'type': ty, 'y': ['onion', 2], 'x': 'egg' if ty == 'change' else None}); go(pg, "Game.state='PHONE'")
+        ph(page); o = opts(page); chk('PHONE', f'{ty}：兩個選項', sorted(o) == sorted(['不要理她。', '看訊息。']), o)
+        for i, t in enumerate(o):
+            ph(page); click_i(page, i)
+            if t == '看訊息。': chk('PHONE', f'{ty}：看訊息 → MSG', state(page) == 'MSG' and ev(page, 'Game.msgShown') is True and ev(page, 'Game.mistakes') == 0)
+            else: chk('PHONE', f'{ty}：不要理她 → 回地圖、清單照樣改、不扣分', state(page) == 'MAP' and ev(page, 'Game.ignoredMsg') is True and ev(page, 'Game.mistakes') == 0 and ev(page, "Game.req.some(a=>a.id==='onion')") is True)
+
+    # ═══ MSG：加買／改項目（已買／沒買）═══
+    def ms_setup(ty, bought):
+        def f(pg):
+            reset(pg, [['pork', 1], ['egg', 1]], {'type': ty, 'y': ['onion', 2], 'x': 'pork' if ty == 'change' else None})
+            go(pg, ("Game.bought={pork:1}; " if bought else '') + "Game.state='MSG'")
+        return f
+    def jm(ty, bought):
+        def j(t, b, a, c):
+            if not bought: return (a['s'] == 'MAP' and a['m'] == b['m'], a)
+            if '我已經買了' in t: return (a['s'] == 'MAP' and a['m'] == b['m'] and ev(page, "Game.req.some(a=>a.id==='pork')") is True, a)
+            return (W(b, a), a)
+        return j
+    each(page, 'MSG', ms_setup('add', False), jm('add', False), 1)
+    each(page, 'MSG', ms_setup('change', False), jm('change', False), 1)
+    each(page, 'MSG', ms_setup('change', True), jm('change', True), 3)
+    each(page, 'MSG', ms_setup('add', False), lambda t, b, a, c: (ev(page, "Game.req.some(a=>a.id==='onion')") is True and a['s'] == 'MAP', a), 1)
+    ms_setup('change', False)(page); click_i(page, 0)
+    chk('MSG', '改項目、還沒買 → 清單換成洋蔥', ev(page, "Game.req.some(a=>a.id==='onion')") and not ev(page, "Game.req.some(a=>a.id==='pork')"))
+    ms_setup('change', True)(page); o = opts(page)
+    for i, t in enumerate(o):
+        ms_setup('change', True)(page); click_i(page, i); cd = card(page)
+        if t.startswith('Ami，你自己'): chk('MSG', '「你自己來買吧」→ 說明要有禮貌', '禮貌' in cd or '客氣' in cd or '請' in cd, cd)
+        if t.startswith('好，我再去買'): chk('MSG', '「我再去買」→ 說明已經買好了要告訴 Ami', '告訴Ami' in cd, cd)
+
+    # ═══ EXPLAIN：三種原因 × 三個說法 ═══
+    CAUSE = {'money': '我的錢不夠，所以沒買。', 'refused': '老闆不賣給我。', 'forgot': '對不起，我忘記了。'}
+    for real in ('money', 'refused', 'forgot'):
+        def ex_setup(pg, real=real):
+            reset(pg, [['fish', 1]]); go(pg, "Game.bought={}; Game.queue=[Game.req[0]]; Game.qi=0; Game.explained={}; Game.lack=" + ("{fish:'%s'}" % real if real != 'forgot' else '{}') + "; Game.state='EXPLAIN'")
+        each(page, 'EXPLAIN', ex_setup, lambda t, b, a, c, real=real: (a['s'] == 'END', a) if t == CAUSE[real] else (W(b, a), a), 3)
+        ex_setup(page)
+        for said in ('money', 'refused', 'forgot'):
+            if said == real: continue
+            ex_setup(page); o = opts(page); i = o.index(CAUSE[said]); click_i(page, i); cd = card(page)
+            w = {('money', 'refused'): '不是錢不夠，是老闆生氣不賣給你', ('money', 'forgot'): '你的錢是夠的，你是忘記買了',
+                 ('refused', 'money'): '老闆沒有不賣，是你的錢不夠', ('refused', 'forgot'): '老闆沒有不賣，你是忘記買了',
+                 ('forgot', 'money'): '你不是忘記，是錢不夠', ('forgot', 'refused'): '你不是忘記，是老闆不賣給你'}[(said, real)]
+            chk('EXPLAIN', f'實際={real}、說{said} → 說明「{w}」', w in cd, cd)
+        # 說對的綠卡
+        ex_setup(page); click_i(page, opts(page).index(CAUSE[real]))
+        chk('EXPLAIN', f'實際={real}、說對 → 記錄原因、進結局', ev(page, f"Game.explained['fish']") == real and state(page) == 'END')
+    # 老闆不賣卻說「錢不夠」不能被 Ami 抓到說謊；忘記卻說「老闆不賣」→ Ami 懷疑
+    ex_setup = lambda pg: (reset(pg, [['fish', 1]]), go(pg, "Game.bought={}; Game.queue=[Game.req[0]]; Game.qi=0; Game.explained={}; Game.lack={}; Game.state='EXPLAIN'"))
+    ex_setup(page); click_i(page, opts(page).index(CAUSE['refused']))
+    chk('EXPLAIN', '忘記卻說老闆不賣 → Ami：你應該沒有騙我吧', '你應該沒有騙我吧' in plain(page, '#npc-dialogue'))
+    ex_setup(page); click_i(page, opts(page).index(CAUSE['money']))
+    chk('EXPLAIN', '忘記卻說錢不夠 → Ami：可是你的錢是夠的啊', '你的錢是夠的' in plain(page, '#npc-dialogue'))
+
+    # ═══ END／RESULT ═══
+    reset(page, [['pork', 1]]); go(page, "Game.bought={pork:1}; Game.queue=[]; Game.settle()")
+    o = opts(page); chk('END', '一個選項「查看結果」', len(o) == 1 and o[0].startswith('查看結果'), o)
+    click_i(page, 0); chk('END', '查看結果 → 結果頁', state(page) == 'RESULT', state(page))
+    o = opts(page); chk('RESULT', '一個選項「查看排行榜」', len(o) == 1 and o[0].startswith('查看排行榜'), o)
+    check('每個選項都按過（%s，共 %d 項檢查）' % ('、'.join(f'{k} {v}' for k, v in COUNT.items()), sum(COUNT.values())), not [f for f in fails if f.startswith('[')], [f for f in fails if f.startswith('[')][:3])
 
 with sync_playwright() as p:
     b = p.chromium.launch()
@@ -565,6 +886,13 @@ with sync_playwright() as p:
     w = ev(page, "document.querySelector('.cashcard').getBoundingClientRect().height")
     check('找錢卡高度正常（不是直排被擠）', w < 110, w)
     check('沒有 JS 錯誤', errs == [], (errs[:1], ev(page,'window.__es'), STEPS[-3:]))
+    # 12. 每一關的每個選項（對的、錯的）都按一遍：另開一頁，用 Game.setup() 重來，不用重新載入
+    pg2 = ctx.new_page(); errs2 = []; pg2.on('pageerror', lambda e: errs2.append(str(e)[:80]))
+    pg2.goto(f'http://127.0.0.1:{PORT}/games/market/index.html'); pg2.wait_for_timeout(400)
+    pg2.fill('#player-name-input', 'María'); pg2.click('.btn-primary'); pg2.wait_for_timeout(300)
+    pg2.locator('#options-area .opt').first.click(); pg2.wait_for_timeout(100)
+    run_options(pg2)
+    check('每個選項測試期間沒有 JS 錯誤', errs2 == [], errs2[:2])
     b.close()
 # 共用檢查（語言／字體／拼音、任務提示、本關單字、錯誤紀錄面板）：順便跑菜市場這一個
 import panels_test
