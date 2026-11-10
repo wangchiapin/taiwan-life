@@ -447,21 +447,23 @@ const Game = defineGame({
   meatPick: null,                // 正在選斤數的菜（點了按斤賣的圖片以後）
   lastAct: null,
   setup() {
-    let items, total, ks;
+    let items, total, ks, msg;
+    /* 測試用網址：?msg=add（Ami 一定加買）、?msg=change（一定改項目）、?msg=1（一定傳訊息，類型隨機） */
+    const force = new URLSearchParams(location.search).get('msg');
     do {
       items = shuffle(ITEMS).slice(0, 4).map(it => ({ ...it, q: pick(it.qs) }));
       total = items.reduce((a, it) => a + cost(it, it.q), 0);
       ks = new Set(items.map(it => it.stall));
-    } while (total > TOTAL_MAX || ks.size < 2);           // 一千元要付得起；至少要逛兩個攤位
-    /* 一半的局，Ami 中途會傳訊息：加買新東西，或是改項目 */
-    let msg = null;
-    if (Math.random() < 0.5) {
-      const type = pick(['add', 'change']);
-      for (const y of shuffle(ITEMS.filter(it => !items.some(x => x.id === it.id)))) {
-        const yq = pick(y.qs);
-        if (total + cost(y, yq) <= TOTAL_MAX) { msg = { type, y: { ...y, q: yq }, xid: type === 'change' ? pick(items).id : null }; break; }
+      /* 一半的局，Ami 中途會傳訊息：加買新東西，或是改項目 */
+      msg = null;
+      if (force || Math.random() < 0.5) {
+        const type = force === 'add' || force === 'change' ? force : pick(['add', 'change']);
+        for (const y of shuffle(ITEMS.filter(it => !items.some(x => x.id === it.id)))) {
+          const yq = pick(y.qs);
+          if (total + cost(y, yq) <= TOTAL_MAX) { msg = { type, y: { ...y, q: yq }, xid: type === 'change' ? pick(items).id : null }; break; }
+        }
       }
-    }
+    } while (total > TOTAL_MAX || ks.size < 2 || (force && !msg));           // 一千元要付得起；至少要逛兩個攤位
     this.task = { items, total, msg, rot: Math.floor(Math.random() * 3), checkStall: pick(items).stall };
     this.req = items.map(it => ({ id: it.id, q: it.q }));     // Ami 要的（Ami 中途改了，這裡跟著改）
     this.cash = 1000; this.saved = 0; this.cur = null; this.st = null; this.tx = []; this.cc = null; this.ck = null;

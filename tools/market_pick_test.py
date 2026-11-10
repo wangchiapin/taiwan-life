@@ -463,6 +463,14 @@ with sync_playwright() as p:
     tap(page, '靠北'); lg = ev(page, 'Game.log[Game.log.length-1].zh')
     check('找對錢時選「靠北！你找錯錢了吧！」→ 說明是「找的錢是對的」', '找的錢是對的' in lg and '禮貌' not in lg, lg)
 
+    # 10i. 測試網址 ?msg=add / change / 1：Ami 一定會傳訊息
+    for q_, want_ in (('add', {'add'}), ('change', {'change'}), ('1', {'add', 'change'})):
+        for _ in range(6):
+            page.goto(f'http://127.0.0.1:{PORT}/games/market/index.html?msg={q_}'); page.wait_for_timeout(250)
+            t_ = ev(page, 'Game.setup(), Game.task.msg && Game.task.msg.type')
+            check(f'網址 ?msg={q_} → 這局一定有 Ami 的訊息（{"/".join(sorted(want_))}）', t_ in want_, t_)
+    page.goto(f'http://127.0.0.1:{PORT}/games/market/index.html'); page.wait_for_timeout(250)
+
     for stall_, item_, key_ in (('魚攤', 'fish', 'fish'), ('菜攤', 'cabbage', 'veg')):
         new_game(page); setreq(page, [[item_, 1]]); ev(page, 'Game.bagDone = true; Game.checkDone = true')
         tap(page, '去' + stall_); buy(page, item_, 1); tap(page, '買好了'); ev(page, 'Game.st.floor = 99'); tap(page, '好，'); P = ev(page, 'Game.payInfo()'); tap(page, P['payOk'])
