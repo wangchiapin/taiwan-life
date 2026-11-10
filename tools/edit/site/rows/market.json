@@ -480,10 +480,18 @@
    "stage": "BAG",
    "stageName": "BAG",
    "who": "",
-   "zh": "你有環保袋，不用再拿塑膠袋。保護地球！"
+   "zh": "你都已經付錢了，突然說不要菜了很奇怪欸。"
   },
   {
    "id": "market-061",
+   "kind": "錯誤說明",
+   "stage": "BAG",
+   "stageName": "BAG",
+   "who": "",
+   "zh": "你有環保袋，不用再拿塑膠袋。保護地球！"
+  },
+  {
+   "id": "market-062",
    "kind": "綠卡說明",
    "stage": "BAG",
    "stageName": "BAG",
@@ -491,20 +499,12 @@
    "zh": "很好！「不用，我有……」可以很客氣地拒絕。"
   },
   {
-   "id": "market-062",
-   "kind": "選項",
-   "stage": "CHECK",
-   "stageName": "CHECK",
-   "who": "",
-   "zh": "好，謝謝。"
-  },
-  {
    "id": "market-063",
    "kind": "選項",
    "stage": "CHECK",
    "stageName": "CHECK",
    "who": "",
-   "zh": "〔Game.boss()〕，你是不是故意的啊？"
+   "zh": "好，謝謝。"
   },
   {
    "id": "market-064",
@@ -512,15 +512,15 @@
    "stage": "CHECK",
    "stageName": "CHECK",
    "who": "",
-   "zh": "好，謝謝。"
+   "zh": "〔Game.boss()〕，你是不是故意的啊？"
   },
   {
    "id": "market-065",
-   "kind": "錯誤說明",
+   "kind": "選項",
    "stage": "CHECK",
    "stageName": "CHECK",
    "who": "",
-   "zh": "數量不對：你買了〔qZh(it, ck.q)〕〔菜名〕，〔Game.boss()〕放了〔qZh(it, ck.wq)〕。拿東西以前，要先看一看。"
+   "zh": "好，謝謝。"
   },
   {
    "id": "market-066",
@@ -528,7 +528,7 @@
    "stage": "CHECK",
    "stageName": "CHECK",
    "who": "",
-   "zh": "數量是對的：〔菜名〕就是〔qZh(it, ck.q)〕。"
+   "zh": "數量不對：你買了〔qZh(it, ck.q)〕〔菜名〕，〔Game.boss()〕放了〔qZh(it, ck.wq)〕。拿東西以前，要先看一看。"
   },
   {
    "id": "market-067",
@@ -536,10 +536,18 @@
    "stage": "CHECK",
    "stageName": "CHECK",
    "who": "",
-   "zh": "要有禮貌，說清楚你要的數量就好。"
+   "zh": "數量是對的：〔菜名〕就是〔qZh(it, ck.q)〕。"
   },
   {
    "id": "market-068",
+   "kind": "錯誤說明",
+   "stage": "CHECK",
+   "stageName": "CHECK",
+   "who": "",
+   "zh": "要有禮貌，說清楚你要的數量就好。"
+  },
+  {
+   "id": "market-069",
    "kind": "選項",
    "stage": "MSG",
    "stageName": "MSG",
@@ -547,7 +555,7 @@
    "zh": "Ami，〔labZh(I.a, I.a.q)〕我已經買了欸！"
   },
   {
-   "id": "market-069",
+   "id": "market-070",
    "kind": "錯誤說明",
    "stage": "MSG",
    "stageName": "MSG",
@@ -555,7 +563,7 @@
    "zh": "〔I.a.zh〕已經買好了，要告訴Ami。"
   },
   {
-   "id": "market-070",
+   "id": "market-071",
    "kind": "綠卡說明",
    "stage": "MSG",
    "stageName": "MSG",
@@ -563,7 +571,7 @@
    "zh": "很好！已經買了的東西，要馬上告訴Ami。"
   },
   {
-   "id": "market-071",
+   "id": "market-072",
    "kind": "台詞",
    "stage": "MSG",
    "stageName": "MSG",
@@ -571,7 +579,7 @@
    "zh": "啊，你已經買了喔？那就不用改了，謝謝！"
   },
   {
-   "id": "market-072",
+   "id": "market-073",
    "kind": "台詞",
    "stage": "MSG",
    "stageName": "MSG",
@@ -579,7 +587,7 @@
    "zh": "謝謝你！"
   },
   {
-   "id": "market-073",
+   "id": "market-074",
    "kind": "旁白",
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
@@ -587,7 +595,7 @@
    "zh": "（你提著環保袋回到Ami家，把菜拿給Ami。）"
   },
   {
-   "id": "market-074",
+   "id": "market-075",
    "kind": "台詞",
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
@@ -595,7 +603,7 @@
    "zh": "咦，〔labZh(it, a.q)〕呢？怎麼沒買？"
   },
   {
-   "id": "market-075",
+   "id": "market-076",
    "kind": "錯誤說明",
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
@@ -603,7 +611,7 @@
    "zh": "不是錢不夠，是老闆生氣不賣給你。"
   },
   {
-   "id": "market-076",
+   "id": "market-077",
    "kind": "錯誤說明",
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
@@ -611,7 +619,7 @@
    "zh": "你的錢是夠的，你是忘記買了。"
   },
   {
-   "id": "market-077",
+   "id": "market-078",
    "kind": "錯誤說明",
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
@@ -619,7 +627,7 @@
    "zh": "老闆沒有不賣，是你的錢不夠。"
   },
   {
-   "id": "market-078",
+   "id": "market-079",
    "kind": "錯誤說明",
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
@@ -627,7 +635,7 @@
    "zh": "老闆沒有不賣，你是忘記買了。"
   },
   {
-   "id": "market-079",
+   "id": "market-080",
    "kind": "錯誤說明",
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
@@ -635,7 +643,7 @@
    "zh": "你不是忘記，是錢不夠，要說清楚。"
   },
   {
-   "id": "market-080",
+   "id": "market-081",
    "kind": "錯誤說明",
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
@@ -643,7 +651,7 @@
    "zh": "你不是忘記，是老闆不賣給你。"
   },
   {
-   "id": "market-081",
+   "id": "market-082",
    "kind": "台詞",
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
@@ -651,7 +659,7 @@
    "zh": "可是你的錢是夠的啊！"
   },
   {
-   "id": "market-082",
+   "id": "market-083",
    "kind": "台詞",
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",

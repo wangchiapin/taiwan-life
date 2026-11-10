@@ -497,6 +497,10 @@ const Game = defineGame({
   hintSections() {
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
     if (this.msgShown) out.push({ title: 'Ami 後來傳的訊息', lines: [this.msgLine()] });
+    const got = Object.entries(this.bought).filter(([, q]) => q > 0).map(([id, q]) => L(labZh(BYID[id], q), labEs(BYID[id], q), labEn(BYID[id], q)));
+    out.push({ title: '你現在買了什麼', lines: got.length ? got : [L('還沒買任何東西', 'Todavía no compraste nada', "You haven't bought anything yet")] });
+    const inCart = Object.entries(this.cart || {}).filter(([, q]) => q > 0).map(([id, q]) => L(labZh(BYID[id], q), labEs(BYID[id], q), labEn(BYID[id], q)));
+    if (inCart.length) out.push({ title: '籃子裡（還沒付錢）', lines: inCart });
     return out;
   },
   listHTML(rowsOnly) {
@@ -974,6 +978,7 @@ const Game = defineGame({
         options: () => rot(['不用，我有環保袋。', '要，給我五個塑膠袋。', '我不要菜了。']),
         ok: () => '不用，我有環保袋。',
         next: c => {
+          if (c === '我不要菜了。') { Game.addMistake(M('你都已經付錢了，突然說不要菜了很奇怪欸。', 'Ya pagaste: decir de repente que no quieres las compras es muy raro.', "You've already paid — suddenly saying you don't want the groceries is really weird.")); return; }
           if (c !== '不用，我有環保袋。') { Game.addMistake(M('你有環保袋，不用再拿塑膠袋。保護地球！', 'Ya llevas bolsa reutilizable: no necesitas bolsa de plástico. ¡Cuida el planeta!', "You already have a reusable bag, so you don't need a plastic one. Protect the planet!")); return; }
           goodFirst('BAG', '很好！「不用，我有……」可以很客氣地拒絕。', '¡Muy bien! «不用，我有…» es una forma muy amable de rechazar.', 'Good! "不用，我有…" is a very polite way to decline.');
           Game.thought = [vend('好，東西都幫你裝好了。', 'Bien, ya le puse todo en la bolsa.', "OK, everything's in the bag.")];

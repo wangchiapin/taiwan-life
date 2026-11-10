@@ -170,6 +170,8 @@ with sync_playwright() as p:
         elif st == 'BAG':
             mm = ev(page, 'Game.mistakes'); tap(page, '要，給我五個'); check('塑膠袋：要塑膠袋扣分', ev(page, 'Game.mistakes') == mm + 1)
             check('塑膠袋說明統一', '環保袋' in ev(page, 'Game.log[Game.log.length-1].zh') and '不用再拿塑膠袋' in ev(page, 'Game.log[Game.log.length-1].zh'), ev(page, 'Game.log[Game.log.length-1].zh'))
+            mm = ev(page, 'Game.mistakes'); tap(page, '我不要菜了'); lg = ev(page, 'Game.log[Game.log.length-1].zh')
+            check('塑膠袋關選「我不要菜了」→ 說明是「已經付錢要收下」，不是環保袋', ev(page, 'Game.mistakes') == mm + 1 and '已經付錢' in lg and '奇怪' in lg and '環保袋' not in lg, lg)
             tap(page, '不用，我有環保袋')
         else: tap(page, '好，謝謝')
     check('付完一攤回到地圖，這攤打勾', state(page) == 'MAP' and ev(page, 'Game.visited.meat') is True)
@@ -428,6 +430,22 @@ with sync_playwright() as p:
     tap(page, '去菜攤'); buy(page, 'cabbage', 1); buy(page, 'egg', 1); buy(page, 'tomato', 1); tap(page, '買好了'); ev(page, 'Game.st.floor = 99'); tap(page, '好，')
     tap(page, '不好意思，我買多了'); tap(page, '番茄我買多了')
     check('Ami沒要的番茄 → 整樣拿掉', state(page) == 'PAY' and 'tomato' not in ev(page, 'Game.cart') and ev(page, 'Game.lack.tomato') is None)
+
+    # 10g. 任務提示：有「你現在買了什麼」，隨買東西更新；籃子裡還沒付錢的另外列
+    new_game(page); setreq(page, [['pork', 1], ['egg', 1]])
+    ev(page, "Game.render(); Hints.toggle(true)")
+    h = ev(page, "[...document.querySelectorAll('#hint-body .h-sec, #hint-body .h-zh')].map(e => { const c = e.cloneNode(true); c.querySelectorAll('rt,rp').forEach(x => x.remove()); return c.textContent; }).join('|')")
+    check('任務提示：還沒買東西 → 寫「還沒買任何東西」', '你現在買了什麼' in h and '還沒買任何東西' in h, h)
+    ev(page, "Hints.toggle(false)")
+    tap(page, '去肉攤'); buy(page, 'pork', 1)
+    ev(page, "Hints.toggle(true)")
+    h = ev(page, "[...document.querySelectorAll('#hint-body .h-sec, #hint-body .h-zh')].map(e => { const c = e.cloneNode(true); c.querySelectorAll('rt,rp').forEach(x => x.remove()); return c.textContent; }).join('|')")
+    check('任務提示：籃子裡的豬肉列在「籃子裡（還沒付錢）」', '籃子裡（還沒付錢）' in h and '豬肉' in h.split('籃子裡（還沒付錢）')[1], h)
+    ev(page, "Hints.toggle(false)")
+    ev(page, "Game.bought = {pork: 1}; Game.cart = {}; Hints.toggle(true)")
+    h = ev(page, "[...document.querySelectorAll('#hint-body .h-sec, #hint-body .h-zh')].map(e => { const c = e.cloneNode(true); c.querySelectorAll('rt,rp').forEach(x => x.remove()); return c.textContent; }).join('|')")
+    check('任務提示：付完錢的豬肉列在「你現在買了什麼」', '一斤豬肉' in h.split('你現在買了什麼')[1] and '還沒買任何東西' not in h, h)
+    ev(page, "Hints.toggle(false)")
 
     for stall_, item_, key_ in (('魚攤', 'fish', 'fish'), ('菜攤', 'cabbage', 'veg')):
         new_game(page); setreq(page, [[item_, 1]]); ev(page, 'Game.bagDone = true; Game.checkDone = true')
