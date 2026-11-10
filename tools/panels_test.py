@@ -66,7 +66,10 @@ def run_one(g, cfg_name, cfg):
                 check(f'{state} 任務提示有內容', n > 5, n)
                 page.evaluate('Hints.toggle(false)')
             # 本關單字
-            vl = (st['vocab'] or {}).get((st.get('vocab_of') or {}).get(state) or state) or []
+            vkey = (st.get('vocab_of') or {}).get(state) or state
+            vl = page.evaluate("(k)=>(typeof VOCAB!=='undefined'&&VOCAB[k])||[]", vkey)   # 現場讀（有些關的單字會依攤位、結局變）
+            acc = st.setdefault('vlive', {}).setdefault(vkey, {})
+            for w in vl: acc[w[0]] = w
             hidden = page.evaluate("document.getElementById('vocab-tab').hidden")
             check(f'{state} 單字分頁{"隱藏" if not vl else "顯示"}', hidden == (not vl), (len(vl), hidden))
             if vl:
@@ -95,7 +98,8 @@ def run_one(g, cfg_name, cfg):
     if cfg_name == CONFIGS[0][0] and st['vocab']:
         by = {}   # 單字組 → 用到它的那幾關
         for stt in st['seen']: by.setdefault((st.get('vocab_of') or {}).get(stt) or stt, []).append(stt)
-        for s, words in st['vocab'].items():
+        for s, wd in st.get('vlive', {}).items():
+            words = list(wd.values())
             if s not in by: continue
             seen = re.sub(r'\s+', '', ''.join(st['seen'][x] for x in by[s]))
             miss = [w[0] for w in words if re.sub(r'\s+', '', w[0]) not in seen]

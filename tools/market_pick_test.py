@@ -447,6 +447,22 @@ with sync_playwright() as p:
     check('任務提示：付完錢的豬肉列在「你現在買了什麼」', '一斤豬肉' in h.split('你現在買了什麼')[1] and '還沒買任何東西' not in h, h)
     ev(page, "Hints.toggle(false)")
 
+    # 10h. 小字典：PICK 依攤位列量詞；MSG 有字典；END 依好壞結局
+    for cur_, want_, no_ in (('meat', ['斤', '半斤', '隻'], ['顆', '把', '根', '盒']), ('fish', ['斤', '半斤', '條', '隻'], ['顆', '把', '根', '盒']), ('veg', ['顆', '把', '根', '盒'], ['斤', '半斤', '隻', '條'])):
+        ev(page, "Game.cur = '%s'" % cur_)
+        ws = ev(page, "VOCAB.PICK.map(w => w[0])")
+        check('PICK 小字典（%s攤）只列這一攤的量詞' % cur_, all(w in ws for w in want_) and not any(w in ws for w in no_) and '籃子' in ws, ws)
+    check('MSG 有小字典', ev(page, "VOCAB.MSG.length") >= 3)
+    ev(page, "Game._endGood = true"); g_ = ev(page, "VOCAB.END.map(w => w[0])")
+    ev(page, "Game._endGood = false"); b_ = ev(page, "VOCAB.END.map(w => w[0])")
+    check('END 小字典：好結局和壞結局不一樣', '新鮮' in g_ and '買錯' in b_ and '新鮮' not in b_, (g_, b_))
+    # 找錢：老闆沒少找時，「靠北你找錯了」也要說「找的錢是對的」
+    new_game(page); setreq(page, [['pork', 1]]); ev(page, 'Game.bagDone = true; Game.checkDone = true')
+    tap(page, '去肉攤'); buy(page, 'pork', 1); tap(page, '買好了'); ev(page, 'Game.st.floor = 99'); tap(page, '好，'); P = ev(page, 'Game.payInfo()'); tap(page, P['payOk'])
+    ev(page, "Game.cc = {bill: 1000, ask: 300, want: 700, given: 700, sc: false}; Game.render()")
+    tap(page, '靠北'); lg = ev(page, 'Game.log[Game.log.length-1].zh')
+    check('找對錢時選「靠北！你找錯錢了吧！」→ 說明是「找的錢是對的」', '找的錢是對的' in lg and '禮貌' not in lg, lg)
+
     for stall_, item_, key_ in (('魚攤', 'fish', 'fish'), ('菜攤', 'cabbage', 'veg')):
         new_game(page); setreq(page, [[item_, 1]]); ev(page, 'Game.bagDone = true; Game.checkDone = true')
         tap(page, '去' + stall_); buy(page, item_, 1); tap(page, '買好了'); ev(page, 'Game.st.floor = 99'); tap(page, '好，'); P = ev(page, 'Game.payInfo()'); tap(page, P['payOk'])

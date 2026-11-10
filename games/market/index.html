@@ -296,20 +296,38 @@ pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
 const WHO = { 'Ami': ['Ami', 'Ami'], '老闆': ['El vendedor', 'The vendor'], '老闆娘': ['La vendedora', 'The vendor'] };
 const SPEAKER_RE = /^(Ami|老闆娘|老闆|我)：/;
 
+const MEAS = {   // 量詞小字典（PICK 依目前攤位列出會用到的）
+  '斤': ['斤', 'jin (unidad de peso, 1 斤 ≈ 600 g)', 'jin (unit of weight, 1 斤 ≈ 600 g)'],
+  '半斤': ['半斤', 'medio jin (≈300 g)', 'half a jin (≈300 g)'],
+  '隻': ['隻', 'clasificador de animales y piezas (pollo, cangrejo, sepia)', 'measure word for animals and pieces (chicken, crab, cuttlefish)'],
+  '條': ['條', 'clasificador de cosas largas (pescado)', 'measure word for long things (fish)'],
+  '顆': ['顆', 'clasificador de cosas redondas', 'measure word for round things'],
+  '把': ['把', 'clasificador de manojos', 'measure word for bunches'],
+  '根': ['根', 'clasificador de cosas largas y finas (maíz)', 'measure word for long thin things (corn)'],
+  '盒': ['盒', 'caja (de huevos)', 'box (of eggs)']
+};
 const VOCAB = {
-  START: [['菜市場', 'mercado tradicional', 'traditional market'], ['老闆', 'jefe (vendedor)', 'boss (vendor)'], ['量詞', 'clasificador', 'measure word'], ['環保袋', 'bolsa reutilizable', 'reusable bag']],
-  PICK: [['斤', 'jin (unidad de peso, 1 斤 ≈ 600 g)', 'jin (unit of weight, 1 斤 ≈ 600 g)'], ['半斤', 'medio jin (≈300 g)', 'half a jin (≈300 g)'], ['把', 'clasificador de manojos', 'measure word for bunches'], ['顆', 'clasificador de cosas redondas', 'measure word for round things'], ['條', 'clasificador de cosas largas', 'measure word for long things'], ['盒', 'caja', 'box'], ['籃子', 'cesta', 'basket']],
-  HAGGLE: [['算', 'cobrar, contar', 'charge, count'], ['便宜', 'barato', 'cheap'], ['一點', 'un poco', 'a bit'], ['殺價', 'regatear', 'bargain'], ['虧本', 'perder dinero', 'lose money']],
+  START: [['菜市場', 'mercado tradicional', 'traditional market'], ['煮飯', 'cocinar (la comida)', 'cook a meal'], ['環保袋', 'bolsa reutilizable', 'reusable bag'], ['斤', 'jin (unidad de peso, 1 斤 ≈ 600 g)', 'jin (unit of weight, 1 斤 ≈ 600 g)']],
+  get PICK() {   // 只列這一攤會用到的量詞
+    const ms = [...new Set(ITEMS.filter(it => it.stall === Game.cur).map(it => it.m))];
+    const out = ms.map(m => MEAS[m]);
+    if (ms.includes('斤')) out.splice(out.indexOf(MEAS['斤']) + 1, 0, MEAS['半斤']);
+    return [...out, ['籃子', 'cesta', 'basket']];
+  },
+  HAGGLE: [['便宜', 'barato', 'cheap'], ['一點', 'un poco', 'a bit'], ['心情', 'estado de ánimo', 'mood'], ['再看看', 'mirar un poco más', 'look around some more'], ['虧本', 'perder dinero', 'lose money'], ['不賣', 'no vender', "won't sell"]],
   MAP: [['肉攤', 'puesto de carne', 'meat stall'], ['魚攤', 'puesto de pescado', 'fish stall'], ['菜攤', 'puesto de verduras', 'vegetable stall'], ['攤位', 'puesto', 'stall']],
   REMOVE: [['不要', 'no querer', "don't want"], ['錢不夠', 'no alcanza el dinero', 'not enough money']],
-  REDUCE_Q: [['改成', 'cambiar a', 'change to']],
-  REDUCE: [['買多了', 'comprar de más', 'buy too much'], ['改', 'cambiar', 'change']],
+  REDUCE_Q: [['改成', 'cambiar a', 'change to'], ['不要了', 'ya no lo quiero', "I don't want it anymore"]],
+  REDUCE: [['買多了', 'comprar de más', 'buy too much'], ['改', 'cambiar', 'change'], ['沒事', 'no pasa nada', 'never mind']],
+  MSG: [['突然想到', 'se me ocurrió de repente', 'just thought of'], ['加買', 'comprar además', 'buy in addition'], ['改買', 'comprar otra cosa en vez', 'buy something else instead'], ['已經', 'ya', 'already']],
   EXPLAIN: [['忘記', 'olvidar', 'forget'], ['不賣', 'no vender', "won't sell"], ['原因', 'motivo', 'reason']],
-  PAY: [['一共', 'en total', 'in total'], ['夠', 'alcanzar', 'be enough'], ['找錢', 'dar el cambio', 'give change'], ['賒帳', 'comprar a crédito', 'buy on credit']],
-  CHANGE: [['找錢', 'dar cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give the wrong change']],
-  CHECK: [['數量', 'cantidad', 'amount'], ['不是', 'no es', 'is not'], ['換', 'cambiar', 'change, swap']],
-  BAG: [['環保袋', 'bolsa reutilizable', 'reusable bag'], ['塑膠袋', 'bolsa de plástico', 'plastic bag']],
-  END: [['新鮮', 'fresco', 'fresh'], ['好吃', 'rico / delicioso', 'delicious']],
+  PAY: [['付', 'pagar', 'pay'], ['不好意思', 'perdón, disculpe', 'excuse me, sorry'], ['夠', 'alcanzar', 'be enough'], ['下次', 'la próxima vez', 'next time'], ['再付', 'pagar después', 'pay later']],
+  CHANGE: [['收', 'cobrar, recibir (dinero)', 'take (payment)'], ['找的錢', 'el cambio', 'the change'], ['找錯', 'dar mal el cambio', 'give the wrong change']],
+  CHECK: [['數量', 'cantidad', 'amount'], ['不是', 'no es', 'is not'], ['故意', 'a propósito', 'on purpose'], ['換', 'cambiar', 'change, swap']],
+  BAG: [['環保袋', 'bolsa reutilizable', 'reusable bag'], ['塑膠袋', 'bolsa de plástico', 'plastic bag'], ['不用', 'no hace falta', 'no need']],
+  get END() { return Game._endGood
+    ? [['新鮮', 'fresco', 'fresh'], ['省', 'ahorrar (dinero)', 'save (money)'], ['煮', 'cocinar', 'cook']]
+    : [['買錯', 'comprar mal', 'buy the wrong thing'], ['看清楚', 'fíjate bien', 'look carefully'], ['殺價', 'regatear', 'bargain']]; },
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 const STAGE = { MAP: ['逛市場', 'recorrer el mercado', 'browsing the market'], PICK: ['買菜', 'comprar', 'buying'], HAGGLE: ['殺價', 'regatear', 'bargaining'], PAY: ['付錢', 'pagar', 'paying'], REMOVE: ['少買一樣', 'quitar algo', 'taking one out'], REDUCE: ['改數量', 'cambiar la cantidad', 'changing the amount'], REDUCE_Q: ['改數量', 'cambiar la cantidad', 'changing the amount'], CHANGE: ['找錢', 'cambio', 'change'], CHECK: ['核對東西', 'revisar las compras', 'checking the goods'], BAG: ['袋子', 'bolsa', 'bag'], MSG: ['Ami的訊息', 'mensaje de Ami', "Ami's message"], EXPLAIN: ['說明原因', 'explicar el motivo', 'explaining'], END: ['回家', 'volver a casa', 'going home'] };
@@ -974,8 +992,8 @@ const Game = defineGame({
           const cc = Game.cc, right = cc.sc ? chFix() : '好，謝謝。';
           if (c !== right) {
             Game.addMistake(c === '好，謝謝。'
-              ? M(`${Game.boss()}少找了：${cc.bill} − ${cc.ask} = ${cc.want}元，${Game.boss() === '老闆娘' ? '她' : '他'}只找了${cc.given}元。`, `Se equivocó: ${cc.bill} − ${cc.ask} = ${cc.want}; solo le dio ${esM(cc.given)}.`, `He short-changed you: ${cc.bill} − ${cc.ask} = ${cc.want}, but he gave ${enM(cc.given)}.`)
-              : c === chFix()
+              ? M(`${Game.boss()}少找了：${cc.bill} − ${cc.ask} = ${cc.want}元，${Game.boss() === '老闆娘' ? '她' : '他'}只找了${cc.given}元。`, `Se equivocó: ${cc.bill} − ${cc.ask} = ${cc.want}; solo le dio ${esM(cc.given)}.`, `${Game.boss() === '老闆娘' ? 'She' : 'He'} short-changed you: ${cc.bill} − ${cc.ask} = ${cc.want}, but ${Game.boss() === '老闆娘' ? 'she' : 'he'} gave ${enM(cc.given)}.`)
+              : (c === chFix() || !cc.sc)
                 ? M(`找的錢是對的：${cc.bill} − ${cc.ask} = ${cc.want}元。`, `El cambio está bien: ${cc.bill} − ${cc.ask} = ${cc.want}.`, `The change is correct: ${cc.bill} − ${cc.ask} = ${cc.want}.`)
                 : M(`要有禮貌，說「${Game.boss()}，好像找錯了」就好。`, 'Hay que ser cortés: di «jefe, creo que se equivocó con el cambio».', 'Be polite: just say "boss, I think the change is off".'));
             return;
@@ -1070,7 +1088,7 @@ const Game = defineGame({
             return;
           }
           Game.explained[a.id] = real;
-          Game.good(real === 'forgot' ? '誠實說「對不起，我忘記了」很好。' : '很好！你把原因說得很清楚。', real === 'forgot' ? 'Está bien decir con honestidad «对不起，我忘记了».' : '¡Muy bien! Explicaste claramente el motivo.', real === 'forgot' ? 'It is good to honestly say "Sorry, I forgot."' : 'Good! You explained the reason clearly.');
+          Game.good(real === 'forgot' ? '誠實說「對不起，我忘記了」很好。' : '很好！你把原因說得很清楚。', real === 'forgot' ? 'Está bien decir con honestidad «對不起，我忘記了».' : '¡Muy bien! Explicaste claramente el motivo.', real === 'forgot' ? 'It is good to honestly say "Sorry, I forgot."' : 'Good! You explained the reason clearly.');
           Game.qi += 1;
           if (Game.qi < Game.queue.length) return;
           Game.settle();
