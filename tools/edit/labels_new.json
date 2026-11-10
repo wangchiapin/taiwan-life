@@ -93,7 +93,7 @@
  "market:t.final": "最後價錢",
  "market:zhNum(500 - t.final)": "找的錢（中文）",
  "market:zhNum(t.final)": "最後價錢（中文）",
- "elevator:t.m": "中途幾樓",
+ "elevator:t.m": "鄰居一開始說的樓",
  "elevator:n": "幾樓",
  "elevator:t.n": "幾樓",
  "cinema:nw(t.people, '全票')": "全票幾張（例：兩張全票）",
@@ -109,5 +109,9 @@
  "market:qZh(it, t.wq)": "老闆放的數量（中文）",
  "market:shortB": "你付的錢",
  "market:want": "應該找的錢",
- "market:zhNum(1000 - t.final)": "應該找的錢（中文）"
+ "market:zhNum(1000 - t.final)": "應該找的錢（中文）",
+ "elevator:t.e": "鄰居真正要去幾樓",
+ "elevator:t.e - 1": "低一層",
+ "elevator:t.x": "中途停的樓層",
+ "elevator:k": "停的樓層"
 }

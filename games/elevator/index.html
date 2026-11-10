@@ -231,7 +231,7 @@ const VOCAB = {
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 const STAGE = { LOBBY: ['大廳', 'vestíbulo', 'lobby'], DIR: ['看箭頭', 'mirar la flecha', 'checking the arrow'], WAIT: ['等人', 'esperar', 'waiting'], FLOOR: ['按樓層', 'elegir piso', 'choosing a floor'], HELP: ['幫忙', 'ayudar', 'helping'], HELP2: ['鄰居改口', 'el vecino se corrige', 'neighbor corrects himself'], EARLY: ['看樓層', 'mirar el piso', 'checking the floor'], STOP: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], STOP_FIX: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], ARRIVE: ['出電梯', 'salir', 'exiting'] };
-const NEXT_LABEL = { LOBBY: '走到電梯前', DIR: '兩部電梯來了', WAIT: '走進電梯', FLOOR: '電梯門關上', HELP: '電梯往上', HELP2: '電梯往上', STOP: '電梯停了', STOP_FIX: '電梯又往上', EARLY: '電梯又停了', ARRIVE: '繼續往上', END: '到Ami家' };
+const NEXT_LABEL = { LOBBY: '走到電梯前', DIR: '兩部電梯來了', WAIT: '電梯來了', FLOOR: '走進電梯', HELP: '電梯往上', HELP2: '電梯往上', STOP: '電梯停了', STOP_FIX: '電梯又往上', EARLY: '電梯又停了', ARRIVE: '繼續往上', END: '到Ami家' };
 
 const PLACES = {
   phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
@@ -347,7 +347,7 @@ const Game = defineGame({
     const toStop = before => {
       const k = t.stopWrong ? t.e - 1 : t.e;
       Game.cur = k;
-      Game.thought = [...(before || []), L(`（電梯向上，在${k}樓停了下來。）`, `(El ascensor sube y se detiene en el piso ${k}.)`, `(The elevator goes up and stops at floor ${k}.)`), nb('到了，謝謝你！再見！', 'Ya llegamos, ¡gracias! ¡Adiós!', 'Here we are — thanks! Bye!')];
+      Game.thought = [...(before || []), L(`（電梯向上，在${k}樓的時候電梯停了下來。）`, `(El ascensor sube y se detiene en el piso ${k}.)`, `(The elevator goes up and stops at floor ${k}.)`), nb('到了，謝謝你！再見！', 'Ya llegamos, ¡gracias! ¡Adiós!', 'Here we are — thanks! Bye!')];
       Game.state = 'STOP';
     };
     /* 鄰居下電梯之後：中途有人按了別層就停一次，不然直接到 Ami 住的樓層 */

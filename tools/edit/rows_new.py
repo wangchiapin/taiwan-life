@@ -69,7 +69,7 @@ for a, b, dk in regs:
     for stt, en, q, body in literals(s[a:b], a):
         before = s[max(0, stt - 80):stt]; line_ = s[s.rfind('\n', 0, stt) + 1:s.find('\n', stt)]
         if dk == 'cfg':
-            sm = re.findall(r'\n      ([A-Z][A-Z_0-9]*): \{', s[gi:stt]); state = sm[-1] if sm else ''
+            sm = re.findall(r'\n      ([A-Z][A-Z_0-9]*): (?:\{|catchState\(\w+, \{)', s[gi:stt]); state = sm[-1] if sm else ''
         elif dk.startswith('fn:'): state = {'amiLines': 'Ami 的 LINE 訊息', 'driverLine': '司機說的話'}.get(dk[3:], dk[3:])
         else: state = {'過場按鈕': '過場按鈕', '位置名稱': '位置列', '任務提示': '提示'}[dk]
         kind = classify(s, stt)

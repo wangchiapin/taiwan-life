@@ -1,0 +1,278 @@
+{
+ "game": "elevator2",
+ "title": "搭電梯（新增三個情境）",
+ "rows": [
+  {
+   "id": "elevator2-001",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "兩部電梯來了"
+  },
+  {
+   "id": "elevator2-002",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "電梯往上"
+  },
+  {
+   "id": "elevator2-003",
+   "kind": "過場按鈕",
+   "stage": "過場按鈕",
+   "stageName": "過場按鈕",
+   "who": "",
+   "zh": "電梯又往上"
+  },
+  {
+   "id": "elevator2-004",
+   "kind": "旁白",
+   "stage": "電梯停下（共用）",
+   "stageName": "電梯停下（共用）",
+   "who": "",
+   "zh": "（電梯向上，在〔停的樓層〕樓的時候電梯停了下來。）"
+  },
+  {
+   "id": "elevator2-005",
+   "kind": "旁白",
+   "stage": "DIR",
+   "stageName": "DIR",
+   "who": "",
+   "zh": "（兩部電梯同時來了。左邊那部先開了門。旁邊的阿姨走過來，問你：）"
+  },
+  {
+   "id": "elevator2-006",
+   "kind": "台詞",
+   "stage": "DIR",
+   "stageName": "DIR",
+   "who": "阿姨",
+   "zh": "請問，這部是往上的嗎？"
+  },
+  {
+   "id": "elevator2-007",
+   "kind": "選項",
+   "stage": "DIR",
+   "stageName": "DIR",
+   "who": "",
+   "zh": "對，往上，請進。"
+  },
+  {
+   "id": "elevator2-008",
+   "kind": "選項",
+   "stage": "DIR",
+   "stageName": "DIR",
+   "who": "",
+   "zh": "不好意思，這部是往下的。"
+  },
+  {
+   "id": "elevator2-009",
+   "kind": "選項",
+   "stage": "DIR",
+   "stageName": "DIR",
+   "who": "",
+   "zh": "你自己不會看嗎？"
+  },
+  {
+   "id": "elevator2-010",
+   "kind": "錯誤說明",
+   "stage": "DIR",
+   "stageName": "DIR",
+   "who": "",
+   "zh": "上面亮的是▼，這部是往下的。要客氣地告訴阿姨，不要讓她搭錯。"
+  },
+  {
+   "id": "elevator2-011",
+   "kind": "錯誤說明",
+   "stage": "DIR",
+   "stageName": "DIR",
+   "who": "",
+   "zh": "這部亮的是▲，是往上的。"
+  },
+  {
+   "id": "elevator2-012",
+   "kind": "綠卡說明",
+   "stage": "DIR",
+   "stageName": "DIR",
+   "who": "",
+   "zh": "你很細心！上電梯以前，要先看上面的箭頭。"
+  },
+  {
+   "id": "elevator2-013",
+   "kind": "綠卡說明",
+   "stage": "DIR",
+   "stageName": "DIR",
+   "who": "",
+   "zh": "你很細心！上電梯以前，要先看上面的箭頭。"
+  },
+  {
+   "id": "elevator2-014",
+   "kind": "台詞",
+   "stage": "DIR",
+   "stageName": "DIR",
+   "who": "阿姨",
+   "zh": "啊，是往下的！不好意思，謝謝你！"
+  },
+  {
+   "id": "elevator2-015",
+   "kind": "旁白",
+   "stage": "DIR",
+   "stageName": "DIR",
+   "who": "",
+   "zh": "（右邊那部電梯也開了，上面亮著▲。你走了進去。）"
+  },
+  {
+   "id": "elevator2-016",
+   "kind": "旁白",
+   "stage": "HELP",
+   "stageName": "HELP",
+   "who": "",
+   "zh": "（你按了〔鄰居一開始說的樓〕樓，電梯開始往上。）"
+  },
+  {
+   "id": "elevator2-017",
+   "kind": "台詞",
+   "stage": "HELP2",
+   "stageName": "HELP2",
+   "who": "鄰居",
+   "zh": "欸，不好意思，我說錯了！我是要到〔鄰居真正要去幾樓〕樓。"
+  },
+  {
+   "id": "elevator2-018",
+   "kind": "選項",
+   "stage": "HELP2",
+   "stageName": "HELP2",
+   "who": "",
+   "zh": "沒關係，我幫你按〔鄰居真正要去幾樓〕樓。"
+  },
+  {
+   "id": "elevator2-019",
+   "kind": "選項",
+   "stage": "HELP2",
+   "stageName": "HELP2",
+   "who": "",
+   "zh": "你剛剛明明說〔鄰居一開始說的樓〕樓！"
+  },
+  {
+   "id": "elevator2-020",
+   "kind": "選項",
+   "stage": "HELP2",
+   "stageName": "HELP2",
+   "who": "",
+   "zh": "那你自己按吧。"
+  },
+  {
+   "id": "elevator2-021",
+   "kind": "錯誤說明",
+   "stage": "HELP2",
+   "stageName": "HELP2",
+   "who": "",
+   "zh": "鄰居只是說錯了，不要生氣，客氣地幫他按〔鄰居真正要去幾樓〕樓就好。"
+  },
+  {
+   "id": "elevator2-022",
+   "kind": "綠卡說明",
+   "stage": "HELP2",
+   "stageName": "HELP2",
+   "who": "",
+   "zh": "你很有禮貌！別人說錯了，不要生氣，幫他按對的就好。"
+  },
+  {
+   "id": "elevator2-023",
+   "kind": "旁白",
+   "stage": "HELP2",
+   "stageName": "HELP2",
+   "who": "",
+   "zh": "（你按了〔鄰居真正要去幾樓〕樓，電梯繼續往上。）"
+  },
+  {
+   "id": "elevator2-024",
+   "kind": "選項",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "不好意思，這裡是〔低一層〕樓，您是不是要到〔鄰居真正要去幾樓〕樓？"
+  },
+  {
+   "id": "elevator2-025",
+   "kind": "錯誤說明",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "這裡是〔低一層〕樓，鄰居要到〔鄰居真正要去幾樓〕樓。他看錯了，要客氣地提醒他。"
+  },
+  {
+   "id": "elevator2-026",
+   "kind": "錯誤說明",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "這裡就是〔鄰居真正要去幾樓〕樓，鄰居沒有看錯，不用提醒他。"
+  },
+  {
+   "id": "elevator2-027",
+   "kind": "綠卡說明",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "你很細心！鄰居出去以前，先看一下樓層。"
+  },
+  {
+   "id": "elevator2-028",
+   "kind": "台詞",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "鄰居",
+   "zh": "啊，不好意思，我看錯了！謝謝你提醒我。"
+  },
+  {
+   "id": "elevator2-029",
+   "kind": "旁白",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "",
+   "zh": "（電梯繼續往上，到〔鄰居真正要去幾樓〕樓了。）"
+  },
+  {
+   "id": "elevator2-030",
+   "kind": "台詞",
+   "stage": "STOP",
+   "stageName": "STOP",
+   "who": "鄰居",
+   "zh": "這次真的到了，謝謝你！再見！"
+  },
+  {
+   "id": "elevator2-031",
+   "kind": "台詞",
+   "stage": "STOP_FIX",
+   "stageName": "STOP_FIX",
+   "who": "鄰居",
+   "zh": "這次真的到了，謝謝你！再見！"
+  },
+  {
+   "id": "elevator2-032",
+   "kind": "選項",
+   "stage": "STOP_FIX",
+   "stageName": "STOP_FIX",
+   "who": "",
+   "zh": "不客氣，慢走！"
+  },
+  {
+   "id": "elevator2-033",
+   "kind": "選項",
+   "stage": "STOP_FIX",
+   "stageName": "STOP_FIX",
+   "who": "",
+   "zh": "你走錯了！"
+  },
+  {
+   "id": "elevator2-034",
+   "kind": "綠卡說明",
+   "stage": "STOP_FIX",
+   "stageName": "STOP_FIX",
+   "who": "",
+   "zh": "你學會了！「慢走」是跟離開的人說的客氣話。"
+  }
+ ]
+}

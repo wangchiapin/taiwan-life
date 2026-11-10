@@ -38,5 +38,7 @@ def classify(src, start):
     if re.search(r'\bask\(\s*$', before): return 'ask'
     line=src[src.rfind('\n',0,start)+1:start]
     if re.search(r'probs\.push\(\[\s*$', line): return 'line'
+    if re.match(r'\s*(ok|fix|rude)\s*:', line): return '選項'
+    if re.match(r'\s*(goodWrong|goodOk)\s*:', line): return '綠卡說明'
     if re.search(r"options:", line) or re.search(r'shuffle\(\[[^\]]*$', before) or re.search(r'o\.push\(\s*$', line) or re.match(r'\s*[?:] \[', line): return '選項'
     return '其他'
