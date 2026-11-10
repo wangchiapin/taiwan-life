@@ -742,10 +742,10 @@ const Game = defineGame({
     if (!this.ignoredMsg) return null;
     const m = this.task.msg; return { y: m.y.id, x: m.type === 'change' ? m.xid : null };
   },
-  /* 回家：先看少買的東西（最多問兩樣原因），再結算 */
+  /* 回家：先看少買的東西（每一樣都問原因），再結算 */
   goHome() {
     const ig = this.ignoredIds(), miss = this.req.filter(a => !this.bought[a.id] && !(ig && a.id === ig.y));   // 因為沒看訊息才漏買的，Ami 自己知道原因，不用問
-    this.wentHome = true; this.queue = miss.slice(0, 2); this.qi = 0;
+    this.wentHome = true; this.queue = miss.slice(); this.qi = 0;
     if (this.queue.length) { this.state = 'EXPLAIN'; return; }
     this.state = 'END'; this.settle();
   },
@@ -785,11 +785,6 @@ const Game = defineGame({
       const it = BYID[id];
       bad2(M(`Ami沒有要${it.zh}。`, `Ami no pidió ${it.es}.`, `Ami didn't ask for ${it.en}.`), { k: 'extra', zs: `${it.zh}我沒有要`, es2: `no pedí ${it.es}`, en2: `I didn't ask for ${it.en}`, zh: `我沒有要${it.zh}`, es: `yo no pedí ${it.es}`, en: `I didn't ask for ${it.en}` });
     });
-    if (none.length === 1) { const { it, q } = none[0]; lines.push(L(`Ami：我要${labZh(it, q)}，你沒有買耶！`, `Ami: ¡Quería ${labEs(it, q)} y no lo trajiste!`, `Ami: I wanted ${labEn(it, q)} and you didn't get it!`)); }
-    else if (none.length) {
-      const jn = (a, w) => a.slice(0, -1).join(', ') + ' ' + w + ' ' + a[a.length - 1];
-      lines.push(L(`Ami：我要${none.map(n => labZh(n.it, n.q)).join('、')}，你都沒有買耶！`, `Ami: ¡Quería ${jn(none.map(n => labEs(n.it, n.q)), 'y')} y no trajiste nada de eso!`, `Ami: I wanted ${jn(none.map(n => labEn(n.it, n.q)), 'and')} and you didn't get any of it!`));
-    }
     if (ig) {   // 沒看 Ami 的訊息：只要她後來要的有沒買對、或她說不要的買了，就一次扣分、Ami 說一句
       const { y, a } = this.msgInfo(), yq = this.req.find(r => r.id === y.id).q;
       if ((this.bought[y.id] || 0) !== yq || (a && this.bought[a.id])) {
@@ -798,12 +793,21 @@ const Game = defineGame({
                       : L(`Ami：我有傳訊息給你，要加買${labZh(y, yq)}欸！你都不看訊息！`, `Ami: ¡Te mandé un mensaje pidiéndote también ${labEs(y, yq)}! ¡Ni lo lees!`, `Ami: I texted you to also get ${labEn(y, yq)}! You never read my messages!`));
       }
     }
-    if (wrong.length === 1) lines.push(L('Ami：' + wrong[0].zh + '。', 'Ami: ' + wrong[0].es + '.', 'Ami: ' + wrong[0].en + '.'));
+    /* 忘記買的、數量不對的、多買的：Ami 合成同一句話說（只有一種時，就是那一種的句子） */
+    let wr = null;    // 數量不對／多買的部分（不含「Ami：」）
+    if (wrong.length === 1) wr = { zh: wrong[0].zh + '。', es: wrong[0].es + '.', en: wrong[0].en + '.' };
     else if (wrong.length) {   // 好幾樣不對：開頭說一次「買太多／太少了」，後面只列每樣要多少，不再每樣都重複一遍
       const ks = new Set(wrong.map(w => w.k)), kind = ks.size === 1 && ks.has('more') ? 'more' : ks.size === 1 && ks.has('less') ? 'less' : 'mix';
       const head = { more: ['買太多了啦！', '¡Compraste de más! ', 'You bought too much! '], less: ['買太少了啦！', '¡Compraste de menos! ', 'You bought too little! '], mix: ['你買錯了啦！', '¡Te equivocaste! ', 'You got some wrong! '] }[kind];
-      lines.push(L('Ami：' + head[0] + wrong.map(w => w.zs).join('、') + '。', 'Ami: ' + head[1] + wrong.map(w => w.es2).join('; ') + '.', 'Ami: ' + head[2] + wrong.map(w => w.en2).join('; ') + '.'));
+      wr = { zh: head[0] + wrong.map(w => w.zs).join('、') + '。', es: head[1] + wrong.map(w => w.es2).join('; ') + '.', en: head[2] + wrong.map(w => w.en2).join('; ') + '.' };
     }
+    const jn = (a, w) => a.length > 1 ? a.slice(0, -1).join(', ') + ' ' + w + ' ' + a[a.length - 1] : a[0];
+    let nz = null;    // 忘記買的部分
+    if (none.length === 1) { const { it, q } = none[0]; nz = { zh: `我要${labZh(it, q)}，你沒有買耶！`, es: `¡Quería ${labEs(it, q)} y no lo trajiste!`, en: `I wanted ${labEn(it, q)} and you didn't get it!` }; }
+    else if (none.length) nz = { zh: `我要${none.map(n => labZh(n.it, n.q)).join('、')}，你都沒有買！`, es: `¡Quería ${jn(none.map(n => labEs(n.it, n.q)), 'y')} y no trajiste nada de eso!`, en: `I wanted ${jn(none.map(n => labEn(n.it, n.q)), 'and')} and you didn't get any of it!` };
+    if (nz && wr) lines.push(L('Ami：' + nz.zh + '還有，' + wr.zh, 'Ami: ' + nz.es + ' Además, ' + wr.es, 'Ami: ' + nz.en + ' Also, ' + wr.en));
+    else if (nz) lines.push(L('Ami：' + nz.zh, 'Ami: ' + nz.es, 'Ami: ' + nz.en));
+    else if (wr) lines.push(L('Ami：' + wr.zh, 'Ami: ' + wr.es, 'Ami: ' + wr.en));
     this._endGood = pens.length === 0;
     this.state = 'END';
     pens.forEach(m => this.addMistake(m));
@@ -1107,7 +1111,9 @@ const Game = defineGame({
         dialogue: () => {
           const a = Game.queue[Game.qi], it = BYID[a.id];
           return [...(Game.qi === 0 ? [L('（你提著環保袋回到Ami家，把菜拿給Ami。）', '(Vuelves a casa de Ami con tu bolsa reutilizable y le entregas las compras.)', '(You get back to Ami\'s place with your reusable bag and hand over the groceries.)')] : []),
-            L(`Ami：咦，${labZh(it, a.q)}呢？怎麼沒買？`, `Ami: Eh, ¿y ${labEs(it, a.q)}? ¿Por qué no lo compraste?`, `Ami: Huh, where's the ${labEn(it, a.q)}? Why didn't you buy it?`)];
+            Game.qi === 0 ? L(`Ami：咦，${labZh(it, a.q)}呢？怎麼沒買？`, `Ami: Eh, ¿y ${labEs(it, a.q)}? ¿Por qué no lo compraste?`, `Ami: Huh, where's the ${labEn(it, a.q)}? Why didn't you buy it?`)
+            : Game.qi === 1 ? L(`Ami：那……${labZh(it, a.q)}怎麼也沒買？`, `Ami: Entonces… ¿por qué tampoco compraste ${labEs(it, a.q)}?`, `Ami: Then… why didn't you buy the ${labEn(it, a.q)} either?`)
+            : L(`Ami：${labZh(it, a.q)}呢？`, `Ami: ¿Y ${labEs(it, a.q)}?`, `Ami: And the ${labEn(it, a.q)}?`)];   // 第一樣完整問；第二樣「那……怎麼也沒買？」；第三樣以後只問「……呢？」
         },
         options: () => rot([CAUSE_OPT.money, CAUSE_OPT.refused, CAUSE_OPT.forgot]),
         ok: () => CAUSE_OPT[Game.causeOf(Game.queue[Game.qi].id)],

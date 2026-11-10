@@ -409,6 +409,24 @@ with sync_playwright() as p:
     fl = ev(page, 'Game.final.map(x=>x.zh)')
     check('只忘記一樣：照原本的句子', any('我要' in l and '你沒有買耶' in l for l in fl), fl)
 
+    # 10c3. 忘記買＋數量不對：合成同一句（只有一個「Ami：」）
+    new_game(page); setreq(page, [['pork', 1], ['egg', 1], ['onion', 1]])
+    ev(page, 'Game.bought = {egg: 2}; Game.lack = {}; Game.explained = {}; Game.queue = []; Game.settle()')
+    fl = ev(page, 'Game.final.map(x=>x.zh)')
+    wl = [l for l in fl if '沒有買' in l]
+    check('沒買＋買錯數量：合成同一句', len(wl) == 1 and wl[0].count('Ami：') == 1 and '你都沒有買' in wl[0] and '還有，' in wl[0] and '雞蛋' in wl[0] and not any(('買太' in l or '買錯了啦' in l) and l is not wl[0] for l in fl), fl)
+
+    # 10c4. 回家問原因：第一樣完整問、第二樣「那……怎麼也沒買？」、第三樣以後「……呢？」
+    new_game(page); setreq(page, [['pork', 1], ['egg', 1], ['onion', 1]])
+    ev(page, 'Game.bought = {}; Game.lack = {}; Game.explained = {}; Game.queue = Game.req.slice(); Game.qi = 0; Game.state = "EXPLAIN"')
+    q3 = [ev(page, '(() => { Game.qi = %d; return Game.getConfig().EXPLAIN.dialogue().map(x => x.zh).join("|"); })()' % i) for i in range(3)]
+    check('回家問原因：第一／第二／第三樣的問法不同', '怎麼沒買？' in q3[0] and '那……' in q3[1] and '怎麼也沒買？' in q3[1] and q3[2].endswith('呢？') and '怎麼' not in q3[2], q3)
+
+    # 10c5. 少買三樣以上：每一樣都問（沒有上限）
+    new_game(page); setreq(page, [['pork', 1], ['egg', 1], ['onion', 1], ['fish', 1]])
+    ev(page, 'Game.bought = {}; Game.lack = {}; Game.explained = {}; Game.bagDone = true; Game.checkDone = true; Game.goHome()')
+    check('少買四樣：四樣都要問', state(page) == 'EXPLAIN' and ev(page, 'Game.queue.length') == 4, ev(page, 'Game.queue.length'))
+
     # 10b. 去過的攤位還可以再去：第一次少買（半斤），回頭補買（再半斤）→ 湊成一斤，不用扣分
     new_game(page); setreq(page, [['pork', 1]])
     ev(page, 'Game.checkDone = true; Game.bagDone = true')

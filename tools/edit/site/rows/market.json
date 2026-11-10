@@ -676,19 +676,19 @@
   },
   {
    "id": "market-085",
-   "kind": "錯誤說明",
+   "kind": "台詞",
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
-   "who": "",
-   "zh": "不是錢不夠，是老闆生氣不賣給你。"
+   "who": "Ami",
+   "zh": "那……〔labZh(it, a.q)〕怎麼也沒買？"
   },
   {
    "id": "market-086",
-   "kind": "錯誤說明",
+   "kind": "台詞",
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
-   "who": "",
-   "zh": "你的錢是夠的，你是忘記買了。"
+   "who": "Ami",
+   "zh": "〔labZh(it, a.q)〕呢？"
   },
   {
    "id": "market-087",
@@ -696,7 +696,7 @@
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
    "who": "",
-   "zh": "老闆沒有不賣，是你的錢不夠。"
+   "zh": "不是錢不夠，是老闆生氣不賣給你。"
   },
   {
    "id": "market-088",
@@ -704,7 +704,7 @@
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
    "who": "",
-   "zh": "老闆沒有不賣，你是忘記買了。"
+   "zh": "你的錢是夠的，你是忘記買了。"
   },
   {
    "id": "market-089",
@@ -712,7 +712,7 @@
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
    "who": "",
-   "zh": "你不是忘記，是錢不夠，要說清楚。"
+   "zh": "老闆沒有不賣，是你的錢不夠。"
   },
   {
    "id": "market-090",
@@ -720,10 +720,26 @@
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
    "who": "",
-   "zh": "你不是忘記，是老闆不賣給你。"
+   "zh": "老闆沒有不賣，你是忘記買了。"
   },
   {
    "id": "market-091",
+   "kind": "錯誤說明",
+   "stage": "EXPLAIN",
+   "stageName": "EXPLAIN",
+   "who": "",
+   "zh": "你不是忘記，是錢不夠，要說清楚。"
+  },
+  {
+   "id": "market-092",
+   "kind": "錯誤說明",
+   "stage": "EXPLAIN",
+   "stageName": "EXPLAIN",
+   "who": "",
+   "zh": "你不是忘記，是老闆不賣給你。"
+  },
+  {
+   "id": "market-093",
    "kind": "台詞",
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
@@ -731,7 +747,7 @@
    "zh": "可是你的錢是夠的啊！"
   },
   {
-   "id": "market-092",
+   "id": "market-094",
    "kind": "台詞",
    "stage": "EXPLAIN",
    "stageName": "EXPLAIN",
