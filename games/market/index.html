@@ -319,8 +319,14 @@ const VOCAB = {
   REMOVE: [['不要', 'no querer', "don't want"], ['錢不夠', 'no alcanza el dinero', 'not enough money']],
   REDUCE_Q: [['改成', 'cambiar a', 'change to'], ['不要了', 'ya no lo quiero', "I don't want it anymore"]],
   REDUCE: [['買多了', 'comprar de más', 'buy too much'], ['改', 'cambiar', 'change'], ['沒事', 'no pasa nada', 'never mind']],
-  PHONE: [['傳訊息', 'mandar un mensaje', 'send a message'], ['不要理她', 'ignorarla', 'ignore her'], ['看訊息', 'leer el mensaje', 'read the message']],
-  MSG: [['突然想到', 'se me ocurrió de repente', 'just thought of'], ['加買', 'comprar además', 'buy in addition'], ['改買', 'comprar otra cosa en vez', 'buy something else instead'], ['已經', 'ya', 'already']],
+  PHONE: [['手機響了', 'suena el celular', 'the phone buzzes'], ['不要理她', 'ignorarla', 'ignore her'], ['看訊息', 'leer el mensaje', 'read the message']],
+  get MSG() {   // 依 Ami 傳的是「加買」還是「改項目」，列出訊息裡真的有的字
+    const m = Game.task && Game.task.msg, out = m && m.type === 'change'
+      ? [['不用', 'no hace falta', 'no need'], ['改買', 'comprar otra cosa en vez', 'buy something else instead']]
+      : [['突然想到', 'se me ocurrió de repente', 'just thought of'], ['加買', 'comprar además', 'buy in addition']];
+    if (m && Game.msgInfo().boughtX) out.push(['已經', 'ya', 'already']);   // 選項「我已經買了欸」
+    return out;
+  },
   EXPLAIN: [['忘記', 'olvidar', 'forget'], ['不賣', 'no vender', "won't sell"], ['原因', 'motivo', 'reason']],
   PAY: [['付', 'pagar', 'pay'], ['不好意思', 'perdón, disculpe', 'excuse me, sorry'], ['夠', 'alcanzar', 'be enough'], ['下次', 'la próxima vez', 'next time'], ['再付', 'pagar después', 'pay later']],
   CHANGE: [['收', 'cobrar, recibir (dinero)', 'take (payment)'], ['找的錢', 'el cambio', 'the change'], ['找錯', 'dar mal el cambio', 'give the wrong change']],
@@ -512,9 +518,9 @@ const Game = defineGame({
   /* Ami 中途傳來的訊息（加買 或 改項目） */
   msgLine() {
     const m = this.task.msg, y = m.y;
-    if (m.type === 'add') return L(`Ami：我突然想到，還要加買${labZh(y, y.q)}！可以幫我買嗎？`, `Ami: ¡Se me acaba de ocurrir que también necesito ${labEs(y, y.q)}! ¿Me lo compras?`, `Ami: I just remembered I also need ${labEn(y, y.q)}! Could you get that too?`);
+    if (m.type === 'add') return L(`Ami：我突然想到，還要加買${labZh(y, y.q)}！可以幫我買嗎？`, `¡Se me acaba de ocurrir que también necesito ${labEs(y, y.q)}! ¿Me lo compras?`, `I just remembered I also need ${labEn(y, y.q)}! Could you get that too?`);
     const a = this.task.items.find(it => it.id === m.xid);
-    return L(`Ami：不好意思，不用買${labZh(a, a.q)}了，改買${labZh(y, y.q)}！`, `Ami: Perdona, ya no hace falta ${labEs(a, a.q)}: ¡mejor compra ${labEs(y, y.q)}!`, `Ami: Sorry — no need for ${labEn(a, a.q)} anymore. Please get ${labEn(y, y.q)} instead!`);
+    return L(`Ami：不好意思，不用買${labZh(a, a.q)}了，改買${labZh(y, y.q)}！`, `Perdona, ya no hace falta ${labEs(a, a.q)}: ¡mejor compra ${labEs(y, y.q)}!`, `Sorry — no need for ${labEn(a, a.q)} anymore. Please get ${labEn(y, y.q)} instead!`);
   },
   hintSections() {
     const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
@@ -639,7 +645,7 @@ const Game = defineGame({
       const p = Math.max(st.floor, r10(st.ask * 0.9));
       if (p < st.ask) {
         this.setAsk(st, p);
-        this.thought = [say(`好啦好啦，看你很有誠意，${p}元！`, `Está bien, está bien, veo que lo dices en serio: ¡${esM(p)}!`, `All right, all right, you seem sincere: ${enM(p)}!`)];
+        this.thought = [say(`好啦好啦，看你很有誠意，${p}元！`, `Está bien, está bien, veo que habla en serio: ¡${esM(p)}!`, `All right, all right, you seem sincere: ${enM(p)}!`)];
       } else this.thought = [say('已經是最便宜的了啦！', '¡Ya es el precio más bajo!', "That's already the lowest price!")];
       return;
     }
@@ -648,7 +654,7 @@ const Game = defineGame({
       // 「再看看」不一定有用：大約三分之一的老闆不留人，價錢不變，你只好再走回來
       if (st.ask > st.floor && Math.random() < 0.35) {
         this.thought = [L('（你轉身要走……）', '(Te das la vuelta para irte…)', '(You turn to leave…)'),
-          say('好啊，慢慢看，喜歡再回來喔！', '¡Claro, mira con calma! Si te gusta, vuelve.', 'Sure, take your time! Come back if you like it!'),
+          say('好啊，慢慢看，喜歡再回來喔！', '¡Claro, mire con calma! Si le gusta, vuelva.', 'Sure, take your time! Come back if you like it!'),
           L(`（${this.boss()}沒有叫住你。你走了幾步，又走回來。）`, '(El vendedor no te detiene. Das unos pasos y vuelves.)', "(The vendor doesn't stop you. You take a few steps and come back.)")];
         return;
       }
@@ -656,15 +662,15 @@ const Game = defineGame({
         const p = Math.max(st.floor, r10(st.ask - (st.ask - st.floor) * 0.6));
         this.setAsk(st, p);
         this.thought = [L('（你轉身要走……）', '(Te das la vuelta para irte…)', '(You turn to leave…)'),
-          say(`欸欸欸，等一下！${p}元賣你啦！`, `¡Eh, eh, espera! ¡Te lo vendo por ${esM(p)}!`, `Hey, hey, wait! I'll sell it to you for ${enM(p)}!`)];
+          say(`欸欸欸，等一下！${p}元賣你啦！`, `¡Eh, eh, espere! ¡Se lo vendo por ${esM(p)}!`, `Hey, hey, wait! I'll sell it to you for ${enM(p)}!`)];
         this.good(`聰明喔！你說了「再看看」，${this.boss()}就降價了！`, '¡Qué buena idea! Dijiste «mirar un poco más» y el vendedor bajó el precio.', 'Smart! You said you\'d look around some more, and the vendor dropped the price!');
-      } else this.thought = [say('這已經是最低價了，不買就算了。', 'Este ya es el precio más bajo; si no compras, no importa.', "That's already my lowest price. If you don't want it, never mind.")];
+      } else this.thought = [say('這已經是最低價了，不買就算了。', 'Este ya es el precio más bajo; si no compra, no importa.', "That's already my lowest price. If you don't want it, never mind.")];
       return;
     }
     const o = +c.match(/^(\d+)/)[1];
     if (o >= st.floor) {
       this.setAsk(st, o);
-      st.acc = { zh: `唉，好啦好啦，算你${o}元！`, es: `Ay, está bien, está bien: ¡te lo dejo en ${esM(o)}!`, en: `Ugh, fine, fine — ${enM(o)} for you!` };
+      st.acc = { zh: `唉，好啦好啦，算你${o}元！`, es: `Ay, está bien, está bien: ¡se lo dejo en ${esM(o)}!`, en: `Ugh, fine, fine — ${enM(o)} for you!` };
       this.state = 'PAY'; return;
     }
     if (o >= st.floor * 0.8) {
@@ -676,14 +682,14 @@ const Game = defineGame({
     st.mood -= 1;
     if (st.mood === 0) {          // 第三次出價太低：老闆生氣，不賣了，這個攤位收攤
       this.addMistake(M(`殺價殺太兇，${this.boss()}生氣了，不賣了。`, 'Regateaste demasiado y el vendedor se enojó: ya no te vende nada.', 'You haggled too aggressively and the vendor got angry: no more sales.'),
-        [say(`${o}元？你在開玩笑嗎？不賣了！不賣了！`, `¿${esM(o)}? ¿Estás bromeando? ¡No te vendo nada!`, `${enM(o)}? Are you kidding? I'm not selling to you!`),
+        [say(`${o}元？你在開玩笑嗎？不賣了！不賣了！`, `¿${esM(o)}? ¿Está bromeando? ¡No le vendo nada!`, `${enM(o)}? Are you kidding? I'm not selling to you!`),
          L(`（${this.boss()}生氣地把東西收起來，你只好走開。）`, '(El vendedor, enojado, guarda su mercancía y no te queda más que irte.)', '(The vendor angrily puts the goods away, and you have to walk off.)')]);
       Object.keys(this.cart).forEach(id => { this.lack[id] = 'refused'; });
       this.closed[this.cur] = true; this.cart = {}; this.meatPick = null; this.st = null;
       this.state = 'MAP';
     } else {
       this.thought = [say(st.mood === 2 ? `${o}元？這樣我會虧本耶！` : `${o}元？你再殺這麼低，我真的不賣了喔！`,
-        st.mood === 2 ? `¿${esM(o)}? ¡Así pierdo dinero!` : `¿${esM(o)}? Si sigues pidiendo tan poco, ¡de verdad no te vendo!`,
+        st.mood === 2 ? `¿${esM(o)}? ¡Así pierdo dinero!` : `¿${esM(o)}? Si sigue pidiendo tan poco, ¡de verdad no le vendo!`,
         st.mood === 2 ? `${enM(o)}? I'd lose money like that!` : `${enM(o)}? Keep lowballing me and I really won't sell!`)];
     }
   },
@@ -766,9 +772,9 @@ const Game = defineGame({
       if (got === 0) {
         const cause = this.explained[a.id];
         if (cause === 'money') bad(M(`${it.zh}沒買，因為錢不夠。`, `No compraste ${it.es} porque no te alcanzó el dinero.`, `You didn't buy the ${it.en} because you ran short of money.`),
-          L(`Ami：啊，是我給你的錢不夠！${it.zh}下次再買吧。`, `Ami: ¡Ay, fui yo quien no te dio suficiente dinero! ${it.es[0].toUpperCase() + it.es.slice(1)} lo compramos la próxima vez.`, `Ami: Oh, I didn't give you enough money! We'll get the ${it.en} next time.`), true);
+          L(`Ami：啊，是我給你的錢不夠！${it.zh}下次再買吧。`, `¡Ay, fui yo quien no te dio suficiente dinero! ${it.es[0].toUpperCase() + it.es.slice(1)} lo compramos la próxima vez.`, `Oh, I didn't give you enough money! We'll get the ${it.en} next time.`), true);
         else if (cause === 'refused') bad(M(`${it.zh}沒買到，因為老闆不賣了。`, `No pudiste comprar ${it.es} porque el vendedor ya no quiso venderte.`, `You couldn't buy the ${it.en} because the vendor stopped selling to you.`),
-          L('Ami：你殺價殺太兇吼……', 'Ami: Regateaste demasiado, ¿eh…?', "Ami: You haggled too hard, huh…"), true);
+          L('Ami：你殺價殺太兇吼……', 'Regateaste demasiado, ¿eh…?', "You haggled too hard, huh…"), true);
         else { pens.push(M(`Ami要${labZh(it, a.q)}，你沒有買。`, `Ami quería ${labEs(it, a.q)} y no lo compraste.`, `Ami wanted ${labEn(it, a.q)} and you didn't buy it.`)); none.push({ it, q: a.q }); }   // 忘記買的：扣分各算各的，Ami 合成一句話說
       } else {
         const more = got > a.q;
@@ -789,8 +795,8 @@ const Game = defineGame({
       const { y, a } = this.msgInfo(), yq = this.req.find(r => r.id === y.id).q;
       if ((this.bought[y.id] || 0) !== yq || (a && this.bought[a.id])) {
         pens.push(M('Ami傳了訊息給你，你沒有看。', 'Ami te mandó un mensaje y no lo leíste.', 'Ami sent you a message and you did not read it.'));
-        lines.push(a ? L(`Ami：我有傳訊息給你，說不要${a.zh}、改買${labZh(y, yq)}欸！你都不看訊息！`, `Ami: ¡Te mandé un mensaje diciendo que no quería ${a.es}, que comprases ${labEs(y, yq)}! ¡Ni lo lees!`, `Ami: I texted you that I didn't want the ${a.en} — get ${labEn(y, yq)} instead! You never read my messages!`)
-                      : L(`Ami：我有傳訊息給你，要加買${labZh(y, yq)}欸！你都不看訊息！`, `Ami: ¡Te mandé un mensaje pidiéndote también ${labEs(y, yq)}! ¡Ni lo lees!`, `Ami: I texted you to also get ${labEn(y, yq)}! You never read my messages!`));
+        lines.push(a ? L(`Ami：我有傳訊息給你，說不要${a.zh}、改買${labZh(y, yq)}欸！你都不看訊息！`, `¡Te mandé un mensaje diciendo que no quería ${a.es}, que comprases ${labEs(y, yq)}! ¡Ni lo lees!`, `I texted you that I didn't want the ${a.en} — get ${labEn(y, yq)} instead! You never read my messages!`)
+                      : L(`Ami：我有傳訊息給你，要加買${labZh(y, yq)}欸！你都不看訊息！`, `¡Te mandé un mensaje pidiéndote también ${labEs(y, yq)}! ¡Ni lo lees!`, `I texted you to also get ${labEn(y, yq)}! You never read my messages!`));
       }
     }
     /* 忘記買的、數量不對的、多買的：Ami 合成同一句話說（只有一種時，就是那一種的句子） */
@@ -805,9 +811,10 @@ const Game = defineGame({
     let nz = null;    // 忘記買的部分
     if (none.length === 1) { const { it, q } = none[0]; nz = { zh: `我要${labZh(it, q)}，你沒有買耶！`, es: `¡Quería ${labEs(it, q)} y no lo trajiste!`, en: `I wanted ${labEn(it, q)} and you didn't get it!` }; }
     else if (none.length) nz = { zh: `我要${none.map(n => labZh(n.it, n.q)).join('、')}，你都沒有買！`, es: `¡Quería ${jn(none.map(n => labEs(n.it, n.q)), 'y')} y no trajiste nada de eso!`, en: `I wanted ${jn(none.map(n => labEn(n.it, n.q)), 'and')} and you didn't get any of it!` };
-    if (nz && wr) lines.push(L('Ami：' + nz.zh + '還有，' + wr.zh, 'Ami: ' + nz.es + ' Además, ' + wr.es, 'Ami: ' + nz.en + ' Also, ' + wr.en));
-    else if (nz) lines.push(L('Ami：' + nz.zh, 'Ami: ' + nz.es, 'Ami: ' + nz.en));
-    else if (wr) lines.push(L('Ami：' + wr.zh, 'Ami: ' + wr.es, 'Ami: ' + wr.en));
+    const cap = t => t.replace(/^([¡¿]?)(.)/, (m, a, b) => a + b.toUpperCase()), low = t => t.replace(/^([¡¿]?)(.)/, (m, a, b) => a + b.toLowerCase());
+    if (nz && wr) lines.push(L('Ami：' + nz.zh + '還有，' + wr.zh, nz.es + ' Además, ' + low(wr.es), nz.en + ' Also, ' + wr.en.replace(/^You /, 'you ')));
+    else if (nz) lines.push(L('Ami：' + nz.zh, nz.es, nz.en));
+    else if (wr) lines.push(L('Ami：' + wr.zh, cap(wr.es), cap(wr.en)));
     this._endGood = pens.length === 0;
     this.state = 'END';
     pens.forEach(m => this.addMistake(m));
@@ -818,9 +825,9 @@ const Game = defineGame({
     const out = [];
     if (!this.queue.length) out.push(L('（你提著環保袋回到Ami家，把菜拿給Ami。）', '(Vuelves a casa de Ami con tu bolsa reutilizable y le entregas las compras.)', '(You get back to Ami\'s place with your reusable bag and hand over the groceries.)'));
     out.push(...lines);
-    out.push(ok ? L(`Ami：哇，菜都好新鮮唷${this.saved > 0 ? '，還省了不少錢' : ''}！謝謝你，${N}！我來煮好吃的給你吃。`, `Ami: ¡Guau, todo está muy fresco${this.saved > 0 ? ' y además ahorraste bastante' : ''}! ¡Gracias, ${N}! Yo cocino algo rico para ti.`, `Ami: Wow, everything is so fresh${this.saved > 0 ? ', and you saved quite a bit' : ''}! Thanks, ${N}! I'll cook something delicious for you.`)
-      : heavy ? L(`Ami：謝謝你！不過有一些東西買錯了……下次要看清楚喔！`, 'Ami: ¡Gracias! Pero compraste mal algunas cosas… ¡la próxima vez fíjate bien!', 'Ami: Thanks! But a few things were wrong… check carefully next time!')
-      : L(`Ami：謝謝你，${N}！今天沒買到的，下次再買。我先用這些來煮。`, `Ami: ¡Gracias, ${N}! Lo que no se pudo comprar hoy lo compramos otro día; cocino con lo que trajiste.`, `Ami: Thanks, ${N}! What we couldn't get today we'll get another time; I'll cook with what you brought.`));
+    out.push(ok ? L(`Ami：哇，菜都好新鮮唷${this.saved > 0 ? '，還省了不少錢' : ''}！謝謝你，${N}！我來煮好吃的給你吃。`, `¡Guau, todo está muy fresco${this.saved > 0 ? ' y además ahorraste bastante' : ''}! ¡Gracias, ${N}! Yo cocino algo rico para ti.`, `Wow, everything is so fresh${this.saved > 0 ? ', and you saved quite a bit' : ''}! Thanks, ${N}! I'll cook something delicious for you.`)
+      : heavy ? L(`Ami：謝謝你！不過有一些東西買錯了……下次要看清楚喔！`, '¡Gracias! Pero compraste mal algunas cosas… ¡la próxima vez fíjate bien!', 'Thanks! But a few things were wrong… check carefully next time!')
+      : L(`Ami：謝謝你，${N}！今天沒買到的，下次再買。我先用這些來煮。`, `¡Gracias, ${N}! Lo que no se pudo comprar hoy lo compramos otro día; cocino con lo que trajiste.`, `Thanks, ${N}! What we couldn't get today we'll get another time; I'll cook with what you brought.`));
     out.push(L(`（你一共花了${spent}元，殺價省了${this.saved}元，殺價獎勵加${bonus}分。）`, `(Gastaste ${esM(spent)} en total; el regateo te ahorró ${esM(this.saved)} y te dio +${bonus} puntos.)`, `(You spent ${enM(spent)} in total; haggling saved you ${enM(this.saved)} and earned +${bonus} points.)`));
     this.final = out;
     track('game_complete', { game: 'market', score: this.score, elapsed: this.elapsedTime, saved: this.saved });
@@ -990,7 +997,7 @@ const Game = defineGame({
       REDUCE_Q: {
         place: () => Game.cur,
         html: () => Game.haggleHTML(Game.st),
-        dialogue: () => [vend('好，要改成多少？', 'Bien, ¿cuánto quiere?', 'OK, how much do you want instead?')],
+        dialogue: () => [vend('好，要改成多少？', 'Bien, ¿cuánto quiere ahora?', 'OK, how much do you want instead?')],
         options: () => { const it = BYID[Game.redId]; return rot([...Game.lowerQs(it).map(q => `${it.zh}改成${qZh(it, q)}。`), `${it.zh}我不要了。`]); },
         ok: () => { const it = BYID[Game.redId], to = Game.overBought()[it.id]; return to ? `${it.zh}改成${qZh(it, to)}。` : `${it.zh}我不要了。`; },
         next: c => {
@@ -1056,7 +1063,7 @@ const Game = defineGame({
           const ck = Game.ck, it = BYID[ck.id], right = ck.wrong ? bgFix() : '好，謝謝。';
           if (c !== right) {
             Game.addMistake(c === '好，謝謝。'
-              ? M(`數量不對：你買了${qZh(it, ck.q)}${it.zh}，${Game.boss()}放了${qZh(it, ck.wq)}。拿東西以前，要先看一看。`, `Cantidad equivocada: compraste ${qEs(it, ck.q)} y pusieron ${qEs(it, ck.wq)}. Revisa antes de llevártelo.`, `Wrong amount: you bought ${qEn(it, ck.q)} and he put in ${qEn(it, ck.wq)}. Check before you take it.`)
+              ? M(`數量不對：你買了${qZh(it, ck.q)}${it.zh}，${Game.boss()}放了${qZh(it, ck.wq)}。拿東西以前，要先看一看。`, `Cantidad equivocada: compraste ${qEs(it, ck.q)} y pusieron ${qEs(it, ck.wq)}. Revisa antes de llevártelo.`, `Wrong amount: you bought ${qEn(it, ck.q)} and ${Game.boss() === '老闆娘' ? 'she' : 'he'} put in ${qEn(it, ck.wq)}. Check before you take it.`)
               : (c === bgFix() || c === '靠北！你裝錯了吧！')
                 ? M(`數量是對的：${it.zh}就是${qZh(it, ck.q)}。`, `La cantidad está bien: ${qEs(it, ck.q)}.`, `The amount is right: ${qEn(it, ck.q)}.`)
                 : M('要有禮貌，說清楚你要的數量就好。', 'Hay que ser cortés: di claramente la cantidad que querías.', 'Be polite: just state clearly the amount you wanted.'));
@@ -1071,7 +1078,7 @@ const Game = defineGame({
       PHONE: {
         place: 'phone',
         html: () => Game.mapHTML(false),
-        dialogue: () => [L('（手機響了，是Ami傳來的LINE。）', '(Suena tu móvil: es un LINE de Ami.)', '(Your phone buzzes: it\'s a LINE message from Ami.)')],
+        dialogue: () => [L('（手機響了，是Ami傳來的LINE。）', '(Suena tu celular: es un LINE de Ami.)', '(Your phone buzzes: it\'s a LINE message from Ami.)')],
         options: () => rot(['不要理她。', '看訊息。']),
         ok: () => '看訊息。',
         next: c => {
@@ -1098,9 +1105,9 @@ const Game = defineGame({
               return;
             }
             Game.good('很好！已經買了的東西，要馬上告訴Ami。', '¡Muy bien! Lo que ya compraste, díselo enseguida a Ami.', 'Good! If you have already bought something, tell Ami right away.');
-            Game.thought = [L('Ami：啊，你已經買了喔？那就不用改了，謝謝！', 'Ami: ¡Ah, ¿ya lo compraste? Entonces no hace falta cambiarlo, gracias!', 'Ami: Oh, you already bought it? Then no need to change it. Thanks!')];
+            Game.thought = [L('Ami：啊，你已經買了喔？那就不用改了，謝謝！', '¡Ah, ¿ya lo compraste? Entonces no hace falta cambiarlo, gracias!', 'Oh, you already bought it? Then no need to change it. Thanks!')];
           } else {
-            Game.thought = [L('Ami：謝謝你！', 'Ami: ¡Gracias!', 'Ami: Thank you!')];
+            Game.thought = [L('Ami：謝謝你！', '¡Gracias!', 'Thank you!')];
           }
           Game.applyMsg(); Game.state = 'MAP';
         }
@@ -1111,9 +1118,9 @@ const Game = defineGame({
         dialogue: () => {
           const a = Game.queue[Game.qi], it = BYID[a.id];
           return [...(Game.qi === 0 ? [L('（你提著環保袋回到Ami家，把菜拿給Ami。）', '(Vuelves a casa de Ami con tu bolsa reutilizable y le entregas las compras.)', '(You get back to Ami\'s place with your reusable bag and hand over the groceries.)')] : []),
-            Game.qi === 0 ? L(`Ami：咦，${labZh(it, a.q)}呢？怎麼沒買？`, `Ami: Eh, ¿y ${labEs(it, a.q)}? ¿Por qué no lo compraste?`, `Ami: Huh, where's the ${labEn(it, a.q)}? Why didn't you buy it?`)
-            : Game.qi === 1 ? L(`Ami：那……${labZh(it, a.q)}怎麼也沒買？`, `Ami: Entonces… ¿por qué tampoco compraste ${labEs(it, a.q)}?`, `Ami: Then… why didn't you buy the ${labEn(it, a.q)} either?`)
-            : L(`Ami：${labZh(it, a.q)}呢？`, `Ami: ¿Y ${labEs(it, a.q)}?`, `Ami: And the ${labEn(it, a.q)}?`)];   // 第一樣完整問；第二樣「那……怎麼也沒買？」；第三樣以後只問「……呢？」
+            Game.qi === 0 ? L(`Ami：咦，${labZh(it, a.q)}呢？怎麼沒買？`, `Eh, ¿y ${labEs(it, a.q)}? ¿Por qué no lo compraste?`, `Huh, where's the ${labEn(it, a.q)}? Why didn't you buy it?`)
+            : Game.qi === 1 ? L(`Ami：那……${labZh(it, a.q)}怎麼也沒買？`, `Entonces… ¿por qué tampoco compraste ${labEs(it, a.q)}?`, `Then… why didn't you buy the ${labEn(it, a.q)} either?`)
+            : L(`Ami：${labZh(it, a.q)}呢？`, `¿Y ${labEs(it, a.q)}?`, `And the ${labEn(it, a.q)}?`)];   // 第一樣完整問；第二樣「那……怎麼也沒買？」；第三樣以後只問「……呢？」
         },
         options: () => rot([CAUSE_OPT.money, CAUSE_OPT.refused, CAUSE_OPT.forgot]),
         ok: () => CAUSE_OPT[Game.causeOf(Game.queue[Game.qi].id)],
@@ -1125,8 +1132,8 @@ const Game = defineGame({
               refused: { money: M('老闆沒有不賣，是你的錢不夠。', 'El vendedor sí quería vender: lo que pasó es que no te alcanzó el dinero.', 'The vendor was willing to sell — you ran short of money.'), forgot: M('老闆沒有不賣，你是忘記買了。', 'El vendedor sí quería vender: se te olvidó comprarlo.', 'The vendor was willing to sell — you forgot to buy it.') },
               forgot: { money: M('你不是忘記，是錢不夠，要說清楚。', 'No lo olvidaste: no te alcanzó el dinero. Dilo claramente.', "You didn't forget: you ran short of money. Say it clearly."), refused: M('你不是忘記，是老闆不賣給你。', 'No lo olvidaste: el vendedor no quiso venderte.', "You didn't forget: the vendor wouldn't sell to you.") }
             };
-            Game.addMistake(why[said][real], said === 'money' && real === 'forgot' ? [L('Ami：可是你的錢是夠的啊！', 'Ami: ¡Pero si tenías dinero de sobra!', 'Ami: But you had plenty of money!')]
-              : said === 'refused' ? [L('Ami：你應該沒有騙我吧！', 'Ami: ¡No me estarás mintiendo, ¿verdad?!', "Ami: You're not lying to me, are you?!")] : null);   // 老闆有沒有賣，Ami 不會知道；她只會懷疑你
+            Game.addMistake(why[said][real], said === 'money' && real === 'forgot' ? [L('Ami：可是你的錢是夠的啊！', '¡Pero si tenías dinero de sobra!', 'But you had plenty of money!')]
+              : said === 'refused' ? [L('Ami：你應該沒有騙我吧！', '¡No me estarás mintiendo, ¿verdad?!', "You're not lying to me, are you?!")] : null);   // 老闆有沒有賣，Ami 不會知道；她只會懷疑你
             return;
           }
           Game.explained[a.id] = real;

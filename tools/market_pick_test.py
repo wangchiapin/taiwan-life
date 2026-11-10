@@ -427,6 +427,10 @@ with sync_playwright() as p:
     ev(page, 'Game.bought = {}; Game.lack = {}; Game.explained = {}; Game.bagDone = true; Game.checkDone = true; Game.goHome()')
     check('少買四樣：四樣都要問', state(page) == 'EXPLAIN' and ev(page, 'Game.queue.length') == 4, ev(page, 'Game.queue.length'))
 
+    # 10c6. 翻譯小視窗會自己加上說話的人（「Ami:」），西文／英文本身不能再寫一次
+    src_ = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'games', 'market', 'index.html'), encoding='utf-8').read()
+    check('西文／英文台詞前面不重複寫「Ami:」', 'Ami: ' not in src_ and '`Ami: ' not in src_)
+
     # 10b. 去過的攤位還可以再去：第一次少買（半斤），回頭補買（再半斤）→ 湊成一斤，不用扣分
     new_game(page); setreq(page, [['pork', 1]])
     ev(page, 'Game.checkDone = true; Game.bagDone = true')
@@ -521,7 +525,11 @@ with sync_playwright() as p:
         ev(page, "Game.cur = '%s'" % cur_)
         ws = ev(page, "VOCAB.PICK.map(w => w[0])")
         check('PICK 小字典（%s攤）只列這一攤的量詞' % cur_, all(w in ws for w in want_) and not any(w in ws for w in no_) and '籃子' in ws, ws)
-    check('MSG 有小字典', ev(page, "VOCAB.MSG.length") >= 3)
+    # MSG 小字典：依 Ami 傳的是加買還是改項目，列訊息裡真的有的字
+    for ty_, want_ in (('add', ['突然想到', '加買']), ('change', ['不用', '改買'])):
+        setreq(page, [['pork', 1], ['egg', 1]], {'type': ty_, 'y': ['onion', 2], 'x': 'egg' if ty_ == 'change' else None})
+        wv = ev(page, "VOCAB.MSG.map(w => w[0])"); line_ = ev(page, "Game.msgLine().zh")
+        check('MSG 小字典（%s）：字都在訊息裡' % ty_, all(w in wv for w in want_) and all(w in line_ for w in wv if w != '已經'), (wv, line_))
     ev(page, "Game._endGood = true"); g_ = ev(page, "VOCAB.END.map(w => w[0])")
     ev(page, "Game._endGood = false"); b_ = ev(page, "VOCAB.END.map(w => w[0])")
     check('END 小字典：好結局和壞結局不一樣', '新鮮' in g_ and '買錯' in b_ and '新鮮' not in b_, (g_, b_))

@@ -63,7 +63,7 @@ def click_c(page,c,i):
 def play(page,g,mode,log):
     bad=set(); trans=0; steps=0; seen=[]
     orc=EXTRA.get(g) or ORACLES.get(g)
-    while steps<400:
+    while steps<int(os.environ.get("SMOKE_STEPS", 1200)):
         steps+=1
         if page.evaluate("document.getElementById('leaderboard-screen').classList.contains('active')"):
             if page.evaluate('EMBED'):   # 地圖模式：看完排行榜按「回到地圖」
