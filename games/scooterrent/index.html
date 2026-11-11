@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<title>租機車 · Alquilar una moto</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：scooterrentgame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "scooterrentgame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #33261f;
+    --red: #d2381e;
+    --red-dark: #8f3513;
+    --yolk: #e0a43a;
+    --night: #2e2630;
+    --kraft: #f3e4d3;
+    --wall: #fbf3ea;
+    --paper: #ffffff;
+    --line: #e5d2bd;
+    --muted: #7a6454;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    background: #e8f0f4;
+  }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  /* ── 登入：店招牌 ── */
+  /* ── 遊戲 ── */
+  /* 購物清單 */
+  @media (hover: hover) {
+    .opt:hover rt { color: #ffe0d2; }
+  }
+  /* ── 排行榜 ── */
+  #lb-table tr.highlight-row { background: #f7dccb; font-weight: 700; }
+  /* ── 句子翻譯 ── */
+  .tr-btn:hover { background: #f7dccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  /* ── 本關單字（右側抽屜） ── */
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+
+
+
+  /* 號碼牌、匯款單、鈔票 */
+  .pbox { margin: 8px 0 12px; background: #fff; border: 2px solid #2f8f83; border-radius: 10px; padding: 8px 14px; }
+  .pbox .ph { color: #2f8f83; font-weight: 700; font-size: 15px; }
+  .pbox .pv { font-size: 22px; font-weight: 700; color: var(--ink); margin-top: 2px; }
+  .pbox .pl { font-size: 15px; color: var(--ink); margin-top: 2px; }
+  .pbox.bill { border-color: var(--red); }
+  .pbox.bill .pv { font-size: 18px; }
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">租機車</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">租機車</h1>
+  <p class="subtitle" data-es="Alquilar una moto" data-en="Renting a scooter">Alquilar una moto</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    Ami 的朋友要來玩，請你去租機車行幫忙租一台機車。你要出示駕照、說清楚租幾天、看契約和保險，付錢找錢，取車和還車都要檢查車子和刮痕，每一步都有可能出錯，要自己核對喔！<br>
+    <span data-es="La amiga de Ami viene de visita y te pide que alquiles una moto. Tienes que mostrar tu licencia, decir cuántos días, revisar el contrato y el seguro, pagar y recibir el cambio, y revisar la moto y los rayones al recogerla y al devolverla. ¡En cada paso puede haber un error, así que revisa todo tú mismo!" data-en="Ami's friend is visiting and Ami asks you to rent a scooter. You show your license, say how many days, check the contract and insurance, pay and check your change, and inspect the scooter and its scratches when you pick it up and return it. Mistakes can happen at every step, so check everything yourself!">Ami 的朋友要來玩，請你去租機車行幫忙租一台機車。你要出示駕照、說清楚租幾天、看契約和保險，付錢找錢，取車和還車都要檢查車子和刮痕，每一步都有可能出錯，要自己核對喔！</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">🛵</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 10 名 · Top 10</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'scooterrent', track: 'scooterrent', vocabQuiz: true, settingsKey: 'scooterrent_settings',
+  defaultPlace: 'shop', defaultEmoji: '🛵',
+  roles: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '店員': { pitch: 1.0 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+   第一版草稿：本次沒有對照 game-kit（讀不到），只用共用檔內建的 GoodTeacher 規則
+══════════════════════════════════════ */
+pinyinPro.customPinyin({
+  '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan',
+  '時間': 'shí jiān', '時候': 'shí hou', '東西': 'dōng xi', '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '著': 'zhe', '囉': 'luo', '啦': 'la', '耶': 'ye',
+  '不好意思': 'bù hǎo yì si', '這個': 'zhè ge', '那個': 'nà ge', '好像': 'hǎo xiàng', '欸': 'èi', '應該': 'yīng gāi', '怎麼': 'zěn me', '舒服': 'shū fu'
+});
+pinyinPro.customPinyin({
+  '租機車行': 'zū jī chē háng', '機車行': 'jī chē háng', '機車': 'jī chē', '租車': 'zū chē', '租金': 'zū jīn', '租': 'zū', '駕照': 'jià zhào', '契約': 'qì yuē', '保險': 'bǎo xiǎn',
+  '強制險': 'qiáng zhì xiǎn', '安全帽': 'ān quán mào', '刮痕': 'guā hén', '刮傷': 'guā shāng', '簽名': 'qiān míng', '西西': 'xī xī', '還車': 'huán chē', '歸還': 'guī huán',
+  '還你': 'huán nǐ', '還我': 'huán wǒ', '還給': 'huán gěi', '修理費': 'xiū lǐ fèi', '報警': 'bào jǐng', '存證': 'cún zhèng', '拍照': 'pāi zhào', '照片': 'zhào piàn', '車況': 'chē kuàng',
+  '單子': 'dān zi', '一共': 'yí gòng', '找': 'zhǎo', '鈔票': 'chāo piào', '收據': 'shōu jù', '櫃檯': 'guì tái', '剛剛': 'gāng gāng', '影印': 'yǐng yìn', '扣': 'kòu', '出了事': 'chū le shì', '只騎': 'zhǐ qí', '騎得': 'qí de'
+});
+// 台灣讀音修正：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '店員': ['El empleado de la tienda', 'The shop clerk'] };
+const SPEAKER_RE = /^(Ami|店員|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['租', 'alquilar', 'to rent'], ['機車', 'moto, scooter', 'scooter'], ['西西', 'cc (cilindrada)', 'cc (engine size)'], ['拍照', 'tomar fotos', 'take photos']],
+  ARRIVE: [['機車行', 'tienda de motos', 'scooter shop']],
+  LICENSE: [['駕照', 'licencia de conducir', "driver's license"], ['影印', 'fotocopiar', 'make a copy']],
+  ORDER: [['租', 'alquilar', 'to rent'], ['天', 'día', 'day']],
+  CONFIRM: [['租車單', 'hoja de alquiler', 'rental sheet'], ['對嗎', '¿es correcto?', 'is that right?']],
+  INSURE: [['契約', 'contrato', 'contract'], ['保險', 'seguro', 'insurance'], ['簽名', 'firmar', 'sign'], ['報警', 'llamar a la policía', 'call the police']],
+  PAY: [['一共', 'en total', 'in total'], ['租金', 'precio del alquiler', 'rental fee']],
+  CHANGE: [['找', 'dar el cambio', 'give change'], ['收', 'recibir, cobrar', 'receive, take payment']],
+  HELMET: [['安全帽', 'casco', 'helmet'], ['裂痕', 'grieta', 'crack'], ['帶子', 'correa', 'strap']],
+  CHECKBIKE: [['刮痕', 'rayón', 'scratch'], ['存證', 'dejar constancia', 'keep as evidence']],
+  RETURN: [['還車', 'devolver la moto', 'return the scooter'], ['扣', 'descontar', 'deduct'], ['修理費', 'costo de reparación', 'repair fee']],
+  get END() { return Game._endGood ? [['剛剛好', 'justo bien', 'just right']] : [['下次', 'la próxima vez', 'next time']]; },
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = (() => {
+  const p = ['付錢', 'pagar', 'paying'];
+  return { ARRIVE: ['走進機車行', 'entrar a la tienda', 'entering the shop'], LICENSE: ['出示駕照', 'mostrar la licencia', 'showing your license'], ORDER: ['說車種和天數', 'decir moto y días', 'saying scooter and days'],
+    CONFIRM: ['核對複誦', 'revisar lo repetido', 'checking the repeat-back'], INSURE: ['看契約和保險', 'contrato y seguro', 'contract and insurance'], PAY: p, PAY_FIX: p, CHANGE: ['找錢', 'el cambio', 'the change'],
+    HELMET: ['借安全帽', 'el casco', 'borrowing a helmet'], CHECKBIKE: ['取車檢查', 'revisar la moto', 'inspecting the scooter'], RETURN: ['還車檢查', 'devolver la moto', 'returning the scooter'] };
+})();
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = { ARRIVE: '走進機車行', LICENSE: '跟店員說話', CONFIRM: '聽店員複誦', INSURE: '看契約', PAY: '聽店員報價', HELMET: '去拿安全帽', CHECKBIKE: '去看車子', RETURN: '過幾天去還車', END: '傳訊息給 Ami' };
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const PLACES = {
+  phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
+  shop: ['🛵', '租機車行', 'Tienda de motos', 'Scooter rental shop', '']
+};
+/* 租金：一百二十五西西一天三百元、一百五十西西一天四百元（待確認，各店不同） */
+const RATE = { 125: 300, 150: 400 };
+const CCS = [125, 150];
+const DAYS = [1, 2, 3];
+const otherCc = c => (c === 125 ? 150 : 125);
+const billFor = n => (n <= 500 ? 500 : n <= 1000 ? 1000 : 2000);   // 你給的鈔票（身上有五百、一千、兩千各一張）
+const dayEs = n => (n === 1 ? '1 día' : `${n} días`);
+const dayEn = n => (n === 1 ? '1 day' : `${n} days`);
+
+/* ══════════════════════════════════════
+   任務提示
+══════════════════════════════════════ */
+const Hints = makeHints({ render: stdHintsRender });
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+const ORDER = ['START', 'ARRIVE', 'LICENSE', 'ORDER', 'CONFIRM', 'INSURE', 'PAY', 'PAY_FIX', 'CHANGE', 'HELMET', 'CHECKBIKE', 'RETURN', 'END', 'RESULT'];
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,
+  hintViews: 0, log: [], feedback: [], visit: 0, att: {}, cash: null,
+  onStart() { this.updateCash(); },
+  updateCash() { document.getElementById('cash-badge').textContent = ''; },
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+  IMAGES: {
+    START: ['images/start.jpg', '📱'], ARRIVE: ['images/arrive.jpg', '🏪'], LICENSE: ['images/license.jpg', '🪪'], ORDER: ['images/order.jpg', '🛵'], CONFIRM: ['images/order.jpg', '🛵'],
+    INSURE: ['images/contract.jpg', '📄'], PAY: ['images/pay.jpg', '💵'], PAY_FIX: ['images/pay.jpg', '💵'], CHANGE: ['images/pay.jpg', '💵'], HELMET: ['images/helmet.jpg', '🪖'],
+    CHECKBIKE: ['images/check.jpg', '📸'], RETURN: ['images/return.jpg', '🛵'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+  },
+
+  setup() {
+    const t = this.task = { rot: Math.floor(Math.random() * 3) };
+    t.cc = 125; t.days = pick(DAYS);                       // Ami 要的
+    t.oCc = t.cc; t.oDays = t.days;                        // 玩家實際說的（ORDER 關會改）
+    t.cfWrong = false; t.cfCc = t.cc; t.cfDays = t.days;
+    t.retWrong = false;
+    initPay(t, t.days * RATE[t.cc], [{ zh: '多算了安全帽費用五十元', price: 50 }, { zh: '多算了一天的保險費一百元', price: 100 }]);   // 先預設，CONFIRM 結束後依實際租的天數重算
+  },
+
+  amiLines() {
+    const N = this.N, t = this.task;
+    return [
+      L(`Ami：${N}，我的朋友要來玩，可以幫我去機車行租一台機車嗎？要「${zhNum(t.cc)}西西」的，租${NZ(t.days)}天。`, `${N}, una amiga viene de visita. ¿Puedes ir a la tienda de motos y alquilar una de ${t.cc} cc por ${dayEs(t.days)}?`, `${N}, a friend of mine is visiting. Could you go to a scooter shop and rent a ${t.cc}cc scooter for ${dayEn(t.days)}?`),
+      L(`Ami：一天大概${zhNum(RATE[t.cc])}元，你身上有五百、一千和兩千元的鈔票。取車的時候要拍照檢查，還車的時候才不會被亂扣錢。`, `Cuesta unos ${esM(RATE[t.cc])} al día; llevas billetes de quinientos, mil y dos mil. Al recoger la moto toma fotos y revísala, para que al devolverla no te cobren de más.`, `It's about ${enM(RATE[t.cc])} a day; you have 500, 1,000 and 2,000 bills. Take photos and inspect the scooter at pickup so nobody overcharges you at return.`),
+      L('Ami：店員說的車種、天數、價錢和找的錢，還有車子有沒有刮傷，都要自己對一下喔！', '¡Compara tú mismo lo que diga el empleado: tipo de moto, días, precio, cambio y si la moto tiene rayones!', 'Check for yourself what the clerk says: the scooter, the days, the price, the change, and whether the scooter has scratches!')
+    ];
+  },
+  hintSections() { return [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }]; },
+
+  listHTML(rowsOnly) {
+    const t = this.task, r = x => this.ruby(x);
+    const rows = [
+      { zh: `要租：${zhNum(t.cc)}西西的機車，租${NZ(t.days)}天`, es: `Alquilar una moto de ${t.cc} cc por ${dayEs(t.days)}`, en: `Rent a ${t.cc}cc scooter for ${dayEn(t.days)}` },
+      { zh: '身上有：機車駕照，還有五百、一千、兩千元的鈔票各一張', es: 'Llevas tu licencia de moto y un billete de quinientos, uno de mil y uno de dos mil', en: 'You have your scooter license and one NT$500, one NT$1,000 and one NT$2,000 bill' }
+    ];
+    if (rowsOnly) return rows;
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 租車單：車種、天數、租金 */
+  rentBox(cc, days, withTotal) {
+    const r = x => this.ruby(x);
+    return `<div class="pbox bill"><div class="ph">🛵 ${r('租車單')}</div><div class="pl">${r('車種')}：${zhNum(cc)}${r('西西')}</div><div class="pl">${r('租')}：${NZ(days)}天</div>` +
+      (withTotal ? `<div class="pv">${r('租金')} NT$ ${this.task.total}</div>` : '') + '</div>';
+  },
+  /* 取車時的車況單 */
+  noteBox() {
+    const r = x => this.ruby(x);
+    return `<div class="pbox"><div class="ph">📝 ${r('車況單')}</div><div class="pl">${r('左邊車身有一道舊刮痕（已拍照）')}</div></div>`;
+  },
+
+  getConfig() {
+    const N = this.N, t = this.task;
+    const att = (zh, es, en) => L(`店員：${zh}`, es, en);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const ccZh = c => `${zhNum(c)}西西`;
+    const pays = payStates(Game, {
+      who: '店員', place: 'shop', html: () => Game.rentBox(t.oCc, t.oDays, true),
+      rudePay: '你是不是想多收我的錢啊？',
+      finish: () => { Game.state = 'HELMET'; },
+      extraWhy: () => M(`店員多報了：租車單上是${t.total}元，他說${t.said}元。付錢要以租車單上的金額為準。`, `El empleado cobró de más: la hoja dice ${esM(t.total)} y dijo ${esM(t.said)}. Paga lo que dice la hoja.`, `The clerk overcharged: the rental sheet says ${enM(t.total)} but he said ${enM(t.said)}. Pay what the sheet says.`)
+    });
+
+    return {
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你在家裡，手機響了一聲，是Ami傳來的LINE。）', '(Estás en casa. Tu celular suena: es un LINE de Ami.)', '(You are at home. Your phone buzzes — a LINE from Ami.)'),
+          ...Game.amiLines(),
+          L('我：好，我現在去租機車！', '¡Bien, voy a alquilar la moto ahora!', "OK, I'm going to rent the scooter now!")
+        ],
+        options: ['走進機車行'],
+        next: () => { Game.startTimer(); Game.state = 'ARRIVE'; }
+      },
+
+      /* ═══ 走進機車行 ═══ */
+      ARRIVE: {
+        place: 'shop',
+        dialogue: () => [L('（你走進一間租機車行。店員坐在櫃檯後面。）', '(Entras a una tienda de alquiler de motos. El empleado está detrás del mostrador.)', '(You walk into a scooter rental shop. The clerk sits behind the counter.)'), att('你好，歡迎光臨。', '¡Hola, buenas!', 'Welcome!')],
+        options: () => rotOf(t, ['你好，我想租機車。', '欸，給我一台車。', '我隨便看看就好，不租。']),
+        next: c => {
+          if (c !== '你好，我想租機車。') {
+            Game.addMistake(c.startsWith('欸')
+              ? POLITE
+              : M('你是來租機車的，要先跟店員說清楚你想租車。', 'Vienes a alquilar una moto: dile claramente al empleado que quieres alquilar.', 'You came to rent a scooter — tell the clerk clearly that you want to rent one.'));
+            return;
+          }
+          goodFirst('ARRIVE', '沒錯！先打招呼，再說你想租機車。', '¡Exacto! Saluda y di que quieres alquilar una moto.', 'Right! Greet them, then say you want to rent a scooter.');
+          Game.state = 'LICENSE';
+        }
+      },
+
+      /* ═══ 出示駕照 ═══ */
+      LICENSE: {
+        place: 'shop',
+        dialogue: () => [att('要租車的話，請給我看你的駕照，我影印一下。', 'Para alquilar, muéstreme su licencia; voy a hacer una copia.', 'To rent, please show me your license — I will make a copy.')],
+        options: () => rotOf(t, ['好，這是我的機車駕照，請看。', '我沒有駕照，可是我騎得很好。', '給你看我朋友的駕照可以嗎？']),
+        next: c => {
+          if (c !== '好，這是我的機車駕照，請看。') {
+            Game.addMistake(c.startsWith('我沒有')
+              ? M('沒有機車駕照不能租機車，也不能騎車，這是違法的。', 'Sin licencia de moto no se puede alquilar ni conducir; es ilegal.', 'You cannot rent or ride a scooter without a license — it is illegal.')
+              : M('要用「自己的」駕照，不能用別人的。', 'Hay que mostrar tu propia licencia, no la de otra persona.', 'You must show your own license, not someone else\'s.'));
+            return;
+          }
+          goodFirst('LICENSE', '沒錯！租機車要出示自己的駕照。', '¡Exacto! Para alquilar una moto muestras tu propia licencia.', 'Right! To rent a scooter you show your own license.');
+          Game.state = 'ORDER';
+        }
+      },
+
+      /* ═══ 說車種和天數：實際說的先記下來（說錯也照樣往下走，錯誤扣分、結局統一看租到的車） ═══ */
+      ORDER: {
+        place: 'shop',
+        dialogue: () => [att('好，駕照還你。你要租哪一種車？租幾天？', 'Bien, aquí tiene su licencia. ¿Qué tipo de moto y por cuántos días?', 'OK, here is your license back. Which scooter, and for how many days?')],
+        options: () => {
+          t._altDays = t._altDays || pick(DAYS.filter(d => d !== t.days));
+          return rotOf(t, [`我要租${ccZh(t.cc)}的機車，租${NZ(t.days)}天。`, `我要租${ccZh(otherCc(t.cc))}的機車，租${NZ(t.days)}天。`, `我要租${ccZh(t.cc)}的機車，租${NZ(t._altDays)}天。`]);
+        },
+        next: c => {
+          const good = `我要租${ccZh(t.cc)}的機車，租${NZ(t.days)}天。`;
+          if (c === good) { t.oCc = t.cc; t.oDays = t.days; goodFirst('ORDER', '沒錯！車種和天數都要說清楚。', '¡Exacto! Di claro el tipo de moto y los días.', 'Right! Say the scooter and the number of days clearly.'); }
+          else if (c.includes(ccZh(otherCc(t.cc)))) {
+            t.oCc = otherCc(t.cc); t.oDays = t.days;
+            Game.addMistake(M(`Ami 要${t.cc}西西的車，你說成${t.oCc}西西。`, `Ami quería una de ${t.cc} cc y dijiste ${t.oCc} cc.`, `Ami wanted a ${t.cc}cc scooter, but you said ${t.oCc}cc.`));
+          } else {
+            t.oCc = t.cc; t.oDays = t._altDays;
+            Game.addMistake(M(`Ami 要租${t.days}天，你說成${t.oDays}天。`, `Ami quería ${dayEs(t.days)} y dijiste ${dayEs(t.oDays)}.`, `Ami wanted ${dayEn(t.days)} but you said ${dayEn(t.oDays)}.`));
+          }
+          /* 店員複誦：45% 聽錯車種或天數 */
+          t.cfWrong = Math.random() < 0.45; t.cfCc = t.oCc; t.cfDays = t.oDays;
+          if (t.cfWrong) { if (Math.random() < 0.5) t.cfCc = otherCc(t.oCc); else t.cfDays = pick(DAYS.filter(d => d !== t.oDays)); }
+          Game.state = 'CONFIRM';
+        }
+      },
+
+      /* ═══ 店員複誦：45% 聽錯（以你「實際說的」為準） ═══ */
+      CONFIRM: catchState(Game, {
+        key: 'CONFIRM', place: 'shop',
+        html: () => Game.rentBox(t.cfCc, t.cfDays, false),
+        dialogue: () => [att(`好，${ccZh(t.cfCc)}的機車，租${NZ(t.cfDays)}天，對嗎？`, `Bien, una moto de ${t.cfCc} cc por ${dayEs(t.cfDays)}, ¿correcto?`, `Okay, a ${t.cfCc}cc scooter for ${dayEn(t.cfDays)} — is that right?`)],
+        ok: '對，沒錯，謝謝。',
+        fix: () => t.cfWrong ? `不好意思，我要的是${ccZh(t.oCc)}，租${NZ(t.oDays)}天。` : `不好意思，我要的是${ccZh(otherCc(t.oCc))}，租${NZ(t.oDays)}天。`,
+        rude: '你到底有沒有在聽啊？',
+        wrong: () => t.cfWrong,
+        whyWrong: () => M(`店員聽錯了：他說「${t.cfCc}西西、${t.cfDays}天」，你說的是「${t.oCc}西西、${t.oDays}天」。`, `El empleado entendió mal: dijo «${t.cfCc} cc, ${dayEs(t.cfDays)}», pero tú dijiste «${t.oCc} cc, ${dayEs(t.oDays)}».`, `The clerk misheard: he said "${t.cfCc}cc, ${dayEn(t.cfDays)}" but you said "${t.oCc}cc, ${dayEn(t.oDays)}".`),
+        whyRight: () => M(`店員說對了：就是「${t.oCc}西西、${t.oDays}天」。`, `Lo repitió bien: «${t.oCc} cc, ${dayEs(t.oDays)}».`, `He had it right: "${t.oCc}cc, ${dayEn(t.oDays)}".`),
+        goodWrong: ['你很細心！店員複誦錯了，要馬上說，不然租金會不一樣。', '¡Qué atento! El empleado repitió mal; dilo enseguida, porque el precio cambia.', 'Well spotted! The clerk repeated it wrong — say so right away, or the price will be different.'],
+        goodOk: ['店員複誦的時候，要對一下車種和天數。', 'Cuando el empleado repita, compara el tipo de moto y los días.', 'When the clerk repeats it, check the scooter and the days.'],
+        apology: () => [att(`啊，不好意思！是${ccZh(t.oCc)}，租${NZ(t.oDays)}天。`, `¡Ay, disculpe! Son ${t.oCc} cc y ${dayEs(t.oDays)}.`, `Oh, sorry! ${t.oCc}cc for ${dayEn(t.oDays)}.`)],
+        go: () => {
+          /* 以實際說的為準：重算租金 */
+          initPay(t, t.oDays * RATE[t.oCc], [{ zh: '多算了安全帽費用五十元', price: 50 }, { zh: '多算了一天的保險費一百元', price: 100 }]);
+          t.retWrong = Math.random() < 0.4;
+          Game.state = 'INSURE';
+        }
+      }),
+
+      /* ═══ 看契約和保險 ═══ */
+      INSURE: {
+        place: 'shop',
+        html: () => Game.rentBox(t.oCc, t.oDays, true),
+        dialogue: () => [L('（店員把租車契約推到你面前。）', '(El empleado empuja el contrato de alquiler hacia ti.)', '(The clerk slides the rental contract over to you.)'), att('這是契約，租金裡有包強制險。如果出事，要馬上報警，也要打電話給我們。你看一下，沒問題就簽名。', 'Este es el contrato; el seguro obligatorio está incluido. Si hay un accidente, llame enseguida a la policía y también a nosotros. Léalo y, si está bien, firme.', 'This is the contract; compulsory insurance is included. If anything happens, call the police right away and call us too. Read it and sign if it looks fine.')],
+        options: () => rotOf(t, ['好，我看過了。如果出事，我會馬上報警，也會打給你們。', '我不看了，直接簽名就好。', '出了事我自己處理，不用打給你們。']),
+        next: c => {
+          if (c !== '好，我看過了。如果出事，我會馬上報警，也會打給你們。') {
+            Game.addMistake(c.startsWith('我不看')
+              ? M('簽名以前要先看契約，租金、保險和賠償都寫在上面。', 'Antes de firmar lee el contrato: el precio, el seguro y las indemnizaciones están ahí.', 'Read the contract before you sign — the fee, insurance and compensation are written in it.')
+              : M('出事要馬上報警，也要通知租車行，不能自己處理。', 'Si hay un accidente, llama a la policía y avisa a la tienda; no lo resuelvas por tu cuenta.', "If there's an accident, call the police and tell the shop — don't handle it alone."));
+            return;
+          }
+          goodFirst('INSURE', '沒錯！簽名以前要看契約，也要知道出事怎麼辦。', '¡Exacto! Lee el contrato antes de firmar y sabe qué hacer si hay un accidente.', 'Right! Read the contract before signing and know what to do after an accident.');
+          Game.state = 'PAY';
+        }
+      },
+
+      PAY: pays.PAY,
+      PAY_FIX: pays.PAY_FIX,
+      CHANGE: pays.CHANGE,
+
+      /* ═══ 借安全帽 ═══ */
+      HELMET: {
+        place: 'shop',
+        dialogue: () => [att('安全帽在這邊，自己挑一頂。', 'Los cascos están aquí; elija uno.', 'The helmets are here — pick one.')],
+        options: () => rotOf(t, ['我挑一頂合適的，看看有沒有裂痕，再戴好、扣好帶子。', '我只騎一小段，不用戴安全帽。', '這頂有裂痕，不過沒關係，就戴這頂。']),
+        next: c => {
+          if (c !== '我挑一頂合適的，看看有沒有裂痕，再戴好、扣好帶子。') {
+            Game.addMistake(c.startsWith('我只騎')
+              ? M('在台灣騎機車一定要戴安全帽，沒戴會被罰。', 'En Taiwán siempre hay que llevar casco en moto; si no, te multan.', 'In Taiwan you must always wear a helmet on a scooter — otherwise you get fined.')
+              : M('有裂痕的安全帽不安全，要請店員換一頂。', 'Un casco con grietas no es seguro; pide que te den otro.', 'A cracked helmet is not safe — ask the clerk for another one.'));
+            return;
+          }
+          goodFirst('HELMET', '沒錯！安全帽要合適、沒有裂痕，還要扣好帶子。', '¡Exacto! El casco debe quedar bien, sin grietas, y con la correa abrochada.', 'Right! The helmet should fit, have no cracks, and the strap must be fastened.');
+          Game.state = 'CHECKBIKE';
+        }
+      },
+
+      /* ═══ 取車檢查：刮痕畫在單子上、拍照存證 ═══ */
+      CHECKBIKE: {
+        place: 'shop',
+        dialogue: () => [L('（店員帶你到店門口，你的機車停在那裡。）', '(El empleado te lleva a la entrada, donde está tu moto.)', '(The clerk takes you out front, where your scooter is parked.)'), att('車在這裡，你看一下車子，我拿車況單給你。', 'Aquí está la moto; revísela, le traigo la hoja de estado.', 'Here is the scooter — take a look while I get the condition sheet.')],
+        options: () => rotOf(t, ['麻煩把車上的刮痕畫在單子上，我也拍照存證。', '看起來沒問題，不用檢查，我直接騎走。', '有刮痕的話，等我還車的時候再說。']),
+        next: c => {
+          if (c !== '麻煩把車上的刮痕畫在單子上，我也拍照存證。') {
+            Game.addMistake(c.startsWith('看起來')
+              ? M('取車的時候一定要先檢查車子，不然還車時可能被說是你弄的。', 'Al recoger la moto hay que revisarla; si no, al devolverla pueden decir que fuiste tú.', 'Inspect the scooter at pickup — otherwise you may be blamed for old damage at return.')
+              : M('刮痕要在取車的時候就記下來、拍照，等還車再說就來不及了。', 'Los rayones se anotan y se fotografían al recoger la moto; al devolverla ya es tarde.', 'Record and photograph scratches at pickup — it is too late once you return it.'));
+            return;
+          }
+          goodFirst('CHECKBIKE', '沒錯！取車先檢查，刮痕要寫在單子上，也要拍照。', '¡Exacto! Revisa al recoger, anota los rayones y toma fotos.', 'Right! Inspect at pickup, write the scratches on the sheet and take photos.');
+          Game.state = 'RETURN';
+        }
+      },
+
+      /* ═══ 還車：40% 店員說有新刮傷要扣錢（其實是舊的） ═══ */
+      RETURN: catchState(Game, {
+        key: 'RETURN', place: 'shop',
+        html: () => Game.noteBox(),
+        dialogue: () => [L(`（過了${NZ(t.oDays)}天，你把機車騎回機車行還車。店員繞著車子看了一圈。）`, `(Pasan ${dayEs(t.oDays)}. Devuelves la moto a la tienda y el empleado le da una vuelta.)`, `(${dayEn(t.oDays)} later you ride the scooter back. The clerk walks around it.)`),
+          t.retWrong ? att('欸，你看，車子左邊有一道刮傷，要扣兩百元修理費喔。', 'Mire, la moto tiene un rayón a la izquierda; le descontaré doscientos dólares de reparación.', 'Look, there is a scratch on the left side — I\'ll deduct NT$200 for repairs.')
+                     : att('我看一下……嗯，車子沒問題，沒有新的刮傷。', 'Déjeme ver… la moto está bien, no hay rayones nuevos.', 'Let me see… the scooter is fine, no new scratches.')],
+        ok: '好，謝謝。',
+        fix: () => t.retWrong ? '不好意思，這道刮痕取車的時候就有了，單子上有寫，我也有拍照。' : '不好意思，車子左邊好像有新的刮傷，要不要扣我的錢？',
+        rude: '你們是不是想亂扣我的錢啊？',
+        wrong: () => t.retWrong,
+        whyWrong: () => M('店員說有新刮傷，可是那道刮痕取車的時候就有了。你有拍照、單子上也有寫，要拿出來說明，不能直接付錢。', 'El empleado dijo que había un rayón nuevo, pero ya existía al recoger la moto. Tienes fotos y está en la hoja: muéstralo, no pagues sin más.', 'The clerk said there was a new scratch, but it was there at pickup. You have photos and it is on the sheet — show them instead of just paying.'),
+        whyRight: () => M('店員說對了：車子沒有新的刮傷，不需要再問他要不要扣錢。', 'El empleado tenía razón: no hay rayones nuevos; no hacía falta preguntar si te iban a descontar.', 'The clerk was right: there are no new scratches, so there was no need to ask about a deduction.'),
+        goodWrong: ['你很細心！取車時拍照、寫在單子上，還車時才能證明那道刮痕本來就有。', '¡Qué atento! Las fotos y la hoja del día de la recogida demuestran que el rayón ya existía.', 'Well spotted! The photos and the sheet from pickup prove the scratch was already there.'],
+        goodOk: ['還車的時候，要跟著店員一起檢查車子。', 'Al devolver la moto, revísala junto con el empleado.', 'When you return the scooter, inspect it together with the clerk.'],
+        apology: () => [att('啊，我對一下單子……真的，這道是舊的，不扣錢，不好意思。', 'Ah, déjeme ver la hoja… es verdad, ese rayón es viejo; no se descuenta nada. Disculpe.', 'Ah, let me check the sheet… you\'re right, that one is old. No deduction — sorry.')],
+        go: () => { Game.stopTimer(); Game.state = 'END'; }
+      }),
+
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2 && t.oCc === t.cc && t.oDays === t.days;
+          track('game_complete', { game: 'scooterrent', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            L('（你走出機車行，打開手機，傳訊息給Ami。）', '(Sales de la tienda, abres el celular y le escribes a Ami.)', '(You leave the shop, open your phone and message Ami.)'),
+            Game._endGood
+              ? L(`Ami：太好了，${N}，謝謝你！車種和天數剛剛好，也沒有被亂扣錢。`, `¡Qué bien, ${N}, gracias! La moto y los días son justo lo que quería, y no te cobraron de más.`, `Great, ${N}, thank you! The scooter and the days are just right, and nobody overcharged you.`)
+              : (t.oCc !== t.cc || t.oDays !== t.days
+                ? L(`Ami：欸，我要的是${zhNum(t.cc)}西西、租${NZ(t.days)}天，怎麼租成${zhNum(t.oCc)}西西、${NZ(t.oDays)}天了……下次要說清楚喔！`, `Oye, yo quería ${t.cc} cc por ${dayEs(t.days)} y alquilaste ${t.oCc} cc por ${dayEs(t.oDays)}… ¡la próxima vez dilo claro!`, `Hey, I wanted ${t.cc}cc for ${dayEn(t.days)}, but you rented ${t.oCc}cc for ${dayEn(t.oDays)}… say it clearly next time!`)
+                : L('Ami：欸，聽起來有點不順利……下次要對店員說的車種、天數、價錢、找的錢，還有車子的刮痕喔！', 'Parece que hubo problemas… la próxima vez revisa el tipo de moto, los días, el precio, el cambio y los rayones.', "Hmm, sounds like it didn't go smoothly… next time check the scooter, days, price, change and scratches."))
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: stdResultCfg('phone')
+    };
+  }
+});
+
+GameBoot();
+Music.init({ bpm: 110, tracks: [
+  { wave: 'square', vol: 0.2, notes: 'A4 . C5 E5 . D5 C5 . | B4 . D5 F5 . E5 D5 . | C5 . E5 G5 . F5 E5 . | D5 - B4 - A4 - . .' },
+  { wave: 'triangle', vol: 0.5, notes: 'A2 . E3 . A2 . E3 . | G2 . D3 . G2 . D3 . | F2 . C3 . F2 . C3 . | E2 . B2 . A2 . . .' },
+  { vol: 0.2, notes: 'k . h . k h . s' }] });
+</script>
+</body>
+</html>
