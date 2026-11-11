@@ -74,11 +74,11 @@
   .bellwrap .pcap { text-align: center; color: #3b4150; font-weight: 700; font-size: 15px; margin-bottom: 8px; }
   .bellplates { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; }
   #options-area.panelmode button.plate { font: inherit; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px 6px 14px; cursor: pointer; color: #2e3340; line-height: 1.2; background: linear-gradient(#fbf8ef, #ece6d6); border: 2px solid #b9ae94; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,.22); user-select: none; -webkit-tap-highlight-color: transparent; }
-  #options-area.panelmode button.plate:hover { background: linear-gradient(#fff, #f1ecde); color: #2e3340; }
+  @media (hover: hover) and (pointer: fine) { #options-area.panelmode button.plate:hover { background: linear-gradient(#fff, #f1ecde); color: #2e3340; } }   /* 只有滑鼠才有 hover；手機上 hover 樣式會讓 iPhone 第一下只算「碰到」、要按第二下才有反應 */
   .plate .nameplate { background: #fff; border: 1.5px solid #c9bfa4; border-radius: 4px; padding: 2px 14px 3px; font-weight: 700; font-size: 18px; }
   .plate .c { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 35% 30%, #fafbfc, #c3c8d0 70%, #a9afb9); border: 3px solid #8d94a1; box-shadow: 0 2px 3px rgba(0,0,0,.35), inset 0 0 0 2px #e9ecf0; transition: box-shadow .12s, background .12s; }
   .plate .c svg { width: 22px; height: 22px; fill: #c0392b; }
-  #options-area.panelmode button.plate:hover .c { box-shadow: 0 0 0 3px #ffb067, 0 2px 3px rgba(0,0,0,.35), inset 0 0 0 2px #e9ecf0; }
+  @media (hover: hover) and (pointer: fine) { #options-area.panelmode button.plate:hover .c { box-shadow: 0 0 0 3px #ffb067, 0 2px 3px rgba(0,0,0,.35), inset 0 0 0 2px #e9ecf0; } }
   #options-area.panelmode button.plate:active .c { background: radial-gradient(circle at 35% 30%, #ffe2bd, #ff9b3d 70%, #e07a14); }
   /* ── 電梯按鍵面板（按樓層、開關門用） ── */
   #options-area.panelmode { display: flex; flex-direction: column; align-items: center; }
@@ -91,8 +91,8 @@
   #options-area.panelmode .pb .c svg { width: 26px; height: 17px; fill: #3a3f4b; }
   #options-area.panelmode .pb .lab { margin-top: 2px; font-size: 14px; font-weight: 700; color: #3b4150; }
   #options-area.panelmode .pb.off { opacity: .35; cursor: default; }
-  #options-area.panelmode button.pb:hover { background: none; color: #2e3340; }
-  #options-area.panelmode button.pb:hover .c { box-shadow: 0 0 0 3px #ffb067, 0 2px 3px rgba(0,0,0,.35), inset 0 0 0 2px #e9ecf0; }
+  @media (hover: hover) and (pointer: fine) { #options-area.panelmode button.pb:hover { background: none; color: #2e3340; } }
+  @media (hover: hover) and (pointer: fine) { #options-area.panelmode button.pb:hover .c { box-shadow: 0 0 0 3px #ffb067, 0 2px 3px rgba(0,0,0,.35), inset 0 0 0 2px #e9ecf0; } }
   #options-area.panelmode button.pb:active .c { background: radial-gradient(circle at 35% 30%, #ffe2bd, #ff9b3d 70%, #e07a14); }
 
 </style></head>
@@ -668,8 +668,7 @@ const Game = defineGame({
       DOOR: {
         place: 'shop',
         html: () => Game.displayHTML(),
-        dialogue: () => [L('（你走出電梯。走廊上有三戶人家，每一戶的門旁邊都有一個電鈴。）', '(Sales del ascensor. En el pasillo hay tres puertas, y junto a cada una hay un timbre.)', '(You step out of the elevator. There are three doors in the hallway, each with a doorbell beside it.)'),
-          L(`我：Ami住在${t.n}樓之${t.unit}。`, `Ami vive en el piso ${t.n}, puerta ${t.unit}.`, `Ami lives on floor ${t.n}, unit ${t.unit}.`)],
+        dialogue: () => [L('（你走出電梯。走廊上有三戶人家，每一戶的門旁邊都有一個電鈴。）', '(Sales del ascensor. En el pasillo hay tres puertas, y junto a cada una hay un timbre.)', '(You step out of the elevator. There are three doors in the hallway, each with a doorbell beside it.)')],   // 不再提示 Ami 住幾號：要自己記得（任務提示／Ami 的訊息）
         options: () => [1, 2, 3].map(k => Game.bellOpt(k)),
         next: c => {
           const k = +c.match(/之(\d)/)[1];
