@@ -475,7 +475,7 @@ const Game = defineGame({
         next: c => {
           if (c !== guardOk) {
             Game.addMistake(c === '閃開啦！'
-              ? M('管理員只是問你找哪一戶，不要叫他閃開，很沒禮貌。要說：找朋友，住在幾樓之幾。', 'El guardia solo pregunta a qué puerta vas: no le digas que se aparte, es de mala educación. Responde con quién buscas y en qué piso vive.', 'The guard is only asking which unit you want — do not tell him to get out of the way, it is rude. Say who you are visiting and where she lives.')
+              ? M('管理員只是問你找哪一戶，不要叫他閃開，很沒禮貌。', 'El guardia solo pregunta a qué puerta vas: no le digas que se aparte, es de mala educación.', 'The guard is only asking which unit you want — do not tell him to get out of the way, it is rude.')
               : M('管理員問你話，要回答他，不要不理他。', 'El guardia te hizo una pregunta: respóndele, no lo ignores.', "The guard asked you a question — answer him, don't ignore him."));
             return;
           }
@@ -576,7 +576,7 @@ const Game = defineGame({
         options: () => rot(['對啊，真的很熱。', '你吃飽了嗎？', '（不說話，看手機）']),
         next: c => {
           if (c !== '對啊，真的很熱。') { Game.addMistake(c === '你吃飽了嗎？' ? M('鄰居在聊天氣，要回答天氣的事。', 'El vecino habla del clima: responde sobre el clima.', 'The neighbor is talking about the weather — answer about the weather.') : M('鄰居跟你說話，不要裝沒聽到，簡單回答一下比較有禮貌。', 'El vecino te habla: no finjas que no oíste; responde algo breve, es más cortés.', "The neighbor spoke to you — don't pretend not to hear; a short reply is more polite.")); return; }
-          goodFirst('CHAT', '很好！在台灣，電梯裡常常會聊聊天氣。', '¡Bien! En Taiwán es común charlar del clima en el ascensor.', 'Good! In Taiwan it is common to chat about the weather in the elevator.');
+          goodFirst('CHAT', '很好，跟鄰居聊聊，練習中文！', '¡Bien! Charla con tu vecino y practica chino.', 'Good! Chat with your neighbor and practice Chinese.');
           rideOn();
         }
       },
@@ -638,18 +638,18 @@ const Game = defineGame({
       EARLY: {
         place: 'shop',
         html: () => Game.displayHTML(),
-        dialogue: () => [L(`（門開了，外面有人要上電梯。）`, `(La puerta se abre y alguien quiere subir.)`, `(The door opens and someone wants to get on.)`), L(`我：Ami住在${t.n}樓……`, `Ami vive en el piso ${t.n}…`, `Ami lives on floor ${t.n}…`)],
-        options: () => rot(['走出電梯。', `不出去，這裡不是${t.n}樓。`, '大聲問：「是誰按這一層的？」']),
+        dialogue: () => [L(`（門開了，外面有人要上電梯。）`, `(La puerta se abre y alguien quiere subir.)`, `(The door opens and someone wants to get on.)`)],
+        options: () => rot(['走出電梯。', `不出去，這裡不是${t.n}樓。`, '（直接按關門，不讓別人進電梯）']),
         next: c => {
           if (c !== `不出去，這裡不是${t.n}樓。`) {
             Game.addMistake(c === '走出電梯。'
               ? M(`這裡是${t.x}樓，Ami住${t.n}樓。出電梯以前，要先看樓層數字。`, `Aquí es el piso ${t.x}; Ami vive en el ${t.n}. Antes de salir, mira el número del piso.`, `This is floor ${t.x}; Ami lives on ${t.n}. Check the floor number before you step out.`)
-              : M('不用問，有人按了這一層而已，不要大聲說話。', 'No hace falta preguntar: alguien solo presionó este piso. No hables en voz alta.', "No need to ask — someone just pressed this floor. Don't shout."));
+              : M('外面的人也要搭電梯，不能按關門不讓他進來，很沒禮貌。', 'La persona de afuera también quiere subir: no cierres la puerta en su cara, es de mala educación.', "The person outside wants to ride too — don't press close to shut them out, it is rude."));
             return;
           }
           goodFirst('EARLY', '你很細心！出電梯以前，要先看樓層。', '¡Qué atento! Antes de salir, mira el piso.', 'Well spotted! Check the floor before you get out.');
           Game.cur = t.n;
-          Game.thought = [L(`（一個人走進電梯，門關上了。電梯繼續往上，到${t.n}樓了。）`, `(Alguien entra, la puerta se cierra y el ascensor sigue subiendo hasta el piso ${t.n}.)`, `(Someone gets in, the door closes and the elevator continues up to floor ${t.n}.)`)];
+          Game.thought = [L(`（那個人走進電梯，門關上了。電梯繼續往上，到${t.n}樓了。）`, `(La persona entra, la puerta se cierra y el ascensor sigue subiendo hasta el piso ${t.n}.)`, `(The person gets in, the door closes and the elevator continues up to floor ${t.n}.)`)];
           Game.state = 'ARRIVE';
         }
       },
