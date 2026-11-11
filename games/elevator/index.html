@@ -69,9 +69,17 @@
   .elev { display: flex; flex-direction: column; align-items: center; margin: 10px 0 14px; }
   .elev .disp { background: #1c1f2a; color: #ff7b3a; font: 700 44px/1 monospace; padding: 12px 28px; border-radius: 8px; border: 4px solid #8a93a8; letter-spacing: 4px; text-shadow: 0 0 8px rgba(255,123,58,.7); }
   .elev .cap { margin-top: 6px; font-size: 16px; color: var(--muted); }
-  .ppanel.bells .pgrid { grid-template-columns: repeat(3, 1fr); gap: 10px 30px; }
-  #options-area.panelmode .pb .c svg { fill: #b23a2a; }
-  #options-area.panelmode .pb .lab { font-size: 17px; }
+  /* ── 三戶各自的門牌＋電鈴（跟走廊圖裡的三扇門一樣，左、中、右＝之1、之2、之3） ── */
+  .bellwrap { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; }
+  .bellwrap .pcap { text-align: center; color: #3b4150; font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+  .bellplates { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; }
+  #options-area.panelmode button.plate { font: inherit; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px 6px 14px; cursor: pointer; color: #2e3340; line-height: 1.2; background: linear-gradient(#fbf8ef, #ece6d6); border: 2px solid #b9ae94; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,.22); user-select: none; -webkit-tap-highlight-color: transparent; }
+  #options-area.panelmode button.plate:hover { background: linear-gradient(#fff, #f1ecde); color: #2e3340; }
+  .plate .nameplate { background: #fff; border: 1.5px solid #c9bfa4; border-radius: 4px; padding: 2px 14px 3px; font-weight: 700; font-size: 18px; }
+  .plate .c { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 35% 30%, #fafbfc, #c3c8d0 70%, #a9afb9); border: 3px solid #8d94a1; box-shadow: 0 2px 3px rgba(0,0,0,.35), inset 0 0 0 2px #e9ecf0; transition: box-shadow .12s, background .12s; }
+  .plate .c svg { width: 22px; height: 22px; fill: #c0392b; }
+  #options-area.panelmode button.plate:hover .c { box-shadow: 0 0 0 3px #ffb067, 0 2px 3px rgba(0,0,0,.35), inset 0 0 0 2px #e9ecf0; }
+  #options-area.panelmode button.plate:active .c { background: radial-gradient(circle at 35% 30%, #ffe2bd, #ff9b3d 70%, #e07a14); }
   /* ── 電梯按鍵面板（按樓層、開關門用） ── */
   #options-area.panelmode { display: flex; flex-direction: column; align-items: center; }
   .ppanel { background: linear-gradient(90deg, #c4c9d1, #e6e9ee 45%, #c9ced6); border: 3px solid #9aa1ad; border-radius: 16px; padding: 14px 30px 16px; box-shadow: inset 0 0 0 2px #f4f6f9, 0 3px 8px rgba(0,0,0,.25); }
@@ -337,8 +345,8 @@ const Game = defineGame({
     if (this.state === 'DOOR') {   // 走廊上三戶的電鈴
       const BELL = '<svg viewBox="0 0 24 24"><path d="M12 3a1.6 1.6 0 0 1 1.6 1.6v.4A6 6 0 0 1 18 11v3.5l1.7 2.3a.8.8 0 0 1-.6 1.3H4.9a.8.8 0 0 1-.6-1.3L6 14.5V11a6 6 0 0 1 4.4-6v-.4A1.6 1.6 0 0 1 12 3zm-2 16h4a2 2 0 0 1-4 0z"/></svg>';
       area.className = 'panelmode';
-      area.innerHTML = `<div class="ppanel bells"><div class="pcap">${this.ruby('按電鈴')}</div><div class="pgrid">`
-        + [1, 2, 3].map(k => `<button class="opt pb" data-raw="${this.bellOpt(k)}" aria-label="${this.bellOpt(k)}"><span class="c">${BELL}</span><span class="lab">${this.ruby('之' + k)}</span></button>`).join('')
+      area.innerHTML = `<div class="bellwrap"><div class="pcap">${this.ruby('按電鈴')}</div><div class="bellplates">`   // 每一戶各有自己的門牌和電鈴
+        + [1, 2, 3].map(k => `<button class="opt plate" data-raw="${this.bellOpt(k)}" aria-label="${this.bellOpt(k)}"><span class="nameplate">${this.ruby('之' + k)}</span><span class="c">${BELL}</span></button>`).join('')
         + `</div></div>`;
       area.querySelectorAll('button.opt').forEach(b => { b.onclick = () => this.handleChoice(b.dataset.raw); });
       return;

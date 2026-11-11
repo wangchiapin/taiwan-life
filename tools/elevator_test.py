@@ -215,7 +215,7 @@ def run(b):
         check(f'任務卡寫「Ami住：8樓之{u}」', f'Ami住：8樓之{u}' in p.evaluate('Game.listHTML(true).map(x=>x.zh).join()'))
         to_lobby(p); to_help(p); help_right(p); leave_trans(p); press(p, '不客氣，慢走！'); leave_trans(p)
         press(p, '不好意思，借過一下。'); leave_trans(p)
-        check('DOOR：三顆電鈴、有「按電鈴」、說 Ami 住幾樓之幾', st(p) == 'DOOR' and p.locator('.ppanel.bells button.opt').count() == 3 and f'8樓之{u}' in txt(p, '#npc-dialogue') and '按電鈴' in txt(p, '.pcap'), (st(p), opts(p)))
+        check('DOOR：三顆電鈴、有「按電鈴」、說 Ami 住幾樓之幾', st(p) == 'DOOR' and p.locator('.bellplates button.plate').count() == 3 and f'8樓之{u}' in txt(p, '#npc-dialogue') and '按電鈴' in txt(p, '.pcap'), (st(p), opts(p)))
         check('DOOR 圖是 door.jpg', img(p).endswith('door.jpg'), img(p))
         seen = {}
         for k in [x for x in (1, 2, 3) if x != u]:
