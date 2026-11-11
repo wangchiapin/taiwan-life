@@ -1286,12 +1286,24 @@ const GameCore = {
     }).join('');
   },
   missing: new Set(),
+  _retried: new Set(),
+  /* 圖片載入失敗：先換成表情，隔一下自動重試一次（手機網路偶爾斷一下）；還是失敗才記成「沒有這張圖」 */
   imageMissing() {
     const img = document.getElementById('npc-avatar'), ph = document.getElementById('scene-placeholder');
-    const cur = img.getAttribute('src');
-    if (cur) this.missing.add(cur);
+    const cur = img.getAttribute('src') || '', key = cur.replace(/[?&]retry=1$/, '');
+    if (key && cur === key && !this._retried.has(key)) {
+      this._retried.add(key);
+      img.style.display = 'none'; ph.style.display = 'grid';
+      setTimeout(() => {
+        if (img.getAttribute('src') !== key) return;   // 這段時間已經換成別張圖了
+        img.addEventListener('load', () => { if (img.getAttribute('src') === key + '?retry=1') { img.style.display = 'block'; ph.style.display = 'none'; } }, { once: true });
+        img.setAttribute('src', key + '?retry=1');
+      }, 700);
+      return;
+    }
+    if (key) this.missing.add(key);
     // 輪流圖的第二張不存在：回到第一張，不要跳成 emoji
-    if (this._anim && cur === this._anim.alt) { this.stopAnim(); if (this._anim0 && !this.missing.has(this._anim0)) { img.setAttribute('src', this._anim0); return; } }
+    if (this._anim && key === this._anim.alt) { this.stopAnim(); if (this._anim0 && !this.missing.has(this._anim0)) { img.setAttribute('src', this._anim0); return; } }
     img.style.display = 'none'; ph.style.display = 'grid';
   },
   stopAnim() { clearInterval(this._animTimer); this._anim = null; },
@@ -1303,7 +1315,7 @@ const GameCore = {
     ph.textContent = emoji;
     if (!src || this.missing.has(src)) { img.style.display = 'none'; ph.style.display = 'grid'; return; }
     img.style.display = 'block'; ph.style.display = 'none';
-    if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+    if ((img.getAttribute('src') || '').replace(/[?&]retry=1$/, '') !== src) img.setAttribute('src', src);
     const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (alt && !calm && !this.missing.has(alt)) {
       const pre = new Image(); pre.onerror = () => this.missing.add(alt); pre.src = alt;   // 先載入，避免閃一下

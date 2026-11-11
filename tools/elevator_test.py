@@ -263,6 +263,22 @@ def run(b):
     p.close()
     for f in ('dir.jpg', 'dir_sorry.jpg', 'neighbor_sorry.jpg'):
         check(f'新圖檔存在：{f}', os.path.exists(os.path.join(HERE, '..', 'games', 'elevator', 'images', f)))
+    # 圖片載入失敗：自動重試一次（斷一下網路還是看得到圖）；重試也失敗才換成表情
+    p = new_page(b); n1 = [0]
+    def flaky(route):
+        n1[0] += 1
+        route.abort() if n1[0] == 1 else route.fulfill(path=os.path.join(HERE, '..', 'games', 'elevator', 'images', 'hall.jpg'), content_type='image/jpeg')
+    p.context.route('**/images/zz_retry.jpg*', flaky)
+    p.evaluate("Game.setImage('images/zz_retry.jpg', '🚪')"); p.wait_for_timeout(2500)
+    check('圖片第一次失敗：自動重試後顯示圖片、沒記成缺圖', p.evaluate("(()=>{const i=document.getElementById('npc-avatar');return i.style.display==='block'&&i.naturalWidth>0})()") and not p.evaluate("[...Game.missing].some(m=>m.includes('zz_retry.jpg'))") and n1[0] == 2, (n1[0], p.evaluate('[...Game.missing]')))
+    p.close()
+    p = new_page(b); n2 = [0]
+    def dead(route):
+        n2[0] += 1; route.abort()
+    p.context.route('**/images/zz_retry.jpg*', dead)
+    p.evaluate("Game.setImage('images/zz_retry.jpg', '🚪')"); p.wait_for_timeout(2500)
+    check('圖片連續失敗：只重試一次，之後顯示表情、記成缺圖', n2[0] == 2 and p.evaluate("document.getElementById('scene-placeholder').style.display") == 'grid' and p.evaluate("[...Game.missing].some(m=>m.includes('zz_retry.jpg'))"), (n2[0], p.evaluate('[...Game.missing]')))
+    p.close()
     # 邊界：n=6, m=4, misspoke → e=5，後面沒有樓層可以早停
     p = new_page(b); set_task(p, n=6, m=4, misspoke=True, early=True)
     check('n=6,m=4,misspoke：沒有早停', p.evaluate('Game.task.early') is False and p.evaluate('Game.task.x') is None)
