@@ -222,7 +222,7 @@ def run(b):
         for k in [x for x in (1, 2, 3) if x != u]:
             m0 = mis(p); press(p, f'按之{k}的電鈴。')
             check(f'DOOR 按錯之{k}：扣分、進 DOOR_WRONG（合併頁，紅卡在最上面）', mis(p) == m0 + 1 and st(p) == 'DOOR_WRONG' and p.evaluate("(()=>{const b=document.getElementById('npc-dialogue');const f=b.querySelector('.fb'),sp=b.querySelector('.speaker');return !!f&&!!sp&&!!(f.compareDocumentPosition(sp)&Node.DOCUMENT_POSITION_FOLLOWING)})()"), (mis(p), st(p)))
-            tx = txt(p, '#npc-dialogue'); who = 'muscle' if '壯男' in tx else 'woman' if '泳衣' in tx else None
+            tx = txt(p, '#npc-dialogue'); who = 'muscle' if '男住戶' in tx else 'woman' if '女住戶' in tx else None
             seen[k] = who
             check(f'DOOR_WRONG 之{k}：有開門的人（{who}）、圖對得上', who is not None and img(p).endswith('door_muscle.jpg' if who == 'muscle' else 'door_woman.jpg'), (tx, img(p)))
             check('DOOR_WRONG 三個選項', sorted(o.strip() for o in opts(p)) == sorted(['不好意思，我按錯了。', '你怎麼不是Ami？', '（不說話，轉身就走）']), opts(p))
@@ -235,9 +235,13 @@ def run(b):
         press(p, f'按之{u}的電鈴。'); check('DOOR 按對：過場後是 END、計時停止', st(p) in ('_TRANS', 'END')); leave_trans(p)
         check('END：Ami 迎接你', st(p) == 'END' and '迎接' in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
         p.close()
+    # 第一次就按對：過場「門開了」用 Ami 探頭的圖
+    p = new_page(b); set_task(p, n=8, m=3, unit=2); to_lobby(p); to_help(p); help_right(p); evt_ok(p); leave_trans(p); press(p, '不客氣，慢走！'); leave_trans(p); press(p, '不好意思，借過一下。'); leave_trans(p)
+    press(p, '按之2的電鈴。'); check('DOOR 一次按對：過場圖是 Ami 探頭 door_ami.jpg', st(p) == '_TRANS' and img(p).endswith('door_ami.jpg'), (st(p), img(p)))
+    p.close()
     # 同一戶按錯兩次，是同一個人
     p = new_page(b); set_task(p, n=8, m=3, unit=2); to_lobby(p); to_help(p); help_right(p); evt_ok(p); leave_trans(p); press(p, '不客氣，慢走！'); leave_trans(p); press(p, '不好意思，借過一下。'); leave_trans(p)
-    press(p, '按之1的電鈴。'); a1 = '壯男' in txt(p, '#npc-dialogue'); press(p, '不好意思，我按錯了。'); press(p, '按之1的電鈴。'); check('同一戶再按錯：還是同一個人', ('壯男' in txt(p, '#npc-dialogue')) == a1)
+    press(p, '按之1的電鈴。'); a1 = '男住戶' in txt(p, '#npc-dialogue'); press(p, '不好意思，我按錯了。'); press(p, '按之1的電鈴。'); check('同一戶再按錯：還是同一個人', ('男住戶' in txt(p, '#npc-dialogue')) == a1)
     p.close()
 
     # ── 5. 三種錯誤一次都遇到，整局打到排行榜（照提醒、照回應走）──

@@ -317,7 +317,7 @@ const Game = defineGame({
     HELP: ['images/elevator.jpg', '🛗'], HELP2: ['images/neighbor_sorry.jpg', '😅'], STOP: ['images/elevator.jpg', '🛗'], STOP_FIX: ['images/elevator.jpg', '🛗'],
     ARRIVE: ['images/hall.jpg', '🚪'], EARLY: ['images/early.jpg', '🚪'], DOOR: ['images/door.jpg', '🚪'], DOOR_WRONG: ['images/door_muscle.jpg', '🚪'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
-  EXTRA_IMAGES: ['images/dir_sorry.jpg', 'images/neighbor_sorry.jpg', 'images/door_muscle.jpg', 'images/door_woman.jpg', 'images/wait_dog.jpg', 'images/neighbor_sorry_dog.jpg'],   // imageFor() 才會用到的圖，也先載好
+  EXTRA_IMAGES: ['images/dir_sorry.jpg', 'images/neighbor_sorry.jpg', 'images/door_muscle.jpg', 'images/door_woman.jpg', 'images/wait_dog.jpg', 'images/neighbor_sorry_dog.jpg', 'images/door_ami.jpg'],   // imageFor() 才會用到的圖，也先載好
   /* 被客氣地指出錯誤的人不好意思的畫面（尷尬臉）：
      阿姨看錯箭頭（DIR 答對後的道歉過場）、鄰居看錯樓層（STOP 答對後的道歉過場）、鄰居自己說錯樓層（HELP2） */
   imageFor() {
@@ -328,6 +328,7 @@ const Game = defineGame({
       if (['HELP', 'STOP', 'STOP_FIX'].includes(s)) return ['images/dog.jpg', '🐶'];
     }
     if (s === 'DIR' && this._transMode) return ['images/dir_sorry.jpg', '😅'];
+    if (s === 'DOOR' && this._transMode) return ['images/door_ami.jpg', '🚪'];   // 按對電鈴後的「門開了」過場：Ami 探頭
     if (s === 'STOP' && this._transMode && t.stopWrong) return ['images/neighbor_sorry.jpg', '😅'];
     if (s === 'DOOR_WRONG') return this.resident() === 'muscle' ? ['images/door_muscle.jpg', '🚪'] : ['images/door_woman.jpg', '🚪'];   // 按錯的那一戶，住的是誰
   },
@@ -687,10 +688,8 @@ const Game = defineGame({
       DOOR_WRONG: {
         place: 'shop',
         dialogue: () => Game.resident() === 'muscle'
-          ? [L('（門開了。一個穿著吊嘎的壯男，一隻手拿著啞鈴，看著你。）', '(Se abre la puerta. Un hombre muy fuerte, en camiseta sin mangas y con una mancuerna en la mano, te mira.)', '(The door opens. A very muscular man in a tank top, a dumbbell in one hand, looks at you.)'),
-            L('男住戶：誰啊？你找誰？', '¿Quién es? ¿A quién busca?', 'Who is it? Who are you looking for?')]
-          : [L('（門開了。一位穿著白色小背心和熱褲的女生，手上拿著洗到一半的泳衣，看著你。）', '(Se abre la puerta. Una chica con camiseta blanca de tirantes y shorts, con un traje de baño a medio lavar en la mano, te mira.)', '(The door opens. A young woman in a white camisole and shorts, holding a half-washed swimsuit, looks at you.)'),
-            L('女住戶：咦？請問你找誰？', '¿Eh? ¿A quién busca, por favor?', 'Huh? Who are you looking for?')],
+          ? [L('男住戶：誰啊？你找誰？', '¿Quién es? ¿A quién busca?', 'Who is it? Who are you looking for?')]
+          : [L('女住戶：咦？請問你找誰？', '¿Eh? ¿A quién busca, por favor?', 'Huh? Who are you looking for?')],
         options: () => rot(['不好意思，我按錯了。', '你怎麼不是Ami？', '（不說話，轉身就走）']),
         next: c => {
           if (c !== '不好意思，我按錯了。') { Game.addMistake(M('按錯別人家的電鈴，要客氣地說「不好意思，我按錯了」。', 'Si tocaste el timbre equivocado, di con cortesía «不好意思，我按錯了».', 'If you rang the wrong bell, politely say "不好意思，我按錯了."')); return; }
