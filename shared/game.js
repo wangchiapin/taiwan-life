@@ -1366,7 +1366,9 @@ const GameCore = {
     const th = this.thought ? `<div class="thought">${this.formatText(this.thought)}</div>` : '';
     const main = this.formatText(raw);
     // 過場畫面：先給評語（綠卡），再接旁白，最後才是過場按鈕
-    html += this._transMode ? this.feedbackHTML() + th : (this.thoughtFirst ? th + main : main + th) + this.feedbackHTML();
+    const body = this.thoughtFirst ? th + main : main + th;
+    // feedbackFirst（遊戲自己設定）：綠卡／紅卡放在對話前面，不放後面
+    html += this._transMode ? this.feedbackHTML() + th : this.feedbackFirst ? this.feedbackHTML() + body : body + this.feedbackHTML();
     const box = document.getElementById('npc-dialogue');
     box.innerHTML = html;
     box.querySelectorAll('[data-tr]').forEach(btn => {

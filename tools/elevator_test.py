@@ -113,8 +113,8 @@ def run(b):
             press(p, '你剛剛明明說3樓！' if first == 'rude1' else '那你自己按吧。')
             check(f'HELP2 選「{first}」：扣分、留在 HELP2', mis(p) == m0 + 1 and st(p) == 'HELP2')
             check('HELP2 錯誤紀錄有關卡名稱', p.evaluate('Game.log[Game.log.length-1].stage[0]') == '鄰居改口')
-        press(p, '沒關係，我幫你按4樓。'); check('HELP2 客氣回應：進過場', st(p) == '_TRANS' and trans_from(p) == 'HELP2')
-        check('HELP2 過場：第一次就對才有綠卡', (p.locator('.fb.good').count() == 1) == (first is None))
+        press(p, '沒關係，我幫你按4樓。'); check('HELP2 客氣回應：直接進 STOP（合併，不跳過場）', st(p) == 'STOP', st(p))
+        check('HELP2 合併頁：第一次就對才有綠卡', (p.locator('.fb.good').count() == 1) == (first is None))
         leave_trans(p); check('HELP2 之後是 STOP（停在4樓，沒看錯）', st(p) == 'STOP' and p.evaluate('Game.cur') == 4, (st(p), p.evaluate('Game.cur')))
         p.close()
     # misspoke 時 lit 不會出現：HELP 沒有「不用按」的選項是對的
@@ -148,6 +148,29 @@ def run(b):
     check('NEXT_LABEL STOP_FIX 是「電梯繼續往上」', p.evaluate("NEXT_LABEL.STOP_FIX") == '電梯繼續往上')
     p.close()
 
+    # ── 第三輪修改：綠卡在最上面、HELP 第三個選項、HELP→STOP 合併、ARRIVE 選項與旁白 ──
+    fb_first = "(()=>{const b=document.getElementById('npc-dialogue');const f=b.querySelector('.fb'),sp=b.querySelector('.speaker');return !!f&&!!sp&&!!(f.compareDocumentPosition(sp)&Node.DOCUMENT_POSITION_FOLLOWING)})()"
+    p = new_page(b); set_task(p, n=8, m=3, lit=False); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); press(p, '按「開門」，等他。'); leave_trans(p); press(p, '按8樓。')
+    check('FLOOR→HELP 合併頁：綠卡在鄰居的話上面', p.evaluate(fb_first))
+    check('HELP 燈沒亮：第三個選項是「幹！你不會自己按喔！」、沒有「已經亮了」', sorted(o.strip() for o in opts(p)) == sorted(['好，我幫你按3樓。', '好，我幫你按8樓。', '幹！你不會自己按喔！']), opts(p))
+    m0 = mis(p); press(p, '幹！你不會自己按喔！'); check('HELP 選「幹」：扣分、留在 HELP', mis(p) == m0 + 1 and st(p) == 'HELP' and '不要罵人' in txt(p, '.fb.bad'), txt(p, '.fb.bad'))
+    p.close()
+    p = new_page(b); set_task(p, n=8, m=3, lit=False, stopWrong=False); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); press(p, '按「開門」，等他。'); leave_trans(p); press(p, '按8樓。')
+    press(p, '好，我幫你按3樓。')
+    check('HELP→STOP 合併：直接是 STOP、綠卡在最上面', st(p) == 'STOP' and p.evaluate(fb_first), st(p))
+    tx = txt(p, '#npc-dialogue')
+    check('HELP→STOP 合併頁：有旁白、鄰居的話只出現一次、有三個選項', '電梯向上' in tx and tx.count('到了，謝謝你！再見！') == 1 and len(opts(p)) == 3, tx)
+    p.close()
+    p = new_page(b); set_task(p, n=8, m=3, lit=True); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); press(p, '按「開門」，等他。'); leave_trans(p); press(p, '按8樓。')
+    check('HELP 燈亮了：第三個選項是「不用按，3樓已經亮了喔。」、沒有「幹」', sorted(o.strip() for o in opts(p)) == sorted(['好，我幫你按3樓。', '好，我幫你按8樓。', '不用按，3樓已經亮了喔。']), opts(p))
+    p.close()
+    p = new_page(b); set_task(p, n=8, m=3, stopWrong=False, early=False); to_lobby(p); to_help(p); help_right(p); leave_trans(p)
+    press(p, '不客氣，慢走！'); check('STOP→ARRIVE 過場：只有綠卡、沒有「電梯繼續往上」旁白', st(p) == '_TRANS' and '電梯繼續往上' not in txt(p, '#npc-dialogue') and p.locator('.fb.good').count() == 1, txt(p, '#npc-dialogue')); leave_trans(p)
+    check('ARRIVE 沒有「電梯繼續往上，到8樓了」旁白（直接到 ARRIVE）', st(p) == 'ARRIVE' and '電梯繼續往上' not in txt(p, '#npc-dialogue'), (st(p), txt(p, '#npc-dialogue')))
+    check('ARRIVE 選項：借過／滾開！別擋路！／用力推開', sorted(o.strip() for o in opts(p)) == sorted(['不好意思，借過一下。', '滾開！別擋路！', '（用力推開）']), opts(p))
+    m0 = mis(p); press(p, '滾開！別擋路！'); check('ARRIVE 選「滾開」：扣分', mis(p) == m0 + 1 and st(p) == 'ARRIVE')
+    p.close()
+
     # ── 4. STOP：鄰居看錯樓層（stopWrong）──
     for first in ('ok', 'rude', 'fix'):
         p = new_page(b); set_task(p, stopWrong=True, early=(first == 'fix')); to_lobby(p); to_help(p); help_right(p); leave_trans(p)
@@ -179,7 +202,7 @@ def run(b):
     m0 = mis(p); press(p, '不好意思，這裡是2樓，您是不是要到3樓？')
     check('沒看錯時亂提醒：扣分、留在 STOP', mis(p) == m0 + 1 and st(p) == 'STOP')
     check('亂提醒的提示：這裡就是3樓', '這裡就是3樓' in txt(p, '.fb.bad'), txt(p, '.fb.bad'))
-    press(p, '靠杯！你不是要去3樓？'); check('沒看錯時說「靠杯」：扣分', mis(p) == m0 + 2)
+    press(p, '靠杯！你不是要去2樓？'); check('沒看錯時說「靠杯」：扣分（數字跟現在樓層不同）', mis(p) == m0 + 2)
     press(p, '不客氣，慢走！')
     check('沒看錯時慢走：不進 STOP_FIX', st(p) in ('_TRANS', 'ARRIVE', 'EARLY') and trans_from(p) in (None, 'STOP')); leave_trans(p)
     check('沒看錯時慢走：直接 ARRIVE', st(p) == 'ARRIVE', st(p))
