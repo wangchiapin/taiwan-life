@@ -193,7 +193,7 @@
 const GAME = {
   scene: 'elevator', track: 'elevator', vocabQuiz: true, settingsKey: 'elevator_settings',
   roles: {
-    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '店員': { pitch: 1.05 }, '阿姨': { pitch: 1.05 }, '男住戶': { pitch: 0.85 }, '女住戶': { pitch: 1.15 }
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '店員': { pitch: 1.05 }, '阿姨': { pitch: 1.05 }, '管理員': { pitch: 0.8 }, '男住戶': { pitch: 0.85 }, '女住戶': { pitch: 1.15 }
   }
 };
 </script>
@@ -237,11 +237,15 @@ pinyinPro.customPinyin({ '著': 'zhe', '喔': 'ō', '啦': 'la', '關係': 'guā
 ══════════════════════════════════════ */
 
 
-const WHO = { 'Ami': ['Ami', 'Ami'], '鄰居': ['El vecino', 'The neighbor'], '阿姨': ['La señora', 'The lady'], '男住戶': ['El vecino de la puerta', 'The man at the door'], '女住戶': ['La vecina de la puerta', 'The woman at the door'] };
-const SPEAKER_RE = /^(Ami|鄰居|阿姨|男住戶|女住戶|我)：/;
+const WHO = { 'Ami': ['Ami', 'Ami'], '鄰居': ['El vecino', 'The neighbor'], '阿姨': ['La señora', 'The lady'], '管理員': ['El guardia del edificio', 'The building guard'], '男住戶': ['El vecino de la puerta', 'The man at the door'], '女住戶': ['La vecina de la puerta', 'The woman at the door'] };
+const SPEAKER_RE = /^(Ami|鄰居|阿姨|管理員|男住戶|女住戶|我)：/;
 
 const VOCAB = {
   START: [['電梯', 'ascensor', 'elevator'], ['樓', 'piso', 'floor'], ['大樓', 'edificio', 'building'], ['住在', 'vivir en', 'live at']],
+  GUARD: [['管理員', 'guardia / administrador del edificio', 'building guard'], ['哪一戶', '¿qué departamento?', 'which unit?'], ['朋友', 'amigo/a', 'friend'], ['住在', 'vivir en', 'live at']],
+  CHAT: [['天氣', 'el clima', 'weather'], ['好熱', 'qué calor', 'so hot'], ['對啊', 'sí, claro', 'yeah, right'], ['吃飽', 'haber comido (¿ya comiste?)', 'have eaten (have you eaten?)']],
+  FART: [['味道', 'olor', 'smell'], ['好臭', 'qué mal olor', 'so smelly'], ['假裝', 'fingir', 'pretend'], ['沒聞到', 'no olí nada', "didn't smell it"]],
+  DOG: [['小狗', 'perrito', 'puppy'], ['不會咬人', 'no muerde', "doesn't bite"], ['可愛', 'lindo', 'cute'], ['可怕', 'da miedo', 'scary'], ['齜牙咧嘴', 'enseñar los dientes', 'bare its teeth']],
   LOBBY: [['按', 'presionar', 'press'], ['哪一個', '¿cuál?', 'which one?'], ['往上', 'hacia arriba', 'up'], ['往下', 'hacia abajo', 'down']],
   DIR: [['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['這部', 'este (ascensor)', 'this one (elevator)'], ['往下', 'hacia abajo', 'down'], ['你自己不會看嗎', '¿no sabes mirar tú mismo?', "can't you look yourself?"]],
   WAIT: [['開門', 'abrir la puerta', 'open the door'], ['關門', 'cerrar la puerta', 'close the door'], ['等一下', 'espera un momento', 'wait a moment']],
@@ -257,8 +261,8 @@ const VOCAB = {
   END: [['迎接', 'recibir', 'greet'], ['歡迎', 'bienvenido', 'welcome']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
-const STAGE = { LOBBY: ['大廳', 'vestíbulo', 'lobby'], DIR: ['看箭頭', 'mirar la flecha', 'checking the arrow'], WAIT: ['等人', 'esperar', 'waiting'], FLOOR: ['按樓層', 'elegir piso', 'choosing a floor'], HELP: ['幫忙', 'ayudar', 'helping'], HELP2: ['鄰居改口', 'el vecino se corrige', 'neighbor corrects himself'], EARLY: ['看樓層', 'mirar el piso', 'checking the floor'], STOP: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], STOP_FIX: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], ARRIVE: ['出電梯', 'salir', 'exiting'], DOOR: ['按電鈴', 'tocar el timbre', 'ringing the bell'], DOOR_WRONG: ['按錯門', 'puerta equivocada', 'wrong door'] };
-const NEXT_LABEL = { LOBBY: '走到電梯前', DIR: '兩部電梯來了', WAIT: '電梯來了', FLOOR: '鄰居走進電梯', HELP: '電梯往上', HELP2: '電梯往上', STOP: '電梯停了', STOP_FIX: '電梯繼續往上', EARLY: '電梯又停了', ARRIVE: '繼續往上', DOOR: '走到Ami家門口', END: '門開了' };
+const STAGE = { GUARD: ['管理員', 'el guardia', 'the guard'], CHAT: ['聊天', 'charlar', 'small talk'], FART: ['怪味道', 'mal olor', 'bad smell'], DOG: ['小狗', 'el perrito', 'the dog'], LOBBY: ['大廳', 'vestíbulo', 'lobby'], DIR: ['看箭頭', 'mirar la flecha', 'checking the arrow'], WAIT: ['等人', 'esperar', 'waiting'], FLOOR: ['按樓層', 'elegir piso', 'choosing a floor'], HELP: ['幫忙', 'ayudar', 'helping'], HELP2: ['鄰居改口', 'el vecino se corrige', 'neighbor corrects himself'], EARLY: ['看樓層', 'mirar el piso', 'checking the floor'], STOP: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], STOP_FIX: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], ARRIVE: ['出電梯', 'salir', 'exiting'], DOOR: ['按電鈴', 'tocar el timbre', 'ringing the bell'], DOOR_WRONG: ['按錯門', 'puerta equivocada', 'wrong door'] };
+const NEXT_LABEL = { GUARD: '管理員叫住你', CHAT: '電梯往上', FART: '電梯往上', DOG: '電梯往上', LOBBY: '走到電梯前', DIR: '兩部電梯來了', WAIT: '電梯來了', FLOOR: '鄰居走進電梯', HELP: '電梯往上', HELP2: '電梯往上', STOP: '電梯停了', STOP_FIX: '電梯繼續往上', EARLY: '電梯又停了', ARRIVE: '繼續往上', DOOR: '走到Ami家門口', END: '門開了' };
 
 const PLACES = {
   phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
@@ -309,15 +313,20 @@ const Game = defineGame({
   },
 
   IMAGES: {
-    START: ['images/start.jpg', '🏢'], LOBBY: ['images/lobby.jpg', '🏢'], DIR: ['images/dir.jpg', '🛗'], WAIT: ['images/wait.jpg', '🛗'], FLOOR: ['images/panel.jpg', '🛗'],
+    START: ['images/start.jpg', '🏢'], GUARD: ['images/guard.jpg', '💂'], CHAT: ['images/chat.jpg', '💬'], FART: ['images/fart.jpg', '😶'], DOG: ['images/dog.jpg', '🐶'], LOBBY: ['images/lobby.jpg', '🏢'], DIR: ['images/dir.jpg', '🛗'], WAIT: ['images/wait.jpg', '🛗'], FLOOR: ['images/panel.jpg', '🛗'],
     HELP: ['images/elevator.jpg', '🛗'], HELP2: ['images/neighbor_sorry.jpg', '😅'], STOP: ['images/elevator.jpg', '🛗'], STOP_FIX: ['images/elevator.jpg', '🛗'],
     ARRIVE: ['images/hall.jpg', '🚪'], EARLY: ['images/hall.jpg', '🚪'], DOOR: ['images/door.jpg', '🚪'], DOOR_WRONG: ['images/door_muscle.jpg', '🚪'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
-  EXTRA_IMAGES: ['images/dir_sorry.jpg', 'images/neighbor_sorry.jpg', 'images/door_muscle.jpg', 'images/door_woman.jpg'],   // imageFor() 才會用到的圖，也先載好
+  EXTRA_IMAGES: ['images/dir_sorry.jpg', 'images/neighbor_sorry.jpg', 'images/door_muscle.jpg', 'images/door_woman.jpg', 'images/wait_dog.jpg', 'images/neighbor_sorry_dog.jpg'],   // imageFor() 才會用到的圖，也先載好
   /* 被客氣地指出錯誤的人不好意思的畫面（尷尬臉）：
      阿姨看錯箭頭（DIR 答對後的道歉過場）、鄰居看錯樓層（STOP 答對後的道歉過場）、鄰居自己說錯樓層（HELP2） */
   imageFor() {
     const t = this.task, s = this.state;
+    if (t.evt === 'DOG') {   // 抽到小狗：電梯裡的是穿粉紅色外套、牽著小狗的阿姨（所有有鄰居的畫面都換成她）
+      if (s === 'WAIT') return ['images/wait_dog.jpg', '🐶'];
+      if (s === 'HELP2' || (s === 'STOP' && this._transMode && t.stopWrong)) return ['images/neighbor_sorry_dog.jpg', '😅'];
+      if (['HELP', 'STOP', 'STOP_FIX'].includes(s)) return ['images/dog.jpg', '🐶'];
+    }
     if (s === 'DIR' && this._transMode) return ['images/dir_sorry.jpg', '😅'];
     if (s === 'STOP' && this._transMode && t.stopWrong) return ['images/neighbor_sorry.jpg', '😅'];
     if (s === 'DOOR_WRONG') return this.resident() === 'muscle' ? ['images/door_muscle.jpg', '🚪'] : ['images/door_woman.jpg', '🚪'];   // 按錯的那一戶，住的是誰
@@ -370,7 +379,7 @@ const Game = defineGame({
   },
   /* 按對樓層、幫鄰居按完樓層之後，不另外跳過場：綠卡直接放在下一頁最上面（下一頁就有鄰居的話，過場會重複） */
   maybeTrans(before, extra) {
-    const merge = (before === 'FLOOR' && this.state === 'HELP') || ((before === 'HELP' || before === 'HELP2') && this.state === 'STOP')
+    const merge = (before === 'FLOOR' && this.state === 'HELP') || ((before === 'HELP' || before === 'HELP2') && ['CHAT', 'FART', 'DOG'].includes(this.state)) || (['CHAT', 'FART', 'DOG'].includes(before) && this.state === 'STOP')
       || (before === 'DOOR' && this.state === 'DOOR_WRONG') || (before === 'DOOR_WRONG' && this.state === 'DOOR');
     this.feedbackFirst = merge;    // 合併的頁面：綠卡放在最上面
     if (merge) { this.closePanels(); return; }
@@ -382,7 +391,7 @@ const Game = defineGame({
     const xs = Array.from({ length: n - e - 1 }, (_, i) => e + 1 + i);   // 中途有人按了的樓層（要在 e 樓之後、Ami 之前；沒有空間就沒有這一關）
     const x = xs.length ? pick(xs) : null;
     this.task = { n, m, e, x, misspoke, lit: !misspoke && Math.random() < 0.35, early: xs.length > 0 && Math.random() < 0.5,
-      dirDown: Math.random() < 0.4, stopWrong: Math.random() < 0.4, unit: pick([1, 2, 3]), rot: Math.floor(Math.random() * 3) };
+      dirDown: Math.random() < 0.4, stopWrong: Math.random() < 0.4, unit: pick([1, 2, 3]), evt: pick(['CHAT', 'FART', 'DOG']), rot: Math.floor(Math.random() * 3) };
     this.wrongUnit = null;
     this.cur = 1;
   },
@@ -416,16 +425,21 @@ const Game = defineGame({
 
   getConfig() {
     const N = this.N, t = this.task;
-    const nb = (zh, es, en) => L(`鄰居：${zh}`, es, en);
     const ay = (zh, es, en) => L(`阿姨：${zh}`, es, en);
+    const nb = (zh, es, en) => t.evt === 'DOG' ? ay(zh, es, en) : L(`鄰居：${zh}`, es, en);   // 抽到小狗的那局，跑進電梯的是牽著小狗的阿姨
     const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
     /* 電梯往上，停在鄰居要出去的樓層 e；stopWrong 時先停在低一層（e−1），鄰居看錯樓層就想出去。before＝要接在前面的旁白 */
-    const toStop = before => {
+    const toStop = before => {   // 先在電梯裡發生一件小事（聊天／怪味道／小狗，每局隨機一個），答對之後電梯才停
+      Game.thought = [...(before || []), L('（電梯向上。）', '(El ascensor sube.)', '(The elevator goes up.)')];
+      Game.state = t.evt;
+    };
+    const rideOn = () => {
       const k = t.stopWrong ? t.e - 1 : t.e;
       Game.cur = k;
-      Game.thought = [...(before || []), L(`（電梯向上，在${k}樓的時候電梯停了下來。）`, `(El ascensor sube y se detiene en el piso ${k}.)`, `(The elevator goes up and stops at floor ${k}.)`)];
+      Game.thought = [L(`（電梯在${k}樓停了下來。）`, `(El ascensor se detiene en el piso ${k}.)`, `(The elevator stops at floor ${k}.)`)];
       Game.state = 'STOP';   // 鄰居那句「到了，謝謝你！」是 STOP 自己的對話，不放進旁白
     };
+    const guardOk = `我要找朋友，她住在${t.n}樓之${t.unit}。`;
     /* 鄰居下電梯之後：中途有人按了別層就停一次，不然直接到 Ami 住的樓層 */
     const afterExit = () => {
       if (t.early) {
@@ -451,7 +465,25 @@ const Game = defineGame({
           L('我：好，我現在上去！', '¡Bien, subo ahora!', "OK, I'm coming up!")
         ],
         options: ['走進大樓'],
-        next: () => { Game.startTimer(); Game.state = 'LOBBY'; }
+        next: () => { Game.startTimer(); Game.state = 'GUARD'; }
+      },
+      /* ═══ 大廳櫃台的管理員：問你找哪一戶 ═══ */
+      GUARD: {
+        place: 'shop',
+        html: () => Game.displayHTML(),
+        dialogue: () => [L('（你走進大樓。櫃台後面的管理員看著你。）', '(Entras al edificio. El guardia detrás del mostrador te mira.)', '(You walk into the building. The guard behind the desk looks at you.)'), L('管理員：你找哪一戶？', '¿A qué departamento va?', 'Which unit are you looking for?')],
+        options: () => rot([guardOk, '（不理他，直接走）', '我要上樓。']),
+        next: c => {
+          if (c !== guardOk) {
+            Game.addMistake(c === '我要上樓。'
+              ? M(`管理員問你找哪一戶，要說清楚：找朋友，住在${t.n}樓之${t.unit}。`, `El guardia pregunta a qué puerta vas: di claro que buscas a una amiga que vive en el piso ${t.n}, puerta ${t.unit}.`, `The guard asks which unit — say clearly that you're visiting a friend on floor ${t.n}, unit ${t.unit}.`)
+              : M('管理員問你話，要回答他，不要不理他。', 'El guardia te hizo una pregunta: respóndele, no lo ignores.', "The guard asked you a question — answer him, don't ignore him."));
+            return;
+          }
+          goodFirst('GUARD', '很好！進大樓以前，管理員會問你找哪一戶。', '¡Bien! Al entrar al edificio, el guardia te pregunta a qué puerta vas.', 'Good! When you enter a building, the guard asks which unit you are visiting.');
+          Game.thought = [L('管理員：好，電梯在那邊。', 'Bien, el ascensor está por allá.', 'OK, the elevator is over there.')];
+          Game.state = 'LOBBY';
+        }
       },
       LOBBY: {
         place: 'shop',
@@ -483,7 +515,7 @@ const Game = defineGame({
       WAIT: {
         place: 'shop',
         html: () => Game.displayHTML(),
-        dialogue: () => [L('（門快要關了。這時候，一位鄰居跑過來。）', '(La puerta casi se cierra cuando un vecino viene corriendo.)', '(The door is about to close when a neighbor runs over.)'), nb('等一下！等一下！', '¡Espere, espere!', 'Wait! Wait!')],
+        dialogue: () => [t.evt === 'DOG' ? L('（門快要關了。這時候，一位穿粉紅色外套、牽著小狗的阿姨跑過來。）', '(La puerta casi se cierra cuando una señora con chaqueta rosa y un perrito corre hacia el ascensor.)', '(The door is about to close when a lady in a pink jacket, leading a puppy, runs over.)') : L('（門快要關了。這時候，一位鄰居跑過來。）', '(La puerta casi se cierra cuando un vecino viene corriendo.)', '(The door is about to close when a neighbor runs over.)'), nb('等一下！等一下！', '¡Espere, espere!', 'Wait! Wait!')],
         options: () => ['按「開門」，等他。', '按「關門」。'],
         next: c => {
           if (c !== '按「開門」，等他。') { Game.addMistake(M('鄰居要來了，要好心一點幫他按著「開」。', 'El vecino ya viene: sé amable y mantén presionado el botón «abrir» para él.', 'The neighbor is coming — be kind and hold the "open" button for them.')); return; }
@@ -542,6 +574,43 @@ const Game = defineGame({
         }
       },
       /* ═══ 電梯停了：鄰居要下電梯。stopWrong 時停的是低一層，他看錯了，要客氣地提醒他 ═══ */
+      /* ═══ 電梯裡的小插曲（每局隨機一個）：聊天、怪味道、鄰居的小狗 ═══ */
+      CHAT: {
+        place: 'shop', html: () => Game.displayHTML(),
+        dialogue: () => [nb('今天天氣好熱喔，對不對？', '¡Qué calor hace hoy, ¿verdad?', "It's so hot today, isn't it?")],
+        options: () => rot(['對啊，真的很熱。', '你吃飽了嗎？', '（不說話，看手機）']),
+        next: c => {
+          if (c !== '對啊，真的很熱。') { Game.addMistake(c === '你吃飽了嗎？' ? M('鄰居在聊天氣，要回答天氣的事。', 'El vecino habla del clima: responde sobre el clima.', 'The neighbor is talking about the weather — answer about the weather.') : M('鄰居跟你說話，不要裝沒聽到，簡單回答一下比較有禮貌。', 'El vecino te habla: no finjas que no oíste; responde algo breve, es más cortés.', "The neighbor spoke to you — don't pretend not to hear; a short reply is more polite.")); return; }
+          goodFirst('CHAT', '很好！在台灣，電梯裡常常會聊聊天氣。', '¡Bien! En Taiwán es común charlar del clima en el ascensor.', 'Good! In Taiwan it is common to chat about the weather in the elevator.');
+          rideOn();
+        }
+      },
+      FART: {
+        place: 'shop', html: () => Game.displayHTML(),
+        dialogue: () => [L('（電梯裡突然有一股怪味道。鄰居看了你一眼，很尷尬。）', '(De pronto hay un mal olor en el ascensor. El vecino te mira de reojo, muy incómodo.)', '(Suddenly there is a bad smell in the elevator. The neighbor glances at you, awkwardly.)')],
+        options: () => rot(['（假裝沒聞到）', '好臭喔！是你吧？', '這個電梯怎麼有怪味道？']),
+        next: c => {
+          if (c !== '（假裝沒聞到）') {
+            Game.addMistake(c === '好臭喔！是你吧？'
+              ? M('不要隨便說別人放屁，很沒禮貌。', 'No acuses a nadie así, es de mala educación.', "Don't accuse someone like that — it's very rude.")
+              : M('這種時候，不要特別說出來，假裝沒聞到比較禮貌。', 'En estos casos no lo menciones: lo cortés es fingir que no olió nada.', "At times like this don't mention it — pretending not to notice is more polite."),
+              c === '好臭喔！是你吧？' ? [nb('不是我啦！', '¡No fui yo!', "It wasn't me!")] : undefined);
+            return;
+          }
+          goodFirst('FART', '你很貼心！遇到這種尷尬的事，假裝沒聞到最禮貌。', '¡Qué considerado! En una situación incómoda así, lo más cortés es fingir que no olió nada.', 'How considerate! In an awkward moment like this, pretending not to notice is the politest thing.');
+          rideOn();
+        }
+      },
+      DOG: {
+        place: 'shop', html: () => Game.displayHTML(),
+        dialogue: () => [L('（阿姨牽著的小狗，對著你齜牙咧嘴。）', '(El perrito de la señora te enseña los dientes.)', "(The lady's puppy bares its teeth at you.)"), nb('不好意思，牠不會咬人。', 'Disculpa, no muerde.', "Sorry, he doesn't bite.")],
+        options: () => rot(['沒關係，牠很可愛。', '走開！你的狗好可怕！', '（尖叫）']),
+        next: c => {
+          if (c !== '沒關係，牠很可愛。') { Game.addMistake(M('主人已經說牠不會咬人了，客氣地回答就好，不要罵人或大叫。', 'El dueño ya dijo que no muerde: responde con cortesía, sin insultar ni gritar.', "The owner already said he doesn't bite — reply politely, don't snap or scream.")); return; }
+          goodFirst('DOG', '很好！主人道歉，你就說「沒關係」。', '¡Bien! Si el dueño se disculpa, responde «沒關係».', 'Good! When the owner apologizes, say "沒關係".');
+          rideOn();
+        }
+      },
       STOP: catchState(Game, {
         key: 'STOP', place: 'shop', html: () => Game.displayHTML(),
         dialogue: () => [nb('到了，謝謝你！再見！', 'Ya llegamos, ¡gracias! ¡Adiós!', 'Here we are — thanks! Bye!')],
