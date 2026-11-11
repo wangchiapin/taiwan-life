@@ -589,7 +589,7 @@ const Game = defineGame({
           if (c !== '（假裝沒聞到）') {
             Game.addMistake(c === '好臭喔！是你吧？'
               ? M('不要隨便說別人放屁，很沒禮貌。', 'No acuses a nadie así, es de mala educación.', "Don't accuse someone like that — it's very rude.")
-              : M('這種時候，不要特別說出來，假裝沒聞到比較禮貌。', 'En estos casos no lo menciones: lo cortés es fingir que no olió nada.', "At times like this don't mention it — pretending not to notice is more polite."),
+              : { ...M('這種時候，不要特別說出來，假裝沒聞到比較禮貌。', 'En estos casos no lo menciones: lo cortés es fingir que no olió nada.', "At times like this don't mention it — pretending not to notice is more polite."), pen: 5 },
               c === '好臭喔！是你吧？' ? [nb('不是我啦！', '¡No fui yo!', "It wasn't me!")] : undefined);
             return;
           }

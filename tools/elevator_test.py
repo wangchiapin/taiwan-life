@@ -263,6 +263,11 @@ def run(b):
     p.close()
     for f in ('dir.jpg', 'dir_sorry.jpg', 'neighbor_sorry.jpg'):
         check(f'新圖檔存在：{f}', os.path.exists(os.path.join(HERE, '..', 'games', 'elevator', 'images', f)))
+    # FART：「怪味道」輕扣 5 分，「是你吧」照常扣 10 分
+    p = new_page(b); set_task(p, n=8, m=3, evt='FART'); to_lobby(p); to_help(p); help_right(p); leave_trans(p)
+    s0 = p.evaluate('Game.score'); press(p, '這個電梯怎麼有怪味道？'); s1 = p.evaluate('Game.score'); press(p, '好臭喔！是你吧？'); s2 = p.evaluate('Game.score')
+    check('FART 「怎麼有怪味道」只扣 5 分、「是你吧」扣 10 分', st(p) == 'FART' and s0 - s1 == 5 and s1 - s2 == 10, (st(p), s0, s1, s2))
+    p.close()
     # 圖片載入失敗：自動重試一次（斷一下網路還是看得到圖）；重試也失敗才換成表情
     p = new_page(b); n1 = [0]
     def flaky(route):
