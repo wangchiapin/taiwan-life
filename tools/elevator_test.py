@@ -99,7 +99,7 @@ def run(b):
         check('DIR 客氣提醒：進過場、不扣分', st(p) == '_TRANS' and trans_from(p) == 'DIR' and mis(p) == m0 + (0 if first == 'fix' else 1), (st(p), mis(p)))
         check('DIR 過場：阿姨不好意思（dir_sorry.jpg）', img(p).endswith('dir_sorry.jpg'), img(p))
         tx = txt(p, '#npc-dialogue')
-        check('DIR 過場：阿姨的道歉＋右邊電梯', '是往下的！不好意思，謝謝你！' in tx and '右邊那部電梯也開了' in tx, tx)
+        check('DIR 過場：阿姨的道歉＋新來的電梯', '是往下的！不好意思，謝謝你！' in tx and '電梯又來了，這次上面亮著▲' in tx, tx)
         check('DIR 過場：第一次就對才有綠卡', (p.locator('.fb.good').count() == 1) == (first == 'fix'), p.locator('.fb.good').count())
         leave_trans(p); check('DIR 之後是 WAIT', st(p) == 'WAIT' and not disp(p).startswith('▼'), (st(p), disp(p)))
         p.close()
@@ -290,9 +290,9 @@ def run(b):
     # ── 管理員：問你找哪一戶 ──
     p = new_page(b); set_task(p, n=9, m=3, unit=3); to_guard(p)
     check('GUARD：管理員問「你找哪一戶？」、沒有先生小姐', '管理員：你找哪一戶？' in txt(p, '#npc-dialogue') and '先生' not in screen(p) and '小姐' not in screen(p), txt(p, '#npc-dialogue'))
-    check('GUARD 三個選項', sorted(o.strip() for o in opts(p)) == sorted(['我要找朋友，她住在9樓之3。', '（不理他，直接走）', '我要上樓。']), opts(p))
+    check('GUARD 三個選項', sorted(o.strip() for o in opts(p)) == sorted(['我要找朋友，她住在9樓之3。', '（不理他，直接走）', '閃開啦！']), opts(p))
     check('GUARD 圖是 guard.jpg', img(p).endswith('guard.jpg'), img(p))
-    for bad in ('（不理他，直接走）', '我要上樓。'):
+    for bad in ('（不理他，直接走）', '閃開啦！'):
         m0 = mis(p); press(p, bad); check(f'GUARD 選「{bad}」：扣分、留在 GUARD', mis(p) == m0 + 1 and st(p) == 'GUARD')
     press(p, '我要找朋友，她住在9樓之3。'); leave_trans(p)
     check('GUARD 答對：進 LOBBY', st(p) == 'LOBBY', st(p))

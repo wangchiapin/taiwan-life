@@ -262,7 +262,7 @@ const VOCAB = {
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 const STAGE = { GUARD: ['管理員', 'el guardia', 'the guard'], CHAT: ['聊天', 'charlar', 'small talk'], FART: ['怪味道', 'mal olor', 'bad smell'], DOG: ['小狗', 'el perrito', 'the dog'], LOBBY: ['大廳', 'vestíbulo', 'lobby'], DIR: ['看箭頭', 'mirar la flecha', 'checking the arrow'], WAIT: ['等人', 'esperar', 'waiting'], FLOOR: ['按樓層', 'elegir piso', 'choosing a floor'], HELP: ['幫忙', 'ayudar', 'helping'], HELP2: ['鄰居改口', 'el vecino se corrige', 'neighbor corrects himself'], EARLY: ['看樓層', 'mirar el piso', 'checking the floor'], STOP: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], STOP_FIX: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], ARRIVE: ['出電梯', 'salir', 'exiting'], DOOR: ['按電鈴', 'tocar el timbre', 'ringing the bell'], DOOR_WRONG: ['按錯門', 'puerta equivocada', 'wrong door'] };
-const NEXT_LABEL = { GUARD: '管理員叫住你', CHAT: '電梯往上', FART: '電梯往上', DOG: '電梯往上', LOBBY: '走到電梯前', DIR: '兩部電梯來了', WAIT: '電梯來了', FLOOR: '鄰居走進電梯', HELP: '電梯往上', HELP2: '電梯往上', STOP: '電梯停了', STOP_FIX: '電梯繼續往上', EARLY: '電梯又停了', ARRIVE: '繼續往上', DOOR: '走到Ami家門口', END: '門開了' };
+const NEXT_LABEL = { GUARD: '管理員叫住你', CHAT: '電梯往上', FART: '電梯往上', DOG: '電梯往上', LOBBY: '走到電梯前', DIR: '電梯來了', WAIT: '電梯來了', FLOOR: '鄰居走進電梯', HELP: '電梯往上', HELP2: '電梯往上', STOP: '電梯停了', STOP_FIX: '電梯繼續往上', EARLY: '電梯又停了', ARRIVE: '繼續往上', DOOR: '走到Ami家門口', END: '門開了' };
 
 const PLACES = {
   phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
@@ -472,11 +472,11 @@ const Game = defineGame({
         place: 'shop',
         html: () => Game.displayHTML(),
         dialogue: () => [L('（你走進大樓。櫃台後面的管理員看著你。）', '(Entras al edificio. El guardia detrás del mostrador te mira.)', '(You walk into the building. The guard behind the desk looks at you.)'), L('管理員：你找哪一戶？', '¿A qué departamento va?', 'Which unit are you looking for?')],
-        options: () => rot([guardOk, '（不理他，直接走）', '我要上樓。']),
+        options: () => rot([guardOk, '（不理他，直接走）', '閃開啦！']),
         next: c => {
           if (c !== guardOk) {
-            Game.addMistake(c === '我要上樓。'
-              ? M(`管理員問你找哪一戶，要說清楚：找朋友，住在${t.n}樓之${t.unit}。`, `El guardia pregunta a qué puerta vas: di claro que buscas a una amiga que vive en el piso ${t.n}, puerta ${t.unit}.`, `The guard asks which unit — say clearly that you're visiting a friend on floor ${t.n}, unit ${t.unit}.`)
+            Game.addMistake(c === '閃開啦！'
+              ? M('管理員只是問你找哪一戶，不要叫他閃開，很沒禮貌。要說：找朋友，住在幾樓之幾。', 'El guardia solo pregunta a qué puerta vas: no le digas que se aparte, es de mala educación. Responde con quién buscas y en qué piso vive.', 'The guard is only asking which unit you want — do not tell him to get out of the way, it is rude. Say who you are visiting and where she lives.')
               : M('管理員問你話，要回答他，不要不理他。', 'El guardia te hizo una pregunta: respóndele, no lo ignores.', "The guard asked you a question — answer him, don't ignore him."));
             return;
           }
@@ -496,10 +496,10 @@ const Game = defineGame({
           Game.state = t.dirDown ? 'DIR' : 'WAIT';
         }
       },
-      /* ═══ 兩部電梯同時來了，先開門的那部是往下的（去地下室）：阿姨問「是往上的嗎？」，要客氣地告訴她 ═══ */
+      /* ═══ 電梯來了，但上面亮的是▼（往下，去地下室）：阿姨問「是往上的嗎？」，要客氣地告訴她 ═══ */
       DIR: catchState(Game, {
         key: 'DIR', place: 'shop', html: () => Game.displayHTML('▼'),
-        dialogue: () => [L('（兩部電梯同時來了。左邊那部先開了門。旁邊的阿姨走過來，問你：）', '(Llegan dos ascensores a la vez. El de la izquierda abre primero. Una señora se acerca y te pregunta:)', '(Two elevators arrive at once. The one on the left opens first. A lady next to you asks:)'), ay('請問，這部是往上的嗎？', 'Disculpe, ¿este sube?', 'Excuse me, does this one go up?')],
+        dialogue: () => [L('（電梯來了，門開了，上面亮著▼。旁邊的阿姨走過來，問你：）', '(Llega el ascensor y abre la puerta, con la ▼ encendida. Una señora se acerca y te pregunta:)', '(The elevator arrives and the door opens, with the ▼ lit. A lady next to you asks:)'), ay('請問，這部是往上的嗎？', 'Disculpe, ¿este sube?', 'Excuse me, does this one go up?')],
         ok: '對，往上，請進。', fix: () => '不好意思，這部是往下的。', rude: '你自己不會看嗎？',
         wrong: () => true,
         whyWrong: () => M('上面亮的是▼，這部是往下的。要客氣地告訴阿姨，不要讓她搭錯。', 'Arriba está encendida la ▼: este baja. Dile con cortesía a la señora para que no se equivoque.', 'The ▼ is lit above: this one goes down. Tell the lady politely so she does not board the wrong one.'),
@@ -508,7 +508,7 @@ const Game = defineGame({
         goodOk: ['你很細心！上電梯以前，要先看上面的箭頭。', '¡Qué atento! Antes de subir, mira la flecha de arriba.', 'Well spotted! Check the arrow above before you get in.'],
         apology: () => [ay('啊，是往下的！不好意思，謝謝你！', '¡Ay, es el que baja! Disculpe, ¡gracias!', 'Oh, it goes down! Sorry, thank you!')],
         go: () => {
-          Game.thought = [...Game.thought, L('（右邊那部電梯也開了，上面亮著▲。你走了進去。）', '(El ascensor de la derecha también abre, con la ▲ encendida. Entras.)', '(The elevator on the right opens too, with the ▲ lit. You step in.)')];
+          Game.thought = [...Game.thought, L('（往下的電梯關上門走了。過了一會兒，電梯又來了，這次上面亮著▲。你走了進去。）', '(El ascensor que baja cierra la puerta y se va. Poco después llega otro, esta vez con la ▲ encendida. Entras.)', '(The elevator going down closes its doors and leaves. A moment later one arrives again, this time with the ▲ lit. You step in.)')];
           Game.state = 'WAIT';
         }
       }),
