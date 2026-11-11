@@ -230,7 +230,7 @@ pinyinPro.customPinyin({
 });
 // 台灣讀音修正（第 4 步檢查清單）：連接詞「和」念 hàn、「嗯」念 ēn
 pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
-pinyinPro.customPinyin({ '著': 'zhe', '喔': 'ō', '啦': 'la', '關係': 'guān xi', '還順利': 'hái shùn lì' });
+pinyinPro.customPinyin({ '著': 'zhe', '喔': 'ō', '啦': 'la', '關係': 'guān xi', '還順利': 'hái shùn lì', '終於': 'zhōng yú' });
 
 /* ══════════════════════════════════════
    小工具
@@ -249,7 +249,7 @@ const VOCAB = {
   LOBBY: [['按', 'presionar', 'press'], ['哪一個', '¿cuál?', 'which one?'], ['往上', 'hacia arriba', 'up'], ['往下', 'hacia abajo', 'down']],
   DIR: [['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['這部', 'este (ascensor)', 'this one (elevator)'], ['往下', 'hacia abajo', 'down'], ['你自己不會看嗎', '¿no sabes mirar tú mismo?', "can't you look yourself?"]],
   WAIT: [['開門', 'abrir la puerta', 'open the door'], ['關門', 'cerrar la puerta', 'close the door'], ['等一下', 'espera un momento', 'wait a moment']],
-  FLOOR: [['樓', 'piso', 'floor'], ['按', 'presionar', 'press'], ['住在', 'vivir en', 'live at']],
+  FLOOR: [['樓', 'piso', 'floor'], ['按', 'presionar', 'press']],
   HELP: [['麻煩', 'por favor, molestar', 'please / trouble'], ['幫我', 'ayúdame a', 'help me'], ['不好意思', 'disculpa', 'sorry / excuse me']],
   HELP2: [['說錯', 'decir algo equivocado', 'say it wrong'], ['沒關係', 'no pasa nada', "it's OK"], ['明明', 'claramente (si lo dijiste)', 'clearly (you did say)'], ['自己', 'uno mismo', 'yourself']],
   EARLY: [['樓層', 'piso', 'floor'], ['出去', 'salir', 'go out'], ['這裡不是', 'aquí no es', 'this is not']],
@@ -527,7 +527,7 @@ const Game = defineGame({
       FLOOR: {
         place: 'shop',
         html: () => Game.displayHTML(),
-        dialogue: () => [L(`我：Ami住在${t.n}樓。`, `Ami vive en el piso ${t.n}.`, `Ami lives on floor ${t.n}.`)],
+        dialogue: () => [],   // 不放玩家台詞（等於直接給答案）：要自己記得 Ami 住幾樓（任務提示／任務卡可以看）
         options: () => Game.FLOORS.map(k => Game.floorOpt(k)),
         next: c => {
           if (c !== `按${t.n}樓。`) { Game.addMistake(M(`你記錯了喔！Ami住在${t.n}樓。`, `¡Te equivocaste! Ami vive en el piso ${t.n}.`, `You got it wrong! Ami lives on floor ${t.n}.`)); return; }
@@ -573,7 +573,7 @@ const Game = defineGame({
       /* ═══ 電梯裡的小插曲（每局隨機一個）：聊天、怪味道、鄰居的小狗 ═══ */
       CHAT: {
         place: 'shop', html: () => Game.displayHTML(),
-        dialogue: () => [nb('今天天氣好熱喔，對不對？', '¡Qué calor hace hoy, ¿verdad?', "It's so hot today, isn't it?")],
+        dialogue: () => [nb('今天天氣好熱喔，對不對？', '¡Qué calor hace hoy! ¿Verdad?', "It's so hot today, isn't it?")],
         options: () => rot(['對啊，真的很熱。', '你吃飽了嗎？', '（不說話，看手機）']),
         next: c => {
           if (c !== '對啊，真的很熱。') { Game.addMistake(c === '你吃飽了嗎？' ? M('鄰居在聊天氣，要回答天氣的事。', 'El vecino habla del clima: responde sobre el clima.', 'The neighbor is talking about the weather — answer about the weather.') : M('鄰居跟你說話，不要裝沒聽到，簡單回答一下比較有禮貌。', 'El vecino te habla: no finjas que no oíste; responde algo breve, es más cortés.', "The neighbor spoke to you — don't pretend not to hear; a short reply is more polite.")); return; }
@@ -583,7 +583,7 @@ const Game = defineGame({
       },
       FART: {
         place: 'shop', html: () => Game.displayHTML(),
-        dialogue: () => [L('（電梯裡突然有一股怪味道。鄰居看了你一眼，很尷尬。）', '(De pronto hay un mal olor en el ascensor. El vecino te mira de reojo, muy incómodo.)', '(Suddenly there is a bad smell in the elevator. The neighbor glances at you, awkwardly.)')],
+        dialogue: () => [L('（電梯裡突然有一股怪味道。鄰居低下頭，很尷尬。）', '(De pronto hay un mal olor en el ascensor. El vecino baja la cabeza, muy incómodo.)', '(Suddenly there is a bad smell in the elevator. The neighbor lowers his head, awkwardly.)')],
         options: () => rot(['（假裝沒聞到）', '好臭喔！是你吧？', '這個電梯怎麼有怪味道？']),
         next: c => {
           if (c !== '（假裝沒聞到）') {
@@ -599,7 +599,7 @@ const Game = defineGame({
       },
       DOG: {
         place: 'shop', html: () => Game.displayHTML(),
-        dialogue: () => [L('（阿姨牽著的小狗，對著你齜牙咧嘴。）', '(El perrito de la señora te enseña los dientes.)', "(The lady's puppy bares its teeth at you.)"), nb('不好意思，牠不會咬人。', 'Disculpa, no muerde.', "Sorry, he doesn't bite.")],
+        dialogue: () => [L('（阿姨牽著的小狗，對著你齜牙咧嘴。）', '(El perrito de la señora te enseña los dientes.)', "(The lady's puppy bares its teeth at you.)"), nb('不好意思，牠不會咬人。', 'Disculpe, no muerde.', "Sorry, he doesn't bite.")],
         options: () => rot(['沒關係，牠很可愛。', '走開！你的狗好可怕！', '（尖叫）']),
         next: c => {
           if (c !== '沒關係，牠很可愛。') { Game.addMistake(M('主人已經說牠不會咬人了，客氣地回答就好，不要罵人或大叫。', 'El dueño ya dijo que no muerde: responde con cortesía, sin insultar ni gritar.', "The owner already said he doesn't bite — reply politely, don't snap or scream.")); return; }
