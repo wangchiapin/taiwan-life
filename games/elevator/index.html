@@ -336,7 +336,7 @@ const Game = defineGame({
   resident() { const w = [1, 2, 3].filter(x => x !== this.task.unit); return this.wrongUnit === w[0] ? 'muscle' : 'woman'; },
   /* 每局隨機：
      n＝Ami 住幾樓、m＝鄰居「一開始說」要去的樓層（3 或 4，這樣才有「低一層」可以停）
-     misspoke＝鄰居說錯樓層（真正要去 e＝m+1 樓）；lit＝m 樓的燈已經亮了（和 misspoke 不會同時發生）
+     misspoke＝鄰居說錯樓層（真正要去 e＝m+1 樓）
      dirDown＝大廳先來的那部電梯是往下的（阿姨問「是往上的嗎？」）
      stopWrong＝電梯先停在比 e 低一層，鄰居看錯說「到了」想出去
      early＝中途 x 樓又停了一次 */
@@ -390,7 +390,7 @@ const Game = defineGame({
     const misspoke = Math.random() < 0.3, e = misspoke ? m + 1 : m;
     const xs = Array.from({ length: n - e - 1 }, (_, i) => e + 1 + i);   // 中途有人按了的樓層（要在 e 樓之後、Ami 之前；沒有空間就沒有這一關）
     const x = xs.length ? pick(xs) : null;
-    this.task = { n, m, e, x, misspoke, lit: !misspoke && Math.random() < 0.35, early: xs.length > 0 && Math.random() < 0.5,
+    this.task = { n, m, e, x, misspoke, early: xs.length > 0 && Math.random() < 0.5,
       dirDown: Math.random() < 0.4, stopWrong: Math.random() < 0.4, unit: pick([1, 2, 3]), evt: pick(['CHAT', 'FART', 'DOG']), rot: Math.floor(Math.random() * 3) };
     this.wrongUnit = null;
     this.cur = 1;
@@ -452,8 +452,7 @@ const Game = defineGame({
       Game.state = 'ARRIVE';
     };
     const exitMistake = () => M('鄰居要出電梯了，可以禮貌地說「慢走」。', 'El vecino va a salir del ascensor: puedes decirle «慢走» con cortesía.', 'The neighbor is getting out — you can politely say "慢走".');
-    const litOpt = `不用按，${t.m}樓已經亮了喔。`;
-    const helpRude = '幹！你不會自己按喔！';   // 燈沒亮的時候，用它當第三個選項
+    const helpRude = '幹！你不會自己按喔！';   // 第三個選項（沒禮貌）
     const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
     return {
       START: {
@@ -538,21 +537,17 @@ const Game = defineGame({
       HELP: {
         place: 'shop',
         html: () => Game.displayHTML(),
-        dialogue: () => [nb(`不好意思，我要到${t.m}樓，麻煩你幫我按一下。`, `Disculpe, voy al piso ${t.m}. ¿Me hace el favor de presionarlo?`, `Excuse me, I'm going to floor ${t.m}. Could you press it for me?`), ...(t.lit ? [L(`（面板上，${t.m}樓的燈已經亮了。）`, `(En el panel, la luz del piso ${t.m} ya está encendida.)`, `(On the panel, the light for floor ${t.m} is already on.)`)] : [])],
-        options: () => rot([`好，我幫你按${t.m}樓。`, `好，我幫你按${t.n}樓。`, t.lit ? litOpt : helpRude]),
+        dialogue: () => [nb(`不好意思，我要到${t.m}樓，麻煩你幫我按一下。`, `Disculpe, voy al piso ${t.m}. ¿Me hace el favor de presionarlo?`, `Excuse me, I'm going to floor ${t.m}. Could you press it for me?`)],
+        options: () => rot([`好，我幫你按${t.m}樓。`, `好，我幫你按${t.n}樓。`, helpRude]),
         next: c => {
-          const right = t.lit ? litOpt : `好，我幫你按${t.m}樓。`;
+          const right = `好，我幫你按${t.m}樓。`;
           if (c !== right) {
             Game.addMistake(c === helpRude
               ? M('鄰居只是請你幫忙按一個鈕，不要罵人，好好幫他按就好。', 'El vecino solo te pide que presiones un botón: no insultes, simplemente ayúdalo.', "The neighbor just asked you to press a button — don't be rude, just help.")
-              : c === litOpt
-              ? M(`${t.m}樓的燈還沒亮，要幫他按。`, `La luz del piso ${t.m} todavía no está encendida: hay que presionarlo por él.`, `The light for floor ${t.m} isn't on yet, so you need to press it for him.`)
-              : c === `好，我幫你按${t.m}樓。`
-                ? M(`${t.m}樓的燈已經亮了，不用再按。再按一次，有的電梯會把它取消！`, `La luz del piso ${t.m} ya está encendida: no hace falta presionar otra vez. ¡En algunos ascensores se cancela!`, `The light for floor ${t.m} is already on — no need to press again. In some elevators that cancels it!`)
-                : M(`鄰居要到${t.m}樓，不是${t.n}樓。`, `El vecino va al piso ${t.m}, no al ${t.n}.`, `The neighbor is going to floor ${t.m}, not ${t.n}.`));
+              : M(`鄰居要到${t.m}樓，不是${t.n}樓。`, `El vecino va al piso ${t.m}, no al ${t.n}.`, `The neighbor is going to floor ${t.m}, not ${t.n}.`));
             return;
           }
-          goodFirst('HELP', t.lit ? '你很細心！燈已經亮了，不用再按。' : '很好！你聽懂了他要去幾樓。', t.lit ? '¡Qué atento! La luz ya está encendida; no hace falta presionar.' : '¡Bien! Entendiste a qué piso va.', t.lit ? 'Well spotted! The light is already on, so no need to press.' : 'Good! You understood which floor he is going to.');
+          goodFirst('HELP', '很好！你聽懂了他要去幾樓。', '¡Bien! Entendiste a qué piso va.', 'Good! You understood which floor he is going to.');
           if (t.misspoke) {   // 鄰居剛才說錯了：電梯往上的時候，他才發現
             Game.thought = [L(`（你按了${t.m}樓，電梯開始往上。）`, `(Presionas el ${t.m} y el ascensor empieza a subir.)`, `(You press ${t.m} and the elevator starts going up.)`)];
             Game.state = 'HELP2';

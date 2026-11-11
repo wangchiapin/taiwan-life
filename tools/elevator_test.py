@@ -3,7 +3,7 @@ r"""搭電梯專用測試：python3 tools/elevator_test.py
   DIR   大廳先開門的電梯是往下的，阿姨問「是往上的嗎？」：對／客氣提醒／沒禮貌；沒有這一關時直接去 WAIT
   HELP2 鄰居說錯樓層：客氣回應／翻舊帳／不管他
   STOP  電梯停在低一層，鄰居看錯想出去：慢走／客氣提醒／沒禮貌；沒看錯時，亂提醒要扣分；提醒後 STOP_FIX 再來一次
-還檢查：每局隨機的條件（m 是 3 或 4、misspoke 不會和 lit 同時、早停樓層在 e 和 Ami 之間）、
+還檢查：每局隨機的條件（m 是 3 或 4、早停樓層在 e 和 Ami 之間）、
 過場用的尷尬臉圖片、錯誤紀錄有關卡名稱、小字典的字都出現在那一關的畫面上、三個面板的語言。"""
 import sys, os, importlib.util
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -41,11 +41,11 @@ def screen(page):   # 這一關畫面上的字（對話＋選項＋樓層顯示�
     return txt(page, '#npc-dialogue') + ' ' + ' '.join(opts(page)) + ' ' + txt(page, '.elev')
 def disp(page): return page.evaluate("(document.querySelector('.elev .disp')||{innerText:''}).innerText")
 
-def set_task(page, n=8, m=3, misspoke=False, dirDown=False, stopWrong=False, early=False, lit=False, unit=2, evt='CHAT'):
+def set_task(page, n=8, m=3, misspoke=False, dirDown=False, stopWrong=False, early=False, unit=2, evt='CHAT'):
     """把這一局的隨機條件固定下來（和 setup() 的規則一致）"""
-    page.evaluate("""o=>{const t=Game.task; Object.assign(t,{n:o.n,m:o.m,misspoke:o.misspoke,e:o.misspoke?o.m+1:o.m,lit:o.lit&&!o.misspoke,dirDown:o.dirDown,stopWrong:o.stopWrong,unit:o.unit,evt:o.evt}); Game.wrongUnit=null;
+    page.evaluate("""o=>{const t=Game.task; Object.assign(t,{n:o.n,m:o.m,misspoke:o.misspoke,e:o.misspoke?o.m+1:o.m,dirDown:o.dirDown,stopWrong:o.stopWrong,unit:o.unit,evt:o.evt}); Game.wrongUnit=null;
       const xs=Array.from({length:t.n-t.e-1},(_,i)=>t.e+1+i); t.x=xs.length?xs[0]:null; t.early=o.early&&xs.length>0; Game.render();}""",
-      dict(n=n, m=m, misspoke=misspoke, dirDown=dirDown, stopWrong=stopWrong, early=early, lit=lit, unit=unit, evt=evt))
+      dict(n=n, m=m, misspoke=misspoke, dirDown=dirDown, stopWrong=stopWrong, early=early, unit=unit, evt=evt))
 
 EVTS = ('CHAT', 'FART', 'DOG')
 EVT_OK = {'CHAT': '對啊，真的很熱。', 'FART': '（假裝沒聞到）', 'DOG': '沒關係，牠很可愛。'}
@@ -61,17 +61,17 @@ def to_help(page):   # LOBBY 之後到 HELP（DIR 若有，先答對）
     press(page, '按「開門」，等他。'); leave_trans(page); assert st(page) == 'FLOOR', st(page)
     press(page, f"按{page.evaluate('Game.task.n')}樓。"); leave_trans(page); assert st(page) == 'HELP', st(page)
 def help_right(page):
-    t = page.evaluate('({m:Game.task.m,lit:Game.task.lit})')
-    press(page, f"不用按，{t['m']}樓已經亮了喔。" if t['lit'] else f"好，我幫你按{t['m']}樓。")
+    t = page.evaluate('({m:Game.task.m})')
+    press(page, f"好，我幫你按{t['m']}樓。")
 
 def run(b):
     # ── 1. 每局隨機條件的規則（setup 跑 300 次）──
     p = new_page(b)
     bad = p.evaluate("""()=>{const r=[];for(let i=0;i<300;i++){Game.setup();const t=Game.task;
-      if(![3,4].includes(t.m))r.push('m'+t.m); if(t.misspoke&&t.lit)r.push('misspoke+lit'); if(t.e!==(t.misspoke?t.m+1:t.m))r.push('e');
+      if(![3,4].includes(t.m))r.push('m'+t.m); if(t.e!==(t.misspoke?t.m+1:t.m))r.push('e');
       if(t.e>=t.n)r.push('e>=n'); if(t.early&&!(t.x>t.e&&t.x<t.n))r.push('x'+t.x+'e'+t.e+'n'+t.n); if(!t.early&&t.x!=null&&!(t.x>t.e&&t.x<t.n))r.push('x2');
       if(t.e-1<2)r.push('e-1<2');}
-      const seen={misspoke:0,lit:0,dirDown:0,stopWrong:0,early:0};for(let i=0;i<300;i++){Game.setup();for(const k in seen)if(Game.task[k])seen[k]++;}
+      const seen={misspoke:0,dirDown:0,stopWrong:0,early:0};for(let i=0;i<300;i++){Game.setup();for(const k in seen)if(Game.task[k])seen[k]++;}
       return {r:[...new Set(r)],seen}}""")
     check('每局隨機條件都符合規則', not bad['r'], bad['r'])
     check('三種錯誤和燈、早停都會出現（300 局）', all(v > 0 for v in bad['seen'].values()), bad['seen'])
@@ -123,10 +123,6 @@ def run(b):
         check('HELP2 合併頁：第一次就對才有綠卡', (p.locator('.fb.good').count() == 1) == (first is None))
         evt_ok(p); leave_trans(p); check('HELP2 之後是 STOP（停在4樓，沒看錯）', st(p) == 'STOP' and p.evaluate('Game.cur') == 4, (st(p), p.evaluate('Game.cur')))
         p.close()
-    # misspoke 時 lit 不會出現：HELP 沒有「不用按」的選項是對的
-    p = new_page(b); set_task(p, misspoke=True, lit=True); to_lobby(p); to_help(p)
-    check('misspoke 時燈不會亮', '面板上' not in screen(p) and p.evaluate('Game.task.lit') is False, screen(p))
-    p.close()
 
     # ── 電梯按鍵面板：WAIT 只能按開關門、FLOOR 只能按樓層（共 16 顆）──
     p = new_page(b); set_task(p, n=12, m=3); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p)
@@ -144,24 +140,23 @@ def run(b):
     p = new_page(b); set_task(p, n=12, m=3); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); p.screenshot(path='/tmp/panel_wait.png'); p.evaluate("Game.showList=true;Game.render()"); p.locator('.list').screenshot(path='/tmp/list.png'); p.close()
 
     # ── 圖2.3 合併：FLOOR 答對後不跳過場，綠卡＋鄰居的話＋選項在同一頁 ──
-    p = new_page(b); set_task(p, n=8, m=3, lit=True); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p)
+    p = new_page(b); set_task(p, n=8, m=3); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p)
     press(p, '按「開門」，等他。'); leave_trans(p); press(p, '按8樓。')
     tx = txt(p, '#npc-dialogue')
     check('FLOOR 答對：直接是 HELP（沒有過場）', st(p) == 'HELP', st(p))
     check('合併頁：有綠卡、鄰居的話只出現一次、有選項', p.locator('.fb.good').count() == 1 and tx.count('麻煩你幫我按一下') == 1 and len(opts(p)) == 3, tx)
-    check('合併頁：先綠卡之外還有「面板上」旁白', '面板上' in tx, tx)
     check('任務卡標題：搭電梯上8樓找Ami', '搭電梯上8樓找Ami' in p.evaluate("(()=>{Game.showList=true;Game.render();const e=document.querySelector('.list .t');const c=e.cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.textContent})()"))
     check('NEXT_LABEL STOP_FIX 是「電梯繼續往上」', p.evaluate("NEXT_LABEL.STOP_FIX") == '電梯繼續往上')
     p.close()
 
     # ── 第三輪修改：綠卡在最上面、HELP 第三個選項、HELP→STOP 合併、ARRIVE 選項與旁白 ──
     fb_first = "(()=>{const b=document.getElementById('npc-dialogue');const f=b.querySelector('.fb'),sp=b.querySelector('.speaker');return !!f&&!!sp&&!!(f.compareDocumentPosition(sp)&Node.DOCUMENT_POSITION_FOLLOWING)})()"
-    p = new_page(b); set_task(p, n=8, m=3, lit=False); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); press(p, '按「開門」，等他。'); leave_trans(p); press(p, '按8樓。')
+    p = new_page(b); set_task(p, n=8, m=3); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); press(p, '按「開門」，等他。'); leave_trans(p); press(p, '按8樓。')
     check('FLOOR→HELP 合併頁：綠卡在鄰居的話上面', p.evaluate(fb_first))
     check('HELP 燈沒亮：第三個選項是「幹！你不會自己按喔！」、沒有「已經亮了」', sorted(o.strip() for o in opts(p)) == sorted(['好，我幫你按3樓。', '好，我幫你按8樓。', '幹！你不會自己按喔！']), opts(p))
     m0 = mis(p); press(p, '幹！你不會自己按喔！'); check('HELP 選「幹」：扣分、留在 HELP', mis(p) == m0 + 1 and st(p) == 'HELP' and '不要罵人' in txt(p, '.fb.bad'), txt(p, '.fb.bad'))
     p.close()
-    p = new_page(b); set_task(p, n=8, m=3, lit=False, stopWrong=False); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); press(p, '按「開門」，等他。'); leave_trans(p); press(p, '按8樓。')
+    p = new_page(b); set_task(p, n=8, m=3, stopWrong=False); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); press(p, '按「開門」，等他。'); leave_trans(p); press(p, '按8樓。')
     press(p, '好，我幫你按3樓。')
     check('HELP→小插曲 合併：直接是小插曲、綠卡在最上面', st(p) in EVTS and (p.evaluate(fb_first) or st(p) == 'FART'), st(p))   # FART 沒有人說話，沒有 .speaker 可比
     check('小插曲頁：旁白「電梯向上」、有三個選項', '電梯向上' in txt(p, '#npc-dialogue') and len(opts(p)) == 3, txt(p, '#npc-dialogue'))
@@ -169,9 +164,6 @@ def run(b):
     tx = txt(p, '#npc-dialogue')
     check('小插曲→STOP 合併：直接是 STOP、綠卡在最上面', st(p) == 'STOP' and p.evaluate(fb_first), st(p))
     check('STOP 合併頁：旁白「電梯在3樓停了下來」、鄰居的話只出現一次、有三個選項', '電梯在3樓停了下來' in tx and tx.count('到了，謝謝你！再見！') == 1 and len(opts(p)) == 3, tx)
-    p.close()
-    p = new_page(b); set_task(p, n=8, m=3, lit=True); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); press(p, '按「開門」，等他。'); leave_trans(p); press(p, '按8樓。')
-    check('HELP 燈亮了：第三個選項是「不用按，3樓已經亮了喔。」、沒有「幹」', sorted(o.strip() for o in opts(p)) == sorted(['好，我幫你按3樓。', '好，我幫你按8樓。', '不用按，3樓已經亮了喔。']), opts(p))
     p.close()
     p = new_page(b); set_task(p, n=8, m=3, stopWrong=False, early=False); to_lobby(p); to_help(p); help_right(p); evt_ok(p); leave_trans(p)
     press(p, '不客氣，慢走！'); check('STOP→ARRIVE 過場：只有綠卡、沒有「電梯繼續往上」旁白', st(p) == '_TRANS' and '電梯繼續往上' not in txt(p, '#npc-dialogue') and p.locator('.fb.good').count() == 1, txt(p, '#npc-dialogue')); leave_trans(p)
@@ -302,7 +294,7 @@ def run(b):
     ev_bad = {'CHAT': ['你吃飽了嗎？', '（不說話，看手機）'], 'FART': ['好臭喔！是你吧？', '這個電梯怎麼有怪味道？'], 'DOG': ['走開！你的狗好可怕！', '（尖叫）']}
     ev_opts = {'CHAT': ['對啊，真的很熱。', '你吃飽了嗎？', '（不說話，看手機）'], 'FART': ['（假裝沒聞到）', '好臭喔！是你吧？', '這個電梯怎麼有怪味道？'], 'DOG': ['沒關係，牠很可愛。', '走開！你的狗好可怕！', '（尖叫）']}
     for ev in EVTS:
-        p = new_page(b); set_task(p, n=8, m=3, stopWrong=False, lit=False); p.evaluate('e=>{Game.task.evt=e}', ev); to_lobby(p); to_help(p); help_right(p)
+        p = new_page(b); set_task(p, n=8, m=3, stopWrong=False); p.evaluate('e=>{Game.task.evt=e}', ev); to_lobby(p); to_help(p); help_right(p)
         check(f'{ev}：HELP 之後是 {ev}', st(p) == ev, st(p))
         check(f'{ev} 三個選項', sorted(o.strip() for o in opts(p)) == sorted(ev_opts[ev]), opts(p))
         check(f'{ev} 圖是 {ev.lower()}.jpg', img(p).endswith(ev.lower() + '.jpg'), img(p))
@@ -313,7 +305,7 @@ def run(b):
         press(p, EVT_OK[ev]); check(f'{ev} 答對：電梯停在3樓、進 STOP', st(p) == 'STOP' and p.evaluate('Game.cur') == 3, (st(p), p.evaluate('Game.cur')))
         p.close()
     # 小狗那局：整局都是穿粉紅色外套、牽小狗的阿姨（旁白、說話的人、圖都換）
-    p = new_page(b); set_task(p, n=8, m=3, stopWrong=True, lit=False, evt='DOG'); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p)
+    p = new_page(b); set_task(p, n=8, m=3, stopWrong=True, evt='DOG'); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p)
     if st(p) == 'DIR': press(p, '不好意思，這部是往下的。'); leave_trans(p)
     check('DOG 局：WAIT 旁白是穿粉紅色外套、牽著小狗的阿姨', '粉紅色外套' in txt(p, '#npc-dialogue') and '阿姨：等一下' in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
     check('DOG 局：WAIT 圖是 wait_dog.jpg', img(p).endswith('wait_dog.jpg'), img(p))
