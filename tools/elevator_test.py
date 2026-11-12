@@ -261,7 +261,7 @@ def run(b):
     miss = [m for m in p.evaluate('[...Game.missing]') if not any(m.endswith(x) for x in pend)]
     check('這一局用到的圖都載得到（還沒做好的門圖除外）', not miss, (miss, pend))
     p.close()
-    for f in ('dir.jpg', 'dir_sorry.jpg', 'neighbor_sorry.jpg', 'elevator_empty.jpg', 'early.jpg', 'door_ami.jpg', 'inside_asks.jpg', 'wrong_doors.jpg', 'wrong_floor.jpg'):
+    for f in ('dir.jpg', 'dir_sorry.jpg', 'neighbor_sorry.jpg', 'elevator_empty.jpg', 'early.jpg', 'door_ami.jpg', 'inside_asks.jpg', 'wrong_doors.jpg', 'wrong_floor.jpg', 'inside_asks_dog.jpg'):
         check(f'新圖檔存在：{f}', os.path.exists(os.path.join(HERE, '..', 'games', 'elevator', 'images', f)))
     # LOBBY：三個選項、按▼和不按都扣分、答對才往下走
     p = new_page(b); set_task(p, n=8, m=3, dirDown=False); to_lobby(p)
@@ -535,10 +535,10 @@ def run(b):
         p.close()
     # 小狗那局：阿姨
     p = new_page(b); set_task(p, n=8, m=3, entry='inside', evt='DOG'); to_lobby(p); to_ask(p); leave_trans(p)
-    check('inside DOG：ASK 是阿姨、粉紅色外套、dog.jpg', st(p) == 'ASK' and '阿姨：請問你到幾樓' in txt(p, '#npc-dialogue') and '粉紅色外套' in txt(p, '#npc-dialogue') and img(p).endswith('dog.jpg'), (st(p), img(p)))
+    check('inside DOG：ASK 是阿姨、粉紅色外套、dog.jpg', st(p) == 'ASK' and '阿姨：請問你到幾樓' in txt(p, '#npc-dialogue') and '粉紅色外套' in txt(p, '#npc-dialogue') and img(p).endswith('inside_asks_dog.jpg'), (st(p), img(p)))
     press(p, '我要到7樓，謝謝。'); check('inside DOG：說錯樓層旁白用「她」', '她幫你按了7樓' in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue')); leave_trans(p)
     press(p, '不出去，這裡不是8樓。'); leave_trans(p)
-    check('inside DOG 回電梯：圖 dog.jpg', st(p) == 'ASK' and img(p).endswith('dog.jpg'), img(p))
+    check('inside DOG 回電梯：圖 inside_asks_dog.jpg（不是齜牙的 dog.jpg）', st(p) == 'ASK' and img(p).endswith('inside_asks_dog.jpg'), img(p))
     p.close()
     # dirDown + inside：DIR 之後進 ASK
     p = new_page(b); set_task(p, n=8, m=3, entry='inside', dirDown=True); to_lobby(p)

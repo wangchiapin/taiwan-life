@@ -332,7 +332,8 @@ const Game = defineGame({
     /* 鄰居（或阿姨）說完再見、下電梯之後的過場（早停／到了 Ami 那層）：電梯裡已經沒有人 */
     if (this._transMode && this._trans && ['STOP', 'STOP_FIX'].includes(this._trans.from) && ['EARLY', 'ARRIVE'].includes(this._trans.to)) return ['images/elevator_empty.jpg', '🛗'];
     /* 走錯樓層後回到電梯（鄰居／裡面的人還在）：電梯圖 */
-    if (this._transMode && this._trans && ['WRONG_FLOOR', 'WRONG_DOOR'].includes(this._trans.from) && ['FLOOR', 'ASK'].includes(this._trans.to)) return t.evt === 'DOG' ? ['images/dog.jpg', '🐶'] : ['images/elevator.jpg', '🛗'];
+    if (this._transMode && this._trans && ['WRONG_FLOOR', 'WRONG_DOOR'].includes(this._trans.from) && ['FLOOR', 'ASK'].includes(this._trans.to)) return t.evt === 'DOG' ? [this._trans.to === 'ASK' ? 'images/inside_asks_dog.jpg' : 'images/dog.jpg', '🐶'] : ['images/elevator.jpg', '🛗'];
+    if (s === 'ASK' && t.evt === 'DOG') return ['images/inside_asks_dog.jpg', '🐶'];   // 阿姨和乖乖的小狗（dog.jpg 的小狗在齜牙，留給後面的小插曲）
     if (s === 'ASK' && Game.askAgain && t.evt !== 'DOG') return ['images/elevator.jpg', '🛗'];   // 走錯樓層回來、他再問一次：已經在電梯裡
     if (t.evt === 'DOG') {   // 抽到小狗：電梯裡的是穿粉紅色外套、牽著小狗的阿姨（所有有鄰居的畫面都換成她）
       if (s === 'WAIT') return ['images/wait_dog.jpg', '🐶'];
