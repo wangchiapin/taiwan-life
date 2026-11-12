@@ -321,7 +321,7 @@ const Game = defineGame({
   IMAGES: {
     START: ['images/start.jpg', '🏢'], GUARD: ['images/guard.jpg', '💂'], CHAT: ['images/chat.jpg', '💬'], FART: ['images/fart.jpg', '😶'], DOG: ['images/dog.jpg', '🐶'], LOBBY: ['images/lobby.jpg', '🏢'], DIR: ['images/dir.jpg', '🛗'], WAIT: ['images/wait.jpg', '🛗'], FLOOR: ['images/panel.jpg', '🛗'],
     HELP: ['images/elevator.jpg', '🛗'], HELP2: ['images/neighbor_sorry.jpg', '😅'], STOP: ['images/elevator.jpg', '🛗'], STOP_FIX: ['images/elevator.jpg', '🛗'],
-    ASK: ['images/elevator.jpg', '🛗'], WRONG_FLOOR: ['images/hall.jpg', '🚪'], WRONG_BELL: ['images/door.jpg', '🚪'], WRONG_DOOR: ['images/door_woman.jpg', '🚪'],   // 暫用現有的圖，新圖（inside_asks／wrong_doors）之後換
+    ASK: ['images/inside_asks.jpg', '🛗'], WRONG_FLOOR: ['images/hall.jpg', '🚪'], WRONG_BELL: ['images/door.jpg', '🚪'], WRONG_DOOR: ['images/door_woman.jpg', '🚪'],   // 暫用現有的圖，新圖（inside_asks／wrong_doors）之後換
     ARRIVE: ['images/hall.jpg', '🚪'], EARLY: ['images/early.jpg', '🚪'], DOOR: ['images/door.jpg', '🚪'], DOOR_WRONG: ['images/door_muscle.jpg', '🚪'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
   EXTRA_IMAGES: ['images/dir_sorry.jpg', 'images/neighbor_sorry.jpg', 'images/door_muscle.jpg', 'images/door_woman.jpg', 'images/wait_dog.jpg', 'images/neighbor_sorry_dog.jpg', 'images/door_ami.jpg', 'images/elevator_empty.jpg'],   // imageFor() 才會用到的圖，也先載好
@@ -333,6 +333,7 @@ const Game = defineGame({
     if (this._transMode && this._trans && ['STOP', 'STOP_FIX'].includes(this._trans.from) && ['EARLY', 'ARRIVE'].includes(this._trans.to)) return ['images/elevator_empty.jpg', '🛗'];
     /* 走錯樓層後回到電梯（鄰居／裡面的人還在）：電梯圖 */
     if (this._transMode && this._trans && ['WRONG_FLOOR', 'WRONG_DOOR'].includes(this._trans.from) && ['FLOOR', 'ASK'].includes(this._trans.to)) return t.evt === 'DOG' ? ['images/dog.jpg', '🐶'] : ['images/elevator.jpg', '🛗'];
+    if (s === 'ASK' && Game.askAgain && t.evt !== 'DOG') return ['images/elevator.jpg', '🛗'];   // 走錯樓層回來、他再問一次：已經在電梯裡
     if (t.evt === 'DOG') {   // 抽到小狗：電梯裡的是穿粉紅色外套、牽著小狗的阿姨（所有有鄰居的畫面都換成她）
       if (s === 'WAIT') return ['images/wait_dog.jpg', '🐶'];
       if (s === 'HELP2' || (s === 'STOP' && this._transMode && t.stopWrong)) return ['images/neighbor_sorry_dog.jpg', '😅'];

@@ -261,7 +261,7 @@ def run(b):
     miss = [m for m in p.evaluate('[...Game.missing]') if not any(m.endswith(x) for x in pend)]
     check('這一局用到的圖都載得到（還沒做好的門圖除外）', not miss, (miss, pend))
     p.close()
-    for f in ('dir.jpg', 'dir_sorry.jpg', 'neighbor_sorry.jpg', 'elevator_empty.jpg', 'early.jpg', 'door_ami.jpg'):
+    for f in ('dir.jpg', 'dir_sorry.jpg', 'neighbor_sorry.jpg', 'elevator_empty.jpg', 'early.jpg', 'door_ami.jpg', 'inside_asks.jpg'):
         check(f'新圖檔存在：{f}', os.path.exists(os.path.join(HERE, '..', 'games', 'elevator', 'images', f)))
     # LOBBY：三個選項、按▼和不按都扣分、答對才往下走
     p = new_page(b); set_task(p, n=8, m=3, dirDown=False); to_lobby(p)
@@ -497,7 +497,7 @@ def run(b):
     leave_trans(p)
     check('ASK：鄰居問「請問你到幾樓？我幫你按。」', st(p) == 'ASK' and '鄰居：請問你到幾樓？我幫你按。' in txt(p, '#npc-dialogue') and '裡面已經站著一位鄰居' in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
     check('ASK 三個選項', sorted(o.strip() for o in opts(p)) == sorted(['我要到8樓，謝謝。', '我要到7樓，謝謝。', '（不回答，自己按）']), opts(p))
-    check('ASK 圖是 elevator.jpg', img(p).endswith('elevator.jpg'), img(p))
+    check('ASK 第一次的圖是 inside_asks.jpg（門開了、他站在裡面）', img(p).endswith('inside_asks.jpg'), img(p))
     words = p.evaluate('s=>VOCAB[s].map(x=>x[0])', 'ASK'); check('小字典 ASK：每個字都在畫面上', all(w in screen(p) for w in words), words)
     s0 = p.evaluate('Game.score'); m0 = mis(p)
     press(p, '（不回答，自己按）')
@@ -508,7 +508,7 @@ def run(b):
     leave_trans(p); check('ASK→WRONG_FLOOR（7 樓）', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 7)
     press(p, '不出去，這裡不是8樓。')
     check('inside 不出去：輕扣 5 分、紅卡說剛剛你說要到7樓', mis(p) == m0 + 2 and '你說要到7樓' in txt(p, '.fb.bad') and st(p) == '_TRANS', txt(p, '.fb.bad'))
-    leave_trans(p); check('回到 ASK（再問一次，不再重複「站著一位鄰居」）', st(p) == 'ASK' and '請問你到幾樓' in txt(p, '#npc-dialogue') and '站著' not in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
+    leave_trans(p); check('再問一次的圖是 elevator.jpg（已在電梯裡）', st(p) == 'ASK' and img(p).endswith('elevator.jpg'), img(p)); check('回到 ASK（再問一次，不再重複「站著一位鄰居」）', st(p) == 'ASK' and '請問你到幾樓' in txt(p, '#npc-dialogue') and '站著' not in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
     press(p, '我要到7樓，謝謝。'); leave_trans(p); press(p, '走出電梯。'); press(p, '按之2的電鈴。')
     check('inside 走出去：WRONG_DOOR、扣 10 分', st(p) == 'WRONG_DOOR' and mis(p) == m0 + 3 and '這裡是7樓' in txt(p, '.fb.bad'))
     press(p, '不好意思，我走錯樓層了。'); check('inside 道歉：過場回電梯，按鈕「回到電梯」', st(p) == '_TRANS' and trans_from(p) == 'WRONG_DOOR' and '回到電梯' in txt(p, '#options-area'))
