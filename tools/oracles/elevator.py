@@ -3,6 +3,7 @@
 ORACLE = """() => {
   const t = Game.task, s = Game.state;
   const m = {
+    ASK: '我要到' + t.n + '樓，謝謝。', WRONG_FLOOR: '不出去，這裡不是' + t.n + '樓。', WRONG_BELL: '按之1的電鈴。', WRONG_DOOR: '不好意思，我走錯樓層了。',
     START: '走進大樓', GUARD: '我要找朋友，她住在' + t.n + '樓之' + t.unit + '。', CHAT: '對啊，真的很熱。', FART: '（假裝沒聞到）', DOG: '沒關係，牠很可愛。', LOBBY: '按▲，往上。', DIR: '不好意思，這部是往下的。', WAIT: '按「開門」，等他。', FLOOR: '按' + t.n + '樓。',
     HELP: '好，我幫你按' + t.m + '樓。',
     HELP2: '沒關係，我幫你按' + t.e + '樓。',
