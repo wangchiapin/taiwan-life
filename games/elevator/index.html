@@ -317,11 +317,13 @@ const Game = defineGame({
     HELP: ['images/elevator.jpg', '🛗'], HELP2: ['images/neighbor_sorry.jpg', '😅'], STOP: ['images/elevator.jpg', '🛗'], STOP_FIX: ['images/elevator.jpg', '🛗'],
     ARRIVE: ['images/hall.jpg', '🚪'], EARLY: ['images/early.jpg', '🚪'], DOOR: ['images/door.jpg', '🚪'], DOOR_WRONG: ['images/door_muscle.jpg', '🚪'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
-  EXTRA_IMAGES: ['images/dir_sorry.jpg', 'images/neighbor_sorry.jpg', 'images/door_muscle.jpg', 'images/door_woman.jpg', 'images/wait_dog.jpg', 'images/neighbor_sorry_dog.jpg', 'images/door_ami.jpg'],   // imageFor() 才會用到的圖，也先載好
+  EXTRA_IMAGES: ['images/dir_sorry.jpg', 'images/neighbor_sorry.jpg', 'images/door_muscle.jpg', 'images/door_woman.jpg', 'images/wait_dog.jpg', 'images/neighbor_sorry_dog.jpg', 'images/door_ami.jpg', 'images/elevator_empty.jpg'],   // imageFor() 才會用到的圖，也先載好
   /* 被客氣地指出錯誤的人不好意思的畫面（尷尬臉）：
      阿姨看錯箭頭（DIR 答對後的道歉過場）、鄰居看錯樓層（STOP 答對後的道歉過場）、鄰居自己說錯樓層（HELP2） */
   imageFor() {
     const t = this.task, s = this.state;
+    /* 鄰居（或阿姨）說完再見、下電梯之後的過場（早停／到了 Ami 那層）：電梯裡已經沒有人 */
+    if (this._transMode && this._trans && ['STOP', 'STOP_FIX'].includes(this._trans.from) && ['EARLY', 'ARRIVE'].includes(this._trans.to)) return ['images/elevator_empty.jpg', '🛗'];
     if (t.evt === 'DOG') {   // 抽到小狗：電梯裡的是穿粉紅色外套、牽著小狗的阿姨（所有有鄰居的畫面都換成她）
       if (s === 'WAIT') return ['images/wait_dog.jpg', '🐶'];
       if (s === 'HELP2' || (s === 'STOP' && this._transMode && t.stopWrong)) return ['images/neighbor_sorry_dog.jpg', '😅'];
@@ -431,7 +433,7 @@ const Game = defineGame({
     const rot = o => o.map((_, i) => o[(i + t.rot) % o.length]);
     /* 電梯往上，停在鄰居要出去的樓層 e；stopWrong 時先停在低一層（e−1），鄰居看錯樓層就想出去。before＝要接在前面的旁白 */
     const toStop = before => {   // 先在電梯裡發生一件小事（聊天／怪味道／小狗，每局隨機一個），答對之後電梯才停
-      Game.thought = [...(before || []), L('（電梯向上。）', '(El ascensor sube.)', '(The elevator goes up.)')];
+      Game.thought = before ? [...before] : [L('（電梯向上。）', '(El ascensor sube.)', '(The elevator goes up.)')];   // 有 before（「你按了N樓，電梯繼續往上」）就不再加「電梯向上」，不然重複
       Game.state = t.evt;
     };
     const rideOn = () => {

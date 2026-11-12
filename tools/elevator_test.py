@@ -261,7 +261,7 @@ def run(b):
     miss = [m for m in p.evaluate('[...Game.missing]') if not any(m.endswith(x) for x in pend)]
     check('這一局用到的圖都載得到（還沒做好的門圖除外）', not miss, (miss, pend))
     p.close()
-    for f in ('dir.jpg', 'dir_sorry.jpg', 'neighbor_sorry.jpg'):
+    for f in ('dir.jpg', 'dir_sorry.jpg', 'neighbor_sorry.jpg', 'elevator_empty.jpg', 'early.jpg', 'door_ami.jpg'):
         check(f'新圖檔存在：{f}', os.path.exists(os.path.join(HERE, '..', 'games', 'elevator', 'images', f)))
     # LOBBY：三個選項、按▼和不按都扣分、答對才往下走
     p = new_page(b); set_task(p, n=8, m=3, dirDown=False); to_lobby(p)
@@ -301,6 +301,25 @@ def run(b):
     # 拼音：「終於」念 zhōng yú（pinyin-pro 預設會念成 wū）
     p = new_page(b)
     check('拼音：終於 念 zhōng yú', 'yú' in p.evaluate("(()=>{const d=document.createElement('div');d.innerHTML=Game.ruby('你終於來了');return [...d.querySelectorAll('rt')].map(x=>x.textContent).join(' ')})()"))
+    p.close()
+    # 鄰居（阿姨）下電梯之後的過場：電梯裡沒有人（elevator_empty.jpg）；他還在電梯裡的過場不換
+    for evt in ('CHAT', 'DOG'):
+        for early in (True, False):
+            p = new_page(b); set_task(p, n=8, m=3, early=early, evt=evt); to_lobby(p); to_help(p); help_right(p); evt_ok(p); leave_trans(p)
+            press(p, '不客氣，慢走！')
+            check(f'{evt} early={early}：STOP 答對後的過場圖是空電梯', st(p) == '_TRANS' and img(p).endswith('elevator_empty.jpg'), (st(p), img(p)))
+            p.close()
+        p = new_page(b); set_task(p, n=8, m=4, stopWrong=True, early=True, evt=evt); to_lobby(p); to_help(p); help_right(p); evt_ok(p); leave_trans(p)
+        press(p, '不好意思，這裡是3樓，您是不是要到4樓？')
+        check(f'{evt} 看錯樓層的道歉過場：他還在電梯裡，不是空電梯', st(p) == '_TRANS' and not img(p).endswith('elevator_empty.jpg'), (st(p), img(p)))
+        leave_trans(p); press(p, '不客氣，慢走！')
+        check(f'{evt} STOP_FIX 答對後的過場圖是空電梯', st(p) == '_TRANS' and img(p).endswith('elevator_empty.jpg'), (st(p), img(p)))
+        p.close()
+    # HELP2（鄰居改口）之後的小插曲頁：只有「你按了N樓，電梯繼續往上」，不再重複「電梯向上」
+    p = new_page(b); set_task(p, n=8, m=3, misspoke=True, evt='CHAT'); to_lobby(p); to_help(p); help_right(p); leave_trans(p)
+    press(p, '沒關係，我幫你按4樓。')
+    tx = txt(p, '#npc-dialogue')
+    check('HELP2 之後的小插曲頁：有「電梯繼續往上」、沒有重複的「電梯向上」', st(p) == 'CHAT' and '電梯繼續往上' in tx and '電梯向上' not in tx, tx)
     p.close()
     # FLOOR：沒有玩家台詞、畫面上沒有 Ami 住幾樓
     p = new_page(b); set_task(p, n=8, m=3); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); press(p, '按「開門」，等他。'); leave_trans(p)
