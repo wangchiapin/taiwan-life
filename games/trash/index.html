@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<title>垃圾車倒垃圾 · Tirar la basura</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：trashgame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "trashgame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #33261f;
+    --red: #d2381e;
+    --red-dark: #8f3513;
+    --yolk: #e0a43a;
+    --night: #2e2630;
+    --kraft: #f3e4d3;
+    --wall: #fbf3ea;
+    --paper: #ffffff;
+    --line: #e5d2bd;
+    --muted: #7a6454;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    background: #e8f0f4;
+  }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  /* ── 登入：店招牌 ── */
+  /* ── 遊戲 ── */
+  /* 購物清單 */
+  @media (hover: hover) {
+    .opt:hover rt { color: #ffe0d2; }
+  }
+  /* ── 排行榜 ── */
+  #lb-table tr.highlight-row { background: #f7dccb; font-weight: 700; }
+  /* ── 句子翻譯 ── */
+  .tr-btn:hover { background: #f7dccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  /* ── 本關單字（右側抽屜） ── */
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+
+
+
+  /* 號碼牌、匯款單、鈔票 */
+  .pbox { margin: 8px 0 12px; background: #fff; border: 2px solid #2f8f83; border-radius: 10px; padding: 8px 14px; }
+  .pbox .ph { color: #2f8f83; font-weight: 700; font-size: 15px; }
+  .pbox .pv { font-size: 22px; font-weight: 700; color: var(--ink); margin-top: 2px; }
+  .pbox .pl { font-size: 15px; color: var(--ink); margin-top: 2px; }
+  .pbox.bill { border-color: var(--red); }
+  .pbox.bill .pv { font-size: 18px; }
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">垃圾車倒垃圾</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">垃圾車倒垃圾</h1>
+  <p class="subtitle" data-es="Tirar la basura" data-en="Taking out the trash">Tirar la basura</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    你新搬進一棟公寓，Ami 用 LINE 教你怎麼倒垃圾。你要看公告、問鄰居，晚上垃圾車一來就拿著垃圾下樓，分清楚一般垃圾、資源回收和廚餘，每一步都有可能有人說錯，要自己核對喔！<br>
+    <span data-es="Te acabas de mudar a un edificio y Ami te explica por LINE cómo tirar la basura. Tienes que leer el aviso, preguntar a la vecina y, cuando llegue el camión por la noche, bajar con la basura y separar bien la basura común, el reciclaje y los restos de comida. ¡Alguien puede equivocarse en cada paso, así que verifícalo tú!" data-en="You just moved into an apartment building and Ami explains over LINE how to take out the trash. You read the notice, ask a neighbor, and when the garbage truck comes in the evening you go down with your trash and sort general waste, recycling and food waste. Someone may get it wrong at every step, so check it yourself!">你新搬進一棟公寓，Ami 用 LINE 教你怎麼倒垃圾。你要看公告、問鄰居，晚上垃圾車一來就拿著垃圾下樓，分清楚一般垃圾、資源回收和廚餘，每一步都有可能有人說錯，要自己核對喔！</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">🚛</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 10 名 · Top 10</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'trash', track: 'trash', vocabQuiz: true, settingsKey: 'trash_settings',
+  defaultPlace: 'street', defaultEmoji: '🚛',
+  roles: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '阿姨': { pitch: 1.05 }, '隊員': { pitch: 0.95 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+   第一版草稿：本次沒有對照 game-kit（讀不到），只用共用檔內建的 GoodTeacher 規則
+══════════════════════════════════════ */
+pinyinPro.customPinyin({
+  '還是': 'hái shì', '還有': 'hái yǒu', '還沒': 'hái méi', '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan',
+  '時間': 'shí jiān', '時候': 'shí hou', '東西': 'dōng xi', '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '著': 'zhe', '囉': 'luo', '啦': 'la', '耶': 'ye',
+  '不好意思': 'bù hǎo yì si', '這個': 'zhè ge', '那個': 'nà ge', '好像': 'hǎo xiàng', '欸': 'èi', '應該': 'yīng gāi', '怎麼': 'zěn me', '舒服': 'shū fu'
+});
+pinyinPro.customPinyin({
+  '垃圾車': 'lè sè chē', '垃圾': 'lè sè', '專用垃圾袋': 'zhuān yòng lè sè dài', '垃圾袋': 'lè sè dài', '垃圾不落地': 'lè sè bù luò dì', '一般垃圾': 'yì bān lè sè',
+  '倒': 'dào', '倒進': 'dào jìn', '一個': 'yí ge', '乾淨': 'gān jìng', '音樂': 'yīn yuè',
+  '只看': 'zhǐ kàn', '只帶': 'zhǐ dài', '還拿': 'hái ná', '等車': 'děng chē', '車子': 'chē zi', '妳': 'nǐ'
+});
+// 台灣讀音修正：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '阿姨': ['La vecina', 'The neighbor'], '隊員': ['El recolector', 'The sanitation worker'] };
+const SPEAKER_RE = /^(Ami|阿姨|隊員|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['垃圾車', 'camión de la basura', 'garbage truck'], ['專用垃圾袋', 'bolsa de basura oficial', 'official trash bag'], ['資源回收', 'reciclaje', 'recycling'], ['廚餘', 'restos de comida', 'food waste']],
+  BOARD: [['公告', 'aviso', 'notice'], ['星期', 'día de la semana', 'day of the week']],
+  ASK: [['新搬來', 'recién mudado', 'newly moved in'], ['巷口', 'la entrada del callejón', 'the mouth of the alley']],
+  HOME: [['專用垃圾袋', 'bolsa de basura oficial', 'official trash bag'], ['黑色塑膠袋', 'bolsa de plástico negra', 'black plastic bag'], ['立體類', 'objetos con volumen (botellas, latas)', 'bulky items (bottles, cans)'], ['平面類', 'objetos planos (papel, cartón)', 'flat items (paper, cardboard)']],
+  ARRIVE: [['垃圾不落地', 'la basura no toca el suelo', 'no trash on the ground'], ['等', 'esperar', 'wait']],
+  TRUCK: [['清潔隊員', 'trabajador de limpieza', 'sanitation worker']],
+  THROW: [['廚餘桶', 'cubo de restos de comida', 'food-waste bin'], ['退收', 'rechazar la recogida', 'refuse to collect']],
+  ASKOIL: [['披薩盒', 'caja de pizza', 'pizza box'], ['油', 'aceite, grasa', 'grease, oil']],
+  OIL: [['沾到', 'mancharse con', 'get stained with'], ['回收', 'reciclar', 'recycle']],
+  get END() { return Game._endGood ? [['乾淨', 'limpio', 'clean']] : [['下次', 'la próxima vez', 'next time']]; },
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = {
+  BOARD: ['看一樓公告', 'leer el aviso', 'reading the notice'], ASK: ['問鄰居', 'preguntar a la vecina', 'asking the neighbor'], HOME: ['整理要倒的東西', 'preparar la basura', 'preparing the trash'],
+  ARRIVE: ['等垃圾車', 'esperar al camión', 'waiting for the truck'], TRUCK: ['聽隊員說資源回收', 'lo que dice el recolector', 'what the worker says'], THROW: ['倒廚餘', 'tirar los restos de comida', 'food waste'],
+  ASKOIL: ['問披薩盒', 'preguntar por la caja', 'asking about the box'], OIL: ['丟披薩盒', 'tirar la caja', 'throwing the box']
+};
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = { BOARD: '下樓去看公告', ASK: '遇到鄰居', HOME: '回家整理東西', ARRIVE: '下樓等垃圾車', TRUCK: '垃圾車來了', THROW: '把東西拿去丟', ASKOIL: '問旁邊的阿姨', OIL: '聽阿姨回答', END: '傳訊息給 Ami' };
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const PLACES = {
+  phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
+  home: ['🏠', '你家', 'Tu casa', 'Your apartment', ''],
+  lobby: ['🏢', '公寓一樓', 'Planta baja', 'Building lobby', ''],
+  street: ['🚛', '巷口', 'La esquina del callejón', 'At the alley corner', '']
+};
+const DAYS = ['一', '二', '四', '五', '六'];                     // 垃圾車開的日子（週三、週日不開，待確認）
+const KIND_OF = { 一: '平面', 二: '立體', 四: '立體', 五: '平面', 六: '立體' };   // 台北市：一、五收平面類；二、四、六收立體類（待確認：各縣市不同）
+const otherKind = k => (k === '平面' ? '立體' : '平面');
+const KIND_ES = { 平面: 'papel y cartón (objetos planos)', 立體: 'botellas y latas (objetos con volumen)' };
+const KIND_EN = { 平面: 'paper and cardboard (flat items)', 立體: 'bottles and cans (bulky items)' };
+const ITEM = { 平面: '紙箱', 立體: '寶特瓶' };
+const ITEM_ES = { 平面: 'la caja de cartón', 立體: 'la botella de plástico' };
+const ITEM_EN = { 平面: 'the cardboard box', 立體: 'the plastic bottle' };
+const TIMES = [[6, 30], [7, 0], [7, 30], [8, 0]];
+const timeZh = tm => `晚上${zhNum(tm[0])}點${tm[1] ? '半' : ''}`;
+const timeEs = tm => `las ${tm[0]}:${tm[1] ? '30' : '00'} de la noche`;
+const timeEn = tm => `${tm[0]}:${tm[1] ? '30' : '00'} pm`;
+const PLACE_LIST = [['巷口的便利商店前面', 'frente a la tienda de conveniencia de la esquina', 'in front of the convenience store at the alley entrance'], ['社區旁邊的小公園', 'el parquecito junto al edificio', 'the small park next to the building']];
+
+/* ══════════════════════════════════════
+   任務提示
+══════════════════════════════════════ */
+const Hints = makeHints({ render: stdHintsRender });
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+const ORDER = ['START', 'BOARD', 'ASK', 'HOME', 'ARRIVE', 'TRUCK', 'THROW', 'ASKOIL', 'OIL', 'END', 'RESULT'];
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,
+  hintViews: 0, log: [], feedback: [], visit: 0, att: {}, cash: null,
+  onStart() { this.updateCash(); },
+  updateCash() { document.getElementById('cash-badge').textContent = ''; },
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+  IMAGES: {
+    START: ['images/start.jpg', '📱'], BOARD: ['images/lobby.jpg', '📋'], ASK: ['images/lobby.jpg', '📋'], HOME: ['images/home.jpg', '🛍️'], ARRIVE: ['images/wait.jpg', '🚛'],
+    TRUCK: ['images/truck.jpg', '🚛'], THROW: ['images/throw.jpg', '🗑️'], ASKOIL: ['images/oil.jpg', '🍕'], OIL: ['images/oil.jpg', '🍕'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+  },
+
+  setup() {
+    const t = this.task = { rot: Math.floor(Math.random() * 3) };
+    t.day = pick(DAYS); t.kind = KIND_OF[t.day];                       // 今天星期幾、今天收哪一類資源回收
+    t.tm = pick(TIMES); t.pl = pick(PLACE_LIST);                       // 公告上真正的垃圾車時間和地點
+    t.fakeTm = pick(TIMES.filter(x => x !== t.tm));                    // 鄰居記錯時說的時間
+    t.fakePl = PLACE_LIST.find(x => x !== t.pl);
+    t.nWrong = Math.random() < 0.45; t.nWhat = Math.random() < 0.5 ? 'time' : 'place';   // 鄰居說錯（時間或地點）
+    t.nTm = t.nWrong && t.nWhat === 'time' ? t.fakeTm : t.tm; t.nPl = t.nWrong && t.nWhat === 'place' ? t.fakePl : t.pl;
+    t.rWrong = Math.random() < 0.45; t.rSaid = t.rWrong ? otherKind(t.kind) : t.kind;   // 隊員說錯今天收哪一類
+    t.bagOK = true; t.recOK = true;                                    // 玩家實際帶下樓的（HOME 關會改）
+  },
+
+  amiLines() {
+    const N = this.N, t = this.task;
+    return [
+      L(`Ami：${N}，你新搬進去的那棟公寓，晚上有垃圾車來收垃圾，不是放在門口就會有人收喔！垃圾車一來，要自己拿著垃圾下樓。`, `${N}, en tu edificio nuevo pasa un camión de la basura por la noche; ¡no basta con dejar la bolsa en la puerta! Cuando llegue el camión, tienes que bajar tú con la basura.`, `${N}, a garbage truck comes to your new building in the evening — you can't just leave the bag at your door! When it arrives, you have to bring your trash down yourself.`),
+      L('Ami：一般垃圾要裝在「專用垃圾袋」裡，資源回收要先分類，吃剩的菜是「廚餘」，要等車來再倒進廚餘桶。', 'Ami: La basura común va en la «bolsa oficial»; el reciclaje se separa antes, y las sobras de comida son «restos de comida»: se echan al cubo cuando llega el camión.', 'Ami: General trash goes in the official trash bag, recycling must be sorted first, and leftover food is food waste — pour it into the food-waste bin when the truck arrives.'),
+      L('Ami：先去一樓看公告，再問問鄰居。你家有一袋垃圾、一個寶特瓶、一個紙箱，還有一個沾了很多油的披薩盒。別人說的跟公告不一樣的話，要自己對一下喔！', 'Ami: Primero lee el aviso de la planta baja y luego pregunta a los vecinos. En casa tienes una bolsa de basura, una botella de plástico, una caja de cartón y una caja de pizza muy grasienta. Si lo que dicen no coincide con el aviso, ¡compruébalo tú!', 'Ami: First read the notice downstairs, then ask your neighbors. At home you have a bag of trash, a plastic bottle, a cardboard box and a very greasy pizza box. If what people say differs from the notice, check it yourself!')
+    ];
+  },
+  hintSections() { return [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }]; },
+
+  listHTML(rowsOnly) {
+    const t = this.task, r = x => this.ruby(x);
+    const rows = [
+      { zh: '要做：看公告、問鄰居，垃圾車來的時候拿著垃圾下樓倒', es: 'Debes: leer el aviso, preguntar a los vecinos y bajar la basura cuando llegue el camión', en: 'To do: read the notice, ask the neighbors, and bring your trash down when the truck arrives' },
+      { zh: '家裡有：一袋垃圾、一個寶特瓶、一個紙箱、一個沾了很多油的披薩盒', es: 'En casa tienes: una bolsa de basura, una botella de plástico, una caja de cartón y una caja de pizza muy grasienta', en: 'At home you have: a bag of trash, a plastic bottle, a cardboard box and a very greasy pizza box' }
+    ];
+    if (rowsOnly) return rows;
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 一樓公佈欄上的公告：垃圾車的日子、時間、地點，還有今天收哪一類資源回收 */
+  noticeBox() {
+    const r = x => this.ruby(x), t = this.task;
+    return `<div class="pbox bill"><div class="ph">📋 ${r('公告')}</div><div class="pl">${r('垃圾車：星期一、二、四、五、六')}</div><div class="pl">${r('時間')}：${r(timeZh(t.tm))}</div><div class="pl">${r('地點')}：${r(t.pl[0])}</div>` +
+      `<div class="pv">${r('今天星期' + t.day + '，資源回收收「' + t.kind + '類」')}</div></div>`;
+  },
+
+  getConfig() {
+    const N = this.N, t = this.task;
+    const att = (who, zh, es, en) => L(`${who}：${zh}`, es, en);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const kindZh = k => `${k}類`;
+    const myBag = '垃圾裝進專用垃圾袋', myBlack = '垃圾裝進家裡的黑色塑膠袋';
+
+    return {
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你在新家的客廳，手機響了一聲，是Ami傳來的LINE。）', '(Estás en la sala de tu nuevo apartamento. Tu celular suena: es un LINE de Ami.)', '(You are in the living room of your new apartment. Your phone buzzes — a LINE from Ami.)'),
+          ...Game.amiLines(),
+          L('我：好，我先下樓去看公告！', '¡Bien, bajo primero a leer el aviso!', "OK, I'll go downstairs and read the notice first!")
+        ],
+        options: ['下樓去看公告'],
+        next: () => { Game.startTimer(); Game.state = 'BOARD'; }
+      },
+
+      /* ═══ 看一樓公告 ═══ */
+      BOARD: {
+        place: 'lobby',
+        html: () => Game.noticeBox(),
+        dialogue: () => [L('（你走到公寓一樓，牆上的公佈欄貼著一張環保局的公告。）', '(Bajas a la planta baja. En el tablón hay un aviso de la oficina de medio ambiente.)', '(You go down to the lobby. A notice from the environmental bureau is posted on the board.)')],
+        options: () => rotOf(t, ['我把垃圾車的時間、地點和今天收哪一類資源回收記下來。', '我只看一下時間，其他不用看。', '不用看公告，等有人敲門再說。']),
+        next: c => {
+          if (c !== '我把垃圾車的時間、地點和今天收哪一類資源回收記下來。') {
+            Game.addMistake(c.startsWith('我只看')
+              ? M('公告上除了時間，還有地點和今天收哪一類資源回收，都要看。', 'El aviso dice la hora, el lugar y qué tipo de reciclaje se recoge hoy: léelo todo.', 'The notice gives the time, the place and which type of recycling is collected today — read all of it.')
+              : M('台灣的垃圾車是定時定點來的，不會有人敲門，要自己先看好時間和地點。', 'En Taiwán el camión pasa a hora y lugar fijos; nadie llama a tu puerta. Revisa tú la hora y el lugar.', 'In Taiwan the truck comes at a fixed time and place; nobody knocks on your door. Check the time and place yourself.'));
+            return;
+          }
+          goodFirst('BOARD', '沒錯！先看公告，記下時間、地點和今天收哪一類資源回收。', '¡Exacto! Lee el aviso y anota la hora, el lugar y el tipo de reciclaje de hoy.', 'Right! Read the notice and note the time, the place and today\'s recycling type.');
+          Game.state = 'ASK';
+        }
+      },
+
+      /* ═══ 問鄰居：45% 說錯時間或地點，要拿公告來核對 ═══ */
+      ASK: catchState(Game, {
+        key: 'ASK', place: 'lobby',
+        html: () => Game.noticeBox(),
+        dialogue: () => [L('（這時候，一位住在樓上的阿姨提著菜走進來。）', '(En ese momento entra una vecina del piso de arriba con la compra.)', '(Just then, a neighbor from upstairs walks in carrying groceries.)'),
+          att('阿姨', '你是新搬來的吧？', 'Tú eres el nuevo vecino, ¿verdad?', 'You must be new here, right?'),
+          L(`阿姨：垃圾車${timeZh(t.nTm)}會到${t.nPl[0]}喔，不要錯過了。`, `La vecina: El camión llega ${timeEs(t.nTm)}, ${t.nPl[1]}. No te lo pierdas.`, `The neighbor: The truck comes at ${timeEn(t.nTm)}, ${t.nPl[2]}. Don't miss it.`)],
+        ok: '好，謝謝阿姨。',
+        fix: () => `不好意思，我看公告上寫的是${timeZh(t.nWrong ? t.tm : t.fakeTm)}，在${t.pl[0]}。`,
+        rude: '妳是不是記錯了？不要亂講。',
+        wrong: () => t.nWrong,
+        whyWrong: () => M(t.nWhat === 'time' ? `阿姨記錯了時間：她說${timeZh(t.nTm)}，公告上寫${timeZh(t.tm)}。要以公告為準。` : `阿姨記錯了地點：她說${t.nPl[0]}，公告上寫${t.pl[0]}。要以公告為準。`,
+          t.nWhat === 'time' ? `La vecina se equivocó de hora: dijo ${timeEs(t.nTm)} y el aviso dice ${timeEs(t.tm)}. Vale lo que dice el aviso.` : `La vecina se equivocó de lugar: dijo ${t.nPl[1]} y el aviso dice ${t.pl[1]}. Vale lo que dice el aviso.`,
+          t.nWhat === 'time' ? `The neighbor got the time wrong: she said ${timeEn(t.nTm)} but the notice says ${timeEn(t.tm)}. Go by the notice.` : `The neighbor got the place wrong: she said ${t.nPl[2]} but the notice says ${t.pl[2]}. Go by the notice.`),
+        whyRight: () => M(`阿姨說對了：公告上就是${timeZh(t.tm)}，在${t.pl[0]}。`, `La vecina tenía razón: el aviso dice ${timeEs(t.tm)}, ${t.pl[1]}.`, `The neighbor was right: the notice says ${timeEn(t.tm)}, ${t.pl[2]}.`),
+        goodWrong: ['你很細心！別人告訴你的時間和地點，要拿公告對一下。', '¡Qué atento! Compara lo que te dicen con el aviso.', 'Well spotted! Compare what people tell you with the notice.'],
+        goodOk: ['鄰居說的要跟公告對一下，一樣才放心。', 'Compara lo que dice la vecina con el aviso.', 'Check what the neighbor says against the notice.'],
+        apology: () => [att('阿姨', `啊，對對對，不好意思，我記錯了！是${timeZh(t.tm)}，在${t.pl[0]}。`, `¡Ay, sí, perdona, me equivoqué! Es ${timeEs(t.tm)}, ${t.pl[1]}.`, `Oh, right, sorry, I got it wrong! It's ${timeEn(t.tm)}, ${t.pl[2]}.`)],
+        go: () => { Game.state = 'HOME'; }
+      }),
+
+      /* ═══ 回家整理：實際帶什麼先記下來（選錯不擋住，垃圾車那邊才會有後果） ═══ */
+      HOME: {
+        place: 'home',
+        html: () => Game.noticeBox(),
+        dialogue: () => [L(`（你回到家，開始整理要倒的東西。今天是星期${t.day}。）`, `(Vuelves a casa y empiezas a preparar lo que vas a tirar. Hoy es ${['lunes','martes','miércoles','jueves','viernes','sábado'][['一','二','三','四','五','六'].indexOf(t.day)]}.)`, `(You go back home and start getting your things ready. Today is ${['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][['一','二','三','四','五','六'].indexOf(t.day)]}.)`)],
+        options: () => rotOf(t, [`${myBag}，再帶${ITEM[t.kind]}，今天收${kindZh(t.kind)}。`, `${myBag}，再帶${ITEM[otherKind(t.kind)]}，那是${kindZh(otherKind(t.kind))}。`, `${myBlack}，再帶${ITEM[t.kind]}，今天收${kindZh(t.kind)}。`]),
+        next: c => {
+          const good = `${myBag}，再帶${ITEM[t.kind]}，今天收${kindZh(t.kind)}。`;
+          t.bagOK = !c.startsWith(myBlack); t.recOK = !c.includes(ITEM[otherKind(t.kind)]);
+          if (c === good) { goodFirst('HOME', '沒錯！一般垃圾要裝專用垃圾袋，資源回收只帶今天收的那一類。', '¡Exacto! La basura común va en la bolsa oficial y del reciclaje solo llevas el tipo de hoy.', 'Right! General trash goes in the official bag, and for recycling you only bring today\'s type.'); }
+          else if (!t.recOK) Game.addMistake(M(`今天星期${t.day}只收${kindZh(t.kind)}，你帶的${ITEM[otherKind(t.kind)]}是${kindZh(otherKind(t.kind))}，今天收不到。`, `Hoy solo se recoge ${KIND_ES[t.kind]}; lo que llevas no se recoge hoy.`, `Today only ${KIND_EN[t.kind]} is collected; what you brought isn't collected today.`));
+          else Game.addMistake(M('一般垃圾要裝在「專用垃圾袋」裡，用黑色塑膠袋清潔隊員不會收。', 'La basura común debe ir en la «bolsa oficial»; con una bolsa negra normal no la recogen.', 'General trash must go in the official trash bag; they won\'t collect it in an ordinary black bag.'));
+          Game.state = 'ARRIVE';
+        }
+      },
+
+      /* ═══ 等垃圾車 ═══ */
+      ARRIVE: {
+        place: 'street',
+        html: () => Game.noticeBox(),
+        dialogue: () => [L(`（${timeZh(t.tm)}，你提著東西走到${t.pl[0]}。遠遠傳來垃圾車的音樂聲。）`, `(${timeEs(t.tm)[0].toUpperCase() + timeEs(t.tm).slice(1)}: sales con tus cosas a ${t.pl[1]}. A lo lejos suena la música del camión.)`, `(At ${timeEn(t.tm)} you carry your things to ${t.pl[2]}. The truck's music plays in the distance.)`),
+          L('（台灣有「垃圾不落地」的規定：垃圾要拿在手上，等車來再丟。）', '(En Taiwán rige «la basura no toca el suelo»: la llevas en la mano y la tiras cuando llega el camión.)', '(Taiwan has a "no trash on the ground" rule: hold it in your hands and throw it away when the truck arrives.)')],
+        options: () => rotOf(t, ['我拿著東西站在路邊等，車子停下來再丟。', '我先把垃圾放在路邊地上，就回家等。', '我把垃圾丟進路邊別人家的垃圾桶。']),
+        next: c => {
+          if (c !== '我拿著東西站在路邊等，車子停下來再丟。') {
+            Game.addMistake(c.startsWith('我先把')
+              ? M('垃圾不能放在路邊地上，要拿在手上等車來。', 'La basura no se deja en el suelo: la llevas en la mano hasta que llegue el camión.', 'Don\'t leave trash on the ground — hold it until the truck arrives.')
+              : M('不能把垃圾丟進別人家的垃圾桶，這樣是亂丟。', 'No se tira la basura en el cubo de otra persona; eso es tirar basura donde no toca.', 'Don\'t put your trash in other people\'s bins — that\'s illegal dumping.'));
+            return;
+          }
+          goodFirst('ARRIVE', '沒錯！垃圾拿在手上，等垃圾車停下來再丟。', '¡Exacto! Lleva la basura en la mano y tírala cuando pare el camión.', 'Right! Hold your trash and throw it away when the truck stops.');
+          Game.state = 'TRUCK';
+        }
+      },
+
+      /* ═══ 隊員說今天收哪一類資源回收：45% 說錯，要拿公告對 ═══ */
+      TRUCK: catchState(Game, {
+        key: 'TRUCK', place: 'street',
+        html: () => Game.noticeBox(),
+        dialogue: () => [L('（垃圾車停下來了，後面有一位清潔隊員在收垃圾，旁邊還有資源回收的桶子。）', '(El camión se detiene; un trabajador de limpieza recoge la basura y al lado hay cubos de reciclaje.)', '(The truck stops. A sanitation worker is collecting trash, with recycling bins beside the truck.)'),
+          att('隊員', `今天星期${t.day}，資源回收收${kindZh(t.rSaid)}喔。`, `Hoy es el día de ${KIND_ES[t.rSaid]}.`, `Today we collect ${KIND_EN[t.rSaid]}.`)],
+        ok: '好，謝謝。',
+        fix: () => `不好意思，公告上寫今天收${kindZh(t.rWrong ? t.kind : otherKind(t.kind))}。`,
+        rude: '你是不是搞錯了？不要亂說。',
+        wrong: () => t.rWrong,
+        whyWrong: () => M(`隊員說錯了：他說收${kindZh(t.rSaid)}，公告上寫今天收${kindZh(t.kind)}。`, `El trabajador se equivocó: dijo ${KIND_ES[t.rSaid]}, pero el aviso dice ${KIND_ES[t.kind]}.`, `The worker got it wrong: he said ${KIND_EN[t.rSaid]}, but the notice says ${KIND_EN[t.kind]}.`),
+        whyRight: () => M(`隊員說對了：今天就是收${kindZh(t.kind)}。`, `El trabajador tenía razón: hoy se recoge ${KIND_ES[t.kind]}.`, `The worker was right: today is ${KIND_EN[t.kind]}.`),
+        goodWrong: ['你很細心！資源回收收哪一類，要拿公告對一下。', '¡Qué atento! Comprueba con el aviso qué tipo de reciclaje se recoge.', 'Well spotted! Check the notice for which type of recycling is collected.'],
+        goodOk: ['隊員說的要跟公告對一下，一樣才放心。', 'Compara lo que dice el trabajador con el aviso.', 'Check what the worker says against the notice.'],
+        apology: () => [att('隊員', `喔，對對對，是我說錯了，今天收${kindZh(t.kind)}。`, `Ah, sí, me equivoqué: hoy es ${KIND_ES[t.kind]}.`, `Oh, right, my mistake — today it's ${KIND_EN[t.kind]}.`)],
+        go: () => { Game.state = 'THROW'; }
+      }),
+
+      /* ═══ 丟東西：實際帶的決定隊員收不收；廚餘的處理選項固定 ═══ */
+      THROW: {
+        place: 'street',
+        dialogue: () => [
+          t.bagOK ? att('隊員', '你這袋是專用垃圾袋，好，我收。', 'Su bolsa es oficial; bien, me la llevo.', 'That is an official bag — OK, I\'ll take it.')
+                  : att('隊員', '欸，這不是專用垃圾袋，我不能收，要換專用垃圾袋再來丟。', 'Oiga, esta no es una bolsa oficial; no puedo recogerla. Cámbiela por una bolsa oficial.', 'Hey, this isn\'t an official bag, so I can\'t take it. Switch to an official bag.'),
+          t.recOK ? att('隊員', '資源回收放在旁邊的桶子，要先沖乾淨。', 'El reciclaje va en el cubo de al lado, y primero hay que enjuagarlo.', 'Recycling goes in the bin beside the truck — rinse it first.')
+                  : att('隊員', `你帶的${ITEM[otherKind(t.kind)]}今天不收，要退收，帶回去，等收${kindZh(otherKind(t.kind))}的日子再丟。`, `Lo que trae hoy no se recoge; llévelo de vuelta y tírelo el día de ${KIND_ES[otherKind(t.kind)]}.`, `What you brought isn't collected today; take it back and put it out on a ${KIND_EN[otherKind(t.kind)]} day.`),
+          L('（你還拿著吃剩的菜，要丟在哪裡？）', '(Aún llevas las sobras de comida. ¿Dónde las tiras?)', '(You are still holding the leftover food. Where does it go?)')],
+        options: () => rotOf(t, ['我把剩菜倒進廚餘桶，裝過剩菜的髒袋子丟進垃圾車。', '我把剩菜連袋子一起丟進廚餘桶。', '我把剩菜倒進資源回收的桶子。']),
+        next: c => {
+          if (c !== '我把剩菜倒進廚餘桶，裝過剩菜的髒袋子丟進垃圾車。') {
+            Game.addMistake(c.startsWith('我把剩菜連')
+              ? M('廚餘桶裡不能放塑膠袋，要把剩菜倒出來，髒袋子丟一般垃圾。', 'En el cubo de restos de comida no puede haber bolsas de plástico: vacía las sobras y la bolsa sucia va a la basura común.', 'No plastic bags in the food-waste bin — pour out the food and put the dirty bag in general trash.')
+              : M('剩菜是廚餘，不能放進資源回收。', 'Las sobras son restos de comida; no van al reciclaje.', 'Leftover food is food waste; it doesn\'t go in the recycling.'));
+            return;
+          }
+          goodFirst('THROW', '沒錯！廚餘倒進廚餘桶，髒袋子丟一般垃圾。', '¡Exacto! Los restos van al cubo de comida y la bolsa sucia a la basura común.', 'Right! Food waste goes in the food-waste bin and the dirty bag in general trash.');
+          Game.state = 'ASKOIL';
+        }
+      },
+
+      /* ═══ 問旁邊的阿姨：沾了油的披薩盒 ═══ */
+      ASKOIL: {
+        place: 'street',
+        dialogue: () => [L('（你手上還有一個披薩盒，沾了很多油。阿姨剛好也在旁邊等著丟垃圾。）', '(Todavía tienes una caja de pizza llena de grasa. La vecina también espera cerca para tirar su basura.)', '(You still have a pizza box covered in grease. The neighbor is waiting nearby to throw out her trash too.)')],
+        options: () => rotOf(t, ['阿姨，不好意思，請問這個沾了油的披薩盒要丟哪裡？', '欸，這個披薩盒要丟哪裡？', '不用問了，我直接丟進資源回收桶。']),
+        next: c => {
+          if (c !== '阿姨，不好意思，請問這個沾了油的披薩盒要丟哪裡？') {
+            Game.addMistake(c.startsWith('欸') ? POLITE : M('不確定的時候要先問，不要自己亂丟。', 'Si no estás seguro, pregunta primero y no tires las cosas al azar.', 'When you\'re not sure, ask first instead of throwing things away at random.'));
+            return;
+          }
+          goodFirst('ASKOIL', '沒錯！不確定怎麼分類，就有禮貌地問鄰居。', '¡Exacto! Si no sabes cómo separar algo, pregunta con educación a un vecino.', 'Right! If you\'re not sure how to sort something, ask a neighbor politely.');
+          Game.state = 'OIL';
+        }
+      },
+
+      OIL: {
+        place: 'street',
+        dialogue: () => [att('阿姨', '沾到油的紙不能回收，要丟一般垃圾，你丟進垃圾車就好。', 'El papel manchado de grasa no se puede reciclar; va a la basura común. Tíralo al camión.', 'Paper stained with grease can\'t be recycled; it goes in general trash. Just throw it in the truck.')],
+        options: () => rotOf(t, ['好，沾到油的丟進垃圾車，謝謝阿姨。', '那我壓扁一下，放進資源回收桶。', '那我放在旁邊，等一下有人會收。']),
+        next: c => {
+          if (c !== '好，沾到油的丟進垃圾車，謝謝阿姨。') {
+            Game.addMistake(c.startsWith('那我壓扁')
+              ? M('沾到油的紙盒不能回收，放進資源回收桶會弄髒其他的紙。', 'Una caja manchada de grasa no se recicla; en el cubo mancharía el resto del papel.', 'A greasy box can\'t be recycled; in the bin it would dirty the other paper.')
+              : M('東西不能放在旁邊，要丟進垃圾車。', 'No se deja la basura a un lado: se echa al camión.', 'Don\'t leave things on the side — throw them into the truck.'));
+            return;
+          }
+          goodFirst('OIL', '沒錯！沾到油的紙盒丟一般垃圾。', '¡Exacto! La caja grasienta va a la basura común.', 'Right! The greasy box goes in general trash.');
+          Game.stopTimer(); Game.state = 'END';
+        }
+      },
+
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          Game._endGood = Game.mistakes <= 2 && t.bagOK && t.recOK;
+          track('game_complete', { game: 'trash', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            L('（你回到家，打開手機，傳訊息給Ami。）', '(Vuelves a casa, abres el celular y le escribes a Ami.)', '(You get home, open your phone and message Ami.)'),
+            Game._endGood
+              ? L(`Ami：太好了，${N}，你學會倒垃圾了！專用垃圾袋、資源回收和廚餘都分得很乾淨。`, `¡Qué bien, ${N}, ya sabes tirar la basura! La bolsa oficial, el reciclaje y los restos de comida, todo bien separado.`, `Great, ${N}, you've learned how to take out the trash! The official bag, recycling and food waste were all sorted properly.`)
+              : (!t.bagOK
+                ? L('Ami：欸，聽起來你的垃圾沒有被收……一般垃圾要用專用垃圾袋喔，下次要記得！', 'Ami: Parece que no te recogieron la basura… la basura común va en la bolsa oficial. ¡La próxima vez, recuérdalo!', 'Hmm, it sounds like your trash wasn\'t collected… general trash goes in the official bag. Remember that next time!')
+                : !t.recOK
+                  ? L(`Ami：欸，你的${ITEM[otherKind(t.kind)]}被退收了……資源回收要看今天收哪一類，下次要看公告喔！`, 'Ami: Oye, te rechazaron el reciclaje… hay que mirar qué tipo se recoge cada día. ¡La próxima vez, lee el aviso!', 'Hey, your recycling was refused… check which type is collected each day. Read the notice next time!')
+                  : L('Ami：欸，聽起來有點不順利……下次要把公告、鄰居和隊員說的對一對喔！', 'Ami: Parece que no fue del todo bien… la próxima vez compara el aviso con lo que digan la vecina y el trabajador.', "Hmm, sounds like it didn't go smoothly… next time compare the notice with what the neighbor and the worker say."))
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: stdResultCfg('phone')
+    };
+  }
+});
+
+GameBoot();
+Music.init({ bpm: 104, tracks: [
+  { wave: 'square', vol: 0.2, notes: 'E5 D5 E5 D5 E5 B4 D5 C5 | A4 . C4 E4 A4 B4 . E4 | G4 B4 C5 . E4 . . . | E5 D5 E5 D5 E5 B4 D5 C5' },
+  { wave: 'triangle', vol: 0.5, notes: 'A2 . E3 . A3 . E3 . | E2 . E3 . G3 . E3 . | A2 . E3 . A3 . E3 . | E2 . E3 . G3 . E3 .' },
+  { vol: 0.2, notes: 'k . . h k . h .' }] });
+</script>
+</body>
+</html>
