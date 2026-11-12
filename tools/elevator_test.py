@@ -261,7 +261,7 @@ def run(b):
     miss = [m for m in p.evaluate('[...Game.missing]') if not any(m.endswith(x) for x in pend)]
     check('這一局用到的圖都載得到（還沒做好的門圖除外）', not miss, (miss, pend))
     p.close()
-    for f in ('dir.jpg', 'dir_sorry.jpg', 'neighbor_sorry.jpg', 'elevator_empty.jpg', 'early.jpg', 'door_ami.jpg', 'inside_asks.jpg', 'wrong_doors.jpg'):
+    for f in ('dir.jpg', 'dir_sorry.jpg', 'neighbor_sorry.jpg', 'elevator_empty.jpg', 'early.jpg', 'door_ami.jpg', 'inside_asks.jpg', 'wrong_doors.jpg', 'wrong_floor.jpg'):
         check(f'新圖檔存在：{f}', os.path.exists(os.path.join(HERE, '..', 'games', 'elevator', 'images', f)))
     # LOBBY：三個選項、按▼和不按都扣分、答對才往下走
     p = new_page(b); set_task(p, n=8, m=3, dirDown=False); to_lobby(p)
@@ -437,7 +437,7 @@ def run(b):
     check('WRONG_FLOOR：電梯真的停在 5 樓（顯示器 5）', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 5 and '5' in disp(p), (st(p), disp(p)))
     check('WRONG_FLOOR：沒有提示的玩家台詞、只說外面是走廊', '走廊' in txt(p, '#npc-dialogue') and '8' not in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
     check('WRONG_FLOOR 兩個選項', sorted(o.strip() for o in opts(p)) == sorted(['走出電梯。', '不出去，這裡不是8樓。']), opts(p))
-    check('WRONG_FLOOR 圖是別層的走廊 wrong_doors.jpg', img(p).endswith('wrong_doors.jpg'), img(p))
+    check('WRONG_FLOOR 圖是電梯門開、外面是別層的走廊 wrong_floor.jpg', img(p).endswith('wrong_floor.jpg'), img(p))
     words = p.evaluate('s=>VOCAB[s].map(x=>x[0])', 'WRONG_FLOOR'); check('小字典 WRONG_FLOOR：每個字都在畫面上', all(w in screen(p) for w in words), words)
     # 沒走出去：發現不對，輕扣 5 分，回到 FLOOR 重按
     press(p, '不出去，這裡不是8樓。')
