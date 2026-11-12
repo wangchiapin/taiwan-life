@@ -54,15 +54,23 @@ def to_guard(page): press(page, '走進大樓'); leave_trans(page); assert st(pa
 def to_lobby(page): to_guard(page); press(page, guard_ok(page)); leave_trans(page); assert st(page) == 'LOBBY', st(page)
 def evt_ok(page):   # 電梯裡的小插曲（若有）答對；之後停在 STOP
     if st(page) in EVTS: press(page, EVT_OK[st(page)])
-def to_help(page):   # LOBBY 之後到 HELP（DIR 若有，先答對）
+def to_help(page):   # LOBBY 之後到 HELP（DIR 若有，先答對）；鄰居進來先開口，所以 WAIT 之後直接是 HELP
     press(page, '按▲，往上。'); leave_trans(page)
     if st(page) == 'DIR': press(page, '不好意思，這部是往下的。'); leave_trans(page)
     assert st(page) == 'WAIT', st(page)
-    press(page, '按「開門」，等他。'); leave_trans(page); assert st(page) == 'FLOOR', st(page)
-    press(page, f"按{page.evaluate('Game.task.n')}樓。"); leave_trans(page); assert st(page) == 'HELP', st(page)
-def help_right(page):
+    press(page, '按「開門」，等他。'); leave_trans(page); assert st(page) == 'HELP', st(page)
+def press_floor(page):   # 輪到自己按樓層：按對 Ami 的樓層（之後是電梯裡的小插曲）
+    leave_trans(page); assert st(page) == 'FLOOR', st(page)
+    press(page, f"按{page.evaluate('Game.task.n')}樓。")
+def to_floor(page, right=True):   # LOBBY → （DIR）→ WAIT → HELP（鄰居先開口）→ 幫他按對 → 輪到自己按樓層（FLOOR）
+    press(page, '按▲，往上。'); leave_trans(page)
+    if st(page) == 'DIR': press(page, '不好意思，這部是往下的。'); leave_trans(page)
+    press(page, '按「開門」，等他。'); assert st(page) == 'HELP', st(page)
+    press(page, f"好，我幫你按{page.evaluate('Game.task.m')}樓。"); leave_trans(page); assert st(page) == 'FLOOR', st(page)
+def help_right(page):   # 幫鄰居按對；沒說錯樓層就接著自己按樓層（到小插曲）。說錯樓層的停在 HELP2，由測試自己處理
     t = page.evaluate('({m:Game.task.m})')
     press(page, f"好，我幫你按{t['m']}樓。")
+    if not page.evaluate('Game.task.misspoke'): press_floor(page)
 
 def run(b):
     # ── 1. 每局隨機條件的規則（setup 跑 300 次）──
@@ -119,8 +127,9 @@ def run(b):
             press(p, '你剛剛明明說3樓！' if first == 'rude1' else '那你自己按吧。')
             check(f'HELP2 選「{first}」：扣分、留在 HELP2', mis(p) == m0 + 1 and st(p) == 'HELP2')
             check('HELP2 錯誤紀錄有關卡名稱', p.evaluate('Game.log[Game.log.length-1].stage[0]') == '鄰居改口')
-        press(p, '沒關係，我幫你按4樓。'); check('HELP2 客氣回應：直接進電梯小插曲（合併，不跳過場）', st(p) in EVTS, st(p))
-        check('HELP2 合併頁：第一次就對才有綠卡', (p.locator('.fb.good').count() == 1) == (first is None))
+        press(p, '沒關係，我幫你按4樓。'); check('HELP2 客氣回應：過場「輪到你按樓層」、旁白你按了4樓', st(p) == '_TRANS' and trans_from(p) == 'HELP2' and '你按了4樓' in txt(p, '#npc-dialogue') and '輪到你按樓層' in txt(p, '#options-area'), (st(p), txt(p, '#npc-dialogue')))
+        check('HELP2 過場：第一次就對才有綠卡', (p.locator('.fb.good').count() == 1) == (first is None))
+        press_floor(p); check('HELP2 之後自己按樓層：直接進電梯小插曲（合併）', st(p) in EVTS, st(p))
         evt_ok(p); leave_trans(p); check('HELP2 之後是 STOP（停在4樓，沒看錯）', st(p) == 'STOP' and p.evaluate('Game.cur') == 4, (st(p), p.evaluate('Game.cur')))
         p.close()
 
@@ -128,22 +137,23 @@ def run(b):
     p = new_page(b); set_task(p, n=12, m=3); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p)
     check('WAIT：面板有 16 顆按鍵、只有開門／關門能按', p.locator('.ppanel .pb').count() == 16 and sorted(x.strip() for x in opts(p)) == sorted(['按「開門」，等他。', '按「關門」。']), opts(p))
     m0 = mis(p); press(p, '按「關門」。'); check('WAIT 按關門：扣分、留在 WAIT', mis(p) == m0 + 1 and st(p) == 'WAIT')
-    press(p, '按「開門」，等他。'); check('WAIT 按開門：過場，按鈕是「鄰居走進電梯」', st(p) == '_TRANS' and '鄰居走進電梯' in txt(p, '#options-area')); leave_trans(p)
+    press(p, '按「開門」，等他。'); check('WAIT 按開門：鄰居先開口（直接是 HELP、不經過場）', st(p) == 'HELP' and '麻煩你幫我按一下' in txt(p, '#npc-dialogue'), st(p))
+    press(p, '好，我幫你按3樓。'); check('HELP 答對：過場，按鈕是「輪到你按樓層」', st(p) == '_TRANS' and '輪到你按樓層' in txt(p, '#options-area')); leave_trans(p)
     exp = ['按地下2樓。', '按地下1樓。'] + [f'按{k}樓。' for k in range(1, 13)]
     check('FLOOR：14 個樓層鍵（地下2到12樓）都能按、開關門不能按', sorted(opts(p)) == sorted(exp) and p.locator('.ppanel .pb').count() == 16, opts(p))
     check('FLOOR：面板上有「按樓層」', '按樓層' in txt(p, '.pcap'))
     for k in ['按地下2樓。', '按地下1樓。', '按1樓。']:
         m1 = mis(p); press(p, k); check(f'FLOOR 按「{k}」：直接顯示錯誤（扣分、留在 FLOOR、不會真的上去）', mis(p) == m1 + 1 and st(p) == 'FLOOR' and p.evaluate('Game.cur') == 1)
     p.screenshot(path='/tmp/panel_floor.png')
-    press(p, '按12樓。'); check('FLOOR 按對 12 樓：進 HELP', st(p) == 'HELP')
+    press(p, '按12樓。'); check('FLOOR 按對 12 樓：進電梯小插曲', st(p) in EVTS, st(p))
     p.close()
     p = new_page(b); set_task(p, n=12, m=3); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); p.screenshot(path='/tmp/panel_wait.png'); p.evaluate("Game.showList=true;Game.render()"); p.locator('.list').screenshot(path='/tmp/list.png'); p.close()
 
     # ── 圖2.3 合併：FLOOR 答對後不跳過場，綠卡＋鄰居的話＋選項在同一頁 ──
     p = new_page(b); set_task(p, n=8, m=3); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p)
-    press(p, '按「開門」，等他。'); leave_trans(p); press(p, '按8樓。')
+    press(p, '按「開門」，等他。')
     tx = txt(p, '#npc-dialogue')
-    check('FLOOR 答對：直接是 HELP（沒有過場）', st(p) == 'HELP', st(p))
+    check('WAIT 答對：直接是 HELP（沒有過場）', st(p) == 'HELP', st(p))
     check('合併頁：有綠卡、鄰居的話只出現一次、有選項', p.locator('.fb.good').count() == 1 and tx.count('麻煩你幫我按一下') == 1 and len(opts(p)) == 3, tx)
     check('任務卡標題：搭電梯上8樓找Ami', '搭電梯上8樓找Ami' in p.evaluate("(()=>{Game.showList=true;Game.render();const e=document.querySelector('.list .t');const c=e.cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.textContent})()"))
     check('NEXT_LABEL STOP_FIX 是「電梯繼續往上」', p.evaluate("NEXT_LABEL.STOP_FIX") == '電梯繼續往上')
@@ -151,14 +161,14 @@ def run(b):
 
     # ── 第三輪修改：綠卡在最上面、HELP 第三個選項、HELP→STOP 合併、ARRIVE 選項與旁白 ──
     fb_first = "(()=>{const b=document.getElementById('npc-dialogue');const f=b.querySelector('.fb'),sp=b.querySelector('.speaker');return !!f&&!!sp&&!!(f.compareDocumentPosition(sp)&Node.DOCUMENT_POSITION_FOLLOWING)})()"
-    p = new_page(b); set_task(p, n=8, m=3); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); press(p, '按「開門」，等他。'); leave_trans(p); press(p, '按8樓。')
-    check('FLOOR→HELP 合併頁：綠卡在鄰居的話上面', p.evaluate(fb_first))
+    p = new_page(b); set_task(p, n=8, m=3); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); press(p, '按「開門」，等他。')
+    check('WAIT→HELP 合併頁：綠卡在鄰居的話上面', p.evaluate(fb_first))
     check('HELP 第三個選項是「幹！你不會自己按喔！」、沒有「已經亮了」', sorted(o.strip() for o in opts(p)) == sorted(['好，我幫你按3樓。', '好，我幫你按8樓。', '幹！你不會自己按喔！']), opts(p))
     m0 = mis(p); press(p, '幹！你不會自己按喔！'); check('HELP 選「幹」：扣分、留在 HELP', mis(p) == m0 + 1 and st(p) == 'HELP' and '不要罵人' in txt(p, '.fb.bad'), txt(p, '.fb.bad'))
     p.close()
-    p = new_page(b); set_task(p, n=8, m=3, stopWrong=False); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); press(p, '按「開門」，等他。'); leave_trans(p); press(p, '按8樓。')
-    press(p, '好，我幫你按3樓。')
-    check('HELP→小插曲 合併：直接是小插曲、綠卡在最上面', st(p) in EVTS and (p.evaluate(fb_first) or st(p) == 'FART'), st(p))   # FART 沒有人說話，沒有 .speaker 可比
+    p = new_page(b); set_task(p, n=8, m=3, stopWrong=False); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); press(p, '按「開門」，等他。')
+    press(p, '好，我幫你按3樓。'); press_floor(p)
+    check('FLOOR→小插曲 合併：直接是小插曲、綠卡在最上面', st(p) in EVTS and (p.evaluate(fb_first) or st(p) == 'FART'), st(p))   # FART 沒有人說話，沒有 .speaker 可比
     check('小插曲頁：旁白「電梯向上」、有三個選項', '電梯向上' in txt(p, '#npc-dialogue') and len(opts(p)) == 3, txt(p, '#npc-dialogue'))
     press(p, EVT_OK[st(p)])
     tx = txt(p, '#npc-dialogue')
@@ -247,7 +257,7 @@ def run(b):
     # ── 5. 三種錯誤一次都遇到，整局打到排行榜（照提醒、照回應走）──
     p = new_page(b); set_task(p, n=9, m=4, misspoke=True, dirDown=True, stopWrong=True, early=True); to_lobby(p); to_help(p)
     check('全部一起：HELP 要按4樓', '4樓' in screen(p))
-    help_right(p); leave_trans(p); press(p, '沒關係，我幫你按5樓。'); evt_ok(p); leave_trans(p)
+    help_right(p); leave_trans(p); press(p, '沒關係，我幫你按5樓。'); press_floor(p); evt_ok(p); leave_trans(p)
     check('全部一起：STOP 停在4樓（e=5）', st(p) == 'STOP' and p.evaluate('Game.cur') == 4, (st(p), p.evaluate('Game.cur')))
     press(p, '不好意思，這裡是4樓，您是不是要到5樓？'); leave_trans(p)
     check('全部一起：STOP_FIX 5樓', st(p) == 'STOP_FIX' and p.evaluate('Game.cur') == 5)
@@ -315,14 +325,16 @@ def run(b):
         leave_trans(p); press(p, '不客氣，慢走！')
         check(f'{evt} STOP_FIX 答對後的過場圖是空電梯', st(p) == '_TRANS' and img(p).endswith('elevator_empty.jpg'), (st(p), img(p)))
         p.close()
-    # HELP2（鄰居改口）之後的小插曲頁：只有「你按了N樓，電梯繼續往上」，不再重複「電梯向上」
+    # HELP2（鄰居改口）之後：先「你按了4樓」，輪到自己按樓層，電梯才往上（小插曲頁只有「電梯向上」一次）
     p = new_page(b); set_task(p, n=8, m=3, misspoke=True, evt='CHAT'); to_lobby(p); to_help(p); help_right(p); leave_trans(p)
     press(p, '沒關係，我幫你按4樓。')
     tx = txt(p, '#npc-dialogue')
-    check('HELP2 之後的小插曲頁：有「電梯繼續往上」、沒有重複的「電梯向上」', st(p) == 'CHAT' and '電梯繼續往上' in tx and '電梯向上' not in tx, tx)
+    check('HELP2 之後的過場：「你按了4樓」、電梯還沒往上', st(p) == '_TRANS' and '你按了4樓' in tx and '電梯繼續往上' not in tx and '電梯向上' not in tx, tx)
+    press_floor(p); tx = txt(p, '#npc-dialogue')
+    check('自己按樓層之後的小插曲頁：有「電梯向上」', st(p) == 'CHAT' and tx.count('電梯向上') == 1, tx)
     p.close()
     # FLOOR：沒有玩家台詞、畫面上沒有 Ami 住幾樓
-    p = new_page(b); set_task(p, n=8, m=3); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); press(p, '按「開門」，等他。'); leave_trans(p)
+    p = new_page(b); set_task(p, n=8, m=3); to_lobby(p); press(p, '按▲，往上。'); leave_trans(p); press(p, '按「開門」，等他。'); press(p, '好，我幫你按3樓。'); leave_trans(p)
     check('FLOOR：沒有「我：」台詞、對話框沒有 Ami 住幾樓', st(p) == 'FLOOR' and '我：' not in txt(p, '#npc-dialogue') and 'Ami住' not in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
     p.screenshot(path='/tmp/floor_nodialogue.png')
     p.close()
@@ -365,9 +377,8 @@ def run(b):
         words = p.evaluate('s=>VOCAB[s].map(x=>x[0])', state); sc = screen(p)
         miss = [w for w in words if w not in sc]; check(f'小字典 {state}：每個字都在畫面上', not miss, miss)
     vocab_ok('DIR'); press(p, '不好意思，這部是往下的。'); leave_trans(p)
-    press(p, '按「開門」，等他。'); leave_trans(p)
-    press(p, f"按{p.evaluate('Game.task.n')}樓。"); leave_trans(p)
-    help_right(p); evt_ok(p); leave_trans(p); vocab_ok('HELP2'); press(p, '沒關係，我幫你按4樓。'); vocab_ok(st(p)); evt_ok(p); leave_trans(p); vocab_ok('STOP')
+    press(p, '按「開門」，等他。'); vocab_ok('HELP')
+    help_right(p); leave_trans(p); vocab_ok('HELP2'); press(p, '沒關係，我幫你按4樓。'); press_floor(p); vocab_ok(st(p)); evt_ok(p); leave_trans(p); vocab_ok('STOP')
     press(p, '不好意思，這裡是3樓，您是不是要到4樓？'); leave_trans(p); vocab_ok('STOP_FIX')
     p.close()
 
@@ -401,7 +412,7 @@ def run(b):
     if st(p) == 'DIR': press(p, '不好意思，這部是往下的。'); leave_trans(p)
     check('DOG 局：WAIT 旁白是穿粉紅色外套、牽著小狗的阿姨', '粉紅色外套' in txt(p, '#npc-dialogue') and '阿姨：等一下' in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
     check('DOG 局：WAIT 圖是 wait_dog.jpg', img(p).endswith('wait_dog.jpg'), img(p))
-    press(p, '按「開門」，等他。'); leave_trans(p); press(p, '按8樓。'); leave_trans(p)
+    press(p, '按「開門」，等他。')
     check('DOG 局：HELP 是阿姨在說話、圖是 dog.jpg', st(p) == 'HELP' and '阿姨：不好意思，我要到3樓' in txt(p, '#npc-dialogue') and img(p).endswith('dog.jpg'), (st(p), img(p)))
     help_right(p)
     check('DOG 局：小狗頁是阿姨說「牠不會咬人」、旁白是阿姨的小狗', st(p) == 'DOG' and '阿姨：不好意思，牠不會咬人' in txt(p, '#npc-dialogue') and '阿姨牽著的小狗' in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
@@ -422,102 +433,151 @@ def run(b):
     p.close()
 
 
-    # ── 8. 搭錯樓層（做法 A）：按了 2～12 樓的別層，電梯真的上去；扣分在陌生人開門的時候 ──
+    # ── 8. 搭錯樓層：按了 2～12 樓的別層。比鄰居低的樓層：先停在那裡（鄰居還在電梯裡）；
+    #       跟鄰居一樣高或更高：鄰居先下車，才到你按的那層。扣分在陌生人開門的時候 ──
     fb_first2 = "(()=>{const b=document.getElementById('npc-dialogue');const f=b.querySelector('.fb'),sp=b.querySelector('.speaker');return !!f&&!!sp&&!!(f.compareDocumentPosition(sp)&Node.DOCUMENT_POSITION_FOLLOWING)})()"
-    def to_floor(p):   # rush：LOBBY → FLOOR
-        press(p, '按▲，往上。'); leave_trans(p)
-        if st(p) == 'DIR': press(p, '不好意思，這部是往下的。'); leave_trans(p)
-        press(p, '按「開門」，等他。'); leave_trans(p); assert st(p) == 'FLOOR', st(p)
-    p = new_page(b); set_task(p, n=8, m=3, entry='rush'); to_lobby(p); to_floor(p)
+    def stranger(p, k, who_fb):   # 走出電梯 → 按電鈴 → 陌生人開門 → 客氣道歉 → 過場回電梯
+        press(p, '走出電梯。'); check(f'走出電梯：進 WRONG_BELL、沒有過場', st(p) == 'WRONG_BELL', st(p))
+        m1 = mis(p); s1 = p.evaluate('Game.score'); press(p, '按之1的電鈴。')
+        check(f'按電鈴：陌生人開門、這時才扣 10 分（{k}樓）', st(p) == 'WRONG_DOOR' and mis(p) == m1 + 1 and p.evaluate('Game.score') == s1 - 10 and f'這裡是{k}樓' in txt(p, '.fb.bad'), (st(p), mis(p), txt(p, '.fb.bad')))
+    # 8-1 比鄰居低（m=4，按 3 樓）：鄰居還在電梯裡，電梯先停在 3 樓
+    p = new_page(b); set_task(p, n=8, m=4, entry='rush', evt='CHAT'); to_lobby(p); to_floor(p)
     s0 = p.evaluate('Game.score'); m0 = mis(p)
-    press(p, '按5樓。')
-    check('FLOOR 按錯 5 樓：進過場、還沒扣分', st(p) == '_TRANS' and trans_from(p) == 'FLOOR' and mis(p) == m0 and p.evaluate('Game.score') == s0, (st(p), mis(p)))
-    check('過場旁白：電梯停了、門開了，沒有提示樓層數字', '門開了' in txt(p, '#npc-dialogue') and '5' not in txt(p, '#npc-dialogue') and '樓' not in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
+    check('FLOOR 開頭：面板、沒有玩家台詞', st(p) == 'FLOOR' and '我：' not in txt(p, '#npc-dialogue'))
+    press(p, '按3樓。')
+    check('按比鄰居低的樓層（3）：進過場、還沒扣分', st(p) == '_TRANS' and trans_from(p) == 'FLOOR' and mis(p) == m0 and p.evaluate('Game.score') == s0, (st(p), mis(p)))
+    check('過場旁白：電梯停了、門開了，沒有樓層數字', '門開了' in txt(p, '#npc-dialogue') and '樓' not in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
     leave_trans(p)
-    check('WRONG_FLOOR：電梯真的停在 5 樓（顯示器 5）', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 5 and '5' in disp(p), (st(p), disp(p)))
-    check('WRONG_FLOOR：沒有提示的玩家台詞、只說外面是走廊', '走廊' in txt(p, '#npc-dialogue') and '8' not in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
-    check('WRONG_FLOOR 兩個選項', sorted(o.strip() for o in opts(p)) == sorted(['走出電梯。', '不出去，這裡不是8樓。']), opts(p))
-    check('WRONG_FLOOR 圖是電梯門開、外面是別層的走廊 wrong_floor.jpg', img(p).endswith('wrong_floor.jpg'), img(p))
+    check('WRONG_FLOOR：電梯停在 3 樓（顯示器 3）、鄰居還在電梯裡', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 3 and '3' in disp(p) and p.evaluate('Game.neighborGone') is False, (st(p), disp(p)))
+    check('WRONG_FLOOR：只說外面是走廊、兩個選項、圖 wrong_floor.jpg', '走廊' in txt(p, '#npc-dialogue') and '8' not in txt(p, '#npc-dialogue') and sorted(o.strip() for o in opts(p)) == sorted(['走出電梯。', '不出去，這裡不是8樓。']) and img(p).endswith('wrong_floor.jpg'), (opts(p), img(p)))
     words = p.evaluate('s=>VOCAB[s].map(x=>x[0])', 'WRONG_FLOOR'); check('小字典 WRONG_FLOOR：每個字都在畫面上', all(w in screen(p) for w in words), words)
-    # 沒走出去：發現不對，輕扣 5 分，回到 FLOOR 重按
     press(p, '不出去，這裡不是8樓。')
-    check('WRONG_FLOOR 不出去：輕扣 5 分、過場回電梯', mis(p) == m0 + 1 and p.evaluate('Game.score') == s0 - 5 and st(p) == '_TRANS' and trans_from(p) == 'WRONG_FLOOR', (mis(p), p.evaluate('Game.score')))
-    check('回電梯過場：圖是 elevator.jpg、按鈕「電梯門關上」', img(p).endswith('elevator.jpg') and '電梯門關上' in txt(p, '#options-area'), (img(p), txt(p, '#options-area')))
-    check('回電梯過場：錯誤紀錄「走錯樓層」、旁白關門', p.evaluate('Game.log[Game.log.length-1].stage[0]') == '走錯樓層' and '關門' in txt(p, '#npc-dialogue'))
-    leave_trans(p); check('回到 FLOOR、樓層顯示器回到 1', st(p) == 'FLOOR' and p.evaluate('Game.cur') == 1 and p.evaluate('Game.wrongFloor') is None, (st(p), disp(p)))
-    # 走出去：三個門鈴
-    press(p, '按12樓。'); leave_trans(p)
-    check('按比 Ami 高的樓層（12）也一樣真的上去', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 12)
-    m1 = mis(p); s1 = p.evaluate('Game.score'); press(p, '走出電梯。')
-    check('走出電梯：進 WRONG_BELL、沒有過場、還沒扣分', st(p) == 'WRONG_BELL' and mis(p) == m1 and p.evaluate('Game.score') == s1, (st(p), mis(p)))
-    check('WRONG_BELL：三個電鈴、面板、圖 wrong_doors.jpg', sorted(o.strip() for o in opts(p)) == sorted([f'按之{k}的電鈴。' for k in (1, 2, 3)]) and p.locator('.bellplates .plate').count() == 3 and img(p).endswith('wrong_doors.jpg'), opts(p))
-    words = p.evaluate('s=>VOCAB[s].map(x=>x[0])', 'WRONG_BELL'); check('小字典 WRONG_BELL：每個字都在畫面上', all(w in screen(p) for w in words), words)
-    press(p, '按之1的電鈴。')
-    check('按任何一個電鈴：陌生人開門、這時才扣 10 分（合併頁，沒有過場）', st(p) == 'WRONG_DOOR' and mis(p) == m1 + 1 and p.evaluate('Game.score') == s1 - 10, (st(p), mis(p)))
-    check('WRONG_DOOR：紅卡在最上面、說這裡是12樓、Ami 住 8 樓', p.evaluate(fb_first2) and '這裡是12樓' in txt(p, '.fb.bad') and 'Ami住8樓' in txt(p, '.fb.bad'), txt(p, '.fb.bad'))
-    check('WRONG_DOOR 之1：男住戶、door_muscle.jpg', '男住戶：誰啊？你找誰？' in txt(p, '#npc-dialogue') and img(p).endswith('door_muscle.jpg'), (txt(p, '#npc-dialogue'), img(p)))
-    check('WRONG_DOOR 錯誤紀錄「走錯樓層」', p.evaluate('Game.log[Game.log.length-1].stage[0]') == '走錯樓層')
-    check('WRONG_DOOR 三個選項', sorted(o.strip() for o in opts(p)) == sorted(['不好意思，我走錯樓層了。', '你怎麼不是Ami？', '（不說話，轉身就走）']), opts(p))
+    check('不出去：輕扣 5 分、過場回電梯（鄰居還在：elevator.jpg、「電梯門關上」）', mis(p) == m0 + 1 and p.evaluate('Game.score') == s0 - 5 and st(p) == '_TRANS' and trans_from(p) == 'WRONG_FLOOR' and img(p).endswith('elevator.jpg') and '電梯門關上' in txt(p, '#options-area'), (mis(p), st(p), img(p)))
+    check('過場：錯誤紀錄「走錯樓層」、紅卡說「剛剛你按錯樓層」、旁白關門', p.evaluate('Game.log[Game.log.length-1].stage[0]') == '走錯樓層' and '按錯樓層' in txt(p, '.fb.bad') and '關門' in txt(p, '#npc-dialogue'), txt(p, '.fb.bad'))
+    leave_trans(p); check('回到 FLOOR、顯示器回到 1', st(p) == 'FLOOR' and p.evaluate('Game.cur') == 1 and p.evaluate('Game.wrongFloor') is None, (st(p), disp(p)))
+    # 再按 2 樓、這次走出去
+    press(p, '按2樓。'); leave_trans(p); stranger(p, 2, None)
+    check('WRONG_BELL：三個電鈴、圖 wrong_doors.jpg（上一步已按，回頭檢查文字）', True)
+    check('WRONG_DOOR：紅卡在最上面、說這裡是2樓、Ami 住 8 樓、男住戶 door_muscle.jpg', p.evaluate(fb_first2) and 'Ami住8樓' in txt(p, '.fb.bad') and '男住戶：誰啊？你找誰？' in txt(p, '#npc-dialogue') and img(p).endswith('door_muscle.jpg'), txt(p, '.fb.bad'))
+    check('WRONG_DOOR 錯誤紀錄「走錯樓層」、三個選項', p.evaluate('Game.log[Game.log.length-1].stage[0]') == '走錯樓層' and sorted(o.strip() for o in opts(p)) == sorted(['不好意思，我走錯樓層了。', '你怎麼不是Ami？', '（不說話，轉身就走）']), opts(p))
     words = p.evaluate('s=>VOCAB[s].map(x=>x[0])', 'WRONG_DOOR'); check('小字典 WRONG_DOOR：每個字都在畫面上', all(w in screen(p) for w in words), words)
     for bad_ in ('你怎麼不是Ami？', '（不說話，轉身就走）'):
         m2 = mis(p); press(p, bad_); check(f'WRONG_DOOR 選「{bad_}」：扣分、留在 WRONG_DOOR', mis(p) == m2 + 1 and st(p) == 'WRONG_DOOR')
     press(p, '不好意思，我走錯樓層了。')
-    check('WRONG_DOOR 客氣道歉：過場回電梯（按鈕「回到電梯」、圖 elevator.jpg、住戶回話）', st(p) == '_TRANS' and trans_from(p) == 'WRONG_DOOR' and '回到電梯' in txt(p, '#options-area') and img(p).endswith('elevator.jpg') and '沒事，沒事，電梯在那邊' in txt(p, '#npc-dialogue'), (st(p), img(p), txt(p, '#npc-dialogue')))
-    check('WRONG_DOOR 道歉：不是第一次就對，沒有綠卡', p.locator('.fb.good').count() == 0)
-    leave_trans(p); check('回到 FLOOR（鄰居還在）、顯示器回到 1', st(p) == 'FLOOR' and p.evaluate('Game.cur') == 1)
-    press(p, '按8樓。'); check('再按對 8 樓：進 HELP', st(p) == 'HELP', st(p))
+    check('WRONG_DOOR 客氣道歉：過場回電梯（「回到電梯」、elevator.jpg、住戶回話、沒有綠卡）', st(p) == '_TRANS' and trans_from(p) == 'WRONG_DOOR' and '回到電梯' in txt(p, '#options-area') and img(p).endswith('elevator.jpg') and '沒事，沒事，電梯在那邊' in txt(p, '#npc-dialogue') and p.locator('.fb.good').count() == 0, (st(p), img(p)))
+    leave_trans(p); check('回到 FLOOR（鄰居還在）', st(p) == 'FLOOR' and p.evaluate('Game.cur') == 1)
+    # 按對：進電梯小插曲（鄰居還在，照原本的流程）
+    press(p, '按8樓。'); check('按對 8 樓：進電梯小插曲（鄰居還在）', st(p) == 'CHAT', st(p))
     check('錯誤共 1+1+2 筆', mis(p) == 4, mis(p))
+    evt_ok(p); leave_trans(p); check('接著 STOP（4樓）、鄰居下車', st(p) == 'STOP' and p.evaluate('Game.cur') == 4)
     p.close()
-    # 之2＝女住戶；第一次就道歉：有綠卡
-    p = new_page(b); set_task(p, n=8, m=3, entry='rush'); to_lobby(p); to_floor(p)
-    press(p, '按9樓。'); leave_trans(p); press(p, '走出電梯。'); press(p, '按之2的電鈴。')
-    check('WRONG_DOOR 之2：女住戶、door_woman.jpg', '女住戶：咦？請問你找誰？' in txt(p, '#npc-dialogue') and img(p).endswith('door_woman.jpg'), (txt(p, '#npc-dialogue'), img(p)))
-    press(p, '不好意思，我走錯樓層了。'); check('WRONG_DOOR 之2 道歉：女住戶「沒關係，電梯在那邊」', '女住戶：沒關係，電梯在那邊' in txt(p, '#npc-dialogue'))
+    # 8-2 第三次起：最多兩次真的上去，第三次直接顯示錯誤
+    p = new_page(b); set_task(p, n=8, m=4, entry='rush'); to_lobby(p); to_floor(p)
+    for k in (2, 3):
+        press(p, f'按{k}樓。'); leave_trans(p); press(p, '不出去，這裡不是8樓。'); leave_trans(p)
+    check('已經搭錯兩次', p.evaluate('Game.wrongRides') == 2 and st(p) == 'FLOOR')
+    m0 = mis(p); press(p, '按2樓。')
+    check('第三次按錯：直接顯示錯誤（扣分、留在 FLOOR、不會上去）', mis(p) == m0 + 1 and st(p) == 'FLOOR' and p.evaluate('Game.cur') == 1, (st(p), mis(p)))
+    press(p, '按8樓。'); check('第三次之後還是可以按對', st(p) == 'CHAT' or st(p) in EVTS, st(p))
     p.close()
-    p = new_page(b); set_task(p, n=8, m=3, entry='rush'); to_lobby(p); to_floor(p)
-    press(p, '按9樓。'); leave_trans(p); press(p, '走出電梯。'); press(p, '按之3的電鈴。')
-    check('WRONG_DOOR 之3：男住戶（單號）', '男住戶' in txt(p, '#npc-dialogue'))
+    # 8-3 跟鄰居一樣高或更高：鄰居先下車，才到你按的那層（每一層都測；stopWrong=False、early=True，早停被略過）
+    for k in [4, 5, 6, 7, 9, 10, 11, 12]:
+        p = new_page(b); set_task(p, n=8, m=4, entry='rush', evt='CHAT', stopWrong=False, early=True); to_lobby(p); to_floor(p)
+        m0 = mis(p); press(p, f'按{k}樓。')
+        check(f'按{k}樓（≥鄰居的4樓）：先進電梯小插曲、沒有過場、還沒扣分、電梯還沒去{k}樓', st(p) == 'CHAT' and mis(p) == m0 and p.evaluate('Game.cur') == 1 and p.evaluate('Game.pendingWrong') == k, (st(p), mis(p)))
+        evt_ok(p); leave_trans(p)
+        check(f'{k}樓：鄰居的樓層（4樓）先停、鄰居說再見', st(p) == 'STOP' and p.evaluate('Game.cur') == 4, (st(p), disp(p)))
+        press(p, '不客氣，慢走！')
+        check(f'{k}樓：鄰居下車後的過場是空電梯（elevator_empty.jpg）、按鈕「電梯停了」', st(p) == '_TRANS' and img(p).endswith('elevator_empty.jpg') and '電梯停了' in txt(p, '#options-area'), (st(p), img(p)))
+        txx = txt(p, '#npc-dialogue')
+        check(f'{k}樓：旁白——' + ('鄰居走了、門還開著' if k == 4 else '電梯繼續往上、停了、門開了'), ('鄰居走了，門還開著' in txx) if k == 4 else ('繼續往上' in txx and '門開了' in txx), txx)
+        leave_trans(p)
+        check(f'{k}樓：真的到了 WRONG_FLOOR（顯示器{k}）、鄰居已下車', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == k and p.evaluate('Game.neighborGone') is True and p.evaluate('Game.pendingWrong') is None, (st(p), disp(p)))
+        press(p, '不出去，這裡不是8樓。')
+        check(f'{k}樓：不出去，輕扣 5 分、回電梯過場是空電梯', mis(p) == m0 + 1 and st(p) == '_TRANS' and img(p).endswith('elevator_empty.jpg') and '電梯門關上' in txt(p, '#options-area'), (mis(p), st(p), img(p)))
+        leave_trans(p); check(f'{k}樓：回到 FLOOR（沒有鄰居、也沒有早停）', st(p) == 'FLOOR', st(p))
+        press(p, '按8樓。')
+        up = 8 > k
+        check(f'{k}樓之後按對 8 樓：直接到 ARRIVE（略過早停）、旁白電梯往' + ('上' if up else '下'), st(p) == '_TRANS' and trans_from(p) == 'FLOOR' and ('電梯往上，到8樓了' if up else '電梯往下，到8樓了') in txt(p, '#npc-dialogue'), (st(p), txt(p, '#npc-dialogue')))
+        leave_trans(p); check(f'{k}樓之後：ARRIVE、顯示器 8', st(p) == 'ARRIVE' and p.evaluate('Game.cur') == 8, (st(p), disp(p)))
+        p.close()
+    # 8-4 鄰居看錯樓層（stopWrong）又剛好按在他的樓層：先停 3 樓、提醒、4 樓下車，才到 WRONG_FLOOR 4
+    p = new_page(b); set_task(p, n=8, m=4, entry='rush', evt='CHAT', stopWrong=True); to_lobby(p); to_floor(p)
+    press(p, '按4樓。'); evt_ok(p); leave_trans(p)
+    check('stopWrong：先停在 3 樓', st(p) == 'STOP' and p.evaluate('Game.cur') == 3)
+    press(p, '不好意思，這裡是3樓，您是不是要到4樓？'); leave_trans(p); press(p, '不客氣，慢走！'); leave_trans(p)
+    check('stopWrong＋按在鄰居的樓層：鄰居下車後停在 4 樓的別層走廊', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 4, (st(p), disp(p)))
     p.close()
-    # 2～12 樓除了 Ami 的樓層，每一個都會真的上去
-    p = new_page(b); set_task(p, n=8, m=3, entry='rush'); to_lobby(p); to_floor(p)
+    # 8-5 鄰居下車之後，第二次按錯：直接上去（沒有鄰居）；之後按對直接到 ARRIVE
+    p = new_page(b); set_task(p, n=8, m=4, entry='rush', evt='CHAT', stopWrong=False); to_lobby(p); to_floor(p)
+    press(p, '按6樓。'); evt_ok(p); leave_trans(p); press(p, '不客氣，慢走！'); leave_trans(p)
+    press(p, '走出電梯。'); press(p, '按之2的電鈴。')
+    check('第一次（6樓）走出去：扣 10 分、WRONG_DOOR 女住戶', st(p) == 'WRONG_DOOR' and '這裡是6樓' in txt(p, '.fb.bad') and '女住戶' in txt(p, '#npc-dialogue'), txt(p, '.fb.bad'))
+    press(p, '不好意思，我走錯樓層了。'); check('道歉：過場回空電梯', st(p) == '_TRANS' and img(p).endswith('elevator_empty.jpg') and '回到電梯' in txt(p, '#options-area'), (st(p), img(p))); leave_trans(p)
+    press(p, '按11樓。'); check('鄰居已下車：第二次按錯 11 樓，過場直接去（不用等小插曲）', st(p) == '_TRANS' and trans_from(p) == 'FLOOR', (st(p), trans_from(p))); leave_trans(p)
+    check('WRONG_FLOOR 11 樓', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 11)
+    press(p, '不出去，這裡不是8樓。'); leave_trans(p); press(p, '按7樓。')
+    check('第三次按錯：直接顯示錯誤', st(p) == 'FLOOR')
+    press(p, '按8樓。'); leave_trans(p); check('最後按對：往下到 8 樓的 ARRIVE', st(p) == 'ARRIVE' and p.evaluate('Game.cur') == 8)
+    p.close()
+    # 8-6 misspoke（e=m+1）：比 e 低才會先停。m=3、e=4：按 3 樓＝比他低，先停；按 4 樓＝跟他一樣高，鄰居先下
+    p = new_page(b); set_task(p, n=8, m=3, misspoke=True, entry='rush', evt='CHAT'); to_lobby(p); to_help(p); help_right(p); leave_trans(p)
+    press(p, '沒關係，我幫你按4樓。'); leave_trans(p); press(p, '按3樓。'); leave_trans(p)
+    check('misspoke：按 3（< e=4）先停在 3 樓、鄰居還在', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 3 and p.evaluate('Game.neighborGone') is False)
+    p.close()
+    # 8-7 每個樓層 2～12（除了 Ami 的）都會真的去：低的馬上停、高的等鄰居下車
     for k in [2, 3, 4, 5, 6, 7, 9, 10, 11, 12]:
-        p.evaluate('Game.mistakes=0'); press(p, f'按{k}樓。'); leave_trans(p)
-        ok = st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == k and f'{k}' in disp(p)
-        press(p, '不出去，這裡不是8樓。'); leave_trans(p)
-        check(f'FLOOR 按{k}樓：真的上到{k}樓、回得來', ok and st(p) == 'FLOOR', (k, st(p)))
-    p.close()
+        p = new_page(b); set_task(p, n=8, m=4, entry='rush', evt='CHAT', stopWrong=False); to_lobby(p); to_floor(p); press(p, f'按{k}樓。')
+        if k < 4: leave_trans(p)
+        else: evt_ok(p); leave_trans(p); press(p, '不客氣，慢走！'); leave_trans(p)
+        check(f'FLOOR 按{k}樓：最後真的停在{k}樓', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == k and f'{k}' in disp(p), (k, st(p), disp(p)))
+        p.close()
 
-    # ── 9. 電梯裡本來就有人（做法 B）：ASK ──
+    # ── 9. 電梯裡本來就有人（做法 B）：ASK。說錯樓層，他幫你按了，但要等他下車才會到那層 ──
     def to_ask(p):
         press(p, '按▲，往上。'); leave_trans(p)
         if st(p) == 'DIR': press(p, '不好意思，這部是往下的。'); leave_trans(p)
-    p = new_page(b); set_task(p, n=8, m=3, entry='inside', askX=7, evt='CHAT'); to_lobby(p)
+    p = new_page(b); set_task(p, n=8, m=3, entry='inside', askX=7, evt='CHAT', stopWrong=False, early=True); to_lobby(p)
     press(p, '按▲，往上。')
-    check('inside：LOBBY 之後過場「電梯來了」，接著是 ASK（沒有 WAIT／FLOOR）', st(p) == '_TRANS' and '電梯來了' in txt(p, '#options-area'))
+    check('inside：LOBBY 之後過場「電梯來了」，接著是 ASK（沒有 WAIT／HELP／FLOOR）', st(p) == '_TRANS' and '電梯來了' in txt(p, '#options-area'))
     leave_trans(p)
     check('ASK：鄰居問「請問你到幾樓？我幫你按。」', st(p) == 'ASK' and '鄰居：請問你到幾樓？我幫你按。' in txt(p, '#npc-dialogue') and '裡面已經站著一位鄰居' in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
     check('ASK 三個選項', sorted(o.strip() for o in opts(p)) == sorted(['我要到8樓，謝謝。', '我要到7樓，謝謝。', '（不回答，自己按）']), opts(p))
-    check('ASK 第一次的圖是 inside_asks.jpg（門開了、他站在裡面）', img(p).endswith('inside_asks.jpg'), img(p))
+    check('ASK 圖是 inside_asks.jpg', img(p).endswith('inside_asks.jpg'), img(p))
     words = p.evaluate('s=>VOCAB[s].map(x=>x[0])', 'ASK'); check('小字典 ASK：每個字都在畫面上', all(w in screen(p) for w in words), words)
     s0 = p.evaluate('Game.score'); m0 = mis(p)
     press(p, '（不回答，自己按）')
     check('ASK 不回答自己按：輕扣 5 分、留在 ASK、紅卡說沒禮貌', mis(p) == m0 + 1 and p.evaluate('Game.score') == s0 - 5 and st(p) == 'ASK' and '要回答他' in txt(p, '.fb.bad') and p.evaluate('Game.log[Game.log.length-1].stage[0]') == '回答樓層', txt(p, '.fb.bad'))
-    # 說錯樓層（7）：他真的幫你按了 7，上去
     press(p, '我要到7樓，謝謝。')
-    check('ASK 說錯樓層：過場、還沒扣分（他幫你按了7樓）', st(p) == '_TRANS' and trans_from(p) == 'ASK' and mis(p) == m0 + 1 and '幫你按了7樓' in txt(p, '#npc-dialogue'), (st(p), mis(p), txt(p, '#npc-dialogue')))
-    leave_trans(p); check('ASK→WRONG_FLOOR（7 樓）', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 7)
+    check('ASK 說錯樓層：直接進小插曲（合併）、還沒扣分、旁白：他幫你按了7樓，自己也按了3樓', st(p) == 'CHAT' and mis(p) == m0 + 1 and '幫你按了7樓，自己也按了3樓' in txt(p, '#npc-dialogue') and p.evaluate('Game.cur') == 1, (st(p), mis(p), txt(p, '#npc-dialogue')))
+    evt_ok(p); leave_trans(p); check('接著先停在他的 3 樓', st(p) == 'STOP' and p.evaluate('Game.cur') == 3)
+    press(p, '不客氣，慢走！')
+    check('他下車後：過場是空電梯、「電梯停了」', st(p) == '_TRANS' and img(p).endswith('elevator_empty.jpg') and '電梯停了' in txt(p, '#options-area'), (st(p), img(p))); leave_trans(p)
+    check('接著 WRONG_FLOOR（7 樓，不是 EARLY）', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 7, (st(p), disp(p)))
     press(p, '不出去，這裡不是8樓。')
-    check('inside 不出去：輕扣 5 分、紅卡說剛剛你說要到7樓', mis(p) == m0 + 2 and '你說要到7樓' in txt(p, '.fb.bad') and st(p) == '_TRANS', txt(p, '.fb.bad'))
-    leave_trans(p); check('再問一次的圖是 elevator.jpg（已在電梯裡）', st(p) == 'ASK' and img(p).endswith('elevator.jpg'), img(p)); check('回到 ASK（再問一次，不再重複「站著一位鄰居」）', st(p) == 'ASK' and '請問你到幾樓' in txt(p, '#npc-dialogue') and '站著' not in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
-    press(p, '我要到7樓，謝謝。'); leave_trans(p); press(p, '走出電梯。'); press(p, '按之2的電鈴。')
-    check('inside 走出去：WRONG_DOOR、扣 10 分', st(p) == 'WRONG_DOOR' and mis(p) == m0 + 3 and '這裡是7樓' in txt(p, '.fb.bad'))
-    press(p, '不好意思，我走錯樓層了。'); check('inside 道歉：過場回電梯，按鈕「回到電梯」', st(p) == '_TRANS' and trans_from(p) == 'WRONG_DOOR' and '回到電梯' in txt(p, '#options-area'))
-    leave_trans(p); check('回到 ASK', st(p) == 'ASK')
-    states = []
+    check('inside 不出去：輕扣 5 分、紅卡說剛剛你說要到7樓、回空電梯', mis(p) == m0 + 2 and '你說要到7樓' in txt(p, '.fb.bad') and st(p) == '_TRANS' and img(p).endswith('elevator_empty.jpg') and '電梯門關上' in txt(p, '#options-area'), (txt(p, '.fb.bad'), img(p)))
+    leave_trans(p); check('回到 FLOOR（自己按樓層，不再問一次）', st(p) == 'FLOOR', st(p))
+    press(p, '按8樓。'); check('按對 8 樓：直接到 ARRIVE（略過早停）、往上', st(p) == '_TRANS' and '電梯往上，到8樓了' in txt(p, '#npc-dialogue')); leave_trans(p)
+    check('ARRIVE 8 樓', st(p) == 'ARRIVE' and p.evaluate('Game.cur') == 8)
+    p.close()
+    # 走出去遇到陌生人
+    p = new_page(b); set_task(p, n=8, m=3, entry='inside', askX=7, evt='CHAT', stopWrong=False); to_lobby(p); to_ask(p); leave_trans(p)
+    press(p, '我要到7樓，謝謝。'); evt_ok(p); leave_trans(p); press(p, '不客氣，慢走！'); leave_trans(p)
+    m0 = mis(p); press(p, '走出電梯。'); press(p, '按之2的電鈴。')
+    check('inside 走出去：WRONG_DOOR、扣 10 分、這裡是7樓', st(p) == 'WRONG_DOOR' and mis(p) == m0 + 1 and '這裡是7樓' in txt(p, '.fb.bad'))
+    press(p, '不好意思，我走錯樓層了。'); check('inside 道歉：過場回電梯（空電梯）', st(p) == '_TRANS' and trans_from(p) == 'WRONG_DOOR' and img(p).endswith('elevator_empty.jpg') and '回到電梯' in txt(p, '#options-area'))
+    leave_trans(p); check('回到 FLOOR', st(p) == 'FLOOR')
+    p.close()
+    # 答對：合併進小插曲
+    p = new_page(b); set_task(p, n=8, m=3, entry='inside', askX=7, evt='CHAT'); to_lobby(p); to_ask(p); leave_trans(p)
     press(p, '我要到8樓，謝謝。')
-    check('ASK 答對（不是第一次）：合併進小插曲，旁白：他幫你按了8樓，自己也按了3樓', st(p) == 'CHAT' and '幫你按了8樓，自己也按了3樓' in txt(p, '#npc-dialogue') and p.locator('.fb.good').count() == 0, (st(p), txt(p, '#npc-dialogue')))
-    press(p, EVT_OK['CHAT']); leave_trans(p)
-    check('inside：接著 STOP（3樓）', st(p) == 'STOP' and p.evaluate('Game.cur') == 3)
+    check('ASK 答對：合併進小插曲、有綠卡、旁白：他幫你按了8樓，自己也按了3樓', st(p) == 'CHAT' and '幫你按了8樓，自己也按了3樓' in txt(p, '#npc-dialogue') and p.locator('.fb.good').count() == 1 and p.evaluate('Game.pendingWrong') is None, (st(p), txt(p, '#npc-dialogue')))
+    p.close()
+    # askX 比 Ami 高也一樣（9 樓）
+    p = new_page(b); set_task(p, n=8, m=3, entry='inside', askX=9, evt='CHAT', stopWrong=False); to_lobby(p); to_ask(p); leave_trans(p)
+    press(p, '我要到9樓，謝謝。'); evt_ok(p); leave_trans(p); press(p, '不客氣，慢走！'); leave_trans(p)
+    check('askX=9：WRONG_FLOOR 9 樓', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 9); press(p, '不出去，這裡不是8樓。'); leave_trans(p); press(p, '按8樓。')
+    check('9 樓之後按 8：電梯往下', '電梯往下，到8樓了' in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
     p.close()
     # inside 全程零失誤走一遍；沒有 WAIT／FLOOR／HELP／HELP2
     for ev in EVTS:
@@ -533,12 +593,28 @@ def run(b):
         check(f'inside {ev} 局：零失誤走到 END', st(p) in ('END', 'RESULT') and mis(p) == 0, (seen_st, mis(p)))
         check(f'inside {ev} 局：沒有 WAIT／FLOOR／HELP／HELP2，有 ASK', 'ASK' in seen_st and not {'WAIT', 'FLOOR', 'HELP', 'HELP2'} & set(seen_st), seen_st)
         p.close()
+    # rush 全程零失誤：順序是 WAIT → HELP → FLOOR → 小插曲
+    p = new_page(b); set_task(p, n=9, m=4, entry='rush', evt='CHAT', stopWrong=False, early=True); to_lobby(p); seen_st = []
+    for _ in range(40):
+        s_ = st(p)
+        if s_ == '_TRANS': leave_trans(p); continue
+        seen_st.append(s_)
+        if s_ == 'END': break
+        o = p.evaluate(smoke.ORACLES['elevator'] if hasattr(smoke, 'ORACLES') and smoke.ORACLES.get('elevator') else 'null')
+        if o is None: break
+        press(p, o)
+    check('rush：零失誤走到 END、順序 WAIT→HELP→FLOOR→CHAT', st(p) in ('END', 'RESULT') and mis(p) == 0 and [x for x in seen_st if x in ('WAIT', 'HELP', 'FLOOR', 'CHAT')] == ['WAIT', 'HELP', 'FLOOR', 'CHAT'], (seen_st, mis(p)))
+    p.close()
     # 小狗那局：阿姨
-    p = new_page(b); set_task(p, n=8, m=3, entry='inside', evt='DOG'); to_lobby(p); to_ask(p); leave_trans(p)
-    check('inside DOG：ASK 是阿姨、粉紅色外套、dog.jpg', st(p) == 'ASK' and '阿姨：請問你到幾樓' in txt(p, '#npc-dialogue') and '粉紅色外套' in txt(p, '#npc-dialogue') and img(p).endswith('inside_asks_dog.jpg'), (st(p), img(p)))
-    press(p, '我要到7樓，謝謝。'); check('inside DOG：說錯樓層旁白用「她」', '她幫你按了7樓' in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue')); leave_trans(p)
-    press(p, '不出去，這裡不是8樓。'); leave_trans(p)
-    check('inside DOG 回電梯：圖 inside_asks_dog.jpg（不是齜牙的 dog.jpg）', st(p) == 'ASK' and img(p).endswith('inside_asks_dog.jpg'), img(p))
+    p = new_page(b); set_task(p, n=8, m=3, entry='inside', evt='DOG', askX=7, stopWrong=False); to_lobby(p); to_ask(p); leave_trans(p)
+    check('inside DOG：ASK 是阿姨、粉紅色外套、inside_asks_dog.jpg', st(p) == 'ASK' and '阿姨：請問你到幾樓' in txt(p, '#npc-dialogue') and '粉紅色外套' in txt(p, '#npc-dialogue') and img(p).endswith('inside_asks_dog.jpg'), (st(p), img(p)))
+    press(p, '我要到7樓，謝謝。'); check('inside DOG：說錯樓層旁白用「她」', '她幫你按了7樓' in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
+    evt_ok(p); leave_trans(p); press(p, '不客氣，慢走！'); leave_trans(p); press(p, '不出去，這裡不是8樓。')
+    check('inside DOG 阿姨下車後，回電梯的圖是空電梯', img(p).endswith('elevator_empty.jpg'), img(p))
+    p.close()
+    # rush DOG：按得比阿姨低，她還在電梯裡，回電梯的圖是 dog.jpg
+    p = new_page(b); set_task(p, n=8, m=4, entry='rush', evt='DOG'); to_lobby(p); to_floor(p); press(p, '按3樓。'); leave_trans(p); press(p, '不出去，這裡不是8樓。')
+    check('rush DOG：阿姨還在電梯裡，回電梯的圖是 dog.jpg', img(p).endswith('dog.jpg'), img(p))
     p.close()
     # dirDown + inside：DIR 之後進 ASK
     p = new_page(b); set_task(p, n=8, m=3, entry='inside', dirDown=True); to_lobby(p)
@@ -551,8 +627,10 @@ def run(b):
     p = new_page(b)
     bad = p.evaluate("""()=>{const r=[];let ins=0,rush=0;for(let i=0;i<400;i++){Game.setup();const t=Game.task;
       if(t.entry==='inside'){ins++; if(t.misspoke)r.push('misspoke'); if(t.e!==t.m)r.push('e!=m');} else rush++;
-      if(![t.n-1,t.n+1].includes(t.askX)||t.askX>12||t.askX<2)r.push('askX'+t.askX);} return {r:[...new Set(r)],ins,rush}}""")
-    check('隨機條件：兩種 entry 都會出現、inside 不會說錯樓層、askX 是相鄰的錯樓層', not bad['r'] and bad['ins'] > 0 and bad['rush'] > 0, bad)
+      if(![t.n-1,t.n+1].includes(t.askX)||t.askX>12||t.askX<2)r.push('askX'+t.askX);
+      if(t.entry==='inside'&&t.askX<=t.e)r.push('askX<=e');
+      if(Game.neighborGone||Game.pendingWrong!=null||Game.wrongRides||Game.wrongFloor!=null)r.push('state');} return {r:[...new Set(r)],ins,rush}}""")
+    check('隨機條件：兩種 entry 都會出現、inside 不會說錯樓層、askX 是相鄰的錯樓層且比鄰居的樓層高、狀態有重置', not bad['r'] and bad['ins'] > 0 and bad['rush'] > 0, bad)
     p.close()
     p = new_page(b)
     check('STAGE／NEXT_LABEL／IMAGES 都有新關卡', p.evaluate("['ASK','WRONG_FLOOR','WRONG_BELL','WRONG_DOOR'].every(k=>STAGE[k]&&NEXT_LABEL[k]&&Game.IMAGES[k])"))
