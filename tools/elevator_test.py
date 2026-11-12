@@ -261,7 +261,7 @@ def run(b):
     miss = [m for m in p.evaluate('[...Game.missing]') if not any(m.endswith(x) for x in pend)]
     check('這一局用到的圖都載得到（還沒做好的門圖除外）', not miss, (miss, pend))
     p.close()
-    for f in ('dir.jpg', 'dir_sorry.jpg', 'neighbor_sorry.jpg', 'elevator_empty.jpg', 'early.jpg', 'door_ami.jpg', 'inside_asks.jpg'):
+    for f in ('dir.jpg', 'dir_sorry.jpg', 'neighbor_sorry.jpg', 'elevator_empty.jpg', 'early.jpg', 'door_ami.jpg', 'inside_asks.jpg', 'wrong_doors.jpg'):
         check(f'新圖檔存在：{f}', os.path.exists(os.path.join(HERE, '..', 'games', 'elevator', 'images', f)))
     # LOBBY：三個選項、按▼和不按都扣分、答對才往下走
     p = new_page(b); set_task(p, n=8, m=3, dirDown=False); to_lobby(p)
@@ -437,7 +437,7 @@ def run(b):
     check('WRONG_FLOOR：電梯真的停在 5 樓（顯示器 5）', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 5 and '5' in disp(p), (st(p), disp(p)))
     check('WRONG_FLOOR：沒有提示的玩家台詞、只說外面是走廊', '走廊' in txt(p, '#npc-dialogue') and '8' not in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
     check('WRONG_FLOOR 兩個選項', sorted(o.strip() for o in opts(p)) == sorted(['走出電梯。', '不出去，這裡不是8樓。']), opts(p))
-    check('WRONG_FLOOR 圖是走廊（hall.jpg，新圖之後換）', img(p).endswith('hall.jpg'), img(p))
+    check('WRONG_FLOOR 圖是別層的走廊 wrong_doors.jpg', img(p).endswith('wrong_doors.jpg'), img(p))
     words = p.evaluate('s=>VOCAB[s].map(x=>x[0])', 'WRONG_FLOOR'); check('小字典 WRONG_FLOOR：每個字都在畫面上', all(w in screen(p) for w in words), words)
     # 沒走出去：發現不對，輕扣 5 分，回到 FLOOR 重按
     press(p, '不出去，這裡不是8樓。')
@@ -450,7 +450,7 @@ def run(b):
     check('按比 Ami 高的樓層（12）也一樣真的上去', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 12)
     m1 = mis(p); s1 = p.evaluate('Game.score'); press(p, '走出電梯。')
     check('走出電梯：進 WRONG_BELL、沒有過場、還沒扣分', st(p) == 'WRONG_BELL' and mis(p) == m1 and p.evaluate('Game.score') == s1, (st(p), mis(p)))
-    check('WRONG_BELL：三個電鈴、面板、圖 door.jpg', sorted(o.strip() for o in opts(p)) == sorted([f'按之{k}的電鈴。' for k in (1, 2, 3)]) and p.locator('.bellplates .plate').count() == 3 and img(p).endswith('door.jpg'), opts(p))
+    check('WRONG_BELL：三個電鈴、面板、圖 wrong_doors.jpg', sorted(o.strip() for o in opts(p)) == sorted([f'按之{k}的電鈴。' for k in (1, 2, 3)]) and p.locator('.bellplates .plate').count() == 3 and img(p).endswith('wrong_doors.jpg'), opts(p))
     words = p.evaluate('s=>VOCAB[s].map(x=>x[0])', 'WRONG_BELL'); check('小字典 WRONG_BELL：每個字都在畫面上', all(w in screen(p) for w in words), words)
     press(p, '按之1的電鈴。')
     check('按任何一個電鈴：陌生人開門、這時才扣 10 分（合併頁，沒有過場）', st(p) == 'WRONG_DOOR' and mis(p) == m1 + 1 and p.evaluate('Game.score') == s1 - 10, (st(p), mis(p)))
