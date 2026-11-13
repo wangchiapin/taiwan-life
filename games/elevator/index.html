@@ -257,7 +257,7 @@ const VOCAB = {
   STOP: [['靠杯', '¡caray! (vulgar)', 'damn (vulgar slang)'], ['到了', 'ya llegó', 'arrived'], ['慢走', 'que le vaya bien', 'take care (to someone leaving)'], ['您', 'usted', 'you (polite)']],
   STOP_FIX: [['到了', 'ya llegó', 'arrived'], ['慢走', 'que le vaya bien', 'take care (to someone leaving)'], ['再見', 'adiós', 'goodbye']],
   ARRIVE: [['借過', 'con permiso', 'excuse me (let me pass)'], ['不好意思', 'disculpa', 'excuse me'], ['到了', 'ya llegó', 'arrived']],
-  ASK: [['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['幾樓', '¿qué piso?', 'which floor?'], ['幫你按', 'presionar por ti', 'press for you']],
+  ASK: [['幾樓', '¿qué piso?', 'which floor?'], ['幫你按', 'presionar por ti', 'press for you']],
   WRONG_FLOOR: [['走廊', 'pasillo', 'hallway'], ['走出電梯', 'salir del ascensor', 'step out of the elevator'], ['這裡不是', 'aquí no es', 'this is not']],
   WRONG_BELL: [['走廊', 'pasillo', 'hallway'], ['電鈴', 'timbre', 'doorbell'], ['之', 'número de puerta (12樓之2: piso 12, puerta 2)', 'unit number (12樓之2: floor 12, unit 2)']],
   WRONG_DOOR: [['不好意思', 'disculpe', 'excuse me'], ['走錯樓層', 'equivocarse de piso', 'go to the wrong floor'], ['不說話', 'no decir nada', 'say nothing']],
@@ -331,7 +331,7 @@ const Game = defineGame({
   imageFor() {
     const t = this.task, s = this.state;
     /* 鄰居（或阿姨）說完再見、下電梯之後的過場（早停／到了 Ami 那層）：電梯裡已經沒有人 */
-    if (this._transMode && this._trans && ['STOP', 'STOP_FIX'].includes(this._trans.from) && ['EARLY', 'ARRIVE', 'WRONG_FLOOR'].includes(this._trans.to)) return ['images/elevator_empty.jpg', '🛗'];
+    if (this._transMode && this._trans && (['STOP', 'STOP_FIX'].includes(this._trans.from) || (t.entry === 'inside' && ['CHAT', 'FART', 'DOG'].includes(this._trans.from))) && ['EARLY', 'ARRIVE', 'WRONG_FLOOR'].includes(this._trans.to)) return ['images/elevator_empty.jpg', '🛗'];
     /* 走錯樓層後回到電梯（鄰居／裡面的人還在）：電梯圖 */
     if (this._transMode && this._trans && ['WRONG_FLOOR', 'WRONG_DOOR'].includes(this._trans.from) && this._trans.to === 'FLOOR') return this.neighborGone ? ['images/elevator_empty.jpg', '🛗'] : t.evt === 'DOG' ? ['images/dog.jpg', '🐶'] : ['images/elevator.jpg', '🛗'];   // 鄰居已經下電梯了就是空電梯
     if (s === 'ASK' && t.evt === 'DOG') return ['images/inside_asks_dog.jpg', '🐶'];   // 阿姨和乖乖的小狗（dog.jpg 的小狗在齜牙，留給後面的小插曲）
@@ -457,6 +457,10 @@ const Game = defineGame({
     const rideOn = () => {
       const k = t.stopWrong ? t.e - 1 : t.e;
       Game.cur = k;
+      if (t.entry === 'inside') {   // 電梯裡本來就有人：他沒說過要去幾樓，玩家不知道他有沒有看錯，所以沒有這一關——他自己道別、走出電梯
+        afterExit([L(`（電梯在${k}樓停了下來。${who}說「到了，再見！」，走出了電梯。）`, `(El ascensor se detiene en el piso ${k}. ${t.evt === 'DOG' ? 'Ella' : 'Él'} dice «到了，再見！» y sale del ascensor.)`, `(The elevator stops at floor ${k}. ${t.evt === 'DOG' ? 'She' : 'He'} says "到了，再見！" and gets out.)`)]);
+        return;
+      }
       Game.thought = [L(`（電梯在${k}樓停了下來。）`, `(El ascensor se detiene en el piso ${k}.)`, `(The elevator stops at floor ${k}.)`)];
       Game.state = 'STOP';   // 鄰居那句「到了，謝謝你！」是 STOP 自己的對話，不放進旁白
     };
@@ -466,20 +470,21 @@ const Game = defineGame({
     const who = t.evt === 'DOG' ? '她' : '他';
     const guardOk = `我要找朋友，她住在${t.n}樓之${t.unit}。`;
     /* 鄰居下電梯之後：中途有人按了別層就停一次，不然直接到 Ami 住的樓層 */
-    const afterExit = () => {
+    const afterExit = (pre = []) => {   // pre：要接在前面的旁白（inside 局：他說再見、走出電梯）
       Game.neighborGone = true;
       if (Game.pendingWrong != null) {   // 剛才按錯的樓層（鄰居在的時候不能先去）：鄰居下車以後才真的到那層
         const k = Game.pendingWrong; Game.pendingWrong = null;
-        goWrongFloor(k, [k === t.e ? L('（鄰居走了，門還開著。外面是別層的走廊。）', '(El vecino se fue y la puerta sigue abierta. Afuera hay el pasillo de otro piso.)', '(The neighbor is gone and the door stays open. Outside is the hallway of another floor.)') : L('（電梯繼續往上，然後停了下來，門開了。）', '(El ascensor sigue subiendo, se detiene y la puerta se abre.)', '(The elevator keeps going up, stops, and the door opens.)')]);
+        goWrongFloor(k, [...pre, k === t.e ? L('（鄰居走了，門還開著。外面是別層的走廊。）', '(El vecino se fue y la puerta sigue abierta. Afuera hay el pasillo de otro piso.)', '(The neighbor is gone and the door stays open. Outside is the hallway of another floor.)') : L('（電梯繼續往上，然後停了下來，門開了。）', '(El ascensor sigue subiendo, se detiene y la puerta se abre.)', '(The elevator keeps going up, stops, and the door opens.)')]);
         return;
       }
       if (t.early) {
         Game.cur = t.x;
-        Game.thought = [L(`（電梯繼續往上，在${t.x}樓又停了，門開了。）`, `(El ascensor sigue subiendo y se vuelve a detener en el piso ${t.x}; la puerta se abre.)`, `(The elevator keeps going up and stops again at floor ${t.x}; the door opens.)`)];
+        Game.thought = [...pre, L(`（電梯繼續往上，在${t.x}樓又停了，門開了。）`, `(El ascensor sigue subiendo y se vuelve a detener en el piso ${t.x}; la puerta se abre.)`, `(The elevator keeps going up and stops again at floor ${t.x}; the door opens.)`)];
         Game.state = 'EARLY';
         return;
       }
       Game.cur = t.n;
+      if (pre.length) Game.thought = pre;
       Game.state = 'ARRIVE';
     };
     const exitMistake = () => M('鄰居要出電梯了，可以禮貌地說「慢走」。', 'El vecino va a salir del ascensor: puedes decirle «慢走» con cortesía.', 'The neighbor is getting out — you can politely say "慢走".');
@@ -549,7 +554,7 @@ const Game = defineGame({
         html: () => Game.displayHTML(),
         dialogue: () => [
           ...([t.evt === 'DOG' ? L('（電梯門開了。裡面已經站著一位穿粉紅色外套、牽著小狗的阿姨。）', '(Se abre el ascensor. Dentro ya hay una señora con chaqueta rosa y un perrito.)', '(The elevator door opens. A lady in a pink jacket, leading a puppy, is already inside.)') : L('（電梯門開了。裡面已經站著一位鄰居，他看著你。）', '(Se abre el ascensor. Dentro ya hay un vecino, que te mira.)', '(The elevator door opens. A neighbor is already inside, looking at you.)')]),
-          nb('請問你到幾樓？我幫你按。', '¿A qué piso va? Yo se lo presiono.', 'Which floor are you going to? I will press it for you.')
+          nb('你要到幾樓？我幫你按。', '¿A qué piso va? Yo se lo presiono.', 'Which floor are you going to? I will press it for you.')
         ],
         options: () => rot([`我要到${t.n}樓，謝謝。`, `我要到${t.askX}樓，謝謝。`, '（不回答，自己按）']),
         next: c => {
@@ -569,11 +574,11 @@ const Game = defineGame({
         place: 'shop',
         html: () => Game.displayHTML(),
         dialogue: () => [L('（外面是一條走廊，有三戶人家。）', '(Afuera hay un pasillo con tres puertas.)', '(Outside there is a hallway with three doors.)')],
-        options: () => rot(['走出電梯。', `不出去，這裡不是${t.n}樓。`]),
+        options: () => rot(['走出電梯。', '不出去，這裡不是Ami住的樓層。']),
         next: c => {
           if (c === '走出電梯。') { Game.state = 'WRONG_BELL'; return; }
           const viaAsk = Game.wrongVia === 'ask';
-          Game.addMistake({ ...M(viaAsk ? `Ami住在${t.n}樓，剛剛你說要到${t.askX}樓。回答以前，要先想清楚。` : `Ami住在${t.n}樓，剛剛你按錯樓層了。按電梯以前，要先想清楚。`, viaAsk ? `Ami vive en el piso ${t.n}, pero dijiste el ${t.askX}. Piensa bien antes de responder.` : `Ami vive en el piso ${t.n}, pero presionaste otro piso. Piensa bien antes de presionar.`, viaAsk ? `Ami lives on floor ${t.n}, but you said ${t.askX}. Think before you answer.` : `Ami lives on floor ${t.n}, but you pressed another floor. Think before you press.`), pen: 5 });
+          Game.addMistake({ ...M(viaAsk ? `剛剛你說要到${t.askX}樓，但那不是Ami住的樓層。回答以前，要先想清楚。` : `剛剛你按錯樓層了。按電梯以前，要先想清楚。`, viaAsk ? `Dijiste el piso ${t.askX}, pero ahí no vive Ami. Piensa bien antes de responder.` : `Presionaste el piso equivocado. Piensa bien antes de presionar.`, viaAsk ? `You said floor ${t.askX}, but Ami doesn't live there. Think before you answer.` : `You pressed the wrong floor. Think before you press.`), pen: 5 });
           Game.thought = [L('（你按了關門，門又關上了。）', '(Presionas «cerrar»; la puerta se cierra.)', '(You press "close"; the door shuts again.)')];
           backToElevator();
         }
@@ -585,7 +590,7 @@ const Game = defineGame({
         options: () => [1, 2, 3].map(k => Game.bellOpt(k)),
         next: c => {
           Game.wrongUnit = +c.match(/之(\d)/)[1]; Game.doorsOpened = (Game.doorsOpened || 0) + 1;
-          Game.addMistake(M(`這裡是${Game.wrongFloor}樓，Ami住${t.n}樓。出電梯以前，要先看樓層數字。`, `Aquí es el piso ${Game.wrongFloor}; Ami vive en el ${t.n}. Antes de salir, mira el número del piso.`, `This is floor ${Game.wrongFloor}; Ami lives on ${t.n}. Check the floor number before you step out.`));
+          Game.addMistake(M(`這裡是${Game.wrongFloor}樓。出電梯以前，要先看樓層數字。`, `Aquí es el piso ${Game.wrongFloor}. Antes de salir, mira el número del piso.`, `This is floor ${Game.wrongFloor}. Check the floor number before you step out.`));
           Game.state = 'WRONG_DOOR';
         }
       },
@@ -719,13 +724,13 @@ const Game = defineGame({
       },
       STOP: catchState(Game, {
         key: 'STOP', place: 'shop', html: () => Game.displayHTML(),
-        dialogue: () => t.entry === 'inside' ? [nb('到了，再見！', 'Ya llegamos, ¡adiós!', 'Here we are — bye!')] : [nb('到了，謝謝你！再見！', 'Ya llegamos, ¡gracias! ¡Adiós!', 'Here we are — thanks! Bye!')],
-        get ok() { return t.entry === 'inside' ? '再見，慢走！' : '不客氣，慢走！'; }, fix: () => `不好意思，這裡是${t.e - 1}樓，您是不是要到${t.e}樓？`, get rude() { return `靠杯！你不是要去${t.stopWrong ? t.e : t.e - 1}樓？`; },   // 電梯裡本來就有人：他沒有跟你道謝，互道再見就好；數字要跟現在停的樓層不一樣
+        dialogue: () => [nb('到了，謝謝你！再見！', 'Ya llegamos, ¡gracias! ¡Adiós!', 'Here we are — thanks! Bye!')],
+        ok: '不客氣，慢走！', fix: () => `不好意思，這裡是${t.e - 1}樓，您是不是要到${t.e}樓？`, get rude() { return `靠杯！你不是要去${t.stopWrong ? t.e : t.e - 1}樓？`; },   // 電梯裡本來就有人：他沒有跟你道謝，互道再見就好；數字要跟現在停的樓層不一樣
         wrong: () => t.stopWrong,
         whyWrong: () => M(`這裡是${t.e - 1}樓，鄰居要到${t.e}樓。他看錯了，要客氣地提醒他。`, `Aquí es el piso ${t.e - 1}; el vecino va al ${t.e}. Se confundió: avísale con cortesía.`, `This is floor ${t.e - 1}; the neighbor is going to ${t.e}. He misread — remind him politely.`),
-        whyRight: () => t.entry === 'inside' ? M('鄰居沒有說過他要去幾樓，你不知道他有沒有看錯，不用提醒他，互道再見就好。', 'El vecino no dijo a qué piso va, así que no sabes si se equivocó: no hace falta avisarle, solo despídanse.', "The neighbor never said which floor he's going to, so you can't know if he misread it — just say goodbye.") : M(`這裡就是${t.e}樓，鄰居沒有看錯，不用提醒他。`, `Aquí es justo el piso ${t.e}; el vecino no se equivocó, no hace falta avisarle.`, `This is exactly floor ${t.e}; the neighbor wasn't wrong, no need to remind him.`),
+        whyRight: () => M(`這裡就是${t.e}樓，鄰居沒有看錯，不用提醒他。`, `Aquí es justo el piso ${t.e}; el vecino no se equivocó, no hace falta avisarle.`, `This is exactly floor ${t.e}; the neighbor wasn't wrong, no need to remind him.`),
         goodWrong: ['你很細心！鄰居出去以前，先看一下樓層。', '¡Qué atento! Antes de que el vecino salga, mira el piso.', 'Well spotted! Check the floor before the neighbor gets out.'],
-        get goodOk() { return t.entry === 'inside' ? ['你學會了！鄰居要下車，說「再見」、「慢走」就很客氣。', '¡Lo aprendiste! Cuando el vecino se baja, «再見» y «慢走» son corteses.', 'You learned it! When the neighbor gets off, "再見" and "慢走" are polite.'] : ['你學會了！「慢走」是跟離開的人說的客氣話。', '¡Lo aprendiste! «慢走» es una frase cortés para quien se va.', 'You learned it! "慢走" is a polite thing to say to someone leaving.']; },
+        goodOk: ['你學會了！「慢走」是跟離開的人說的客氣話。', '¡Lo aprendiste! «慢走» es una frase cortés para quien se va.', 'You learned it! "慢走" is a polite thing to say to someone leaving.'],
         apology: () => [nb('啊，不好意思，我看錯了！謝謝你提醒我。', '¡Ay, disculpe, leí mal! Gracias por avisarme.', 'Oh, sorry, I misread it! Thanks for telling me.')],
         go: wrong => {
           if (!wrong) { afterExit(); return; }
@@ -750,11 +755,11 @@ const Game = defineGame({
         place: 'shop',
         html: () => Game.displayHTML(),
         dialogue: () => [L(`（門開了，外面有人要上電梯。）`, `(La puerta se abre y alguien quiere subir.)`, `(The door opens and someone wants to get on.)`)],
-        options: () => rot(['走出電梯。', `不出去，這裡不是${t.n}樓。`, '（直接按關門，不讓別人進電梯）']),
+        options: () => rot(['走出電梯。', '不出去，這裡不是Ami住的樓層。', '（直接按關門，不讓別人進電梯）']),
         next: c => {
-          if (c !== `不出去，這裡不是${t.n}樓。`) {
+          if (c !== '不出去，這裡不是Ami住的樓層。') {
             Game.addMistake(c === '走出電梯。'
-              ? M(`這裡是${t.x}樓，Ami住${t.n}樓。出電梯以前，要先看樓層數字。`, `Aquí es el piso ${t.x}; Ami vive en el ${t.n}. Antes de salir, mira el número del piso.`, `This is floor ${t.x}; Ami lives on ${t.n}. Check the floor number before you step out.`)
+              ? M(`這裡是${t.x}樓。出電梯以前，要先看樓層數字。`, `Aquí es el piso ${t.x}. Antes de salir, mira el número del piso.`, `This is floor ${t.x}. Check the floor number before you step out.`)
               : M('外面的人也要搭電梯，不能按關門不讓他進來，很沒禮貌。', 'La persona de afuera también quiere subir: no cierres la puerta en su cara, es de mala educación.', "The person outside wants to ride too — don't press close to shut them out, it is rude."));
             return;
           }
@@ -786,8 +791,8 @@ const Game = defineGame({
           if (k !== t.unit) {
             Game.wrongUnit = k;
             Game.bellHits[k] = (Game.bellHits[k] || 0) + 1; Game.angry = Game.bellHits[k] >= 2;
-            if (Game.angry) { Game.addMistake({ ...M(`你剛剛已經按過之${k}了。Ami住在${t.n}樓之${t.unit}。一直按同一戶，別人會生氣。`, `Ya tocaste la puerta ${k}. Ami vive en el piso ${t.n}, puerta ${t.unit}. Si insistes en la misma, se enojan.`, `You already rang unit ${k}. Ami lives on floor ${t.n}, unit ${t.unit}. Ringing the same one again makes people angry.`), pen: 15 }); Game.state = 'DOOR_WRONG'; return; }
-            Game.addMistake(M(`Ami住在${t.n}樓之${t.unit}，不是之${k}。按錯別人家的電鈴，會打擾別人。`, `Ami vive en el piso ${t.n}, puerta ${t.unit}, no la ${k}. Tocar el timbre equivocado molesta a otras personas.`, `Ami lives on floor ${t.n}, unit ${t.unit}, not ${k}. Ringing the wrong bell disturbs other people.`));
+            if (Game.angry) { Game.addMistake({ ...M(`你剛剛已經按過之${k}了，Ami不住這裡。一直按同一戶，別人會生氣。`, `Ya tocaste la puerta ${k}; Ami no vive ahí. Si insistes en la misma, se enojan.`, `You already rang unit ${k}; Ami doesn't live there. Ringing the same one again makes people angry.`), pen: 15 }); Game.state = 'DOOR_WRONG'; return; }
+            Game.addMistake(M(`這裡不是Ami家。按錯別人家的電鈴，會打擾別人。`, `Esta no es la casa de Ami. Tocar el timbre equivocado molesta a otras personas.`, `This isn't Ami's home. Ringing the wrong bell disturbs other people.`));
             Game.state = 'DOOR_WRONG';
             return;
           }
