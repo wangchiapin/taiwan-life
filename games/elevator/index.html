@@ -75,6 +75,7 @@
   .bellplates { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; }
   #options-area.panelmode button.plate { font: inherit; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px 6px 14px; cursor: pointer; color: #2e3340; line-height: 1.2; background: linear-gradient(#fbf8ef, #ece6d6); border: 2px solid #b9ae94; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,.22); user-select: none; -webkit-tap-highlight-color: transparent; }
   @media (hover: hover) and (pointer: fine) { #options-area.panelmode button.plate:hover { background: linear-gradient(#fff, #f1ecde); color: #2e3340; } }   /* 只有滑鼠才有 hover；手機上 hover 樣式會讓 iPhone 第一下只算「碰到」、要按第二下才有反應 */
+  #options-area.panelmode .plate.off { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px 6px 14px; opacity: .35; filter: grayscale(1); border: 2px dashed #b9ae94; border-radius: 12px; cursor: not-allowed; }
   .plate .nameplate { background: #fff; border: 1.5px solid #c9bfa4; border-radius: 4px; padding: 2px 14px 3px; font-weight: 700; font-size: 18px; }
   .plate .c { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 35% 30%, #fafbfc, #c3c8d0 70%, #a9afb9); border: 3px solid #8d94a1; box-shadow: 0 2px 3px rgba(0,0,0,.35), inset 0 0 0 2px #e9ecf0; transition: box-shadow .12s, background .12s; }
   .plate .c svg { width: 22px; height: 22px; fill: #c0392b; }
@@ -238,7 +239,7 @@ pinyinPro.customPinyin({ '著': 'zhe', '喔': 'ō', '啦': 'la', '關係': 'guā
 
 
 const WHO = { 'Ami': ['Ami', 'Ami'], '鄰居': ['El vecino', 'The neighbor'], '阿姨': ['La señora', 'The lady'], '管理員': ['El guardia del edificio', 'The building guard'], '男住戶': ['El vecino de la puerta', 'The man at the door'], '女住戶': ['La vecina de la puerta', 'The woman at the door'] };
-const SPEAKER_RE = /^(Ami|鄰居|阿姨|管理員|男住戶|女住戶|我)：/;
+const SPEAKER_RE = /^(Ami|鄰居|阿姨|管理員|男住戶|女住戶|小女孩|老師|我)：/;
 
 const VOCAB = {
   START: [['電梯', 'ascensor', 'elevator'], ['樓', 'piso', 'floor'], ['大樓', 'edificio', 'building'], ['住在', 'vivir en', 'live at']],
@@ -259,7 +260,7 @@ const VOCAB = {
   ASK: [['請問', 'disculpe, una pregunta', 'excuse me, may I ask'], ['幾樓', '¿qué piso?', 'which floor?'], ['幫你按', 'presionar por ti', 'press for you']],
   WRONG_FLOOR: [['走廊', 'pasillo', 'hallway'], ['走出電梯', 'salir del ascensor', 'step out of the elevator'], ['這裡不是', 'aquí no es', 'this is not']],
   WRONG_BELL: [['走廊', 'pasillo', 'hallway'], ['電鈴', 'timbre', 'doorbell'], ['之', 'número de puerta (12樓之2: piso 12, puerta 2)', 'unit number (12樓之2: floor 12, unit 2)']],
-  WRONG_DOOR: [['你找誰', '¿a quién busca?', 'who are you looking for?'], ['走錯樓層', 'equivocarse de piso', 'go to the wrong floor'], ['不說話', 'no decir nada', 'say nothing']],
+  WRONG_DOOR: [['不好意思', 'disculpe', 'excuse me'], ['走錯樓層', 'equivocarse de piso', 'go to the wrong floor'], ['不說話', 'no decir nada', 'say nothing']],
   DOOR: [['電鈴', 'timbre', 'doorbell'], ['之', 'número de puerta (12樓之2: piso 12, puerta 2)', 'unit number (12樓之2: floor 12, unit 2)'], ['按', 'presionar', 'press']],
   DOOR_WRONG: [['你找誰', '¿a quién busca?', 'who are you looking for?'], ['按錯', 'presionar el equivocado', 'press the wrong one'], ['不說話', 'no decir nada', 'say nothing']],
   END: [['迎接', 'recibir', 'greet'], ['歡迎', 'bienvenido', 'welcome']],
@@ -324,7 +325,7 @@ const Game = defineGame({
     ASK: ['images/inside_asks.jpg', '🛗'], WRONG_FLOOR: ['images/wrong_floor.jpg', '🚪'], WRONG_BELL: ['images/wrong_doors.jpg', '🚪'], WRONG_DOOR: ['images/door_woman.jpg', '🚪'],   // 暫用現有的圖，新圖（inside_asks／wrong_doors）之後換
     ARRIVE: ['images/hall.jpg', '🚪'], EARLY: ['images/early.jpg', '🚪'], DOOR: ['images/door.jpg', '🚪'], DOOR_WRONG: ['images/door_muscle.jpg', '🚪'], END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
-  EXTRA_IMAGES: ['images/dir_sorry.jpg', 'images/neighbor_sorry.jpg', 'images/door_muscle.jpg', 'images/door_woman.jpg', 'images/wait_dog.jpg', 'images/neighbor_sorry_dog.jpg', 'images/door_ami.jpg', 'images/elevator_empty.jpg'],   // imageFor() 才會用到的圖，也先載好
+  EXTRA_IMAGES: ['images/dir_sorry.jpg', 'images/neighbor_sorry.jpg', 'images/door_muscle.jpg', 'images/door_woman.jpg', 'images/wait_dog.jpg', 'images/neighbor_sorry_dog.jpg', 'images/door_ami.jpg', 'images/elevator_empty.jpg', 'images/door_girl.jpg', 'images/door_ben.jpg', 'images/door_muscle_angry.jpg', 'images/door_woman_angry.jpg'],   // imageFor() 才會用到的圖，也先載好
   /* 被客氣地指出錯誤的人不好意思的畫面（尷尬臉）：
      阿姨看錯箭頭（DIR 答對後的道歉過場）、鄰居看錯樓層（STOP 答對後的道歉過場）、鄰居自己說錯樓層（HELP2） */
   imageFor() {
@@ -342,11 +343,15 @@ const Game = defineGame({
     if (s === 'DIR' && this._transMode) return ['images/dir_sorry.jpg', '😅'];
     if (s === 'DOOR' && this._transMode) return ['images/door_ami.jpg', '🚪'];   // 按對電鈴後的「門開了」過場：Ami 探頭
     if (s === 'STOP' && this._transMode && t.stopWrong) return ['images/neighbor_sorry.jpg', '😅'];
-    if (s === 'DOOR_WRONG' || s === 'WRONG_DOOR') return this.resident() === 'muscle' ? ['images/door_muscle.jpg', '🚪'] : ['images/door_woman.jpg', '🚪'];   // 按錯的那一戶，住的是誰
+    if (s === 'DOOR_WRONG' || s === 'WRONG_DOOR') {   // 開門的人：走錯樓層是小女孩／老師，Ami 那層按錯是男、女住戶（同一個電鈴按第二次就生氣抱胸）
+      const r = this.resident(), ang = s === 'DOOR_WRONG' && this.angry;
+      return [{ girl: 'images/door_girl.jpg', ben: 'images/door_ben.jpg', muscle: ang ? 'images/door_muscle_angry.jpg' : 'images/door_muscle.jpg', woman: ang ? 'images/door_woman_angry.jpg' : 'images/door_woman.jpg' }[r], '🚪'];
+    }
   },
   cur: 1,
   /* 按錯門時開門的人：三戶裡 Ami 以外的兩戶，編號小的是壯男，編號大的是女生 */
-  resident() { if (this.wrongFloor != null) return this.wrongUnit % 2 ? 'muscle' : 'woman'; const w = [1, 2, 3].filter(x => x !== this.task.unit); return this.wrongUnit === w[0] ? 'muscle' : 'woman'; },
+  resident() { if (this.wrongFloor != null) return (this.strangers || ['girl', 'ben'])[Math.max(1, Math.min(this.doorsOpened || 1, 2)) - 1];   // 走錯樓層：第一次開門的是 strangers[0]，第二次是另一位（同一局不重複；沒走出電梯就沒有開門，不算）
+     const w = [1, 2, 3].filter(x => x !== this.task.unit); return this.wrongUnit === w[0] ? 'muscle' : 'woman'; },
   /* 每局隨機：
      n＝Ami 住幾樓、m＝鄰居「一開始說」要去的樓層（3 或 4，這樣才有「低一層」可以停）
      misspoke＝鄰居說錯樓層（真正要去 e＝m+1 樓）
@@ -368,7 +373,9 @@ const Game = defineGame({
       const BELL = '<svg viewBox="0 0 24 24"><path d="M12 3a1.6 1.6 0 0 1 1.6 1.6v.4A6 6 0 0 1 18 11v3.5l1.7 2.3a.8.8 0 0 1-.6 1.3H4.9a.8.8 0 0 1-.6-1.3L6 14.5V11a6 6 0 0 1 4.4-6v-.4A1.6 1.6 0 0 1 12 3zm-2 16h4a2 2 0 0 1-4 0z"/></svg>';
       area.className = 'panelmode';
       area.innerHTML = `<div class="bellwrap"><div class="pcap">${this.ruby('按電鈴')}</div><div class="bellplates">`   // 每一戶各有自己的門牌和電鈴
-        + [1, 2, 3].map(k => `<button class="opt plate" data-raw="${this.bellOpt(k)}" aria-label="${this.bellOpt(k)}"><span class="nameplate">${this.ruby('之' + k)}</span><span class="c">${BELL}</span></button>`).join('')
+        + [1, 2, 3].map(k => this.state === 'DOOR' && this.bellOff[k]
+          ? `<span class="plate off"><span class="nameplate">${this.ruby('之' + k)}</span><span class="c">${BELL}</span></span>`   // 生氣過的那一戶：變灰、不能再按
+          : `<button class="opt plate" data-raw="${this.bellOpt(k)}" aria-label="${this.bellOpt(k)}"><span class="nameplate">${this.ruby('之' + k)}</span><span class="c">${BELL}</span></button>`).join('')
         + `</div></div>`;
       area.querySelectorAll('button.opt').forEach(b => { b.onclick = () => this.handleChoice(b.dataset.raw); });
       return;
@@ -406,7 +413,7 @@ const Game = defineGame({
     const x = xs.length ? pick(xs) : null;
     this.task = { n, m, e, x, misspoke, entry, askX: pick([n - 1, n + 1].filter(v => v <= 12)), early: xs.length > 0 && Math.random() < 0.5,
       dirDown: Math.random() < 0.4, stopWrong: entry === 'rush' && Math.random() < 0.4, unit: pick([1, 2, 3]), evt: pick(['CHAT', 'FART', 'DOG']), rot: Math.floor(Math.random() * 3) };
-    this.wrongUnit = null; this.wrongFloor = null; this.neighborGone = false; this.pendingWrong = null; this.wrongRides = 0; this.wrongVia = null; this.lastWrong = null;
+    this.wrongUnit = null; this.wrongFloor = null; this.neighborGone = false; this.pendingWrong = null; this.wrongRides = 0; this.wrongVia = null; this.lastWrong = null; this.strangers = Math.random() < 0.5 ? ['girl', 'ben'] : ['ben', 'girl']; this.bellHits = {}; this.bellOff = {}; this.angry = false; this.doorsOpened = 0;
     this.cur = 1;
   },
   amiLines() {
@@ -577,23 +584,23 @@ const Game = defineGame({
         dialogue: () => [L('（你走出電梯。走廊上有三戶人家，每一戶的門旁邊都有一個電鈴。）', '(Sales del ascensor. En el pasillo hay tres puertas, y junto a cada una hay un timbre.)', '(You step out of the elevator. There are three doors in the hallway, each with a doorbell beside it.)')],
         options: () => [1, 2, 3].map(k => Game.bellOpt(k)),
         next: c => {
-          Game.wrongUnit = +c.match(/之(\d)/)[1];
+          Game.wrongUnit = +c.match(/之(\d)/)[1]; Game.doorsOpened = (Game.doorsOpened || 0) + 1;
           Game.addMistake(M(`這裡是${Game.wrongFloor}樓，Ami住${t.n}樓。出電梯以前，要先看樓層數字。`, `Aquí es el piso ${Game.wrongFloor}; Ami vive en el ${t.n}. Antes de salir, mira el número del piso.`, `This is floor ${Game.wrongFloor}; Ami lives on ${t.n}. Check the floor number before you step out.`));
           Game.state = 'WRONG_DOOR';
         }
       },
       WRONG_DOOR: {
         place: 'shop',
-        dialogue: () => Game.resident() === 'muscle'
-          ? [L('男住戶：誰啊？你找誰？', '¿Quién es? ¿A quién busca?', 'Who is it? Who are you looking for?')]
-          : [L('女住戶：咦？請問你找誰？', '¿Eh? ¿A quién busca, por favor?', 'Huh? Who are you looking for?')],
+        dialogue: () => Game.resident() === 'girl'
+          ? [L('小女孩：麻麻…有奇怪的人來敲門…', 'Niña: Mamá… hay un extraño tocando la puerta…', 'Little girl: Mommy… a strange person is knocking…')]
+          : [L('老師：欸，是要上中文課的學生嗎？', 'Profesor: Oye, ¿eres un alumno que viene a la clase de chino?', 'Teacher: Hey, are you a student here for the Chinese lesson?')],
         options: () => rot(['不好意思，我走錯樓層了。', '你怎麼不是Ami？', '（不說話，轉身就走）']),
         next: c => {
           if (c !== '不好意思，我走錯樓層了。') { Game.addMistake(M('走錯樓層、打擾別人，要客氣地說「不好意思，我走錯樓層了」。', 'Si te equivocaste de piso y molestaste a alguien, di con cortesía «不好意思，我走錯樓層了».', 'If you went to the wrong floor and bothered someone, politely say "不好意思，我走錯樓層了."')); return; }
           goodFirst('WRONG_DOOR', '你很有禮貌！走錯了，要說「不好意思」。', '¡Qué cortés! Si te equivocas, di «不好意思».', 'How polite! If you got it wrong, say "不好意思".');
-          Game.thought = [Game.resident() === 'muscle'
-            ? L('男住戶：沒事，沒事，電梯在那邊。', 'No pasa nada, no pasa nada. El ascensor está por allá.', "It's fine, it's fine. The elevator is over there.")
-            : L('女住戶：沒關係，電梯在那邊。', 'No hay problema. El ascensor está por allá.', "That's OK. The elevator is over there."),
+          Game.thought = [Game.resident() === 'girl'
+            ? L('小女孩：喔…掰掰。', 'Niña: Ah… adiós.', 'Little girl: Oh… bye-bye.')
+            : L('老師：喔，不是學生啊。沒關係，電梯在那邊。', 'Profesor: Ah, no eres alumno. No pasa nada, el ascensor está por allá.', "Teacher: Oh, not a student. That's OK, the elevator is over there."),
             L('（你回到電梯。）', '(Vuelves al ascensor.)', '(You go back to the elevator.)')];
           backToElevator();
         }
@@ -773,11 +780,13 @@ const Game = defineGame({
         place: 'shop',
         html: () => Game.displayHTML(),
         dialogue: () => [L('（你走出電梯。走廊上有三戶人家，每一戶的門旁邊都有一個電鈴。）', '(Sales del ascensor. En el pasillo hay tres puertas, y junto a cada una hay un timbre.)', '(You step out of the elevator. There are three doors in the hallway, each with a doorbell beside it.)')],   // 不再提示 Ami 住幾號：要自己記得（任務提示／Ami 的訊息）
-        options: () => [1, 2, 3].map(k => Game.bellOpt(k)),
+        options: () => [1, 2, 3].filter(k => !Game.bellOff[k]).map(k => Game.bellOpt(k)),   // 生氣過的那一戶，電鈴不能再按
         next: c => {
           const k = +c.match(/之(\d)/)[1];
           if (k !== t.unit) {
             Game.wrongUnit = k;
+            Game.bellHits[k] = (Game.bellHits[k] || 0) + 1; Game.angry = Game.bellHits[k] >= 2;
+            if (Game.angry) { Game.addMistake({ ...M(`你剛剛已經按過之${k}了。Ami住在${t.n}樓之${t.unit}。一直按同一戶，別人會生氣。`, `Ya tocaste la puerta ${k}. Ami vive en el piso ${t.n}, puerta ${t.unit}. Si insistes en la misma, se enojan.`, `You already rang unit ${k}. Ami lives on floor ${t.n}, unit ${t.unit}. Ringing the same one again makes people angry.`), pen: 15 }); Game.state = 'DOOR_WRONG'; return; }
             Game.addMistake(M(`Ami住在${t.n}樓之${t.unit}，不是之${k}。按錯別人家的電鈴，會打擾別人。`, `Ami vive en el piso ${t.n}, puerta ${t.unit}, no la ${k}. Tocar el timbre equivocado molesta a otras personas.`, `Ami lives on floor ${t.n}, unit ${t.unit}, not ${k}. Ringing the wrong bell disturbs other people.`));
             Game.state = 'DOOR_WRONG';
             return;
@@ -790,13 +799,25 @@ const Game = defineGame({
       /* 按錯門：別人家的人開門，要客氣地說「不好意思，我按錯了」 */
       DOOR_WRONG: {
         place: 'shop',
-        dialogue: () => Game.resident() === 'muscle'
-          ? [L('男住戶：誰啊？你找誰？', '¿Quién es? ¿A quién busca?', 'Who is it? Who are you looking for?')]
-          : [L('女住戶：咦？請問你找誰？', '¿Eh? ¿A quién busca, por favor?', 'Huh? Who are you looking for?')],
+        dialogue: () => Game.angry
+          ? [Game.resident() === 'muscle'
+            ? L('男住戶：你又來了？！到底要找誰？', '¿Otra vez tú? ¿A quién buscas por fin?', 'You again?! Who exactly are you looking for?')
+            : L('女住戶：你又按我家的電鈴？到底要找誰？', '¿Otra vez tocas mi timbre? ¿A quién buscas por fin?', 'You rang my bell again? Who exactly are you looking for?')]
+          : Game.resident() === 'muscle'
+            ? [L('男住戶：誰啊？你找誰？', '¿Quién es? ¿A quién busca?', 'Who is it? Who are you looking for?')]
+            : [L('女住戶：咦？請問你找誰？', '¿Eh? ¿A quién busca, por favor?', 'Huh? Who are you looking for?')],
         options: () => rot(['不好意思，我按錯了。', '你怎麼不是Ami？', '（不說話，轉身就走）']),
         next: c => {
           if (c !== '不好意思，我按錯了。') { Game.addMistake(M('按錯別人家的電鈴，要客氣地說「不好意思，我按錯了」。', 'Si tocaste el timbre equivocado, di con cortesía «不好意思，我按錯了».', 'If you rang the wrong bell, politely say "不好意思，我按錯了."')); return; }
           goodFirst('DOOR_WRONG', '你很有禮貌！按錯了，要說「不好意思」。', '¡Qué cortés! Si te equivocas, di «不好意思».', 'How polite! If you got it wrong, say "不好意思".');
+          if (Game.angry) {   // 生氣的那一戶：道歉以後，這個電鈴不能再按
+            Game.bellOff[Game.wrongUnit] = true; Game.angry = false;
+            Game.thought = [Game.resident() === 'muscle'
+              ? L('男住戶：哼！不要再按了。', 'Residente: ¡Hmph! No vuelvas a tocar.', 'Resident: Hmph! Don\'t ring again.')
+              : L('女住戶：哼！別再按了。', 'Residente: ¡Hmph! No vuelvas a tocar.', 'Resident: Hmph! Don\'t ring again.')];
+            Game.state = 'DOOR';
+            return;
+          }
           Game.thought = [Game.resident() === 'muscle'
             ? L('男住戶：沒事，沒事。', 'No pasa nada, no pasa nada.', "It's fine, it's fine.")
             : L('女住戶：沒關係，你再找找看。', 'No hay problema, busca otra vez.', "That's OK, have another look.")];
