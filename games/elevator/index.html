@@ -254,7 +254,7 @@ const VOCAB = {
   HELP: [['麻煩', 'por favor, molestar', 'please / trouble'], ['幫我', 'ayúdame a', 'help me'], ['不好意思', 'disculpa', 'sorry / excuse me']],
   HELP2: [['說錯', 'decir algo equivocado', 'say it wrong'], ['沒關係', 'no pasa nada', "it's OK"], ['明明', 'claramente (si lo dijiste)', 'clearly (you did say)'], ['自己', 'uno mismo', 'yourself']],
   EARLY: [['樓層', 'piso', 'floor'], ['出去', 'salir', 'go out'], ['這裡不是', 'aquí no es', 'this is not']],
-  STOP: [['靠杯', '¡caray! (vulgar)', 'damn (vulgar slang)'], ['到了', 'ya llegó', 'arrived'], ['慢走', 'que le vaya bien', 'take care (to someone leaving)'], ['您', 'usted', 'you (polite)']],
+  STOP: [['靠杯', '¡carajo! (vulgar)', 'damn (vulgar slang)'], ['到了', 'ya llegó', 'arrived'], ['慢走', 'que le vaya bien', 'take care (to someone leaving)'], ['您', 'usted', 'you (polite)']],
   STOP_FIX: [['提醒', 'recordar, avisar', 'to remind'], ['慢走', 'que le vaya bien', 'take care (to someone leaving)'], ['再見', 'adiós', 'goodbye']],
   ARRIVE: [['借過', 'con permiso', 'excuse me (let me pass)'], ['不好意思', 'disculpa', 'excuse me'], ['到了', 'ya llegó', 'arrived']],
   ASK: [['幾樓', '¿qué piso?', 'which floor?'], ['幫你按', 'presionar por ti', 'press for you']],
@@ -474,7 +474,7 @@ const Game = defineGame({
       Game.neighborGone = true;
       if (Game.pendingWrong != null) {   // 剛才按錯的樓層（鄰居在的時候不能先去）：鄰居下車以後才真的到那層
         const k = Game.pendingWrong; Game.pendingWrong = null;
-        goWrongFloor(k, [...pre, k === t.e ? L('（鄰居走了，門還開著。外面是別層的走廊。）', '(El vecino se fue y la puerta sigue abierta. Afuera hay el pasillo de otro piso.)', '(The neighbor is gone and the door stays open. Outside is the hallway of another floor.)') : L('（電梯繼續往上，然後停了下來，門開了。）', '(El ascensor sigue subiendo, se detiene y la puerta se abre.)', '(The elevator keeps going up, stops, and the door opens.)')]);
+        goWrongFloor(k, [...pre, k === t.e ? L('（鄰居走了，門還開著。外面是別層的走廊。）', '(El vecino se fue y la puerta sigue abierta. Afuera está el pasillo de otro piso.)', '(The neighbor is gone and the door stays open. Outside is the hallway of another floor.)') : L('（電梯繼續往上，然後停了下來，門開了。）', '(El ascensor sigue subiendo, se detiene y la puerta se abre.)', '(The elevator keeps going up, stops, and the door opens.)')]);
         return;
       }
       if (t.early) {
@@ -630,7 +630,7 @@ const Game = defineGame({
         next: c => {
           if (c !== `按${t.n}樓。`) {
             const mm = c.match(/^按(地下)?(\d+)樓/), k = mm[1] ? -mm[2] : +mm[2];
-            if (k <= 1 || Game.wrongRides >= 2) { Game.addMistake(M(`你記錯了喔！Ami住在${t.n}樓。`, `¡Te equivocaste! Ami vive en el piso ${t.n}.`, `You got it wrong! Ami lives on floor ${t.n}.`)); return; }   // 地下室、1 樓：直接顯示錯誤
+            if (k <= 1 || Game.wrongRides >= 2) { Game.addMistake(M('你記錯了喔！再看一下Ami傳的訊息。', '¡Te equivocaste! Mira otra vez el mensaje de Ami.', 'You got it wrong! Look at Ami’s message again.')); return; }   // 地下室、1 樓：直接顯示錯誤
             Game.wrongRides++; Game.wrongVia = 'press';
             if (!Game.neighborGone && k >= t.e) { Game.pendingWrong = k; toStop(); return; }   // 比鄰居的樓層高（或一樣）：鄰居先下車，才到你按的那層
             const down = k < (Game.lastWrong ?? (Game.neighborGone ? t.e : 1));   // 電梯停在上次走錯的樓層（沒有的話：鄰居下車的樓層，或 1 樓）：按比那層低的就是往下
@@ -681,7 +681,7 @@ const Game = defineGame({
         next: c => {
           if (c !== `沒關係，我幫你按${t.e}樓。`) { Game.addMistake(M(`鄰居只是說錯了，不要生氣，客氣地幫他按${t.e}樓就好。`, `El vecino solo se equivocó al decirlo: no te enfades, presiona con cortesía el ${t.e} para él.`, `The neighbor just misspoke — don't get annoyed; politely press ${t.e} for him.`)); return; }
           goodFirst('HELP2', '你很有禮貌！別人說錯了，不要生氣，幫他按對的就好。', '¡Qué amable! Si alguien se equivoca al decir algo, no te enfades: ayúdalo con el piso correcto.', "How kind! If someone misspeaks, don't get annoyed — just press the right floor for them.");
-          Game.thought = [L(`（你按了${t.e}樓。）`, `(Presionas el ${t.e}.)`, `(You press ${t.e}.)`)];
+          Game.thought = [L(`（你按了${t.e}樓。他也連按兩下${t.m}樓的按鈕，把它取消了。）`, `(Presionas el ${t.e}. Él pulsa dos veces el botón del ${t.m} para cancelarlo.)`, `(You press ${t.e}. He double-presses the ${t.m} button to cancel it.)`)];   // 連按兩下是多數廠牌的取消方式
           Game.state = 'FLOOR';
         }
       },
