@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<title>熱炒店 · El restaurante de salteados</title>
+
+<!-- GA4（目前沿用飲料店的評估 ID，要分開統計請換成新的資料串流 ID） -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGQZPYNBLX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGQZPYNBLX');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.20.0/dist/index.js"></script>
+
+<!-- Firebase：設定在 shared/firebase.js（所有遊戲共用）；排行榜 collection：rechaogame_scores（不要改名） -->
+<script src="../../shared/player.js"></script>
+<script type="module">
+  import { initFB } from "../../shared/firebase.js";
+  initFB({ scoresCol: "rechaogame_scores" });
+</script>
+
+
+<link rel="stylesheet" href="../../shared/game.css">
+<style>
+  :root {
+    --ink: #33261f;
+    --red: #d2381e;
+    --red-dark: #8f3513;
+    --yolk: #e0a43a;
+    --night: #2e2630;
+    --kraft: #f3e4d3;
+    --wall: #fbf3ea;
+    --paper: #ffffff;
+    --line: #e5d2bd;
+    --muted: #7a6454;
+    --ami: #b3456b;
+    --bad: #c0392b;
+  }
+  body {
+    background: #f6ece0;
+  }
+  /* 嵌入模式：不要閃一下開始畫面 */
+  /* ── 登入：店招牌 ── */
+  /* ── 遊戲 ── */
+  /* 購物清單 */
+  @media (hover: hover) {
+    .opt:hover rt { color: #ffe0d2; }
+  }
+  /* ── 排行榜 ── */
+  #lb-table tr.highlight-row { background: #f7dccb; font-weight: 700; }
+  /* ── 句子翻譯 ── */
+  .tr-btn:hover { background: #f7dccb; border-color: var(--red); }
+  /* 加大可點範圍 */
+  /* ── 本關單字（右側抽屜） ── */
+  /* 視窗不夠寬時，留出右側分頁的位置，避免蓋住對話 */
+  /* ── 即時回饋卡（停留到下一次選擇） ── */
+
+
+
+  /* 號碼牌、匯款單、鈔票 */
+  .pbox { margin: 8px 0 12px; background: #fff; border: 2px solid #2f8f83; border-radius: 10px; padding: 8px 14px; }
+  .pbox .ph { color: #2f8f83; font-weight: 700; font-size: 15px; }
+  .pbox .pv { font-size: 22px; font-weight: 700; color: var(--ink); margin-top: 2px; }
+  .pbox .pl { font-size: 15px; color: var(--ink); margin-top: 2px; }
+  .pbox.bill { border-color: var(--red); }
+  .pbox.bill .pv { font-size: 18px; }
+  .pbox .br { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; font-size: 16px; border-bottom: 1px dashed #e5d2bd; }
+  .pbox .br.tot { font-weight: 700; border-bottom: 0; padding-top: 6px; }
+  .pbox .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; font-size: 16px; }
+</style></head>
+<body>
+
+<!-- ── 登入 ── -->
+<div id="login-screen" class="screen active">
+  <div class="storefront" aria-hidden="true"><div class="awning"></div><div class="name">熱炒</div></div>
+  <h1 style="margin:0;font-size:30px;letter-spacing:2px">熱炒店</h1>
+  <p class="subtitle" data-es="Cenar en un restaurante de salteados" data-en="Dinner at a stir-fry restaurant">Cenar en un restaurante de salteados</p>
+  <div class="input-group">
+    <label for="player-name-input">你的名字 / <span data-es="Tu nombre" data-en="Your name">Tu nombre</span></label>
+    <input type="text" id="player-name-input" placeholder="例：María、小明" maxlength="20" autocomplete="off">
+    <span class="error-msg" id="name-error"></span>
+  </div>
+  <div class="seg-group">
+    <div class="seg" role="group" aria-label="中文字體">
+      <button type="button" data-script="trad" aria-pressed="true">繁體</button>
+      <button type="button" data-script="simp" aria-pressed="false">简体</button>
+    </div>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">Español</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+  <p class="flavor-text">
+    Ami 和朋友晚上要去熱炒店吃飯，請你先去幫大家點菜。人數、菜、啤酒、加點、結帳，老闆娘有時會聽錯、上錯菜、多算錢，要自己多注意喔！<br>
+    <span data-es="Ami y sus amigos cenan esta noche en un restaurante de platos salteados y te piden que vayas primero a pedir. Personas, platos, cerveza, pedidos extra y la cuenta: ¡a veces la dueña oye mal, trae un plato equivocado o cobra de más, así que presta atención!" data-en="Ami and her friends are having dinner at a stir-fry restaurant tonight, and you go first to order. Party size, dishes, beer, extra orders and the bill: the owner sometimes mishears, brings the wrong dish or overcharges, so stay alert!">Ami y sus amigos cenan esta noche en un restaurante de platos salteados y te piden que vayas primero a pedir. Personas, platos, cerveza, pedidos extra y la cuenta: ¡a veces la dueña oye mal, trae un plato equivocado o cobra de más, así que presta atención!</span>
+  </p>
+</div>
+
+<!-- ── 遊戲 ── -->
+<div id="game-window">
+  <div class="top-bar">
+    <div class="tb-btns">
+      <button class="btn-pinyin" id="btn-pinyin" aria-pressed="false" onclick="Game.togglePinyin()" data-es="Ver pinyin" data-en="Show pinyin">Ver pinyin</button>
+      <button class="btn-pinyin" id="btn-music" onclick="Music.toggle()" title="音樂 · Música">🎵</button>
+      <button class="btn-pinyin restart" id="btn-restart" onclick="restartGame()">↻ 重新開始</button>
+    </div>
+    <span class="chip" id="player-badge"></span>
+    <span class="chip" id="timer-display">⏱ 0:00</span>
+    <span class="chip score" id="score-badge">100 分</span>
+  </div>
+  <div id="place-bar">
+    <span class="icon" id="place-icon" aria-hidden="true">⛽</span>
+    <div>
+      <div class="who" id="place-who">Ami</div>
+      <div class="status" id="place-status">LINE</div>
+    </div>
+    <span class="clock" id="cash-badge"></span>
+  </div>
+  <div id="scene">
+    <img id="npc-avatar" alt="" style="display:none" onerror="Game.imageMissing()">
+    <div id="scene-placeholder" aria-hidden="true"></div>
+  </div>
+  <div id="npc-dialogue" aria-live="polite"></div>
+  <div id="options-area"></div>
+</div>
+
+<!-- ── 排行榜 ── -->
+<div id="leaderboard-screen" class="screen">
+  <div style="font-size:44px" aria-hidden="true">🏆</div>
+  <h2 data-zh="排行榜" data-es="Clasificación" data-en="Leaderboard">排行榜 Clasificación</h2>
+  <p class="lb-subtitle">前 10 名 · Top 10</p>
+  <div id="rank-banner" style="width:100%"></div>
+  <p class="lb-subtitle" id="lb-loading" data-zh="載入中" data-es="Cargando…" data-en="Loading…">載入中 Cargando…</p>
+  <table id="lb-table" style="display:none">
+    <thead><tr><th>名次</th><th data-zh="玩家" data-es="Jugador" data-en="Player">玩家 Jugador</th><th data-zh="分數" data-es="Puntos" data-en="Score">分數 Puntos</th><th data-zh="時間" data-es="Tiempo" data-en="Time">時間 Tiempo</th></tr></thead>
+    <tbody id="lb-body"></tbody>
+  </table>
+  <button class="btn-restart" onclick="location.reload()" data-zh="再玩一次" data-es="Jugar otra vez" data-en="Play again">再玩一次 Jugar otra vez</button>
+</div>
+
+<div id="toast" role="alert"></div>
+
+<!-- ── 右側分頁 ── -->
+<div id="side-tabs" hidden>
+  <button class="side-tab hint" id="hint-tab" aria-expanded="false" aria-controls="hints">任務提示</button>
+  <button class="side-tab" id="vocab-tab" aria-expanded="false" aria-controls="vocab">本關單字<span class="v-count" id="vocab-count">0</span></button>
+  <button class="side-tab log" id="log-tab" aria-expanded="false" aria-controls="log">錯誤紀錄<span class="v-count" id="log-count">0</span></button>
+</div>
+<aside id="hints" class="drawer" aria-label="任務提示 Pistas">
+  <div class="v-head"><div><b>任務提示</b><br><small data-es="Lo que te dijeron" data-en="What you were told">Lo que te dijeron</small></div><button id="hint-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="hint-body"></div>
+</aside>
+<aside id="vocab" class="drawer" aria-label="本關單字 Vocabulario">
+  <div class="v-head"><div><b>本關單字</b><br><small data-es="Vocabulario de esta parte" data-en="Words for this part">Vocabulario de esta parte</small></div><button id="vocab-close" aria-label="關閉 Cerrar">✕</button></div>
+  <ul id="vocab-list"></ul>
+</aside>
+<aside id="log" class="drawer" aria-label="錯誤紀錄 Errores">
+  <div class="v-head"><div><b>錯誤紀錄</b><br><small data-es="Tus errores" data-en="Your mistakes">Tus errores</small></div><button id="log-close" aria-label="關閉 Cerrar">✕</button></div>
+  <div id="log-body"></div>
+</aside>
+
+<script>
+/* 這個遊戲的設定（共用程式在 shared/game.js） */
+const GAME = {
+  scene: 'rechao', track: 'rechao', vocabQuiz: true, settingsKey: 'rechao_settings',
+  defaultPlace: 'shop', defaultEmoji: '🍻',
+  roles: {
+    'Ami': { pitch: 1.15 }, '我': { pitch: 0.9 }, '老闆娘': { pitch: 1.1 }
+  }
+};
+</script>
+<script src="../../shared/game.js"></script>
+<script>
+/* ══════════════════════════════════════
+   台灣讀音修正（pinyin-pro 預設是大陸讀音）
+   第一版草稿：本次沒有對照 game-kit（讀不到），只用共用檔內建的 GoodTeacher 規則
+══════════════════════════════════════ */
+pinyinPro.customPinyin({
+  '還是': 'hái shì', '還有': 'hái yǒu', '還要': 'hái yào', '訊息': 'xùn xí', '還沒': 'hái méi', '嗎': 'ma', '誰': 'shéi', '幾': 'jǐ', '喔': 'ō', '唷': 'yō', '什麼': 'shén me', '謝謝': 'xiè xie', '麻煩': 'má fan',
+  '時間': 'shí jiān', '時候': 'shí hou', '東西': 'dōng xi', '我們': 'wǒ men', '你們': 'nǐ men', '記得': 'jì de', '著': 'zhe', '囉': 'luo', '啦': 'la', '耶': 'ye',
+  '不好意思': 'bù hǎo yì si', '這個': 'zhè ge', '那個': 'nà ge', '好像': 'hǎo xiàng', '欸': 'èi', '應該': 'yīng gāi', '怎麼': 'zěn me', '朋友': 'péng yǒu',
+  '老闆娘': 'lǎo bǎn niáng', '老闆': 'lǎo bǎn', '一共': 'yí gòng', '找': 'zhǎo', '收': 'shōu', '一盤': 'yì pán', '各一盤': 'gè yì pán', '兩盤': 'liǎng pán',
+  '一瓶': 'yì píng', '兩瓶': 'liǎng píng', '位子': 'wèi zi', '小心': 'xiǎo xīn', '小心燙': 'xiǎo xīn tàng', '複誦': 'fù sòng', '算錯': 'suàn cuò', '多算': 'duō suàn'
+});
+pinyinPro.customPinyin({
+  '熱炒店': 'rè chǎo diàn', '熱炒': 'rè chǎo', '點菜': 'diǎn cài', '菜單': 'cài dān', '加點': 'jiā diǎn', '台啤': 'tái pí', '啤酒': 'pí jiǔ', '空瓶': 'kōng píng',
+  '菜脯蛋': 'cài pú dàn', '炒空心菜': 'chǎo kōng xīn cài', '空心菜': 'kōng xīn cài', '客家小炒': 'kè jiā xiǎo chǎo', '三杯雞': 'sān bēi jī', '鹽酥蝦': 'yán sū xiā', '蔥爆牛肉': 'cōng bào niú ròu',
+  '結帳': 'jié zhàng', '帳單': 'zhàng dān', '櫃檯': 'guì tái', '上桌': 'shàng zhuō', '沒開': 'méi kāi', '幾位': 'jǐ wèi', '確認': 'què rèn', '鈔票': 'chāo piào', '零錢': 'líng qián',
+  '喝了': 'hē le', '喝完': 'hē wán', '吃飽': 'chī bǎo', '菜': 'cài', '陸續': 'lù xù', '燙': 'tàng', '退': 'tuì', '少算': 'shǎo suàn', '下次再付': 'xià cì zài fù'
+});
+// 台灣讀音修正：連接詞「和」念 hàn、「嗯」念 ēn
+pinyinPro.customPinyin({ '和': 'hàn', '嗯': 'ēn' });
+
+/* 角色名稱：翻譯視窗用 [西文, 英文] */
+const WHO = { 'Ami': ['Ami', 'Ami'], '老闆娘': ['La dueña del restaurante', 'The owner (lady boss)'] };
+const SPEAKER_RE = /^(Ami|老闆娘|我)：/;
+
+/* ══════════════════════════════════════
+   每一關的單字（中文、西文、英文；拼音自動產生）
+══════════════════════════════════════ */
+const VOCAB = {
+  START: [['熱炒店', 'restaurante de platos salteados', 'stir-fry restaurant'], ['點菜', 'pedir los platos', 'order dishes'], ['啤酒', 'cerveza', 'beer'], ['台啤', 'Taiwan Beer (marca)', 'Taiwan Beer (brand)']],
+  SEAT: [['幾位', '¿cuántas personas?', 'how many people?'], ['歡迎光臨', 'bienvenido(a)', 'welcome']],
+  ORDER: [['菜單', 'menú', 'menu'], ['這邊請', 'por aquí, por favor', 'this way, please'], ['想好', 'haber decidido', 'have decided'], ['各一盤', 'un plato de cada uno', 'one plate of each'], ['我要', 'quiero', 'I want']],
+  BEER: [['喝幾瓶算幾瓶', 'se cobra lo que se bebe', 'you pay for what you drink'], ['沒開', 'sin abrir', 'unopened'], ['退', 'devolver', 'return (to the shop)']],
+  CONFIRM: [['確認', 'confirmar', 'confirm'], ['對嗎', '¿es correcto?', 'is that right?'], ['不好意思', 'disculpe', 'excuse me']],
+  SERVE: [['上桌', 'servirse a la mesa', 'be served at the table'], ['小心燙', 'cuidado, quema', 'careful, hot'], ['沒有點', 'no pedimos', "we didn't order"]],
+  ADD: [['加點', 'pedir algo más', 'order more'], ['還要', 'además, quiere más', 'anything more']],
+  RETURN: [['結帳', 'pagar la cuenta', 'pay the bill'], ['空瓶', 'botella vacía', 'empty bottle'], ['櫃檯', 'caja, mostrador', 'counter']],
+  PAY: [['帳單', 'la cuenta', 'the bill'], ['一共', 'en total', 'in total'], ['算錯', 'calcular mal', 'miscalculate'], ['應該', 'debería', 'should']],
+  PAY_FIX: [['下次再付', 'pagar la próxima vez', 'pay next time'], ['給你', 'te doy', 'here you are (giving)']],
+  CHANGE: [['找', 'dar el cambio', 'give change'], ['收', 'recibir, cobrar', 'receive, take payment']],
+  get END() { return Game._endGood ? [['剛剛好', 'justo bien', 'just right']] : [['下次', 'la próxima vez', 'next time']]; },
+  RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
+};
+
+/* 關卡名稱（錯誤紀錄用） */
+const STAGE = (() => {
+  const p = ['付錢', 'pagar', 'paying'];
+  return { SEAT: ['說人數', 'decir cuántas personas', 'party size'], ORDER: ['點菜', 'pedir los platos', 'ordering dishes'], BEER: ['點啤酒', 'pedir cerveza', 'ordering beer'],
+    CONFIRM: ['核對複誦', 'revisar lo repetido', 'checking the repeat-back'], SERVE: ['核對上的菜', 'revisar el plato', 'checking the dish'], ADD: ['加點', 'pedir más', 'ordering more'],
+    RETURN: ['算啤酒', 'contar la cerveza', 'counting the beer'], PAY: p, PAY_FIX: p, CHANGE: ['找錢', 'el cambio', 'the change'] };
+})();
+
+/* 過場按鈕上的情境句：key 是下一關 */
+const NEXT_LABEL = { SEAT: '走進店裡', ORDER: '看菜單', BEER: '點啤酒', CONFIRM: '聽老闆娘確認', SERVE: '等菜上桌', ADD: '看 Ami 的訊息', RETURN: '走去櫃檯', PAY: '看帳單', END: '走出熱炒店' };
+
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+const PLACES = {
+  phone: ['📱', 'Ami', 'LINE · Mensaje', 'Message', 'phone'],
+  shop: ['🍻', '熱炒店', 'Restaurante de salteados', 'Stir-fry restaurant', '']
+};
+/* 菜單：價錢是常見範圍，待確認（各店不同） */
+const DISHES = [
+  { zh: '菜脯蛋', es: 'tortilla de rábano en conserva', en: 'preserved radish omelet', p: 100 },
+  { zh: '炒空心菜', es: 'espinaca de agua salteada', en: 'stir-fried water spinach', p: 100 },
+  { zh: '客家小炒', es: 'salteado hakka', en: 'Hakka stir-fry', p: 180 },
+  { zh: '鹽酥蝦', es: 'camarones fritos con sal y pimienta', en: 'salt-and-pepper shrimp', p: 220 },
+  { zh: '三杯雞', es: 'pollo a las tres copas', en: 'three-cup chicken', p: 250 },
+  { zh: '蔥爆牛肉', es: 'res salteada con cebolleta', en: 'scallion beef', p: 260 }
+];
+const BEER_P = 80;      // 台啤一瓶（待確認）
+const dz = (a, l) => a.map(d => d[l]).join(l === 'zh' ? '、' : ', ');
+const dishZh = a => dz(a, 'zh') + '各一盤';
+const billFor = n => (n <= 500 ? 500 : n <= 1000 ? 1000 : n <= 1500 ? 1500 : 2000);   // 你給的鈔票
+
+/* ══════════════════════════════════════
+   任務提示
+══════════════════════════════════════ */
+const Hints = makeHints({ render: stdHintsRender });
+document.getElementById('hint-tab').onclick = () => Hints.toggle();
+document.getElementById('hint-close').onclick = () => Hints.toggle(false);
+
+const ORDER = ['START', 'SEAT', 'ORDER', 'BEER', 'CONFIRM', 'SERVE', 'ADD', 'RETURN', 'PAY', 'PAY_FIX', 'CHANGE', 'END', 'RESULT'];
+
+/* ══════════════════════════════════════
+   遊戲主體
+══════════════════════════════════════ */
+const Game = defineGame({
+  state: 'START',
+  playerName: '你',
+  showPinyin: false, showList: false,
+  startTime: null, elapsedTime: 0, timerInterval: null,
+  score: 100, mistakes: 0, mistakeLog: [],
+  thought: null, thoughtFirst: false,
+  hintViews: 0, log: [], feedback: [], visit: 0, att: {}, cash: null,
+  onStart() { this.updateCash(); },
+  updateCash() { document.getElementById('cash-badge').textContent = ''; },
+  setPlace(mode) {
+    const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
+    document.getElementById('place-bar').className = cls || '';
+    document.getElementById('place-icon').textContent = icon;
+    document.getElementById('place-who').textContent = who;
+    document.getElementById('place-status').textContent = X(es, en);
+  },
+
+  IMAGES: {
+    START: ['images/start.jpg', '📱'], SEAT: ['images/entrance.jpg', '🍻'], ORDER: ['images/menu.jpg', '📋'], BEER: ['images/menu.jpg', '🍺'], CONFIRM: ['images/menu.jpg', '📋'],
+    SERVE: ['images/dish.jpg', '🍽️'], ADD: ['images/table.jpg', '🍻'], RETURN: ['images/table.jpg', '🍺'],
+    PAY: ['images/bill.jpg', '🧾'], PAY_FIX: ['images/bill.jpg', '🧾'], CHANGE: ['images/bill.jpg', '💵'],
+    END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
+  },
+
+  setup() {
+    const t = this.task = { rot: Math.floor(Math.random() * 3) };
+    /* Ami 要的 */
+    t.dishes = shuffle(DISHES).slice(0, 3);
+    const rest = shuffle(DISHES.filter(d => !t.dishes.includes(d)));
+    t.addDish = rest[0];                                   // Ami 之後加點的菜
+    t.swapDish = rest[1]; t.extraDish = rest[2];           // 點菜時的錯誤選項用
+    t.swapIdx = 1 + Math.floor(Math.random() * 2);         // 錯誤選項裡被換掉的那一道（第 2 或第 3 道）
+    t.beer = pick([4, 6]); t.beerAdd = pick([2, 3]);
+    /* 玩家實際點的（會在各關改） */
+    t.oDishes = t.dishes.slice(); t.oBeer = t.beer; t.oAdd = t.addDish; t.oBeerAdd = t.beerAdd;
+    t.billBeer = 0; t.drunk = 0; t.unopened = 0;
+    t.cfWrong = false; t.svWrong = false;
+    initPay(t, 0, [{ zh: '一盤菜', es: 'un plato', en: 'a plate', price: 0, kind: 'dish' }]);   // 先預設，付錢以前（RETURN）依實際點的重算
+  },
+
+  amiLines() {
+    const N = this.N, t = this.task;
+    const ls = [
+      L(`Ami：${N}，我們今天晚上四個人要去熱炒店吃飯，我晚一點到。你先去幫我們點菜，好嗎？`, `${N}, esta noche somos cuatro y vamos a cenar a un restaurante de platos salteados (熱炒店). Yo llego un poco tarde. ¿Puedes ir primero a pedir?`, `${N}, four of us are having dinner at a stir-fry restaurant tonight, and I'll be a bit late. Could you go first and order for us?`),
+      L(`Ami：菜我要：${dz(t.dishes, 'zh')}，各一盤。啤酒先拿${NZ(t.beer)}瓶台啤。`, `Quiero: ${dz(t.dishes, 'es')}, un plato de cada uno. De cerveza, pide ${t.beer} botellas de Taiwan Beer para empezar.`, `I want: ${dz(t.dishes, 'en')}, one plate of each. For beer, get ${t.beer} bottles of Taiwan Beer to start.`),
+      L('Ami：我到了以後可能會再加點，到時候我再傳訊息給你。結帳的時候要自己核對帳單喔！', 'Cuando llegue quizá pidamos algo más; entonces te escribo. ¡A la hora de pagar, revisa tú mismo la cuenta!', "After I arrive we may order more — I'll message you then. When it's time to pay, check the bill yourself!")
+    ];
+    if (ORDER.indexOf(this.st0) >= ORDER.indexOf('ADD')) ls.push(L(`Ami：我快到了！再幫我們加點：一盤${t.addDish.zh}，啤酒再加${NZ(t.beerAdd)}瓶。`, `¡Ya casi llego! Pidan algo más: un plato de ${t.addDish.es} y ${t.beerAdd} botellas de cerveza más.`, `I'm almost there! Please add: one plate of ${t.addDish.en} and ${t.beerAdd} more bottles of beer.`));
+    return ls;
+  },
+  hintSections() { return [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }]; },
+
+  listHTML(rowsOnly) {
+    const t = this.task, r = x => this.ruby(x);
+    const rows = [
+      { zh: `四個人（你、Ami 和兩個朋友）`, es: 'Son cuatro (tú, Ami y dos amigos)', en: 'Four people (you, Ami and two friends)' },
+      { zh: `菜：${dishZh(t.dishes)}`, es: `Platos: ${dz(t.dishes, 'es')} (uno de cada)`, en: `Dishes: ${dz(t.dishes, 'en')} (one of each)` },
+      { zh: `啤酒：先拿${NZ(t.beer)}瓶台啤`, es: `Cerveza: ${t.beer} botellas de Taiwan Beer para empezar`, en: `Beer: ${t.beer} bottles of Taiwan Beer to start` },
+      { zh: '身上有：五百元、一千元的鈔票和零錢', es: 'Llevas billetes de quinientos y mil dólares taiwaneses, y cambio', en: 'You have NT$500 and NT$1000 bills and some change' }
+    ];
+    if (rowsOnly) return rows;
+    this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
+    const sp1 = spkBtn(this._spk.length - 1, '朗讀 ' + X('Escuchar', 'Listen'));
+    this._tr.push({ zh: rows.map(x => x.zh).join(' '), es: rows.map(x => x.es).join(' '), en: rows.map(x => x.en).join(' ') });
+    const tr1 = `<button class="tr-btn" data-tr="${this._tr.length - 1}" aria-label="翻譯 Traducir">${TR_ICON}</button>`;
+    return `<div class="list"><div class="t">${r('我的狀況')}<span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
+  },
+  /* 菜單 */
+  menuHTML() {
+    const r = x => this.ruby(x);
+    return `<div class="pbox"><div class="ph">📋 ${r('菜單')}</div>` + DISHES.map(d => `<div class="br"><span>${r(d.zh)}</span><span>${d.p}${r('元')}</span></div>`).join('') +
+      `<div class="br"><span>${r('台啤')}（${r('一瓶')}）</span><span>${BEER_P}${r('元')}</span></div></div>`;
+  },
+  /* 桌上的空瓶 */
+  tableHTML() {
+    const t = this.task, r = x => this.ruby(x);
+    return `<div class="pbox"><div class="ph">🍻 ${r('桌上')}</div><div class="chips"><span>🍺 ${r('空瓶')} ×${t.drunk}</span><span>🍾 ${r('沒開')} ×${t.unopened}</span></div></div>`;
+  },
+  /* 菜上桌 */
+  dishHTML() {
+    const t = this.task, r = x => this.ruby(x);
+    return `<div class="pbox"><div class="ph">🍽️ ${r('上桌')}</div><div class="pv">${r(t.svGot.zh)}</div></div>`;
+  },
+  /* 帳單：報價那一關（PAY）顯示老闆娘算的，抓到錯以後顯示正確的 */
+  billItems() {
+    const t = this.task, all = t.oDishes.concat(t.oAdd ? [t.oAdd] : []);
+    return { dishes: all, beerN: t.billBeer };
+  },
+  billHTML(said) {
+    const t = this.task, r = x => this.ruby(x), b = this.billItems();
+    let rows = b.dishes.map(d => `<div class="br"><span>${r(d.zh)}</span><span>${d.p}</span></div>`).join('') +
+      `<div class="br"><span>${r('台啤')} ×${b.beerN}</span><span>${b.beerN * BEER_P}</span></div>`;
+    if (said && t.payWrong) rows += `<div class="br"><span>${r(t.extra.zh)}</span><span>${t.extra.price}</span></div>`;
+    return `<div class="pbox bill"><div class="ph">🧾 ${r('帳單')}</div>${rows}<div class="br tot"><span>${r('一共')}</span><span>NT$ ${said ? t.said : t.total}</span></div></div>`;
+  },
+
+  getConfig() {
+    const N = this.N, t = this.task;
+    const boss = (zh, es, en) => L(`老闆娘：${zh}`, es, en);
+    const goodFirst = (key, zh, es, en) => { if (Game.att[key] === 1) Game.good(zh, es, en); };
+    const pays = payStates(Game, {
+      who: '老闆娘', place: 'shop', html: () => Game.billHTML(Game.st0 === 'PAY'),
+      rudePay: '你們是不是想多收我們的錢啊？',
+      extraWhy: () => t.extra.kind === 'beer'
+        ? M(`老闆娘多算了：${t.extra.zh}（${t.extra.price}元），那瓶沒有開，不用算。`, `La dueña cobró de más: ${t.extra.es} (${esM(t.extra.price)}); esa botella no se abrió y no se paga.`, `The owner overcharged: ${t.extra.en} (${enM(t.extra.price)}); that bottle was never opened, so it isn't charged.`)
+        : M(`老闆娘多算了：帳單上有${t.extra.zh}（${t.extra.price}元），你們沒有點。`, `La dueña cobró de más: en la cuenta aparece ${t.extra.es} (${esM(t.extra.price)}) y no lo pidieron.`, `The owner overcharged: the bill includes ${t.extra.en} (${enM(t.extra.price)}), which you didn't order.`)
+    });
+    const oTb = () => t.oBeer + t.oBeerAdd;
+    const pool = () => DISHES.filter(d => !t.oDishes.includes(d));
+
+    return {
+      START: {
+        place: 'phone',
+        html: () => Game.listHTML(),
+        dialogue: () => [
+          L('（你走到熱炒店門口，店裡很熱鬧。手機響了一聲，是Ami傳來的LINE。）', '(Llegas a la puerta del restaurante; dentro hay mucho ambiente. Tu celular suena: es un LINE de Ami.)', '(You reach the door of the stir-fry restaurant; it is lively inside. Your phone buzzes — a LINE from Ami.)'),
+          ...Game.amiLines().slice(0, 3),
+          L('我：好，我先進去點菜！', '¡Bien, voy a entrar a pedir!', "OK, I'll go in and order first!")
+        ],
+        options: ['走進熱炒店'],
+        next: () => { Game.startTimer(); Game.state = 'SEAT'; }
+      },
+
+      /* ═══ 幾位 ═══ */
+      SEAT: {
+        place: 'shop',
+        dialogue: () => [L('（店裡很吵，大家一邊吃一邊喝啤酒。老闆娘走過來。）', '(El local es ruidoso: todos comen y beben cerveza. La dueña se acerca.)', '(It is noisy inside; everyone is eating and drinking beer. The owner walks over.)'), boss('歡迎光臨，請問幾位？', '¡Hola, buenas! ¿Cuántas personas son?', 'Welcome! How many people?')],
+        options: () => rotOf(t, ['四位。', '三位。', '兩位。']),
+        next: c => {
+          if (c !== '四位。') { Game.addMistake(M('Ami說你們四個人：你、Ami 和兩個朋友。', 'Ami dijo que son cuatro: tú, Ami y dos amigos.', 'Ami said there are four of you: you, Ami and two friends.')); return; }
+          goodFirst('SEAT', '沒錯！四個人，要說「四位」。', '¡Exacto! Son cuatro: se dice «四位».', 'Right! Four people — say "四位".');
+          Game.thought = [boss('好，這邊請。菜單在桌上，想好再叫我。', 'Bien, por aquí. El menú está en la mesa; llámeme cuando haya decidido.', "Okay, this way. The menu's on the table — call me when you've decided.")];
+          Game.state = 'ORDER';
+        }
+      },
+
+      /* ═══ 點菜：實際點的先記下來（點錯也照樣往下走，結局統一看點到的菜） ═══ */
+      ORDER: {
+        place: 'shop',
+        html: () => Game.menuHTML(),
+        dialogue: () => [boss('想好要點什麼了嗎？', '¿Ya decidió qué va a pedir?', 'Have you decided what to order?')],
+        options: () => {
+          const swap = t.dishes.map((d, i) => i === t.swapIdx ? t.swapDish : d);
+          return rotOf(t, [`我要${dishZh(t.dishes)}。`, `我要${dishZh(swap)}。`, `我要${dishZh(t.dishes.concat([t.extraDish]))}。`]);
+        },
+        next: c => {
+          const swap = t.dishes.map((d, i) => i === t.swapIdx ? t.swapDish : d);
+          if (c === `我要${dishZh(t.dishes)}。`) { t.oDishes = t.dishes.slice(); goodFirst('ORDER', '沒錯！三道菜都照 Ami 說的點。', '¡Exacto! Los tres platos son los que dijo Ami.', 'Right! All three dishes are what Ami said.'); }
+          else if (c === `我要${dishZh(swap)}。`) {
+            t.oDishes = swap;
+            Game.addMistake(M(`Ami 要的是${t.dishes[t.swapIdx].zh}，你點成了${t.swapDish.zh}。`, `Ami quería ${t.dishes[t.swapIdx].es}, pero pediste ${t.swapDish.es}.`, `Ami wanted ${t.dishes[t.swapIdx].en}, but you ordered ${t.swapDish.en}.`));
+          } else {
+            t.oDishes = t.dishes.concat([t.extraDish]);
+            Game.addMistake(M(`Ami 沒有要${t.extraDish.zh}，你多點了一道。`, `Ami no quería ${t.extraDish.es}; pediste un plato de más.`, `Ami didn't want ${t.extraDish.en}; you ordered one dish too many.`));
+          }
+          Game.state = 'BEER';
+        }
+      },
+
+      /* ═══ 點啤酒：同樣先記下來 ═══ */
+      BEER: {
+        place: 'shop',
+        html: () => Game.menuHTML(),
+        dialogue: () => [boss('好。啤酒是喝幾瓶算幾瓶，沒開的可以退。要先拿幾瓶？', 'Bien. La cerveza se cobra por botella bebida; las que no se abren se pueden devolver. ¿Cuántas quiere para empezar?', 'Okay. Beer is charged by the bottles you drink; unopened ones can be returned. How many to start?')],
+        options: () => rotOf(t, [t.beer, t.beer + 2, t.beer - 2].map(n => `先拿${NZ(n)}瓶台啤。`)),
+        next: c => {
+          const n = [t.beer, t.beer + 2, t.beer - 2].find(x => c === `先拿${NZ(x)}瓶台啤。`);
+          t.oBeer = n;
+          if (n === t.beer) goodFirst('BEER', '沒錯！啤酒先拿的瓶數要照 Ami 說的。', '¡Exacto! El número de botellas es el que dijo Ami.', 'Right! The number of bottles is what Ami said.');
+          else Game.addMistake(M(`Ami 說先拿${t.beer}瓶，你說成${n}瓶。`, `Ami dijo ${t.beer} botellas y pediste ${n}.`, `Ami said ${t.beer} bottles but you said ${n}.`));
+          /* 老闆娘複誦：45% 說錯一項（菜或啤酒） */
+          t.cfWrong = Math.random() < 0.45; t.cfKind = pick(['dish', 'beer']);
+          t.cfDishes = t.oDishes.slice(); t.cfBeer = t.oBeer;
+          if (t.cfWrong) {
+            if (t.cfKind === 'dish') { const i = Math.floor(Math.random() * t.oDishes.length); t.cfDishes[i] = pick(pool()); } else t.cfBeer = t.oBeer + pick([2, -2]);
+          }
+          Game.state = 'CONFIRM';
+        }
+      },
+
+      /* ═══ 老闆娘複誦：45% 說錯（以你「實際點的」為準） ═══ */
+      CONFIRM: catchState(Game, {
+        key: 'CONFIRM', place: 'shop',
+        dialogue: () => [boss(`好，跟你確認一下：${dishZh(t.cfDishes)}，啤酒${zhNum(t.cfBeer)}瓶，對嗎？`, `Bien, le confirmo: ${dz(t.cfDishes, 'es')} (uno de cada) y ${t.cfBeer} botellas de cerveza, ¿correcto?`, `Okay, let me confirm: ${dz(t.cfDishes, 'en')} (one of each) and ${t.cfBeer} bottles of beer — is that right?`)],
+        ok: '對，沒錯，謝謝。',
+        fix: () => `不好意思，我們點的是${dishZh(t.oDishes)}，啤酒${zhNum(t.cfWrong ? t.oBeer : t.oBeer + 2)}瓶。`,
+        rude: '你到底有沒有在聽啊？',
+        wrong: () => t.cfWrong,
+        whyWrong: () => M(`老闆娘說錯了：你點的是「${dishZh(t.oDishes)}、啤酒${t.oBeer}瓶」，她說「${dishZh(t.cfDishes)}、啤酒${t.cfBeer}瓶」。`, `La dueña se equivocó: pediste «${dz(t.oDishes, 'es')}, ${t.oBeer} botellas» y ella dijo «${dz(t.cfDishes, 'es')}, ${t.cfBeer} botellas».`, `The owner got it wrong: you ordered "${dz(t.oDishes, 'en')}, ${t.oBeer} bottles" but she said "${dz(t.cfDishes, 'en')}, ${t.cfBeer} bottles".`),
+        whyRight: () => M(`老闆娘說對了：「${dishZh(t.oDishes)}、啤酒${t.oBeer}瓶」。`, `Lo repitió bien: «${dz(t.oDishes, 'es')}, ${t.oBeer} botellas».`, `She had it right: "${dz(t.oDishes, 'en')}, ${t.oBeer} bottles".`),
+        goodWrong: ['你很細心！老闆娘複誦錯了，要馬上說，不然上錯菜就麻煩了。', '¡Qué atento! La dueña repitió mal; habla enseguida, o traerán platos equivocados.', 'Well spotted! She repeated it wrong — speak up right away, or the wrong dishes will come.'],
+        goodOk: ['老闆娘複誦的時候，要對一下自己點的菜和啤酒。', 'Cuando la dueña repita, compara con lo que pediste.', 'When she repeats the order, compare it with what you ordered.'],
+        apology: () => [boss(`啊，不好意思！是${dishZh(t.oDishes)}，啤酒${zhNum(t.oBeer)}瓶，我改過來了。`, `¡Ay, disculpe! Son ${dz(t.oDishes, 'es')} y ${t.oBeer} botellas; ya lo corregí.`, `Oh, sorry! ${dz(t.oDishes, 'en')} and ${t.oBeer} bottles — I've fixed it.`)],
+        go: () => {
+          /* 菜上桌：40% 端錯（端來一道沒點的菜） */
+          t.svDish = pick(t.oDishes); t.svWrong = Math.random() < 0.4; t.svGot = t.svWrong ? pick(pool()) : t.svDish;
+          Game.state = 'SERVE';
+        }
+      }),
+
+      /* ═══ 菜上桌：40% 端錯 ═══ */
+      SERVE: catchState(Game, {
+        key: 'SERVE', place: 'shop',
+        html: () => Game.dishHTML(),
+        dialogue: () => [L('（過了一會兒，菜陸續上桌了。老闆娘端來一盤菜。）', '(Al rato empiezan a llegar los platos a la mesa. La dueña trae uno.)', '(After a while the dishes start arriving. The owner brings one over.)'), boss(`來，${t.svGot.zh}，小心燙！`, `Aquí tiene: ${t.svGot.es}. ¡Cuidado, quema!`, `Here: ${t.svGot.en}. Careful, it's hot!`)],
+        ok: '好，謝謝。',
+        fix: () => `不好意思，這道${(t.svWrong ? t.svGot : t.svDish).zh}我們沒有點。`,
+        rude: '這不是我們的菜！你是不是搞錯桌了？',
+        wrong: () => t.svWrong,
+        whyWrong: () => M(`這道${t.svGot.zh}你們沒有點。菜端上桌，要先看一下是不是自己點的。`, `Este plato (${t.svGot.es}) no lo pidieron. Al recibir un plato, mira si es el suyo.`, `You didn't order this dish (${t.svGot.en}). Check that a dish is yours before accepting it.`),
+        whyRight: () => M(`這道${t.svDish.zh}是你們點的，沒有錯。`, `Este plato (${t.svDish.es}) sí lo pidieron.`, `You did order this dish (${t.svDish.en}).`),
+        goodWrong: ['你很細心！菜不是自己點的，要馬上說。', '¡Qué atento! Si el plato no es el suyo, dilo enseguida.', "Well spotted! If a dish isn't yours, say so right away."],
+        goodOk: ['菜上桌的時候，要看一下是不是自己點的。', 'Cuando llegue un plato, mira si es el que pidieron.', 'When a dish arrives, check that it is one you ordered.'],
+        apology: () => [boss('啊，不好意思，上錯桌了！我馬上拿走。', '¡Ay, disculpe, era de otra mesa! Me lo llevo enseguida.', 'Oh, sorry, wrong table! I\'ll take it away right now.'), L(`（老闆娘把那盤端走，換上你們的${t.svDish.zh}。）`, `(La dueña se lleva el plato y trae el de ustedes: ${t.svDish.es}.)`, `(The owner takes the plate away and brings yours: ${t.svDish.en}.)`)],
+        go: () => { Game.state = 'ADD'; }
+      }),
+
+      /* ═══ 加點：Ami 傳訊息，實際說的先記下來 ═══ */
+      ADD: {
+        place: 'shop',
+        dialogue: () => [
+          L('（手機響了，是Ami傳來的LINE。）', '(Suena tu celular: es un LINE de Ami.)', '(Your phone buzzes — a LINE from Ami.)'),
+          Game.amiLines()[3],
+          L('我：好，我跟老闆娘說。', 'Bien, se lo digo a la dueña.', "OK, I'll tell the owner."),
+          boss('還要加點嗎？', '¿Quieren pedir algo más?', 'Would you like to order more?')
+        ],
+        options: () => {
+          const a = t.beerAdd, alt = a === 2 ? 3 : 2, o = pool().filter(d => d !== t.addDish)[0] || DISHES.find(d => d !== t.addDish);
+          t._addWrongDish = t._addWrongDish || o;
+          return rotOf(t, [`再加一盤${t.addDish.zh}，啤酒再加${NZ(a)}瓶。`, `再加一盤${t._addWrongDish.zh}，啤酒再加${NZ(a)}瓶。`, `再加一盤${t.addDish.zh}，啤酒再加${NZ(alt)}瓶。`]);
+        },
+        next: c => {
+          const a = t.beerAdd, alt = a === 2 ? 3 : 2;
+          if (c === `再加一盤${t.addDish.zh}，啤酒再加${NZ(a)}瓶。`) { t.oAdd = t.addDish; t.oBeerAdd = a; goodFirst('ADD', '沒錯！加點也要照 Ami 的訊息說。', '¡Exacto! El pedido extra también es el del mensaje de Ami.', "Right! The extra order is also what Ami's message said."); }
+          else if (c.includes(t._addWrongDish.zh)) {
+            t.oAdd = t._addWrongDish; t.oBeerAdd = a;
+            Game.addMistake(M(`Ami 要加的是${t.addDish.zh}，你說成${t._addWrongDish.zh}。`, `Ami quería añadir ${t.addDish.es}, pero dijiste ${t._addWrongDish.es}.`, `Ami wanted to add ${t.addDish.en}, but you said ${t._addWrongDish.en}.`));
+          } else {
+            t.oAdd = t.addDish; t.oBeerAdd = alt;
+            Game.addMistake(M(`Ami 要再加${a}瓶啤酒，你說成${alt}瓶。`, `Ami pidió ${a} botellas más y dijiste ${alt}.`, `Ami asked for ${a} more bottles but you said ${alt}.`));
+          }
+          Game.thought = [boss('好，馬上來。', 'Bien, enseguida.', 'Okay, coming right up.')];
+          /* 桌上的啤酒：實際喝了幾瓶（最少留一瓶沒開） */
+          const tb = oTb(); t.drunk = Math.min(tb - 1, t.beer + t.beerAdd - 1); t.unopened = tb - t.drunk;
+          Game.state = 'RETURN';
+        }
+      },
+
+      /* ═══ 算啤酒：喝幾瓶算幾瓶，沒開的要退（先記下來） ═══ */
+      RETURN: {
+        place: 'shop',
+        html: () => Game.tableHTML(),
+        dialogue: () => [
+          L('（菜差不多吃完了，Ami 說她們吃飽了，請你去櫃檯結帳。）', '(Ya casi terminan de comer; Ami dice que están llenos y te pide que vayas a la caja a pagar.)', '(The meal is nearly over. Ami says everyone is full and asks you to pay at the counter.)'),
+          boss('要結帳了嗎？啤酒是喝幾瓶算幾瓶。你們喝了幾瓶？', '¿Van a pagar? La cerveza se cobra por botella bebida. ¿Cuántas bebieron?', 'Ready to pay? Beer is charged by the bottles drunk. How many did you drink?')
+        ],
+        options: () => rotOf(t, [`喝了${NZ(t.drunk)}瓶，有${NZ(t.unopened)}瓶沒開，沒開的不用算。`, `${NZ(oTb())}瓶都算，謝謝。`, `喝了${NZ(t.drunk - 1)}瓶，有${NZ(t.unopened + 1)}瓶沒開。`]),
+        next: c => {
+          if (c.startsWith('喝了' + NZ(t.drunk) + '瓶')) { t.billBeer = t.drunk; goodFirst('RETURN', '沒錯！沒開的啤酒不用算，要說清楚。', '¡Exacto! Las botellas sin abrir no se pagan: dilo claro.', "Right! Unopened bottles aren't charged — say so clearly."); }
+          else if (c.startsWith(NZ(oTb()))) {
+            t.billBeer = oTb();
+            Game.addMistake(M(`有${t.unopened}瓶沒開，不用算錢，你卻說全部都算。`, `Había ${t.unopened} sin abrir, que no se pagan, pero dijiste que cobraran todas.`, `${t.unopened} bottle(s) were unopened and shouldn't be charged, but you said to charge them all.`));
+          } else {
+            t.billBeer = t.drunk - 1;
+            Game.addMistake(M(`你們喝了${t.drunk}瓶，不是${t.drunk - 1}瓶，要照實說。`, `Bebieron ${t.drunk}, no ${t.drunk - 1}: hay que decir la verdad.`, `You drank ${t.drunk}, not ${t.drunk - 1} — be honest about it.`));
+          }
+          /* 算帳單：菜（點的＋加點的）＋啤酒；老闆娘有 45% 多算 */
+          const all = t.oDishes.concat([t.oAdd]);
+          const extras = DISHES.filter(d => !all.includes(d)).map(d => ({ zh: `一盤${d.zh}`, es: `un plato de ${d.es}`, en: `a plate of ${d.en}`, price: d.p, kind: 'dish' }));
+          if (t.billBeer === t.drunk && t.unopened > 0) extras.push({ zh: '一瓶沒開的啤酒', es: 'una cerveza sin abrir', en: 'an unopened beer', price: BEER_P, kind: 'beer' });
+          initPay(t, sum(all.map(d => d.p)) + t.billBeer * BEER_P, extras);
+          Game.state = 'PAY';
+        }
+      },
+
+      PAY: pays.PAY,
+      PAY_FIX: pays.PAY_FIX,
+      CHANGE: pays.CHANGE,
+
+      END: {
+        place: 'phone',
+        dialogue: () => {
+          const sameDishes = t.oDishes.length === 3 && t.oDishes.every((d, i) => d === t.dishes[i]);
+          t._orderOK = sameDishes && t.oBeer === t.beer && t.oAdd === t.addDish && t.oBeerAdd === t.beerAdd;
+          t._beerOK = t.billBeer === t.drunk;
+          Game._endGood = Game.mistakes <= 2 && t._orderOK && t._beerOK;
+          track('game_complete', { game: 'rechao', score: Game.score, elapsed: Game.elapsedTime });
+          return [
+            L('（你走出熱炒店，打開手機，傳訊息給Ami。）', '(Sales del restaurante, abres el celular y le escribes a Ami.)', '(You step out of the restaurant, open your phone and message Ami.)'),
+            Game._endGood
+              ? L(`Ami：太好了，${N}，謝謝你！菜和啤酒剛剛好，帳也沒有算錯。`, `¡Qué bien, ${N}, gracias! Los platos y la cerveza fueron justo lo que queríamos, y la cuenta estuvo bien.`, `Great, ${N}, thank you! The dishes and beer were just right, and the bill was correct.`)
+              : (!t._orderOK
+                ? L('Ami：欸，桌上的菜和啤酒好像和我說的不一樣……下次點菜要說清楚喔！', 'Oye, los platos y la cerveza de la mesa no son lo que dije… ¡la próxima vez pide con claridad!', "Hey, the dishes and beer on the table aren't what I said… order clearly next time!")
+                : !t._beerOK
+                  ? L('Ami：欸，啤酒的錢好像算錯了……沒開的酒不用算，下次要說清楚喔！', 'Oye, parece que la cerveza se cobró mal… las botellas sin abrir no se pagan: ¡la próxima vez dilo claro!', "Hey, the beer seems to have been charged wrong… unopened bottles aren't charged — say so clearly next time!")
+                  : L('Ami：欸，聽起來有點不順利……下次點菜、上菜和帳單都要自己核對喔！', 'Parece que hubo problemas… la próxima vez revisa tú mismo el pedido, los platos y la cuenta.', "Hmm, sounds like it didn't go smoothly… next time check the order, the dishes and the bill yourself."))
+          ];
+        },
+        options: () => ['查看結果 ' + X('Ver resultado', 'See results')],
+        next: () => { Game.state = 'RESULT'; uploadResult(); }
+      },
+      RESULT: stdResultCfg('phone')
+    };
+  }
+});
+
+GameBoot();
+Music.init({ bpm: 132, tracks: [
+  { wave: 'square', vol: 0.18, notes: 'E5 . G5 E5 . A5 G5 . | D5 . F5 D5 . G5 F5 . | C5 . E5 G5 . F5 E5 . | D5 - B4 - C5 - . .' },
+  { wave: 'triangle', vol: 0.5, notes: 'C3 . G3 . C3 . G3 . | G2 . D3 . G2 . D3 . | A2 . E3 . A2 . E3 . | F2 . C3 . G2 . . .' },
+  { vol: 0.22, notes: 'k . h . s h k .' }] });
+</script>
+</body>
+</html>

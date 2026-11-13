@@ -174,3 +174,4 @@ iPhone 版 Chrome 上，頁面可以捲動時，往下捲之後有時回不到�
 - P-013 加油站 `gasstation`：[docs/draft-games/gasstation.md](docs/draft-games/gasstation.md)，尚未修改（第一版草稿：台詞、拼音、流程待 Ben 審；測試等修改完再寫；讀音沒有對照 game-kit）
 - P-014 租機車 `scooterrent`：[docs/draft-games/scooterrent.md](docs/draft-games/scooterrent.md)，尚未修改（第一版草稿：台詞、拼音、流程待 Ben 審；測試等修改完再寫；讀音沒有對照 game-kit）
 - P-015 垃圾車倒垃圾 `trash`：[docs/draft-games/trash.md](docs/draft-games/trash.md)，尚未修改（第一版草稿：台詞、拼音、流程待 Ben 審；測試等修改完再寫；讀音沒有對照 game-kit）
+- P-018 熱炒店 `rechao`：[docs/draft-games/rechao.md](docs/draft-games/rechao.md)，尚未修改（第一版草稿：台詞、拼音、流程待 Ben 審；測試等修改完再寫；讀音沒有對照 game-kit）

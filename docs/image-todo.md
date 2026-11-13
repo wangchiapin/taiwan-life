@@ -84,3 +84,7 @@
 ## 垃圾車倒垃圾 trash（2026-11-12，P-015 草稿：尚未修改）
 提示詞：`docs/image-prompts-trash.md`（照順序一次做一張，Ben 確認再下一張）。圖片檔名：start、lobby、home、wait、truck、throw、oil、result、end_good、end_bad（共 10 張，720×720）。Ami 用 `games/drinks/images/call.jpg` 的頭肩裁切當角色參考圖。
 - [ ] trash：start、lobby、home、wait、truck、throw、oil、result、end_good、end_bad
+
+## 熱炒店 rechao（2026-11-13，P-018 草稿：尚未修改）
+提示詞：`docs/image-prompts-rechao.md`（照順序一次做一張，Ben 確認再下一張）。圖片檔名：entrance、start、menu、dish、table、bill、result、end_good、end_bad（共 9 張，720×720）。Ami 用 `games/drinks/images/call.jpg` 的頭肩裁切當角色參考圖。
+- [ ] rechao：entrance、start、menu、dish、table、bill、result、end_good、end_bad
