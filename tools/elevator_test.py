@@ -544,6 +544,16 @@ def run(b):
     press(p, '不出去，這裡不是Ami住的樓層。'); leave_trans(p); press(p, '按12樓。')
     check('從 7 樓按 12 樓：往上到 12 樓、顯示器 ▲', '電梯往上，到12樓了' in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
     p.close()
+    # 8-7d 往下到 Ami 那層：旁白「電梯往下」、過場按鈕「繼續往下」；往上的就是「繼續往上」
+    p = new_page(b); set_task(p, n=9, m=4, entry='rush', evt='CHAT', stopWrong=False); to_lobby(p); to_floor(p); press(p, '按11樓。'); evt_ok(p); leave_trans(p)
+    if st(p) == 'STOP': press(p, '不客氣，慢走！'); leave_trans(p)
+    press(p, '不出去，這裡不是Ami住的樓層。'); leave_trans(p); press(p, '按9樓。')
+    check('從 11 樓按對 9 樓：旁白「電梯往下」、按鈕「繼續往下」（不是「繼續往上」）', st(p) == '_TRANS' and '往下' in txt(p, '#npc-dialogue') and '繼續往下' in txt(p, '#options-area') and '繼續往上' not in txt(p, '#options-area'), (st(p), txt(p, '#npc-dialogue'), txt(p, '#options-area')))
+    p.close()
+    p = new_page(b); set_task(p, n=9, m=4, entry='rush', evt='CHAT', stopWrong=False); to_lobby(p); to_floor(p); press(p, '按9樓。'); evt_ok(p); leave_trans(p)
+    if st(p) == 'STOP': press(p, '不客氣，慢走！')
+    check('一般往上到 Ami 那層：按鈕「繼續往上」', '繼續往上' in txt(p, '#options-area') and '繼續往下' not in txt(p, '#options-area'), txt(p, '#options-area'))
+    p.close()
     # 8-7c 鄰居還在電梯裡：先按 3 樓（比鄰居 5 樓低）回來，再按 2 樓：往下
     p = new_page(b); set_task(p, n=12, m=5, entry='rush', evt='CHAT', stopWrong=False); to_lobby(p); to_floor(p); press(p, '按3樓。'); leave_trans(p)
     check('先到 3 樓（往上 ▲、鄰居還在）', st(p) == 'WRONG_FLOOR' and '▲' in txt(p, '.disp') and p.evaluate('Game.neighborGone') is False, (st(p), txt(p, '.disp')))
@@ -690,6 +700,28 @@ def run(b):
     p = new_page(b)
     check('STAGE／NEXT_LABEL／IMAGES 都有新關卡', p.evaluate("['ASK','WRONG_FLOOR','WRONG_BELL','WRONG_DOOR'].every(k=>STAGE[k]&&NEXT_LABEL[k]&&Game.IMAGES[k])"))
     p.close()
+
+    # ── 連續兩頁（過場→下一關）不能出現同一句台詞：各種任務組合各玩一遍 ──
+    dup = []; pages = 0
+    for entry in ('rush', 'inside'):
+        for mis_ in ((False, True) if entry == 'rush' else (False,)):
+            for sw in ((False, True) if entry == 'rush' else (False,)):
+                for evt in ('CHAT', 'FART', 'DOG'):
+                    for early in (False, True):
+                        for dd in (False, True):
+                            p = new_page(b); set_task(p, n=9, m=3, misspoke=mis_, stopWrong=sw, evt=evt, early=early, dirDown=dd, entry=entry); to_lobby(p)
+                            prev = []
+                            for _ in range(40):
+                                lines = [x.strip() for x in p.evaluate('(Game._spk||[]).map(x=>x.text)')]
+                                pages += 1
+                                same = [x for x in lines if x and x in prev]
+                                if same: dup.append((entry, mis_, sw, evt, early, dd, st(p), same))
+                                prev = lines
+                                if st(p) in ('ARRIVE', 'DOOR', 'END'): break
+                                if st(p) == '_TRANS': leave_trans(p); continue
+                                press(p, p.evaluate(smoke.ORACLES['elevator']))
+                            p.close()
+    check(f'連續兩頁沒有同一句台詞（共檢查 {pages} 頁）', not dup, dup[:3])
 
     # ── 7. 網頁沒有出錯 ──
     p = new_page(b); set_task(p, misspoke=True, dirDown=True, stopWrong=True, early=True)

@@ -267,7 +267,7 @@ const VOCAB = {
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 const STAGE = { GUARD: ['管理員', 'el guardia', 'the guard'], CHAT: ['聊天', 'charlar', 'small talk'], FART: ['怪味道', 'mal olor', 'bad smell'], DOG: ['小狗', 'el perrito', 'the dog'], LOBBY: ['大廳', 'vestíbulo', 'lobby'], DIR: ['看箭頭', 'mirar la flecha', 'checking the arrow'], WAIT: ['等人', 'esperar', 'waiting'], FLOOR: ['按樓層', 'elegir piso', 'choosing a floor'], HELP: ['幫忙', 'ayudar', 'helping'], HELP2: ['鄰居改口', 'el vecino se corrige', 'neighbor corrects himself'], EARLY: ['看樓層', 'mirar el piso', 'checking the floor'], STOP: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], STOP_FIX: ['鄰居下樓', 'el vecino baja', 'neighbor exits'], ARRIVE: ['出電梯', 'salir', 'exiting'], ASK: ['回答樓層', 'responder el piso', 'answering the floor'], WRONG_FLOOR: ['走錯樓層', 'piso equivocado', 'wrong floor'], WRONG_BELL: ['走錯樓層', 'piso equivocado', 'wrong floor'], WRONG_DOOR: ['走錯樓層', 'piso equivocado', 'wrong floor'], DOOR: ['按電鈴', 'tocar el timbre', 'ringing the bell'], DOOR_WRONG: ['按錯門', 'puerta equivocada', 'wrong door'] };
-const NEXT_LABEL = { GUARD: '管理員叫住你', CHAT: '電梯往上', FART: '電梯往上', DOG: '電梯往上', LOBBY: '走到電梯前', DIR: '電梯來了', WAIT: '電梯來了', FLOOR: from => from === 'WRONG_FLOOR' ? '電梯門關上' : from === 'WRONG_DOOR' ? '回到電梯' : '輪到你按樓層', HELP: '電梯往上', HELP2: '繼續', STOP: '電梯停了', STOP_FIX: '電梯繼續往上', EARLY: '電梯又停了', ARRIVE: '繼續往上', DOOR: '走到Ami家門口', END: '門開了',
+const NEXT_LABEL = { GUARD: '管理員叫住你', CHAT: '電梯往上', FART: '電梯往上', DOG: '電梯往上', LOBBY: '走到電梯前', DIR: '電梯來了', WAIT: '電梯來了', FLOOR: from => from === 'WRONG_FLOOR' ? '電梯門關上' : from === 'WRONG_DOOR' ? '回到電梯' : '輪到你按樓層', HELP: '電梯往上', HELP2: '繼續', STOP: '電梯停了', STOP_FIX: '電梯繼續往上', EARLY: '電梯又停了', ARRIVE: () => Game.arrow === '▼' ? '繼續往下' : '繼續往上', DOOR: '走到Ami家門口', END: '門開了',
   ASK: from => from === 'WRONG_FLOOR' ? '電梯門關上' : from === 'WRONG_DOOR' ? '回到電梯' : '電梯來了',
   WRONG_FLOOR: '電梯停了', WRONG_BELL: '走出電梯', WRONG_DOOR: '門開了' };
 
@@ -736,7 +736,7 @@ const Game = defineGame({
         go: wrong => {
           if (!wrong) { afterExit(); return; }
           Game.cur = t.e;
-          Game.thought = [...Game.thought, L(`（電梯繼續往上，到${t.e}樓了。）`, `(El ascensor sigue subiendo y llega al piso ${t.e}.)`, `(The elevator continues up to floor ${t.e}.)`), nb('謝謝你剛剛提醒我！再見！', '¡Gracias por avisarme hace un momento! ¡Adiós!', 'Thanks for the reminder earlier! Bye!')];
+          Game.thought = [...Game.thought, L(`（電梯繼續往上，到${t.e}樓了。）`, `(El ascensor sigue subiendo y llega al piso ${t.e}.)`, `(The elevator continues up to floor ${t.e}.)`)];   // 「謝謝你剛剛提醒我！再見！」是 STOP_FIX 自己的對話，不放進過場旁白，不然連著出現兩次
           Game.state = 'STOP_FIX';
         }
       }),
