@@ -413,7 +413,7 @@ const Game = defineGame({
     const x = xs.length ? pick(xs) : null;
     this.task = { n, m, e, x, misspoke, entry, askX: pick([n - 1, n + 1].filter(v => v <= 12)), early: xs.length > 0 && Math.random() < 0.5,
       dirDown: Math.random() < 0.4, stopWrong: entry === 'rush' && Math.random() < 0.4, unit: pick([1, 2, 3]), evt: pick(['CHAT', 'FART', 'DOG']), rot: Math.floor(Math.random() * 3) };
-    this.wrongUnit = null; this.wrongFloor = null; this.neighborGone = false; this.pendingWrong = null; this.wrongRides = 0; this.wrongVia = null; this.lastWrong = null; this.strangers = Math.random() < 0.5 ? ['girl', 'ben'] : ['ben', 'girl']; this.bellHits = {}; this.bellOff = {}; this.angry = false; this.doorsOpened = 0;
+    this.arrow = '▲'; this.wrongUnit = null; this.wrongFloor = null; this.neighborGone = false; this.pendingWrong = null; this.wrongRides = 0; this.wrongVia = null; this.lastWrong = null; this.strangers = Math.random() < 0.5 ? ['girl', 'ben'] : ['ben', 'girl']; this.bellHits = {}; this.bellOff = {}; this.angry = false; this.doorsOpened = 0;
     this.cur = 1;
   },
   amiLines() {
@@ -439,7 +439,7 @@ const Game = defineGame({
     return `<div class="list"><div class="t"><span>${r(`搭電梯上${t.n}樓找Ami`)}</span><span class="grow"></span>${sp1}${tr1}</div>` + rows.map(x => `<div>• ${r(x.zh)}</div>`).join('') + '</div>';
   },
   /* 招牌元素：樓層顯示器 */
-  displayHTML(arrow = '▲') {
+  displayHTML(arrow = this.arrow || '▲') {
     const r = s => this.ruby(s);
     return `<div class="elev"><div class="disp">${arrow} ${this.cur}</div><div class="cap">${r(FL(this.cur))}</div></div>`;
   },
@@ -465,8 +465,8 @@ const Game = defineGame({
       Game.state = 'STOP';   // 鄰居那句「到了，謝謝你！」是 STOP 自己的對話，不放進旁白
     };
     /* 搭錯樓層：電梯真的停在 k 樓，門開了。不提示樓層（要自己看顯示器）；扣分在陌生人開門的時候 */
-    const goWrongFloor = (k, thought) => { Game.wrongFloor = k; Game.lastWrong = k; Game.cur = k; Game.thought = thought; Game.state = 'WRONG_FLOOR'; };
-    const backToElevator = () => { Game.wrongFloor = null; Game.cur = 1; Game.state = 'FLOOR'; };   // 回來之後都是自己按樓層（鄰居還在就照原本的流程，已經下車就直接到 Ami 那層）
+    const goWrongFloor = (k, thought, down = false) => { Game.arrow = down ? '▼' : '▲'; Game.wrongFloor = k; Game.lastWrong = k; Game.cur = k; Game.thought = thought; Game.state = 'WRONG_FLOOR'; };
+    const backToElevator = () => { Game.arrow = '▲'; Game.wrongFloor = null; Game.cur = 1; Game.state = 'FLOOR'; };   // 回來之後都是自己按樓層（鄰居還在就照原本的流程，已經下車就直接到 Ami 那層）
     const who = t.evt === 'DOG' ? '她' : '他';
     const guardOk = `我要找朋友，她住在${t.n}樓之${t.unit}。`;
     /* 鄰居下電梯之後：中途有人按了別層就停一次，不然直接到 Ami 住的樓層 */
@@ -633,14 +633,15 @@ const Game = defineGame({
             if (k <= 1 || Game.wrongRides >= 2) { Game.addMistake(M(`你記錯了喔！Ami住在${t.n}樓。`, `¡Te equivocaste! Ami vive en el piso ${t.n}.`, `You got it wrong! Ami lives on floor ${t.n}.`)); return; }   // 地下室、1 樓：直接顯示錯誤
             Game.wrongRides++; Game.wrongVia = 'press';
             if (!Game.neighborGone && k >= t.e) { Game.pendingWrong = k; toStop(); return; }   // 比鄰居的樓層高（或一樣）：鄰居先下車，才到你按的那層
-            goWrongFloor(k, [L('（電梯往上，然後停了下來，門開了。）', '(El ascensor sube, se detiene y la puerta se abre.)', '(The elevator goes up, stops, and the door opens.)')]);   // 比較低的樓層：先停在那裡（鄰居還在電梯裡）；扣分在陌生人開門的時候
+            const down = k < (Game.lastWrong ?? (Game.neighborGone ? t.e : 1));   // 電梯停在上次走錯的樓層（沒有的話：鄰居下車的樓層，或 1 樓）：按比那層低的就是往下
+            goWrongFloor(k, [down ? L('（電梯往下，然後停了下來，門開了。）', '(El ascensor baja, se detiene y la puerta se abre.)', '(The elevator goes down, stops, and the door opens.)') : L('（電梯往上，然後停了下來，門開了。）', '(El ascensor sube, se detiene y la puerta se abre.)', '(The elevator goes up, stops, and the door opens.)')], down);   // 比較低的樓層：先停在那裡（鄰居還在電梯裡）；扣分在陌生人開門的時候
             return;
           }
           Game.wrongFloor = null; Game.pendingWrong = null; Game.cur = 1;
           goodFirst('FLOOR', `對了！按${t.n}樓。`, `¡Correcto! Presiona el ${t.n}.`, `Right! Press ${t.n}.`);
           if (Game.neighborGone) {   // 鄰居已經下車：直接到 Ami 那層（不再有早停）
             const up = Game.lastWrong == null || t.n > Game.lastWrong;
-            Game.cur = t.n;
+            Game.arrow = up ? '▲' : '▼'; Game.cur = t.n;
             Game.thought = [up ? L(`（電梯往上，到${t.n}樓了。）`, `(El ascensor sube y llega al piso ${t.n}.)`, `(The elevator goes up to floor ${t.n}.)`) : L(`（電梯往下，到${t.n}樓了。）`, `(El ascensor baja y llega al piso ${t.n}.)`, `(The elevator goes down to floor ${t.n}.)`)];
             Game.state = 'ARRIVE';
             return;

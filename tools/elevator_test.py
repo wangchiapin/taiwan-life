@@ -533,6 +533,22 @@ def run(b):
         check(f'FLOOR 按{k}樓：最後真的停在{k}樓', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == k and f'{k}' in disp(p), (k, st(p), disp(p)))
         p.close()
 
+    # 8-7b 鄰居下車後先去高樓層（11），回電梯再按低樓層（7）：旁白和顯示器箭頭都要是往下
+    p = new_page(b); set_task(p, n=12, m=4, entry='rush', evt='CHAT', stopWrong=False); to_lobby(p); to_floor(p); press(p, '按11樓。'); evt_ok(p); leave_trans(p)
+    if st(p) == 'STOP': press(p, '不客氣，慢走！'); leave_trans(p)
+    check('先到 11 樓（往上，▲）', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 11 and '▲' in txt(p, '.disp'), (st(p), txt(p, '.disp')))
+    press(p, '不出去，這裡不是Ami住的樓層。'); leave_trans(p); press(p, '按7樓。')
+    tr_ = txt(p, '#npc-dialogue'); leave_trans(p)
+    check('從 11 樓按 7 樓：過場旁白「電梯往下」、顯示器 ▼ 7', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 7 and '往下' in tr_ and '往上' not in tr_ and '▼' in txt(p, '.disp'), (st(p), tr_, txt(p, '.disp')))
+    press(p, '不出去，這裡不是Ami住的樓層。'); leave_trans(p); press(p, '按12樓。')
+    check('從 7 樓按 12 樓：往上到 12 樓、顯示器 ▲', '電梯往上，到12樓了' in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
+    p.close()
+    # 8-7c 鄰居還在電梯裡：先按 3 樓（比鄰居 5 樓低）回來，再按 2 樓：往下
+    p = new_page(b); set_task(p, n=12, m=5, entry='rush', evt='CHAT', stopWrong=False); to_lobby(p); to_floor(p); press(p, '按3樓。'); leave_trans(p)
+    check('先到 3 樓（往上 ▲、鄰居還在）', st(p) == 'WRONG_FLOOR' and '▲' in txt(p, '.disp') and p.evaluate('Game.neighborGone') is False, (st(p), txt(p, '.disp')))
+    press(p, '不出去，這裡不是Ami住的樓層。'); leave_trans(p); press(p, '按2樓。'); tr_ = txt(p, '#npc-dialogue'); leave_trans(p)
+    check('鄰居還在、從 3 樓按 2 樓：旁白「電梯往下」、顯示器 ▼ 2', st(p) == 'WRONG_FLOOR' and '往下' in tr_ and '▼' in txt(p, '.disp'), (st(p), tr_, txt(p, '.disp')))
+    p.close()
     # 8-8 第二次走錯樓層：換另一位（同一局不重複）；女孩的道歉回話
     p = new_page(b); set_task(p, n=8, m=4, entry='rush', evt='CHAT'); p.evaluate("Game.strangers=['girl','ben']"); to_lobby(p); to_floor(p)
     press(p, '按2樓。'); leave_trans(p); press(p, '走出電梯。'); press(p, '按之1的電鈴。')
