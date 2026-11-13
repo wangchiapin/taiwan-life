@@ -13,14 +13,14 @@ from playwright.sync_api import sync_playwright
 
 FAILS = []; PASS = [0]
 def check(name, ok, info=''):
-    if ok: PASS[0] += 1
+    if ok: PASS[0] += 1; os.environ.get('ET_V') and print('ok', name[:50], flush=True)
     else: FAILS.append(f'✗ {name} {info}'); print('✗', name, info)
 
-def new_page(b, vp=None):
+def new_page(b, vp=None, q=''):
     ctx = b.new_context(viewport=vp or {'width': 1000, 'height': 900}); ctx.route('**/*', smoke.route)
     page = ctx.new_page(); errs = []
     page.on('pageerror', lambda e: errs.append(str(e))); page.on('dialog', lambda d: d.accept())
-    page.goto(f'http://127.0.0.1:{smoke.PORT}/games/elevator/index.html'); page.wait_for_timeout(300)
+    page.goto(f'http://127.0.0.1:{smoke.PORT}/games/elevator/index.html' + q); page.wait_for_timeout(300)
     page.fill('#player-name-input', 'María'); page.click('.btn-primary'); page.wait_for_timeout(200)
     page.errs = errs; return page
 
@@ -39,6 +39,8 @@ def txt(page, sel):   # 某個區塊的字（先拿掉拼音 <rt>，不然拼音
     return page.evaluate("s=>{const e=document.querySelector(s);if(!e)return '';const c=e.cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.textContent}", sel)
 def screen(page):   # 這一關畫面上的字（對話＋選項＋樓層顯示器）
     return txt(page, '#npc-dialogue') + ' ' + ' '.join(opts(page)) + ' ' + txt(page, '.elev')
+def vis(page):   # 畫面上看得到的字（不含程式碼、拼音）
+    return page.evaluate("()=>{const c=document.body.cloneNode(true);c.querySelectorAll('script,style,rt').forEach(e=>e.remove());return c.textContent}")
 def disp(page): return page.evaluate("(document.querySelector('.elev .disp')||{innerText:''}).innerText")
 
 def set_task(page, n=8, m=3, misspoke=False, dirDown=False, stopWrong=False, early=False, unit=2, evt='CHAT', entry='rush', askX=None):
@@ -331,6 +333,9 @@ def run(b):
     press(p, '沒關係，我幫你按4樓。')
     tx = txt(p, '#npc-dialogue')
     check('HELP2 之後的過場：「你按了4樓」、電梯還沒往上', st(p) == '_TRANS' and '你按了4樓' in tx and '電梯繼續往上' not in tx and '電梯向上' not in tx, tx)
+    check('HELP2 之後的過場：鄰居連按兩下取消原本說錯的3樓', '連按兩下3樓' in tx and '取消' in tx, tx)
+    vw = p.evaluate("[...document.querySelectorAll('#vocab-list .v-zh')].map(e=>e.textContent)")
+    check('HELP2 之後的過場：小字典有「連按兩下」「取消」，而且這頁的字典每個詞都在旁白或選項裡', '連按兩下' in vw and '取消' in vw and all(w in tx + ' ' + ' '.join(opts(p)) for w in ['連按兩下', '取消']), vw)
     press_floor(p); tx = txt(p, '#npc-dialogue')
     check('自己按樓層之後的小插曲頁：有「電梯向上」', st(p) == 'CHAT' and tx.count('電梯向上') == 1, tx)
     p.close()
@@ -479,6 +484,10 @@ def run(b):
     check('已經搭錯兩次', p.evaluate('Game.wrongRides') == 2 and st(p) == 'FLOOR')
     m0 = mis(p); press(p, '按2樓。')
     check('第三次按錯：直接顯示錯誤（扣分、留在 FLOOR、不會上去）', mis(p) == m0 + 1 and st(p) == 'FLOOR' and p.evaluate('Game.cur') == 1, (st(p), mis(p)))
+    body = vis(p); lg = p.evaluate('JSON.stringify(Game.log[Game.log.length-1])')
+    check('第三次按錯的紅卡：不透露 Ami 住幾樓', 'Ami住在' not in body and 'Ami住在' not in lg and '再看一下Ami傳的訊息' in (body + lg), (body[-200:], lg[-200:]))
+    p.evaluate('Game.cur=1'); mb = mis(p); press(p, '按1樓。')
+    check('按 1 樓（k≤1）：扣分、紅卡也不透露樓層', mis(p) == mb + 1 and 'Ami住在' not in vis(p))
     press(p, '按8樓。'); check('第三次之後還是可以按對', st(p) == 'CHAT' or st(p) in EVTS, st(p))
     p.close()
     # 8-3 跟鄰居一樣高或更高：鄰居先下車，才到你按的那層（每一層都測；stopWrong=False、early=True，早停被略過）
@@ -723,6 +732,24 @@ def run(b):
                             p.close()
     check(f'連續兩頁沒有同一句台詞（共檢查 {pages} 頁）', not dup, dup[:3])
 
+    # ── 語言與字體：西文、英文、簡體各把每一關畫一遍（強制切到那一關），畫面不能有 undefined／NaN／${ ，簡體不能剩繁體字 ──
+    for lang, script in (('es', 'trad'), ('en', 'trad'), ('zh', 'simp'), ('es', 'simp')):
+        p = new_page(b, q=f'?s={script}&l={lang}'); p.wait_for_timeout(500)
+        set_task(p, n=8, m=3, misspoke=True, stopWrong=True, early=True, evt='DOG'); bad = []; seen = []
+        states = p.evaluate('Object.keys(Game.getConfig())')
+        for sname in states:
+            try:
+                p.evaluate("s=>{Game.state=s; Game.cur=Game.cur||1; Game.thought=Game.thought||[]; Game.render();}", sname); p.wait_for_timeout(120)
+                t = vis(p); seen.append(sname)
+            except Exception as e:
+                bad.append((sname, 'render', str(e)[:60])); continue
+            for w in ('undefined', 'NaN', '${', '[object'):
+                if w in t: bad.append((sname, w))
+            if script == 'simp':
+                left = [c for c in set(t) if c in '電樓層關鈕對說記']
+                if left: bad.append((sname, 'trad-chars', left))
+        check(f'語言 {lang}/{script}：{len(seen)} 關畫面沒有 undefined／NaN／繁體殘留', not bad and not p.errs and len(seen) >= 20, (bad, p.errs[:2], len(seen)))
+        p.close()
     # ── 7. 網頁沒有出錯 ──
     p = new_page(b); set_task(p, misspoke=True, dirDown=True, stopWrong=True, early=True)
     to_lobby(p); to_help(p)   # 拼音預設就是開的，新台詞的 ruby 也會一起畫出來

@@ -252,7 +252,10 @@ const VOCAB = {
   WAIT: [['開門', 'abrir la puerta', 'open the door'], ['關門', 'cerrar la puerta', 'close the door'], ['等一下', 'espera un momento', 'wait a moment']],
   FLOOR: [['樓', 'piso', 'floor'], ['按', 'presionar', 'press']],
   HELP: [['麻煩', 'por favor, molestar', 'please / trouble'], ['幫我', 'ayúdame a', 'help me'], ['不好意思', 'disculpa', 'sorry / excuse me']],
-  HELP2: [['說錯', 'decir algo equivocado', 'say it wrong'], ['沒關係', 'no pasa nada', "it's OK"], ['明明', 'claramente (si lo dijiste)', 'clearly (you did say)'], ['自己', 'uno mismo', 'yourself']],
+  get HELP2() {   // 鄰居改口這一頁：4 個詞；按下「沒關係」之後的過場旁白多了「取消」，過場頁（_transMode）才多列這兩個詞
+    const base = [['說錯', 'decir algo equivocado', 'say it wrong'], ['沒關係', 'no pasa nada', "it's OK"], ['明明', 'claramente (si lo dijiste)', 'clearly (you did say)'], ['自己', 'uno mismo', 'yourself']];
+    return Game._transMode ? [...base, ['連按兩下', 'pulsar dos veces', 'double-press'], ['取消', 'cancelar', 'cancel']] : base;
+  },
   EARLY: [['樓層', 'piso', 'floor'], ['出去', 'salir', 'go out'], ['這裡不是', 'aquí no es', 'this is not']],
   STOP: [['靠杯', '¡carajo! (vulgar)', 'damn (vulgar slang)'], ['到了', 'ya llegó', 'arrived'], ['慢走', 'que le vaya bien', 'take care (to someone leaving)'], ['您', 'usted', 'you (polite)']],
   STOP_FIX: [['提醒', 'recordar, avisar', 'to remind'], ['慢走', 'que le vaya bien', 'take care (to someone leaving)'], ['再見', 'adiós', 'goodbye']],
