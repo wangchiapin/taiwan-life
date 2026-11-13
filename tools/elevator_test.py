@@ -551,7 +551,10 @@ def run(b):
     press(p, '我要到7樓，謝謝。')
     check('ASK 說錯樓層：直接進小插曲（合併）、還沒扣分、旁白：他幫你按了7樓，自己也按了3樓', st(p) == 'CHAT' and mis(p) == m0 + 1 and '幫你按了7樓，自己也按了3樓' in txt(p, '#npc-dialogue') and p.evaluate('Game.cur') == 1, (st(p), mis(p), txt(p, '#npc-dialogue')))
     evt_ok(p); leave_trans(p); check('接著先停在他的 3 樓', st(p) == 'STOP' and p.evaluate('Game.cur') == 3)
-    press(p, '不客氣，慢走！')
+    check('inside STOP：他只說「到了，再見！」、沒有謝謝、不會看錯樓層；選項有「再見，慢走！」', '到了，再見！' in txt(p, '#npc-dialogue') and '謝謝' not in txt(p, '#npc-dialogue') and '再見，慢走！' in [o.strip() for o in opts(p)] and p.evaluate('Game.task.stopWrong') is False, (txt(p, '#npc-dialogue'), opts(p)))
+    m_ = mis(p); press(p, '不好意思，這裡是2樓，您是不是要到3樓？'); check('inside STOP：提醒他是錯的（你不知道他要去幾樓）', mis(p) == m_ + 1 and '沒有說過他要去幾樓' in txt(p, '.fb.bad'), txt(p, '.fb.bad'))
+    m0 += 1   # 上面故意按錯的那一次
+    press(p, '再見，慢走！')
     check('他下車後：過場是空電梯、「電梯停了」', st(p) == '_TRANS' and img(p).endswith('elevator_empty.jpg') and '電梯停了' in txt(p, '#options-area'), (st(p), img(p))); leave_trans(p)
     check('接著 WRONG_FLOOR（7 樓，不是 EARLY）', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 7, (st(p), disp(p)))
     press(p, '不出去，這裡不是8樓。')
@@ -562,7 +565,7 @@ def run(b):
     p.close()
     # 走出去遇到陌生人
     p = new_page(b); set_task(p, n=8, m=3, entry='inside', askX=7, evt='CHAT', stopWrong=False); to_lobby(p); to_ask(p); leave_trans(p)
-    press(p, '我要到7樓，謝謝。'); evt_ok(p); leave_trans(p); press(p, '不客氣，慢走！'); leave_trans(p)
+    press(p, '我要到7樓，謝謝。'); evt_ok(p); leave_trans(p); press(p, '再見，慢走！'); leave_trans(p)
     m0 = mis(p); press(p, '走出電梯。'); press(p, '按之2的電鈴。')
     check('inside 走出去：WRONG_DOOR、扣 10 分、這裡是7樓', st(p) == 'WRONG_DOOR' and mis(p) == m0 + 1 and '這裡是7樓' in txt(p, '.fb.bad'))
     press(p, '不好意思，我走錯樓層了。'); check('inside 道歉：過場回電梯（空電梯）', st(p) == '_TRANS' and trans_from(p) == 'WRONG_DOOR' and img(p).endswith('elevator_empty.jpg') and '回到電梯' in txt(p, '#options-area'))
@@ -575,7 +578,7 @@ def run(b):
     p.close()
     # askX 比 Ami 高也一樣（9 樓）
     p = new_page(b); set_task(p, n=8, m=3, entry='inside', askX=9, evt='CHAT', stopWrong=False); to_lobby(p); to_ask(p); leave_trans(p)
-    press(p, '我要到9樓，謝謝。'); evt_ok(p); leave_trans(p); press(p, '不客氣，慢走！'); leave_trans(p)
+    press(p, '我要到9樓，謝謝。'); evt_ok(p); leave_trans(p); press(p, '再見，慢走！'); leave_trans(p)
     check('askX=9：WRONG_FLOOR 9 樓', st(p) == 'WRONG_FLOOR' and p.evaluate('Game.cur') == 9); press(p, '不出去，這裡不是8樓。'); leave_trans(p); press(p, '按8樓。')
     check('9 樓之後按 8：電梯往下', '電梯往下，到8樓了' in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
     p.close()
@@ -609,7 +612,7 @@ def run(b):
     p = new_page(b); set_task(p, n=8, m=3, entry='inside', evt='DOG', askX=7, stopWrong=False); to_lobby(p); to_ask(p); leave_trans(p)
     check('inside DOG：ASK 是阿姨、粉紅色外套、inside_asks_dog.jpg', st(p) == 'ASK' and '阿姨：請問你到幾樓' in txt(p, '#npc-dialogue') and '粉紅色外套' in txt(p, '#npc-dialogue') and img(p).endswith('inside_asks_dog.jpg'), (st(p), img(p)))
     press(p, '我要到7樓，謝謝。'); check('inside DOG：說錯樓層旁白用「她」', '她幫你按了7樓' in txt(p, '#npc-dialogue'), txt(p, '#npc-dialogue'))
-    evt_ok(p); leave_trans(p); press(p, '不客氣，慢走！'); leave_trans(p); press(p, '不出去，這裡不是8樓。')
+    evt_ok(p); leave_trans(p); press(p, '再見，慢走！'); leave_trans(p); press(p, '不出去，這裡不是8樓。')
     check('inside DOG 阿姨下車後，回電梯的圖是空電梯', img(p).endswith('elevator_empty.jpg'), img(p))
     p.close()
     # rush DOG：按得比阿姨低，她還在電梯裡，回電梯的圖是 dog.jpg
@@ -626,7 +629,7 @@ def run(b):
     # 隨機條件
     p = new_page(b)
     bad = p.evaluate("""()=>{const r=[];let ins=0,rush=0;for(let i=0;i<400;i++){Game.setup();const t=Game.task;
-      if(t.entry==='inside'){ins++; if(t.misspoke)r.push('misspoke'); if(t.e!==t.m)r.push('e!=m');} else rush++;
+      if(t.entry==='inside'){ins++; if(t.misspoke)r.push('misspoke'); if(t.e!==t.m)r.push('e!=m'); if(t.stopWrong)r.push('inside stopWrong');} else rush++;
       if(![t.n-1,t.n+1].includes(t.askX)||t.askX>12||t.askX<2)r.push('askX'+t.askX);
       if(t.entry==='inside'&&t.askX<=t.e)r.push('askX<=e');
       if(Game.neighborGone||Game.pendingWrong!=null||Game.wrongRides||Game.wrongFloor!=null)r.push('state');} return {r:[...new Set(r)],ins,rush}}""")

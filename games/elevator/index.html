@@ -405,7 +405,7 @@ const Game = defineGame({
     const xs = Array.from({ length: n - e - 1 }, (_, i) => e + 1 + i);   // 中途有人按了的樓層（要在 e 樓之後、Ami 之前；沒有空間就沒有這一關）
     const x = xs.length ? pick(xs) : null;
     this.task = { n, m, e, x, misspoke, entry, askX: pick([n - 1, n + 1].filter(v => v <= 12)), early: xs.length > 0 && Math.random() < 0.5,
-      dirDown: Math.random() < 0.4, stopWrong: Math.random() < 0.4, unit: pick([1, 2, 3]), evt: pick(['CHAT', 'FART', 'DOG']), rot: Math.floor(Math.random() * 3) };
+      dirDown: Math.random() < 0.4, stopWrong: entry === 'rush' && Math.random() < 0.4, unit: pick([1, 2, 3]), evt: pick(['CHAT', 'FART', 'DOG']), rot: Math.floor(Math.random() * 3) };
     this.wrongUnit = null; this.wrongFloor = null; this.neighborGone = false; this.pendingWrong = null; this.wrongRides = 0; this.wrongVia = null; this.lastWrong = null;
     this.cur = 1;
   },
@@ -712,13 +712,13 @@ const Game = defineGame({
       },
       STOP: catchState(Game, {
         key: 'STOP', place: 'shop', html: () => Game.displayHTML(),
-        dialogue: () => [nb('到了，謝謝你！再見！', 'Ya llegamos, ¡gracias! ¡Adiós!', 'Here we are — thanks! Bye!')],
-        ok: '不客氣，慢走！', fix: () => `不好意思，這裡是${t.e - 1}樓，您是不是要到${t.e}樓？`, get rude() { return `靠杯！你不是要去${t.stopWrong ? t.e : t.e - 1}樓？`; },   // 數字要跟現在停的樓層不一樣
+        dialogue: () => t.entry === 'inside' ? [nb('到了，再見！', 'Ya llegamos, ¡adiós!', 'Here we are — bye!')] : [nb('到了，謝謝你！再見！', 'Ya llegamos, ¡gracias! ¡Adiós!', 'Here we are — thanks! Bye!')],
+        get ok() { return t.entry === 'inside' ? '再見，慢走！' : '不客氣，慢走！'; }, fix: () => `不好意思，這裡是${t.e - 1}樓，您是不是要到${t.e}樓？`, get rude() { return `靠杯！你不是要去${t.stopWrong ? t.e : t.e - 1}樓？`; },   // 電梯裡本來就有人：他沒有跟你道謝，互道再見就好；數字要跟現在停的樓層不一樣
         wrong: () => t.stopWrong,
         whyWrong: () => M(`這裡是${t.e - 1}樓，鄰居要到${t.e}樓。他看錯了，要客氣地提醒他。`, `Aquí es el piso ${t.e - 1}; el vecino va al ${t.e}. Se confundió: avísale con cortesía.`, `This is floor ${t.e - 1}; the neighbor is going to ${t.e}. He misread — remind him politely.`),
-        whyRight: () => M(`這裡就是${t.e}樓，鄰居沒有看錯，不用提醒他。`, `Aquí es justo el piso ${t.e}; el vecino no se equivocó, no hace falta avisarle.`, `This is exactly floor ${t.e}; the neighbor wasn't wrong, no need to remind him.`),
+        whyRight: () => t.entry === 'inside' ? M('鄰居沒有說過他要去幾樓，你不知道他有沒有看錯，不用提醒他，互道再見就好。', 'El vecino no dijo a qué piso va, así que no sabes si se equivocó: no hace falta avisarle, solo despídanse.', "The neighbor never said which floor he's going to, so you can't know if he misread it — just say goodbye.") : M(`這裡就是${t.e}樓，鄰居沒有看錯，不用提醒他。`, `Aquí es justo el piso ${t.e}; el vecino no se equivocó, no hace falta avisarle.`, `This is exactly floor ${t.e}; the neighbor wasn't wrong, no need to remind him.`),
         goodWrong: ['你很細心！鄰居出去以前，先看一下樓層。', '¡Qué atento! Antes de que el vecino salga, mira el piso.', 'Well spotted! Check the floor before the neighbor gets out.'],
-        goodOk: ['你學會了！「慢走」是跟離開的人說的客氣話。', '¡Lo aprendiste! «慢走» es una frase cortés para quien se va.', 'You learned it! "慢走" is a polite thing to say to someone leaving.'],
+        get goodOk() { return t.entry === 'inside' ? ['你學會了！鄰居要下車，說「再見」、「慢走」就很客氣。', '¡Lo aprendiste! Cuando el vecino se baja, «再見» y «慢走» son corteses.', 'You learned it! When the neighbor gets off, "再見" and "慢走" are polite.'] : ['你學會了！「慢走」是跟離開的人說的客氣話。', '¡Lo aprendiste! «慢走» es una frase cortés para quien se va.', 'You learned it! "慢走" is a polite thing to say to someone leaving.']; },
         apology: () => [nb('啊，不好意思，我看錯了！謝謝你提醒我。', '¡Ay, disculpe, leí mal! Gracias por avisarme.', 'Oh, sorry, I misread it! Thanks for telling me.')],
         go: wrong => {
           if (!wrong) { afterExit(); return; }
