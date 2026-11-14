@@ -818,8 +818,18 @@ const Vocab = {
     document.getElementById('vocab').classList.toggle('open', this.open);
     document.getElementById('vocab-tab').setAttribute('aria-expanded', this.open);
   },
-  render(state) {
-    const list = VOCAB[state] || [];
+  /* 過場頁：上一關的字典 ＋ 這頁旁白／評語裡出現、別關字典有收的詞（自動比對，遊戲不用另外寫）
+     只比對 2 個字以上的詞；是別的詞的一部分的不重複列（老闆 ⊂ 老闆娘）。*/
+  transExtra(box, base) {
+    const c = box.cloneNode(true); c.querySelectorAll('rt,rp').forEach(e => e.remove());
+    const text = c.textContent, have = new Set(base.map(w => w[0])), found = new Map();
+    VocabQuiz.states().forEach(s => { try { (VOCAB[s] || []).forEach(w => { if (Array.from(w[0]).length >= 2 && !have.has(w[0]) && text.includes(w[0]) && !found.has(w[0])) found.set(w[0], w); }); } catch (e) {} });
+    const zhs = [...found.keys(), ...have];
+    return [...found.values()].filter(w => !zhs.some(o => o !== w[0] && o.includes(w[0])));
+  },
+  render(state, extra) {
+    if (state === '_TRANS' && Game._transList) extra = Game._transList;   // 換語言重畫時，過場頁還是同一份字典
+    const list = state === '_TRANS' ? (extra || []) : [...(VOCAB[state] || []), ...(extra || [])];
     document.getElementById('vocab-count').textContent = list.length;
     document.getElementById('vocab-tab').hidden = !list.length;
     document.getElementById('side-tabs').hidden = false;
@@ -1390,6 +1400,10 @@ const GameCore = {
       btn.onclick = () => { const x = this._spk[+btn.dataset.spk]; Speech.speak(x.text, btn, x.who); };
     });
 
+    if (this._transMode) {   // 過場頁的小字典：補上這頁旁白裡出現的詞
+      const base = VOCAB[this.state] || [], extra = Vocab.transExtra(box, base);
+      this._transList = [...base, ...extra]; Vocab.render(this.state, extra);
+    } else this._transList = null;
     if (cfg.mount && !this._transMode) cfg.mount(box);
     const area = document.getElementById('options-area');
     area.className = '';

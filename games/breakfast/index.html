@@ -993,6 +993,10 @@ const Game = defineGame({
     html += this._transMode ? this.feedbackHTML() + th : (this.thoughtFirst ? th + main : main + th) + this.feedbackHTML();
     const box = document.getElementById('npc-dialogue');
     box.innerHTML = html;
+    if (this._transMode) {   // 過場頁的小字典：補上這頁旁白裡出現的詞（和 shared/game.js 的 render 一樣）
+      const base = VOCAB[this.state] || [], extra = Vocab.transExtra(box, base);
+      this._transList = [...base, ...extra]; Vocab.render(this.state, extra);
+    } else this._transList = null;
     box.querySelectorAll('[data-tr]').forEach(btn => {
       btn.onclick = () => Tr.open(this._tr[+btn.dataset.tr], btn);
     });
