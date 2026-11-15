@@ -6,7 +6,8 @@
    沒呼叫 end 的那一局，後台就會顯示「沒玩完」。
    寫到 memorma 專案：plays（每局）、visits（每台裝置每天每遊戲一筆）。
    兩者都會多帶一個 tz（玩家裝置的時區，例如 America/Mexico_City），後台用它推測玩家來自哪個國家；抓不到就不帶。
-   （memorma 的 Firestore 規則要允許 tz 欄位，主檔在 game-kit 的 firebase-rules/memorma-24dab.rules.txt）
+   也會多帶一個 ref（從哪裡進來的記號，例如網址 ?ref=share＝朋友分享的連結；沒有就不帶）。
+   （memorma 的 Firestore 規則要允許 tz、ref 欄位，主檔在 game-kit 的 firebase-rules/memorma-24dab.rules.txt）
    任何錯誤都靜默，不影響遊戲。 */
 (function () {
   var GAME = 'tw';          // ← 每個遊戲改成自己的代號（英文小寫、底線）
@@ -20,6 +21,19 @@
     try { return String(Intl.DateTimeFormat().resolvedOptions().timeZone || '').slice(0, 64); } catch (e) { return ''; }
   }
   var TZ = tzName();
+
+  /* ref：這個訪客是從哪裡進來的記號（例如 ?ref=share＝朋友分享的連結）。
+     只收英數字、底線、連字號，最長 16 字，統一小寫；其他一律忽略（規則也限制 1～16 字串）。
+     網址有 ?ref= 就記下並暫存在這個分頁（sessionStorage，同分頁的 iframe 讀得到、分頁關掉就消失）；
+     沒有就讀暫存。所以「首頁收到記號、遊戲頁（iframe）才寫紀錄」也記得到。 */
+  function cleanRef(x) { x = String(x == null ? '' : x).trim().toLowerCase(); return /^[a-z0-9_-]{1,16}$/.test(x) ? x : ''; }
+  function refName() {
+    var r = '';
+    try { r = cleanRef(new URLSearchParams(location.search).get('ref')); } catch (e) {}
+    try { if (r) sessionStorage.setItem('hg.ref', r); else r = cleanRef(sessionStorage.getItem('hg.ref')); } catch (e) {}
+    return r;
+  }
+  var REF = refName();
 
   function gid() { try { return (HG.gameFn ? HG.gameFn() : GAME) || GAME; } catch (e) { return GAME; } } // taiwan-life 這類共用引擎的遊戲可改寫 HGPlays.gameFn
   function day() { // 以台灣時間（UTC+8）算「哪一天」，方便老師對帳
@@ -61,6 +75,7 @@
         var id = d + '_' + g + '_' + L.uid;
         var v = { game: g, day: d, uid: L.uid, at: L.F.serverTimestamp() };
         if (TZ) v.tz = TZ;
+        if (REF) v.ref = REF;
         return L.F.setDoc(L.F.doc(L.db, 'visits', id), v)
           .then(function () { ls(key, d); });
       }).catch(function () {});
@@ -73,6 +88,7 @@
         var data = { game: gid(), level: mine.level, uid: L.uid, name: getName(name), day: day(),
                      startedAt: L.F.serverTimestamp(), done: false };
         if (TZ) data.tz = TZ;
+        if (REF) data.ref = REF;
         return L.F.addDoc(L.F.collection(L.db, 'plays'), data).then(function (ref) {
           mine.id = ref.id; if (mine.pendingEnd) HG._finish(mine, mine.pendingEnd);
         });

@@ -175,6 +175,16 @@ html{color-scheme:light}
 </div>
 
 <!-- 玩家代碼、Firebase（進度上傳）：shared/ 共用檔 -->
+<script>
+/* 分享連結的記號：網址有 ?ref=（例如 share）就暫存在這個分頁，地圖裡開的遊戲（iframe）寫遊玩紀錄時會帶上它。
+   規則同 game-kit parts/plays.js：只收英數字、底線、連字號，最長 16 字。分頁關掉就消失。 */
+(function () {
+  try {
+    var r = String(new URLSearchParams(location.search).get('ref') || '').trim().toLowerCase();
+    if (/^[a-z0-9_-]{1,16}$/.test(r)) sessionStorage.setItem('hg.ref', r);
+  } catch (e) {}
+})();
+</script>
 <script src="shared/player.js"></script>
 <script src="shared/festival.js"></script>
 <script type="module">

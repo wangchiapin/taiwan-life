@@ -196,3 +196,10 @@
 - 不要用 `.btn-restart` 當分享鈕的 class（smoke.py 和 `showLeaderboard` 靠它找主按鈕）。
 - 測試：`python3 tools/share_test.py [遊戲…]`（不給就測 37 個，406 項）；smoke perfect／mixed／embed／trans 抽三個遊戲都過。
 - 沒動 Firebase 規則和 Firestore 資料；「從分享進來」統計（game-kit 檢查清單 16 的待做 B）等 Ben 說要做才做。
+
+## 2026-11-16 「從分享進來」記號 ref（尚未推上 GitHub，等 Ben 說「推」；要等 Ben 先把新規則貼進 Firebase）
+- 遊戲的遊玩紀錄（`shared/game.js` 裡的 HGPlays，寫到 memorma-24dab 的 visits／plays）多帶 `ref`：網址有 `?ref=`（只收英數字、底線、連字號，最長 16 字，轉小寫）就記下並暫存在分頁（sessionStorage `hg.ref`）；沒有就讀暫存。
+- 因為遊戲在地圖的 iframe 裡、訪客紀錄由遊戲頁寫，所以地圖首頁 `index.html` 一開始就把 `?ref=` 存進暫存，遊戲頁再讀。
+- ⚠ 順序：memorma-24dab 的新規則（game-kit `firebase-rules/memorma-24dab.rules.txt`，2026-11-16 05:26）要**先**貼進 Firebase 才能推這個版本；舊規則會擋掉帶 ref 的紀錄。
+- 測試：`python3 tools/ref_test.py`（44 項；規則檔和兩份紀錄程式的一致性也檢查）。
+- 沒動 tiendadebebidas-d75ac 的規則和資料。
