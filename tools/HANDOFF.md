@@ -188,3 +188,11 @@
 - 推上去之後 Ben 要做：把 `tools/tiendadebebidas-d75ac.rules.txt` 貼到 Firebase console 發布；管理員頁「設定檢查」建 3 個新排行榜複合索引（score 降冪＋elapsed 升冪）；「地圖開關」打開三個遊戲。
 - 圖片：一開始 Ben 說先不要列；10/27 晚上他改口要做圖，提示詞已寫在 `docs/image-prompts-noodle-conbini-yansuji.md`（23 張），進度看 `docs/image-todo.md`。遊戲已推上去（31009d0），三個都還是維修中。
 
+
+## 2026-11-16 分享成績按鈕（尚未推上 GitHub，等 Ben 說「推」）
+- 排行榜畫面（本系列最後一頁）在「再玩一次／回到地圖」正上方加「分享成績」鈕，0 分不顯示；37 個遊戲一次到位（程式只在 `shared/game.js` 的 `addShareButton`，樣式 `.btn-share` 在 `shared/game.css`）。
+- 一句話含暱稱（沒填就省略）、分數、遊戲名（標題「中文 · 西文」的中文）和「台灣生存日記」；語言跟著翻譯設定（西／英／中文繁簡）。連結固定是首頁 `https://wangchiapin.github.io/taiwan-life/?ref=share`（單頁遊戲還沒有分享縮圖，首頁有）。
+- 手機用系統分享選單；不支援或出錯就複製「一句話＋連結」；玩家自己關掉選單什麼都不做。地圖 `index.html` 的 iframe 加了 `allow="web-share"`。
+- 不要用 `.btn-restart` 當分享鈕的 class（smoke.py 和 `showLeaderboard` 靠它找主按鈕）。
+- 測試：`python3 tools/share_test.py [遊戲…]`（不給就測 37 個，406 項）；smoke perfect／mixed／embed／trans 抽三個遊戲都過。
+- 沒動 Firebase 規則和 Firestore 資料；「從分享進來」統計（game-kit 檢查清單 16 的待做 B）等 Ben 說要做才做。

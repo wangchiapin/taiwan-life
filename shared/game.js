@@ -1170,6 +1170,78 @@ function uploadResult() {
 }
 
 /* ══════════════════════════════════════
+   分享成績（HGShare 來自 game-kit/parts/share.js；統一規則寫在那個檔案最上面）
+   按鈕在排行榜畫面（本系列最後一頁），放在「再玩一次／回到地圖」的正上方；0 分不顯示。
+   連結固定是首頁加 ?ref=share（遊戲單頁還沒有分享預覽縮圖；首頁有，而且朋友可以玩整個系列）。
+══════════════════════════════════════ */
+/* SHARE-BEGIN（內容同 game-kit/parts/share.js，改那邊要回頭改這裡） */
+const HGShare = (() => {
+  async function copyText(s) {
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(s); return true; } } catch (e) {}
+    try {
+      const ta = document.createElement('textarea'); ta.value = s; ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+      document.body.appendChild(ta); ta.select();
+      const r = document.execCommand('copy'); ta.remove(); return !!r;
+    } catch (e) { return false; }
+  }
+  async function send({ title, text, url }) {
+    if (navigator.share) {
+      try { await navigator.share({ title, text, url }); return 'shared'; }
+      catch (e) { if (e && e.name === 'AbortError') return 'aborted'; }   // 其他錯誤改走複製
+    }
+    return (await copyText(text + '\n' + url)) ? 'copied' : 'failed';
+  }
+  return { copyText, send };
+})();
+/* SHARE-END */
+const SHARE_URL = 'https://wangchiapin.github.io/taiwan-life/?ref=share';
+const SHARE_TITLE = '台灣生存日記 · Sobrevive en Taiwán';
+const SHARE_LABEL = {
+  share:  ['分享成績', 'Compartir resultado', 'Share my score'],
+  copied: ['已複製，可以貼給朋友', 'Copiado, ¡pégalo a un amigo!', 'Copied, paste it to a friend!'],
+  failed: ['複製失敗', 'No se pudo copiar', 'Could not copy']
+};
+function shareGameName() { return Z(document.title.split(' · ')[0].trim()); }   // 標題格式「中文名 · 西文名」
+function shareMessage() {
+  const nick = String(Game.playerName || '').trim(), sc = Game.score, g = shareGameName();
+  if (Settings.lang === 'es') return '¡' + (nick ? 'Soy ' + nick + ' y saqué' : 'Saqué') + ' ' + sc + ' puntos en ' + g + ' (Sobrevive en Taiwán)! ¿Puedes superarme?';
+  if (Settings.lang === 'en') return (nick ? 'I’m ' + nick + ' and I scored' : 'I scored') + ' ' + sc + ' in ' + g + ' (Survive in Taiwan)! Can you beat me?';
+  return Z((nick ? '我是' + nick + '，在' : '我在') + '台灣生存日記的' + document.title.split(' · ')[0].trim() + '拿到 ' + sc + ' 分！你能超過我嗎？');
+}
+function setShareLabel(btn, key) {
+  const [zh, es, en] = SHARE_LABEL[key];
+  btn.dataset.zh = zh; btn.dataset.es = es; btn.dataset.en = en;
+  btn.textContent = ONLYZH() ? Z(zh) : Z(zh) + ' ' + (Settings.lang === 'en' ? en : es);
+}
+let _shareBusy = false, _shareTimer = 0;
+async function doShare() {
+  if (_shareBusy) return; _shareBusy = true;
+  const btn = document.getElementById('shareBtn');
+  try {
+    const r = await HGShare.send({ title: SHARE_TITLE, text: shareMessage(), url: SHARE_URL });
+    track('share_score', { game: GAME.track, result: r, embed: EMBED ? 1 : 0 });
+    if (r === 'copied' || r === 'failed') {
+      setShareLabel(btn, r);
+      clearTimeout(_shareTimer); _shareTimer = setTimeout(() => setShareLabel(btn, 'share'), 2200);
+    }
+  } finally { _shareBusy = false; }
+}
+function addShareButton() {
+  const screen = document.getElementById('leaderboard-screen');
+  let btn = document.getElementById('shareBtn');
+  if (Game.score <= 0) { if (btn) btn.remove(); return; }   // 0 分不用分享
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'shareBtn'; btn.className = 'btn-share'; btn.type = 'button';
+    btn.addEventListener('click', doShare);
+    const main = screen.querySelector('.btn-restart');   // 再玩一次／回到地圖：分享鈕放在它的正上方
+    screen.insertBefore(btn, main);
+  }
+  setShareLabel(btn, 'share');
+}
+
+/* ══════════════════════════════════════
    排行榜
 ══════════════════════════════════════ */
 async function showLeaderboard() {
@@ -1184,6 +1256,7 @@ async function showLeaderboard() {
   document.getElementById('side-tabs').hidden = true;
   document.getElementById('game-window').classList.remove('active');
   document.getElementById('leaderboard-screen').classList.add('active');
+  addShareButton();
   const myName = Game.playerName, myScore = Game.score, myElapsed = Game.elapsedTime;
 
   if (window._FB) await saveLeaderboardScore();
