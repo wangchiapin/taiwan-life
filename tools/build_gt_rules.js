@@ -60,7 +60,12 @@ for (const u of usedCls) {
 }
 classes.NEUTRAL = neutral.join(''); classes.T4BU_MINUS = bu_minus; classes.T4BU_PLUS = bu_plus;
 
-const data = { chars, rules, classes };
+/* 「沒有規則時，直接用 GoodTeacher 的預設讀音」的字：pinyin-pro 在這些字上會讀錯台灣讀音（停車 jū、訊息 xī、時間 jiàn…）。
+   只收「GoodTeacher 預設讀音就是教育部讀音」、而且人工確認過的字；要加字，先確認 GoodTeacher 的預設沒錯再加。 */
+const DEF_CHARS = '車息間期熄綜載仔只危突椰唉於微們麼還鑰髮差乾績識惜擊播巍了寧究暫儲檔艘飩獺';
+const def = {};
+for (const c of DEF_CHARS) { if (chr[c]) def[c] = (lab[chr[c][0]] || chr[c][0]).normalize('NFC'); }
+const data = { chars, rules, classes, def };
 const json = JSON.stringify(data);
 const block = '/* GT-RULES-BEGIN（由 tools/build_gt_rules.js 產生，請不要手改；GoodTeacher 更新後重跑） */\n' +
   'const GT_DATA = ' + json + ';\n/* GT-RULES-END */';
