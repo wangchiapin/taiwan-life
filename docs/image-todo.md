@@ -25,9 +25,9 @@
 
 ## 麵店 noodle、超商 conbini、鹽酥雞 yansuji（2026-10-27）
 提示詞全部寫在 `docs/image-prompts-noodle-conbini-yansuji.md`（共 23 張，含順序、底圖、檢查重點）。做完一張勾一張，一次做一張，Ben 確認再下一張。
-- [ ] noodle：shop、side、bowl、pay、start、result、end_good、end_bad
-- [ ] conbini：counter、shelf、draw、pay、start、result、end_good、end_bad
-- [ ] yansuji：stall、bag、pay、start、result、end_good、end_bad
+- [x] （已完成 11/16）noodle：shop、side、bowl、pay、start、result、end_good、end_bad
+- [x] （已完成 11/16）conbini：counter、shelf、draw、pay、start、result、end_good、end_bad
+- [x] （已完成 11/8）yansuji：stall、bag、pay、start、result、end_good、end_bad
 
 ## 關帝廟 guandi（2026-10-29）
 提示詞全部寫在 `docs/image-prompts-guandi.md`（共 16 張，含順序、底圖、檢查重點）。做完一張勾一張，一次做一張，Ben 確認再下一張。
