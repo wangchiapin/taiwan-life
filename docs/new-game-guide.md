@@ -59,7 +59,7 @@
 
 - 場景 ID：資料夾名 = `scene` = 排行榜前綴。排行榜 collection 叫 `<scene>game_scores`，**不能改名**。
 - 三種語言：台詞一律用 `L(中文, 西文, 英文)`。繁體／簡體、西文／英文由玩家設定決定。
-- 拼音用台灣讀音，多音字照 GoodTeacher（共用檔已內建，見第 12 節）。GoodTeacher 沒有規則、又讀錯的詞，才加進該遊戲的 `customPinyin`。統一：「和」念 hàn、「嗯」念 ēn。
+- 拼音用台灣讀音，多音字照 GoodTeacher（共用檔已內建，見第 12 節）。GoodTeacher 沒有規則、又讀錯的詞，才加進該遊戲的 `customPinyin`。統一：「和」念 hàn；「嗯」照 GoodTeacher 念 en（輕聲），不要再手寫 ēn。
 - 分數：100 分起，每個錯誤 −10。`Game.addMistake()` 扣分、`Game.good()` 出綠卡。
 - 結局：錯誤 ≤ 2 次是好結局，否則壞結局（冰淇淋店另有更多條件）。結局後進結果頁，呼叫 `uploadResult()` 上傳成績。
 - **好壞結局看「最後實際拿到的東西」是否符合 Ami 的訂單**，不是看過程中選了什麼。
