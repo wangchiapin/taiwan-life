@@ -726,7 +726,7 @@ const Game = defineGame({
         next: c => {
           if (c !== '自己拿一個平安符，隨喜投一點香油錢。') { Game.addMistake(c.includes('全部') ? M('平安符拿一個就好，不要全部拿走。', 'Basta con un amuleto; no te los lleves todos.', 'Take just one charm — not all of them.') : M('平安符放在旁邊，要自己拿。', 'Los amuletos están al lado; los tomas tú mismo.', 'The charms are set out beside you — take one yourself.')); return; }
           goodFirst('AMULET', '沒錯！平安符自己拿，香油錢隨喜。', '¡Exacto! Tomas el amuleto tú mismo y donas lo que quieras.', 'Right! Take the charm yourself and donate as you wish.');
-          Game.thought = [narr('你拿了一個平安符。告示牌說，平安符要先過爐，再帶回家。你走向大殿的香爐。', 'Tomas un amuleto. El letrero dice que debe pasarse sobre el incensario antes de llevarlo a casa. Vas hacia el incensario del salón.', 'You take a charm. The sign says it must be passed over the burner before you take it home. You walk to the hall burner.')];
+          Game.thought = [narr('你拿了一個平安符。告示牌說，平安符要先過爐，再帶回家。你走回前面的天公爐。', 'Tomas un amuleto. El letrero dice que debe pasarse sobre el incensario antes de llevarlo a casa. Vuelves al incensario del Cielo, al frente.', 'You take a charm. The sign says it must be passed over the burner before you take it home. You walk back to the Heaven burner at the front.')];
           Game.state = 'GUOLU';
         }
       },
