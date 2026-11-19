@@ -62,7 +62,7 @@ classes.NEUTRAL = neutral.join(''); classes.T4BU_MINUS = bu_minus; classes.T4BU_
 
 /* 「沒有規則時，直接用 GoodTeacher 的預設讀音」的字：pinyin-pro 在這些字上會讀錯台灣讀音（停車 jū、訊息 xī、時間 jiàn…）。
    只收「GoodTeacher 預設讀音就是教育部讀音」、而且人工確認過的字；要加字，先確認 GoodTeacher 的預設沒錯再加。 */
-const DEF_CHARS = '車息間期熄綜載仔只危突椰唉於微們麼還鑰髮差乾績識惜擊播巍了寧究暫儲檔艘飩獺嗯欸調夾夹炸切築筑臟麗丽廈厦饨縫缝绩暂识击储档喔遛啦卡谁質质框角綜综企熟當曳跡迹捲模跌夕蹈擁殼勁傍括耶鋪獲幹帆簿淑妳驟桿叔悄喲蹟鑽樸朴擲掷嗨寂菌隻揣偽難难豁掙挣削曲賜赐咧轉转喪丧崗岗剝剥';
+const DEF_CHARS = '車息間期熄綜載仔只危突椰唉於微們麼還鑰髮差乾績識惜擊播巍了寧究暫儲檔艘飩獺嗯欸調夾夹炸切築筑臟麗丽廈厦饨縫缝绩暂识击储档喔遛啦卡谁質质框角綜综企熟當曳跡迹捲模跌夕蹈擁殼勁傍括耶鋪獲幹帆簿淑妳驟桿叔悄喲蹟鑽樸朴擲掷嗨寂菌隻揣偽難难豁掙挣削曲賜赐咧轉转喪丧崗岗剝剥論蛤抹將穴馴似踏昔眶酵緝蔔垃圾拚咔';
 const def = {};
 for (const c of DEF_CHARS) { if (chr[c]) def[c] = (lab[chr[c][0]] || chr[c][0]).normalize('NFC'); }
 const data = { chars, rules, classes, def };
