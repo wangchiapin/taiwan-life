@@ -47,6 +47,8 @@
     --line: #cfdcd9;
     --muted: #5f7471;
     --bad: #c0392b;
+    --red: var(--teal);        /* 共用紅色成交按鈕用：訂位遊戲用主色綠 */
+    --red-dark: var(--teal-dark);
   }
   body {
     background: var(--mint);
@@ -121,8 +123,6 @@
   @media (hover: hover) {
     .opt:hover rt { color: #bfe3df; }
   }
-  .opt.call { border-color: #b3456b; color: #b3456b; }
-  .opt.call:hover { background: #b3456b; color: #fff; }
   button:focus-visible, input:focus-visible { outline: 3px solid var(--mustard); outline-offset: 2px; }
   /* ── 排行榜 ── */
   .congrats-banner { background: var(--mustard); color: var(--ink); }
@@ -1339,7 +1339,7 @@ const Game = defineGame({
     area.classList.toggle('single', opts.length === 1 || opts.some(o => o.length > 14));
     opts.forEach(opt => {
       const btn = document.createElement('button');
-      btn.className = 'opt' + (opt.startsWith('等一下喔') ? ' call' : '');
+      btn.className = 'opt';
       btn.innerHTML = this.ruby(opt);
       btn.onclick = () => this.handleChoice(opt);
       area.appendChild(btn);
