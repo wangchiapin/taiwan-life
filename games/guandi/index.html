@@ -369,7 +369,7 @@ const Game = defineGame({
   },
 
   IMAGES: {
-    START: ['images/start.jpg', '📱'], GATE: ['images/gate.jpg', '⛩️'], FIRE: ['images/fire.jpg', '🔥'], HEAVEN: ['images/heaven.jpg', '🙏'],
+    START: ['images/start.jpg', '🏯'], GATE: ['images/gate.jpg', '⛩️'], FIRE: ['images/fire.jpg', '🔥'], HEAVEN: ['images/heaven.jpg', '🙏'],
     MAIN: ['images/main.jpg', '🏯'], THROW: ['images/throw.jpg', '🌙'], DRAW: ['images/draw.jpg', '🎋'], SLIP_NUM: ['images/cabinet.jpg', '🗄️'],
     READ: ['images/read.jpg', '📜'], REGISTER: ['images/desk.jpg', '🏮'], PAY: ['images/desk.jpg', '💵'], PAY_FIX: ['images/desk.jpg', '💵'], CHANGE: ['images/desk.jpg', '💵'],
     AMULET: ['images/amulet.jpg', '🧧'], GUOLU: ['images/guolu.jpg', '🔄'], EXIT: ['images/exit.jpg', '⛩️'],
@@ -427,7 +427,7 @@ const Game = defineGame({
     const ORDER = ['START', 'GATE', 'FIRE', 'HEAVEN', 'MAIN', 'THROW', 'DRAW', 'SLIP_NUM', 'READ', 'REGISTER', 'PAY', 'PAY_FIX', 'CHANGE', 'AMULET', 'GUOLU', 'EXIT', 'END', 'RESULT'];
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
     const t = this.task, sg = this.signs();
-    const out = [{ title: 'Ami 的 LINE 訊息', lines: this.amiLines() }];
+    const out = [{ title: 'Ami 說的話', lines: this.amiLines() }];
     const signs = ['GATE', 'FIRE', 'HEAVEN', 'MAIN', 'THROW', 'DRAW', 'SLIP_NUM', 'REGISTER', 'AMULET', 'GUOLU', 'EXIT'].filter(s => at(s)).map(s => sg[s]);
     if (signs.length) out.push({ title: '廟裡的告示牌', lines: signs });
     if (at('PAY_FIX')) out.push({ title: '廟公說的話', lines: [L(`廟公：一共是${zhNum(t.said)}元。`, `Son ${esM(t.said)} en total.`, `${enM(t.said)} in total.`)] });
@@ -504,12 +504,12 @@ const Game = defineGame({
     const board = () => Game.boardHTML();
 
     return {
-      /* ═══ Ami 的 LINE ═══ */
+      /* ═══ 廟門口跟 Ami 碰面（Ami 當面說話） ═══ */
       START: {
-        place: 'phone',
+        place: 'temple',
         html: () => Game.listHTML(),
         dialogue: () => [
-          narr('你站在關帝廟門口。手機響了一聲，是Ami傳來的LINE。', 'Estás frente al templo de Guan Di. Tu celular suena: es un LINE de Ami.', 'You stand in front of the Guan Di temple. Your phone buzzes — a LINE from Ami.'),
+          narr('你和Ami約在關帝廟門口見面。Ami先到了，她轉過身來看著你。', 'Quedaste con Ami en la entrada del templo de Guan Di. Ella ya llegó y se da la vuelta para mirarte.', 'You arranged to meet Ami at the entrance of the Guan Di temple. She is already there and turns around to look at you.'),
           ...Game.amiLines(),
           L('我：好，我們進去吧。', 'Bien, entremos.', "OK, let's go in.")
         ],
