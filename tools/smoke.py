@@ -88,7 +88,7 @@ def play(page,g,mode,log):
             try: ans=page.evaluate(orc)
             except Exception: ans=None
         idx=None
-        if ans:
+        if ans and not isinstance(ans,list):
             for i,o in enumerate(opts):
                 if o.strip()==ans: idx=i; break
             if idx is None:
@@ -97,7 +97,14 @@ def play(page,g,mode,log):
         if idx is None:
             cand=[i for i,o in enumerate(opts) if (st,o) not in bad] or list(range(len(opts)))
             idx=random.choice(cand)
+        if page.locator('#options-area .opt.multi').count():   # 多選題：oracle 回傳陣列（亂玩時隨機勾），勾完按確定
+            picks=ans if isinstance(ans,list) else random.sample(opts[:-1],random.randint(1,len(opts)-1))
+            for i,o in enumerate(opts[:-1]):
+                on=page.locator('#options-area .opt').nth(i).get_attribute('aria-pressed')=='true'
+                if (o.strip() in picks)!=on: click_i(page,i)
+            click_i(page,len(opts)-1); continue
         m0=page.evaluate('Game.mistakes'); click_c(page,c,idx)
+        page.wait_for_function('()=>!Game.busy',timeout=10000)   # 播音效中（關帝廟搖籤筒）：等播完
         if page.evaluate('Game.state')==st and page.evaluate('Game.mistakes')>m0: bad.add((st,opts[idx]))
     log.append(seen); return 'timeout',trans
 def fbcheck(page,g,embed):
