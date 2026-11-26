@@ -86,6 +86,10 @@
   .slip .poem { font-size: 20px; }
   .form-row { display: flex; gap: 10px; padding: 3px 0; font-size: 18px; }
   .form-row b { min-width: 4.2em; color: var(--muted); font-weight: 500; }
+#options-area.cards { display: flex; flex-direction: column; gap: 10px; }
+#options-area .opt.card { display: flex; align-items: center; gap: 12px; padding: 6px; text-align: left; }
+#options-area .opt.card img { width: 96px; height: 96px; flex: 0 0 96px; object-fit: cover; border-radius: 8px; image-rendering: pixelated; }
+#options-area .opt.card span { flex: 1; }
 </style></head>
 <body>
 
@@ -291,7 +295,7 @@ const VOCAB = {
   START: [['關帝廟', 'templo de Guan Di', 'Guan Di temple'], ['關公', 'Guan Gong (Guan Yu)', 'Guan Gong (Guan Yu)'], ['保佑', 'proteger, bendecir', 'bless, protect'], ['不順利', 'que no va bien', 'not going smoothly']],
   GATE: [['龍邊', 'lado del dragón (derecha)', 'dragon side (right)'], ['虎邊', 'lado del tigre (izquierda)', 'tiger side (left)'], ['龍進虎出', 'entrar por el dragón, salir por el tigre', 'enter by the dragon, exit by the tiger'], ['告示牌', 'letrero', 'sign']],
   FIRE: [['點火處', 'lugar para encender el incienso', 'place to light incense'], ['一炷香', 'una varilla de incienso', 'a stick of incense'], ['搧', 'abanicar', 'fan'], ['晃', 'agitar suavemente', 'shake gently'], ['吹', 'soplar', 'blow']],
-  HEAVEN: [['天公爐', 'incensario del Cielo', 'Heaven’s incense burner'], ['天公', 'el Emperador del Cielo', 'the Heavenly Emperor'], ['先……再……', 'primero… después…', 'first… then…'], ['拜', 'rendir culto, rezar', 'worship, pray']],
+  HEAVEN: [['天公爐', 'incensario del Cielo', 'Heaven’s incense burner'], ['天公', 'el Emperador del Cielo', 'the Heavenly Emperor'], ['先……再……', 'primero… después…', 'first… then…'], ['拜', 'rendir culto, rezar', 'worship, pray'], ['大殿', 'salón principal', 'main hall'], ['側殿', 'salón lateral', 'side hall']],
   MAIN: [['關聖帝君', 'Guan Shengdijun (Guan Gong)', 'Lord Guan (Guan Gong)'], ['姓名', 'nombre', 'name'], ['住在', 'vivir en', 'live at'], ['保佑', 'proteger, bendecir', 'bless, protect'], ['平安', 'paz y seguridad', 'safe and sound']],
   THROW: [['擲筊', 'lanzar los jiaobei', 'throw the moon blocks'], ['筊杯', 'jiaobei (bloques de madera)', 'moon blocks'], ['聖筊', 'sí (una plana, una redonda)', 'yes (one flat, one round)'], ['笑筊', 'sonrisa (dos planas)', 'smile (both flat)'], ['陰筊', 'no (dos redondas)', 'no (both round)'], ['連續', 'seguidos', 'in a row']],
   DRAW: [['籤筒', 'cilindro con varillas', 'fortune stick holder'], ['抽籤', 'sacar una varilla', 'draw a fortune stick'], ['求籤', 'pedir una suerte', 'ask for a fortune']],
@@ -318,7 +322,7 @@ const STAGE = {
 
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
-  GATE: '走到廟門口', FIRE: '去點火處拿香', HEAVEN: '走到天公爐', MAIN: '走進主殿', THROW: '拿起筊杯', DRAW: '走到籤筒前', SLIP_NUM: '走到籤櫃',
+  GATE: '走到廟門口', FIRE: '去點香處拿香點香', HEAVEN: '走到天公爐', MAIN: '走進主殿', THROW: '拿起筊杯', DRAW: '走到籤筒前', SLIP_NUM: '走到籤櫃',
   READ: '看籤詩', REGISTER: '走到登記處', PAY: '付錢', PAY_FIX: '聽廟公重算', CHANGE: '等找錢', AMULET: '看旁邊的桌子', GUOLU: '走到香爐前', EXIT: '準備離開', END: '走出廟門'
 };
 
@@ -357,10 +361,11 @@ const Game = defineGame({
   att: {},                       // 每一關選了幾次（第一次就對才給綠卡）
   cash: null,
   ti: 0, streak: 0, throwWrong: false,   // 擲筊：第幾次、連續幾個聖筊、這一次有沒有選錯過
-  EXTRA_IMAGES: ['images/gate_in.jpg'],   // imageFor() 才會用到的圖，也先載好
-  /* 過場頁預設用上一關的圖；進廟門的過場旁白在說「前面是香案、點火處」，所以改用廟裡點火處、Ami 在旁邊的圖 */
+  EXTRA_IMAGES: ['images/gate_in.jpg', 'images/fire_out.jpg', 'images/side.jpg'],   // imageFor() 才會用到的圖，也先載好
+  /* 過場頁預設用上一關的圖；旁白已經到下一個畫面時，改用符合旁白的圖：進廟門（點火處、Ami 在旁邊）、熄火後（香頭只剩灰） */
   imageFor() {
     if (this._transMode && this._trans && this._trans.from === 'GATE' && this._trans.to === 'FIRE') return ['images/gate_in.jpg', '🕯️'];
+    if (this._transMode && this._trans && this._trans.from === 'FIRE' && this._trans.to === 'HEAVEN') return ['images/fire_out.jpg', '🔥'];   // 火熄了：香頭只剩灰、還在冒煙
   },
   onStart() { this.updateCash(); },
   updateCash() { document.getElementById('cash-badge').textContent = ''; },
@@ -514,7 +519,7 @@ const Game = defineGame({
         place: 'temple',
         html: () => Game.listHTML(),
         dialogue: () => [
-          narr('你和Ami約在關帝廟門口見面。Ami先到了，她轉過身來看著你。', 'Quedaste con Ami en la entrada del templo de Guan Di. Ella ya llegó y se da la vuelta para mirarte.', 'You arranged to meet Ami at the entrance of the Guan Di temple. She is already there and turns around to look at you.'),
+          narr('你和Ami約在關帝廟門口見面。', 'Quedaste con Ami en la entrada del templo de Guan Di.', 'You arranged to meet Ami at the entrance of the Guan Di temple.'),
           ...Game.amiLines(),
           L('我：好，我們進去吧。', 'Bien, entremos.', "OK, let's go in.")
         ],
@@ -526,13 +531,13 @@ const Game = defineGame({
       GATE: {
         place: 'temple',
         dialogue: () => [narr('廟門有三個門：左邊、右邊，還有中間最大的門。門口有一塊告示牌。', 'La entrada tiene tres puertas: izquierda, derecha y la grande del centro. Hay un letrero en la entrada.', 'The entrance has three doors: left, right, and the big one in the middle. There is a sign at the door.'),
-          ami('我在旁邊，你慢慢來。', 'Estoy a tu lado; tómate tu tiempo.', "I'm right here — take your time.")],
+          ami('你知道要從哪個門進去嗎？', '¿Sabes por qué puerta hay que entrar?', 'Do you know which door we should go in through?')],
         options: () => rotOf(t, ['從右邊的門（龍邊）進去。', '從左邊的門（虎邊）進去。', '從中間的門進去。']),
         next: c => {
           if (c === '從左邊的門（虎邊）進去。') { Game.addMistake(M('虎邊是出口，要從龍邊進去。龍進虎出。', 'El lado del tigre es la salida; se entra por el lado del dragón. Dragón entra, tigre sale.', 'The tiger side is the exit — enter by the dragon side. Dragon in, tiger out.')); return; }
           if (c !== '從右邊的門（龍邊）進去。') { Game.addMistake(M('中間最大的門是給神明走的，我們要從龍邊（右邊）進去。', 'La puerta central es para las deidades; nosotros entramos por el lado del dragón (derecha).', 'The big middle door is for the deities — we enter by the dragon side (right).')); return; }
           goodFirst('GATE', '沒錯！龍進虎出，從龍邊進去。', '¡Exacto! Dragón entra, tigre sale: se entra por el lado del dragón.', 'Right! Dragon in, tiger out — enter by the dragon side.');
-          Game.thought = [narr('你和Ami從右邊的門走進去。前面是香案，旁邊有點火處。', 'Tú y Ami entran por la puerta de la derecha. Al frente hay una mesa de incienso y, al lado, un lugar para encender.', 'You and Ami go in through the right-hand door. Ahead is the incense table, with a lighting spot beside it.'),
+          Game.thought = [narr('你和Ami從右邊的門走進去，然後到了點香的地方。', 'Tú y Ami entran por la puerta de la derecha y llegan al lugar donde se enciende el incienso.', 'You and Ami go in through the right-hand door, and arrive at the place where you light the incense.'),
             ami('我們先去點香吧！', '¡Primero vamos a encender el incienso!', "Let's go light the incense first!")];
           Game.state = 'FIRE';
         }
@@ -542,7 +547,7 @@ const Game = defineGame({
       FIRE: {
         place: 'temple',
         dialogue: () => [narr('你拿了三炷香，在點火處把香點著了。香頭有火。', 'Tomas tres varillas de incienso y las enciendes en el lugar de encendido. Las puntas tienen llama.', 'You take three sticks of incense and light them at the lighting spot. The tips are on fire.'),
-          ami('我也點好了。', 'Yo también ya lo encendí.', "I've lit mine too.")],
+          ami('你的香的火有一點旺喔...該怎麼辦呢？', '¡La llama de tu incienso está un poco fuerte...! ¿Qué hacemos?', 'The flame on your incense is a bit strong... what should we do?')],
         options: () => rotOf(t, [t.fire === 'shake' ? '用手輕輕晃動，把火晃熄。' : '用另一隻手把火搧熄。', '用嘴巴把火吹熄。', '把香頭放在地上踩熄。']),
         next: c => {
           const ok = t.fire === 'shake' ? '用手輕輕晃動，把火晃熄。' : '用另一隻手把火搧熄。';
@@ -561,11 +566,12 @@ const Game = defineGame({
       /* ═══ 先拜天公 ═══ */
       HEAVEN: {
         place: 'temple',
-        dialogue: () => [narr('前面有一個天公爐，裡面是大殿，關公在最裡面。', 'Al frente está el incensario del Cielo; dentro está el salón principal, con Guan Gong al fondo.', 'In front is the Heaven burner; inside is the main hall, with Guan Gong at the back.'),
-          ami('我在這裡等你。', 'Te espero aquí.', "I'll wait right here.")],
-        options: () => rotOf(t, ['先在天公爐拜天公，再進去拜關公。', '直接進去拜關公，不拜天公。', '先拜旁邊的小神明，最後才拜天公。']),
+        dialogue: () => [narr('外面有天公爐，裡面是大殿，旁邊還有側殿。', 'Afuera está el incensario del Cielo, adentro el salón principal, y a un lado hay un salón lateral.', 'Outside is the Heaven burner, inside is the main hall, and beside it there is a side hall.'),
+          ami('我們按照順序來拜拜吧！你知道要先拜什麼嗎？', '¡Vamos a rezar en orden! ¿Sabes a quién hay que rezar primero?', "Let's pay respects in order! Do you know who we should pray to first?")],
+        options: () => rotOf(t, ['天公爐拜天公', '大殿拜關聖帝君', '側殿拜其他神明']),
+        optionImage: o => ({ '天公爐拜天公': 'images/heaven.jpg', '大殿拜關聖帝君': 'images/main.jpg', '側殿拜其他神明': 'images/side.jpg' })[o],
         next: c => {
-          if (c !== '先在天公爐拜天公，再進去拜關公。') { Game.addMistake(c === '直接進去拜關公，不拜天公。' ? M('要先拜天公，再拜主神。', 'Primero se reza al Cielo y después a la deidad principal.', 'Pay respects to Heaven first, then the main deity.') : M('天公是最先拜的，小神明要放到最後。', 'Al Cielo se le reza primero; las deidades menores van al final.', 'Heaven comes first; the minor deities come last.')); return; }
+          if (c !== '天公爐拜天公') { Game.addMistake(c === '大殿拜關聖帝君' ? M('要先拜天公，再拜主神。', 'Primero se reza al Cielo y después a la deidad principal.', 'Pay respects to Heaven first, then the main deity.') : M('天公是最先拜的，其他神明要放到最後。', 'Al Cielo se le reza primero; las demás deidades van al final.', 'Heaven comes first; the other deities come last.')); return; }
           goodFirst('HEAVEN', '沒錯！先拜天公，再拜關公。', '¡Exacto! Primero el Cielo, después Guan Gong.', 'Right! Heaven first, then Guan Gong.');
           Game.thought = [narr('你雙手拿香，向天公拜了三下，把香插進天公爐，再走進大殿。', 'Con ambas manos haces tres reverencias al Cielo, pones el incienso en el incensario y entras al salón principal.', 'With both hands you bow three times to Heaven, place the incense in the burner, and enter the main hall.')];
           Game.state = 'MAIN';

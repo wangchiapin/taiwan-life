@@ -1502,10 +1502,12 @@ const GameCore = {
     area.innerHTML = '';
     const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
     area.classList.toggle('single', cfg.single ?? (opts.length === 1 || opts.some(o => o.length > 12)));
+    const cardImg = !this._transMode && cfg.optionImage;   // 選項要用圖片卡片時：optionImage(選項) → 圖片路徑
+    if (cardImg) area.classList.add('cards');
     opts.forEach(opt => {
       const btn = document.createElement('button');
-      btn.className = 'opt';
-      btn.innerHTML = this.ruby(opt);
+      btn.className = 'opt' + (cardImg ? ' card' : '');
+      btn.innerHTML = cardImg ? `<img src="${cardImg(opt)}" alt=""><span>${this.ruby(opt)}</span>` : this.ruby(opt);
       btn.onclick = () => this.handleChoice(opt);
       area.appendChild(btn);
     });
