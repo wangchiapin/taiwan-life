@@ -3,7 +3,7 @@ ORACLE = """() => {
   const t = Game.task, s = Game.state, S = t.slip, N = Game.N;
   const m = {
     START: '走進關帝廟',
-    GATE: '走龍邊的門進去（面對廟，在右邊）。',
+    GATE: '從右邊的門（龍邊）進去。',
     FIRE: t.fire === 'shake' ? '用手輕輕晃動，把火晃熄。' : '用另一隻手把火搧熄。',
     HEAVEN: '先在天公爐拜天公，再進去拜關公。',
     MAIN: `關聖帝君，我是${N}，住在附近。最近不太順利，請您保佑我平安順利。`,
@@ -17,7 +17,7 @@ ORACLE = """() => {
     CHANGE: () => t.changeWrong ? `不好意思，好像找錯了，應該找${zhNum(t.change)}元吧？` : '好，謝謝。',
     AMULET: '自己拿一個平安符，隨喜投一點香油錢。',
     GUOLU: '在香爐上方，順時針繞三圈。',
-    EXIT: '走虎邊的門出去（面對廟，在左邊）。',
+    EXIT: '從左邊的門（虎邊）出去。',
     END: '查看結果', RESULT: '查看排行榜'
   };
   const v = m[s]; return typeof v === 'function' ? v() : (v ?? null);

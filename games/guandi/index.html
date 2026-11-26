@@ -357,6 +357,11 @@ const Game = defineGame({
   att: {},                       // 每一關選了幾次（第一次就對才給綠卡）
   cash: null,
   ti: 0, streak: 0, throwWrong: false,   // 擲筊：第幾次、連續幾個聖筊、這一次有沒有選錯過
+  EXTRA_IMAGES: ['images/gate_in.jpg'],   // imageFor() 才會用到的圖，也先載好
+  /* 過場頁預設用上一關的圖；進廟門的過場旁白在說「前面是香案、點火處」，所以改用廟裡點火處、Ami 在旁邊的圖 */
+  imageFor() {
+    if (this._transMode && this._trans && this._trans.from === 'GATE' && this._trans.to === 'FIRE') return ['images/gate_in.jpg', '🕯️'];
+  },
   onStart() { this.updateCash(); },
   updateCash() { document.getElementById('cash-badge').textContent = ''; },
   /* ── 位置列：PLACES[key] = [圖示, 中文, 西文, 英文, class] ── */
@@ -522,12 +527,13 @@ const Game = defineGame({
         place: 'temple',
         dialogue: () => [narr('廟門有三個門：左邊、右邊，還有中間最大的門。門口有一塊告示牌。', 'La entrada tiene tres puertas: izquierda, derecha y la grande del centro. Hay un letrero en la entrada.', 'The entrance has three doors: left, right, and the big one in the middle. There is a sign at the door.'),
           ami('我在旁邊，你慢慢來。', 'Estoy a tu lado; tómate tu tiempo.', "I'm right here — take your time.")],
-        options: () => rotOf(t, ['走龍邊的門進去（面對廟，在右邊）。', '走虎邊的門進去（面對廟，在左邊）。', '走中間最大的門進去。']),
+        options: () => rotOf(t, ['從右邊的門（龍邊）進去。', '從左邊的門（虎邊）進去。', '從中間的門進去。']),
         next: c => {
-          if (c === '走虎邊的門進去（面對廟，在左邊）。') { Game.addMistake(M('虎邊是出口，要從龍邊進去。龍進虎出。', 'El lado del tigre es la salida; se entra por el lado del dragón. Dragón entra, tigre sale.', 'The tiger side is the exit — enter by the dragon side. Dragon in, tiger out.')); return; }
-          if (c !== '走龍邊的門進去（面對廟，在右邊）。') { Game.addMistake(M('中間最大的門是給神明走的，我們要從龍邊（右邊）進去。', 'La puerta central es para las deidades; nosotros entramos por el lado del dragón (derecha).', 'The big middle door is for the deities — we enter by the dragon side (right).')); return; }
+          if (c === '從左邊的門（虎邊）進去。') { Game.addMistake(M('虎邊是出口，要從龍邊進去。龍進虎出。', 'El lado del tigre es la salida; se entra por el lado del dragón. Dragón entra, tigre sale.', 'The tiger side is the exit — enter by the dragon side. Dragon in, tiger out.')); return; }
+          if (c !== '從右邊的門（龍邊）進去。') { Game.addMistake(M('中間最大的門是給神明走的，我們要從龍邊（右邊）進去。', 'La puerta central es para las deidades; nosotros entramos por el lado del dragón (derecha).', 'The big middle door is for the deities — we enter by the dragon side (right).')); return; }
           goodFirst('GATE', '沒錯！龍進虎出，從龍邊進去。', '¡Exacto! Dragón entra, tigre sale: se entra por el lado del dragón.', 'Right! Dragon in, tiger out — enter by the dragon side.');
-          Game.thought = [narr('你和Ami從右邊的門走進去。前面是香案，旁邊有點火處。', 'Tú y Ami entran por la puerta de la derecha. Al frente hay una mesa de incienso y, al lado, un lugar para encender.', 'You and Ami go in through the right-hand door. Ahead is the incense table, with a lighting spot beside it.')];
+          Game.thought = [narr('你和Ami從右邊的門走進去。前面是香案，旁邊有點火處。', 'Tú y Ami entran por la puerta de la derecha. Al frente hay una mesa de incienso y, al lado, un lugar para encender.', 'You and Ami go in through the right-hand door. Ahead is the incense table, with a lighting spot beside it.'),
+            ami('我們先去點香吧！', '¡Primero vamos a encender el incienso!', "Let's go light the incense first!")];
           Game.state = 'FIRE';
         }
       },
@@ -750,9 +756,9 @@ const Game = defineGame({
         place: 'temple',
         dialogue: () => [narr('廟門有三個門。', 'La salida tiene tres puertas.', 'There are three doors.'),
           ami('走吧，我陪你出去。', 'Vamos, salgo contigo.', "Let's go — I'll walk out with you.")],
-        options: () => rotOf(t, ['走虎邊的門出去（面對廟，在左邊）。', '走龍邊的門出去（面對廟，在右邊）。', '走中間最大的門出去。']),
+        options: () => rotOf(t, ['從左邊的門（虎邊）出去。', '從右邊的門（龍邊）出去。', '從中間的門出去。']),
         next: c => {
-          if (c !== '走虎邊的門出去（面對廟，在左邊）。') { Game.addMistake(c.includes('龍邊') ? M('龍邊是入口，要從虎邊出去。龍進虎出。', 'El lado del dragón es la entrada; se sale por el lado del tigre.', 'The dragon side is the entrance — leave by the tiger side.') : M('中間最大的門是給神明走的，我們要從虎邊（左邊）出去。', 'La puerta central es para las deidades; salimos por el lado del tigre (izquierda).', 'The big middle door is for the deities — we leave by the tiger side (left).')); return; }
+          if (c !== '從左邊的門（虎邊）出去。') { Game.addMistake(c.includes('龍邊') ? M('龍邊是入口，要從虎邊出去。龍進虎出。', 'El lado del dragón es la entrada; se sale por el lado del tigre.', 'The dragon side is the entrance — leave by the tiger side.') : M('中間最大的門是給神明走的，我們要從虎邊（左邊）出去。', 'La puerta central es para las deidades; salimos por el lado del tigre (izquierda).', 'The big middle door is for the deities — we leave by the tiger side (left).')); return; }
           goodFirst('EXIT', '沒錯！龍進虎出，從虎邊出去。', '¡Exacto! Dragón entra, tigre sale.', 'Right! Dragon in, tiger out.');
           Game.stopTimer(); Game.state = 'END';
         }
