@@ -1469,6 +1469,8 @@ const GameCore = {
     if (this.state === 'END' && !this._endGood) [src, emoji, alt] = ['images/end_bad.jpg', '😅'];
     if (this.adjustImage) [src, emoji, alt] = this.adjustImage([src, emoji, alt]);
     this.setImage(src, emoji, alt);
+    const sceneBox = document.getElementById('scene');   // 關卡設定 noImage: true → 這一關不放圖（過場頁還是會顯示圖）
+    if (sceneBox) sceneBox.style.display = (!this._transMode && cfg.noImage) ? 'none' : '';
     Vocab.render(this.state);
     if (Hints.open) Hints.render();
     Log.render();
@@ -1502,6 +1504,31 @@ const GameCore = {
     area.innerHTML = '';
     const opts = this._transMode ? [this.transLabel()] : val(cfg.options);
     area.classList.toggle('single', cfg.single ?? (opts.length === 1 || opts.some(o => o.length > 12)));
+    if (!this._transMode && cfg.multi) {   // 多選題：cfg.options() 全部列出，玩家點選（再點取消），按「確定」才送出（choice 是選中的文字陣列）
+      if (this._multiFor !== this.state) { this._multiFor = this.state; this._multiSel = new Set(); }
+      area.classList.remove('single');
+      val(cfg.options).forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'opt multi' + (this._multiSel.has(opt) ? ' on' : '');
+        btn.setAttribute('aria-pressed', this._multiSel.has(opt) ? 'true' : 'false');
+        btn.dataset.raw = opt;
+        btn.innerHTML = this.ruby(opt);
+        btn.onclick = () => {
+          const on = !this._multiSel.has(opt);
+          on ? this._multiSel.add(opt) : this._multiSel.delete(opt);
+          btn.classList.toggle('on', on); btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        };
+        area.appendChild(btn);
+      });
+      const go = document.createElement('button');
+      go.className = 'opt deal multi-go';
+      go.innerHTML = this.ruby('確定') + ' ' + esc(X('Confirmar', 'Confirm'));
+      go.dataset.raw = '確定';
+      go.onclick = () => this.handleChoice([...this._multiSel]);
+      area.appendChild(go);
+      return;
+    }
+    this._multiFor = null;
     const cardImg = !this._transMode && cfg.optionImage;   // 選項要用圖片卡片時：optionImage(選項) → 圖片路徑
     if (cardImg) area.classList.add('cards');
     opts.forEach(opt => {

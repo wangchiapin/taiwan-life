@@ -90,6 +90,14 @@
 #options-area .opt.card { display: flex; align-items: center; gap: 12px; padding: 6px; text-align: left; }
 #options-area .opt.card img { width: 96px; height: 96px; flex: 0 0 96px; object-fit: cover; border-radius: 8px; image-rendering: pixelated; }
 #options-area .opt.card span { flex: 1; }
+#options-area .opt.multi.on { background: #fff3d6; border-color: #c8960c; font-weight: 700; }
+#options-area .opt.multi.on::before { content: '✓ '; color: #2e9c5b; }
+#options-area .multi-go { grid-column: 1 / -1; background: var(--ink, #2B2620); border-color: var(--ink, #2B2620); color: #fff; }
+@media (min-width: 700px) {
+  #options-area.cards { flex-direction: row; }
+  #options-area .opt.card { flex: 1 1 0; flex-direction: column; text-align: center; }
+  #options-area .opt.card img { width: 100%; height: auto; aspect-ratio: 1; flex: none; }
+}
 </style></head>
 <body>
 
@@ -240,6 +248,9 @@ const SPEAKER_RE = /^(Ami|廟公|我)：/;
    本遊戲的小工具（POLITE、rotOf、catchState 已搬到 shared/game.js）
 ══════════════════════════════════════ */
 
+const MAIN_RIGHT = ['向神明問好', '自己的名字', '自己的生日', '自己的住址', '自己的心願'];
+const MAIN_WRONG = ['自己的電話號碼', '自己的身高體重', '今天的天氣'];
+
 /* ══════════════════════════════════════
    籤詩：關聖帝君一百籤，從五種等級各取幾支（共 20 支）
    n 籤號；g 等級；poem 籤詩原文四句；gloss 白話一句（Ami 解籤時說的）
@@ -296,7 +307,7 @@ const VOCAB = {
   GATE: [['龍邊', 'lado del dragón (derecha)', 'dragon side (right)'], ['虎邊', 'lado del tigre (izquierda)', 'tiger side (left)'], ['龍進虎出', 'entrar por el dragón, salir por el tigre', 'enter by the dragon, exit by the tiger'], ['告示牌', 'letrero', 'sign']],
   FIRE: [['點火處', 'lugar para encender el incienso', 'place to light incense'], ['一炷香', 'una varilla de incienso', 'a stick of incense'], ['搧', 'abanicar', 'fan'], ['晃', 'agitar suavemente', 'shake gently'], ['吹', 'soplar', 'blow']],
   HEAVEN: [['天公爐', 'incensario del Cielo', 'Heaven’s incense burner'], ['天公', 'el Emperador del Cielo', 'the Heavenly Emperor'], ['先……再……', 'primero… después…', 'first… then…'], ['拜', 'rendir culto, rezar', 'worship, pray'], ['大殿', 'salón principal', 'main hall'], ['側殿', 'salón lateral', 'side hall']],
-  MAIN: [['關聖帝君', 'Guan Shengdijun (Guan Gong)', 'Lord Guan (Guan Gong)'], ['姓名', 'nombre', 'name'], ['住在', 'vivir en', 'live at'], ['保佑', 'proteger, bendecir', 'bless, protect'], ['平安', 'paz y seguridad', 'safe and sound']],
+  MAIN: [['關聖帝君', 'Guan Shengdijun (Guan Gong)', 'Lord Guan (Guan Gong)'], ['姓名', 'nombre', 'name'], ['生日', 'cumpleaños', 'birthday'], ['住址', 'dirección', 'address'], ['住在', 'vivir en', 'live at'], ['保佑', 'proteger, bendecir', 'bless, protect'], ['平安', 'paz y seguridad', 'safe and sound']],
   THROW: [['擲筊', 'lanzar los jiaobei', 'throw the moon blocks'], ['筊杯', 'jiaobei (bloques de madera)', 'moon blocks'], ['聖筊', 'sí (una plana, una redonda)', 'yes (one flat, one round)'], ['笑筊', 'sonrisa (dos planas)', 'smile (both flat)'], ['陰筊', 'no (dos redondas)', 'no (both round)'], ['連續', 'seguidos', 'in a row']],
   DRAW: [['籤筒', 'cilindro con varillas', 'fortune stick holder'], ['抽籤', 'sacar una varilla', 'draw a fortune stick'], ['求籤', 'pedir una suerte', 'ask for a fortune']],
   SLIP_NUM: [['籤櫃', 'cajonera de papeles de suerte', 'fortune slip cabinet'], ['第……籤', 'la suerte n.º …', 'fortune No. …'], ['不好意思', 'disculpe', 'excuse me'], ['籤詩', 'poema de la suerte', 'fortune poem']],
@@ -322,7 +333,7 @@ const STAGE = {
 
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
-  GATE: '走到廟門口', FIRE: '去點香處拿香點香', HEAVEN: '走到天公爐', MAIN: '走進主殿', THROW: '拿起筊杯', DRAW: '走到籤筒前', SLIP_NUM: '走到籤櫃',
+  GATE: '走到廟門口', FIRE: '去點香處拿香點香', HEAVEN: '走到廟的前面', MAIN: '走進大殿', THROW: '拿起筊杯', DRAW: '走到籤筒前', SLIP_NUM: '走到籤櫃',
   READ: '看籤詩', REGISTER: '走到登記處', PAY: '付錢', PAY_FIX: '聽廟公重算', CHANGE: '等找錢', AMULET: '看旁邊的桌子', GUOLU: '走到香爐前', EXIT: '準備離開', END: '走出廟門'
 };
 
@@ -365,7 +376,8 @@ const Game = defineGame({
   /* 過場頁預設用上一關的圖；旁白已經到下一個畫面時，改用符合旁白的圖：進廟門（點火處、Ami 在旁邊）、熄火後（香頭只剩灰） */
   imageFor() {
     if (this._transMode && this._trans && this._trans.from === 'GATE' && this._trans.to === 'FIRE') return ['images/gate_in.jpg', '🕯️'];
-    if (this._transMode && this._trans && this._trans.from === 'FIRE' && this._trans.to === 'HEAVEN') return ['images/fire_out.jpg', '🔥'];   // 火熄了：香頭只剩灰、還在冒煙
+    if (this._transMode && this._trans && this._trans.from === 'FIRE' && this._trans.to === 'HEAVEN') return ['images/fire_out.jpg', '🔥'];
+    if (this._transMode && this._trans && this._trans.from === 'HEAVEN') return ['images/heaven.jpg', '🙏'];   // 拜天公的過場：天公爐   // 火熄了：香頭只剩灰、還在冒煙
   },
   onStart() { this.updateCash(); },
   updateCash() { document.getElementById('cash-badge').textContent = ''; },
@@ -423,7 +435,7 @@ const Game = defineGame({
       GATE: L('告示牌：龍進虎出。請由龍邊進、虎邊出。（面對廟，龍邊在右邊，虎邊在左邊。）', 'Letrero: entrar por el dragón, salir por el tigre. (De cara al templo, el dragón está a la derecha y el tigre a la izquierda.)', 'Sign: enter by the dragon, exit by the tiger. (Facing the temple, the dragon side is on the right, the tiger side on the left.)'),
       FIRE: L('告示牌：香點著以後，請輕輕晃動或用手搧，把火熄掉。不要用嘴吹。', 'Letrero: tras encender el incienso, agítalo suavemente o abanícalo con la mano para apagar la llama. No soples.', 'Sign: after lighting the incense, gently shake it or fan it with your hand to put out the flame. Do not blow on it.'),
       HEAVEN: L('告示牌：請先拜天公，再拜主神。', 'Letrero: primero rinde culto al Cielo y después a la deidad principal.', 'Sign: first pay respects to Heaven, then to the main deity.'),
-      MAIN: L('告示牌：向神明說話時，先說自己的姓名和住址，再說心願。', 'Letrero: al hablar con la deidad, di primero tu nombre y dirección y después tu deseo.', 'Sign: when you speak to the deity, say your name and address first, then your wish.'),
+      MAIN: L('告示牌：向神明說話時，先問好，再說自己的姓名、生日和住址，然後再說心願。', 'Letrero: al hablar con la deidad, saluda primero, luego di tu nombre, cumpleaños y dirección, y después tu deseo.', 'Sign: when you speak to the deity, greet first, then say your name, birthday and address, and then your wish.'),
       THROW: L('告示牌：一平一圓是聖筊（同意）；兩個平面是笑筊（還沒決定）；兩個圓面是陰筊（不同意）。連續三個聖筊，才可以求籤。', 'Letrero: una plana y una redonda = sí; dos planas = sonrisa (aún no decide); dos redondas = no. Hacen falta tres «sí» seguidos para sacar la suerte.', 'Sign: one flat + one round = yes; both flat = smile (undecided); both round = no. You need three yeses in a row to draw a fortune.'),
       DRAW: L('告示牌：搖籤筒，掉出一支籤就好。', 'Letrero: agita el cilindro; basta con una varilla que caiga.', 'Sign: shake the holder — one stick that falls out is enough.'),
       SLIP_NUM: L('告示牌：籤支上的號碼，要和籤詩的號碼一樣。', 'Letrero: el número de la varilla debe ser igual al del papel.', 'Sign: the number on the stick must match the number on the slip.'),
@@ -558,7 +570,7 @@ const Game = defineGame({
             return;
           }
           goodFirst('FIRE', '沒錯！熄香要輕輕晃動或用手搧，不用嘴吹。', '¡Exacto! Se apaga agitando suavemente o abanicando, no soplando.', 'Right! Shake gently or fan it — never blow.');
-          Game.thought = [narr('火熄了，香頭還在冒煙。你拿著香，走向前面的天公爐。', 'La llama se apagó y la punta sigue humeando. Con el incienso en la mano, vas hacia el incensario del Cielo.', 'The flame is out and the tips are still smoking. Incense in hand, you walk to the Heaven burner.')];
+          Game.thought = [narr('火熄了，香頭還在冒煙。你拿著香，和Ami一起走到廟的前面。', 'La llama se apagó y la punta sigue humeando. Con el incienso en la mano, vas con Ami a la parte de enfrente del templo.', 'The flame is out and the tips are still smoking. Incense in hand, you and Ami walk to the front of the temple.')];
           Game.state = 'HEAVEN';
         }
       },
@@ -566,13 +578,14 @@ const Game = defineGame({
       /* ═══ 先拜天公 ═══ */
       HEAVEN: {
         place: 'temple',
+        noImage: true,   // 這一關只有旁白、Ami 的話和三張圖片卡
         dialogue: () => [narr('外面有天公爐，裡面是大殿，旁邊還有側殿。', 'Afuera está el incensario del Cielo, adentro el salón principal, y a un lado hay un salón lateral.', 'Outside is the Heaven burner, inside is the main hall, and beside it there is a side hall.'),
           ami('我們按照順序來拜拜吧！你知道要先拜什麼嗎？', '¡Vamos a rezar en orden! ¿Sabes a quién hay que rezar primero?', "Let's pay respects in order! Do you know who we should pray to first?")],
         options: () => rotOf(t, ['天公爐拜天公', '大殿拜關聖帝君', '側殿拜其他神明']),
         optionImage: o => ({ '天公爐拜天公': 'images/heaven.jpg', '大殿拜關聖帝君': 'images/main.jpg', '側殿拜其他神明': 'images/side.jpg' })[o],
         next: c => {
           if (c !== '天公爐拜天公') { Game.addMistake(c === '大殿拜關聖帝君' ? M('要先拜天公，再拜主神。', 'Primero se reza al Cielo y después a la deidad principal.', 'Pay respects to Heaven first, then the main deity.') : M('天公是最先拜的，其他神明要放到最後。', 'Al Cielo se le reza primero; las demás deidades van al final.', 'Heaven comes first; the other deities come last.')); return; }
-          goodFirst('HEAVEN', '沒錯！先拜天公，再拜關公。', '¡Exacto! Primero el Cielo, después Guan Gong.', 'Right! Heaven first, then Guan Gong.');
+          goodFirst('HEAVEN', '沒錯！先拜天公，再拜關聖帝君。', '¡Exacto! Primero el Cielo, después Guan Shengdijun.', 'Right! Heaven first, then Lord Guan.');
           Game.thought = [narr('你雙手拿香，向天公拜了三下，把香插進天公爐，再走進大殿。', 'Con ambas manos haces tres reverencias al Cielo, pones el incienso en el incensario y entras al salón principal.', 'With both hands you bow three times to Heaven, place the incense in the burner, and enter the main hall.')];
           Game.state = 'MAIN';
         }
@@ -581,13 +594,23 @@ const Game = defineGame({
       /* ═══ 向關公說話 ═══ */
       MAIN: {
         place: 'temple',
+        multi: true,
         dialogue: () => [narr('大殿裡，關聖帝君的神像在正前方。你拿著香，站在神像前面。', 'En el salón principal, la estatua de Guan Shengdijun está al frente. Con el incienso en la mano, te paras ante ella.', 'In the main hall, the statue of Lord Guan is straight ahead. Incense in hand, you stand before it.'),
-          ami('我在你旁邊。', 'Estoy a tu lado.', "I'm right next to you.")],
-        options: () => rotOf(t, [`關聖帝君，我是${N}，住在附近。最近不太順利，請您保佑我平安順利。`, '關聖帝君，請讓我中大獎，我想要很多很多錢。', '關聖帝君，請您保佑我，不用說我是誰。']),
+          ami('你知道要跟關聖帝君說什麼嗎？', '¿Sabes qué hay que decirle a Guan Shengdijun?', 'Do you know what to say to Lord Guan?'),
+          ...((Game.att.MAIN || 0) >= 3 ? [L('（提示：要說的是問好、名字、生日、住址和心願。）', '(Pista: hay que saludar y decir tu nombre, cumpleaños, dirección y deseo.)', '(Hint: say hello, then your name, birthday, address and wish.)')] : [])],
+        options: () => { const all = MAIN_RIGHT.concat(MAIN_WRONG); t.mixM ??= [1, 3, 5, 7][Math.floor(Math.random() * 4)]; t.mixO ??= Math.floor(Math.random() * all.length); return all.map((_, i) => all[(i * t.mixM + t.mixO) % all.length]); },
         next: c => {
-          if (c !== `關聖帝君，我是${N}，住在附近。最近不太順利，請您保佑我平安順利。`) { Game.addMistake(c.includes('中大獎') ? M('心願不要太貪心，要求平安順利就好。', 'No pidas con codicia; basta con pedir paz y que todo vaya bien.', "Don't be greedy — just ask for safety and things going smoothly.") : M('要先說自己的姓名和住址，神明才知道是誰在說話。', 'Di primero tu nombre y dirección, para que la deidad sepa quién habla.', 'Say your name and address first, so the deity knows who is speaking.')); return; }
-          goodFirst('MAIN', '很好！先說姓名和住址，再說心願。', '¡Muy bien! Primero nombre y dirección, luego el deseo.', 'Good! Name and address first, then your wish.');
-          Game.thought = [narr('你拜了三下，把香插進大殿的香爐。旁邊的桌上放著一副筊杯。', 'Haces tres reverencias y pones el incienso en el incensario del salón. En la mesa de al lado hay un par de jiaobei.', 'You bow three times and place the incense in the hall burner. A pair of moon blocks lies on the table beside you.')];
+          const miss = MAIN_RIGHT.some(o => !c.includes(o)), extra = c.some(o => !MAIN_RIGHT.includes(o));
+          if (miss || extra) {
+            const parts = [];
+            if (miss) parts.push(M('好像少說了什麼……', 'Parece que faltó decir algo…', 'It seems you left something out…'));
+            if (extra) parts.push(M('好像有些沒有必要說……', 'Parece que algunas cosas no hace falta decirlas…', "It seems some of these don't need to be said…"));
+            Game.addMistake(M(parts.map(x => x.zh).join(''), parts.map(x => x.es).join(' '), parts.map(x => x.en).join(' ')));
+            return;
+          }
+          goodFirst('MAIN', '很好！先問好，再說姓名、生日和住址，最後說心願。', '¡Muy bien! Primero saluda, luego nombre, cumpleaños y dirección, y al final tu deseo.', 'Good! Greet first, then your name, birthday and address, and your wish last.');
+          Game.thought = [L(`我：關聖帝君你好，我是${N}，我的生日是……，我住在……，我最近有點不太順利，請關聖帝君保佑。`, `Yo: Hola, Guan Shengdijun. Soy ${N}, mi cumpleaños es…, vivo en… Últimamente no me va muy bien; por favor, protégeme.`, `Me: Hello, Lord Guan. I'm ${N}, my birthday is…, I live at… Things haven't gone very smoothly lately; please bless me.`),
+            narr('你拜了三下，把香插進大殿的香爐。旁邊的桌上放著一副筊杯。', 'Haces tres reverencias y pones el incienso en el incensario del salón. En la mesa de al lado hay un par de jiaobei.', 'You bow three times and place the incense in the hall burner. A pair of moon blocks lies on the table beside you.')];
           Game.state = 'THROW';
         }
       },
