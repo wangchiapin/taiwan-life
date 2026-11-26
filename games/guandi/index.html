@@ -339,7 +339,48 @@ function rattle(ctx, t0, o) {
 }
 const RATTLE = { seed: 7, n: 22, lo: 1800, hi: 5200, q: 7, tube: 420, thud: .25, vol: 1.18 };
 const RATTLE_MS = 2300;
-const SHAKE = '搖一搖籤筒，讓一支籤自己掉出來。';
+const SHAKE = '輕搖籤筒，等一支籤掉出來。';
+
+/* 搖籤筒動畫：背景（draw_bg.jpg）不動，手和籤筒（draw_hands.png，比畫面高 60，下緣的手臂有延長）跟著聲音晃五下，
+   最後一支籤翻出來掉到地上彈兩下。t＝聲音開始後的秒數，時間點和 rattle() 一樣。
+   停住時的畫面＝draw.jpg，最後一格＝draw_done.jpg */
+const ART = {};
+function drawArt() {
+  if (!ART.bg) for (const [k, f] of [['bg', 'draw_bg.jpg'], ['hands', 'draw_hands.png']]) { ART[k] = new Image(); ART[k].src = 'images/' + f; }
+  return [ART.bg, ART.hands].every(i => i.complete && i.naturalWidth);
+}
+function stickAt(g, x, y, deg, sc, clipY) {   // 一支籤（紅頭）
+  g.save();
+  if (clipY) { g.beginPath(); g.rect(0, 0, 720, clipY); g.clip(); }
+  g.translate(x, y); g.rotate(-deg * Math.PI / 180); g.scale(sc, sc);
+  [['#d79646', -3.5, -75, 7, 150], ['#a05f28', -3.5, -75, 2, 150], ['#7d461e', 1.5, -75, 2, 150], ['#b92823', -3.5, -75, 7, 30]]
+    .forEach(([c, ...r]) => { g.fillStyle = c; g.fillRect(...r); });
+  g.restore();
+}
+function shakeFrame(g, tmp, t) {
+  const GAP = .34, DROP = 5 * GAP + .22, OUT = DROP - .3, tg = tmp.getContext('2d');
+  tg.clearRect(0, 0, tmp.width, tmp.height); tg.drawImage(ART.hands, 0, 0);
+  let dx = 0, dy = 0, ang = 0;
+  if (t > 0 && t < 5 * GAP) {
+    const s = Math.sin((t % GAP) / GAP * 2 * Math.PI), w = Math.sin(t / GAP * Math.PI);
+    dy = 16 * s; ang = 4.5 * w; dx = 5 * w;
+    for (let x = 314; x < 406; x += 7) {   // 籤束一撮一撮往上跳
+      const up = Math.floor(Math.random() * 14 * Math.abs(s) + Math.random() * 4);
+      if (up) tg.drawImage(ART.hands, x, 352, 7, 126, x, 352 - up, 7, 126);
+    }
+  }
+  g.drawImage(ART.bg, 0, 0, 720, 720);
+  if (t >= 1.45 && t < OUT) stickAt(tg, 366, 415 - 75 * Math.min(1, (t - 1.45) / (OUT - 1.45)), -3, 1, 470);   // 從籤筒冒出來
+  else if (t >= OUT && t < DROP) {   // 翻出去往地上掉
+    const u = (t - OUT) / (DROP - OUT);
+    stickAt(g, 366 - 206 * u, 340 + 292 * u * u - 60 * Math.sin(Math.PI * u), -3 + 101 * u, 1 - .12 * u);
+  } else if (t >= DROP) {            // 落地，彈兩下
+    const d = t - DROP, lift = d < .11 ? 24 * Math.sin(Math.PI * d / .11) : d < .18 ? 10 * Math.sin(Math.PI * (d - .11) / .07) : 0;
+    stickAt(g, 160, 632 - lift, 98, .88);
+  }
+  g.save(); g.translate(dx, dy); g.translate(360, 640); g.rotate(-ang * Math.PI / 180); g.translate(-360, -640);
+  g.drawImage(tmp, 0, 0); g.restore();
+}
 
 function beiSVG(face, i) {
   const flip = i ? ' transform="translate(W 0) scale(-1 1)"' : '';
@@ -391,7 +432,7 @@ const STAGE = {
 
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
-  GATE: '走到廟門口', FIRE: '去點香處拿香點香', HEAVEN: '走到廟的前面', MAIN: '走進大殿', SIDE: '走到側殿', THROW: '回到大殿', DRAW: from => from === 'CONFIRM' ? '回到籤筒重抽' : '走到籤筒前', CONFIRM: '問是不是這支籤', SLIP_NUM: '走到籤櫃',
+  GATE: '走到廟門口', FIRE: '去點香處拿香點香', HEAVEN: '走到廟的前面', MAIN: '走進大殿', SIDE: '走到側殿', THROW: '去求籤', DRAW: from => from === 'CONFIRM' ? '回去重新求籤' : '走到籤筒前', CONFIRM: '問問關聖帝君是不是這支籤', SLIP_NUM: '走到籤櫃',
   READ: '看籤詩', REGISTER: '走到登記處', PAY: '付錢', PAY_FIX: '聽廟公重算', CHANGE: '等找錢', AMULET: '看旁邊的桌子', GUOLU: '走到香爐前', EXIT: '準備離開', END: '走出廟門'
 };
 
@@ -430,12 +471,13 @@ const Game = defineGame({
   att: {},                       // 每一關選了幾次（第一次就對才給綠卡）
   cash: null,
   ti: 0, streak: 0, goNext: null,   // 擲筊：第幾次、連續幾個聖筊、這一關丟完要去哪裡（null＝還要再丟）
-  EXTRA_IMAGES: ['images/gate_in.jpg', 'images/fire_out.jpg'],   // imageFor() 才會用到的圖，也先載好
+  EXTRA_IMAGES: ['images/gate_in.jpg', 'images/fire_out.jpg', 'images/draw_done.jpg', 'images/draw_bg.jpg', 'images/draw_hands.png'],   // imageFor() 才會用到的圖，也先載好
   /* 過場頁預設用上一關的圖；旁白已經到下一個畫面時，改用符合旁白的圖：進廟門（點火處、Ami 在旁邊）、熄火後（香頭只剩灰） */
   imageFor() {
     if (this._transMode && this._trans && this._trans.from === 'GATE' && this._trans.to === 'FIRE') return ['images/gate_in.jpg', '🕯️'];
     if (this._transMode && this._trans && this._trans.from === 'FIRE' && this._trans.to === 'HEAVEN') return ['images/fire_out.jpg', '🔥'];
     if (this._transMode && this._trans && this._trans.from === 'HEAVEN') return ['images/heaven.jpg', '🙏'];   // 拜天公的過場：天公爐   // 火熄了：香頭只剩灰、還在冒煙
+    if (this._transMode && this._trans && this._trans.from === 'DRAW') return ['images/draw_done.jpg', '🎋'];   // 抽籤的過場：籤掉在地上
   },
   onStart() { this.updateCash(); },
   updateCash() { document.getElementById('cash-badge').textContent = ''; },
@@ -485,7 +527,7 @@ const Game = defineGame({
     this.ti = 0; this.streak = 0; this.goNext = null;
     this.phase = 'ready'; this.round = 0; this.last = null; this.busy = false;
   },
-  /* 抽籤：選對以後先播籤筒聲，播完才跳下一頁；按了靜音、或裝置不能出聲就不用等 */
+  /* 抽籤：按下以後播籤筒聲和搖晃動畫，播完才跳下一頁。靜音照樣播動畫（只是沒聲音）；開了「減少動態」就不晃 */
   busy: false,
   playRattle() {
     try { if (localStorage.getItem('hg.mute.taiwan-life') === '1') return false; } catch (e) {}
@@ -496,14 +538,38 @@ const Game = defineGame({
     } catch (e) { return false; }
     return true;
   },
+  /* 在場景圖上面疊一張畫布播動畫；回傳畫布（圖還沒載好就不播，回傳 null） */
+  shakeAnim(t) {
+    const img = document.getElementById('npc-avatar');
+    if (!drawArt() || !img.offsetWidth) return null;
+    const cv = document.createElement('canvas'), tmp = document.createElement('canvas');
+    cv.id = 'shake-canvas'; cv.width = cv.height = tmp.width = 720; tmp.height = ART.hands.naturalHeight;
+    cv.setAttribute('aria-hidden', 'true');
+    const g = cv.getContext('2d'), t0 = performance.now(); let last = -1;
+    const place = () => Object.assign(cv.style, { position: 'absolute', left: img.offsetLeft + 'px', top: img.offsetTop + 'px', width: img.offsetWidth + 'px', height: img.offsetHeight + 'px', borderRadius: getComputedStyle(img).borderRadius });
+    img.parentNode.style.position = 'relative'; img.parentNode.appendChild(cv); place(); shakeFrame(g, tmp, 0);
+    const tick = () => {
+      if (!cv.isConnected) return;
+      if (this.task !== t || !this.busy || this.state !== 'DRAW') return cv.remove();
+      const sec = (performance.now() - t0) / 1000 - .05, n = Math.floor(sec * 25);   // 每秒換 25 次
+      if (n !== last) { last = n; place(); shakeFrame(g, tmp, sec); }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    return cv;
+  },
   handleChoice(choice) {
-    if (this.busy) return;                       // 聲音播放中，按鈕先不理
-    if (this.state !== 'DRAW' || choice !== SHAKE || !this.playRattle()) return GameCore.handleChoice.call(this, choice);
+    if (this.busy) return;                       // 播放中，按鈕先不理
+    if (this.state !== 'DRAW' || choice !== SHAKE) return GameCore.handleChoice.call(this, choice);
+    const sound = this.playRattle(), calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!sound && calm) return GameCore.handleChoice.call(this, choice);
     const t = this.task;
     this.busy = true; Tr.closeAll(); Speech.stop(); Music.duck(true);
     document.querySelectorAll('#options-area .opt').forEach(b => { b.disabled = true; });
+    const cv = calm ? null : this.shakeAnim(t);
     setTimeout(() => {
       Music.duck(false);
+      if (cv) cv.remove();
       if (this.task !== t || !this.busy) return;
       this.busy = false;
       if (this.state === 'DRAW') GameCore.handleChoice.call(this, choice);
@@ -525,7 +591,6 @@ const Game = defineGame({
       HEAVEN: L('告示牌：請先拜天公，再拜主神。', 'Letrero: primero rinde culto al Cielo y después a la deidad principal.', 'Sign: first pay respects to Heaven, then to the main deity.'),
       MAIN: L('告示牌：向神明說話時，先問好，再說自己的姓名、生日和住址，然後再說心願。', 'Letrero: al hablar con la deidad, saluda primero, luego di tu nombre, cumpleaños y dirección, y después tu deseo.', 'Sign: when you speak to the deity, greet first, then say your name, birthday and address, and then your wish.'),
       THROW: L('告示牌：一平一圓是聖筊（同意）；兩個平面是笑筊（還沒決定）；兩個圓面是陰筊（不同意）。抽籤前要一個聖筊；抽籤後要連續三個聖筊，才是那支籤。', 'Letrero: una plana y una redonda = sí; dos planas = sonrisa (aún no decide); dos redondas = no. Antes de sacar la varilla hace falta un «sí»; después, tres «sí» seguidos para confirmarla.', 'Sign: one flat + one round = yes; both flat = smile (undecided); both round = no. One yes before drawing; three yeses in a row afterwards to confirm the stick.'),
-      DRAW: L('告示牌：搖籤筒，掉出一支籤就好。', 'Letrero: agita el cilindro; basta con una varilla que caiga.', 'Sign: shake the holder — one stick that falls out is enough.'),
       SLIP_NUM: L('告示牌：籤支上的號碼，要和籤詩的號碼一樣。', 'Letrero: el número de la varilla debe ser igual al del papel.', 'Sign: the number on the stick must match the number on the slip.'),
       REGISTER: L('告示牌：光明燈，一年五百元。請寫姓名。', 'Letrero: lámpara de luz, un año, NT$500. Escribe tu nombre.', 'Sign: light lamp, one year, NT$500. Please write your name.'),
       AMULET: L('告示牌：平安符請自己拿，隨喜投香油錢。', 'Letrero: toma el amuleto tú mismo y deja la donación que quieras.', 'Sign: take a charm yourself and donate as you wish.'),
@@ -538,7 +603,7 @@ const Game = defineGame({
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
     const t = this.task, sg = this.signs();
     const out = [{ title: 'Ami 說的話', lines: this.amiLines() }];
-    const signs = ['GATE', 'FIRE', 'HEAVEN', 'MAIN', 'THROW', 'DRAW', 'SLIP_NUM', 'REGISTER', 'AMULET', 'GUOLU', 'EXIT'].filter(s => at(s)).map(s => sg[s]);
+    const signs = ['GATE', 'FIRE', 'HEAVEN', 'MAIN', 'THROW', 'SLIP_NUM', 'REGISTER', 'AMULET', 'GUOLU', 'EXIT'].filter(s => at(s)).map(s => sg[s]);
     if (signs.length) out.push({ title: '廟裡的告示牌', lines: signs });
     if (at('PAY_FIX')) out.push({ title: '廟公說的話', lines: [L(`廟公：一共是${zhNum(t.said)}元。`, `Son ${esM(t.said)} en total.`, `${enM(t.said)} in total.`)] });
     return out;
@@ -633,18 +698,19 @@ const Game = defineGame({
   },
   /* 這一次丟出來的結果，Ami 說一句 */
   amiResult(st) {
-    const k = this.last, zh = RES[k].zh, es = { sheng: 'sí', xiao: 'sonrisa', yin: 'no' }[k], en = { sheng: 'yes', xiao: 'smile', yin: 'no' }[k];
+    const k = this.last;
     const say = (z, s, e) => L(`Ami：${z}`, s, e);
     if (st === 'THROW') {
-      if (k === 'sheng') return say('是聖筊！可以抽籤了。', '¡Salió «sí»! Ya puedes sacar la suerte.', "It's a yes! You can draw now.");
+      if (k === 'sheng') return say('是聖筊！關聖帝君說可以，去求籤吧！', '¡Salió «sí»! Guan Shengdijun dice que sí. ¡Ve a pedir tu suerte!', "It's a yes! Lord Guan says you may. Go and ask for your fortune!");
       return k === 'xiao'
-        ? say('是笑筊，神明沒有回答。再丟一次。', 'Salió «sonrisa»: la deidad no responde. Lanza otra vez.', "It's a smile: no answer from the deity. Throw again.")
-        : say('是陰筊，神明說不行。再丟一次。', 'Salió «no»: la deidad dice que no. Lanza otra vez.', "It's a no: the deity says no. Throw again.");
+        ? say('是笑筊，關聖帝君笑笑的沒有回答，再試一次看看吧！', 'Salió «sonrisa»: Guan Shengdijun sonríe y no responde. ¡Prueba otra vez!', "It's a smile: Lord Guan just smiles and doesn't answer. Try again!")
+        : say('是陰筊，關聖帝君說不行，再試一次看看吧！', 'Salió «no»: Guan Shengdijun dice que no. ¡Prueba otra vez!', "It's a no: Lord Guan says no. Try again!");
     }
-    if (k !== 'sheng') return say(`是${zh}，不是這支籤。重新抽一支吧。`, `Salió «${es}»: no es esta varilla. Saca otra.`, `It's a "${en}": not this stick. Draw another one.`);
+    if (k === 'xiao') return say('是笑筊，可能不是這支，再求一支看看吧！', 'Salió «sonrisa»: quizá no sea esta. ¡Pide otra varilla!', "It's a smile: maybe it's not this one. Ask for another stick!");
+    if (k === 'yin') return say('是陰筊，關聖帝君說不是這支，再求一支看看吧！', 'Salió «no»: Guan Shengdijun dice que no es esta. ¡Pide otra varilla!', "It's a no: Lord Guan says it's not this one. Ask for another stick!");
     return this.streak >= 3
-      ? say('三個聖筊！就是這支籤。', '¡Tres «sí»! Es esta varilla.', 'Three yeses! This is the one.')
-      : say('聖筊！再丟一次。', '¡«Sí»! Lanza otra vez.', 'Yes! Throw again.');
+      ? say('三個聖筊！關聖帝君說就是這支籤！', '¡Tres «sí»! Guan Shengdijun dice que es esta varilla.', 'Three yeses! Lord Guan says this is the one!')
+      : say('是聖筊！很好，再丟一次！', '¡Salió «sí»! Muy bien, lanza otra vez.', "It's a yes! Good, throw again!");
   },
   testPrep() {   // 自動測試用：擲筊關直接丟到可以換下一步
     if (!['THROW', 'CONFIRM'].includes(this.state) || this.goNext) return;
@@ -803,7 +869,8 @@ const Game = defineGame({
         dialogue: () => [narr('你走到側殿，向其他神明拜了三下。', 'Vas al salón lateral y haces tres reverencias a las otras deidades.', 'You go to the side hall and bow three times to the other deities.')],
         options: ['插上最後一支香。'],
         next: () => {
-          Game.thought = [narr('你插上最後一支香，三支香都拜完了。', 'Pones la última varilla: ya has ofrecido las tres.', "You place the last stick — you've now offered all three.")];
+          Game.thought = [narr('你插上最後一支香，雙手合十再拜一次。', 'Pones la última varilla, juntas las manos y haces otra reverencia.', 'You place the last stick, press your palms together and bow once more.'),
+            ami('我們去跟關聖帝君求個籤吧！', '¡Vamos a pedirle una suerte a Guan Shengdijun!', "Let's go and ask Lord Guan for a fortune!")];
           Game.state = 'THROW';
         }
       },
@@ -811,24 +878,24 @@ const Game = defineGame({
       /* ═══ 擲筊（抽籤前）：一個聖筊，才可以抽籤 ═══ */
       THROW: {
         place: 'temple',
-        html: () => Game.formatText([L('我：請問關聖帝君，我可以抽籤嗎？', 'Yo: Guan Shengdijun, ¿puedo sacar la suerte?', 'Me: Lord Guan, may I draw a fortune?')]) + Game.beiHTML(),
+        html: () => Game.formatText([ami('要先問問關聖帝君可不可以給你一支籤唷！', 'Primero hay que preguntarle a Guan Shengdijun si puede darte una varilla.', 'First you need to ask Lord Guan whether he can give you a fortune stick!'),
+          L('我：請問關聖帝君，可以給我一支籤嗎？', 'Yo: Guan Shengdijun, ¿puede darme una varilla, por favor?', 'Me: Lord Guan, may I have a fortune stick?')]) + Game.beiHTML(),
         mount: box => Game.bindToss(box),
         dialogue: () => said('THROW'),
         options: goLabel,
         next: leaveThrow
       },
 
-      /* ═══ 抽籤 ═══ */
+      /* ═══ 抽籤：只有一個動作（各廟做法不同，不考怎麼抽，也不扣分） ═══ */
       DRAW: {
         place: 'temple',
-        dialogue: () => [narr('籤筒裡有很多支籤。', 'El cilindro tiene muchas varillas.', 'The holder is full of fortune sticks.'),
-          ami('我在旁邊陪你。', 'Estoy aquí contigo.', "I'm here with you.")],
-        options: () => rotOf(t, [SHAKE, '一次抽兩支，比較保險。', '用手在籤筒裡挑一支自己喜歡的。']),
-        next: c => {
-          if (c !== SHAKE) { Game.addMistake(c.includes('兩支') ? M('一次只能抽一支，一件事問一次。', 'Solo se saca una varilla: una pregunta, una vez.', 'Draw only one stick — one question, one time.') : M('籤要讓它自己掉出來，不能自己挑。', 'La varilla debe caer sola; no se elige.', 'Let the stick fall out by itself — you can’t choose.')); return; }
-          goodFirst('DRAW', '沒錯！籤要讓它自己掉出來。', '¡Exacto! La varilla debe caer sola.', 'Right! Let the stick fall out by itself.');
+        mount: () => drawArt(),   // 先把動畫要用的圖載好
+        dialogue: () => [Game.round ? ami('我們再求一支籤吧！', '¡Pidamos otra varilla!', "Let's ask for another stick!")
+          : ami('你來求一支籤吧！', '¡Pide tú una varilla!', 'Go ahead and ask for a fortune stick!')],
+        options: [SHAKE],
+        next: () => {
           const n = Game.drawnSlip().n;
-          Game.thought = [narr(`一支籤掉出來了。籤支上寫著「${slipNo(n)}」。你把籤支放在桌上。`, `Cae una varilla. Dice «${slipNoEs(n)}». La dejas sobre la mesa.`, `One stick falls out. It reads "No. ${n}". You put it on the table.`)];
+          Game.thought = [narr(`一支籤掉出來了。籤支上寫著「${slipNo(n)}」。`, `Cae una varilla. Dice «${slipNoEs(n)}».`, `A stick falls out. It reads "No. ${n}".`)];
           Game.state = 'CONFIRM';
         }
       },

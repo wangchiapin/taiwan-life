@@ -180,6 +180,17 @@ Edit the attached image. Keep the same temple, the same pixel-art style and the 
 Edit the attached image. Keep the same hall, the same pixel-art style and the same warm lighting, and change ONLY the framing: the camera is at chest height, close to the big bronze incense burner in the main hall; thin incense smoke rises from many burning sticks. The player's two plain bare hands (no rings, no watch, no nail polish, no sleeves) hold a small red cloth protection charm on a string just above the burner, over the smoke. The altar and red candles are softly blurred behind. No arrows, no readable text.
 ```
 
+### 補充：`draw_bg.jpg`（抽籤動畫的背景，2026-11-26）
+
+- 用在：抽籤時的晃動動畫。手和籤筒另外從原本的抽籤圖剪下來（`draw_hands.png`）。
+- 底圖：上傳原本手捧籤筒的抽籤圖（編輯式）
+
+```
+Edit the attached image. Cozy 16-bit pixel art illustration, square 1:1 image, clean chunky pixel outlines, soft warm color palette, warm gentle candlelight. Camera: exactly the same as the attached image (first-person view, facing the main altar straight on, at eye level, perfectly level and centered); do not move, zoom or crop. Keep everything identical and change ONLY this: remove both hands, both arms, the bamboo fortune-stick holder and all of its sticks. Fill the area behind them naturally with what belongs there: the middle of the red-and-gold carved offering table with a bronze incense burner on it, the table legs, the altar steps and the dark glossy tiled floor. The young woman on the right, the statue, the lanterns, the pillars and every other object must stay exactly the same in position, size and appearance. No hands, no new people, no new objects, no readable text.
+```
+
+---
+
 ### 14. `result.jpg`
 
 - 用在：RESULT
