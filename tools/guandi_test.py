@@ -56,7 +56,7 @@ with sync_playwright() as p:
     check('往上滑會丟', ev(page, 'Game.phase') in ('fly', 'landed'))
     check('上滑時畫面不捲動', abs(ev(page, 'scrollY') - y0) < 3, (y0, ev(page, 'scrollY')))
     page.wait_for_timeout(350); page.screenshot(path='/tmp/t_fly.png')
-    page.wait_for_timeout(1000)
+    page.wait_for_timeout(1200)
     check('第一次笑筊／陰筊時沒有任何按鈕', ev(page, 'Game.phase') == 'landed' and page.locator('#options-area .opt').count() == 0)
     check('Ami 說結果', 'Ami：是' in txt(page) and '再試一次' in txt(page), txt(page))
     check('可以直接再滑', '再往上滑一次' in txt(page))
@@ -65,7 +65,7 @@ with sync_playwright() as p:
     page.screenshot(path='/tmp/t_landed.png', full_page=True)
     page.locator('.toss.again').tap(); page.wait_for_timeout(200)
     check('落地後點一下不會丟', ev(page, 'Game.ti') == 1 and ev(page, 'Game.phase') == 'landed')
-    swipe(page, -110); page.wait_for_timeout(1300)
+    swipe(page, -110); page.wait_for_timeout(1550)
     check('再滑一次得到聖筊、出現一顆按鈕', ev(page, 'Game.ti') == 2 and page.locator('#options-area .opt').count() == 1 and '關聖帝君說可以，去求籤吧' in txt(page))
     check('聖筊以後不能再丟', page.locator('.toss[role=button]').count() == 0)
     page.screenshot(path='/tmp/t_pass.png', full_page=True)
@@ -79,10 +79,10 @@ with sync_playwright() as p:
         if name == '點一下': page.mouse.click(x, y)
         elif name == '往上拖': page.mouse.move(x, y); page.mouse.down(); page.mouse.move(x, y - 120, steps=6); page.mouse.up()
         else: el.focus(); page.keyboard.press('Enter')
-        page.wait_for_timeout(1300); check('電腦' + name + '會丟', ev(page, 'Game.phase') == 'landed')
+        page.wait_for_timeout(1550); check('電腦' + name + '會丟', ev(page, 'Game.phase') == 'landed')
     jump(page, 'THROW', '甲')
     for i in (1, 2):
-        el = page.locator('.toss[role=button]'); bb = el.bounding_box(); page.mouse.click(bb['x'] + bb['width'] / 2, bb['y'] + bb['height'] * .5); page.wait_for_timeout(1300)
+        el = page.locator('.toss[role=button]'); bb = el.bounding_box(); page.mouse.click(bb['x'] + bb['width'] / 2, bb['y'] + bb['height'] * .5); page.wait_for_timeout(1550)
         check('電腦落地後再點一下會再丟', ev(page, 'Game.ti') == i)
     jump(page, 'THROW', '乙'); bb = page.locator('.toss.ready').bounding_box(); x, y = bb['x'] + bb['width'] / 2, bb['y'] + 40
     page.mouse.move(x, y); page.mouse.down(); page.mouse.move(x, y + 80, steps=4); page.mouse.up(); page.wait_for_timeout(200)
@@ -140,8 +140,22 @@ with sync_playwright() as p:
     dist = ev(page, "(()=>{const c={};for(let i=0;i<4000;i++){Game.setup();c[Game.task.plan]=(c[Game.task.plan]||0)+1}return c})()")
     check('劇本比例 40/30/30', all(abs(dist[k] / 4000 - v) < .04 for k, v in (('甲', .4), ('乙', .3), ('丙', .3))), dist)
     # ── 丟到一半重畫、離開關卡 ──
-    jump(page, 'THROW', '甲'); ev(page, 'Game.toss(); Game.toss(); Game.render()'); page.wait_for_timeout(1300)
+    jump(page, 'THROW', '甲'); ev(page, 'Game.toss(); Game.toss(); Game.render()'); page.wait_for_timeout(1550)
     check('連按只丟一次', ev(page, 'Game.phase') == 'landed' and ev(page, 'Game.ti') == 1)
+    # ── 擲筊落地聲：五聲、有聲才播、靜音照樣丟 ──
+    snd = ev(page, """(async()=>{const c=new OfflineAudioContext(1,44100,44100);beiSound(c,.05,BEI);const d=(await c.startRendering()).getChannelData(0);
+      const W=441,e=[];for(let i=0;i+W<=d.length;i+=W){let m=0;for(let j=i;j<i+W;j++)m=Math.max(m,Math.abs(d[j]));e.push(m)}
+      const peaks=BEI.at.map(a=>{const k=Math.round((a+.05)*100);const near=Math.max(...e.slice(k,k+4));const before=k>6?Math.min(...e.slice(k-4,k)):0;return [near,before]});
+      let m=0,l=0;for(let i=0;i<d.length;i++){const a=Math.abs(d[i]);if(a>m)m=a;if(a>.01)l=i}return {peaks,m,l:l/44100}})()""")
+    check('落地聲有五聲，聲音之間分得開', len(snd['peaks']) == 5 and all(a > .08 and a > b * 2.5 for a, b in snd['peaks']), snd)
+    check('落地聲不破音、長度合理', .4 < snd['m'] <= 1 and .5 < snd['l'] < .75, snd)
+    ev(page, "(()=>{window.__bei=0; const old=beiSound; beiSound=(...a)=>{window.__bei++; old(...a)}; return 1})()")
+    for muted in (False, True):
+        ev(page, f"localStorage.setItem('hg.mute.taiwan-life','{int(muted)}'); window.__bei=0")
+        jump(page, 'THROW', '甲'); ev(page, 'Game.toss()'); page.wait_for_timeout(1000)
+        check('落地前還在飛', ev(page, 'Game.phase') == 'fly'); page.wait_for_timeout(500)
+        check(('靜音：不播，照樣落地' if muted else '有聲：丟一次播一次'), ev(page, 'window.__bei') == (0 if muted else 1) and ev(page, 'Game.phase') == 'landed', ev(page, 'window.__bei'))
+    ev(page, "localStorage.removeItem('hg.mute.taiwan-life')")
     # ── 籤筒聲和搖晃動畫：點了才晃、播完才跳頁、靜音照樣晃 ──
     SHK = '輕搖籤筒，等一支籤掉出來。'
     btn = lambda: page.locator('#options-area .opt').first
@@ -237,7 +251,7 @@ with sync_playwright() as p:
         if not c.startswith('廟公'): k = m(); pick_(c); check('解籤錯的選項：' + c, st() == 'ASK' and m() == k + 1)
     pick_('廟公，可以請你幫我解籤嗎？')
     if st() == '_TRANS': go()
-    check('到聽懂題', st() == 'MEAN' and '廟公的意思是什麼？' in txt(page) and ev(page, 'Game.task.slip.gloss.zh') in txt(page) and len(opts()) == 3, txt(page))
+    check('到聽懂題', st() == 'MEAN' and 'Ami：María，你覺得廟公的意思是什麼？' in txt(page) and ev(page, 'Game.task.slip.gloss.zh') in txt(page) and len(opts()) == 3, txt(page))
     bad = ev(page, """(()=>{const out=[];for(const s of SLIPS){if(!s.say||!s.tags)out.push([s.n,'缺']);for(let i=0;i<60;i++){const w=otherSlips(s);
       if(new Set([s,...w]).size!==3||w.some(x=>x.tags.some(g=>s.tags.includes(g)))||w[0].tags.some(g=>w[1].tags.includes(g)))out.push([s.n,w.map(x=>x.n)])}}
       if(new Set(SLIPS.map(s=>s.say)).size!==SLIPS.length)out.push('重複');return out})()""")
@@ -271,25 +285,59 @@ with sync_playwright() as p:
     k = m(); pick_('填好了'); check('名字、期限填錯只扣一次', st() == 'FILL' and m() == k + 1)
     check('扣分後已選的還在、打開填錯的那行', txt(page, '.fill').count('✓') == 3 and opened() == ['name'] and page.locator('.pick.on').count() == 1, (opened(), txt(page, '.fill')))
     check('錯誤說明兩項', '姓名要寫自己的名字。' in ev(page, 'Game.log.at(-1).zh') and '期限要選一年' in ev(page, 'Game.log.at(-1).zh'))
-    tap('name', 'María'); head('term'); tap('term', '一年'); pick_('填好了'); check('填對過場', st() == '_TRANS' and '你把登記單交給廟公' in txt(page))
-    go(); card = txt(page)
+    tap('name', 'María'); head('term'); tap('term', '一年'); pick_('填好了'); card = txt(page)
+    check('填對直接到登記、沒有過場和稱讚卡', st() == 'REGISTER' and '（你把登記單交給廟公。）' in card and '登記單填好了' not in card, (st(), card))
     check('登記單顯示剛才填的', st() == 'REGISTER' and all(x in card for x in ('María', '四月二十一號', '台南市成功路二十五號', '一年')), card)
-    for kind in ('name', 'birth', 'addr', 'term', None):
-        for d in (1, 30):
-            jump(page, 'REGISTER'); ev(page, f"Game.task.form={{name:Game.N,m:4,d:{d},addr:3,term:'一年'}}; Game.task.regWrong={'true' if kind else 'false'}; Game.task.regKind='{kind or 'addr'}'; Game.render()")
-            said = ev(page, "[...document.querySelectorAll('#npc-dialogue .line, #npc-dialogue p, #npc-dialogue div')].map(e=>{const c=e.cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.textContent}).find(t=>t.startsWith('廟公：光明燈登記'))||''") or txt(page)
-            said = said[said.index('光明燈登記：'):]; said = said[:said.index('對嗎')]
-            mine = ['María', ev(page, f'birthZh(4,{d})'), '高雄市中正路八號', '一年']
-            miss = [i for i, x in enumerate(mine) if x not in said]
-            want = [] if not kind else [('name', 'birth', 'addr', 'term').index(kind)]
-            check(f'複誦 {kind} {d}號：只錯那一項', miss == want, (said, miss))
-            o = opts(); right = ev(page, "Game.getConfig().REGISTER.options()")
-            check('複誦三個選項', len(o) == 3 and '你到底有沒有在看我寫的啊？' in o, o)
-            ans = '對，沒錯。' if not kind else [x for x in o if x.startswith('不好意思')][0]
-            for c in o:
-                if c != ans: k = m(); pick_(c); check('複誦錯的選項：' + c, st() == 'REGISTER' and m() == k + 1)
-            if kind: check('抓錯選項說正確內容', mine[want[0]] in ans, ans)
-            pick_(ans); check('複誦答對往付錢', ev(page, 'Game._trans?Game._trans.to:Game.state') == 'PAY', st())
+    # 複誦：名字、生日（差一天／差一個月）、住址（整個換掉／只錯門牌）；說對時「不好意思」要說別的內容
+    kinds = [('name', ''), ('birth', 'day'), ('birth', 'month'), ('addr', 'whole'), ('addr', 'number')]
+    for kind, sub in kinds:
+        for wrong in (True, False):
+            for mm, d, ai, step in ((4, 1, 3, 1), (4, 30, 0, -1), (3, 31, 1, 1), (1, 31, 2, -1), (12, 15, 1, 1)):
+                jump(page, 'REGISTER'); ev(page, f"Object.assign(Game.task,{{form:{{name:Game.N,m:{mm},d:{d},addr:{ai},term:'一年'}},regWrong:{str(wrong).lower()},regKind:'{kind}',regBirth:'{sub}',regAddr:'{sub}',regStep:{step}}}); Game.render()")
+                said = txt(page); said = said[said.index('光明燈登記：'):]; said = said[:said.index('對嗎')]
+                mine = ['María', ev(page, f'birthZh({mm},{d})'), ev(page, f'ADDR[{ai}][0]'), '一年']
+                miss = [i for i, x in enumerate(mine) if f'{x}' not in said]
+                idx = ('name', 'birth', 'addr').index(kind); tag = f'{kind} {sub} {mm}/{d} {"錯" if wrong else "對"}'
+                check('複誦只錯該錯的那一項：' + tag, miss == ([idx] if wrong else []), (said, miss))
+                if wrong and sub in ('day', 'month'):
+                    sm, sd = ev(page, f"(()=>{{for(let m=1;m<=12;m++)for(let d=1;d<=daysIn(m);d++)if({said!r}.includes('是'+birthZh(m,d)+'，'))return [m,d]}})()")
+                    no_month = sub == 'month' and (mm, d) in ((3, 31), (1, 31))
+                    want_ok = (abs(sm - mm) == 1 and sd == d) if sub == 'month' and not no_month else (sm == mm and abs(sd - d) == 1)
+                    check('生日差一天或差一個月：' + tag, want_ok, (sm, sd))
+                if wrong and sub == 'number': check('只錯門牌：' + tag, mine[2].split('路')[0] + '路' in said, said)
+                o = opts(); check('複誦三個選項：' + tag, len(o) == 3 and '對，沒錯。' in o and '你到底有沒有在看我寫的啊？' in o, o)
+                fix = [x for x in o if x.startswith('不好意思')][0]
+                if wrong: check('更正選項說正確內容：' + tag, mine[idx] in fix, fix)
+                else: check('說對時更正選項是別的內容：' + tag, mine[idx] + '。' not in fix, (fix, mine[idx]))
+                ans = fix if wrong else '對，沒錯。'
+                for c in o:
+                    if c != ans: k = m(); pick_(c); check('複誦錯的選項：' + c, st() == 'REGISTER' and m() == k + 1)
+                pick_(ans); check('複誦答對往付錢：' + tag, ev(page, 'Game._trans?Game._trans.to:Game.state') == 'PAY', st())
+    d = ev(page, "(()=>{const c={};for(let i=0;i<3000;i++){Game.setup();const t=Game.task;c[t.regKind]=1;c[t.regBirth]=1;c[t.regAddr]=1;c['p'+t.said]=1}return Object.keys(c).sort()})()")
+    check('每局會抽到的種類（沒有期限）', d == sorted(['name', 'birth', 'addr', 'day', 'month', 'whole', 'number', 'p300', 'p500', 'p1000']), d)
+    # 付錢：三種燈、三個選項
+    for said in (500, 300, 1000):
+        jump(page, 'PAY'); ev(page, f"Object.assign(Game.task,{{payWrong:{str(said != 500).lower()},said:{said},other:LAMPS.find(x=>x.price==={said if said != 500 else 300})}}); Game.render()")
+        t_ = txt(page, '#game-window')
+        check(f'價目牌三種燈（{said}）', all(x in t_ for x in ('光明燈（一年）500元', '文昌燈（一年）300元', '財神燈（一年）1000元')) and '金紙' not in t_ and '蠟燭' not in t_, t_)
+        o = opts(); fix = [x for x in o if x.startswith('不好意思')][0]
+        check(f'付錢三個選項（{said}）', len(o) == 3 and '好，這裡是一千元。' in o and '可以算便宜一點嗎？' in o and (('五百元' in fix) == (said != 500)), o)
+        ans = fix if said != 500 else '好，這裡是一千元。'
+        for c in o:
+            if c != ans: k = m(); pick_(c); check(f'付錢錯的選項（{said}）：' + c, st() == 'PAY' and m() == k + 1)
+        pick_('可以算便宜一點嗎？'); check('講價的說明', '不能講價' in ev(page, 'Game.log.at(-1).zh'))
+        pick_(ans); check(f'付錢答對（{said}）', ev(page, 'Game._trans?Game._trans.to:Game.state') == ('PAY_FIX' if said != 500 else 'CHANGE'), st())
+    jump(page, 'AMULET'); check('平安符 Ami 的話', 'Ami：María，我們來領一個平安符吧！' in txt(page), txt(page))
+    # 第三個聖筊換笑臉圖
+    page.emulate_media(reduced_motion='reduce'); jump(page, 'CONFIRM', '甲'); seen = []
+    for i in range(3):
+        page.locator('.toss[role=button]').focus(); page.keyboard.press('Enter'); page.wait_for_timeout(260); seen.append(src())
+        if i == 2: page.wait_for_timeout(300); page.screenshot(path='/tmp/t_happy.png', full_page=True)
+    check('只有第三個聖筊換笑臉圖', seen == ['images/throw.jpg', 'images/throw.jpg', 'images/throw_happy.jpg'] and page.locator('#npc-avatar').is_visible(), seen)
+    pick_('走到籤櫃'); check('離開後換回別的圖', st() == 'SLIP_NUM' and src() == 'images/cabinet.jpg', src())
+    page.emulate_media(reduced_motion='no-preference')
+    for state in ('REGISTER', 'PAY', 'MEAN', 'AMULET'):
+        jump(page, state); ev(page, "if(!Game.showPinyin)Game.togglePinyin()"); page.wait_for_timeout(300); page.screenshot(path=f'/tmp/t_{state}_py.png', full_page=True); ev(page, "Game.togglePinyin()")
     check('生日、住址只用在這一局', ev(page, "(()=>{Game.setup();return Object.keys(Game.task.form).length===0 && !JSON.stringify(localStorage).includes('成功路')})()"))
     ctx.close()
     # ── 手機：登記單排得下 ──

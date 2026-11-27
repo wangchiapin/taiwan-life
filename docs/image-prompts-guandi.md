@@ -50,6 +50,7 @@
 | 15 | `end_good.jpg` | END（錯 2 次以內：Ami 笑，輕鬆） | Ami 參考圖（從飲料店 end_good.jpg 裁頭肩） |
 | 16 | `end_bad.jpg` | END（錯比較多：Ami 溫柔安慰） | 上傳已確認的 end_good.jpg（編輯式） |
 
+> `throw_happy.jpg` 已完成（2026-11-27）：底圖 throw.jpg，只改 Ami 的表情成興奮大笑；CONFIRM 丟出第三個聖筊時顯示。
 > 有些關卡暫時共用圖：PAY、PAY_FIX、CHANGE 都用 `desk.jpg`；ASK、MEAN 用 `explain.jpg`（2026-11-27 完成），FILL 用 `desk.jpg`。
 > 尷尬表情：`cabinet_sorry.jpg` 已完成（2026-11-27，拿錯籤道歉時用）；`desk_sorry.jpg` 已完成（2026-11-27，登記唸錯、算錯錢、找錯錢時用）。
 

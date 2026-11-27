@@ -405,7 +405,7 @@ function catchState(G, o) {
     options: () => rotOf(t, [o.ok, o.fix(), o.rude]),
     next: c => {
       const wrong = o.wrong(), fix = o.fix(), right = wrong ? fix : o.ok;
-      if (c !== right) { G.addMistake(c === o.ok ? o.whyWrong() : c === fix ? o.whyRight() : POLITE); return; }
+      if (c !== right) { G.addMistake(c === o.ok ? o.whyWrong() : c === fix ? o.whyRight() : o.whyRude ? o.whyRude() : POLITE); return; }
       if (G.att[o.key] === 1) G.good(...(wrong ? o.goodWrong : o.goodOk));
       G.thought = wrong && o.apology ? o.apology() : null;
       o.go(wrong);

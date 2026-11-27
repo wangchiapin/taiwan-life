@@ -17,10 +17,10 @@ ORACLE = """() => {
     REGISTER: () => {
       if (!t.regWrong) return '對，沒錯。';
       const f = Game.filled();
-      return { name: `不好意思，我的名字是${N}。`, birth: `不好意思，我的生日是${birthZh(f.m, f.d)}。`, addr: `不好意思，我住在${ADDR[f.addr][0]}。`, term: '不好意思，我要點一年的。' }[t.regKind];
+      return { name: `不好意思，我的名字是${N}。`, birth: `不好意思，我的生日是${birthZh(f.m, f.d)}。`, addr: `不好意思，我住在${ADDR[f.addr][0]}。` }[t.regKind];
     },
-    PAY: () => t.payWrong ? `不好意思，好像算錯了，應該是${zhNum(t.total)}元吧？` : `給你${zhNum(t.bill)}元。`,
-    PAY_FIX: `給你${zhNum(t.bill)}元。`,
+    PAY: () => t.payWrong ? `不好意思，我點的是光明燈，應該是${zhNum(t.total)}元吧？` : `好，這裡是${zhNum(t.bill)}元。`,
+    PAY_FIX: `好，這裡是${zhNum(t.bill)}元。`,
     CHANGE: () => t.changeWrong ? `不好意思，好像找錯了，應該找${zhNum(t.change)}元吧？` : '好，謝謝。',
     AMULET: '自己拿一個平安符，隨喜投一點香油錢。',
     GUOLU: '在香爐上方，順時針繞三圈。',

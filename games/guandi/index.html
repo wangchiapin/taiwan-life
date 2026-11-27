@@ -256,7 +256,7 @@ pinyinPro.customPinyin({
   '擲筊': 'zhí jiǎo', '筊杯': 'jiǎo bēi', '聖筊': 'shèng jiǎo', '笑筊': 'xiào jiǎo', '陰筊': 'yīn jiǎo', '筊': 'jiǎo',
   '籤': 'qiān', '籤詩': 'qiān shī', '籤筒': 'qiān tǒng', '籤櫃': 'qiān guì', '求籤': 'qiú qiān', '抽籤': 'chōu qiān', '解籤': 'jiě qiān',
   '上上籤': 'shàng shàng qiān', '上吉籤': 'shàng jí qiān', '中吉籤': 'zhōng jí qiān', '中平籤': 'zhōng píng qiān', '下下籤': 'xià xià qiān',
-  '光明燈': 'guāng míng dēng', '平安符': 'píng ān fú', '香油錢': 'xiāng yóu qián', '隨喜': 'suí xǐ', '保佑': 'bǎo yòu', '順時針': 'shùn shí zhēn', '逆時針': 'nì shí zhēn',
+  '光明燈': 'guāng míng dēng', '文昌燈': 'wén chāng dēng', '財神燈': 'cái shén dēng', '平安符': 'píng ān fú', '香油錢': 'xiāng yóu qián', '隨喜': 'suí xǐ', '保佑': 'bǎo yòu', '順時針': 'shùn shí zhēn', '逆時針': 'nì shí zhēn',
   '躺平': 'tǎng píng', '老頭': 'lǎo tóu', '揉爛': 'róu làn',
   '一月': 'yī yuè', '十一月': 'shí yī yuè', '一號': 'yī hào', '十一號': 'shí yī hào', '二十一號': 'èr shí yī hào', '三十一號': 'sān shí yī hào',
   '廟公': 'miào gōng', '登記': 'dēng jì', '登記單': 'dēng jì dān', '價目牌': 'jià mù pái', '告示牌': 'gào shì pái',
@@ -383,6 +383,39 @@ const RATTLE = { seed: 7, n: 22, lo: 1800, hi: 5200, q: 7, tube: 420, thud: .25,
 const RATTLE_MS = 2300;
 const SHAKE = '輕搖籤筒，等一支籤掉出來。';
 
+/* 擲筊落地聲（木頭掉在石磚地）：用程式合成。ctx＝AudioContext，t0＝第一聲的時間，o＝音色
+   一共五聲，越彈越小聲、間隔越短；每一聲是兩個筊杯前後差一點點落地 */
+function beiSound(ctx, t0, o) {
+  let seed = o.seed; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const len = Math.floor(ctx.sampleRate * .2), noise = ctx.createBuffer(1, len, ctx.sampleRate), d = noise.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = rnd() * 2 - 1;
+  const out = ctx.createGain(), lp = ctx.createBiquadFilter(); out.gain.value = o.vol; lp.type = 'lowpass'; lp.frequency.value = o.cut; lp.Q.value = .5; out.connect(lp); lp.connect(ctx.destination);
+  const burst = (t, type, freq, q, dur, v) => {
+    const n = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    n.buffer = noise; f.type = type; f.frequency.value = freq; f.Q.value = q;
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+    n.connect(f); f.connect(g); g.connect(out); n.start(t, rnd() * .05); n.stop(t + dur + .01);
+  };
+  const hit = (t, pitch, v) => {
+    burst(t, 'lowpass', o.thud * pitch, .7, .045, v * o.thudV);          // 撞到地板的悶響
+    burst(t, 'bandpass', o.knock * pitch, 4, .035, v * o.knockV);        // 木頭的「喀」
+    o.modes.forEach(([freq, amp, dur]) => {                              // 木塊本身很短的「叩」
+      const s = ctx.createOscillator(), a = ctx.createGain(), f = freq * pitch * (.96 + rnd() * .08);
+      s.frequency.setValueAtTime(f * 1.06, t); s.frequency.exponentialRampToValueAtTime(f, t + .012);
+      a.gain.setValueAtTime(.0001, t); a.gain.linearRampToValueAtTime(v * amp, t + .0015); a.gain.exponentialRampToValueAtTime(.001, t + dur);
+      s.connect(a); a.connect(out); s.start(t); s.stop(t + dur + .01);
+    });
+  };
+  o.at.forEach((dt, i) => {
+    hit(t0 + dt, i % 2 ? 1.04 : 1, o.loud[i]);
+    hit(t0 + dt + .026, i % 2 ? .9 : .88, o.loud[i] * .6);
+  });
+}
+const BEI = { seed: 11, vol: .85, cut: 2600, thud: 500, thudV: .9, knock: 900, knockV: 1.1, modes: [[390, .6, .06], [930, .35, .032]],
+  at: [0, .14, .265, .375, .475], loud: [1, .72, .52, .38, .28] };
+/* 丟一次的畫面長度、第一聲的時間（毫秒）；筊杯彈跳的時間點和 BEI.at 一樣 */
+const TOSS_MS = 1200, TOSS_LAND = 640;
+
 /* 搖籤筒動畫：背景（draw_bg.jpg）不動，手和籤筒（draw_hands.png，比畫面高 60，下緣的手臂有延長）跟著聲音晃五下，
    最後一支籤翻出來掉到地上彈兩下。t＝聲音開始後的秒數，時間點和 rattle() 一樣。
    停住時的畫面＝draw.jpg，最後一格＝draw_done.jpg */
@@ -442,12 +475,22 @@ const ADDR = [
   ['台南市成功路二十五號', 'Chenggong Road n.º 25, Tainan', 'No. 25 Chenggong Road, Tainan'],
   ['高雄市中正路八號', 'Zhongzheng Road n.º 8, Kaohsiung', 'No. 8 Zhongzheng Road, Kaohsiung']
 ];
+/* 廟公只唸錯門牌號碼時用：每個地址原本的號碼、容易聽錯的兩個號碼 */
+const HOUSE = [[3, [4, 13]], [12, [2, 20]], [25, [15, 26]], [8, [7, 18]]];
+const addrNo = (i, n) => { const [old] = HOUSE[i], [zh, es, en] = ADDR[i]; return [zh.replace(`${zhNum(old)}號`, `${zhNum(n)}號`), es.replace(`n.º ${old}`, `n.º ${n}`), en.replace(`No. ${old} `, `No. ${n} `)]; };
 const MONTH_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 const MONTH_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const FILL_ROWS = ['name', 'birth', 'addr', 'term'];
 const daysIn = m => m === 2 ? 29 : [4, 6, 9, 11].includes(m) ? 30 : 31;
 const birthZh = (m, d) => `${zhNum(m)}月${zhNum(d)}號`;
 const TERMS = { '半年': ['medio año', 'half a year'], '三個月': ['tres meses', 'three months'], '一年': ['un año', 'one year'] };
+
+/* 價目牌上的三種燈（第一種是玩家要點的） */
+const LAMPS = [
+  { zh: '光明燈', es: 'la lámpara de luz', en: 'the light lamp', price: 500 },
+  { zh: '文昌燈', es: 'la lámpara de Wenchang', en: 'the Wenchang lamp', price: 300 },
+  { zh: '財神燈', es: 'la lámpara del dios de la riqueza', en: 'the God of Wealth lamp', price: 1000 }
+];
 
 /* 登記單上，廟公可能寫錯的人名 */
 const FAKE_NAMES = ['小美', '大衛', '阿明', '佩佩', 'Lucas', 'Sofía'];
@@ -470,11 +513,11 @@ const VOCAB = {
   ASK: [['解籤', 'interpretar la suerte', 'interpret a fortune'], ['廟公', 'encargado del templo', 'temple keeper'], ['旁邊', 'al lado', 'beside'], ['老頭', 'viejo (grosero)', 'old man (rude)'], ['揉爛', 'arrugar y estrujar', 'crumple up'], ['丟掉', 'tirar', 'throw away']],
   MEAN: [['廟公', 'encargado del templo', 'temple keeper'], ['意思', 'significado', 'meaning']],
   FILL: [['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['登記單', 'formulario de registro', 'registration form'], ['姓名', 'nombre', 'name'], ['生日', 'cumpleaños', 'birthday'], ['住址', 'dirección', 'address'], ['期限', 'plazo', 'period'], ['選擇', 'elegir', 'choose'], ['半年', 'medio año', 'half a year']],
-  REGISTER: [['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['登記', 'registrar', 'register'], ['生日', 'cumpleaños', 'birthday'], ['住在', 'vivir en', 'live at'], ['一年', 'un año', 'one year'], ['不好意思', 'disculpe', 'excuse me']],
-  PAY: [['一共', 'en total', 'in total'], ['算錯', 'calcular mal', 'miscalculate'], ['價目牌', 'tabla de precios', 'price board'], ['應該', 'debería', 'should']],
+  REGISTER: [['交給', 'entregar a', 'hand to'], ['登記單', 'formulario de registro', 'registration form'], ['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['登記', 'registrar', 'register'], ['生日', 'cumpleaños', 'birthday'], ['住在', 'vivir en', 'live at'], ['一年', 'un año', 'one year'], ['不好意思', 'disculpe', 'excuse me']],
+  PAY: [['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['文昌燈', 'lámpara de Wenchang (estudios)', 'Wenchang lamp (studies)'], ['財神燈', 'lámpara del dios de la riqueza', 'God of Wealth lamp'], ['便宜', 'barato', 'cheap'], ['一共', 'en total', 'in total'], ['價目牌', 'tabla de precios', 'price board'], ['應該', 'debería', 'should']],
   PAY_FIX: [['夠', 'alcanzar, ser suficiente', 'be enough'], ['當場', 'en el momento', 'on the spot'], ['下次再付', 'pagar la próxima vez', 'pay next time']],
   CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give wrong change'], ['應該找', 'debería darme de cambio', 'should give back']],
-  AMULET: [['平安符', 'amuleto de protección', 'protection charm'], ['自己拿', 'tomarlo uno mismo', 'take it yourself'], ['隨喜', 'donar lo que uno quiera', 'donate as you wish'], ['香油錢', 'donación al templo', 'temple donation']],
+  AMULET: [['平安符', 'amuleto de protección', 'protection charm'], ['領', 'recoger', 'collect'], ['自己拿', 'tomarlo uno mismo', 'take it yourself'], ['隨喜', 'donar lo que uno quiera', 'donate as you wish'], ['香油錢', 'donación al templo', 'temple donation']],
   GUOLU: [['過爐', 'pasar sobre el incensario', 'pass over the burner'], ['順時針', 'en sentido horario', 'clockwise'], ['逆時針', 'en sentido antihorario', 'counter-clockwise'], ['繞三圈', 'dar tres vueltas', 'circle three times']],
   EXIT: [['龍進虎出', 'entrar por el dragón, salir por el tigre', 'enter by the dragon, exit by the tiger'], ['虎邊', 'lado del tigre (izquierda)', 'tiger side (left)'], ['出去', 'salir', 'go out']],
   END: [['心意', 'la intención, el corazón', 'the thought that counts'], ['輕鬆', 'relajado', 'relaxed'], ['下次', 'la próxima vez', 'next time']],
@@ -493,7 +536,7 @@ const STAGE = {
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
   GATE: '走到廟門口', FIRE: '去點香處拿香點香', HEAVEN: '走到廟的前面', MAIN: '走進大殿', SIDE: '走到側殿', THROW: '去求籤', DRAW: from => from === 'CONFIRM' ? '回去重新求籤' : '走到籤筒前', CONFIRM: '問問關聖帝君是不是這支籤', SLIP_NUM: '走到籤櫃',
-  READ: '看籤詩', ASK: '拿籤詩給廟公看', MEAN: '聽廟公解籤', FILL: '走到登記處', REGISTER: '聽廟公唸一次', PAY: '付錢', PAY_FIX: '聽廟公重算', CHANGE: '等找錢', AMULET: '看旁邊的桌子', GUOLU: '走到香爐前', EXIT: '準備離開', END: '走出廟門'
+  READ: '看籤詩', ASK: '拿籤詩給廟公看', MEAN: '聽廟公解籤', FILL: '走到登記處', PAY: '付錢', PAY_FIX: '聽廟公重算', CHANGE: '等找錢', AMULET: '看旁邊的桌子', GUOLU: '走到香爐前', EXIT: '準備離開', END: '走出廟門'
 };
 
 /* ══════════════════════════════════════
@@ -533,9 +576,11 @@ const Game = defineGame({
   att: {},                       // 每一關選了幾次（第一次就對才給綠卡）
   cash: null,
   ti: 0, streak: 0, goNext: null,   // 擲筊：第幾次、連續幾個聖筊、這一關丟完要去哪裡（null＝還要再丟）
-  EXTRA_IMAGES: ['images/cabinet_sorry.jpg', 'images/desk_sorry.jpg', 'images/gate_in.jpg', 'images/fire_out.jpg', 'images/draw_done.jpg', 'images/draw_bg.jpg', 'images/draw_hands.png'],   // imageFor() 才會用到的圖，也先載好
+  EXTRA_IMAGES: ['images/throw_happy.jpg', 'images/cabinet_sorry.jpg', 'images/desk_sorry.jpg', 'images/gate_in.jpg', 'images/fire_out.jpg', 'images/draw_done.jpg', 'images/draw_bg.jpg', 'images/draw_hands.png'],   // imageFor() 才會用到的圖，也先載好
   /* 過場頁預設用上一關的圖；旁白已經到下一個畫面時，改用符合旁白的圖：進廟門（點火處、Ami 在旁邊）、熄火後（香頭只剩灰） */
   imageFor() {
+    /* 第三個聖筊：Ami 興奮地笑 */
+    if (!this._transMode && this.state === 'CONFIRM' && this.phase === 'landed' && this.goNext === 'SLIP_NUM') return ['images/throw_happy.jpg', '😄'];
     /* 廟公講錯被抓到：道歉的畫面換成尷尬的臉（SORRY_IMGS 有圖的關卡才換） */
     const from = this._transMode && this._trans ? this._trans.from : this.state === 'PAY_FIX' ? 'PAY' : null;
     const wrong = from && this.task && { SLIP_NUM: this.task.numWrong, REGISTER: this.task.regWrong, PAY: this.task.payWrong, CHANGE: this.task.changeWrong }[from];
@@ -584,18 +629,19 @@ const Game = defineGame({
     /* 聽懂題：正解＋兩個意思不同的籤 */
     t.mean = [slip, ...otherSlips(slip)].map(x => x.say);
     const seen = [slip.gloss.zh, ...t.mean].join('');
-    VOCAB.MEAN = [['廟公', 'encargado del templo', 'temple keeper'], ['意思', 'significado', 'meaning'], ...MEAN_WORDS.filter(w => seen.includes(w[0]))];
+    VOCAB.MEAN = [['覺得', 'creer, opinar', 'think, feel'], ['廟公', 'encargado del templo', 'temple keeper'], ['意思', 'significado', 'meaning'], ...MEAN_WORDS.filter(w => seen.includes(w[0]))];
     /* 填登記單：名字三選一（自己的暱稱＋兩個別人的名字） */
     t.form = {}; t.fillOpen = 'name'; t.pickMonth = false;
     const others = FAKE_NAMES.filter(x => x !== this.N).map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(a => a[1]);
     t.names = rotOf(t, [this.N, others[0], others[1]]);
-    /* 廟公複誦登記單時有 45% 機率錯一項（名字、生日、住址或期限） */
-    t.regWrong = Math.random() < 0.45; t.regKind = pick(['name', 'birth', 'addr', 'term']); t.regName = pick(others);
-    t.regShift = pick([1, 2, 3]); t.regTerm = pick(['半年', '三個月']);
-    /* 付錢：光明燈 500 元，身上只有一張一千元，所以要找 500 */
-    const total = 500, extras = [{ zh: '金紙', es: 'papel dorado', en: 'joss paper', price: 100 }, { zh: '蠟燭', es: 'velas', en: 'candles', price: 50 }];
-    t.total = total; t.payWrong = Math.random() < 0.45; t.extra = pick(extras);
-    t.said = t.payWrong ? total + t.extra.price : total;
+    /* 廟公複誦登記單時有 45% 機率錯一項：名字；生日（差一天或差一個月）；住址（整個換掉或只錯門牌號碼） */
+    t.regWrong = Math.random() < 0.45; t.regKind = pick(['name', 'birth', 'addr']); t.regName = pick(others);
+    t.regBirth = pick(['day', 'month']); t.regStep = pick([1, -1]);
+    t.regAddr = pick(['whole', 'number']); t.regShift = pick([1, 2, 3]); t.regNum = pick([0, 1]);
+    /* 付錢：光明燈 500 元，身上只有一張一千元，所以要找 500。廟公可能報成別種燈的價錢 */
+    const total = 500;
+    t.total = total; t.payWrong = Math.random() < 0.45; t.other = pick(LAMPS.slice(1));
+    t.said = t.payWrong ? t.other.price : total;
     t.bill = 1000; t.change = t.bill - total;
     t.changeWrong = Math.random() < 0.4;
     t.given = t.changeWrong ? t.change + pick([-100, -50, 50, 100]) : t.change;
@@ -604,12 +650,14 @@ const Game = defineGame({
   },
   /* 抽籤：按下以後播籤筒聲和搖晃動畫，播完才跳下一頁。靜音照樣播動畫（只是沒聲音）；開了「減少動態」就不晃 */
   busy: false,
-  playRattle() {
+  playRattle() { return this.playSfx((c, t) => rattle(c, t, RATTLE)); },
+  /* 播合成音效（靜音時不播）；draw(ctx, 開始時間) */
+  playSfx(draw) {
     try { if (localStorage.getItem('hg.mute.taiwan-life') === '1') return false; } catch (e) {}
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
     try {
       this.sfx = this.sfx || new AC(); this.sfx.resume();
-      rattle(this.sfx, this.sfx.currentTime + .05, RATTLE);
+      draw(this.sfx, this.sfx.currentTime + .05);
     } catch (e) { return false; }
     return true;
   },
@@ -743,18 +791,24 @@ const Game = defineGame({
     const t = this.task, st = this.state;
     Tr.closeAll(); Speech.stop();
     this.phase = 'fly'; this.thought = null; this.feedback = []; this.render();
-    const quick = matchMedia('(prefers-reduced-motion: reduce)').matches, ms = quick ? 150 : 1000;
+    const quick = matchMedia('(prefers-reduced-motion: reduce)').matches, ms = quick ? 150 : TOSS_MS;
+    Music.duck(true);
+    this.playSfx((c, at) => beiSound(c, at + (quick ? 0 : TOSS_LAND / 1000 - .05), BEI));
     if (!quick) document.querySelectorAll('.toss.fly .bei svg').forEach((cup, i) => {
       const d = i ? 1 : -1;
+      const at = (n, y, x, turn, flip = 1080) => ({ transform: `translate(${d * x}px, ${y}px) rotateX(${flip}deg) rotate(${d * turn}deg)`, offset: (TOSS_LAND + n) / TOSS_MS });
+      const hits = BEI.at.map(s => s * 1000), heights = [-34, -22, -13, -7];   // 每次落地之間彈起的高度
       cup.animate([
         { transform: `translate(${-d * 30}px, 20px) rotateX(0deg) rotate(0deg)` },
-        { transform: `translate(${d * 6}px, -150px) rotateX(540deg) rotate(${d * 150}deg)`, offset: .4 },
-        { transform: `translate(${d * 4}px, 8px) rotateX(1080deg) rotate(${d * 340}deg)`, offset: .75 },
-        { transform: `translate(${d * 2}px, -14px) rotateX(1080deg) rotate(${d * 356}deg)`, offset: .87 },
+        at(-330, -150, 6, 150, 540),
+        ...hits.flatMap((h, n) => n < 4
+          ? [at(h, 8, 4 - n, 340 + n * 4), at((h + hits[n + 1]) / 2, heights[n], 4 - n, 343 + n * 4)]
+          : [at(h, 8, 1, 358)]),
         { transform: 'translate(0, 0) rotateX(1080deg) rotate(' + d * 360 + 'deg)' }
       ], { duration: ms, easing: 'ease-out' });
     });
     setTimeout(() => {
+      Music.duck(false);
       if (this.task !== t || this.phase !== 'fly') return;
       this.land();
       if (this.state !== st) return;
@@ -870,9 +924,7 @@ const Game = defineGame({
   boardHTML() {
     const r = s => this.ruby(s);
     return `<div class="card"><div class="mh">🏮 ${r('價目牌')}</div>` +
-      `<div class="mrow"><b>${r('光明燈（一年）')}</b><span>500${r('元')}</span></div>` +
-      `<div class="mrow"><b>${r('金紙')}</b><span>100${r('元')}</span></div>` +
-      `<div class="mrow"><b>${r('蠟燭')}</b><span>50${r('元')}</span></div></div>`;
+      LAMPS.map(x => `<div class="mrow"><b>${r(x.zh + '（一年）')}</b><span>${x.price}${r('元')}</span></div>`).join('') + '</div>';
   },
 
   /* ── 狀態設定 ── */
@@ -895,9 +947,9 @@ const Game = defineGame({
 
     /* ── 付錢三關：報價、付錢、找錢（光明燈 500 元，用一千元付，找 500） ── */
     const st = (zh, es, en) => L(`廟公：${zh}`, es, en);
-    const payOk = `給你${zhNum(t.bill)}元。`;
-    const claim = t.payWrong ? t.total : t.total + t.extra.price;
-    const fixTotal = `不好意思，好像算錯了，應該是${zhNum(claim)}元吧？`;
+    const payOk = `好，這裡是${zhNum(t.bill)}元。`;
+    const claim = t.payWrong ? t.total : t.other.price;   // 廟公報對時，「更正」選項說的是別種燈的價錢
+    const fixTotal = `不好意思，我點的是光明燈，應該是${zhNum(claim)}元吧？`;
     const fixChange = `不好意思，好像找錯了，應該找${zhNum(t.changeWrong ? t.change : t.given + 50)}元吧？`;
     const afterPay = () => { Game.state = 'AMULET'; };
     const toChange = () => { Game.state = 'CHANGE'; };
@@ -1095,7 +1147,7 @@ const Game = defineGame({
       MEAN: {
         place: 'temple',
         dialogue: () => [staff(`好，我看看。${S.gloss.zh}`, `A ver… ${S.gloss.es}`, `Let me see… ${S.gloss.en}`),
-          L('廟公的意思是什麼？', '¿Qué quiso decir el encargado?', 'What did the temple keeper mean?')],
+          ami(`${N}，你覺得廟公的意思是什麼？`, `${N}, ¿qué crees que quiso decir el encargado?`, `${N}, what do you think the temple keeper meant?`)],
         options: () => rotOf(t, t.mean),
         next: c => {
           if (c !== S.say) { Game.addMistake(M('廟公不是這個意思。再看一次、聽一次他說的話。', 'No es eso lo que dijo. Vuelve a leer y escuchar sus palabras.', "That's not what he meant. Read and listen to his words again.")); return; }
@@ -1130,8 +1182,6 @@ const Game = defineGame({
             Game.addMistake(M(parts.map(x => x.zh).join(''), parts.map(x => x.es).join(' '), parts.map(x => x.en).join(' ')));
             return;
           }
-          goodFirst('FILL', '很好！登記單填好了。', '¡Muy bien! El formulario está completo.', 'Good! The form is filled in.');
-          Game.thought = [narr('你把登記單交給廟公。', 'Entregas el formulario al encargado.', 'You hand the form to the temple keeper.')];
           Game.state = 'REGISTER';
         }
       },
@@ -1139,22 +1189,29 @@ const Game = defineGame({
       /* ═══ 登記光明燈：廟公複誦登記單，可能說錯一項 ═══ */
       REGISTER: (() => {
         const f = Game.filled(), k = t.regKind;
-        const mine = { name: N, birth: birthZh(f.m, f.d), addr: ADDR[f.addr][0], term: '一年' };
-        /* 廟公說錯時用的值 */
-        const wd = f.d < daysIn(f.m) ? f.d + 1 : f.d - 1, wa = (f.addr + t.regShift) % ADDR.length;
-        const bad = { name: t.regName, birth: birthZh(f.m, wd), addr: ADDR[wa][0], term: t.regTerm };
+        const mine = { name: N, birth: birthZh(f.m, f.d), addr: ADDR[f.addr][0] };
+        /* 廟公說錯時用的值（廟公說對時，「更正」選項改說這個錯的值） */
+        const months = [f.m + t.regStep, f.m - t.regStep].filter(m => m >= 1 && m <= 12 && f.d <= daysIn(m));
+        const byMonth = t.regBirth === 'month' && months.length > 0;   // 例如三月三十一號，前後兩個月都沒有 31 號，就改成差一天
+        const wm = byMonth ? months[0] : f.m, wd = byMonth ? f.d : f.d + t.regStep >= 1 && f.d + t.regStep <= daysIn(f.m) ? f.d + t.regStep : f.d - t.regStep;
+        const wa = (f.addr + t.regShift) % ADDR.length;
+        const badAddr = t.regAddr === 'number' ? addrNo(f.addr, HOUSE[f.addr][1][t.regNum]) : ADDR[wa];
+        const bad = { name: t.regName, birth: birthZh(wm, wd), addr: badAddr[0] };
         const said = { ...mine, ...(t.regWrong ? { [k]: bad[k] } : {}) };
-        const day = t.regWrong && k === 'birth' ? wd : f.d, ai = t.regWrong && k === 'addr' ? wa : f.addr;
-        const label = { name: '名字', birth: '生日', addr: '住址', term: '期限' }[k];
-        const es = { name: 'el nombre', birth: 'el cumpleaños', addr: 'la dirección', term: 'el plazo' }[k];
-        const en = { name: 'name', birth: 'birthday', addr: 'address', term: 'period' }[k];
+        const [month, day] = t.regWrong && k === 'birth' ? [wm, wd] : [f.m, f.d];
+        const addr = t.regWrong && k === 'addr' ? badAddr : ADDR[f.addr];
+        const claim = t.regWrong ? mine : bad;
+        const label = { name: '名字', birth: '生日', addr: '住址' }[k];
+        const es = { name: 'el nombre', birth: 'el cumpleaños', addr: 'la dirección' }[k];
+        const en = { name: 'name', birth: 'birthday', addr: 'address' }[k];
         return catchState(Game, {
           key: 'REGISTER', place: 'temple', html: () => Game.formHTML(),
-          dialogue: () => [staff(`光明燈登記：名字是「${said.name}」，生日是${said.birth}，住在${said.addr}，點${said.term}，對嗎？`,
-            `Registro de la lámpara de luz: nombre «${said.name}», cumpleaños el ${day} de ${MONTH_ES[f.m - 1]}, dirección ${ADDR[ai][1]}, por ${TERMS[said.term][0]}. ¿Correcto?`,
-            `Light lamp registration: name "${said.name}", birthday ${MONTH_EN[f.m - 1]} ${day}, address ${ADDR[ai][2]}, for ${TERMS[said.term][1]}. Is that right?`)],
+          dialogue: () => [narr('你把登記單交給廟公。', 'Entregas el formulario al encargado.', 'You hand the form to the temple keeper.'),
+            staff(`光明燈登記：名字是「${said.name}」，生日是${said.birth}，住在${said.addr}，點一年，對嗎？`,
+            `Registro de la lámpara de luz: nombre «${said.name}», cumpleaños el ${day} de ${MONTH_ES[month - 1]}, dirección ${addr[1]}, por un año. ¿Correcto?`,
+            `Light lamp registration: name "${said.name}", birthday ${MONTH_EN[month - 1]} ${day}, address ${addr[2]}, for one year. Is that right?`)],
           ok: '對，沒錯。',
-          fix: () => ({ name: `不好意思，我的名字是${N}。`, birth: `不好意思，我的生日是${mine.birth}。`, addr: `不好意思，我住在${mine.addr}。`, term: '不好意思，我要點一年的。' })[k],
+          fix: () => ({ name: `不好意思，我的名字是${claim.name}。`, birth: `不好意思，我的生日是${claim.birth}。`, addr: `不好意思，我住在${claim.addr}。` })[k],
           rude: '你到底有沒有在看我寫的啊？',
           wrong: () => t.regWrong,
           whyWrong: () => M(`廟公說錯了：登記單上的${label}是「${mine[k]}」，他說「${bad[k]}」。`, `El encargado se equivocó en ${es}: compara con el formulario.`, `The keeper got the ${en} wrong — compare with the form.`),
@@ -1162,7 +1219,7 @@ const Game = defineGame({
           goodWrong: ['你很細心！登記的內容說錯了，要馬上說。', '¡Qué atento! Si repiten mal el registro, hay que decirlo enseguida.', 'Well spotted! If the registration is repeated wrong, speak up right away.'],
           goodOk: ['廟公複誦的時候，要對一下登記單。', 'Cuando el encargado repita los datos, compáralos con el formulario.', 'When the keeper reads it back, compare it with the form.'],
           apology: () => [staff('啊，不好意思！我改過來。', '¡Ay, disculpe! Lo corrijo.', 'Oh, sorry! I will fix it.'),
-            staff(`好，「${N}」，${mine.birth}，${mine.addr}，一年，沒錯了。光明燈五百元。`, `Bien: «${N}», ${f.d} de ${MONTH_ES[f.m - 1]}, ${ADDR[f.addr][1]}, un año. Ahora sí. La lámpara de luz cuesta NT$500.`, `Okay: "${N}", ${MONTH_EN[f.m - 1]} ${f.d}, ${ADDR[f.addr][2]}, one year — correct now. The light lamp is NT$500.`)],
+            staff(`好，「${N}」，${mine.birth}，${mine.addr}，一年，沒錯了。`, `Bien: «${N}», ${f.d} de ${MONTH_ES[f.m - 1]}, ${ADDR[f.addr][1]}, un año. Ahora sí.`, `Okay: "${N}", ${MONTH_EN[f.m - 1]} ${f.d}, ${ADDR[f.addr][2]}, one year — correct now.`)],
           go: () => { Game.state = 'PAY'; }
         });
       })(),
@@ -1171,10 +1228,11 @@ const Game = defineGame({
       PAY: catchState(Game, {
         key: 'PAY', place: 'temple', html: board,
         dialogue: () => [st(`好的，一共是${zhNum(t.said)}元。`, `Muy bien, son ${esM(t.said)} en total.`, `All right, that's ${enM(t.said)} in total.`)],
-        ok: payOk, fix: () => fixTotal, rude: '你是不是想騙我的錢啊？',
+        ok: payOk, fix: () => fixTotal, rude: '可以算便宜一點嗎？',
+        whyRude: () => M('點燈的價錢是固定的，不能講價。', 'El precio de las lámparas es fijo: no se regatea.', "The lamp prices are fixed — you don't bargain."),
         wrong: () => t.payWrong,
-        whyWrong: () => M(`廟公算錯了：你只點了光明燈五百元，沒有要${t.extra.zh}，他多算了${t.extra.price}元（${t.said}元）。`, `El encargado se equivocó: solo pediste la lámpara de 500 y no ${t.extra.es}; cobró ${t.extra.price} de más (${esM(t.said)}).`, `The keeper got it wrong: you only asked for the NT$500 lamp, not ${t.extra.en}; he charged ${t.extra.price} extra (${enM(t.said)}).`),
-        whyRight: () => M(`廟公算對了：光明燈一共是${t.total}元。`, `Lo calculó bien: la lámpara son ${esM(t.total)}.`, `He was right: the lamp is ${enM(t.total)}.`),
+        whyWrong: () => M(`廟公報錯了：你點的是光明燈，五百元。${zhNum(t.said)}元是${t.other.zh}的價錢。`, `El encargado se equivocó: pediste la lámpara de luz, ${esM(t.total)}. ${esM(t.said)} es el precio de ${t.other.es}.`, `The keeper got it wrong: you asked for the light lamp, ${enM(t.total)}. ${enM(t.said)} is the price of ${t.other.en}.`),
+        whyRight: () => M(`廟公說對了：光明燈是${t.total}元。`, `Lo dijo bien: la lámpara de luz cuesta ${esM(t.total)}.`, `He was right: the light lamp is ${enM(t.total)}.`),
         goodWrong: ['你很細心！付錢以前，要先對一下價目牌。', '¡Qué atento! Antes de pagar, compara con la tabla de precios.', 'Well spotted! Before you pay, check the price board.'],
         goodOk: ['沒錯！付錢以前，要先對一下價目牌。', '¡Exacto! Antes de pagar, compara con la tabla de precios.', 'Right! Before you pay, check the price board.'],
         go: wrong => { if (wrong) { Game.state = 'PAY_FIX'; return; } toChange(); }
@@ -1182,7 +1240,7 @@ const Game = defineGame({
       PAY_FIX: {
         place: 'temple', html: board,
         dialogue: () => [st(`啊，不好意思！是${zhNum(t.total)}元。`, `¡Ay, disculpe! Son ${esM(t.total)}.`, `Oh, sorry! It's ${enM(t.total)}.`)],
-        options: () => rotOf(t, [payOk, `給你${zhNum(stdShortBill(t.total))}元。`, '我下次再付，可以嗎？']),
+        options: () => rotOf(t, [payOk, `好，這裡是${zhNum(stdShortBill(t.total))}元。`, '我下次再付，可以嗎？']),
         next: c => {
           if (c !== payOk) {
             Game.addMistake(c === '我下次再付，可以嗎？'
@@ -1211,7 +1269,7 @@ const Game = defineGame({
       AMULET: {
         place: 'temple',
         dialogue: () => [narr('光明燈登記好了。旁邊的桌子上，放著一些平安符，旁邊有一個香油錢箱。', 'La lámpara quedó registrada. En la mesa de al lado hay amuletos y una caja de donaciones.', 'The lamp is registered. On the table beside you are some protection charms and a donation box.'),
-          ami('我在旁邊。', 'Estoy a tu lado.', "I'm beside you.")],
+          ami(`${N}，我們來領一個平安符吧！`, `${N}, ¡vamos a recoger un amuleto!`, `${N}, let's go and get a protection charm!`)],
         options: () => rotOf(t, ['自己拿一個平安符，隨喜投一點香油錢。', '把旁邊的平安符全部拿走。', '站在旁邊，等廟公拿平安符給我。']),
         next: c => {
           if (c !== '自己拿一個平安符，隨喜投一點香油錢。') { Game.addMistake(c.includes('全部') ? M('平安符拿一個就好，不要全部拿走。', 'Basta con un amuleto; no te los lleves todos.', 'Take just one charm — not all of them.') : M('平安符放在旁邊，要自己拿。', 'Los amuletos están al lado; los tomas tú mismo.', 'The charms are set out beside you — take one yourself.')); return; }
