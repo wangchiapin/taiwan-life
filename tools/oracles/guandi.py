@@ -22,7 +22,7 @@ ORACLE = """() => {
     PAY: () => t.payWrong ? `不好意思，我點的是光明燈，應該是${zhNum(t.total)}元吧？` : `好，這裡是${zhNum(t.bill)}元。`,
     PAY_FIX: `好，這裡是${zhNum(t.bill)}元。`,
     CHANGE: () => t.changeWrong ? `不好意思，好像找錯了，應該找${zhNum(t.change)}元吧？` : '好，謝謝。',
-    AMULET: '自己拿一個平安符，隨喜投一點香油錢。',
+    AMULET: '（拿一個平安符，隨喜投一點香油錢）',
     GUOLU: '在香爐上方，順時針繞三圈。',
     EXIT: '從左邊的門（虎邊）出去。',
     END: '查看結果', RESULT: '查看排行榜'
