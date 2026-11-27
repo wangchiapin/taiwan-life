@@ -7,7 +7,7 @@ ORACLE = """() => {
     FIRE: t.fire === 'shake' ? '用手輕輕晃動，把火晃熄。' : '用另一隻手把火搧熄。',
     HEAVEN: '天公爐拜天公',
     MAIN: MAIN_RIGHT,
-    SIDE: '插上最後一支香。',
+    SIDE: '去求籤',
     THROW: () => '走到籤筒前',
     CONFIRM: () => Game.goNext === 'SLIP_NUM' ? '走到籤櫃' : '回去重新求籤',
     DRAW: '輕搖籤筒，等一支籤掉出來。',
@@ -23,6 +23,7 @@ ORACLE = """() => {
     PAY_FIX: `好，這裡是${zhNum(t.bill)}元。`,
     CHANGE: () => t.changeWrong ? `不好意思，好像找錯了，應該找${zhNum(t.change)}元吧？` : '好，謝謝。',
     AMULET: '（拿一個平安符，隨喜投一點香油錢）',
+    CHARM: '過香爐',
     GUOLU: '在香爐上方，順時針繞三圈。',
     EXIT: '從左邊的門（虎邊）出去。',
     END: '查看結果', RESULT: '查看排行榜'

@@ -20,7 +20,7 @@ def open_game(b, errs, mobile=False):
     return ctx, page
 
 def jump(page, state, plan=None):
-    ev(page, f"""(()=>{{ {f"let n=0; do Game.setup(); while(Game.task.plan!=='{plan}' && ++n<500);" if plan else 'Game.setup();'}
+    ev(page, f"""(()=>{{ {f"let n=0; do Game.setup(); while(Game.task.ask.length+'-'+Game.task.miss!=='{plan}' && ++n<2000);" if plan else 'Game.setup();'}
       Game.state='{state}'; Game.mistakes=0; Game.score=100; Game.thought=null; Game.feedback=[]; Game._trans=null; Game.render(); }})()""")
 
 def opt(page, text):
@@ -44,7 +44,7 @@ with sync_playwright() as p:
     b = p.chromium.launch(); errs = []
     # ── 手機：往上滑才丟 ──
     ctx, page = open_game(b, errs, mobile=True)
-    jump(page, 'THROW', '甲')
+    jump(page, 'THROW', '2-0')
     check('手機提示是往上滑', '往上滑' in ev(page, "(()=>{const c=document.querySelector('.toss').cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.textContent})()"))
     check('丟之前沒有選項', page.locator('#options-area .opt').count() == 0)
     page.screenshot(path='/tmp/t_ready.png')
@@ -75,22 +75,22 @@ with sync_playwright() as p:
     # ── 電腦：點、拖、鍵盤 ──
     ctx, page = open_game(b, errs)
     for name in ('點一下', '往上拖', '鍵盤'):
-        jump(page, 'THROW', '乙'); el = page.locator('.toss.ready'); bb = el.bounding_box(); x, y = bb['x'] + bb['width'] / 2, bb['y'] + bb['height'] * .7
+        jump(page, 'THROW', '1-1'); el = page.locator('.toss.ready'); bb = el.bounding_box(); x, y = bb['x'] + bb['width'] / 2, bb['y'] + bb['height'] * .7
         if name == '點一下': page.mouse.click(x, y)
         elif name == '往上拖': page.mouse.move(x, y); page.mouse.down(); page.mouse.move(x, y - 120, steps=6); page.mouse.up()
         else: el.focus(); page.keyboard.press('Enter')
         page.wait_for_timeout(1550); check('電腦' + name + '會丟', ev(page, 'Game.phase') == 'landed')
-    jump(page, 'THROW', '甲')
+    jump(page, 'THROW', '2-0')
     for i in (1, 2):
         el = page.locator('.toss[role=button]'); bb = el.bounding_box(); page.mouse.click(bb['x'] + bb['width'] / 2, bb['y'] + bb['height'] * .5); page.wait_for_timeout(1550)
         check('電腦落地後再點一下會再丟', ev(page, 'Game.ti') == i)
-    jump(page, 'THROW', '乙'); bb = page.locator('.toss.ready').bounding_box(); x, y = bb['x'] + bb['width'] / 2, bb['y'] + 40
+    jump(page, 'THROW', '1-1'); bb = page.locator('.toss.ready').bounding_box(); x, y = bb['x'] + bb['width'] / 2, bb['y'] + 40
     page.mouse.move(x, y); page.mouse.down(); page.mouse.move(x, y + 80, steps=4); page.mouse.up(); page.wait_for_timeout(200)
     check('電腦往下拖不會丟', ev(page, 'Game.phase') == 'ready')
-    # ── 三種劇本：次數、重抽、Ami 的話、按鈕 ──
+    # ── 七種劇本（抽籤前丟幾次-第一支籤第幾丟沒過）：次數、重抽、Ami 的話、按鈕 ──
     page.emulate_media(reduced_motion='reduce')
-    for plan, want in (('甲', 5), ('乙', 5), ('丙', 6)):
-        for run in range(4):
+    for plan, want in (('1-0', 4), ('1-1', 5), ('1-2', 6), ('1-3', 7), ('2-0', 5), ('2-1', 6), ('2-2', 7)):
+        for run in range(3):
             jump(page, 'THROW', plan); ev(page, "Game.mistakes=0; Game.score=100")
             throws, non, sticks, steps = 0, 0, [], 0
             while ev(page, 'Game.state') != 'SLIP_NUM' and steps < 60:
@@ -132,15 +132,18 @@ with sync_playwright() as p:
                     page.locator('#options-area .opt').click(); page.wait_for_timeout(60)
                     check('按鈕直接到下一步', ev(page, 'Game.state') == go, ev(page, 'Game.state'))
             check(f'{plan} 丟 {want} 次', throws == want, throws)
-            check(f'{plan} 剛好一次笑筊／陰筊', non == 1, non)
-            check(f'{plan} 抽籤次數', len(sticks) == (1 if plan == '甲' else 2), sticks)
+            ask_n, miss = map(int, plan.split('-'))
+            check(f'{plan} 笑筊／陰筊次數', non == (ask_n - 1) + (miss > 0), non)
+            check(f'{plan} 抽籤次數', len(sticks) == (2 if miss else 1), sticks)
             check(f'{plan} 重抽是不同的籤', len(set(sticks)) == len(sticks), sticks)
             check(f'{plan} 最後的籤和籤櫃一致', sticks and sticks[-1] == ev(page, 'Game.task.slip.n'))
     page.emulate_media(reduced_motion='no-preference')
-    dist = ev(page, "(()=>{const c={};for(let i=0;i<4000;i++){Game.setup();c[Game.task.plan]=(c[Game.task.plan]||0)+1}return c})()")
-    check('劇本比例 40/30/30', all(abs(dist[k] / 4000 - v) < .04 for k, v in (('甲', .4), ('乙', .3), ('丙', .3))), dist)
+    dist = ev(page, "(()=>{const c={},n={};let max=0;for(let i=0;i<40000;i++){Game.setup();const t=Game.task,k=t.ask.length+'-'+t.miss;c[k]=(c[k]||0)+1;const total=t.ask.length+(t.miss?t.miss+3:3);n[total]=(n[total]||0)+1;max=Math.max(max,total)}return {c,n,max}})()")
+    want = {'1-0': .21, '1-1': .175, '1-2': .175, '1-3': .14, '2-0': .12, '2-1': .09, '2-2': .09}
+    check('劇本比例', sorted(dist['c']) == sorted(want) and all(abs(dist['c'][k] / 40000 - v) < .012 for k, v in want.items()), dist)
+    check('總次數 4～7 次的比例，最多 7 次', dist['max'] == 7 and all(abs(dist['n'][str(k)] / 40000 - v) < .012 for k, v in ((4, .21), (5, .295), (6, .265), (7, .23))), dist)
     # ── 丟到一半重畫、離開關卡 ──
-    jump(page, 'THROW', '甲'); ev(page, 'Game.toss(); Game.toss(); Game.render()'); page.wait_for_timeout(1550)
+    jump(page, 'THROW', '2-0'); ev(page, 'Game.toss(); Game.toss(); Game.render()'); page.wait_for_timeout(1550)
     check('連按只丟一次', ev(page, 'Game.phase') == 'landed' and ev(page, 'Game.ti') == 1)
     # ── 擲筊落地聲：五聲、有聲才播、靜音照樣丟 ──
     snd = ev(page, """(async()=>{const c=new OfflineAudioContext(1,44100,44100);beiSound(c,.05,BEI);const d=(await c.startRendering()).getChannelData(0);
@@ -152,7 +155,7 @@ with sync_playwright() as p:
     ev(page, "(()=>{window.__bei=0; const old=beiSound; beiSound=(...a)=>{window.__bei++; old(...a)}; return 1})()")
     for muted in (False, True):
         ev(page, f"localStorage.setItem('hg.mute.taiwan-life','{int(muted)}'); window.__bei=0")
-        jump(page, 'THROW', '甲'); ev(page, 'Game.toss()'); page.wait_for_timeout(1000)
+        jump(page, 'THROW', '2-0'); ev(page, 'Game.toss()'); page.wait_for_timeout(1000)
         check('落地前還在飛', ev(page, 'Game.phase') == 'fly'); page.wait_for_timeout(500)
         check(('靜音：不播，照樣落地' if muted else '有聲：丟一次播一次'), ev(page, 'window.__bei') == (0 if muted else 1) and ev(page, 'Game.phase') == 'landed', ev(page, 'window.__bei'))
     ev(page, "localStorage.removeItem('hg.mute.taiwan-life')")
@@ -191,9 +194,8 @@ with sync_playwright() as p:
     jump(page, 'HEAVEN'); opt(page, '天公爐拜天公'); check('天公爐插一支', '把一支香插進天公爐' in ev(page, 'Game.thought[0].zh'))
     ev(page, 'Game.handleChoice(Game.transLabel()); Game.handleChoice(MAIN_RIGHT.slice())'); check('大殿插一支', any('把一支香插進大殿' in t for t in ev(page, 'Game.thought.map(t=>t.zh)')))
     ev(page, 'Game.handleChoice(Game.transLabel())'); check('進側殿', ev(page, 'Game.state') == 'SIDE')
-    opt(page, '插上最後一支香。')
-    check('插完香的過場', '雙手合十再拜一次' in txt(page) and 'Ami：我們去跟關聖帝君求個籤吧！' in txt(page) and txt(page, '#options-area') == '去求籤', txt(page))
-    ev(page, 'Game.handleChoice(Game.transLabel())'); check('回大殿擲筊', ev(page, 'Game.state') == 'THROW' and ev(page, 'Game.phase') == 'ready')
+    check('側殿一頁看完', '（你走到側殿，向其他神明拜了三下，插上最後一支香，雙手合十再拜一次。）' in txt(page) and 'Ami：你知道這些是哪些神明嗎？我們去跟關聖帝君求個籤吧！' in txt(page) and txt(page, '#options-area') == '去求籤', txt(page))
+    opt(page, '去求籤'); check('回大殿擲筊', ev(page, 'Game.state') == 'THROW' and ev(page, 'Game.phase') == 'ready')
     ctx.close()
     # ── 籤支方框拿掉、籤櫃、側殿、解籤、聽懂題、登記單 ──
     ctx, page = open_game(b, errs)
@@ -218,7 +220,12 @@ with sync_playwright() as p:
                 pick_(ev(page, f"({smoke.ORACLES['guandi']})()")); check('付完錢換回原圖', src() == DESK, src())
     for state in ('ASK', 'MEAN'):
         jump(page, state); check(state + ' 用解籤圖', src() == 'images/explain.jpg' and page.locator('#npc-avatar').is_visible(), src())
-    jump(page, 'SIDE'); check('側殿 Ami 的問題', 'Ami：你知道這些是哪些神明嗎？' in txt(page) and opts() == ['插上最後一支香。'], txt(page))
+    jump(page, 'SIDE'); check('側殿只有一個按鈕', opts() == ['去求籤'], opts())
+    for state in ev(page, 'Object.keys(STAGE)'):
+        jump(page, state); ev(page, 'Hints.toggle(true)'); h = txt(page, '#hint-body')
+        if 'Ami 說的話' in h or '今天我帶你去關帝廟' in h or '今天的事' not in h: check('任務提示沒有 Ami 的話：' + state, False, h)
+        ev(page, 'Hints.toggle(false)')
+    check('每一關的任務提示都檢查過', True)
     jump(page, 'MAIN'); check('遊戲裡的確定只有中文', ev(page, "(()=>{const c=document.querySelector('#options-area .opt:last-child').cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.textContent.trim()})()") == '確定')
     for state in ('CONFIRM', 'SLIP_NUM'):
         jump(page, state); check(state + ' 沒有籤支方框', '你抽到的籤支' not in txt(page))
@@ -235,11 +242,14 @@ with sync_playwright() as p:
             pick_('對，是這張，謝謝。'); check('拿對時不用尷尬圖', src() != 'images/cabinet_sorry.jpg', src())
     # 看籤詩：選項照籤的等級；Ami 只說等級
     good = '謝謝關公。我會好好努力。'
+    lines = {'上上': '，你很幸運欸！', '上吉': '，運氣很不錯喔！', '中吉': '，還不錯唷！', '中平': '，普普通通，慢慢來就好。', '下下': '……沒關係，最近小心一點就好。'}
+    missing = ev(page, "(()=>{const out=[];for(const s of SLIPS){Game.task.slip=s;const g=GRADES[s.g],z=g.zh+g.ami[0];for(const [w] of g.words)if(!z.includes(w))out.push(w)}return out})()")
+    check('看籤詩新單字都在台詞裡', missing == [], missing)
     for n in ev(page, 'SLIPS.map(s=>s.n)'):
         jump(page, 'READ'); ev(page, f"Game.task.slip=SLIPS.find(s=>s.n==={n}); Game.render()")
         g, gloss = ev(page, '[Game.task.slip.g, Game.task.slip.gloss.zh]'); o = opts()
         third = '那我可以不用學中文了吧！' if g == '上上' else '再抽一次，抽到上上籤為止。'; rude = '到底在供三小？'
-        if sorted(o) != sorted([good, '那我可以躺平了。', third, rude]) or gloss in txt(page) or f'Ami：這是{g}籤。' not in txt(page): check(f'第{n}籤看籤詩', False, (o, txt(page)))
+        if sorted(o) != sorted([good, '那我可以躺平了。', third, rude]) or gloss in txt(page) or f'Ami：這是{g}籤{lines[g]}' not in txt(page): check(f'第{n}籤看籤詩', False, (o, txt(page)))
     check('20 支籤的看籤詩選項都檢查過', True)
     for g in ('上上', '下下'):
         jump(page, 'READ'); ev(page, f"Game.task.slip=SLIPS.find(s=>s.g==='{g}'); Game.render()")
@@ -314,7 +324,10 @@ with sync_playwright() as p:
                 for c in o:
                     if c != ans: k = m(); pick_(c); check('複誦錯的選項：' + c, st() == 'REGISTER' and m() == k + 1)
                 pick_(ans); check('複誦答對往付錢：' + tag, ev(page, 'Game._trans?Game._trans.to:Game.state') == 'PAY', st())
-                check('複誦過場有廟公收費的話：' + tag, st() == '_TRANS' and '廟公：沒問題！這樣要先跟你收費。' in txt(page) and txt(page, '#options-area') == '付錢', txt(page))
+                t_ = txt(page)
+                if wrong: one = t_.count('廟公：') == 1 and '廟公：啊，不好意思！我改過來。好，「María」，' in t_ and '，一年。沒問題！這樣要先跟你收費。' in t_ and all(x in t_ for x in mine[1:3])
+                else: one = t_.count('廟公：') == 1 and '廟公：沒問題！這樣要先跟你收費。' in t_
+                check('複誦過場廟公只有一句：' + tag, st() == '_TRANS' and one and txt(page, '#options-area') == '付錢', t_)
     d = ev(page, "(()=>{const c={};for(let i=0;i<3000;i++){Game.setup();const t=Game.task;c[t.regKind]=1;c[t.regBirth]=1;c[t.regAddr]=1;c['p'+t.said]=1}return Object.keys(c).sort()})()")
     check('每局會抽到的種類（沒有期限）', d == sorted(['name', 'birth', 'addr', 'day', 'month', 'whole', 'number', 'p300', 'p500', 'p1000']), d)
     # 付錢：三種燈、三個選項
@@ -338,9 +351,15 @@ with sync_playwright() as p:
     for c in opts():
         if c != ok_amulet: k = m(); pick_(c); check('平安符錯的選項：' + c, st() == 'AMULET' and m() == k + 1)
     check('嫌醜的提醒', '很不禮貌' in ev(page, "Game.log.map(x=>x.zh).join()"))
-    pick_(ok_amulet); check('平安符答對往過爐', ev(page, 'Game._trans?Game._trans.to:Game.state') == 'GUOLU', st())
+    pick_(ok_amulet); check('拿到平安符的過場', st() == '_TRANS' and '（你拿了一個平安符。）' in txt(page) and '過爐' not in txt(page) and txt(page, '#options-area') == '繼續', txt(page))
+    go(); check('Ami 問平安符', st() == 'CHARM' and 'Ami：María，你知道拿到平安符之後還要做什麼嗎？' in txt(page) and sorted(opts()) == sorted(['掛在樹上', '燒掉', '過香爐']) and src() == 'images/amulet.jpg', txt(page))
+    ev(page, 'Hints.toggle(true)'); check('回答前任務提示沒有過爐告示', '順時針' not in txt(page, '#hint-body')); ev(page, 'Hints.toggle(false)')
+    for c, why in (('掛在樹上', '平安符要帶在身上，才可以保佑平安啦！'), ('燒掉', '關聖帝君剛剛給你的平安符，怎麼可以馬上就燒掉？')):
+        k = m(); pick_(c); check('平安符問題錯的選項：' + c, st() == 'CHARM' and m() == k + 1 and why in txt(page, '#npc-dialogue .fb.bad'), txt(page))
+    pick_('過香爐'); check('答對：稱讚、走回天公爐（錯過再答對也有稱讚）', st() == '_TRANS' and '很棒喔！你很清楚台灣的拜拜文化呢！' in txt(page, '#npc-dialogue .fb.good') and '（你走回前面的天公爐。）' in txt(page) and txt(page, '#options-area') == '走到香爐前', txt(page))
+    go(); check('過爐 Ami 的話', st() == 'GUOLU' and 'Ami：你做一次，我看看你會不會。' in txt(page), txt(page))
     # 第三個聖筊換笑臉圖
-    page.emulate_media(reduced_motion='reduce'); jump(page, 'CONFIRM', '甲'); seen = []
+    page.emulate_media(reduced_motion='reduce'); jump(page, 'CONFIRM', '2-0'); seen = []
     for i in range(3):
         page.locator('.toss[role=button]').focus(); page.keyboard.press('Enter'); page.wait_for_timeout(260); seen.append(src())
         if i == 2: page.wait_for_timeout(300); page.screenshot(path='/tmp/t_happy.png', full_page=True)
@@ -360,7 +379,7 @@ with sync_playwright() as p:
         check('手機登記單不超出畫面：' + row + extra, ev(page, 'document.documentElement.scrollWidth <= innerWidth + 1') and ev(page, "[...document.querySelectorAll('.fill button')].every(e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&e.scrollWidth<=e.clientWidth+1})"))
         h = ev(page, "document.querySelector('.fill').offsetHeight"); check('手機登記單高度不超過七成畫面：' + row + extra, h < 844 * .7, h)
         if extra: page.screenshot(path='/tmp/t_fill_days_m.png', full_page=True)
-    for state in ('ASK', 'MEAN', 'READ', 'SIDE', 'REGISTER', 'PAY', 'AMULET'):
+    for state in ('ASK', 'MEAN', 'READ', 'SIDE', 'REGISTER', 'PAY', 'AMULET', 'CHARM', 'GUOLU'):
         jump(page, state); page.screenshot(path=f'/tmp/t_{state}_m.png', full_page=True)
         check('手機不超出畫面：' + state, ev(page, 'document.documentElement.scrollWidth <= innerWidth + 1'))
     for py in (False, True):
