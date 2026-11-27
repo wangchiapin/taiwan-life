@@ -21,7 +21,7 @@ def open_game(b, errs, mobile=False):
 
 def jump(page, state, plan=None):
     ev(page, f"""(()=>{{ {f"let n=0; do Game.setup(); while(Game.task.plan!=='{plan}' && ++n<500);" if plan else 'Game.setup();'}
-      Game.state='{state}'; Game.thought=null; Game.feedback=[]; Game._trans=null; Game.render(); }})()""")
+      Game.state='{state}'; Game.mistakes=0; Game.score=100; Game.thought=null; Game.feedback=[]; Game._trans=null; Game.render(); }})()""")
 
 def opt(page, text):
     page.locator('#options-area .opt', has_text=text).first.click() if False else ev(page, f"Game.handleChoice({text!r})")
@@ -138,7 +138,7 @@ with sync_playwright() as p:
             check(f'{plan} 最後的籤和籤櫃一致', sticks and sticks[-1] == ev(page, 'Game.task.slip.n'))
     page.emulate_media(reduced_motion='no-preference')
     dist = ev(page, "(()=>{const c={};for(let i=0;i<4000;i++){Game.setup();c[Game.task.plan]=(c[Game.task.plan]||0)+1}return c})()")
-    check('劇本比例 50/25/25', abs(dist['甲'] / 4000 - .5) < .05 and abs(dist['乙'] / 4000 - .25) < .04 and abs(dist['丙'] / 4000 - .25) < .04, dist)
+    check('劇本比例 40/30/30', all(abs(dist[k] / 4000 - v) < .04 for k, v in (('甲', .4), ('乙', .3), ('丙', .3))), dist)
     # ── 丟到一半重畫、離開關卡 ──
     jump(page, 'THROW', '甲'); ev(page, 'Game.toss(); Game.toss(); Game.render()'); page.wait_for_timeout(1300)
     check('連按只丟一次', ev(page, 'Game.phase') == 'landed' and ev(page, 'Game.ti') == 1)
@@ -180,6 +180,129 @@ with sync_playwright() as p:
     opt(page, '插上最後一支香。')
     check('插完香的過場', '雙手合十再拜一次' in txt(page) and 'Ami：我們去跟關聖帝君求個籤吧！' in txt(page) and txt(page, '#options-area') == '去求籤', txt(page))
     ev(page, 'Game.handleChoice(Game.transLabel())'); check('回大殿擲筊', ev(page, 'Game.state') == 'THROW' and ev(page, 'Game.phase') == 'ready')
+    ctx.close()
+    # ── 籤支方框拿掉、籤櫃、側殿、解籤、聽懂題、登記單 ──
+    ctx, page = open_game(b, errs)
+    opts = lambda: ev(page, "[...document.querySelectorAll('#options-area .opt')].map(b=>b.dataset.raw||(c=>{c.querySelectorAll('rt').forEach(r=>r.remove());return c.textContent})(b.cloneNode(true)))")
+    pick_ = lambda c: ev(page, f"Game.handleChoice({c!r})")
+    src = lambda: ev(page, "document.querySelector('#npc-avatar').getAttribute('src')")
+    st = lambda: ev(page, 'Game.state')
+    m = lambda: ev(page, 'Game.mistakes')
+    go = lambda: pick_(ev(page, 'Game.transLabel()'))
+    # 登記處道歉用尷尬圖：唸錯、算錯錢、找錯錢才換，沒錯就用原圖
+    SORRY, DESK = 'images/desk_sorry.jpg', 'images/desk.jpg'
+    for state, flag in (('REGISTER', 'regWrong'), ('PAY', 'payWrong'), ('CHANGE', 'changeWrong')):
+        for wrong in (True, False):
+            jump(page, state); ev(page, f"Game.task.{flag}={str(wrong).lower()}; Game.render()")
+            check(f'{state} 抓錯前用原圖', src() == DESK, src())
+            ans = ev(page, f"({smoke.ORACLES['guandi']})()")
+            pick_(ans); page.wait_for_timeout(300)
+            check(f'{state} {"說錯：道歉用尷尬圖" if wrong else "沒說錯：不用尷尬圖"}', (src() == SORRY if wrong else src() != SORRY) and page.locator('#npc-avatar').is_visible(), (src(), st()))
+            if state == 'PAY' and wrong:
+                if st() == '_TRANS': go()
+                check('重算那一關也是尷尬圖', st() == 'PAY_FIX' and src() == SORRY, (st(), src()))
+                pick_(ev(page, f"({smoke.ORACLES['guandi']})()")); check('付完錢換回原圖', src() == DESK, src())
+    for state in ('ASK', 'MEAN'):
+        jump(page, state); check(state + ' 用解籤圖', src() == 'images/explain.jpg' and page.locator('#npc-avatar').is_visible(), src())
+    jump(page, 'SIDE'); check('側殿 Ami 的問題', 'Ami：你知道這些是哪些神明嗎？' in txt(page) and opts() == ['插上最後一支香。'], txt(page))
+    jump(page, 'MAIN'); check('遊戲裡的確定只有中文', ev(page, "(()=>{const c=document.querySelector('#options-area .opt:last-child').cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.textContent.trim()})()") == '確定')
+    for state in ('CONFIRM', 'SLIP_NUM'):
+        jump(page, state); check(state + ' 沒有籤支方框', '你抽到的籤支' not in txt(page))
+    for wrong in (True, False):
+        jump(page, 'SLIP_NUM'); ev(page, f"Game.task.numWrong={str(wrong).lower()}; Game.render()")
+        o = opts(); n, claim, mine = ev(page, '[Game.task.numSaid, Game.task.numClaim, Game.task.slip.n]')
+        fix = ev(page, f"`不好意思，我抽到的是${{slipNo({mine if wrong else claim})}}。`")
+        check(f'籤櫃選項（廟公{"拿錯" if wrong else "拿對"}）', fix in o and '廟公，你的眼睛是不是不太好？' in o and (wrong or claim != mine), o)
+        if wrong:
+            pick_(fix); page.wait_for_timeout(300)
+            check('廟公道歉用尷尬圖', st() == '_TRANS' and src() == 'images/cabinet_sorry.jpg' and page.locator('#npc-avatar').is_visible(), src())
+            go(); check('下一關換回原圖', st() == 'READ' and src() == 'images/read.jpg', src())
+        else:
+            pick_('對，是這張，謝謝。'); check('拿對時不用尷尬圖', src() != 'images/cabinet_sorry.jpg', src())
+    # 看籤詩：選項照籤的等級；Ami 只說等級
+    good = '謝謝關公。我會好好努力。'
+    for n in ev(page, 'SLIPS.map(s=>s.n)'):
+        jump(page, 'READ'); ev(page, f"Game.task.slip=SLIPS.find(s=>s.n==={n}); Game.render()")
+        g, gloss = ev(page, '[Game.task.slip.g, Game.task.slip.gloss.zh]'); o = opts()
+        third = '那我可以不用學中文了吧！' if g == '上上' else '再抽一次，抽到上上籤為止。'
+        if sorted(o) != sorted([good, '那我可以躺平了。', third]) or gloss in txt(page) or f'Ami：這是{g}籤。' not in txt(page): check(f'第{n}籤看籤詩', False, (o, txt(page)))
+    check('20 支籤的看籤詩選項都檢查過', True)
+    for g in ('上上', '下下'):
+        jump(page, 'READ'); ev(page, f"Game.task.slip=SLIPS.find(s=>s.g==='{g}'); Game.render()")
+        for c in opts():
+            if c != good: k = m(); pick_(c); check('看籤詩錯的選項：' + c, st() == 'READ' and m() == k + 1)
+    pick_(good); check('看籤詩過場', st() == '_TRANS' and 'Ami：María，請廟公幫你解籤吧！' in txt(page), txt(page))
+    go(); check('到解籤', st() == 'ASK' and sorted(opts()) == sorted(['廟公，可以請你幫我解籤嗎？', '欸，老頭，這什麼意思？', '（把籤紙揉爛丟掉）']), opts())
+    for c in opts():
+        if not c.startswith('廟公'): k = m(); pick_(c); check('解籤錯的選項：' + c, st() == 'ASK' and m() == k + 1)
+    pick_('廟公，可以請你幫我解籤嗎？')
+    if st() == '_TRANS': go()
+    check('到聽懂題', st() == 'MEAN' and '廟公的意思是什麼？' in txt(page) and ev(page, 'Game.task.slip.gloss.zh') in txt(page) and len(opts()) == 3, txt(page))
+    bad = ev(page, """(()=>{const out=[];for(const s of SLIPS){if(!s.say||!s.tags)out.push([s.n,'缺']);for(let i=0;i<60;i++){const w=otherSlips(s);
+      if(new Set([s,...w]).size!==3||w.some(x=>x.tags.some(g=>s.tags.includes(g)))||w[0].tags.some(g=>w[1].tags.includes(g)))out.push([s.n,w.map(x=>x.n)])}}
+      if(new Set(SLIPS.map(s=>s.say)).size!==SLIPS.length)out.push('重複');return out})()""")
+    check('聽懂題的錯選項和正解意思不重疊', bad == [], bad[:5])
+    right = ev(page, 'Game.task.slip.say')
+    for c in opts():
+        if c != right: k = m(); pick_(c); check('聽懂題錯的選項', st() == 'MEAN' and m() == k + 1)
+    pick_(right); check('聽懂題過場', st() == '_TRANS' and 'Ami：走吧，我們去登記光明燈。' in txt(page), txt(page))
+    go(); check('到填登記單', st() == 'FILL')
+    tap = lambda k, v: page.locator(f'.pick[data-k="{k}"][data-v="{v}"]').click()
+    head = lambda r: page.locator(f'.grp[data-row="{r}"] .head').click()
+    opened = lambda: ev(page, "[...document.querySelectorAll('.fill .grp')].filter(g=>g.querySelector('.body')).map(g=>g.dataset.row)")
+    check('登記單四行、先開姓名', page.locator('.fill .grp').count() == 4 and opened() == ['name'], opened())
+    check('名字三選一、含自己', page.locator('.pick[data-k="name"]').count() == 3 and page.locator('.pick[data-k="name"][data-v="María"]').count() == 1)
+    check('一開始什麼都沒選', page.locator('.pick.on').count() == 0)
+    head('name'); check('再點一次收起來', opened() == [])
+    head('addr'); check('一次只開一行', opened() == ['addr']); head('term'); check('換開另一行', opened() == ['term'])
+    k = m(); pick_('填好了'); check('沒填完不扣分、打開第一個沒填的', st() == 'FILL' and m() == k and '登記單還沒填完' in txt(page) and opened() == ['name'])
+    other = ev(page, 'Game.task.names.find(n=>n!==Game.N)'); tap('name', other); check('選完名字自動開生日', opened() == ['birth'] and page.locator('.pick[data-k="m"]').count() == 12 and page.locator('.pick[data-k="d"]').count() == 0)
+    tap('m', 1); check('選月後換成日期', page.locator('.pick[data-k="m"]').count() == 0 and page.locator('.pick[data-k="d"]').count() == 31 and '請選日期' in txt(page, '.grp[data-row="birth"] .head'))
+    head('birth'); head('birth'); check('收起再打開仍是選日期', page.locator('.pick[data-k="d"]').count() == 31)
+    page.locator('.pick.back').click(); check('可以換月份', page.locator('.pick[data-k="m"]').count() == 12)
+    tap('m', 2); check('二月 29 天', page.locator('.pick[data-k="d"]').count() == 29)
+    page.locator('.pick.back').click(); tap('m', 4); check('四月 30 天', page.locator('.pick[data-k="d"]').count() == 30)
+    tap('d', 21); check('選完日期自動開住址', opened() == ['addr'] and '四月二十一號' in txt(page, '.grp[data-row="birth"] .head'))
+    tap('addr', 2); check('選完住址開期限', opened() == ['term']); tap('term', '半年'); check('全部選完都收起來', opened() == [] and txt(page, '.fill').count('✓') == 4)
+    head('birth'); page.locator('.pick.back').click(); tap('m', 1); tap('d', 31); page.locator('.grp[data-row="birth"] .head').click(); page.locator('.pick.back').click(); tap('m', 2)
+    check('換成較短的月份：清掉超過的日期', ev(page, 'Game.task.form.d') is None and '請選日期' in txt(page, '.grp[data-row="birth"] .head'))
+    page.locator('.pick.back').click(); tap('m', 4); tap('d', 21); check('改完沒有未填的就收起來', opened() == [])
+    page.screenshot(path='/tmp/t_fill.png', full_page=True)
+    k = m(); pick_('填好了'); check('名字、期限填錯只扣一次', st() == 'FILL' and m() == k + 1)
+    check('扣分後已選的還在、打開填錯的那行', txt(page, '.fill').count('✓') == 3 and opened() == ['name'] and page.locator('.pick.on').count() == 1, (opened(), txt(page, '.fill')))
+    check('錯誤說明兩項', '姓名要寫自己的名字。' in ev(page, 'Game.log.at(-1).zh') and '期限要選一年' in ev(page, 'Game.log.at(-1).zh'))
+    tap('name', 'María'); head('term'); tap('term', '一年'); pick_('填好了'); check('填對過場', st() == '_TRANS' and '你把登記單交給廟公' in txt(page))
+    go(); card = txt(page)
+    check('登記單顯示剛才填的', st() == 'REGISTER' and all(x in card for x in ('María', '四月二十一號', '台南市成功路二十五號', '一年')), card)
+    for kind in ('name', 'birth', 'addr', 'term', None):
+        for d in (1, 30):
+            jump(page, 'REGISTER'); ev(page, f"Game.task.form={{name:Game.N,m:4,d:{d},addr:3,term:'一年'}}; Game.task.regWrong={'true' if kind else 'false'}; Game.task.regKind='{kind or 'addr'}'; Game.render()")
+            said = ev(page, "[...document.querySelectorAll('#npc-dialogue .line, #npc-dialogue p, #npc-dialogue div')].map(e=>{const c=e.cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.textContent}).find(t=>t.startsWith('廟公：光明燈登記'))||''") or txt(page)
+            said = said[said.index('光明燈登記：'):]; said = said[:said.index('對嗎')]
+            mine = ['María', ev(page, f'birthZh(4,{d})'), '高雄市中正路八號', '一年']
+            miss = [i for i, x in enumerate(mine) if x not in said]
+            want = [] if not kind else [('name', 'birth', 'addr', 'term').index(kind)]
+            check(f'複誦 {kind} {d}號：只錯那一項', miss == want, (said, miss))
+            o = opts(); right = ev(page, "Game.getConfig().REGISTER.options()")
+            check('複誦三個選項', len(o) == 3 and '你到底有沒有在看我寫的啊？' in o, o)
+            ans = '對，沒錯。' if not kind else [x for x in o if x.startswith('不好意思')][0]
+            for c in o:
+                if c != ans: k = m(); pick_(c); check('複誦錯的選項：' + c, st() == 'REGISTER' and m() == k + 1)
+            if kind: check('抓錯選項說正確內容', mine[want[0]] in ans, ans)
+            pick_(ans); check('複誦答對往付錢', ev(page, 'Game._trans?Game._trans.to:Game.state') == 'PAY', st())
+    check('生日、住址只用在這一局', ev(page, "(()=>{Game.setup();return Object.keys(Game.task.form).length===0 && !JSON.stringify(localStorage).includes('成功路')})()"))
+    ctx.close()
+    # ── 手機：登記單排得下 ──
+    ctx, page = open_game(b, errs, mobile=True)
+    jump(page, 'FILL')
+    page.screenshot(path='/tmp/t_fill_m.png', full_page=True)
+    for row, extra in (('name', ''), ('birth', ''), ('birth', 'Game.task.form.m=1;'), ('addr', ''), ('term', '')):
+        ev(page, f"Game.task.form={{}}; {extra} Game.task.fillOpen='{row}'; Game.render()")
+        check('手機登記單不超出畫面：' + row + extra, ev(page, 'document.documentElement.scrollWidth <= innerWidth + 1') and ev(page, "[...document.querySelectorAll('.fill button')].every(e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&e.scrollWidth<=e.clientWidth+1})"))
+        h = ev(page, "document.querySelector('.fill').offsetHeight"); check('手機登記單高度不超過七成畫面：' + row + extra, h < 844 * .7, h)
+        if extra: page.screenshot(path='/tmp/t_fill_days_m.png', full_page=True)
+    for state in ('ASK', 'MEAN', 'READ', 'SIDE'):
+        jump(page, state); page.screenshot(path=f'/tmp/t_{state}_m.png', full_page=True)
     ctx.close(); b.close()
     check('沒有程式錯誤', not errs, errs[:3])
 print(f'通過 {ok} 項，失敗 {fail} 項')

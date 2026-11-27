@@ -1522,7 +1522,7 @@ const GameCore = {
       });
       const go = document.createElement('button');
       go.className = 'opt deal multi-go';
-      go.innerHTML = this.ruby('確定') + ' ' + esc(X('Confirmar', 'Confirm'));
+      go.innerHTML = this.ruby('確定');   // 遊戲裡的「確定」只顯示中文（拼音照設定）
       go.dataset.raw = '確定';
       go.onclick = () => this.handleChoice([...this._multiSel]);
       area.appendChild(go);

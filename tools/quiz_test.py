@@ -36,6 +36,11 @@ def play_to_result(page, g, wrong_once=True):
             idx = random.choice(cand); m0 = page.evaluate('Game.mistakes'); smoke.click_c(page, c, idx)
             if page.evaluate('Game.state') == st and page.evaluate('Game.mistakes') > m0: bad.add((st, opts[idx]))
             continue
+        if page.locator('#options-area .opt.multi').count():   # 多選題（關帝廟大殿）：正解是陣列，勾完按確定
+            picks = page.evaluate('a=>a.map(x=>Z(x))', ans)
+            for i, o in enumerate(opts[:-1]):
+                if (page.locator('#options-area .opt').nth(i).get_attribute('aria-pressed') == 'true') != (o.strip() in picks + ans): smoke.click_i(page, i)
+            smoke.click_i(page, len(opts) - 1); continue
         az = page.evaluate('a=>a&&Z(a)', ans)   # 簡體時畫面上的選項是簡體字
         idx = next((i for i, o in enumerate(opts) if o.strip() in (ans, az)), None)
         if idx is None: idx = next((i for i, o in enumerate(opts) if ans and (ans in o or az in o)), 0)

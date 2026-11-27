@@ -13,7 +13,12 @@ ORACLE = """() => {
     DRAW: '輕搖籤筒，等一支籤掉出來。',
     SLIP_NUM: () => t.numWrong ? `不好意思，我抽到的是${slipNo(S.n)}。` : '對，是這張，謝謝。',
     READ: '謝謝關公。我會好好努力。',
-    REGISTER: () => t.regWrong ? (t.regKind === 'name' ? `不好意思，我的名字是${N}。` : '不好意思，我要點一年的。') : '對，沒錯。',
+    ASK: '廟公，可以請你幫我解籤嗎？', MEAN: () => S.say, FILL: '填好了',
+    REGISTER: () => {
+      if (!t.regWrong) return '對，沒錯。';
+      const f = Game.filled();
+      return { name: `不好意思，我的名字是${N}。`, birth: `不好意思，我的生日是${birthZh(f.m, f.d)}。`, addr: `不好意思，我住在${ADDR[f.addr][0]}。`, term: '不好意思，我要點一年的。' }[t.regKind];
+    },
     PAY: () => t.payWrong ? `不好意思，好像算錯了，應該是${zhNum(t.total)}元吧？` : `給你${zhNum(t.bill)}元。`,
     PAY_FIX: `給你${zhNum(t.bill)}元。`,
     CHANGE: () => t.changeWrong ? `不好意思，好像找錯了，應該找${zhNum(t.change)}元吧？` : '好，謝謝。',

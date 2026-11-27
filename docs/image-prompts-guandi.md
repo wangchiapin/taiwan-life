@@ -50,7 +50,8 @@
 | 15 | `end_good.jpg` | END（錯 2 次以內：Ami 笑，輕鬆） | Ami 參考圖（從飲料店 end_good.jpg 裁頭肩） |
 | 16 | `end_bad.jpg` | END（錯比較多：Ami 溫柔安慰） | 上傳已確認的 end_good.jpg（編輯式） |
 
-> 有些關卡暫時共用圖：PAY、PAY_FIX、CHANGE 都用 `desk.jpg`。「廟公被抓到說錯時的尷尬表情」`*_sorry.jpg` 這版先不做（程式也還沒接），之後要加再說。
+> 有些關卡暫時共用圖：PAY、PAY_FIX、CHANGE 都用 `desk.jpg`；ASK、MEAN 用 `explain.jpg`（2026-11-27 完成），FILL 用 `desk.jpg`。
+> 尷尬表情：`cabinet_sorry.jpg` 已完成（2026-11-27，拿錯籤道歉時用）；`desk_sorry.jpg` 已完成（2026-11-27，登記唸錯、算錯錢、找錯錢時用）。
 
 ---
 
@@ -220,3 +221,30 @@ Cozy 16-bit pixel art illustration, square 1:1 image, clean chunky pixel outline
 ```
 Edit the attached image. Keep the same woman (face, hair, clothes, bag), the same temple, the same lighting and the same pixel-art style, and change ONLY her expression and pose: she now gives a gentle, slightly sheepish smile with soft eyebrows, one hand lightly rubbing the back of her neck, the other at her side, as if comforting a friend after a messy day. No readable text.
 ```
+
+---
+
+## 2026-11-27 補圖
+
+### `explain.jpg`
+
+- 用在：ASK、MEAN（請廟公解籤、廟公解說）
+- 狀態：完成（Gemini 出的圖還留著籤支，用程式修掉）
+- 底圖：上傳已確認的 cabinet.jpg（編輯式）
+- 檢查重點：背景、廟公、鏡頭和原圖一樣；竹籤支不見了；你的手拿著籤詩紙伸向廟公；廟公一手指著紙、嘴巴微張在解說。
+
+```
+Edit the attached image. Keep everything identical: the same cozy 16-bit pixel art style, square 1:1, the same temple hall, wooden drawer cabinet, pillars, lanterns, floor and warm lighting. Keep the same first-person camera: eye level (about 150 cm), facing straight ahead, level, same framing and same distance. The viewer is the camera and is never drawn, except one plain bare hand (no rings, no watch, no nail polish, no sleeve). Change ONLY these things: remove the bamboo fortune stick completely and close the pulled-out drawer. The viewer's hand, entering from the bottom edge, now holds the yellow paper fortune slip (only unreadable squiggle lines) and offers it forward toward the temple keeper. The temple keeper is the same man (same face and hair, white T-shirt, black vest, dark trousers) standing in the same place, leaning slightly toward the paper, pointing at it with the index finger of one hand, the other hand raised in a gentle explaining gesture, with a kind smile and his mouth slightly open as if he is speaking. There is only one paper slip in the whole picture, and he is not holding any other paper. No readable text, no numbers.
+```
+
+### `desk_sorry.jpg`
+
+- 用在：REGISTER、PAY、PAY_FIX、CHANGE（廟公唸錯登記內容、算錯錢、找錯錢，被抓到道歉時）
+- 狀態：完成
+- 底圖：上傳已確認的 desk.jpg（編輯式）
+- 檢查重點：登記處、桌上東西、你的兩隻手、鏡頭和原圖一樣；只有廟公的表情和一隻手改了。
+
+```
+Edit the attached image. Keep everything identical: the same cozy 16-bit pixel art style, square 1:1, the same temple registration desk, shelves of small lamps behind it, lanterns, red tray, pen, registration form and warm lighting. Keep the same first-person camera: eye level (about 150 cm), facing straight ahead, level, same framing and same distance. The viewer is the camera and is never drawn, except the same two plain bare hands already in the picture, which stay exactly as they are. Change ONLY the temple keeper's expression and one arm. He is the same man (same face shape and hair, white T-shirt, black vest) sitting or standing in the same place: an embarrassed, apologetic, sheepish smile, eyebrows slanted upward in the middle, a light blush, one small sweat drop on his forehead, and one hand raised to scratch the back of his head, while his other hand stays resting on the desk. No readable text, no numbers.
+```
+

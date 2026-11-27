@@ -96,6 +96,24 @@
   .slip .poem { font-size: 20px; }
   .form-row { display: flex; gap: 10px; padding: 3px 0; font-size: 18px; }
   .form-row b { min-width: 4.2em; color: var(--muted); font-weight: 500; }
+  /* 填登記單：用點的 */
+  .fill .note { color: var(--muted); font-size: 16px; padding-bottom: 4px; }
+  .fill .grp { border-top: 1px dashed #ecd0a8; }
+  .fill .head { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 4px 0; font: inherit; font-size: 17px; color: var(--ink); background: none; border: 0; text-align: left; cursor: pointer; }
+  .fill .head b { flex: none; min-width: 3em; color: var(--red-dark); }
+  .fill .head .val { flex: 1; min-width: 0; }
+  .fill .head .val.empty, .fill .head .val em { color: var(--muted); font-style: normal; }
+  .fill .head i { flex: none; color: #c8960c; font-style: normal; font-weight: 700; }
+  .fill .body { padding-bottom: 10px; }
+  .fill .picks.days .pick { min-height: 36px; }
+  .fill .picks.addr .pick { padding: 3px 8px; }
+  .picks { display: flex; flex-wrap: wrap; gap: 6px; }
+  .picks.months { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .picks.days { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .picks.addr { flex-direction: column; }
+  .pick { font: inherit; font-size: 17px; color: var(--ink); background: #fff; border: 2px solid #d9c3a4; border-radius: 10px; padding: 6px 10px; min-height: 40px; cursor: pointer; }
+  .picks.months .pick, .picks.days .pick { padding: 4px 0; }
+  .pick.on { background: #fff3d6; border-color: #c8960c; font-weight: 700; }
 #options-area.cards { display: flex; flex-direction: column; gap: 10px; }
 #options-area .opt.card { display: flex; align-items: center; gap: 12px; padding: 6px; text-align: left; }
 #options-area .opt.card img { width: 96px; height: 96px; flex: 0 0 96px; object-fit: cover; border-radius: 8px; image-rendering: pixelated; }
@@ -239,6 +257,8 @@ pinyinPro.customPinyin({
   '籤': 'qiān', '籤詩': 'qiān shī', '籤筒': 'qiān tǒng', '籤櫃': 'qiān guì', '求籤': 'qiú qiān', '抽籤': 'chōu qiān', '解籤': 'jiě qiān',
   '上上籤': 'shàng shàng qiān', '上吉籤': 'shàng jí qiān', '中吉籤': 'zhōng jí qiān', '中平籤': 'zhōng píng qiān', '下下籤': 'xià xià qiān',
   '光明燈': 'guāng míng dēng', '平安符': 'píng ān fú', '香油錢': 'xiāng yóu qián', '隨喜': 'suí xǐ', '保佑': 'bǎo yòu', '順時針': 'shùn shí zhēn', '逆時針': 'nì shí zhēn',
+  '躺平': 'tǎng píng', '老頭': 'lǎo tóu', '揉爛': 'róu làn',
+  '一月': 'yī yuè', '十一月': 'shí yī yuè', '一號': 'yī hào', '十一號': 'shí yī hào', '二十一號': 'èr shí yī hào', '三十一號': 'sān shí yī hào',
   '廟公': 'miào gōng', '登記': 'dēng jì', '登記單': 'dēng jì dān', '價目牌': 'jià mù pái', '告示牌': 'gào shì pái',
   '炷': 'zhù',
   '不順利': 'bú shùn lì', '最近': 'zuì jìn', '住在': 'zhù zài', '附近': 'fù jìn'
@@ -263,7 +283,8 @@ const MAIN_WRONG = ['自己的電話號碼', '自己的身高體重', '今天的
 
 /* ══════════════════════════════════════
    籤詩：關聖帝君一百籤，從五種等級各取幾支（共 20 支）
-   n 籤號；g 等級；poem 籤詩原文四句；gloss 白話一句（Ami 解籤時說的）
+   n 籤號；g 等級；poem 籤詩原文四句；gloss 白話一句（廟公解籤時說的）
+   say 換句話說（聽懂題的選項）；tags 意思分類：聽懂題錯的選項只從分類完全不重疊的籤挑，才不會有兩個都對
    等級標示依「流年知否」網站；各廟的標示不一定一樣
 ══════════════════════════════════════ */
 const GRADES = {
@@ -274,29 +295,50 @@ const GRADES = {
   '下下': { zh: '下下籤', es: 'suerte difícil', en: 'a difficult fortune' }
 };
 const SLIPS = [
-  { n: 1, g: '上上', poem: ['巍巍獨步向雲間', '玉殿千官第一班', '富貴榮華天付汝', '福如東海壽如山'], gloss: L('運氣很好，事情會很順利。', 'Tienes muy buena suerte: todo irá muy bien.', 'Your luck is very good — things will go smoothly.') },
-  { n: 60, g: '上上', poem: ['羨君兄弟好名聲', '只管謙撝莫自矜', '丹詔槐黃相逼近', '巍巍科甲兩同登'], gloss: L('保持謙虛，好消息快要來了。', 'Sé humilde: las buenas noticias están por llegar.', 'Stay humble — good news is coming soon.') },
-  { n: 65, g: '上上', poem: ['朔風凜凜正窮冬', '多羨門庭喜氣濃', '更入新春人事後', '衷言方得信先容'], gloss: L('家裡有喜氣，新的一年會順利。', 'Hay alegría en casa; el año nuevo irá bien.', 'There is joy at home; the new year will go well.') },
-  { n: 100, g: '上上', poem: ['我本天仙雷雨師', '吉凶禍福我先知', '至誠禱祝皆靈應', '抽得終籤百事宜'], gloss: L('只要誠心祈求，事情都會順利。', 'Si rezas con sinceridad, todo saldrá bien.', 'If you pray sincerely, everything will go well.') },
-  { n: 2, g: '上吉', poem: ['盈虛消息總天時', '自此君當百事宜', '若問前程歸縮地', '更須方寸好修為'], gloss: L('時機到了就會變好，自己也要努力。', 'Cuando llegue el momento mejorará, pero tú también debes esforzarte.', 'Things will improve when the time comes, but you must try too.') },
-  { n: 7, g: '上吉', poem: ['仙風道骨本天生', '又遇仙宗為主盟', '指日丹成謝巖谷', '一朝引領向天行'], gloss: L('你本來就有很好的條件，還會遇到貴人。', 'Tienes buenas cualidades y encontrarás a quien te ayude.', 'You have good qualities and will meet someone who helps you.') },
-  { n: 28, g: '上吉', poem: ['公侯將相本無種', '好把勤勞契上天', '人事盡從天理見', '才高豈得困林泉'], gloss: L('只要認真努力，就有機會成功。', 'Si te esfuerzas de verdad, tendrás oportunidad de triunfar.', 'If you work hard, you have a chance to succeed.') },
-  { n: 40, g: '上吉', poem: ['新來換得好規模', '何用隨他步與趨', '只聽耳邊消息到', '崎嶇歷盡見亨衢'], gloss: L('換一個新做法，辛苦過後路會變好走。', 'Cambia de método: tras las dificultades el camino se allana.', 'Try a new way — after the hard part, the road gets easier.') },
-  { n: 3, g: '中吉', poem: ['衣食自然生處有', '勸君不用苦勞心', '但能孝梯存忠信', '福祿來成禍不侵'], gloss: L('吃穿不用擔心，守信用就會平安。', 'No te preocupes por comida ni ropa; sé honesto y estarás a salvo.', "Don't worry about food and clothes; stay honest and you'll be safe.") },
-  { n: 31, g: '中吉', poem: ['秋冬作事只尋常', '春到門庭漸吉昌', '千里信音符遠望', '萱堂快樂未渠央'], gloss: L('現在普通普通，到了春天會慢慢變好。', 'Ahora todo es normal; con la primavera irá mejorando.', 'Now it is ordinary; by spring things will slowly improve.') },
-  { n: 70, g: '中吉', poem: ['雷雨風雲各有司', '至誠禱告莫生疑', '與君定約為霖日', '正是蘊隆中伏時'], gloss: L('誠心祈禱，不要懷疑，時候到了就有結果。', 'Reza con sinceridad y sin dudar: a su tiempo habrá resultado.', "Pray sincerely without doubt — results come in time.") },
-  { n: 75, g: '中吉', poem: ['生前結得好緣姻', '一笑相逢情自親', '相當人物無高下', '得意休論富與貧'], gloss: L('你會遇到合得來的人，互相尊重最重要。', 'Conocerás a alguien afín; lo importante es el respeto mutuo.', 'You will meet someone compatible; mutual respect matters most.') },
-  { n: 5, g: '中平', poem: ['子有三般不自由', '門庭蕭索冷如秋', '若逢牛鼠交承日', '萬事回春不用憂'], gloss: L('現在有點冷清，等時機到了就會好轉。', 'Ahora está algo apagado; mejorará cuando llegue el momento.', 'Things are quiet now; they will pick up when the time is right.') },
-  { n: 15, g: '中平', poem: ['兩家門戶各相當', '不是姻緣莫較量', '直待春風好消息', '卻調琴瑟向蘭房'], gloss: L('不要急，等對的時機再決定。', 'No te apresures; decide cuando llegue el momento adecuado.', "Don't rush — decide when the time is right.") },
-  { n: 55, g: '中平', poem: ['勤耕力作莫蹉跎', '衣食隨時安分過', '縱使經商收倍利', '不如逐歲廩禾多'], gloss: L('踏踏實實過日子，比想賺大錢更好。', 'Vivir con los pies en la tierra vale más que buscar grandes ganancias.', 'Steady, honest living beats chasing big profits.') },
-  { n: 85, g: '中平', poem: ['一春風雨正瀟瀟', '千里行人去路遙', '移寡就多君得計', '如何歸路轉無聊'], gloss: L('路上會有點辛苦，做決定以前要想清楚。', 'El camino será algo duro; piensa bien antes de decidir.', 'The road will be a bit hard; think carefully before you decide.') },
-  { n: 10, g: '下下', poem: ['病患時時命蹇衰', '何須打瓦共鑽龜', '宜教重見一陽復', '始可求神仗佛持'], gloss: L('最近運氣比較弱，先好好休息，等情況變好。', 'Tu suerte está floja; descansa y espera a que mejore.', 'Your luck is weak right now — rest and wait for it to improve.') },
-  { n: 14, g: '下下', poem: ['一見佳人便喜歡', '誰知去後有多般', '人情冷暖君休訝', '歷涉應知行路難'], gloss: L('看起來很好的事，後面可能有麻煩，要冷靜看。', 'Lo que parece bueno puede traer problemas; mantén la calma.', 'What looks good may bring trouble later — stay calm.') },
-  { n: 23, g: '下下', poem: ['花開花謝在春風', '貴賤窮通百歲中', '羨子榮華今已矣', '到頭萬事總成空'], gloss: L('好運壞運都會過去，不要太執著。', 'La buena y la mala suerte pasan; no te aferres.', "Good luck and bad luck both pass — don't cling to either.") },
-  { n: 35, g: '下下', poem: ['一山如畫對清江', '門裏團圓事事雙', '誰料半途分折去', '空幃無語對銀缸'], gloss: L('原本很圓滿，中間可能有變化，要多溝通、多珍惜。', 'Todo iba bien, pero puede haber cambios: comunícate y valora lo que tienes.', 'Things were going well but may change — communicate and treasure what you have.') }
+  { n: 1, g: '上上', poem: ['巍巍獨步向雲間', '玉殿千官第一班', '富貴榮華天付汝', '福如東海壽如山'], gloss: L('運氣很好，事情會很順利。', 'Tienes muy buena suerte: todo irá muy bien.', 'Your luck is very good — things will go smoothly.'), say: '你最近的運氣非常好。', tags: ['lucky', 'good'] },
+  { n: 60, g: '上上', poem: ['羨君兄弟好名聲', '只管謙撝莫自矜', '丹詔槐黃相逼近', '巍巍科甲兩同登'], gloss: L('保持謙虛，好消息快要來了。', 'Sé humilde: las buenas noticias están por llegar.', 'Stay humble — good news is coming soon.'), say: '不要太驕傲，很快會有好事。', tags: ['humble', 'good'] },
+  { n: 65, g: '上上', poem: ['朔風凜凜正窮冬', '多羨門庭喜氣濃', '更入新春人事後', '衷言方得信先容'], gloss: L('家裡有喜氣，新的一年會順利。', 'Hay alegría en casa; el año nuevo irá bien.', 'There is joy at home; the new year will go well.'), say: '明年你們家會有開心的事。', tags: ['family', 'good', 'lucky'] },
+  { n: 100, g: '上上', poem: ['我本天仙雷雨師', '吉凶禍福我先知', '至誠禱祝皆靈應', '抽得終籤百事宜'], gloss: L('只要誠心祈求，事情都會順利。', 'Si rezas con sinceridad, todo saldrá bien.', 'If you pray sincerely, everything will go well.'), say: '真心拜拜，事情就會很順利。', tags: ['sincere', 'good', 'lucky'] },
+  { n: 2, g: '上吉', poem: ['盈虛消息總天時', '自此君當百事宜', '若問前程歸縮地', '更須方寸好修為'], gloss: L('時機到了就會變好，自己也要努力。', 'Cuando llegue el momento mejorará, pero tú también debes esforzarte.', 'Things will improve when the time comes, but you must try too.'), say: '認真做，再等一下，就會越來越好。', tags: ['wait', 'effort', 'good'] },
+  { n: 7, g: '上吉', poem: ['仙風道骨本天生', '又遇仙宗為主盟', '指日丹成謝巖谷', '一朝引領向天行'], gloss: L('你本來就有很好的條件，還會遇到貴人。', 'Tienes buenas cualidades y encontrarás a quien te ayude.', 'You have good qualities and will meet someone who helps you.'), say: '你很不錯，也會有人來幫你。', tags: ['people', 'good'] },
+  { n: 28, g: '上吉', poem: ['公侯將相本無種', '好把勤勞契上天', '人事盡從天理見', '才高豈得困林泉'], gloss: L('只要認真努力，就有機會成功。', 'Si te esfuerzas de verdad, tendrás oportunidad de triunfar.', 'If you work hard, you have a chance to succeed.'), say: '肯用功的人，可以做得很成功。', tags: ['effort'] },
+  { n: 40, g: '上吉', poem: ['新來換得好規模', '何用隨他步與趨', '只聽耳邊消息到', '崎嶇歷盡見亨衢'], gloss: L('換一個新做法，辛苦過後路會變好走。', 'Cambia de método: tras las dificultades el camino se allana.', 'Try a new way — after the hard part, the road gets easier.'), say: '試試別的方法，累一陣子以後就好了。', tags: ['newway', 'hard', 'good'] },
+  { n: 3, g: '中吉', poem: ['衣食自然生處有', '勸君不用苦勞心', '但能孝梯存忠信', '福祿來成禍不侵'], gloss: L('吃穿不用擔心，守信用就會平安。', 'No te preocupes por comida ni ropa; sé honesto y estarás a salvo.', "Don't worry about food and clothes; stay honest and you'll be safe."), say: '生活沒問題，做人要誠實。', tags: ['honest'] },
+  { n: 31, g: '中吉', poem: ['秋冬作事只尋常', '春到門庭漸吉昌', '千里信音符遠望', '萱堂快樂未渠央'], gloss: L('現在普通普通，到了春天會慢慢變好。', 'Ahora todo es normal; con la primavera irá mejorando.', 'Now it is ordinary; by spring things will slowly improve.'), say: '先不用急，春天以後會比較好。', tags: ['wait', 'good'] },
+  { n: 70, g: '中吉', poem: ['雷雨風雲各有司', '至誠禱告莫生疑', '與君定約為霖日', '正是蘊隆中伏時'], gloss: L('誠心祈禱，不要懷疑，時候到了就有結果。', 'Reza con sinceridad y sin dudar: a su tiempo habrá resultado.', "Pray sincerely without doubt — results come in time."), say: '要相信神明，慢慢等答案。', tags: ['sincere', 'wait'] },
+  { n: 75, g: '中吉', poem: ['生前結得好緣姻', '一笑相逢情自親', '相當人物無高下', '得意休論富與貧'], gloss: L('你會遇到合得來的人，互相尊重最重要。', 'Conocerás a alguien afín; lo importante es el respeto mutuo.', 'You will meet someone compatible; mutual respect matters most.'), say: '你會認識聊得來的人，要尊重對方。', tags: ['people'] },
+  { n: 5, g: '中平', poem: ['子有三般不自由', '門庭蕭索冷如秋', '若逢牛鼠交承日', '萬事回春不用憂'], gloss: L('現在有點冷清，等時機到了就會好轉。', 'Ahora está algo apagado; mejorará cuando llegue el momento.', 'Things are quiet now; they will pick up when the time is right.'), say: '現在不太熱鬧，以後會好起來。', tags: ['wait', 'good'] },
+  { n: 15, g: '中平', poem: ['兩家門戶各相當', '不是姻緣莫較量', '直待春風好消息', '卻調琴瑟向蘭房'], gloss: L('不要急，等對的時機再決定。', 'No te apresures; decide cuando llegue el momento adecuado.', "Don't rush — decide when the time is right."), say: '先別做決定，等一等比較好。', tags: ['wait', 'careful'] },
+  { n: 55, g: '中平', poem: ['勤耕力作莫蹉跎', '衣食隨時安分過', '縱使經商收倍利', '不如逐歲廩禾多'], gloss: L('踏踏實實過日子，比想賺大錢更好。', 'Vivir con los pies en la tierra vale más que buscar grandes ganancias.', 'Steady, honest living beats chasing big profits.'), say: '認真過生活，不要只想著發財。', tags: ['honest', 'effort'] },
+  { n: 85, g: '中平', poem: ['一春風雨正瀟瀟', '千里行人去路遙', '移寡就多君得計', '如何歸路轉無聊'], gloss: L('路上會有點辛苦，做決定以前要想清楚。', 'El camino será algo duro; piensa bien antes de decidir.', 'The road will be a bit hard; think carefully before you decide.'), say: '事情不太容易，要好好考慮再做。', tags: ['hard', 'careful'] },
+  { n: 10, g: '下下', poem: ['病患時時命蹇衰', '何須打瓦共鑽龜', '宜教重見一陽復', '始可求神仗佛持'], gloss: L('最近運氣比較弱，先好好休息，等情況變好。', 'Tu suerte está floja; descansa y espera a que mejore.', 'Your luck is weak right now — rest and wait for it to improve.'), say: '現在先照顧自己，不要急著做事。', tags: ['rest', 'wait'] },
+  { n: 14, g: '下下', poem: ['一見佳人便喜歡', '誰知去後有多般', '人情冷暖君休訝', '歷涉應知行路難'], gloss: L('看起來很好的事，後面可能有麻煩，要冷靜看。', 'Lo que parece bueno puede traer problemas; mantén la calma.', 'What looks good may bring trouble later — stay calm.'), say: '看起來太好的事要小心。', tags: ['careful', 'trouble'] },
+  { n: 23, g: '下下', poem: ['花開花謝在春風', '貴賤窮通百歲中', '羨子榮華今已矣', '到頭萬事總成空'], gloss: L('好運壞運都會過去，不要太執著。', 'La buena y la mala suerte pasan; no te aferres.', "Good luck and bad luck both pass — don't cling to either."), say: '好事壞事都不會一直在，看開一點。', tags: ['letgo'] },
+  { n: 35, g: '下下', poem: ['一山如畫對清江', '門裏團圓事事雙', '誰料半途分折去', '空幃無語對銀缸'], gloss: L('原本很圓滿，中間可能有變化，要多溝通、多珍惜。', 'Todo iba bien, pero puede haber cambios: comunícate y valora lo que tienes.', 'Things were going well but may change — communicate and treasure what you have.'), say: '以後可能不一樣，要多聊聊、珍惜身邊的人。', tags: ['trouble', 'people', 'family'] }
 ];
 const slipNo = n => `第${zhNum(n)}籤`;
 const slipNoEs = n => `n.º ${n}`;
+/* 聽懂題：回傳兩支「意思分類」和正解、彼此都不重疊的籤 */
+function otherSlips(slip) {
+  const apart = (x, y) => !x.tags.some(g => y.tags.includes(g));
+  for (;;) {
+    const a = pick(SLIPS.filter(x => apart(x, slip))), rest = SLIPS.filter(x => apart(x, slip) && apart(x, a));
+    if (rest.length) return [a, pick(rest)];
+  }
+}
+/* 聽懂題畫面上可能出現的單字：每局挑出這次真的看得到的 */
+const MEAN_WORDS = [
+  ['運氣', 'suerte', 'luck'], ['順利', 'ir bien', 'go smoothly'], ['謙虛', 'humilde', 'humble'], ['保持', 'mantenerse', 'stay'], ['驕傲', 'orgulloso', 'proud'], ['消息', 'noticia', 'news'],
+  ['喜氣', 'ambiente de alegría', 'joyful air'], ['開心', 'alegre', 'happy'], ['誠心', 'con sinceridad', 'sincerely'], ['祈求', 'rezar pidiendo', 'pray for'], ['祈禱', 'rezar', 'pray'], ['真心', 'de corazón', 'sincerely'],
+  ['時機', 'momento oportuno', 'right moment'], ['努力', 'esforzarse', 'make an effort'], ['認真', 'en serio', 'seriously'], ['越來越', 'cada vez más', 'more and more'], ['條件', 'cualidades', 'qualities'], ['貴人', 'persona que te ayuda', 'helpful person'],
+  ['機會', 'oportunidad', 'chance'], ['成功', 'tener éxito', 'succeed'], ['用功', 'aplicado', 'hard-working'], ['做法', 'manera de hacer', 'way of doing'], ['辛苦', 'duro, cansado', 'hard, tiring'], ['方法', 'método', 'method'], ['一陣子', 'un tiempo', 'a while'],
+  ['擔心', 'preocuparse', 'worry'], ['守信用', 'cumplir la palabra', 'keep one’s word'], ['平安', 'paz y seguridad', 'safe and sound'], ['誠實', 'honesto', 'honest'], ['生活', 'vida', 'life'], ['普通', 'normal', 'ordinary'], ['春天', 'primavera', 'spring'],
+  ['懷疑', 'dudar', 'doubt'], ['結果', 'resultado', 'result'], ['相信', 'creer', 'believe'], ['神明', 'deidad', 'deity'], ['答案', 'respuesta', 'answer'], ['合得來', 'llevarse bien', 'get along'], ['聊得來', 'tener buena conversación', 'click in conversation'],
+  ['尊重', 'respetar', 'respect'], ['對方', 'la otra persona', 'the other person'], ['冷清', 'apagado, sin movimiento', 'quiet, deserted'], ['好轉', 'mejorar', 'improve'], ['熱鬧', 'animado', 'lively'], ['決定', 'decidir', 'decide'],
+  ['踏踏實實', 'con los pies en la tierra', 'down-to-earth'], ['賺大錢', 'ganar mucho dinero', 'make big money'], ['發財', 'hacerse rico', 'get rich'], ['清楚', 'claro', 'clear'], ['容易', 'fácil', 'easy'], ['考慮', 'pensárselo', 'consider'],
+  ['比較', 'más bien, relativamente', 'rather'], ['休息', 'descansar', 'rest'], ['情況', 'situación', 'situation'], ['照顧', 'cuidar', 'take care of'], ['麻煩', 'problema', 'trouble'], ['冷靜', 'calma', 'calm'], ['小心', 'tener cuidado', 'be careful'],
+  ['執著', 'aferrarse', 'cling'], ['看開', 'tomarlo con calma', 'let it go'], ['圓滿', 'completo, perfecto', 'complete, happy'], ['變化', 'cambio', 'change'], ['溝通', 'comunicarse', 'communicate'], ['珍惜', 'valorar', 'cherish'], ['身邊', 'a tu lado', 'around you']
+];
 
 /* 擲筊：兩個筊杯，一面平、一面圓 */
 const RES = {
@@ -393,6 +435,20 @@ function beiSVG(face, i) {
   return `<svg viewBox="0 0 110 62"><g${flip.replace('W', '110')}>${body}</g></svg>`;
 }
 
+/* 填登記單：虛構的地址 [中文, 西文, 英文]、生日寫法 */
+const ADDR = [
+  ['台北市中山路三號', 'Zhongshan Road n.º 3, Taipéi', 'No. 3 Zhongshan Road, Taipei'],
+  ['台中市民生路十二號', 'Minsheng Road n.º 12, Taichung', 'No. 12 Minsheng Road, Taichung'],
+  ['台南市成功路二十五號', 'Chenggong Road n.º 25, Tainan', 'No. 25 Chenggong Road, Tainan'],
+  ['高雄市中正路八號', 'Zhongzheng Road n.º 8, Kaohsiung', 'No. 8 Zhongzheng Road, Kaohsiung']
+];
+const MONTH_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const MONTH_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const FILL_ROWS = ['name', 'birth', 'addr', 'term'];
+const daysIn = m => m === 2 ? 29 : [4, 6, 9, 11].includes(m) ? 30 : 31;
+const birthZh = (m, d) => `${zhNum(m)}月${zhNum(d)}號`;
+const TERMS = { '半年': ['medio año', 'half a year'], '三個月': ['tres meses', 'three months'], '一年': ['un año', 'one year'] };
+
 /* 登記單上，廟公可能寫錯的人名 */
 const FAKE_NAMES = ['小美', '大衛', '阿明', '佩佩', 'Lucas', 'Sofía'];
 
@@ -407,11 +463,14 @@ const VOCAB = {
   MAIN: [['關聖帝君', 'Guan Shengdijun (Guan Gong)', 'Lord Guan (Guan Gong)'], ['姓名', 'nombre', 'name'], ['生日', 'cumpleaños', 'birthday'], ['住址', 'dirección', 'address'], ['住在', 'vivir en', 'live at'], ['保佑', 'proteger, bendecir', 'bless, protect'], ['平安', 'paz y seguridad', 'safe and sound']],
   SIDE: [['側殿', 'salón lateral', 'side hall'], ['神明', 'deidades', 'deities'], ['插', 'clavar, colocar', 'stick in'], ['最後', 'último', 'last']],
   THROW: [['筊杯', 'jiaobei (bloques de madera)', 'moon blocks'], ['聖筊', 'sí (una plana, una redonda)', 'yes (one flat, one round)'], ['笑筊', 'sonrisa (dos planas)', 'smile (both flat)'], ['陰筊', 'no (dos redondas)', 'no (both round)'], ['丟', 'lanzar', 'throw'], ['抽籤', 'sacar una varilla', 'draw a fortune stick'], ['神明', 'deidad', 'deity']],
-  CONFIRM: [['籤支', 'varilla de la suerte', 'fortune stick'], ['筊杯', 'jiaobei (bloques de madera)', 'moon blocks'], ['聖筊', 'sí (una plana, una redonda)', 'yes (one flat, one round)'], ['笑筊', 'sonrisa (dos planas)', 'smile (both flat)'], ['陰筊', 'no (dos redondas)', 'no (both round)'], ['連續', 'seguidos', 'in a row'], ['丟', 'lanzar', 'throw']],
-  DRAW: [['籤筒', 'cilindro con varillas', 'fortune stick holder'], ['抽籤', 'sacar una varilla', 'draw a fortune stick'], ['求籤', 'pedir una suerte', 'ask for a fortune']],
+  CONFIRM: [['筊杯', 'jiaobei (bloques de madera)', 'moon blocks'], ['聖筊', 'sí (una plana, una redonda)', 'yes (one flat, one round)'], ['笑筊', 'sonrisa (dos planas)', 'smile (both flat)'], ['陰筊', 'no (dos redondas)', 'no (both round)'], ['連續', 'seguidos', 'in a row'], ['丟', 'lanzar', 'throw']],
+  DRAW: [['籤筒', 'cilindro con varillas', 'fortune stick holder'], ['籤支', 'varilla de la suerte', 'fortune stick'], ['抽籤', 'sacar una varilla', 'draw a fortune stick'], ['求籤', 'pedir una suerte', 'ask for a fortune']],
   SLIP_NUM: [['籤櫃', 'cajonera de papeles de suerte', 'fortune slip cabinet'], ['第……籤', 'la suerte n.º …', 'fortune No. …'], ['不好意思', 'disculpe', 'excuse me'], ['籤詩', 'poema de la suerte', 'fortune poem']],
-  READ: [['籤詩', 'poema de la suerte', 'fortune poem'], ['上上籤', 'la mejor suerte', 'the best fortune'], ['中平籤', 'suerte regular', 'so-so fortune'], ['下下籤', 'suerte difícil', 'a difficult fortune'], ['努力', 'esforzarse', 'make an effort']],
-  REGISTER: [['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['登記單', 'formulario de registro', 'registration form'], ['一年', 'un año', 'one year'], ['不好意思', 'disculpe', 'excuse me']],
+  READ: [['籤詩', 'poema de la suerte', 'fortune poem'], ['上上籤', 'la mejor suerte', 'the best fortune'], ['中平籤', 'suerte regular', 'so-so fortune'], ['下下籤', 'suerte difícil', 'a difficult fortune'], ['努力', 'esforzarse', 'make an effort'], ['躺平', 'tumbarse y no esforzarse', 'lie flat, stop trying']],
+  ASK: [['解籤', 'interpretar la suerte', 'interpret a fortune'], ['廟公', 'encargado del templo', 'temple keeper'], ['旁邊', 'al lado', 'beside'], ['老頭', 'viejo (grosero)', 'old man (rude)'], ['揉爛', 'arrugar y estrujar', 'crumple up'], ['丟掉', 'tirar', 'throw away']],
+  MEAN: [['廟公', 'encargado del templo', 'temple keeper'], ['意思', 'significado', 'meaning']],
+  FILL: [['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['登記單', 'formulario de registro', 'registration form'], ['姓名', 'nombre', 'name'], ['生日', 'cumpleaños', 'birthday'], ['住址', 'dirección', 'address'], ['期限', 'plazo', 'period'], ['選擇', 'elegir', 'choose'], ['半年', 'medio año', 'half a year']],
+  REGISTER: [['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['登記', 'registrar', 'register'], ['生日', 'cumpleaños', 'birthday'], ['住在', 'vivir en', 'live at'], ['一年', 'un año', 'one year'], ['不好意思', 'disculpe', 'excuse me']],
   PAY: [['一共', 'en total', 'in total'], ['算錯', 'calcular mal', 'miscalculate'], ['價目牌', 'tabla de precios', 'price board'], ['應該', 'debería', 'should']],
   PAY_FIX: [['夠', 'alcanzar, ser suficiente', 'be enough'], ['當場', 'en el momento', 'on the spot'], ['下次再付', 'pagar la próxima vez', 'pay next time']],
   CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give wrong change'], ['應該找', 'debería darme de cambio', 'should give back']],
@@ -426,14 +485,15 @@ const VOCAB = {
 const STAGE = {
   GATE: ['走哪個門', 'qué puerta usar', 'which door'], FIRE: ['熄香', 'apagar la llama del incienso', 'putting out the flame'], HEAVEN: ['拜天公', 'rezar al Cielo', 'praying to Heaven'],
   MAIN: ['拜關公', 'rezar a Guan Gong', 'praying to Guan Gong'], THROW: ['擲筊', 'lanzar los jiaobei', 'throwing the moon blocks'], DRAW: ['抽籤', 'sacar la suerte', 'drawing a fortune'], CONFIRM: ['確認籤支', 'confirmar la varilla', 'confirming the stick'],
-  SLIP_NUM: ['核對籤詩', 'revisar el papel de la suerte', 'checking the slip'], READ: ['看籤詩', 'leer la suerte', 'reading the fortune'], REGISTER: ['登記光明燈', 'registrar la lámpara', 'registering the lamp'],
+  SLIP_NUM: ['核對籤詩', 'revisar el papel de la suerte', 'checking the slip'], READ: ['看籤詩', 'leer la suerte', 'reading the fortune'],
+  ASK: ['請廟公解籤', 'pedir que interpreten la suerte', 'asking for an explanation'], MEAN: ['聽懂解籤', 'entender la explicación', 'understanding the explanation'], FILL: ['填登記單', 'rellenar el formulario', 'filling in the form'], REGISTER: ['登記光明燈', 'registrar la lámpara', 'registering the lamp'],
   PAY: ['付錢', 'pagar', 'paying'], PAY_FIX: ['付錢', 'pagar', 'paying'], CHANGE: ['找錢', 'el cambio', 'the change'], AMULET: ['平安符', 'el amuleto', 'the charm'], GUOLU: ['過爐', 'pasar por el incensario', 'passing over the burner'], EXIT: ['走哪個門出去', 'qué puerta para salir', 'which door to leave by']
 };
 
 /* 過場按鈕上的情境句：key 是下一關 */
 const NEXT_LABEL = {
   GATE: '走到廟門口', FIRE: '去點香處拿香點香', HEAVEN: '走到廟的前面', MAIN: '走進大殿', SIDE: '走到側殿', THROW: '去求籤', DRAW: from => from === 'CONFIRM' ? '回去重新求籤' : '走到籤筒前', CONFIRM: '問問關聖帝君是不是這支籤', SLIP_NUM: '走到籤櫃',
-  READ: '看籤詩', REGISTER: '走到登記處', PAY: '付錢', PAY_FIX: '聽廟公重算', CHANGE: '等找錢', AMULET: '看旁邊的桌子', GUOLU: '走到香爐前', EXIT: '準備離開', END: '走出廟門'
+  READ: '看籤詩', ASK: '拿籤詩給廟公看', MEAN: '聽廟公解籤', FILL: '走到登記處', REGISTER: '聽廟公唸一次', PAY: '付錢', PAY_FIX: '聽廟公重算', CHANGE: '等找錢', AMULET: '看旁邊的桌子', GUOLU: '走到香爐前', EXIT: '準備離開', END: '走出廟門'
 };
 
 /* ══════════════════════════════════════
@@ -457,6 +517,8 @@ document.getElementById('hint-close').onclick = () => Hints.toggle(false);
 /* ══════════════════════════════════════
    遊戲主體
 ══════════════════════════════════════ */
+const SORRY_IMGS = { SLIP_NUM: 'images/cabinet_sorry.jpg', REGISTER: 'images/desk_sorry.jpg', PAY: 'images/desk_sorry.jpg', CHANGE: 'images/desk_sorry.jpg' };   // 關卡 → 道歉時的圖
+
 const Game = defineGame({
   state: 'START',
   playerName: '你',
@@ -471,9 +533,13 @@ const Game = defineGame({
   att: {},                       // 每一關選了幾次（第一次就對才給綠卡）
   cash: null,
   ti: 0, streak: 0, goNext: null,   // 擲筊：第幾次、連續幾個聖筊、這一關丟完要去哪裡（null＝還要再丟）
-  EXTRA_IMAGES: ['images/gate_in.jpg', 'images/fire_out.jpg', 'images/draw_done.jpg', 'images/draw_bg.jpg', 'images/draw_hands.png'],   // imageFor() 才會用到的圖，也先載好
+  EXTRA_IMAGES: ['images/cabinet_sorry.jpg', 'images/desk_sorry.jpg', 'images/gate_in.jpg', 'images/fire_out.jpg', 'images/draw_done.jpg', 'images/draw_bg.jpg', 'images/draw_hands.png'],   // imageFor() 才會用到的圖，也先載好
   /* 過場頁預設用上一關的圖；旁白已經到下一個畫面時，改用符合旁白的圖：進廟門（點火處、Ami 在旁邊）、熄火後（香頭只剩灰） */
   imageFor() {
+    /* 廟公講錯被抓到：道歉的畫面換成尷尬的臉（SORRY_IMGS 有圖的關卡才換） */
+    const from = this._transMode && this._trans ? this._trans.from : this.state === 'PAY_FIX' ? 'PAY' : null;
+    const wrong = from && this.task && { SLIP_NUM: this.task.numWrong, REGISTER: this.task.regWrong, PAY: this.task.payWrong, CHANGE: this.task.changeWrong }[from];
+    if (wrong && SORRY_IMGS[from] && !this.missing.has(SORRY_IMGS[from])) return [SORRY_IMGS[from], '😅'];
     if (this._transMode && this._trans && this._trans.from === 'GATE' && this._trans.to === 'FIRE') return ['images/gate_in.jpg', '🕯️'];
     if (this._transMode && this._trans && this._trans.from === 'FIRE' && this._trans.to === 'HEAVEN') return ['images/fire_out.jpg', '🔥'];
     if (this._transMode && this._trans && this._trans.from === 'HEAVEN') return ['images/heaven.jpg', '🙏'];   // 拜天公的過場：天公爐   // 火熄了：香頭只剩灰、還在冒煙
@@ -493,18 +559,18 @@ const Game = defineGame({
   IMAGES: {
     START: ['images/start.jpg', '🏯'], GATE: ['images/gate.jpg', '⛩️'], FIRE: ['images/fire.jpg', '🔥'], HEAVEN: ['images/heaven.jpg', '🙏'],
     MAIN: ['images/main.jpg', '🏯'], SIDE: ['images/side.jpg', '🙏'], THROW: ['images/throw.jpg', '🌙'], CONFIRM: ['images/throw.jpg', '🌙'], DRAW: ['images/draw.jpg', '🎋'], SLIP_NUM: ['images/cabinet.jpg', '🗄️'],
-    READ: ['images/read.jpg', '📜'], REGISTER: ['images/desk.jpg', '🏮'], PAY: ['images/desk.jpg', '💵'], PAY_FIX: ['images/desk.jpg', '💵'], CHANGE: ['images/desk.jpg', '💵'],
+    READ: ['images/read.jpg', '📜'], ASK: ['images/explain.jpg', '🧓'], MEAN: ['images/explain.jpg', '🧓'], FILL: ['images/desk.jpg', '📝'], REGISTER: ['images/desk.jpg', '🏮'], PAY: ['images/desk.jpg', '💵'], PAY_FIX: ['images/desk.jpg', '💵'], CHANGE: ['images/desk.jpg', '💵'],
     AMULET: ['images/amulet.jpg', '🧧'], GUOLU: ['images/guolu.jpg', '🔄'], EXIT: ['images/exit.jpg', '⛩️'],
     END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
 
   setup() {
     /* 籤：隨機一支。擲筊結果先排好，每局丟 5～6 次、剛好出現一次笑筊或陰筊：
-       甲(50%) 抽籤前先沒過一次 → 聖筊；第一支籤就三聖筊（5 次）
-       乙(25%) 抽籤前一次過；第一支籤第 1 丟沒過 → 重抽 → 三聖筊（5 次）
-       丙(25%) 同乙，但第 2 丟才沒過（6 次） */
+       甲(40%) 抽籤前先沒過一次 → 聖筊；第一支籤就三聖筊（5 次）
+       乙(30%) 抽籤前一次過；第一支籤第 1 丟沒過 → 重抽 → 三聖筊（5 次）
+       丙(30%) 同乙，但第 2 丟才沒過（6 次） */
     const slip = pick(SLIPS), no = pick(['xiao', 'yin']), three = ['sheng', 'sheng', 'sheng'];
-    const plan = pick(['甲', '甲', '乙', '丙']), redraw = plan !== '甲';
+    const plan = pick(['甲', '甲', '甲', '甲', '乙', '乙', '乙', '丙', '丙', '丙']), redraw = plan !== '甲';
     const t = this.task = {
       slip, plan, rot: Math.floor(Math.random() * 3), fire: pick(['shake', 'fan']),
       ask: redraw ? ['sheng'] : [no, 'sheng'],
@@ -514,9 +580,18 @@ const Game = defineGame({
     /* 籤櫃：廟公有 45% 機率拿錯號碼（差一號） */
     t.numWrong = Math.random() < 0.45;
     t.numSaid = t.numWrong ? (slip.n === 100 ? 99 : slip.n === 1 ? 2 : slip.n + pick([-1, 1])) : slip.n;
-    /* 登記單：廟公複誦時有 45% 機率錯一項（名字或期限） */
-    t.regWrong = Math.random() < 0.45; t.regKind = pick(['name', 'term']); t.regName = pick(FAKE_NAMES.filter(x => x !== this.N));
-    t.regTerm = pick(['半年', '三個月']);
+    t.numClaim = slip.n === 100 ? 99 : slip.n === 1 ? 2 : slip.n + pick([-1, 1]);   // 廟公拿對時，「抓錯」選項說的錯號碼
+    /* 聽懂題：正解＋兩個意思不同的籤 */
+    t.mean = [slip, ...otherSlips(slip)].map(x => x.say);
+    const seen = [slip.gloss.zh, ...t.mean].join('');
+    VOCAB.MEAN = [['廟公', 'encargado del templo', 'temple keeper'], ['意思', 'significado', 'meaning'], ...MEAN_WORDS.filter(w => seen.includes(w[0]))];
+    /* 填登記單：名字三選一（自己的暱稱＋兩個別人的名字） */
+    t.form = {}; t.fillOpen = 'name'; t.pickMonth = false;
+    const others = FAKE_NAMES.filter(x => x !== this.N).map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(a => a[1]);
+    t.names = rotOf(t, [this.N, others[0], others[1]]);
+    /* 廟公複誦登記單時有 45% 機率錯一項（名字、生日、住址或期限） */
+    t.regWrong = Math.random() < 0.45; t.regKind = pick(['name', 'birth', 'addr', 'term']); t.regName = pick(others);
+    t.regShift = pick([1, 2, 3]); t.regTerm = pick(['半年', '三個月']);
     /* 付錢：光明燈 500 元，身上只有一張一千元，所以要找 500 */
     const total = 500, extras = [{ zh: '金紙', es: 'papel dorado', en: 'joss paper', price: 100 }, { zh: '蠟燭', es: 'velas', en: 'candles', price: 50 }];
     t.total = total; t.payWrong = Math.random() < 0.45; t.extra = pick(extras);
@@ -592,18 +667,18 @@ const Game = defineGame({
       MAIN: L('告示牌：向神明說話時，先問好，再說自己的姓名、生日和住址，然後再說心願。', 'Letrero: al hablar con la deidad, saluda primero, luego di tu nombre, cumpleaños y dirección, y después tu deseo.', 'Sign: when you speak to the deity, greet first, then say your name, birthday and address, and then your wish.'),
       THROW: L('告示牌：一平一圓是聖筊（同意）；兩個平面是笑筊（還沒決定）；兩個圓面是陰筊（不同意）。抽籤前要一個聖筊；抽籤後要連續三個聖筊，才是那支籤。', 'Letrero: una plana y una redonda = sí; dos planas = sonrisa (aún no decide); dos redondas = no. Antes de sacar la varilla hace falta un «sí»; después, tres «sí» seguidos para confirmarla.', 'Sign: one flat + one round = yes; both flat = smile (undecided); both round = no. One yes before drawing; three yeses in a row afterwards to confirm the stick.'),
       SLIP_NUM: L('告示牌：籤支上的號碼，要和籤詩的號碼一樣。', 'Letrero: el número de la varilla debe ser igual al del papel.', 'Sign: the number on the stick must match the number on the slip.'),
-      REGISTER: L('告示牌：光明燈，一年五百元。請寫姓名。', 'Letrero: lámpara de luz, un año, NT$500. Escribe tu nombre.', 'Sign: light lamp, one year, NT$500. Please write your name.'),
+      FILL: L('告示牌：光明燈，一年五百元。請寫姓名、生日和住址。', 'Letrero: lámpara de luz, un año, NT$500. Escribe tu nombre, cumpleaños y dirección.', 'Sign: light lamp, one year, NT$500. Please write your name, birthday and address.'),
       AMULET: L('告示牌：平安符請自己拿，隨喜投香油錢。', 'Letrero: toma el amuleto tú mismo y deja la donación que quieras.', 'Sign: take a charm yourself and donate as you wish.'),
       GUOLU: L('告示牌：平安符請在香爐上方，順時針繞三圈。', 'Letrero: pasa el amuleto sobre el incensario, tres vueltas en sentido horario.', 'Sign: pass your charm over the incense burner, three times clockwise.'),
       EXIT: L('告示牌：龍進虎出。', 'Letrero: entrar por el dragón, salir por el tigre.', 'Sign: enter by the dragon, exit by the tiger.')
     };
   },
   hintSections() {
-    const ORDER = ['START', 'GATE', 'FIRE', 'HEAVEN', 'MAIN', 'SIDE', 'THROW', 'DRAW', 'CONFIRM', 'SLIP_NUM', 'READ', 'REGISTER', 'PAY', 'PAY_FIX', 'CHANGE', 'AMULET', 'GUOLU', 'EXIT', 'END', 'RESULT'];
+    const ORDER = ['START', 'GATE', 'FIRE', 'HEAVEN', 'MAIN', 'SIDE', 'THROW', 'DRAW', 'CONFIRM', 'SLIP_NUM', 'READ', 'ASK', 'MEAN', 'FILL', 'REGISTER', 'PAY', 'PAY_FIX', 'CHANGE', 'AMULET', 'GUOLU', 'EXIT', 'END', 'RESULT'];
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
     const t = this.task, sg = this.signs();
     const out = [{ title: 'Ami 說的話', lines: this.amiLines() }];
-    const signs = ['GATE', 'FIRE', 'HEAVEN', 'MAIN', 'THROW', 'SLIP_NUM', 'REGISTER', 'AMULET', 'GUOLU', 'EXIT'].filter(s => at(s)).map(s => sg[s]);
+    const signs = ['GATE', 'FIRE', 'HEAVEN', 'MAIN', 'THROW', 'SLIP_NUM', 'FILL', 'AMULET', 'GUOLU', 'EXIT'].filter(s => at(s)).map(s => sg[s]);
     if (signs.length) out.push({ title: '廟裡的告示牌', lines: signs });
     if (at('PAY_FIX')) out.push({ title: '廟公說的話', lines: [L(`廟公：一共是${zhNum(t.said)}元。`, `Son ${esM(t.said)} en total.`, `${enM(t.said)} in total.`)] });
     return out;
@@ -712,15 +787,15 @@ const Game = defineGame({
       ? say('三個聖筊！關聖帝君說就是這支籤！', '¡Tres «sí»! Guan Shengdijun dice que es esta varilla.', 'Three yeses! Lord Guan says this is the one!')
       : say('是聖筊！很好，再丟一次！', '¡Salió «sí»! Muy bien, lanza otra vez.', "It's a yes! Good, throw again!");
   },
-  testPrep() {   // 自動測試用：擲筊關直接丟到可以換下一步
+  testPrep(good) {   // 自動測試用：擲筊關直接丟到可以換下一步；登記單先填好（good＝填正確的）
+    if (this.state === 'FILL') {
+      const t = this.task, any = a => a[Math.floor(Math.random() * a.length)];
+      t.form = { name: good ? this.N : any(t.names), m: any([1, 2, 6, 11, 12]), d: any([1, 5, 11, 21, 29]), addr: any([0, 1, 2, 3]), term: good ? '一年' : any(Object.keys(TERMS)) };
+      return this.render();
+    }
     if (!['THROW', 'CONFIRM'].includes(this.state) || this.goNext) return;
     for (let i = 0; i < 6 && !this.goNext; i++) this.land();
     this.feedback = []; this.render();
-  },
-  /* 籤支（籤櫃前） */
-  stickHTML(slip = this.task.slip) {
-    const r = s => this.ruby(s);
-    return `<div class="card slip"><div class="mh">${r('你抽到的籤支')}</div><div class="sn">${r(slipNo(slip.n))}</div></div>`;
   },
   /* 籤詩紙 */
   slipHTML() {
@@ -728,13 +803,68 @@ const Game = defineGame({
     return `<div class="card slip"><div class="sn">${r(slipNo(s.n))}</div><div class="sg">${r(GRADES[s.g].zh)}</div>` +
       `<div class="poem">${s.poem.map(l => `<div>${r(l)}</div>`).join('')}</div></div>`;
   },
-  /* 光明燈登記單 */
+  /* 登記單填好的內容（自動測試直接跳關時，沒填的用預設值） */
+  filled() { return { name: this.N, m: 3, d: 5, addr: 0, term: '一年', ...this.task.form }; },
   formHTML() {
-    const r = s => this.ruby(s);
+    const r = s => this.ruby(s), f = this.filled();
+    const row = (k, v) => `<div class="form-row"><b>${r(k)}</b><span>${r(v)}</span></div>`;
     return `<div class="card"><div class="mh">🏮 ${r('光明燈登記單')}</div>` +
-      `<div class="form-row"><b>${r('姓名')}</b><span>${r(this.N)}</span></div>` +
-      `<div class="form-row"><b>${r('期限')}</b><span>${r('一年')}</span></div>` +
-      `<div class="form-row"><b>${r('金額')}</b><span>${r('五百元')}</span></div></div>`;
+      row('姓名', f.name) + row('生日', birthZh(f.m, f.d)) + row('住址', ADDR[f.addr][0]) + row('期限', f.term) + row('金額', '五百元') + '</div>';
+  },
+  /* 填登記單：平常只看到四行，點哪一行才展開；選完自動收起來、打開下一個還沒填的。
+     選的內容記在 task.form（只用在這一局），展開哪一行記在 task.fillOpen */
+  rowDone(k) { const f = this.task.form; return k === 'birth' ? !!(f.m && f.d) : f[k] !== undefined; },
+  fillHTML() {
+    const r = s => this.ruby(s), t = this.task, f = t.form;
+    const btn = (k, v, label) => `<button type="button" class="pick${f[k] === v ? ' on' : ''}" data-k="${k}" data-v="${esc(String(v))}" aria-pressed="${f[k] === v}">${label}</button>`;
+    const seq = n => Array.from({ length: n }, (_, i) => i + 1);
+    const body = {
+      name: () => `<div class="picks">${t.names.map(n => btn('name', n, r(n))).join('')}</div>`,
+      /* 生日：同一個位置先選月份，再換成日期 */
+      birth: () => !f.m || t.pickMonth
+        ? `<div class="picks months">${seq(12).map(m => btn('m', m, r(zhNum(m) + '月'))).join('')}</div>`
+        /* 「換月份」放在日期最後一排的空位 */
+        : `<div class="picks days">${seq(daysIn(f.m)).map(d => btn('d', d, d)).join('')}` +
+          `<button type="button" class="pick back" style="grid-column: span ${7 - daysIn(f.m) % 7}">${r('換月份')}</button></div>`,
+      addr: () => `<div class="picks addr">${ADDR.map((a, i) => btn('addr', i, r(a[0]))).join('')}</div>`,
+      term: () => `<div class="picks">${Object.keys(TERMS).map(x => btn('term', x, r(x))).join('')}</div>`
+    };
+    const value = {
+      name: () => r(f.name), addr: () => r(ADDR[f.addr][0]), term: () => r(f.term),
+      birth: () => r(birthZh(f.m, f.d))
+    };
+    const title = { name: '姓名', birth: '生日', addr: '住址', term: '期限' };
+    return `<div class="card fill"><div class="mh">🏮 ${r('光明燈登記單')}</div><div class="note">${r('光明燈一年五百元')}</div>` +
+      FILL_ROWS.map(k => {
+        const open = t.fillOpen === k, done = this.rowDone(k);
+        const shown = done ? value[k]() : k === 'birth' && f.m ? `${r(zhNum(f.m) + '月')}　<em>${r('請選日期')}</em>` : r('請選擇');
+        return `<div class="grp" data-row="${k}"><button type="button" class="head" aria-expanded="${open}"><b>${r(title[k])}</b>` +
+          `<span class="val${done || (k === 'birth' && f.m) ? '' : ' empty'}">${shown}</span><i aria-hidden="true">${open ? '▾' : done ? '✓' : '▸'}</i></button>` +
+          (open ? `<div class="body">${body[k]()}</div>` : '') + '</div>';
+      }).join('') + '</div>';
+  },
+  bindFill(box) {
+    const card = box.querySelector('.fill'); if (!card) return;
+    const t = this.task, f = t.form;
+    const redraw = row => {   // 只重畫登記單；row：重畫後要看得到、取得焦點的那一行
+      const w = document.createElement('div'); w.innerHTML = this.fillHTML(); card.replaceWith(w.firstElementChild); this.bindFill(box);
+      const el = row && box.querySelector(`.grp[data-row="${row}"]`);
+      if (el) { el.querySelector('.head').focus({ preventScroll: true }); el.scrollIntoView({ block: 'nearest' }); }
+    };
+    card.querySelectorAll('.head').forEach(h => {
+      h.onclick = () => { const k = h.parentNode.dataset.row; t.fillOpen = t.fillOpen === k ? null : k; t.pickMonth = false; redraw(k); };
+    });
+    card.querySelectorAll('.pick').forEach(b => {
+      b.onclick = () => {
+        if (b.classList.contains('back')) { t.pickMonth = true; return redraw('birth'); }
+        const k = b.dataset.k, v = ['m', 'd', 'addr'].includes(k) ? +b.dataset.v : b.dataset.v;
+        f[k] = v;
+        if (k === 'm') { t.pickMonth = false; if (f.d > daysIn(v)) delete f.d; return redraw('birth'); }
+        const row = k === 'd' ? 'birth' : k, i = FILL_ROWS.indexOf(row);
+        t.fillOpen = [...FILL_ROWS.slice(i + 1), ...FILL_ROWS.slice(0, i)].find(x => !this.rowDone(x)) || null;
+        redraw(t.fillOpen || row);
+      };
+    });
   },
   /* 價目牌 */
   boardHTML() {
@@ -866,7 +996,8 @@ const Game = defineGame({
       /* ═══ 側殿：拜其他神明，插最後一支香 ═══ */
       SIDE: {
         place: 'temple',
-        dialogue: () => [narr('你走到側殿，向其他神明拜了三下。', 'Vas al salón lateral y haces tres reverencias a las otras deidades.', 'You go to the side hall and bow three times to the other deities.')],
+        dialogue: () => [narr('你走到側殿，向其他神明拜了三下。', 'Vas al salón lateral y haces tres reverencias a las otras deidades.', 'You go to the side hall and bow three times to the other deities.'),
+          ami('你知道這些是哪些神明嗎？', '¿Sabes qué deidades son estas?', 'Do you know which deities these are?')],
         options: ['插上最後一支香。'],
         next: () => {
           Game.thought = [narr('你插上最後一支香，雙手合十再拜一次。', 'Pones la última varilla, juntas las manos y haces otra reverencia.', 'You place the last stick, press your palms together and bow once more.'),
@@ -903,8 +1034,7 @@ const Game = defineGame({
       /* ═══ 擲筊（抽籤後）：連續三個聖筊，才是這支籤；沒過就重抽 ═══ */
       CONFIRM: {
         place: 'temple',
-        html: () => { const n = Game.drawnSlip().n; return Game.stickHTML(Game.drawnSlip()) +
-          Game.formatText([L(`我：請問是${slipNo(n)}嗎？`, `Yo: ¿Es la suerte ${slipNoEs(n)}?`, `Me: Is it No. ${n}?`)]) + Game.beiHTML(); },
+        html: () => { const n = Game.drawnSlip().n; return Game.formatText([L(`我：請問是${slipNo(n)}嗎？`, `Yo: ¿Es la suerte ${slipNoEs(n)}?`, `Me: Is it No. ${n}?`)]) + Game.beiHTML(); },
         mount: box => Game.bindToss(box),
         dialogue: () => said('CONFIRM'),
         options: goLabel,
@@ -913,9 +1043,9 @@ const Game = defineGame({
 
       /* ═══ 籤櫃：廟公拿籤詩，號碼可能拿錯 ═══ */
       SLIP_NUM: catchState(Game, {
-        key: 'SLIP_NUM', place: 'temple', html: () => Game.stickHTML(),
+        key: 'SLIP_NUM', place: 'temple',
         dialogue: () => [staff(`你的籤是${slipNo(t.numSaid)}，這張給你。`, `Su suerte es la ${slipNoEs(t.numSaid)}; aquí tiene.`, `Your fortune is No. ${t.numSaid}. Here you go.`)],
-        ok: '對，是這張，謝謝。', fix: () => `不好意思，我抽到的是${slipNo(S.n)}。`, rude: '你到底會不會看號碼啊？',
+        ok: '對，是這張，謝謝。', fix: () => `不好意思，我抽到的是${slipNo(t.numWrong ? S.n : t.numClaim)}。`, rude: '廟公，你的眼睛是不是不太好？',
         wrong: () => t.numWrong,
         whyWrong: () => M(`廟公拿錯了：籤支上是${slipNo(S.n)}，他拿的是${slipNo(t.numSaid)}。要先對一下號碼。`, `Se equivocó: tu varilla dice ${slipNoEs(S.n)} y te dio la ${slipNoEs(t.numSaid)}. Compara el número.`, `He got it wrong: your stick says No. ${S.n} but he gave you No. ${t.numSaid}. Check the number.`),
         whyRight: () => M(`號碼是對的：${slipNo(S.n)}。`, `El número es correcto: ${slipNoEs(S.n)}.`, `The number is right: No. ${S.n}.`),
@@ -925,42 +1055,117 @@ const Game = defineGame({
         go: () => { Game.state = 'READ'; }
       }),
 
-      /* ═══ 看籤詩：Ami 只說一句白話 ═══ */
+      /* ═══ 看籤詩：Ami 只說是什麼籤，白話解釋留給廟公 ═══ */
       READ: {
         place: 'temple',
         html: () => Game.slipHTML(),
         dialogue: () => [narr('籤詩是古文，很難懂。', 'El poema está en chino clásico y es difícil de entender.', 'The poem is in classical Chinese and hard to follow.'),
-          ami(`這是${GRADES[S.g].zh}。${S.gloss.zh}`, `Es «${GRADES[S.g].zh}» (${GRADES[S.g].es}). ${S.gloss.es}`, `It's a "${GRADES[S.g].zh}" (${GRADES[S.g].en}). ${S.gloss.en}`)],
-        options: () => rotOf(t, ['謝謝關公。我會好好努力。', '那我什麼都不用做了。', '再抽一次，抽到上上籤為止。']),
+          ami(`這是${GRADES[S.g].zh}。`, `Es «${GRADES[S.g].zh}» (${GRADES[S.g].es}).`, `It's a "${GRADES[S.g].zh}" (${GRADES[S.g].en}).`)],
+        options: () => rotOf(t, ['謝謝關公。我會好好努力。', '那我可以躺平了。', S.g === '上上' ? '那我可以不用學中文了吧！' : '再抽一次，抽到上上籤為止。']),
         next: c => {
-          if (c !== '謝謝關公。我會好好努力。') { Game.addMistake(c.includes('不用做') ? M('籤是提醒你，不是保證，還是要自己努力。', 'La suerte es un recordatorio, no una garantía: igual debes esforzarte.', 'A fortune is a reminder, not a guarantee — you still have to try.') : M('一件事只問一次，不能一直重抽。', 'Una pregunta se hace una sola vez; no se repite hasta que salga bien.', "Ask once per question — don't redraw until you like the answer.")); return; }
+          if (c !== '謝謝關公。我會好好努力。') {
+            Game.addMistake(c.includes('躺平') ? M('籤是提醒你，不是保證，還是要自己努力。', 'La suerte es un recordatorio, no una garantía: igual debes esforzarte.', 'A fortune is a reminder, not a guarantee — you still have to try.')
+              : c.includes('學中文') ? M('抽到好籤很棒，可是中文還是要自己學喔！', '¡Qué bien sacar una buena suerte! Pero el chino hay que estudiarlo igual.', "A good fortune is great, but you still have to learn Chinese yourself!")
+                : M('一件事只問一次，不能一直重抽。', 'Una pregunta se hace una sola vez; no se repite hasta que salga bien.', "Ask once per question — don't redraw until you like the answer."));
+            return;
+          }
           goodFirst('READ', '很好！籤詩是提醒，要自己好好努力。', '¡Muy bien! El poema es un recordatorio: hay que esforzarse.', 'Good! The poem is a reminder — you still have to try your best.');
-          Game.thought = [narr('你把籤詩收好。Ami說：「走吧，我們去登記光明燈。」', 'Guardas bien el papel. Ami dice: «Vamos a registrar la lámpara de luz».', 'You put the slip away. Ami says, "Let\'s go register a light lamp."')];
+          Game.thought = [ami(`${N}，請廟公幫你解籤吧！`, `${N}, ¡pídele al encargado del templo que te explique el poema!`, `${N}, ask the temple keeper to explain your fortune!`)];
+          Game.state = 'ASK';
+        }
+      },
+
+      /* ═══ 請廟公解籤：有禮貌地開口 ═══ */
+      ASK: {
+        place: 'temple',
+        dialogue: () => [narr('你拿著籤詩，走到廟公旁邊。', 'Con el poema en la mano, te acercas al encargado del templo.', 'Fortune poem in hand, you go over to the temple keeper.')],
+        options: () => rotOf(t, ['廟公，可以請你幫我解籤嗎？', '欸，老頭，這什麼意思？', '（把籤紙揉爛丟掉）']),
+        next: c => {
+          if (c !== '廟公，可以請你幫我解籤嗎？') {
+            Game.addMistake(c.includes('老頭') ? M('這樣很沒禮貌。要叫「廟公」，再說「可以請你……嗎？」', 'Eso es de mala educación. Llámalo «廟公» y pídelo con «可以請你……嗎？».', 'That is rude. Call him 廟公 and ask politely with 可以請你……嗎？')
+              : M('籤紙不能揉爛亂丟。看不懂的話，可以請廟公解籤。', 'No arrugues ni tires el papel. Si no lo entiendes, pide al encargado que te lo explique.', "Don't crumple and throw away the slip. If you can't understand it, ask the keeper to explain."));
+            return;
+          }
+          goodFirst('ASK', '很好！請人幫忙的時候，要有禮貌。', '¡Muy bien! Al pedir ayuda hay que ser amable.', 'Good! Be polite when you ask for help.');
+          Game.state = 'MEAN';
+        }
+      },
+
+      /* ═══ 聽懂題：廟公說白話，選一樣意思的 ═══ */
+      MEAN: {
+        place: 'temple',
+        dialogue: () => [staff(`好，我看看。${S.gloss.zh}`, `A ver… ${S.gloss.es}`, `Let me see… ${S.gloss.en}`),
+          L('廟公的意思是什麼？', '¿Qué quiso decir el encargado?', 'What did the temple keeper mean?')],
+        options: () => rotOf(t, t.mean),
+        next: c => {
+          if (c !== S.say) { Game.addMistake(M('廟公不是這個意思。再看一次、聽一次他說的話。', 'No es eso lo que dijo. Vuelve a leer y escuchar sus palabras.', "That's not what he meant. Read and listen to his words again.")); return; }
+          goodFirst('MEAN', '沒錯！你聽懂廟公的意思了。', '¡Exacto! Entendiste lo que dijo.', 'Right! You understood what he said.');
+          Game.thought = [ami('走吧，我們去登記光明燈。', 'Vamos a registrar la lámpara de luz.', "Let's go and register a light lamp.")];
+          Game.state = 'FILL';
+        }
+      },
+
+      /* ═══ 填光明燈登記單：名字和期限要填對，生日、住址自己選 ═══ */
+      FILL: {
+        place: 'temple',
+        html: () => Game.formatText([ami('你自己填登記單吧！', '¡Rellena tú el formulario!', 'Go ahead and fill in the form yourself!')]) + Game.fillHTML(),
+        mount: box => Game.bindFill(box),
+        dialogue: () => [],
+        options: ['填好了'],
+        next: () => {
+          const f = t.form;
+          const missing = FILL_ROWS.find(k => !Game.rowDone(k));
+          if (missing) {   // 沒填完：打開那一行、只提醒，不扣分
+            t.fillOpen = missing; t.pickMonth = false;
+            Game.att.FILL -= 1;
+            Game.thought = [narr('登記單還沒填完。', 'Todavía faltan datos en el formulario.', "The form isn't finished yet.")];
+            return;
+          }
+          const badName = f.name !== N, badTerm = f.term !== '一年';
+          if (badName || badTerm) {
+            t.fillOpen = badName ? 'name' : 'term';   // 打開填錯的那一行
+            const parts = [];
+            if (badName) parts.push(M('姓名要寫自己的名字。', 'En el nombre debes poner el tuyo.', 'Write your own name.'));
+            if (badTerm) parts.push(M('告示牌寫光明燈一年五百元，期限要選一年。', 'El letrero dice un año por NT$500: elige un año.', 'The sign says one year for NT$500 — choose one year.'));
+            Game.addMistake(M(parts.map(x => x.zh).join(''), parts.map(x => x.es).join(' '), parts.map(x => x.en).join(' ')));
+            return;
+          }
+          goodFirst('FILL', '很好！登記單填好了。', '¡Muy bien! El formulario está completo.', 'Good! The form is filled in.');
+          Game.thought = [narr('你把登記單交給廟公。', 'Entregas el formulario al encargado.', 'You hand the form to the temple keeper.')];
           Game.state = 'REGISTER';
         }
       },
 
       /* ═══ 登記光明燈：廟公複誦登記單，可能說錯一項 ═══ */
-      REGISTER: catchState(Game, {
-        key: 'REGISTER', place: 'temple', html: () => Game.formHTML(),
-        dialogue: () => {
-          const name = t.regWrong && t.regKind === 'name' ? t.regName : N, term = t.regWrong && t.regKind === 'term' ? t.regTerm : '一年';
-          const nameEs = t.regWrong && t.regKind === 'name' ? t.regName : N;
-          return [staff(`光明燈登記：名字是「${name}」，點${term}，對嗎？`, `Registro de la lámpara de luz: nombre «${nameEs}», por ${term === '一年' ? 'un año' : term === '半年' ? 'medio año' : 'tres meses'}. ¿Correcto?`, `Light lamp registration: name "${nameEs}", for ${term === '一年' ? 'one year' : term === '半年' ? 'half a year' : 'three months'}. Is that right?`)];
-        },
-        ok: '對，沒錯。', fix: () => t.regKind === 'name' ? `不好意思，我的名字是${N}。` : '不好意思，我要點一年的。', rude: '你到底有沒有在看我寫的啊？',
-        wrong: () => t.regWrong,
-        whyWrong: () => t.regKind === 'name'
-          ? M(`廟公說錯了：登記單上是「${N}」，他說「${t.regName}」。`, `El encargado se equivocó: el formulario dice «${N}» y dijo «${t.regName}».`, `The keeper got it wrong: the form says "${N}" but he said "${t.regName}".`)
-          : M(`廟公說錯了：登記單上是一年，他說「${t.regTerm}」。`, `El encargado se equivocó: el formulario dice un año y dijo «${t.regTerm}».`, `The keeper got it wrong: the form says one year but he said "${t.regTerm}".`),
-        whyRight: () => t.regKind === 'name'
-          ? M(`廟公說的是對的：名字是「${N}」。`, `Lo que dijo es correcto: el nombre es «${N}».`, `He was right: the name is "${N}".`)
-          : M('廟公說的是對的：一年。', 'Lo que dijo es correcto: un año.', 'He was right: one year.'),
-        goodWrong: ['你很細心！登記的內容說錯了，要馬上說。', '¡Qué atento! Si repiten mal el registro, hay que decirlo enseguida.', 'Well spotted! If the registration is repeated wrong, speak up right away.'],
-        goodOk: ['廟公複誦的時候，要對一下登記單。', 'Cuando el encargado repita los datos, compáralos con el formulario.', 'When the keeper reads it back, compare it with the form.'],
-        apology: () => [staff('啊，不好意思！我改過來。', '¡Ay, disculpe! Lo corrijo.', 'Oh, sorry! I will fix it.'), staff(`好，「${N}」，一年，沒錯了。光明燈五百元。`, `Bien: «${N}», un año. Ahora sí. La lámpara de luz cuesta NT$500.`, `Okay: "${N}", one year — correct now. The light lamp is NT$500.`)],
-        go: () => { Game.state = 'PAY'; }
-      }),
+      REGISTER: (() => {
+        const f = Game.filled(), k = t.regKind;
+        const mine = { name: N, birth: birthZh(f.m, f.d), addr: ADDR[f.addr][0], term: '一年' };
+        /* 廟公說錯時用的值 */
+        const wd = f.d < daysIn(f.m) ? f.d + 1 : f.d - 1, wa = (f.addr + t.regShift) % ADDR.length;
+        const bad = { name: t.regName, birth: birthZh(f.m, wd), addr: ADDR[wa][0], term: t.regTerm };
+        const said = { ...mine, ...(t.regWrong ? { [k]: bad[k] } : {}) };
+        const day = t.regWrong && k === 'birth' ? wd : f.d, ai = t.regWrong && k === 'addr' ? wa : f.addr;
+        const label = { name: '名字', birth: '生日', addr: '住址', term: '期限' }[k];
+        const es = { name: 'el nombre', birth: 'el cumpleaños', addr: 'la dirección', term: 'el plazo' }[k];
+        const en = { name: 'name', birth: 'birthday', addr: 'address', term: 'period' }[k];
+        return catchState(Game, {
+          key: 'REGISTER', place: 'temple', html: () => Game.formHTML(),
+          dialogue: () => [staff(`光明燈登記：名字是「${said.name}」，生日是${said.birth}，住在${said.addr}，點${said.term}，對嗎？`,
+            `Registro de la lámpara de luz: nombre «${said.name}», cumpleaños el ${day} de ${MONTH_ES[f.m - 1]}, dirección ${ADDR[ai][1]}, por ${TERMS[said.term][0]}. ¿Correcto?`,
+            `Light lamp registration: name "${said.name}", birthday ${MONTH_EN[f.m - 1]} ${day}, address ${ADDR[ai][2]}, for ${TERMS[said.term][1]}. Is that right?`)],
+          ok: '對，沒錯。',
+          fix: () => ({ name: `不好意思，我的名字是${N}。`, birth: `不好意思，我的生日是${mine.birth}。`, addr: `不好意思，我住在${mine.addr}。`, term: '不好意思，我要點一年的。' })[k],
+          rude: '你到底有沒有在看我寫的啊？',
+          wrong: () => t.regWrong,
+          whyWrong: () => M(`廟公說錯了：登記單上的${label}是「${mine[k]}」，他說「${bad[k]}」。`, `El encargado se equivocó en ${es}: compara con el formulario.`, `The keeper got the ${en} wrong — compare with the form.`),
+          whyRight: () => M(`廟公說的是對的：${label}是「${mine[k]}」。`, `Lo que dijo es correcto: ${es} coincide con el formulario.`, `He was right: the ${en} matches the form.`),
+          goodWrong: ['你很細心！登記的內容說錯了，要馬上說。', '¡Qué atento! Si repiten mal el registro, hay que decirlo enseguida.', 'Well spotted! If the registration is repeated wrong, speak up right away.'],
+          goodOk: ['廟公複誦的時候，要對一下登記單。', 'Cuando el encargado repita los datos, compáralos con el formulario.', 'When the keeper reads it back, compare it with the form.'],
+          apology: () => [staff('啊，不好意思！我改過來。', '¡Ay, disculpe! Lo corrijo.', 'Oh, sorry! I will fix it.'),
+            staff(`好，「${N}」，${mine.birth}，${mine.addr}，一年，沒錯了。光明燈五百元。`, `Bien: «${N}», ${f.d} de ${MONTH_ES[f.m - 1]}, ${ADDR[f.addr][1]}, un año. Ahora sí. La lámpara de luz cuesta NT$500.`, `Okay: "${N}", ${MONTH_EN[f.m - 1]} ${f.d}, ${ADDR[f.addr][2]}, one year — correct now. The light lamp is NT$500.`)],
+          go: () => { Game.state = 'PAY'; }
+        });
+      })(),
 
       /* ═══ 付錢（報價、付錢、找錢） ═══ */
       PAY: catchState(Game, {
