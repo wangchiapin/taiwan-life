@@ -1368,9 +1368,10 @@ const Game = defineGame({
           ami('你做一次，我看看你會不會。', 'Hazlo tú; a ver si sabes.', 'You do it — let me see if you know how.')],
         options: () => rotOf(t, ['在香爐上方，順時針繞三圈。', '在香爐上方，逆時針繞三圈。', '把平安符丟進香爐裡。']),
         next: c => {
-          if (c !== '在香爐上方，順時針繞三圈。') { Game.addMistake(c.includes('逆時針') ? M('方向錯了喔！', '¡La dirección está mal!', 'Wrong direction!') : M('平安符不能丟進香爐，會燒掉！', '¡El amuleto no se tira al incensario: se quemaría!', "Don't drop the charm in the burner: it would burn!")); return; }
+          if (c !== '在香爐上方，順時針繞三圈。') { Game.addMistake(c.includes('逆時針') ? M('方向錯了喔！', '¡La dirección está mal!', 'Wrong direction!') : M('平安符不能丟進香爐喔！', '¡El amuleto no se tira al incensario!', "Don't throw the charm into the burner!")); return; }
           goodFirst('GUOLU', '沒錯！過爐要順時針繞三圈。', '¡Exacto! Se pasa tres veces en sentido horario.', 'Right! Three times clockwise.');
-          Game.thought = [narr('你拿好平安符。事情都做完了，關聖帝君保佑你一切順利。', 'Sostienes bien tu amuleto. Ya está todo hecho. ¡Que Guan Shengdijun te proteja y todo te vaya bien!', "You hold on to your charm. Everything is done. May Lord Guan watch over you so that all goes well.")];
+          Game.thought = [narr('你拿好平安符。事情都做完了，關聖帝君保佑你一切順利。', 'Sostienes bien tu amuleto. Ya está todo hecho. ¡Que Guan Shengdijun te proteja y todo te vaya bien!', "You hold on to your charm. Everything is done. May Lord Guan watch over you so that all goes well."),
+            ami(`${N}，太好了！之後一定會很順利的，我們走吧！`, `${N}, ¡qué bien! Seguro que a partir de ahora todo te irá bien. ¡Vámonos!`, `${N}, great! Things are sure to go well from now on. Let's go!`)];
           Game.state = 'EXIT';
         }
       },
@@ -1378,8 +1379,7 @@ const Game = defineGame({
       /* ═══ 虎邊出去 ═══ */
       EXIT: {
         place: 'temple',
-        dialogue: () => [narr('廟門有三個門。', 'La salida tiene tres puertas.', 'There are three doors.'),
-          ami('走吧，我陪你出去。', 'Vamos, salgo contigo.', "Let's go — I'll walk out with you.")],
+        dialogue: () => [ami(`${N}，你還記得要從哪個門出去嗎？`, `${N}, ¿te acuerdas de por qué puerta hay que salir?`, `${N}, do you remember which door we go out through?`)],
         options: () => rotOf(t, ['從右邊的門（虎邊）出去。', '從左邊的門（龍邊）出去。', '從中間的門出去。']),
         next: c => {
           if (c !== '從右邊的門（虎邊）出去。') { Game.addMistake(c.includes('龍邊') ? M('龍進虎出，龍邊是入口唷！', 'Dragón entra, tigre sale: ¡el lado del dragón es la entrada!', 'Dragon in, tiger out: the dragon side is the entrance!') : M('中間最大的門是給神明走的！', '¡La puerta grande del centro es para las deidades!', 'The big middle door is for the deities!')); return; }
@@ -1398,7 +1398,7 @@ const Game = defineGame({
             narr('你和Ami一起走出廟門。', 'Sales del templo junto a Ami.', 'You and Ami walk out of the temple together.'),
             Game._endGood
               ? ami(`拜完以後，心裡有輕鬆一點嗎，${N}？我們去吃點東西吧！`, `¿Te sientes más tranquilo después de rezar, ${N}? ¡Vamos a comer algo!`, `Feeling a bit lighter after praying, ${N}? Let's go get something to eat!`)
-              : ami(`今天有點亂，不過心意最重要。下次我再陪你來，${N}。`, `Hoy fue un poco caótico, pero lo que cuenta es la intención. La próxima vez vengo contigo otra vez, ${N}.`, `Today was a bit messy, but the thought is what counts. I'll come with you again next time, ${N}.`)
+              : ami(`第一次來拜拜，感覺有點亂，不過心意最重要。下次我再陪你來，${N}。`, `Como es la primera vez que vienes a rezar, todo ha sido un poco caótico, pero lo que cuenta es la intención. La próxima vez vengo contigo otra vez, ${N}.`, `It was your first time praying here, so it felt a bit messy, but the thought is what counts. I'll come with you again next time, ${N}.`)
           ];
         },
         options: () => ['查看結果 ' + X('Ver resultado', 'See results')],

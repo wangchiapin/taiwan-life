@@ -372,12 +372,15 @@ with sync_playwright() as p:
     check('走回天公爐的過場圖', src() == 'images/guolu.jpg', src())
     go(); check('過爐 Ami 的話', st() == 'GUOLU' and 'Ami：你做一次，我看看你會不會。' in txt(page) and src() == 'images/guolu.jpg', txt(page))
     pick_('在香爐上方，順時針繞三圈。')
-    check('過爐後旁白', st() == '_TRANS' and '（你拿好平安符。事情都做完了，關聖帝君保佑你一切順利。）' in txt(page) and '包包' not in txt(page) and src() == 'images/guolu.jpg', txt(page))
+    check('過爐後旁白', st() == '_TRANS' and '（你拿好平安符。事情都做完了，關聖帝君保佑你一切順利。）' in txt(page) and 'Ami：María，太好了！之後一定會很順利的，我們走吧！' in txt(page) and '包包' not in txt(page) and src() == 'images/guolu.jpg', txt(page))
     go(); good, dragon, mid = '從右邊的門（虎邊）出去。', '從左邊的門（龍邊）出去。', '從中間的門出去。'
     check('出廟門：選項和圖', st() == 'EXIT' and sorted(opts()) == sorted([good, dragon, mid]) and src() == 'images/exit_hold.jpg', (opts(), src()))
+    check('出廟門：只有 Ami 問門，沒有旁白', 'Ami：María，你還記得要從哪個門出去嗎？' in txt(page) and '廟門有三個門' not in txt(page), txt(page))
     for c, why in ((dragon, '龍進虎出，龍邊是入口唷！'), (mid, '中間最大的門是給神明走的！')):
         k = m(); pick_(c); check('出廟門錯的選項：' + c, st() == 'EXIT' and m() == k + 1 and why in txt(page, '#npc-dialogue .fb.bad'), txt(page))
     pick_(good); check('從右邊虎邊出去：過關', st() == 'END', st())
+    ev(page, 'Game.mistakes=3; Game.render()')
+    check('錯超過兩次的結局台詞', 'Ami：第一次來拜拜，感覺有點亂，不過心意最重要。下次我再陪你來，María。' in txt(page), txt(page))
     for f in ('go_desk', 'go_amulet', 'amulet_hold', 'exit_hold'):
         check('新圖載得到：' + f, ev(page, f"new Promise(r=>{{const i=new Image();i.onload=()=>r(i.naturalWidth===720);i.onerror=()=>r(false);i.src='images/{f}.jpg'}})"))
     # ── 2026-11-28 第二批：我的狀況、廟門錯誤、點香關卡、錯誤訊息不講答案 ──
@@ -434,7 +437,7 @@ with sync_playwright() as p:
     fresh('DRAW'); page.screenshot(path='/tmp/t_DRAW.png', full_page=True)
     fresh('ASK'); wrong('ASK', '欸，老頭，這什麼意思？', '這樣很沒禮貌喔！'); wrong('ASK', '（把籤紙揉爛丟掉）', '籤紙不能揉爛亂丟喔！')
     fresh('AMULET'); wrong('AMULET', '（拿走全部的平安符）', '不可以全部拿走喔！')
-    fresh('GUOLU'); wrong('GUOLU', '在香爐上方，逆時針繞三圈。', '方向錯了喔！'); wrong('GUOLU', '把平安符丟進香爐裡。', '平安符不能丟進香爐，會燒掉！')
+    fresh('GUOLU'); wrong('GUOLU', '在香爐上方，逆時針繞三圈。', '方向錯了喔！'); wrong('GUOLU', '把平安符丟進香爐裡。', '平安符不能丟進香爐喔！')
     # 第三個聖筊換笑臉圖
     page.emulate_media(reduced_motion='reduce'); jump(page, 'CONFIRM', '2-0'); seen = []
     for i in range(3):
