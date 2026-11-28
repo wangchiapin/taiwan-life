@@ -993,7 +993,7 @@ const Game = defineGame({
     /* 答錯的訊息不講答案（2026-11-28）：抓錯關卡不管廟公有沒有講錯都是同一句；沒禮貌的選項不用共用的 POLITE（它叫人「告訴他正確的」） */
     const recheck = (zh, es, en) => () => M(zh, es, en);
     const rudeWhy = recheck('這樣說很沒禮貌喔！', '¡Decir eso es de mala educación!', "That's a rude thing to say!");
-    const slipAgain = recheck('號碼再對一次！', '¡Vuelve a comparar el número!', 'Check the number again!');
+    const slipAgain = recheck('你記錯你抽到哪一支籤了唷！', '¡Ups! No recuerdas bien qué varilla sacaste.', "Oops, you've got the wrong stick number in mind!");
     const formAgain = recheck('登記單再對一次！', '¡Vuelve a comparar con el formulario!', 'Check the form again!');
     const priceAgain = recheck('價目牌再看一次！', '¡Vuelve a mirar la tabla de precios!', 'Check the price board again!');
     const changeAgain = recheck('找的錢再算一次！', '¡Vuelve a calcular el cambio!', 'Work out the change again!');

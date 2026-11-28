@@ -408,7 +408,7 @@ with sync_playwright() as p:
     for i in range(4): ev(page, "Game.handleChoice(['自己的名字'])")
     check('拜關公錯很多次也不給答案', st() == 'MAIN' and ev(page, 'Game.mistakes') == 4 and '提示：要說的是' not in txt(page) and '心願' not in txt(page), txt(page))
     rude = '這樣說很沒禮貌喔！'
-    for state, flag, neutral, rudeopt in (('SLIP_NUM', 'numWrong', '號碼再對一次！', '廟公，你的眼睛是不是不太好？'), ('REGISTER', 'regWrong', '登記單再對一次！', '你到底有沒有在看我寫的啊？'),
+    for state, flag, neutral, rudeopt in (('SLIP_NUM', 'numWrong', '你記錯你抽到哪一支籤了唷！', '廟公，你的眼睛是不是不太好？'), ('REGISTER', 'regWrong', '登記單再對一次！', '你到底有沒有在看我寫的啊？'),
                                           ('PAY', 'payWrong', '價目牌再看一次！', '可以算便宜一點嗎？'), ('CHANGE', 'changeWrong', '找的錢再算一次！', '你是不是故意少找我錢啊？')):
         for w in (True, False):
             fresh(state)
