@@ -344,20 +344,41 @@ with sync_playwright() as p:
         pick_(ans); check(f'付錢答對（{said}）', ev(page, 'Game._trans?Game._trans.to:Game.state') == ('PAY_FIX' if said != 500 else 'CHANGE'), st())
     for wrong in (True, False):
         jump(page, 'CHANGE'); ev(page, f"Game.task.changeWrong={str(wrong).lower()}; Game.render()"); pick_(ev(page, f"({smoke.ORACLES['guandi']})()"))
-        check('找錢過場', st() == '_TRANS' and 'Ami：María，我們去領一個平安符吧！' in txt(page) and txt(page, '#options-area') == '去領平安符', txt(page))
+        if wrong:
+            check('找錯錢第一頁：只有道歉、尷尬圖', st() == '_TRANS' and '啊，不好意思' in txt(page) and '平安符' not in txt(page) and txt(page, '#options-area') == '繼續' and src() == 'images/desk_sorry.jpg', (txt(page), src()))
+            go()
+            check('找錯錢第二頁：Ami、平安符桌遠景', st() == 'GO_AMULET' and 'Ami：María，我們去領一個平安符吧！' in txt(page) and '不好意思' not in txt(page) and opts() == ['去領平安符'] and src() == 'images/go_amulet.jpg', (txt(page), src()))
+            pick_('去領平安符'); check('第二頁按完直接到平安符', st() == 'AMULET', st())
+        else:
+            check('找錢過場：一頁、平安符桌遠景', st() == '_TRANS' and 'Ami：María，我們去領一個平安符吧！' in txt(page) and txt(page, '#options-area') == '去領平安符' and src() == 'images/go_amulet.jpg', (txt(page), src()))
+            go(); check('按完直接到平安符', st() == 'AMULET', st())
+    jump(page, 'MEAN'); pick_(ev(page, f"({smoke.ORACLES['guandi']})()"))
+    check('去登記處的過場圖', st() == '_TRANS' and src() == 'images/go_desk.jpg', src())
+    jump(page, 'AMULET'); check('平安符旁白改好了', '（桌子上放著一些平安符，旁邊有一個香油錢箱。）' in txt(page) and '登記好了' not in txt(page) and src() == 'images/amulet.jpg', txt(page))
     jump(page, 'AMULET'); check('平安符 Ami 的話', 'Ami：哇！這些平安符好漂亮喔！' in txt(page), txt(page))
     ok_amulet = '（拿一個平安符，隨喜投一點香油錢）'
     check('平安符三個選項', sorted(opts()) == sorted([ok_amulet, '（拿走全部的平安符）', '這些平安符好醜喔！我不要拿！']), opts())
     for c in opts():
         if c != ok_amulet: k = m(); pick_(c); check('平安符錯的選項：' + c, st() == 'AMULET' and m() == k + 1)
     check('嫌醜的提醒', '很不禮貌' in ev(page, "Game.log.map(x=>x.zh).join()"))
-    pick_(ok_amulet); check('拿到平安符的過場', st() == '_TRANS' and '（你拿了一個平安符。）' in txt(page) and '過爐' not in txt(page) and txt(page, '#options-area') == '繼續', txt(page))
-    go(); check('Ami 問平安符', st() == 'CHARM' and 'Ami：María，你知道拿到平安符之後還要做什麼嗎？' in txt(page) and sorted(opts()) == sorted(['掛在樹上', '燒掉', '過香爐']) and src() == 'images/amulet.jpg', txt(page))
+    pick_(ok_amulet); check('拿到平安符的過場圖', src() == 'images/amulet_hold.jpg', src())
+    check('拿到平安符的過場', st() == '_TRANS' and '（你拿了一個平安符。）' in txt(page) and '過爐' not in txt(page) and txt(page, '#options-area') == '繼續', txt(page))
+    go(); check('Ami 問平安符', st() == 'CHARM' and 'Ami：María，你知道拿到平安符之後還要做什麼嗎？' in txt(page) and sorted(opts()) == sorted(['掛在樹上', '燒掉', '過香爐']) and src() == 'images/amulet_hold.jpg', txt(page))
     ev(page, 'Hints.toggle(true)'); check('回答前任務提示沒有過爐告示', '順時針' not in txt(page, '#hint-body')); ev(page, 'Hints.toggle(false)')
     for c, why in (('掛在樹上', '平安符要帶在身上，才可以保佑平安啦！'), ('燒掉', '關聖帝君剛剛給你的平安符，怎麼可以馬上就燒掉？')):
         k = m(); pick_(c); check('平安符問題錯的選項：' + c, st() == 'CHARM' and m() == k + 1 and why in txt(page, '#npc-dialogue .fb.bad'), txt(page))
     pick_('過香爐'); check('答對：稱讚、走回天公爐（錯過再答對也有稱讚）', st() == '_TRANS' and '很棒喔！你很清楚台灣的拜拜文化呢！' in txt(page, '#npc-dialogue .fb.good') and '（你走回前面的天公爐。）' in txt(page) and txt(page, '#options-area') == '走到香爐前', txt(page))
-    go(); check('過爐 Ami 的話', st() == 'GUOLU' and 'Ami：你做一次，我看看你會不會。' in txt(page), txt(page))
+    check('走回天公爐的過場圖', src() == 'images/guolu.jpg', src())
+    go(); check('過爐 Ami 的話', st() == 'GUOLU' and 'Ami：你做一次，我看看你會不會。' in txt(page) and src() == 'images/guolu.jpg', txt(page))
+    pick_('在香爐上方，順時針繞三圈。')
+    check('過爐後旁白', st() == '_TRANS' and '（你拿好平安符。事情都做完了，關聖帝君保佑你一切順利。）' in txt(page) and '包包' not in txt(page) and src() == 'images/guolu.jpg', txt(page))
+    go(); good, dragon, mid = '從右邊的門（虎邊）出去。', '從左邊的門（龍邊）出去。', '從中間的門出去。'
+    check('出廟門：選項和圖', st() == 'EXIT' and sorted(opts()) == sorted([good, dragon, mid]) and src() == 'images/exit_hold.jpg', (opts(), src()))
+    for c, why in ((dragon, '龍邊是入口，要從虎邊出去。'), (mid, '我們要從虎邊（右邊）出去。')):
+        k = m(); pick_(c); check('出廟門錯的選項：' + c, st() == 'EXIT' and m() == k + 1 and why in txt(page, '#npc-dialogue .fb.bad'), txt(page))
+    pick_(good); check('從右邊虎邊出去：過關', st() == 'END', st())
+    for f in ('go_desk', 'go_amulet', 'amulet_hold', 'exit_hold'):
+        check('新圖載得到：' + f, ev(page, f"new Promise(r=>{{const i=new Image();i.onload=()=>r(i.naturalWidth===720);i.onerror=()=>r(false);i.src='images/{f}.jpg'}})"))
     # 第三個聖筊換笑臉圖
     page.emulate_media(reduced_motion='reduce'); jump(page, 'CONFIRM', '2-0'); seen = []
     for i in range(3):

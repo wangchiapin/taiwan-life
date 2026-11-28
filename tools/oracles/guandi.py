@@ -25,7 +25,8 @@ ORACLE = """() => {
     AMULET: '（拿一個平安符，隨喜投一點香油錢）',
     CHARM: '過香爐',
     GUOLU: '在香爐上方，順時針繞三圈。',
-    EXIT: '從左邊的門（虎邊）出去。',
+    GO_AMULET: '去領平安符',
+    EXIT: '從右邊的門（虎邊）出去。',
     END: '查看結果', RESULT: '查看排行榜'
   };
   const v = m[s]; return typeof v === 'function' ? v() : (v ?? null);

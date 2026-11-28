@@ -532,11 +532,12 @@ const VOCAB = {
   REGISTER: [['交給', 'entregar a', 'hand to'], ['登記單', 'formulario de registro', 'registration form'], ['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['登記', 'registrar', 'register'], ['生日', 'cumpleaños', 'birthday'], ['住在', 'vivir en', 'live at'], ['一年', 'un año', 'one year'], ['不好意思', 'disculpe', 'excuse me'], ['收費', 'cobrar', 'charge a fee']],
   PAY: [['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['文昌燈', 'lámpara de Wenchang (estudios)', 'Wenchang lamp (studies)'], ['財神燈', 'lámpara del dios de la riqueza', 'God of Wealth lamp'], ['便宜', 'barato', 'cheap'], ['一共', 'en total', 'in total'], ['價目牌', 'tabla de precios', 'price board'], ['應該', 'debería', 'should']],
   PAY_FIX: [['夠', 'alcanzar, ser suficiente', 'be enough'], ['當場', 'en el momento', 'on the spot'], ['下次再付', 'pagar la próxima vez', 'pay next time']],
+  GO_AMULET: [['平安符', 'amuleto de protección', 'protection charm'], ['領', 'recoger', 'collect']],
   CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give wrong change'], ['應該找', 'debería darme de cambio', 'should give back'], ['領', 'recoger', 'collect']],
   AMULET: [['平安符', 'amuleto de protección', 'protection charm'], ['漂亮', 'bonito', 'pretty'], ['隨喜', 'donar lo que uno quiera', 'donate as you wish'], ['投', 'echar, depositar', 'drop in'], ['香油錢', 'donación al templo', 'temple donation'], ['全部', 'todos', 'all'], ['醜', 'feo', 'ugly']],
   CHARM: [['平安符', 'amuleto de protección', 'protection charm'], ['拿到', 'recibir', 'get'], ['之後', 'después', 'after'], ['掛', 'colgar', 'hang'], ['樹', 'árbol', 'tree'], ['燒掉', 'quemar', 'burn up'], ['過香爐', 'pasar sobre el incensario', 'pass over the incense burner']],
   GUOLU: [['過爐', 'pasar sobre el incensario', 'pass over the burner'], ['順時針', 'en sentido horario', 'clockwise'], ['逆時針', 'en sentido antihorario', 'counter-clockwise'], ['繞三圈', 'dar tres vueltas', 'circle three times']],
-  EXIT: [['龍進虎出', 'entrar por el dragón, salir por el tigre', 'enter by the dragon, exit by the tiger'], ['虎邊', 'lado del tigre (izquierda)', 'tiger side (left)'], ['出去', 'salir', 'go out']],
+  EXIT: [['龍進虎出', 'entrar por el dragón, salir por el tigre', 'enter by the dragon, exit by the tiger'], ['虎邊', 'lado del tigre (al salir, a la derecha)', 'tiger side (on your right going out)'], ['出去', 'salir', 'go out']],
   END: [['心意', 'la intención, el corazón', 'the thought that counts'], ['輕鬆', 'relajado', 'relaxed'], ['下次', 'la próxima vez', 'next time']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
@@ -595,7 +596,7 @@ const Game = defineGame({
   att: {},                       // 每一關選了幾次（第一次就對才給綠卡）
   cash: null,
   ti: 0, streak: 0, goNext: null,   // 擲筊：第幾次、連續幾個聖筊、這一關丟完要去哪裡（null＝還要再丟）
-  EXTRA_IMAGES: ['images/throw_happy.jpg', 'images/cabinet_sorry.jpg', 'images/desk_sorry.jpg', 'images/gate_in.jpg', 'images/fire_out.jpg', 'images/draw_done.jpg', 'images/draw_bg.jpg', 'images/draw_hands.png'],   // imageFor() 才會用到的圖，也先載好
+  EXTRA_IMAGES: ['images/throw_happy.jpg', 'images/cabinet_sorry.jpg', 'images/desk_sorry.jpg', 'images/go_desk.jpg', 'images/gate_in.jpg', 'images/fire_out.jpg', 'images/draw_done.jpg', 'images/draw_bg.jpg', 'images/draw_hands.png'],   // imageFor() 才會用到的圖，也先載好
   /* 過場頁預設用上一關的圖；旁白已經到下一個畫面時，改用符合旁白的圖：進廟門（點火處、Ami 在旁邊）、熄火後（香頭只剩灰） */
   imageFor() {
     /* 第三個聖筊：Ami 興奮地笑 */
@@ -608,6 +609,11 @@ const Game = defineGame({
     if (this._transMode && this._trans && this._trans.from === 'FIRE' && this._trans.to === 'HEAVEN') return ['images/fire_out.jpg', '🔥'];
     if (this._transMode && this._trans && this._trans.from === 'HEAVEN') return ['images/heaven.jpg', '🙏'];   // 拜天公的過場：天公爐   // 火熄了：香頭只剩灰、還在冒煙
     if (this._transMode && this._trans && this._trans.from === 'DRAW') return ['images/draw_done.jpg', '🎋'];   // 抽籤的過場：籤掉在地上
+    /* 過場旁白或 Ami 的話已經在下一個地方：換成符合的圖（找錯錢道歉那頁在上面就換成尷尬臉了） */
+    if (this._transMode && this._trans) {
+      const next = { MEAN: ['images/go_desk.jpg', '🏮'], CHANGE: ['images/go_amulet.jpg', '🧧'], AMULET: ['images/amulet_hold.jpg', '🧧'], CHARM: ['images/guolu.jpg', '🔄'] }[this._trans.from];
+      if (next) return next;
+    }
   },
   onStart() { this.updateCash(); },
   updateCash() { document.getElementById('cash-badge').textContent = ''; },
@@ -623,8 +629,8 @@ const Game = defineGame({
   IMAGES: {
     START: ['images/start.jpg', '🏯'], GATE: ['images/gate.jpg', '⛩️'], FIRE: ['images/fire.jpg', '🔥'], HEAVEN: ['images/heaven.jpg', '🙏'],
     MAIN: ['images/main.jpg', '🏯'], SIDE: ['images/side.jpg', '🙏'], THROW: ['images/throw.jpg', '🌙'], CONFIRM: ['images/throw.jpg', '🌙'], DRAW: ['images/draw.jpg', '🎋'], SLIP_NUM: ['images/cabinet.jpg', '🗄️'],
-    READ: ['images/read.jpg', '📜'], ASK: ['images/explain.jpg', '🧓'], MEAN: ['images/explain.jpg', '🧓'], FILL: ['images/desk.jpg', '📝'], REGISTER: ['images/desk.jpg', '🏮'], PAY: ['images/desk.jpg', '💵'], PAY_FIX: ['images/desk.jpg', '💵'], CHANGE: ['images/desk.jpg', '💵'],
-    AMULET: ['images/amulet.jpg', '🧧'], CHARM: ['images/amulet.jpg', '🧧'], GUOLU: ['images/guolu.jpg', '🔄'], EXIT: ['images/exit.jpg', '⛩️'],
+    READ: ['images/read.jpg', '📜'], ASK: ['images/explain.jpg', '🧓'], MEAN: ['images/explain.jpg', '🧓'], FILL: ['images/desk.jpg', '📝'], REGISTER: ['images/desk.jpg', '🏮'], PAY: ['images/desk.jpg', '💵'], PAY_FIX: ['images/desk.jpg', '💵'], CHANGE: ['images/desk.jpg', '💵'], GO_AMULET: ['images/go_amulet.jpg', '🧧'],
+    AMULET: ['images/amulet.jpg', '🧧'], CHARM: ['images/amulet_hold.jpg', '🧧'], GUOLU: ['images/guolu.jpg', '🔄'], EXIT: ['images/exit_hold.jpg', '⛩️'],
     END: ['images/end_good.jpg', '🎉'], RESULT: ['images/result.jpg', '📊']
   },
 
@@ -746,7 +752,7 @@ const Game = defineGame({
     };
   },
   hintSections() {
-    const ORDER = ['START', 'GATE', 'FIRE', 'HEAVEN', 'MAIN', 'SIDE', 'THROW', 'DRAW', 'CONFIRM', 'SLIP_NUM', 'READ', 'ASK', 'MEAN', 'FILL', 'REGISTER', 'PAY', 'PAY_FIX', 'CHANGE', 'AMULET', 'CHARM', 'GUOLU', 'EXIT', 'END', 'RESULT'];
+    const ORDER = ['START', 'GATE', 'FIRE', 'HEAVEN', 'MAIN', 'SIDE', 'THROW', 'DRAW', 'CONFIRM', 'SLIP_NUM', 'READ', 'ASK', 'MEAN', 'FILL', 'REGISTER', 'PAY', 'PAY_FIX', 'CHANGE', 'GO_AMULET', 'AMULET', 'CHARM', 'GUOLU', 'EXIT', 'END', 'RESULT'];
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
     const t = this.task, sg = this.signs();
     const out = [];   // Ami 就在旁邊，她的話不放任務提示（今天的事已經在「我的狀況」）
@@ -977,6 +983,7 @@ const Game = defineGame({
     const fixChange = `不好意思，好像找錯了，應該找${zhNum(t.changeWrong ? t.change : t.given + 50)}元吧？`;
     const afterPay = () => { Game.state = 'AMULET'; };
     const toChange = () => { Game.state = 'CHANGE'; };
+    const goAmulet = () => ami(`${N}，我們去領一個平安符吧！`, `${N}, ¡vamos a recoger un amuleto!`, `${N}, let's go and get a protection charm!`);
     const board = () => Game.boardHTML();
 
     return {
@@ -1287,16 +1294,23 @@ const Game = defineGame({
         goodWrong: ['你很細心！拿到零錢要馬上數。', '¡Qué atento! Cuenta el cambio en el momento.', 'Well spotted! Count your change right away.'],
         goodOk: ['找的錢要自己算一下：給的錢減掉總價。', 'Calcula el cambio tú mismo: lo que diste menos el total.', 'Work out the change yourself: what you gave minus the total.'],
         apology: () => [st(`啊，不好意思！找你${zhNum(t.change)}元。`, `¡Ay, disculpe! Le doy ${esM(t.change)} de cambio.`, `Oh, sorry! Here's ${enM(t.change)} change.`)],
-        go: () => {
-          Game.thought = [...(Game.thought || []), ami(`${N}，我們去領一個平安符吧！`, `${N}, ¡vamos a recoger un amuleto!`, `${N}, let's go and get a protection charm!`)];
+        go: wrong => {
+          if (wrong) { Game.state = 'GO_AMULET'; return; }   // 廟公找錯：先看他道歉，下一頁才換 Ami
+          Game.thought = [goAmulet()];
           afterPay();
         }
       }),
+      GO_AMULET: {
+        place: 'temple',
+        dialogue: () => [goAmulet()],
+        options: () => [NEXT_LABEL.AMULET],
+        next: () => afterPay()
+      },
 
       /* ═══ 平安符：放在旁邊，自己拿，和光明燈分開 ═══ */
       AMULET: {
         place: 'temple',
-        dialogue: () => [narr('光明燈登記好了。旁邊的桌子上，放著一些平安符，旁邊有一個香油錢箱。', 'La lámpara quedó registrada. En la mesa de al lado hay amuletos y una caja de donaciones.', 'The lamp is registered. On the table beside you are some protection charms and a donation box.'),
+        dialogue: () => [narr('桌子上放著一些平安符，旁邊有一個香油錢箱。', 'En la mesa hay unos amuletos y, al lado, una caja de donaciones.', 'There are some protection charms on the table, with a donation box beside them.'),
           ami('哇！這些平安符好漂亮喔！', '¡Guau! ¡Qué bonitos son estos amuletos!', 'Wow! These protection charms are so pretty!')],
         options: () => rotOf(t, ['（拿一個平安符，隨喜投一點香油錢）', '（拿走全部的平安符）', '這些平安符好醜喔！我不要拿！']),
         next: c => {
@@ -1329,7 +1343,7 @@ const Game = defineGame({
         next: c => {
           if (c !== '在香爐上方，順時針繞三圈。') { Game.addMistake(c.includes('逆時針') ? M('過爐要順時針繞三圈，不是逆時針。', 'Se pasa en sentido horario tres veces, no antihorario.', 'Go clockwise three times, not counter-clockwise.') : M('平安符不能丟進香爐，會燒掉。要在爐上繞三圈。', 'El amuleto no se tira al incensario: se quemaría. Se pasa tres veces por encima.', "Don't drop the charm in the burner — it would burn. Circle it over the burner three times.")); return; }
           goodFirst('GUOLU', '沒錯！過爐要順時針繞三圈。', '¡Exacto! Se pasa tres veces en sentido horario.', 'Right! Three times clockwise.');
-          Game.thought = [narr('你把平安符收進包包。事情都做完了，該回去了。', 'Guardas el amuleto en tu bolsa. Todo está hecho; es hora de volver.', "You put the charm in your bag. Everything is done — time to head back.")];
+          Game.thought = [narr('你拿好平安符。事情都做完了，關聖帝君保佑你一切順利。', 'Sostienes bien tu amuleto. Ya está todo hecho. ¡Que Guan Shengdijun te proteja y todo te vaya bien!', "You hold on to your charm. Everything is done. May Lord Guan watch over you so that all goes well.")];
           Game.state = 'EXIT';
         }
       },
@@ -1339,9 +1353,9 @@ const Game = defineGame({
         place: 'temple',
         dialogue: () => [narr('廟門有三個門。', 'La salida tiene tres puertas.', 'There are three doors.'),
           ami('走吧，我陪你出去。', 'Vamos, salgo contigo.', "Let's go — I'll walk out with you.")],
-        options: () => rotOf(t, ['從左邊的門（虎邊）出去。', '從右邊的門（龍邊）出去。', '從中間的門出去。']),
+        options: () => rotOf(t, ['從右邊的門（虎邊）出去。', '從左邊的門（龍邊）出去。', '從中間的門出去。']),
         next: c => {
-          if (c !== '從左邊的門（虎邊）出去。') { Game.addMistake(c.includes('龍邊') ? M('龍邊是入口，要從虎邊出去。龍進虎出。', 'El lado del dragón es la entrada; se sale por el lado del tigre.', 'The dragon side is the entrance — leave by the tiger side.') : M('中間最大的門是給神明走的，我們要從虎邊（左邊）出去。', 'La puerta central es para las deidades; salimos por el lado del tigre (izquierda).', 'The big middle door is for the deities — we leave by the tiger side (left).')); return; }
+          if (c !== '從右邊的門（虎邊）出去。') { Game.addMistake(c.includes('龍邊') ? M('龍邊是入口，要從虎邊出去。龍進虎出。', 'El lado del dragón es la entrada; se sale por el lado del tigre.', 'The dragon side is the entrance — leave by the tiger side.') : M('中間最大的門是給神明走的，我們要從虎邊（右邊）出去。', 'La puerta central es para las deidades; salimos por el lado del tigre (derecha).', 'The big middle door is for the deities — we leave by the tiger side (right).')); return; }
           goodFirst('EXIT', '沒錯！龍進虎出，從虎邊出去。', '¡Exacto! Dragón entra, tigre sale.', 'Right! Dragon in, tiger out.');
           Game.stopTimer(); Game.state = 'END';
         }
