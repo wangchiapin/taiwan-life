@@ -223,7 +223,7 @@ with sync_playwright() as p:
     jump(page, 'SIDE'); check('側殿只有一個按鈕', opts() == ['去求籤'], opts())
     for state in ev(page, 'Object.keys(STAGE)'):
         jump(page, state); ev(page, 'Hints.toggle(true)'); h = txt(page, '#hint-body')
-        if 'Ami 說的話' in h or '今天我帶你去關帝廟' in h or '今天的事' not in h: check('任務提示沒有 Ami 的話：' + state, False, h)
+        if 'Ami 說的話' in h or '今天我帶你去關帝廟' in h or '最近不太順利，Ami陪你去拜拜' not in h: check('任務提示沒有 Ami 的話：' + state, False, h)
         ev(page, 'Hints.toggle(false)')
     check('每一關的任務提示都檢查過', True)
     jump(page, 'MAIN'); check('遊戲裡的確定只有中文', ev(page, "(()=>{const c=document.querySelector('#options-area .opt:last-child').cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.textContent.trim()})()") == '確定')
@@ -295,8 +295,8 @@ with sync_playwright() as p:
     page.screenshot(path='/tmp/t_fill.png', full_page=True)
     k = m(); pick_('填好了'); check('名字、期限填錯只扣一次', st() == 'FILL' and m() == k + 1)
     check('扣分後已選的還在、打開填錯的那行', txt(page, '.fill').count('✓') == 3 and opened() == ['name'] and page.locator('.pick.on').count() == 1, (opened(), txt(page, '.fill')))
-    check('錯誤說明兩項', '姓名要寫自己的名字。' in ev(page, 'Game.log.at(-1).zh') and '期限要選一年' in ev(page, 'Game.log.at(-1).zh'))
-    tap('name', 'María'); head('term'); tap('term', '一年'); pick_('填好了'); card = txt(page)
+    check('錯誤說明兩項', ev(page, 'Game.log.at(-1).zh') == '姓名寫錯了喔！期限選錯了，看一下告示牌！')
+    tap('name', 'María'); head('term'); tap('term', '一年'); ev(page, 'Game.task.regWrong=false'); pick_('填好了'); card = txt(page)   # 這裡檢查「說對」的版本，不受亂數影響
     check('填對直接到登記、沒有過場和稱讚卡', st() == 'REGISTER' and '（你把登記單交給廟公。）' in card and '登記單填好了' not in card, (st(), card))
     check('登記單顯示剛才填的', st() == 'REGISTER' and all(x in txt(page, '#npc-dialogue .card') for x in ('María', '4月21號', '台南市成功路25號', '1年', '500元')) and all(x in card for x in ('生日是四月二十一號', '住在台南市成功路二十五號', '點一年')), card)
     # 複誦：名字、生日（差一天／差一個月）、住址（整個換掉／只錯門牌）；說對時「不好意思」要說別的內容
@@ -374,11 +374,54 @@ with sync_playwright() as p:
     check('過爐後旁白', st() == '_TRANS' and '（你拿好平安符。事情都做完了，關聖帝君保佑你一切順利。）' in txt(page) and '包包' not in txt(page) and src() == 'images/guolu.jpg', txt(page))
     go(); good, dragon, mid = '從右邊的門（虎邊）出去。', '從左邊的門（龍邊）出去。', '從中間的門出去。'
     check('出廟門：選項和圖', st() == 'EXIT' and sorted(opts()) == sorted([good, dragon, mid]) and src() == 'images/exit_hold.jpg', (opts(), src()))
-    for c, why in ((dragon, '龍邊是入口，要從虎邊出去。'), (mid, '我們要從虎邊（右邊）出去。')):
+    for c, why in ((dragon, '龍進虎出，龍邊是入口唷！'), (mid, '中間最大的門是給神明走的！')):
         k = m(); pick_(c); check('出廟門錯的選項：' + c, st() == 'EXIT' and m() == k + 1 and why in txt(page, '#npc-dialogue .fb.bad'), txt(page))
     pick_(good); check('從右邊虎邊出去：過關', st() == 'END', st())
     for f in ('go_desk', 'go_amulet', 'amulet_hold', 'exit_hold'):
         check('新圖載得到：' + f, ev(page, f"new Promise(r=>{{const i=new Image();i.onload=()=>r(i.naturalWidth===720);i.onerror=()=>r(false);i.src='images/{f}.jpg'}})"))
+    # ── 2026-11-28 第二批：我的狀況、廟門錯誤、點香關卡、錯誤訊息不講答案 ──
+    fresh = lambda s_: (jump(page, s_), ev(page, 'Game.att={}; Game.render()'))
+    last = lambda: ev(page, 'Game.log.at(-1).zh')
+    def wrong(state, c, msg, tag=None):
+        k = m(); pick_(c)
+        check(f'{tag or state} 錯誤訊息：{c}', st() == state and m() == k + 1 and last() == msg and msg in txt(page, '#npc-dialogue .fb.bad'), (st(), last()))
+    fresh('START'); card = txt(page, '#npc-dialogue .list')
+    check('我的狀況只有兩行', card.count('• ') == 2 and '• 最近不太順利，Ami陪你去拜拜，求關聖帝君保佑' in card and '• 你身上有：一張一千元的鈔票，還有一點零錢' in card and '暱稱' not in card and '不會幫你' not in card, card)
+    fresh('GATE'); wrong('GATE', '從左邊的門（虎邊）進去。', '龍進虎出，面對廟，左邊是虎邊，是出口唷！'); wrong('GATE', '從中間的門進去。', '中間最大的門是給神明走的！')
+    gate_ok = '從右邊的門（龍邊）進去。'
+    pick_(gate_ok); check('進廟門（錯過再答對）直接到點香關卡、沒有稱讚卡', st() == 'TO_FIRE' and page.locator('#npc-dialogue .fb').count() == 0, (st(), txt(page)))
+    fresh('GATE'); pick_(gate_ok); t_ = txt(page)
+    check('進廟門直接到點香關卡', st() == 'TO_FIRE' and '（你和Ami從右邊的門走進去，然後到了點香的地方。）' in t_ and 'Ami：我們先去點香吧！' in t_ and src() == 'images/gate_in.jpg' and page.locator('#npc-avatar').is_visible(), (st(), t_, src()))
+    check('稱讚卡在最上面', ev(page, "document.querySelector('#npc-dialogue').firstElementChild.className") == 'fb good', txt(page))
+    page.screenshot(path='/tmp/t_TO_FIRE.png', full_page=True)
+    fire_ok = '去點香處拿香點香'
+    check('點香關卡四個選項', sorted(opts()) == sorted([fire_ok, '拿出你的香水', '很香？Ami肚子餓了？', '有點臭嗎？']), opts())
+    for c, msg in (('拿出你的香水', '不需要拿出香水啦！'), ('很香？Ami肚子餓了？', 'Ami不是說食物很香啦！'), ('有點臭嗎？', '不是香跟臭的香，你搞錯了啦！')): wrong('TO_FIRE', c, msg)
+    check('答錯後稱讚卡收掉', page.locator('#npc-dialogue .fb.good').count() == 0)
+    pick_(fire_ok); check('點香答對直接到熄香', st() == 'FIRE' and src() == 'images/fire.jpg', (st(), src()))
+    first = ev(page, "(()=>{const seen=new Set();for(let i=0;i<300;i++){Game.setup();Game.state='TO_FIRE';seen.add(Game.getConfig().TO_FIRE.options()[0])}return seen.size})()")
+    check('點香選項順序會輪換', first == 4, first)
+    fresh('FIRE'); wrong('FIRE', '用嘴巴把火吹熄。', '不能用嘴吹。嘴巴吹過的氣對神明不禮貌。'); wrong('FIRE', '把香頭放在地上踩熄。', '香不能放在地上踩。')
+    fresh('HEAVEN'); wrong('HEAVEN', '大殿拜關聖帝君', '關聖帝君不是第一個拜的喔！'); wrong('HEAVEN', '側殿拜其他神明', '其他神明不是第一個拜的喔！')
+    fresh('MAIN')
+    for i in range(4): ev(page, "Game.handleChoice(['自己的名字'])")
+    check('拜關公錯很多次也不給答案', st() == 'MAIN' and ev(page, 'Game.mistakes') == 4 and '提示：要說的是' not in txt(page) and '心願' not in txt(page), txt(page))
+    rude = '這樣說很沒禮貌喔！'
+    for state, flag, neutral, rudeopt in (('SLIP_NUM', 'numWrong', '號碼再對一次！', '廟公，你的眼睛是不是不太好？'), ('REGISTER', 'regWrong', '登記單再對一次！', '你到底有沒有在看我寫的啊？'),
+                                          ('PAY', 'payWrong', '價目牌再看一次！', '可以算便宜一點嗎？'), ('CHANGE', 'changeWrong', '找的錢再算一次！', '你是不是故意少找我錢啊？')):
+        for w in (True, False):
+            fresh(state)
+            if state == 'REGISTER': ev(page, "Game.task.form={name:Game.N,m:4,d:21,addr:2,term:'一年'}")
+            if state == 'PAY': ev(page, f"Object.assign(Game.task,{{said:{300 if w else 500},other:LAMPS.find(x=>x.price===300)}})")
+            ev(page, f"Game.task.{flag}={str(w).lower()}; Game.render()")
+            ans = ev(page, f"({smoke.ORACLES['guandi']})()"); o = opts()
+            check(f'{state} 選項（{w}）', ans in o and rudeopt in o and len(o) == 3, (ans, o))
+            for c in o:
+                if c != ans: wrong(state, c, ('點燈的價錢是固定的，不能講價。' if state == 'PAY' else rude) if c == rudeopt else neutral, f'{state}（廟公{"講錯" if w else "沒講錯"}）')
+    fresh('READ'); wrong('READ', '那我可以躺平了。', '籤是提醒你，不是保證喔！')
+    fresh('ASK'); wrong('ASK', '欸，老頭，這什麼意思？', '這樣很沒禮貌喔！'); wrong('ASK', '（把籤紙揉爛丟掉）', '籤紙不能揉爛亂丟喔！')
+    fresh('AMULET'); wrong('AMULET', '（拿走全部的平安符）', '不可以全部拿走喔！')
+    fresh('GUOLU'); wrong('GUOLU', '在香爐上方，逆時針繞三圈。', '方向錯了喔！'); wrong('GUOLU', '把平安符丟進香爐裡。', '平安符不能丟進香爐，會燒掉！')
     # 第三個聖筊換笑臉圖
     page.emulate_media(reduced_motion='reduce'); jump(page, 'CONFIRM', '2-0'); seen = []
     for i in range(3):

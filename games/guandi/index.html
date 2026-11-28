@@ -266,7 +266,7 @@ pinyinPro.customPinyin({
   '躺平': 'tǎng píng', '供三小': 'gōng sān xiǎo', '老頭': 'lǎo tóu', '揉爛': 'róu làn',
   '個月': 'ge yuè', '一月': 'yī yuè', '十一月': 'shí yī yuè', '一號': 'yī hào', '十一號': 'shí yī hào', '二十一號': 'èr shí yī hào', '三十一號': 'sān shí yī hào',
   '廟公': 'miào gōng', '登記': 'dēng jì', '登記單': 'dēng jì dān', '價目牌': 'jià mù pái', '告示牌': 'gào shì pái',
-  '炷': 'zhù',
+  '炷': 'zhù', '點著': 'diǎn zháo', '臭': 'chòu',
   '不順利': 'bú shùn lì', '最近': 'zuì jìn', '住在': 'zhù zài', '附近': 'fù jìn'
 });
 // 台灣讀音修正：連接詞「和」念 hàn
@@ -517,6 +517,7 @@ const FAKE_NAMES = ['小美', '大衛', '阿明', '佩佩', 'Lucas', 'Sofía'];
 const VOCAB = {
   START: [['關帝廟', 'templo de Guan Di', 'Guan Di temple'], ['關公', 'Guan Gong (Guan Yu)', 'Guan Gong (Guan Yu)'], ['保佑', 'proteger, bendecir', 'bless, protect'], ['不順利', 'que no va bien', 'not going smoothly']],
   GATE: [['龍邊', 'lado del dragón (derecha)', 'dragon side (right)'], ['虎邊', 'lado del tigre (izquierda)', 'tiger side (left)'], ['龍進虎出', 'entrar por el dragón, salir por el tigre', 'enter by the dragon, exit by the tiger'], ['告示牌', 'letrero', 'sign']],
+  TO_FIRE: [['點香', 'encender el incienso', 'light incense'], ['香水', 'perfume', 'perfume'], ['很香', 'huele muy bien', 'smells great'], ['肚子餓', 'tener hambre', 'be hungry'], ['臭', 'apestar, oler mal', 'smelly']],
   FIRE: [['點火處', 'lugar para encender el incienso', 'place to light incense'], ['一炷香', 'una varilla de incienso', 'a stick of incense'], ['搧', 'abanicar', 'fan'], ['晃', 'agitar suavemente', 'shake gently'], ['吹', 'soplar', 'blow']],
   HEAVEN: [['天公爐', 'incensario del Cielo', 'Heaven’s incense burner'], ['天公', 'el Emperador del Cielo', 'the Heavenly Emperor'], ['先……再……', 'primero… después…', 'first… then…'], ['拜', 'rendir culto, rezar', 'worship, pray'], ['大殿', 'salón principal', 'main hall'], ['側殿', 'salón lateral', 'side hall']],
   MAIN: [['關聖帝君', 'Guan Shengdijun (Guan Gong)', 'Lord Guan (Guan Gong)'], ['姓名', 'nombre', 'name'], ['生日', 'cumpleaños', 'birthday'], ['住址', 'dirección', 'address'], ['住在', 'vivir en', 'live at'], ['保佑', 'proteger, bendecir', 'bless, protect'], ['平安', 'paz y seguridad', 'safe and sound']],
@@ -546,7 +547,7 @@ const READ_WORDS = VOCAB.READ;   // 看籤詩每局固定的單字；Ami 那句�
 
 /* 關卡名稱（錯誤紀錄用） */
 const STAGE = {
-  GATE: ['走哪個門', 'qué puerta usar', 'which door'], FIRE: ['熄香', 'apagar la llama del incienso', 'putting out the flame'], HEAVEN: ['拜天公', 'rezar al Cielo', 'praying to Heaven'],
+  GATE: ['走哪個門', 'qué puerta usar', 'which door'], TO_FIRE: ['去點香', 'ir a encender el incienso', 'going to light incense'], FIRE: ['熄香', 'apagar la llama del incienso', 'putting out the flame'], HEAVEN: ['拜天公', 'rezar al Cielo', 'praying to Heaven'],
   MAIN: ['拜關公', 'rezar a Guan Gong', 'praying to Guan Gong'], THROW: ['擲筊', 'lanzar los jiaobei', 'throwing the moon blocks'], DRAW: ['抽籤', 'sacar la suerte', 'drawing a fortune'], CONFIRM: ['確認籤支', 'confirmar la varilla', 'confirming the stick'],
   SLIP_NUM: ['核對籤詩', 'revisar el papel de la suerte', 'checking the slip'], READ: ['看籤詩', 'leer la suerte', 'reading the fortune'],
   ASK: ['請廟公解籤', 'pedir que interpreten la suerte', 'asking for an explanation'], MEAN: ['聽懂解籤', 'entender la explicación', 'understanding the explanation'], FILL: ['填登記單', 'rellenar el formulario', 'filling in the form'], REGISTER: ['登記光明燈', 'registrar la lámpara', 'registering the lamp'],
@@ -597,7 +598,7 @@ const Game = defineGame({
   cash: null,
   ti: 0, streak: 0, goNext: null,   // 擲筊：第幾次、連續幾個聖筊、這一關丟完要去哪裡（null＝還要再丟）
   EXTRA_IMAGES: ['images/throw_happy.jpg', 'images/cabinet_sorry.jpg', 'images/desk_sorry.jpg', 'images/go_desk.jpg', 'images/gate_in.jpg', 'images/fire_out.jpg', 'images/draw_done.jpg', 'images/draw_bg.jpg', 'images/draw_hands.png'],   // imageFor() 才會用到的圖，也先載好
-  /* 過場頁預設用上一關的圖；旁白已經到下一個畫面時，改用符合旁白的圖：進廟門（點火處、Ami 在旁邊）、熄火後（香頭只剩灰） */
+  /* 過場頁預設用上一關的圖；旁白已經到下一個畫面時，改用符合旁白的圖：熄火後（香頭只剩灰） */
   imageFor() {
     /* 第三個聖筊：Ami 興奮地笑 */
     if (!this._transMode && this.state === 'CONFIRM' && this.phase === 'landed' && this.goNext === 'SLIP_NUM') return ['images/throw_happy.jpg', '😄'];
@@ -605,7 +606,6 @@ const Game = defineGame({
     const from = this._transMode && this._trans ? this._trans.from : this.state === 'PAY_FIX' ? 'PAY' : null;
     const wrong = from && this.task && { SLIP_NUM: this.task.numWrong, REGISTER: this.task.regWrong, PAY: this.task.payWrong, CHANGE: this.task.changeWrong }[from];
     if (wrong && SORRY_IMGS[from] && !this.missing.has(SORRY_IMGS[from])) return [SORRY_IMGS[from], '😅'];
-    if (this._transMode && this._trans && this._trans.from === 'GATE' && this._trans.to === 'FIRE') return ['images/gate_in.jpg', '🕯️'];
     if (this._transMode && this._trans && this._trans.from === 'FIRE' && this._trans.to === 'HEAVEN') return ['images/fire_out.jpg', '🔥'];
     if (this._transMode && this._trans && this._trans.from === 'HEAVEN') return ['images/heaven.jpg', '🙏'];   // 拜天公的過場：天公爐   // 火熄了：香頭只剩灰、還在冒煙
     if (this._transMode && this._trans && this._trans.from === 'DRAW') return ['images/draw_done.jpg', '🎋'];   // 抽籤的過場：籤掉在地上
@@ -616,6 +616,12 @@ const Game = defineGame({
     }
   },
   onStart() { this.updateCash(); },
+  /* 走進廟門以後直接是下一關（不另外跳過場），稱讚卡放在那一頁最上面 */
+  maybeTrans(before, extra) {
+    if (before === 'GATE' && this.state === 'TO_FIRE') { this.closePanels(); return; }
+    GameCore.maybeTrans.call(this, before, extra);
+  },
+  get feedbackFirst() { return this.state === 'TO_FIRE' && this.feedback.some(f => f.type === 'good'); },
   updateCash() { document.getElementById('cash-badge').textContent = ''; },
   /* ── 位置列：PLACES[key] = [圖示, 中文, 西文, 英文, class] ── */
   setPlace(mode) {
@@ -627,7 +633,7 @@ const Game = defineGame({
   },
 
   IMAGES: {
-    START: ['images/start.jpg', '🏯'], GATE: ['images/gate.jpg', '⛩️'], FIRE: ['images/fire.jpg', '🔥'], HEAVEN: ['images/heaven.jpg', '🙏'],
+    START: ['images/start.jpg', '🏯'], GATE: ['images/gate.jpg', '⛩️'], TO_FIRE: ['images/gate_in.jpg', '🕯️'], FIRE: ['images/fire.jpg', '🔥'], HEAVEN: ['images/heaven.jpg', '🙏'],
     MAIN: ['images/main.jpg', '🏯'], SIDE: ['images/side.jpg', '🙏'], THROW: ['images/throw.jpg', '🌙'], CONFIRM: ['images/throw.jpg', '🌙'], DRAW: ['images/draw.jpg', '🎋'], SLIP_NUM: ['images/cabinet.jpg', '🗄️'],
     READ: ['images/read.jpg', '📜'], ASK: ['images/explain.jpg', '🧓'], MEAN: ['images/explain.jpg', '🧓'], FILL: ['images/desk.jpg', '📝'], REGISTER: ['images/desk.jpg', '🏮'], PAY: ['images/desk.jpg', '💵'], PAY_FIX: ['images/desk.jpg', '💵'], CHANGE: ['images/desk.jpg', '💵'], GO_AMULET: ['images/go_amulet.jpg', '🧧'],
     AMULET: ['images/amulet.jpg', '🧧'], CHARM: ['images/amulet_hold.jpg', '🧧'], GUOLU: ['images/guolu.jpg', '🔄'], EXIT: ['images/exit_hold.jpg', '⛩️'],
@@ -646,7 +652,7 @@ const Game = defineGame({
     const miss = twice ? (roll < 0.4 ? 0 : roll < 0.7 ? 1 : 2) : (roll < 0.3 ? 0 : roll < 0.55 ? 1 : roll < 0.8 ? 2 : 3);
     const redraw = miss > 0;
     const t = this.task = {
-      slip, miss, rot: Math.floor(Math.random() * 3), fire: pick(['shake', 'fan']),
+      slip, miss, rot: Math.floor(Math.random() * 12), fire: pick(['shake', 'fan']),
       ask: twice ? [no(), 'sheng'] : ['sheng'],
       confirm: redraw ? [[...three.slice(0, miss - 1), no()], three] : [three],
       drawn: redraw ? [pick(SLIPS.filter(x => x !== slip)), slip] : [slip]
@@ -752,7 +758,7 @@ const Game = defineGame({
     };
   },
   hintSections() {
-    const ORDER = ['START', 'GATE', 'FIRE', 'HEAVEN', 'MAIN', 'SIDE', 'THROW', 'DRAW', 'CONFIRM', 'SLIP_NUM', 'READ', 'ASK', 'MEAN', 'FILL', 'REGISTER', 'PAY', 'PAY_FIX', 'CHANGE', 'GO_AMULET', 'AMULET', 'CHARM', 'GUOLU', 'EXIT', 'END', 'RESULT'];
+    const ORDER = ['START', 'GATE', 'TO_FIRE', 'FIRE', 'HEAVEN', 'MAIN', 'SIDE', 'THROW', 'DRAW', 'CONFIRM', 'SLIP_NUM', 'READ', 'ASK', 'MEAN', 'FILL', 'REGISTER', 'PAY', 'PAY_FIX', 'CHANGE', 'GO_AMULET', 'AMULET', 'CHARM', 'GUOLU', 'EXIT', 'END', 'RESULT'];
     const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
     const t = this.task, sg = this.signs();
     const out = [];   // Ami 就在旁邊，她的話不放任務提示（今天的事已經在「我的狀況」）
@@ -766,10 +772,8 @@ const Game = defineGame({
   listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s), N = this.N;
     const rows = [
-      { zh: '今天的事：請關公保佑，最近不太順利', es: 'Hoy: pedir la protección de Guan Gong; últimamente no te va bien', en: 'Today: ask Guan Gong for protection; things haven’t gone well lately' },
-      { zh: `你的暱稱：${N}（登記的時候用這個名字）`, es: `Tu apodo: ${N} (úsalo al registrarte)`, en: `Your nickname: ${N} (use it when registering)` },
-      { zh: '你身上有：一張一千元的鈔票，還有一點零錢', es: 'Llevas: un billete de mil dólares taiwaneses y algo de cambio', en: 'You have: one 1,000-dollar bill and some small change' },
-      { zh: 'Ami 會陪你，但是不會幫你', es: 'Ami te acompaña, pero no te ayuda', en: "Ami keeps you company, but won't help" }
+      { zh: '最近不太順利，Ami陪你去拜拜，求關聖帝君保佑', es: 'Últimamente no te va muy bien; Ami te acompaña al templo a pedir la protección de Guan Shengdijun', en: "Things haven't gone well lately; Ami goes with you to the temple to ask for Lord Guan's protection" },
+      { zh: '你身上有：一張一千元的鈔票，還有一點零錢', es: 'Llevas: un billete de mil dólares taiwaneses y algo de cambio', en: 'You have: one 1,000-dollar bill and some small change' }
     ];
     if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
@@ -985,6 +989,13 @@ const Game = defineGame({
     const toChange = () => { Game.state = 'CHANGE'; };
     const goAmulet = () => ami(`${N}，我們去領一個平安符吧！`, `${N}, ¡vamos a recoger un amuleto!`, `${N}, let's go and get a protection charm!`);
     const board = () => Game.boardHTML();
+    /* 答錯的訊息不講答案（2026-11-28）：抓錯關卡不管廟公有沒有講錯都是同一句；沒禮貌的選項不用共用的 POLITE（它叫人「告訴他正確的」） */
+    const recheck = (zh, es, en) => () => M(zh, es, en);
+    const rudeWhy = recheck('這樣說很沒禮貌喔！', '¡Decir eso es de mala educación!', "That's a rude thing to say!");
+    const slipAgain = recheck('號碼再對一次！', '¡Vuelve a comparar el número!', 'Check the number again!');
+    const formAgain = recheck('登記單再對一次！', '¡Vuelve a comparar con el formulario!', 'Check the form again!');
+    const priceAgain = recheck('價目牌再看一次！', '¡Vuelve a mirar la tabla de precios!', 'Check the price board again!');
+    const changeAgain = recheck('找的錢再算一次！', '¡Vuelve a calcular el cambio!', 'Work out the change again!');
 
     return {
       /* ═══ 廟門口跟 Ami 碰面（Ami 當面說話） ═══ */
@@ -1007,11 +1018,26 @@ const Game = defineGame({
           ami('你知道要從哪個門進去嗎？', '¿Sabes por qué puerta hay que entrar?', 'Do you know which door we should go in through?')],
         options: () => rotOf(t, ['從右邊的門（龍邊）進去。', '從左邊的門（虎邊）進去。', '從中間的門進去。']),
         next: c => {
-          if (c === '從左邊的門（虎邊）進去。') { Game.addMistake(M('虎邊是出口，要從龍邊進去。龍進虎出。', 'El lado del tigre es la salida; se entra por el lado del dragón. Dragón entra, tigre sale.', 'The tiger side is the exit — enter by the dragon side. Dragon in, tiger out.')); return; }
-          if (c !== '從右邊的門（龍邊）進去。') { Game.addMistake(M('中間最大的門是給神明走的，我們要從龍邊（右邊）進去。', 'La puerta central es para las deidades; nosotros entramos por el lado del dragón (derecha).', 'The big middle door is for the deities — we enter by the dragon side (right).')); return; }
+          if (c === '從左邊的門（虎邊）進去。') { Game.addMistake(M('龍進虎出，面對廟，左邊是虎邊，是出口唷！', 'Dragón entra, tigre sale: de cara al templo, a la izquierda está el lado del tigre, ¡que es la salida!', 'Dragon in, tiger out: facing the temple, the left is the tiger side, and that is the exit!')); return; }
+          if (c !== '從右邊的門（龍邊）進去。') { Game.addMistake(M('中間最大的門是給神明走的！', '¡La puerta grande del centro es para las deidades!', 'The big middle door is for the deities!')); return; }
           goodFirst('GATE', '沒錯！龍進虎出，從龍邊進去。', '¡Exacto! Dragón entra, tigre sale: se entra por el lado del dragón.', 'Right! Dragon in, tiger out — enter by the dragon side.');
-          Game.thought = [narr('你和Ami從右邊的門走進去，然後到了點香的地方。', 'Tú y Ami entran por la puerta de la derecha y llegan al lugar donde se enciende el incienso.', 'You and Ami go in through the right-hand door, and arrive at the place where you light the incense.'),
-            ami('我們先去點香吧！', '¡Primero vamos a encender el incienso!', "Let's go light the incense first!")];
+          Game.state = 'TO_FIRE';
+        }
+      },
+
+      /* ═══ 聽懂「點香」：和香水、很香、臭不香分清楚 ═══ */
+      TO_FIRE: {
+        place: 'temple',
+        dialogue: () => [narr('你和Ami從右邊的門走進去，然後到了點香的地方。', 'Tú y Ami entran por la puerta de la derecha y llegan al lugar donde se enciende el incienso.', 'You and Ami go in through the right-hand door, and arrive at the place where you light the incense.'),
+          ami('我們先去點香吧！', '¡Primero vamos a encender el incienso!', "Let's go light the incense first!")],
+        options: () => rotOf(t, [NEXT_LABEL.FIRE, '拿出你的香水', '很香？Ami肚子餓了？', '有點臭嗎？']),
+        next: c => {
+          if (c !== NEXT_LABEL.FIRE) {
+            Game.addMistake(c === '拿出你的香水' ? M('不需要拿出香水啦！', '¡No hace falta sacar el perfume!', 'No need to get your perfume out!')
+              : c.includes('肚子餓') ? M('Ami不是說食物很香啦！', '¡Ami no está diciendo que la comida huela bien!', "Ami isn't saying some food smells good!")
+                : M('不是香跟臭的香，你搞錯了啦！', 'No es el «香» de oler bien o mal: ¡te has confundido!', "It's not the 香 that is the opposite of 臭: you've got it wrong!"));
+            return;
+          }
           Game.state = 'FIRE';
         }
       },
@@ -1026,8 +1052,8 @@ const Game = defineGame({
           const ok = t.fire === 'shake' ? '用手輕輕晃動，把火晃熄。' : '用另一隻手把火搧熄。';
           if (c !== ok) {
             Game.addMistake(c === '用嘴巴把火吹熄。'
-              ? M('不能用嘴吹。嘴巴吹過的氣對神明不禮貌，要輕輕晃動或用手搧。', 'No se sopla: soplar con la boca es una falta de respeto; agita suavemente o abanica con la mano.', 'Don’t blow on it — it is disrespectful. Shake it gently or fan it with your hand.')
-              : M('香不能放在地上踩。要輕輕晃動或用手搧，把火熄掉。', 'No se pisa el incienso: agítalo suavemente o abanícalo con la mano.', "Don't stamp on incense — shake it gently or fan it with your hand."));
+              ? M('不能用嘴吹。嘴巴吹過的氣對神明不禮貌。', 'No se sopla: soplar con la boca es una falta de respeto a las deidades.', 'Don’t blow on it: your breath is disrespectful to the deities.')
+              : M('香不能放在地上踩。', 'El incienso no se pone en el suelo ni se pisa.', "Don't put incense on the floor and stamp on it."));
             return;
           }
           goodFirst('FIRE', '沒錯！熄香要輕輕晃動或用手搧，不用嘴吹。', '¡Exacto! Se apaga agitando suavemente o abanicando, no soplando.', 'Right! Shake gently or fan it — never blow.');
@@ -1045,7 +1071,7 @@ const Game = defineGame({
         options: () => rotOf(t, ['天公爐拜天公', '大殿拜關聖帝君', '側殿拜其他神明']),
         optionImage: o => ({ '天公爐拜天公': 'images/heaven.jpg', '大殿拜關聖帝君': 'images/main.jpg', '側殿拜其他神明': 'images/side.jpg' })[o],
         next: c => {
-          if (c !== '天公爐拜天公') { Game.addMistake(c === '大殿拜關聖帝君' ? M('要先拜天公，再拜主神。', 'Primero se reza al Cielo y después a la deidad principal.', 'Pay respects to Heaven first, then the main deity.') : M('天公是最先拜的，其他神明要放到最後。', 'Al Cielo se le reza primero; las demás deidades van al final.', 'Heaven comes first; the other deities come last.')); return; }
+          if (c !== '天公爐拜天公') { Game.addMistake(c === '大殿拜關聖帝君' ? M('關聖帝君不是第一個拜的喔！', '¡A Guan Shengdijun no se le reza primero!', "Lord Guan isn't the first one to pray to!") : M('其他神明不是第一個拜的喔！', '¡A las otras deidades no se les reza primero!', "The other deities aren't the first ones to pray to!")); return; }
           goodFirst('HEAVEN', '沒錯！先拜天公，再拜關聖帝君。', '¡Exacto! Primero el Cielo, después Guan Shengdijun.', 'Right! Heaven first, then Lord Guan.');
           Game.thought = [narr('你雙手拿香，向天公拜了三下，把一支香插進天公爐，再走進大殿。', 'Con ambas manos haces tres reverencias al Cielo, pones una varilla de incienso en el incensario y entras al salón principal.', 'With both hands you bow three times to Heaven, place one incense stick in the burner, and enter the main hall.')];
           Game.state = 'MAIN';
@@ -1057,8 +1083,7 @@ const Game = defineGame({
         place: 'temple',
         multi: true,
         dialogue: () => [narr('大殿裡，關聖帝君的神像在正前方。你拿著香，站在神像前面。', 'En el salón principal, la estatua de Guan Shengdijun está al frente. Con el incienso en la mano, te paras ante ella.', 'In the main hall, the statue of Lord Guan is straight ahead. Incense in hand, you stand before it.'),
-          ami('你知道要跟關聖帝君說什麼嗎？', '¿Sabes qué hay que decirle a Guan Shengdijun?', 'Do you know what to say to Lord Guan?'),
-          ...((Game.att.MAIN || 0) >= 3 ? [L('（提示：要說的是問好、名字、生日、住址和心願。）', '(Pista: hay que saludar y decir tu nombre, cumpleaños, dirección y deseo.)', '(Hint: say hello, then your name, birthday, address and wish.)')] : [])],
+          ami('你知道要跟關聖帝君說什麼嗎？', '¿Sabes qué hay que decirle a Guan Shengdijun?', 'Do you know what to say to Lord Guan?')],
         options: () => { const all = MAIN_RIGHT.concat(MAIN_WRONG); t.mixM ??= [1, 3, 5, 7][Math.floor(Math.random() * 4)]; t.mixO ??= Math.floor(Math.random() * all.length); return all.map((_, i) => all[(i * t.mixM + t.mixO) % all.length]); },
         next: c => {
           const miss = MAIN_RIGHT.some(o => !c.includes(o)), extra = c.some(o => !MAIN_RIGHT.includes(o));
@@ -1126,8 +1151,7 @@ const Game = defineGame({
         dialogue: () => [staff(`你的籤是${slipNo(t.numSaid)}，這張給你。`, `Su suerte es la ${slipNoEs(t.numSaid)}; aquí tiene.`, `Your fortune is No. ${t.numSaid}. Here you go.`)],
         ok: '對，是這張，謝謝。', fix: () => `不好意思，我抽到的是${slipNo(t.numWrong ? S.n : t.numClaim)}。`, rude: '廟公，你的眼睛是不是不太好？',
         wrong: () => t.numWrong,
-        whyWrong: () => M(`廟公拿錯了：籤支上是${slipNo(S.n)}，他拿的是${slipNo(t.numSaid)}。要先對一下號碼。`, `Se equivocó: tu varilla dice ${slipNoEs(S.n)} y te dio la ${slipNoEs(t.numSaid)}. Compara el número.`, `He got it wrong: your stick says No. ${S.n} but he gave you No. ${t.numSaid}. Check the number.`),
-        whyRight: () => M(`號碼是對的：${slipNo(S.n)}。`, `El número es correcto: ${slipNoEs(S.n)}.`, `The number is right: No. ${S.n}.`),
+        whyWrong: slipAgain, whyRight: slipAgain, whyRude: rudeWhy,
         goodWrong: ['你很細心！籤詩的號碼要和籤支一樣。', '¡Qué atento! El número del papel debe ser igual al de la varilla.', 'Well spotted! The slip number must match the stick.'],
         goodOk: ['拿到籤詩以後，先對一下號碼。', 'Al recibir el papel, compara primero el número.', 'When you get the slip, check the number first.'],
         apology: () => [staff(`啊，不好意思！${slipNo(S.n)}，這張才對。`, `¡Ay, disculpe! La ${slipNoEs(S.n)} es esta.`, `Oh, sorry! No. ${S.n} — this is the right one.`)],
@@ -1144,7 +1168,7 @@ const Game = defineGame({
         next: c => {
           if (c !== '謝謝關公。我會好好努力。') {
             Game.addMistake(c === '到底在供三小？' ? M('這句話很不禮貌，不要這樣說。', 'Esa frase es muy grosera; no la digas.', "That's very rude — don't say that.")
-              : c.includes('躺平') ? M('籤是提醒你，不是保證，還是要自己努力。', 'La suerte es un recordatorio, no una garantía: igual debes esforzarte.', 'A fortune is a reminder, not a guarantee — you still have to try.')
+              : c.includes('躺平') ? M('籤是提醒你，不是保證喔！', '¡La suerte es un recordatorio, no una garantía!', 'A fortune is a reminder, not a guarantee!')
               : c.includes('學中文') ? M('抽到好籤很棒，可是中文還是要自己學喔！', '¡Qué bien sacar una buena suerte! Pero el chino hay que estudiarlo igual.', "A good fortune is great, but you still have to learn Chinese yourself!")
                 : M('一件事只問一次，不能一直重抽。', 'Una pregunta se hace una sola vez; no se repite hasta que salga bien.', "Ask once per question — don't redraw until you like the answer."));
             return;
@@ -1162,8 +1186,8 @@ const Game = defineGame({
         options: () => rotOf(t, ['廟公，可以請你幫我解籤嗎？', '欸，老頭，這什麼意思？', '（把籤紙揉爛丟掉）']),
         next: c => {
           if (c !== '廟公，可以請你幫我解籤嗎？') {
-            Game.addMistake(c.includes('老頭') ? M('這樣很沒禮貌。要叫「廟公」，再說「可以請你……嗎？」', 'Eso es de mala educación. Llámalo «廟公» y pídelo con «可以請你……嗎？».', 'That is rude. Call him 廟公 and ask politely with 可以請你……嗎？')
-              : M('籤紙不能揉爛亂丟。看不懂的話，可以請廟公解籤。', 'No arrugues ni tires el papel. Si no lo entiendes, pide al encargado que te lo explique.', "Don't crumple and throw away the slip. If you can't understand it, ask the keeper to explain."));
+            Game.addMistake(c.includes('老頭') ? M('這樣很沒禮貌喔！', '¡Eso es de mala educación!', "That's very rude!")
+              : M('籤紙不能揉爛亂丟喔！', '¡El papel no se arruga ni se tira!', "Don't crumple up the slip and throw it away!"));
             return;
           }
           goodFirst('ASK', '很好！請人幫忙的時候，要有禮貌。', '¡Muy bien! Al pedir ayuda hay que ser amable.', 'Good! Be polite when you ask for help.');
@@ -1205,8 +1229,8 @@ const Game = defineGame({
           if (badName || badTerm) {
             t.fillOpen = badName ? 'name' : 'term';   // 打開填錯的那一行
             const parts = [];
-            if (badName) parts.push(M('姓名要寫自己的名字。', 'En el nombre debes poner el tuyo.', 'Write your own name.'));
-            if (badTerm) parts.push(M('告示牌寫光明燈一年五百元，期限要選一年。', 'El letrero dice un año por NT$500: elige un año.', 'The sign says one year for NT$500 — choose one year.'));
+            if (badName) parts.push(M('姓名寫錯了喔！', 'El nombre está mal.', 'The name is wrong.'));
+            if (badTerm) parts.push(M('期限選錯了，看一下告示牌！', 'El plazo está mal elegido: ¡mira el letrero!', 'Wrong term: check the sign!'));
             Game.addMistake(M(parts.map(x => x.zh).join(''), parts.map(x => x.es).join(' '), parts.map(x => x.en).join(' ')));
             return;
           }
@@ -1229,9 +1253,6 @@ const Game = defineGame({
         const [month, day] = t.regWrong && k === 'birth' ? [wm, wd] : [f.m, f.d];
         const addr = t.regWrong && k === 'addr' ? badAddr : ADDR[f.addr];
         const claim = t.regWrong ? mine : bad;
-        const label = { name: '名字', birth: '生日', addr: '住址' }[k];
-        const es = { name: 'el nombre', birth: 'el cumpleaños', addr: 'la dirección' }[k];
-        const en = { name: 'name', birth: 'birthday', addr: 'address' }[k];
         return catchState(Game, {
           key: 'REGISTER', place: 'temple', html: () => Game.formHTML(),
           dialogue: () => [narr('你把登記單交給廟公。', 'Entregas el formulario al encargado.', 'You hand the form to the temple keeper.'),
@@ -1242,8 +1263,7 @@ const Game = defineGame({
           fix: () => ({ name: `不好意思，我的名字是${claim.name}。`, birth: `不好意思，我的生日是${claim.birth}。`, addr: `不好意思，我住在${claim.addr}。` })[k],
           rude: '你到底有沒有在看我寫的啊？',
           wrong: () => t.regWrong,
-          whyWrong: () => M(`廟公說錯了：登記單上的${label}是「${mine[k]}」，他說「${bad[k]}」。`, `El encargado se equivocó en ${es}: compara con el formulario.`, `The keeper got the ${en} wrong — compare with the form.`),
-          whyRight: () => M(`廟公說的是對的：${label}是「${mine[k]}」。`, `Lo que dijo es correcto: ${es} coincide con el formulario.`, `He was right: the ${en} matches the form.`),
+          whyWrong: formAgain, whyRight: formAgain, whyRude: rudeWhy,
           goodWrong: ['你很細心！登記的內容說錯了，要馬上說。', '¡Qué atento! Si repiten mal el registro, hay que decirlo enseguida.', 'Well spotted! If the registration is repeated wrong, speak up right away.'],
           goodOk: ['廟公複誦的時候，要對一下登記單。', 'Cuando el encargado repita los datos, compáralos con el formulario.', 'When the keeper reads it back, compare it with the form.'],
           apology: () => [staff(`啊，不好意思！我改過來。好，「${N}」，${mine.birth}，${mine.addr}，一年。沒問題！這樣要先跟你收費。`,
@@ -1263,8 +1283,7 @@ const Game = defineGame({
         ok: payOk, fix: () => fixTotal, rude: '可以算便宜一點嗎？',
         whyRude: () => M('點燈的價錢是固定的，不能講價。', 'El precio de las lámparas es fijo: no se regatea.', "The lamp prices are fixed — you don't bargain."),
         wrong: () => t.payWrong,
-        whyWrong: () => M(`廟公報錯了：你點的是光明燈，五百元。${zhNum(t.said)}元是${t.other.zh}的價錢。`, `El encargado se equivocó: pediste la lámpara de luz, ${esM(t.total)}. ${esM(t.said)} es el precio de ${t.other.es}.`, `The keeper got it wrong: you asked for the light lamp, ${enM(t.total)}. ${enM(t.said)} is the price of ${t.other.en}.`),
-        whyRight: () => M(`廟公說對了：光明燈是${t.total}元。`, `Lo dijo bien: la lámpara de luz cuesta ${esM(t.total)}.`, `He was right: the light lamp is ${enM(t.total)}.`),
+        whyWrong: priceAgain, whyRight: priceAgain,
         goodWrong: ['你很細心！付錢以前，要先對一下價目牌。', '¡Qué atento! Antes de pagar, compara con la tabla de precios.', 'Well spotted! Before you pay, check the price board.'],
         goodOk: ['沒錯！付錢以前，要先對一下價目牌。', '¡Exacto! Antes de pagar, compara con la tabla de precios.', 'Right! Before you pay, check the price board.'],
         go: wrong => { if (wrong) { Game.state = 'PAY_FIX'; return; } toChange(); }
@@ -1289,8 +1308,7 @@ const Game = defineGame({
         dialogue: () => [st(`收你${zhNum(t.bill)}元，找你${zhNum(t.given)}元。`, `Recibo ${esM(t.bill)}; le doy ${esM(t.given)} de cambio.`, `Out of ${enM(t.bill)} — here's ${enM(t.given)} change.`)],
         ok: '好，謝謝。', fix: () => fixChange, rude: '你是不是故意少找我錢啊？',
         wrong: () => t.changeWrong,
-        whyWrong: () => M(`找錯了：${t.bill}減${t.total}，應該找${t.change}元，他找了${t.given}元。`, `Se equivocó con el cambio: ${t.bill} − ${t.total} = ${t.change}; le dieron ${t.given}.`, `Wrong change: ${t.bill} − ${t.total} = ${t.change}, but you got ${t.given}.`),
-        whyRight: () => M(`找對了：${t.bill}−${t.total}＝${t.change}元。`, `El cambio está bien: ${t.bill} − ${t.total} = ${t.change}.`, `The change is right: ${t.bill} − ${t.total} = ${t.change}.`),
+        whyWrong: changeAgain, whyRight: changeAgain, whyRude: rudeWhy,
         goodWrong: ['你很細心！拿到零錢要馬上數。', '¡Qué atento! Cuenta el cambio en el momento.', 'Well spotted! Count your change right away.'],
         goodOk: ['找的錢要自己算一下：給的錢減掉總價。', 'Calcula el cambio tú mismo: lo que diste menos el total.', 'Work out the change yourself: what you gave minus the total.'],
         apology: () => [st(`啊，不好意思！找你${zhNum(t.change)}元。`, `¡Ay, disculpe! Le doy ${esM(t.change)} de cambio.`, `Oh, sorry! Here's ${enM(t.change)} change.`)],
@@ -1314,7 +1332,7 @@ const Game = defineGame({
           ami('哇！這些平安符好漂亮喔！', '¡Guau! ¡Qué bonitos son estos amuletos!', 'Wow! These protection charms are so pretty!')],
         options: () => rotOf(t, ['（拿一個平安符，隨喜投一點香油錢）', '（拿走全部的平安符）', '這些平安符好醜喔！我不要拿！']),
         next: c => {
-          if (c !== '（拿一個平安符，隨喜投一點香油錢）') { Game.addMistake(c.includes('全部') ? M('平安符拿一個就好，不要全部拿走。', 'Basta con un amuleto; no te los lleves todos.', 'Take just one charm — not all of them.') : M('在廟裡嫌平安符醜，很不禮貌。', 'Decir en el templo que los amuletos son feos es de mala educación.', "Calling the charms ugly in a temple is rude.")); return; }
+          if (c !== '（拿一個平安符，隨喜投一點香油錢）') { Game.addMistake(c.includes('全部') ? M('不可以全部拿走喔！', '¡No puedes llevártelos todos!', "You can't take them all!") : M('在廟裡嫌平安符醜，很不禮貌。', 'Decir en el templo que los amuletos son feos es de mala educación.', "Calling the charms ugly in a temple is rude.")); return; }
           goodFirst('AMULET', '沒錯！平安符自己拿，香油錢隨喜。', '¡Exacto! Tomas el amuleto tú mismo y donas lo que quieras.', 'Right! Take the charm yourself and donate as you wish.');
           Game.thought = [narr('你拿了一個平安符。', 'Tomas un amuleto.', 'You take a charm.')];
           Game.state = 'CHARM';
@@ -1341,7 +1359,7 @@ const Game = defineGame({
           ami('你做一次，我看看你會不會。', 'Hazlo tú; a ver si sabes.', 'You do it — let me see if you know how.')],
         options: () => rotOf(t, ['在香爐上方，順時針繞三圈。', '在香爐上方，逆時針繞三圈。', '把平安符丟進香爐裡。']),
         next: c => {
-          if (c !== '在香爐上方，順時針繞三圈。') { Game.addMistake(c.includes('逆時針') ? M('過爐要順時針繞三圈，不是逆時針。', 'Se pasa en sentido horario tres veces, no antihorario.', 'Go clockwise three times, not counter-clockwise.') : M('平安符不能丟進香爐，會燒掉。要在爐上繞三圈。', 'El amuleto no se tira al incensario: se quemaría. Se pasa tres veces por encima.', "Don't drop the charm in the burner — it would burn. Circle it over the burner three times.")); return; }
+          if (c !== '在香爐上方，順時針繞三圈。') { Game.addMistake(c.includes('逆時針') ? M('方向錯了喔！', '¡La dirección está mal!', 'Wrong direction!') : M('平安符不能丟進香爐，會燒掉！', '¡El amuleto no se tira al incensario: se quemaría!', "Don't drop the charm in the burner: it would burn!")); return; }
           goodFirst('GUOLU', '沒錯！過爐要順時針繞三圈。', '¡Exacto! Se pasa tres veces en sentido horario.', 'Right! Three times clockwise.');
           Game.thought = [narr('你拿好平安符。事情都做完了，關聖帝君保佑你一切順利。', 'Sostienes bien tu amuleto. Ya está todo hecho. ¡Que Guan Shengdijun te proteja y todo te vaya bien!', "You hold on to your charm. Everything is done. May Lord Guan watch over you so that all goes well.")];
           Game.state = 'EXIT';
@@ -1355,7 +1373,7 @@ const Game = defineGame({
           ami('走吧，我陪你出去。', 'Vamos, salgo contigo.', "Let's go — I'll walk out with you.")],
         options: () => rotOf(t, ['從右邊的門（虎邊）出去。', '從左邊的門（龍邊）出去。', '從中間的門出去。']),
         next: c => {
-          if (c !== '從右邊的門（虎邊）出去。') { Game.addMistake(c.includes('龍邊') ? M('龍邊是入口，要從虎邊出去。龍進虎出。', 'El lado del dragón es la entrada; se sale por el lado del tigre.', 'The dragon side is the entrance — leave by the tiger side.') : M('中間最大的門是給神明走的，我們要從虎邊（右邊）出去。', 'La puerta central es para las deidades; salimos por el lado del tigre (derecha).', 'The big middle door is for the deities — we leave by the tiger side (right).')); return; }
+          if (c !== '從右邊的門（虎邊）出去。') { Game.addMistake(c.includes('龍邊') ? M('龍進虎出，龍邊是入口唷！', 'Dragón entra, tigre sale: ¡el lado del dragón es la entrada!', 'Dragon in, tiger out: the dragon side is the entrance!') : M('中間最大的門是給神明走的！', '¡La puerta grande del centro es para las deidades!', 'The big middle door is for the deities!')); return; }
           goodFirst('EXIT', '沒錯！龍進虎出，從虎邊出去。', '¡Exacto! Dragón entra, tigre sale.', 'Right! Dragon in, tiger out.');
           Game.stopTimer(); Game.state = 'END';
         }

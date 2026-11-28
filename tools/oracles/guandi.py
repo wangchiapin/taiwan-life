@@ -4,6 +4,7 @@ ORACLE = """() => {
   const m = {
     START: '走進關帝廟',
     GATE: '從右邊的門（龍邊）進去。',
+    TO_FIRE: '去點香處拿香點香',
     FIRE: t.fire === 'shake' ? '用手輕輕晃動，把火晃熄。' : '用另一隻手把火搧熄。',
     HEAVEN: '天公爐拜天公',
     MAIN: MAIN_RIGHT,
