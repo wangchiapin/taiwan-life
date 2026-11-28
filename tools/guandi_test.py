@@ -99,7 +99,7 @@ with sync_playwright() as p:
                 if st == 'DRAW':
                     again = len(sticks) > 0
                     check('抽籤頁 Ami 的話', ('我們再求一支籤吧！' if again else '你來求一支籤吧！') in txt(page) and '籤筒裡有很多' not in txt(page), txt(page))
-                    check('抽籤只有一個按鈕', page.locator('#options-area .opt').count() == 1 and txt(page, '#options-area') == '輕搖籤筒，等一支籤掉出來。')
+                    check('抽籤三個選項', sorted(ev(page, "[...document.querySelectorAll('#options-area .opt')].map(b=>{const c=b.cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.textContent.trim()})")) == sorted(['輕搖籤筒，等一支籤掉出來。', '隨便抽一支自己喜歡的籤。', '把籤筒用力丟在地上。']), txt(page, '#options-area'))
                     m = ev(page, 'Game.mistakes'); sticks.append(ev(page, 'Game.drawnSlip().n')); opt(page, '輕搖籤筒，等一支籤掉出來。'); page.wait_for_function('()=>!Game.busy')
                     n = ev(page, 'slipNo(Game.drawnSlip().n)')
                     check('抽籤過場的旁白、按鈕、圖', f'一支籤掉出來了。籤支上寫著「{n}」。' in txt(page) and '桌上' not in txt(page) and txt(page, '#options-area') == '問問關聖帝君是不是這支籤'
@@ -161,7 +161,7 @@ with sync_playwright() as p:
     ev(page, "localStorage.removeItem('hg.mute.taiwan-life')")
     # ── 籤筒聲和搖晃動畫：點了才晃、播完才跳頁、靜音照樣晃 ──
     SHK = '輕搖籤筒，等一支籤掉出來。'
-    btn = lambda: page.locator('#options-area .opt').first
+    btn = lambda: page.locator('#options-area .opt').nth(ev(page, 'Game.getConfig().DRAW.options().indexOf(SHAKE)'))
     snap = "document.querySelector('#shake-canvas').toDataURL()"
     for muted in (False, True):
         tag = '靜音' if muted else '有聲'
@@ -194,7 +194,7 @@ with sync_playwright() as p:
     jump(page, 'HEAVEN'); opt(page, '天公爐拜天公'); check('天公爐插一支', '把一支香插進天公爐' in ev(page, 'Game.thought[0].zh'))
     ev(page, 'Game.handleChoice(Game.transLabel()); Game.handleChoice(MAIN_RIGHT.slice())'); check('大殿插一支', any('把一支香插進大殿' in t for t in ev(page, 'Game.thought.map(t=>t.zh)')))
     ev(page, 'Game.handleChoice(Game.transLabel())'); check('進側殿', ev(page, 'Game.state') == 'SIDE')
-    check('側殿一頁看完', '（你走到側殿，向其他神明拜了三下，插上最後一支香，雙手合十再拜一次。）' in txt(page) and 'Ami：你知道這些是哪些神明嗎？我們去跟關聖帝君求個籤吧！' in txt(page) and txt(page, '#options-area') == '去求籤', txt(page))
+    check('側殿一頁看完', '（你走到側殿，向其他神明拜了三下，插上最後一支香，雙手合十再拜一次。）' in txt(page) and 'Ami：你知道這些是哪些神明嗎？你可以上網查查看喔！我們去跟關聖帝君求個籤吧！' in txt(page) and txt(page, '#options-area') == '去求籤', txt(page))
     opt(page, '去求籤'); check('回大殿擲筊', ev(page, 'Game.state') == 'THROW' and ev(page, 'Game.phase') == 'ready')
     ctx.close()
     # ── 籤支方框拿掉、籤櫃、側殿、解籤、聽懂題、登記單 ──
@@ -249,7 +249,8 @@ with sync_playwright() as p:
         jump(page, 'READ'); ev(page, f"Game.task.slip=SLIPS.find(s=>s.n==={n}); Game.render()")
         g, gloss = ev(page, '[Game.task.slip.g, Game.task.slip.gloss.zh]'); o = opts()
         third = '那我可以不用學中文了吧！' if g == '上上' else '再抽一次，抽到上上籤為止。'; rude = '到底在供三小？'
-        if sorted(o) != sorted([good, '那我可以躺平了。', third, rude]) or gloss in txt(page) or f'Ami：這是{g}籤{lines[g]}' not in txt(page): check(f'第{n}籤看籤詩', False, (o, txt(page)))
+        flat = '那我可以躺平了。' if g in ('上上', '上吉', '中吉') else '那我還是躺平好了。'
+        if sorted(o) != sorted([good, flat, third, rude]) or gloss in txt(page) or f'Ami：這是{g}籤{lines[g]}' not in txt(page): check(f'第{n}籤看籤詩', False, (o, txt(page)))
     check('20 支籤的看籤詩選項都檢查過', True)
     for g in ('上上', '下下'):
         jump(page, 'READ'); ev(page, f"Game.task.slip=SLIPS.find(s=>s.g==='{g}'); Game.render()")
@@ -418,7 +419,19 @@ with sync_playwright() as p:
             check(f'{state} 選項（{w}）', ans in o and rudeopt in o and len(o) == 3, (ans, o))
             for c in o:
                 if c != ans: wrong(state, c, ('點燈的價錢是固定的，不能講價。' if state == 'PAY' else rude) if c == rudeopt else neutral, f'{state}（廟公{"講錯" if w else "沒講錯"}）')
-    fresh('READ'); wrong('READ', '那我可以躺平了。', '籤是提醒你，不是保證喔！')
+    for g in ('上上', '上吉', '中吉', '中平', '下下'):
+        fresh('READ'); ev(page, f"Game.task.slip=SLIPS.find(s=>s.g==='{g}'); Game.render()")
+        if g in ('上上', '上吉', '中吉'): wrong('READ', '那我可以躺平了。', '籤是提醒你，不是一定喔！', f'READ {g}')
+        else: wrong('READ', '那我還是躺平好了。', '籤是提醒你，不可以放棄喔！', f'READ {g}')
+    fresh('DRAW'); wrong('DRAW', '隨便抽一支自己喜歡的籤。', '有些廟可以用手抽，但是要誠心誠意，不能隨便啦！'); wrong('DRAW', '把籤筒用力丟在地上。', '不可以這樣！要尊重神明！')
+    check('抽籤答錯扣分、不播動畫', ev(page, 'Game.score') == 80 and not ev(page, 'Game.busy') and page.locator('#shake-canvas').count() == 0, ev(page, 'Game.score'))
+    pick_('輕搖籤筒，等一支籤掉出來。'); page.wait_for_function('()=>!Game.busy'); check('抽籤錯過再選對：照樣往下', st() == '_TRANS' and ev(page, 'Game._trans.to') == 'CONFIRM', st())
+    first = ev(page, "(()=>{const seen=new Set();for(let i=0;i<300;i++){Game.setup();Game.state='DRAW';seen.add(Game.getConfig().DRAW.options()[0])}return seen.size})()")
+    check('抽籤選項順序會輪換', first == 3, first)
+    fresh('SLIP_NUM'); t_ = txt(page)
+    check('籤櫃旁白在廟公說話前', '（你把籤拿給廟公。）' in t_ and t_.index('（你把籤拿給廟公。）') < t_.index('廟公：你的籤是'), t_)
+    page.screenshot(path='/tmp/t_SLIP_NUM.png', full_page=True)
+    fresh('DRAW'); page.screenshot(path='/tmp/t_DRAW.png', full_page=True)
     fresh('ASK'); wrong('ASK', '欸，老頭，這什麼意思？', '這樣很沒禮貌喔！'); wrong('ASK', '（把籤紙揉爛丟掉）', '籤紙不能揉爛亂丟喔！')
     fresh('AMULET'); wrong('AMULET', '（拿走全部的平安符）', '不可以全部拿走喔！')
     fresh('GUOLU'); wrong('GUOLU', '在香爐上方，逆時針繞三圈。', '方向錯了喔！'); wrong('GUOLU', '把平安符丟進香爐裡。', '平安符不能丟進香爐，會燒掉！')

@@ -521,11 +521,11 @@ const VOCAB = {
   FIRE: [['點火處', 'lugar para encender el incienso', 'place to light incense'], ['一炷香', 'una varilla de incienso', 'a stick of incense'], ['搧', 'abanicar', 'fan'], ['晃', 'agitar suavemente', 'shake gently'], ['吹', 'soplar', 'blow']],
   HEAVEN: [['天公爐', 'incensario del Cielo', 'Heaven’s incense burner'], ['天公', 'el Emperador del Cielo', 'the Heavenly Emperor'], ['先……再……', 'primero… después…', 'first… then…'], ['拜', 'rendir culto, rezar', 'worship, pray'], ['大殿', 'salón principal', 'main hall'], ['側殿', 'salón lateral', 'side hall']],
   MAIN: [['關聖帝君', 'Guan Shengdijun (Guan Gong)', 'Lord Guan (Guan Gong)'], ['姓名', 'nombre', 'name'], ['生日', 'cumpleaños', 'birthday'], ['住址', 'dirección', 'address'], ['住在', 'vivir en', 'live at'], ['保佑', 'proteger, bendecir', 'bless, protect'], ['平安', 'paz y seguridad', 'safe and sound']],
-  SIDE: [['側殿', 'salón lateral', 'side hall'], ['神明', 'deidades', 'deities'], ['插', 'clavar, colocar', 'stick in'], ['最後', 'último', 'last'], ['雙手合十', 'juntar las palmas', 'press your palms together'], ['求籤', 'pedir una suerte', 'ask for a fortune']],
+  SIDE: [['側殿', 'salón lateral', 'side hall'], ['神明', 'deidades', 'deities'], ['插', 'clavar, colocar', 'stick in'], ['最後', 'último', 'last'], ['雙手合十', 'juntar las palmas', 'press your palms together'], ['上網', 'conectarse a internet', 'go online'], ['查', 'buscar, consultar', 'look up'], ['求籤', 'pedir una suerte', 'ask for a fortune']],
   THROW: [['筊杯', 'jiaobei (bloques de madera)', 'moon blocks'], ['聖筊', 'sí (una plana, una redonda)', 'yes (one flat, one round)'], ['笑筊', 'sonrisa (dos planas)', 'smile (both flat)'], ['陰筊', 'no (dos redondas)', 'no (both round)'], ['丟', 'lanzar', 'throw'], ['抽籤', 'sacar una varilla', 'draw a fortune stick'], ['神明', 'deidad', 'deity']],
   CONFIRM: [['筊杯', 'jiaobei (bloques de madera)', 'moon blocks'], ['聖筊', 'sí (una plana, una redonda)', 'yes (one flat, one round)'], ['笑筊', 'sonrisa (dos planas)', 'smile (both flat)'], ['陰筊', 'no (dos redondas)', 'no (both round)'], ['連續', 'seguidos', 'in a row'], ['丟', 'lanzar', 'throw']],
-  DRAW: [['籤筒', 'cilindro con varillas', 'fortune stick holder'], ['籤支', 'varilla de la suerte', 'fortune stick'], ['抽籤', 'sacar una varilla', 'draw a fortune stick'], ['求籤', 'pedir una suerte', 'ask for a fortune']],
-  SLIP_NUM: [['籤櫃', 'cajonera de papeles de suerte', 'fortune slip cabinet'], ['第……籤', 'la suerte n.º …', 'fortune No. …'], ['不好意思', 'disculpe', 'excuse me'], ['籤詩', 'poema de la suerte', 'fortune poem']],
+  DRAW: [['籤筒', 'cilindro con varillas', 'fortune stick holder'], ['籤支', 'varilla de la suerte', 'fortune stick'], ['抽籤', 'sacar una varilla', 'draw a fortune stick'], ['求籤', 'pedir una suerte', 'ask for a fortune'], ['隨便', 'de cualquier manera', 'any old way'], ['用力', 'con fuerza', 'hard, with force'], ['丟', 'lanzar, tirar', 'throw']],
+  SLIP_NUM: [['拿給', 'entregar a', 'hand to'], ['籤櫃', 'cajonera de papeles de suerte', 'fortune slip cabinet'], ['第……籤', 'la suerte n.º …', 'fortune No. …'], ['不好意思', 'disculpe', 'excuse me'], ['籤詩', 'poema de la suerte', 'fortune poem']],
   READ: [['籤詩', 'poema de la suerte', 'fortune poem'], ['上上籤', 'la mejor suerte', 'the best fortune'], ['中平籤', 'suerte regular', 'so-so fortune'], ['下下籤', 'suerte difícil', 'a difficult fortune'], ['努力', 'esforzarse', 'make an effort'], ['躺平', 'tumbarse y no esforzarse', 'lie flat, stop trying'], ['供三小', '¿qué diablos dices? (grosero, del taiwanés)', 'what the heck are you saying? (rude, from Taiwanese)']],
   ASK: [['解籤', 'interpretar la suerte', 'interpret a fortune'], ['廟公', 'encargado del templo', 'temple keeper'], ['旁邊', 'al lado', 'beside'], ['老頭', 'viejo (grosero)', 'old man (rude)'], ['揉爛', 'arrugar y estrujar', 'crumple up'], ['丟掉', 'tirar', 'throw away']],
   MEAN: [['廟公', 'encargado del templo', 'temple keeper'], ['意思', 'significado', 'meaning']],
@@ -543,6 +543,7 @@ const VOCAB = {
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 
+const GOOD_GRADES = ['上上', '上吉', '中吉'];   // 看籤詩：好籤和不好的籤（中平、下下），「躺平」選項不一樣
 const READ_WORDS = VOCAB.READ;   // 看籤詩每局固定的單字；Ami 那句話的單字在 setup() 依籤的等級加上
 
 /* 關卡名稱（錯誤紀錄用） */
@@ -1105,7 +1106,7 @@ const Game = defineGame({
       SIDE: {
         place: 'temple',
         dialogue: () => [narr('你走到側殿，向其他神明拜了三下，插上最後一支香，雙手合十再拜一次。', 'Vas al salón lateral, haces tres reverencias a las otras deidades, pones la última varilla, juntas las manos y haces otra reverencia.', 'You go to the side hall, bow three times to the other deities, place the last stick, press your palms together and bow once more.'),
-          ami('你知道這些是哪些神明嗎？我們去跟關聖帝君求個籤吧！', '¿Sabes qué deidades son estas? ¡Vamos a pedirle una suerte a Guan Shengdijun!', "Do you know which deities these are? Let's go and ask Lord Guan for a fortune!")],
+          ami('你知道這些是哪些神明嗎？你可以上網查查看喔！我們去跟關聖帝君求個籤吧！', '¿Sabes qué deidades son estas? ¡Puedes buscarlo en internet! ¡Vamos a pedirle una suerte a Guan Shengdijun!', "Do you know which deities these are? You can look them up online! Let's go and ask Lord Guan for a fortune!")],
         options: [NEXT_LABEL.THROW],
         next: () => { Game.state = 'THROW'; }
       },
@@ -1121,14 +1122,20 @@ const Game = defineGame({
         next: leaveThrow
       },
 
-      /* ═══ 抽籤：只有一個動作（各廟做法不同，不考怎麼抽，也不扣分） ═══ */
+      /* ═══ 抽籤：輕搖籤筒（有些廟可以用手抽，但是要誠心誠意、不能隨便；各廟做法不同） ═══ */
       DRAW: {
         place: 'temple',
         mount: () => drawArt(),   // 先把動畫要用的圖載好
         dialogue: () => [Game.round ? ami('我們再求一支籤吧！', '¡Pidamos otra varilla!', "Let's ask for another stick!")
           : ami('你來求一支籤吧！', '¡Pide tú una varilla!', 'Go ahead and ask for a fortune stick!')],
-        options: [SHAKE],
-        next: () => {
+        options: () => rotOf(t, [SHAKE, '隨便抽一支自己喜歡的籤。', '把籤筒用力丟在地上。']),
+        next: c => {
+          if (c !== SHAKE) {
+            Game.addMistake(c === '隨便抽一支自己喜歡的籤。'
+              ? M('有些廟可以用手抽，但是要誠心誠意，不能隨便啦！', 'En algunos templos se puede sacar con la mano, pero con sinceridad, ¡no de cualquier manera!', 'Some temples let you draw by hand, but do it sincerely, not any old way!')
+              : M('不可以這樣！要尊重神明！', '¡Eso no se hace! ¡Hay que respetar a las deidades!', "You can't do that! Show the deities respect!"));
+            return;
+          }
           const n = Game.drawnSlip().n;
           Game.thought = [narr(`一支籤掉出來了。籤支上寫著「${slipNo(n)}」。`, `Cae una varilla. Dice «${slipNoEs(n)}».`, `A stick falls out. It reads "No. ${n}".`)];
           Game.state = 'CONFIRM';
@@ -1148,7 +1155,8 @@ const Game = defineGame({
       /* ═══ 籤櫃：廟公拿籤詩，號碼可能拿錯 ═══ */
       SLIP_NUM: catchState(Game, {
         key: 'SLIP_NUM', place: 'temple',
-        dialogue: () => [staff(`你的籤是${slipNo(t.numSaid)}，這張給你。`, `Su suerte es la ${slipNoEs(t.numSaid)}; aquí tiene.`, `Your fortune is No. ${t.numSaid}. Here you go.`)],
+        dialogue: () => [narr('你把籤拿給廟公。', 'Le entregas la varilla al encargado del templo.', 'You hand the stick to the temple keeper.'),
+          staff(`你的籤是${slipNo(t.numSaid)}，這張給你。`, `Su suerte es la ${slipNoEs(t.numSaid)}; aquí tiene.`, `Your fortune is No. ${t.numSaid}. Here you go.`)],
         ok: '對，是這張，謝謝。', fix: () => `不好意思，我抽到的是${slipNo(t.numWrong ? S.n : t.numClaim)}。`, rude: '廟公，你的眼睛是不是不太好？',
         wrong: () => t.numWrong,
         whyWrong: slipAgain, whyRight: slipAgain, whyRude: rudeWhy,
@@ -1164,11 +1172,12 @@ const Game = defineGame({
         html: () => Game.slipHTML(),
         dialogue: () => [narr('籤詩是古文，很難懂。', 'El poema está en chino clásico y es difícil de entender.', 'The poem is in classical Chinese and hard to follow.'),
           ami(`這是${GRADES[S.g].zh}${GRADES[S.g].ami[0]}`, `Es «${GRADES[S.g].zh}» (${GRADES[S.g].es}). ${GRADES[S.g].ami[1]}`, `It's a "${GRADES[S.g].zh}" (${GRADES[S.g].en}). ${GRADES[S.g].ami[2]}`)],
-        options: () => rotOf(t, ['謝謝關公。我會好好努力。', '那我可以躺平了。', S.g === '上上' ? '那我可以不用學中文了吧！' : '再抽一次，抽到上上籤為止。', '到底在供三小？']),
+        options: () => rotOf(t, ['謝謝關公。我會好好努力。', GOOD_GRADES.includes(S.g) ? '那我可以躺平了。' : '那我還是躺平好了。', S.g === '上上' ? '那我可以不用學中文了吧！' : '再抽一次，抽到上上籤為止。', '到底在供三小？']),
         next: c => {
           if (c !== '謝謝關公。我會好好努力。') {
             Game.addMistake(c === '到底在供三小？' ? M('這句話很不禮貌，不要這樣說。', 'Esa frase es muy grosera; no la digas.', "That's very rude — don't say that.")
-              : c.includes('躺平') ? M('籤是提醒你，不是保證喔！', '¡La suerte es un recordatorio, no una garantía!', 'A fortune is a reminder, not a guarantee!')
+              : c === '那我可以躺平了。' ? M('籤是提醒你，不是一定喔！', 'La suerte es un recordatorio, ¡no es algo seguro!', 'A fortune is a reminder, not a sure thing!')
+              : c === '那我還是躺平好了。' ? M('籤是提醒你，不可以放棄喔！', 'La suerte es un recordatorio, ¡no te rindas!', "A fortune is a reminder — don't give up!")
               : c.includes('學中文') ? M('抽到好籤很棒，可是中文還是要自己學喔！', '¡Qué bien sacar una buena suerte! Pero el chino hay que estudiarlo igual.', "A good fortune is great, but you still have to learn Chinese yourself!")
                 : M('一件事只問一次，不能一直重抽。', 'Una pregunta se hace una sola vez; no se repite hasta que salga bien.', "Ask once per question — don't redraw until you like the answer."));
             return;
