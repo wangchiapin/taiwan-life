@@ -105,6 +105,18 @@ def play_cov(page, g, stats, tried):
         cls = [norm(x) for x in cls]
         key = page.evaluate("typeof Game.testKey==='function' ? String(Game.testKey()) : ''")
         sk = st + (':' + key if key else '')
+        if page.locator('#options-area .opt.multi').count():   # 多選題（關帝廟大殿）：先送一次錯的（全部勾），再照正解勾；正解是陣列
+            right = page.evaluate(orc) if orc else None
+            t = tried.setdefault(sk, set())
+            if isinstance(right, list) and 'multi-wrong' in t:
+                picks = page.evaluate('a=>a.map(x=>Z(x))', right) + right; stats['right'].setdefault(sk, set()).add('多選正解')
+            else:
+                t.add('multi-wrong'); stats['wrong'].setdefault(sk, set()).add('多選全部勾')
+                picks = opts[:-1] if isinstance(right, list) else random.sample(opts[:-1], random.randint(1, len(opts) - 1))
+                if not isinstance(right, list): stats['no_oracle'].add(sk)
+            for i, o in enumerate(opts[:-1]):
+                if (page.locator('#options-area .opt').nth(i).get_attribute('aria-pressed') == 'true') != (o.strip() in picks): smoke.click_i(page, i)
+            smoke.click_i(page, len(opts) - 1); continue
         ans = None
         if orc:
             try: ans = page.evaluate(orc)

@@ -60,6 +60,7 @@ def click_c(page,c,i):
     tap=c[i][1]; j=sum(1 for _,tp in c[:i] if tp==tap)
     if tap: page.locator('[data-choice]:visible').nth(j).click()
     else: click_i(page,j)
+    page.wait_for_function("()=>typeof Game==='undefined'||!Game.busy",timeout=10000)   # 播動畫中（關帝廟搖籤筒）：按鈕鎖住，等播完
 def play(page,g,mode,log):
     bad=set(); trans=0; steps=0; seen=[]
     orc=EXTRA.get(g) or ORACLES.get(g)

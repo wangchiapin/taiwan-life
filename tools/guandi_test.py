@@ -296,7 +296,7 @@ with sync_playwright() as p:
     page.screenshot(path='/tmp/t_fill.png', full_page=True)
     k = m(); pick_('填好了'); check('名字、期限填錯只扣一次', st() == 'FILL' and m() == k + 1)
     check('扣分後已選的還在、打開填錯的那行', txt(page, '.fill').count('✓') == 3 and opened() == ['name'] and page.locator('.pick.on').count() == 1, (opened(), txt(page, '.fill')))
-    check('錯誤說明兩項', ev(page, 'Game.log.at(-1).zh') == '姓名寫錯了喔！期限選錯了，看一下告示牌！')
+    check('錯誤說明兩項', ev(page, 'Game.log.at(-1).zh') == '姓名寫錯了喔！期限選錯了，看一下登記單上面寫的！')
     tap('name', 'María'); head('term'); tap('term', '一年'); ev(page, 'Game.task.regWrong=false'); pick_('填好了'); card = txt(page)   # 這裡檢查「說對」的版本，不受亂數影響
     check('填對直接到登記、沒有過場和稱讚卡', st() == 'REGISTER' and '（你把登記單交給廟公。）' in card and '登記單填好了' not in card, (st(), card))
     check('登記單顯示剛才填的', st() == 'REGISTER' and all(x in txt(page, '#npc-dialogue .card') for x in ('María', '4月21號', '台南市成功路25號', '1年', '500元')) and all(x in card for x in ('生日是四月二十一號', '住在台南市成功路二十五號', '點一年')), card)
@@ -466,7 +466,72 @@ with sync_playwright() as p:
         jump(page, 'PAY'); ev(page, f"if(Game.showPinyin!=={str(py).lower()})Game.togglePinyin()"); page.screenshot(path=f'/tmp/t_price_m_{int(py)}.png', full_page=True)
         w = ev(page, "[document.querySelector('.card.price').offsetWidth, document.querySelector('#npc-dialogue').clientWidth]")
         check('手機價目牌排得下', w[0] <= w[1] and ev(page, 'document.documentElement.scrollWidth <= innerWidth + 1'), w)
+    ctx.close()
+    # ── 任務提示、我的狀況、結局台詞和單字 ──
+    ctx, page = open_game(b, errs)
+    hint = lambda: (ev(page, 'Hints.render()'), ev(page, "(()=>{const c=document.querySelector('#hint-body').cloneNode(true);c.querySelectorAll('rt').forEach(r=>r.remove());return c.textContent})()"))[1]
+    words = lambda: ev(page, "[...document.querySelectorAll('#vocab-list .v-zh')].map(e=>e.textContent)")
+    have = {'PAY_FIX': '你身上有：一張一千元的鈔票，還有一點零錢', 'CHANGE': '你付了一張一千元的鈔票，身上還有一點零錢', 'GO_AMULET': '你身上有：五百元，還有一點零錢',
+            'AMULET': '你身上有：五百元，還有一點零錢', 'CHARM': '你身上有：五百元、一點零錢和一個平安符', 'EXIT': '你身上有：五百元、一點零錢和一個平安符'}
+    for state, mine in have.items():
+        for w in (True, False):
+            jump(page, state); ev(page, f"Object.assign(Game.task,{{payWrong:{str(w).lower()},said:{300 if w else 500}}}); Game.render()")
+            h = hint()
+            check(f'{state} 提示的價錢一定是正確的（{w}）', '廟公說的話一共是五百元。' in h and '三百元' not in h, h)
+            check(f'{state} 我的狀況', mine in h, h)
+    jump(page, 'PAY'); h = hint(); check('付錢時提示不先列廟公的話', '廟公說的話' not in h and have['PAY_FIX'] in h, h)
+    jump(page, 'EXIT'); h = hint()
+    check('告示牌不重複、沒有登記單那一張', h.count('龍進虎出') == 1 and '請寫姓名' not in h and '面對廟' in h, h)
+    for m_, line, ws in ((0, '拜完以後，心裡有輕鬆一點嗎，María？我們去吃點東西吧！', ['輕鬆']),
+                         (3, '第一次來拜拜，感覺有點亂，不過心意最重要。下次我再陪你來，María。', ['心意', '下次', '第一次', '拜拜', '感覺', '亂'])):
+        jump(page, 'END'); ev(page, f"Game.mistakes={m_}; Game._endText=null; Game.render()")
+        check(f'結局台詞（錯 {m_} 次）', 'Ami：' + line in txt(page), txt(page))
+        check(f'結局單字（錯 {m_} 次）', words() == ws, words())
+    # ── 本關單字、過場單字：每個詞都要在那一關（過場）的畫面上看得到 ──
+    ev(page, '''()=>{const r=Game.render; window.__v={}; Game.render=function(){r.apply(this,arguments); if(this._transMode) return;
+      const k=this.state==='_TRANS'?this._trans.from+'>'+this._trans.to:this.state, s=window.__v[k]||={text:'',words:{}};
+      for(const q of ['#npc-dialogue','#options-area']){const c=document.querySelector(q).cloneNode(true);c.querySelectorAll('rt,rp,style,svg').forEach(e=>e.remove());s.text+=c.textContent+' ';}
+      document.querySelectorAll('#vocab-list .v-zh').forEach(e=>s.words[e.textContent]=1);}}''')
+    SWEEP = '''right=>{
+      const reset=st=>{Object.assign(Game,{mistakes:0,score:100,thought:null,feedback:[],_trans:null,att:{},log:[],phase:'ready',goNext:null,ti:0,streak:0,busy:false,_endText:null,round:0});Game.state=st;Game.render();};
+      const go=c=>{Game.busy=false; if(Game.state==='DRAW'&&c===SHAKE) GameCore.handleChoice.call(Game,c); else Game.handleChoice(c);};
+      Game.setup(); const task=Game.task;
+      for(const st of STATE_ORDER){
+        if(st==='RESULT') continue;
+        for(const flag of [true,false]){
+          Object.assign(task,{numWrong:flag,regWrong:flag,payWrong:flag,changeWrong:flag,said:flag?task.other.price:task.total}); task.given=flag?task.change-50:task.change;
+          reset(st);
+          if(st==='END'){for(const m of [0,5]){reset(st);Game.mistakes=m;Game._endText=null;Game.render();}continue;}
+          if(st==='THROW'||st==='CONFIRM'){for(const list of [['xiao','yin','sheng'],['yin','sheng','sheng','sheng']]){reset(st);task.ask=list;task.confirm=[list,['sheng','sheng','sheng']];for(let i=0;i<4&&!Game.goNext;i++){Game.land();Game.render();}}continue;}
+          if(st==='FILL'){for(const good of [false,true]){task.form={};task.fillOpen='name';reset(st);for(const row of ['birth','addr','term']){task.fillOpen=row;Game.render();}go('填好了');Game.testPrep(good);go('填好了');}continue;}
+          if(st==='MAIN'){for(const c of [['自己的名字'],[...MAIN_RIGHT,'今天的天氣'],[...MAIN_RIGHT]]){reset(st);go(c);}continue;}
+          const o_=Game.getConfig()[st].options, opts=typeof o_==='function'?o_():o_;
+          const ok=eval('('+right+')')();
+          for(const c of [...opts.filter(o=>o!==ok),...opts.filter(o=>o===ok)]){reset(st);go(c);}
+          if(opts.includes(ok)){reset(st);Game.att={[st]:1};go(ok);}   /* 第二次才答對：過場沒有稱讚卡 */
+        }
+      }
+    }'''
+    for i in range(12): ev(page, 'Game.stopTimer()'); page.evaluate(SWEEP, smoke.ORACLES['guandi'])
+    seen = ev(page, 'window.__v'); trans = ev(page, "Object.fromEntries(Object.entries(TRANS_VOCAB).map(([k,v])=>[k,v.map(w=>w[0])]))")
+    for k, v in seen.items():
+        if k == 'RESULT': continue
+        miss = [w for w in v['words'] if w != '第……籤' and w not in v['text']]
+        check(f'單字都看得到：{k}', not miss, miss)
+    for k, v in trans.items():
+        got = set(seen.get(k, {}).get('words', {}))
+        check(f'過場單字：{k}', got == set(v), (sorted(set(v) - got), sorted(got - set(v))))
+    check('每個過場都有自己的單字清單', not [k for k in seen if '>' in k and k not in trans], [k for k in seen if '>' in k and k not in trans])
+    for g_ in ('上上', '上吉', '中吉', '中平', '下下'):
+        ev(page, f"(()=>{{let n=0; do Game.setup(); while(Game.task.slip.g!=='{g_}' && ++n<500); Game.state='READ'; Game.render()}})()")
+        w = words(); grades = [x for x in w if len(x) == 3 and x.endswith('籤')]
+        check(f'看籤詩的籤等級（{g_}）', set(grades) == {g_ + '籤', '上上籤'} and ('放棄' in w) == (g_ in ('中平', '下下')), w)
+    for f_, yes, no in (('shake', '晃', '搧'), ('fan', '搧', '晃')):
+        ev(page, f"(()=>{{let n=0; do Game.setup(); while(Game.task.fire!=='{f_}' && ++n<500); Game.state='FIRE'; Game.render()}})()")
+        check(f'熄香單字只列這局的動作（{f_}）', yes in words() and no not in words(), words())
     ctx.close(); b.close()
     check('沒有程式錯誤', not errs, errs[:3])
+import panels_test   # 共用檢查：語言、本關單字、任務提示面板
+_n, _f, _w = panels_test.check_games(['guandi'], verbose=False); ok += _n - len(_f); fail += len(_f)
 print(f'通過 {ok} 項，失敗 {fail} 項')
 sys.exit(1 if fail else 0)

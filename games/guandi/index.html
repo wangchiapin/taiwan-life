@@ -349,7 +349,8 @@ const MEAN_WORDS = [
   ['尊重', 'respetar', 'respect'], ['對方', 'la otra persona', 'the other person'], ['冷清', 'apagado, sin movimiento', 'quiet, deserted'], ['好轉', 'mejorar', 'improve'], ['熱鬧', 'animado', 'lively'], ['決定', 'decidir', 'decide'],
   ['踏踏實實', 'con los pies en la tierra', 'down-to-earth'], ['賺大錢', 'ganar mucho dinero', 'make big money'], ['發財', 'hacerse rico', 'get rich'], ['清楚', 'claro', 'clear'], ['容易', 'fácil', 'easy'], ['考慮', 'pensárselo', 'consider'],
   ['比較', 'más bien, relativamente', 'rather'], ['休息', 'descansar', 'rest'], ['情況', 'situación', 'situation'], ['照顧', 'cuidar', 'take care of'], ['麻煩', 'problema', 'trouble'], ['冷靜', 'calma', 'calm'], ['小心', 'tener cuidado', 'be careful'],
-  ['執著', 'aferrarse', 'cling'], ['看開', 'tomarlo con calma', 'let it go'], ['圓滿', 'completo, perfecto', 'complete, happy'], ['變化', 'cambio', 'change'], ['溝通', 'comunicarse', 'communicate'], ['珍惜', 'valorar', 'cherish'], ['身邊', 'a tu lado', 'around you']
+  ['執著', 'aferrarse', 'cling'], ['看開', 'tomarlo con calma', 'let it go'], ['圓滿', 'completo, perfecto', 'complete, happy'], ['變化', 'cambio', 'change'], ['溝通', 'comunicarse', 'communicate'], ['珍惜', 'valorar', 'cherish'], ['身邊', 'a tu lado', 'around you'],
+  ['互相', 'mutuamente', 'each other'], ['遇到', 'encontrarse con', 'come across'], ['重要', 'importante', 'important'], ['本來', 'por naturaleza, de por sí', 'originally'], ['原本', 'al principio', 'originally'], ['弱', 'débil', 'weak'], ['看起來', 'parecer', 'seem'], ['只要', 'con tal de que, basta con', 'as long as']
 ];
 
 /* 擲筊：兩個筊杯，一面平、一面圓 */
@@ -515,36 +516,58 @@ const FAKE_NAMES = ['小美', '大衛', '阿明', '佩佩', 'Lucas', 'Sofía'];
    每一關的單字（中文、西文、英文；拼音自動產生）
 ══════════════════════════════════════ */
 const VOCAB = {
-  START: [['關帝廟', 'templo de Guan Di', 'Guan Di temple'], ['關公', 'Guan Gong (Guan Yu)', 'Guan Gong (Guan Yu)'], ['保佑', 'proteger, bendecir', 'bless, protect'], ['不順利', 'que no va bien', 'not going smoothly']],
-  GATE: [['龍邊', 'lado del dragón (derecha)', 'dragon side (right)'], ['虎邊', 'lado del tigre (izquierda)', 'tiger side (left)'], ['龍進虎出', 'entrar por el dragón, salir por el tigre', 'enter by the dragon, exit by the tiger'], ['告示牌', 'letrero', 'sign']],
+  START: [['關帝廟', 'templo de Guan Di', 'Guan Di temple'], ['關公', 'Guan Gong (Guan Yu)', 'Guan Gong (Guan Yu)'], ['保佑', 'proteger, bendecir', 'bless, protect'], ['不太順利', 'que no va muy bien', 'not going so well'], ['約', 'quedar (en verse)', 'arrange to meet'], ['見面', 'verse, encontrarse', 'meet'], ['陪', 'acompañar', 'keep someone company'], ['拜拜', 'ir a rezar (al templo)', 'pray at a temple'], ['鈔票', 'billete', 'banknote'], ['零錢', 'cambio, monedas', 'small change']],
+  GATE: [['龍邊', 'lado del dragón (derecha)', 'dragon side (right)'], ['虎邊', 'lado del tigre (izquierda)', 'tiger side (left)'], ['龍進虎出', 'entrar por el dragón, salir por el tigre', 'enter by the dragon, exit by the tiger'], ['告示牌', 'letrero', 'sign'], ['廟門', 'puerta del templo', 'temple gate'], ['中間', 'en medio', 'middle']],
   TO_FIRE: [['點香', 'encender el incienso', 'light incense'], ['香水', 'perfume', 'perfume'], ['很香', 'huele muy bien', 'smells great'], ['肚子餓', 'tener hambre', 'be hungry'], ['臭', 'apestar, oler mal', 'smelly']],
-  FIRE: [['點火處', 'lugar para encender el incienso', 'place to light incense'], ['一炷香', 'una varilla de incienso', 'a stick of incense'], ['搧', 'abanicar', 'fan'], ['晃', 'agitar suavemente', 'shake gently'], ['吹', 'soplar', 'blow']],
-  HEAVEN: [['天公爐', 'incensario del Cielo', 'Heaven’s incense burner'], ['天公', 'el Emperador del Cielo', 'the Heavenly Emperor'], ['先……再……', 'primero… después…', 'first… then…'], ['拜', 'rendir culto, rezar', 'worship, pray'], ['大殿', 'salón principal', 'main hall'], ['側殿', 'salón lateral', 'side hall']],
-  MAIN: [['關聖帝君', 'Guan Shengdijun (Guan Gong)', 'Lord Guan (Guan Gong)'], ['姓名', 'nombre', 'name'], ['生日', 'cumpleaños', 'birthday'], ['住址', 'dirección', 'address'], ['住在', 'vivir en', 'live at'], ['保佑', 'proteger, bendecir', 'bless, protect'], ['平安', 'paz y seguridad', 'safe and sound']],
+  FIRE: [['點火處', 'lugar para encender el incienso', 'place to light incense'], ['搧', 'abanicar', 'fan'], ['晃', 'agitar suavemente', 'shake gently'], ['吹', 'soplar', 'blow'], ['三炷香', 'tres varillas de incienso', 'three sticks of incense'], ['點著', 'encender, prender', 'light up'], ['香頭', 'punta del incienso', 'tip of the incense'], ['旺', '(fuego) fuerte, vivo', '(of fire) strong'], ['熄', 'apagar', 'put out'], ['踩', 'pisar', 'step on']],
+  HEAVEN: [['天公爐', 'incensario del Cielo', 'Heaven’s incense burner'], ['天公', 'el Emperador del Cielo', 'the Heavenly Emperor'], ['拜', 'rendir culto, rezar', 'worship, pray'], ['大殿', 'salón principal', 'main hall'], ['側殿', 'salón lateral', 'side hall'], ['按照', 'según, siguiendo', 'according to'], ['順序', 'orden', 'order'], ['關聖帝君', 'Guan Shengdijun (Guan Gong)', 'Lord Guan (Guan Gong)'], ['神明', 'deidad', 'deity']],
+  MAIN: [['關聖帝君', 'Guan Shengdijun (Guan Gong)', 'Lord Guan (Guan Gong)'], ['生日', 'cumpleaños', 'birthday'], ['住址', 'dirección', 'address'], ['名字', 'nombre', 'name'], ['心願', 'deseo', 'wish'], ['神像', 'estatua de una deidad', 'statue of a deity'], ['問好', 'saludar', 'greet'], ['身高', 'estatura', 'height'], ['體重', 'peso', 'weight'], ['電話號碼', 'número de teléfono', 'phone number']],
   SIDE: [['側殿', 'salón lateral', 'side hall'], ['神明', 'deidades', 'deities'], ['插', 'clavar, colocar', 'stick in'], ['最後', 'último', 'last'], ['雙手合十', 'juntar las palmas', 'press your palms together'], ['上網', 'conectarse a internet', 'go online'], ['查', 'buscar, consultar', 'look up'], ['求籤', 'pedir una suerte', 'ask for a fortune']],
-  THROW: [['筊杯', 'jiaobei (bloques de madera)', 'moon blocks'], ['聖筊', 'sí (una plana, una redonda)', 'yes (one flat, one round)'], ['笑筊', 'sonrisa (dos planas)', 'smile (both flat)'], ['陰筊', 'no (dos redondas)', 'no (both round)'], ['丟', 'lanzar', 'throw'], ['抽籤', 'sacar una varilla', 'draw a fortune stick'], ['神明', 'deidad', 'deity']],
+  THROW: [['筊杯', 'jiaobei (bloques de madera)', 'moon blocks'], ['聖筊', 'sí (una plana, una redonda)', 'yes (one flat, one round)'], ['笑筊', 'sonrisa (dos planas)', 'smile (both flat)'], ['陰筊', 'no (dos redondas)', 'no (both round)'], ['丟', 'lanzar', 'throw'], ['求籤', 'pedir una suerte', 'ask for a fortune'], ['平面', 'cara plana', 'flat side'], ['圓面', 'cara redonda', 'round side']],
   CONFIRM: [['筊杯', 'jiaobei (bloques de madera)', 'moon blocks'], ['聖筊', 'sí (una plana, una redonda)', 'yes (one flat, one round)'], ['笑筊', 'sonrisa (dos planas)', 'smile (both flat)'], ['陰筊', 'no (dos redondas)', 'no (both round)'], ['連續', 'seguidos', 'in a row'], ['丟', 'lanzar', 'throw']],
-  DRAW: [['籤筒', 'cilindro con varillas', 'fortune stick holder'], ['籤支', 'varilla de la suerte', 'fortune stick'], ['抽籤', 'sacar una varilla', 'draw a fortune stick'], ['求籤', 'pedir una suerte', 'ask for a fortune'], ['隨便', 'de cualquier manera', 'any old way'], ['用力', 'con fuerza', 'hard, with force'], ['丟', 'lanzar, tirar', 'throw']],
-  SLIP_NUM: [['拿給', 'entregar a', 'hand to'], ['籤櫃', 'cajonera de papeles de suerte', 'fortune slip cabinet'], ['第……籤', 'la suerte n.º …', 'fortune No. …'], ['不好意思', 'disculpe', 'excuse me'], ['籤詩', 'poema de la suerte', 'fortune poem']],
-  READ: [['籤詩', 'poema de la suerte', 'fortune poem'], ['上上籤', 'la mejor suerte', 'the best fortune'], ['中平籤', 'suerte regular', 'so-so fortune'], ['下下籤', 'suerte difícil', 'a difficult fortune'], ['努力', 'esforzarse', 'make an effort'], ['躺平', 'tumbarse y no esforzarse', 'lie flat, stop trying'], ['供三小', '¿qué diablos dices? (grosero, del taiwanés)', 'what the heck are you saying? (rude, from Taiwanese)']],
+  DRAW: [['籤筒', 'cilindro con varillas', 'fortune stick holder'], ['隨便', 'de cualquier manera', 'any old way'], ['用力', 'con fuerza', 'hard, with force'], ['丟', 'lanzar, tirar', 'throw'], ['輕搖', 'agitar suavemente', 'shake gently'], ['掉出來', 'caerse (hacia fuera)', 'fall out']],
+  SLIP_NUM: [['拿給', 'entregar a', 'hand to'], ['第……籤', 'la suerte n.º …', 'fortune No. …'], ['不好意思', 'disculpe', 'excuse me'], ['廟公', 'encargado del templo', 'temple keeper'], ['抽到', 'sacar (en un sorteo)', 'draw, get'], ['記錯', 'recordar mal', 'remember wrong'], ['眼睛', 'ojos', 'eyes']],
+  READ: [['籤詩', 'poema de la suerte', 'fortune poem'], ['上上籤', 'la mejor suerte', 'the best fortune'], ['中平籤', 'suerte regular', 'so-so fortune'], ['下下籤', 'suerte difícil', 'a difficult fortune'], ['努力', 'esforzarse', 'make an effort'], ['躺平', 'tumbarse y no esforzarse', 'lie flat, stop trying'], ['供三小', '¿qué diablos dices? (grosero, del taiwanés)', 'what the heck are you saying? (rude, from Taiwanese)'], ['古文', 'chino clásico', 'classical Chinese'], ['提醒', 'recordar, avisar', 'remind'], ['放棄', 'rendirse', 'give up']],
   ASK: [['解籤', 'interpretar la suerte', 'interpret a fortune'], ['廟公', 'encargado del templo', 'temple keeper'], ['旁邊', 'al lado', 'beside'], ['老頭', 'viejo (grosero)', 'old man (rude)'], ['揉爛', 'arrugar y estrujar', 'crumple up'], ['丟掉', 'tirar', 'throw away']],
   MEAN: [['廟公', 'encargado del templo', 'temple keeper'], ['意思', 'significado', 'meaning']],
-  FILL: [['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['登記單', 'formulario de registro', 'registration form'], ['姓名', 'nombre', 'name'], ['生日', 'cumpleaños', 'birthday'], ['住址', 'dirección', 'address'], ['期限', 'plazo', 'period'], ['選擇', 'elegir', 'choose'], ['半年', 'medio año', 'half a year']],
-  REGISTER: [['交給', 'entregar a', 'hand to'], ['登記單', 'formulario de registro', 'registration form'], ['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['登記', 'registrar', 'register'], ['生日', 'cumpleaños', 'birthday'], ['住在', 'vivir en', 'live at'], ['一年', 'un año', 'one year'], ['不好意思', 'disculpe', 'excuse me'], ['收費', 'cobrar', 'charge a fee']],
-  PAY: [['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['文昌燈', 'lámpara de Wenchang (estudios)', 'Wenchang lamp (studies)'], ['財神燈', 'lámpara del dios de la riqueza', 'God of Wealth lamp'], ['便宜', 'barato', 'cheap'], ['一共', 'en total', 'in total'], ['價目牌', 'tabla de precios', 'price board'], ['應該', 'debería', 'should']],
+  FILL: [['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['登記單', 'formulario de registro', 'registration form'], ['姓名', 'nombre', 'name'], ['生日', 'cumpleaños', 'birthday'], ['住址', 'dirección', 'address'], ['期限', 'plazo', 'period'], ['選擇', 'elegir', 'choose'], ['半年', 'medio año', 'half a year'], ['填', 'rellenar', 'fill in']],
+  REGISTER: [['交給', 'entregar a', 'hand to'], ['登記單', 'formulario de registro', 'registration form'], ['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['登記', 'registrar', 'register'], ['生日', 'cumpleaños', 'birthday'], ['住在', 'vivir en', 'live at'], ['一年', 'un año', 'one year'], ['不好意思', 'disculpe', 'excuse me'], ['名字', 'nombre', 'name'], ['金額', 'importe', 'amount']],
+  PAY: [['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['文昌燈', 'lámpara de Wenchang (estudios)', 'Wenchang lamp (studies)'], ['財神燈', 'lámpara del dios de la riqueza', 'God of Wealth lamp'], ['便宜', 'barato', 'cheap'], ['一共', 'en total', 'in total'], ['價目牌', 'tabla de precios', 'price board'], ['應該', 'debería', 'should'], ['點', 'encender (una lámpara)', 'light (a lamp)'], ['講價', 'regatear', 'bargain']],
   PAY_FIX: [['夠', 'alcanzar, ser suficiente', 'be enough'], ['當場', 'en el momento', 'on the spot'], ['下次再付', 'pagar la próxima vez', 'pay next time']],
   GO_AMULET: [['平安符', 'amuleto de protección', 'protection charm'], ['領', 'recoger', 'collect']],
-  CHANGE: [['找錢', 'dar el cambio', 'give change'], ['找錯', 'dar mal el cambio', 'give wrong change'], ['應該找', 'debería darme de cambio', 'should give back'], ['領', 'recoger', 'collect']],
+  CHANGE: [['找錯', 'dar mal el cambio', 'give wrong change'], ['應該找', 'debería darme de cambio', 'should give back'], ['故意', 'a propósito', 'on purpose']],
   AMULET: [['平安符', 'amuleto de protección', 'protection charm'], ['漂亮', 'bonito', 'pretty'], ['隨喜', 'donar lo que uno quiera', 'donate as you wish'], ['投', 'echar, depositar', 'drop in'], ['香油錢', 'donación al templo', 'temple donation'], ['全部', 'todos', 'all'], ['醜', 'feo', 'ugly']],
   CHARM: [['平安符', 'amuleto de protección', 'protection charm'], ['拿到', 'recibir', 'get'], ['之後', 'después', 'after'], ['掛', 'colgar', 'hang'], ['樹', 'árbol', 'tree'], ['燒掉', 'quemar', 'burn up'], ['過香爐', 'pasar sobre el incensario', 'pass over the incense burner']],
-  GUOLU: [['過爐', 'pasar sobre el incensario', 'pass over the burner'], ['順時針', 'en sentido horario', 'clockwise'], ['逆時針', 'en sentido antihorario', 'counter-clockwise'], ['繞三圈', 'dar tres vueltas', 'circle three times']],
-  EXIT: [['龍進虎出', 'entrar por el dragón, salir por el tigre', 'enter by the dragon, exit by the tiger'], ['虎邊', 'lado del tigre (al salir, a la derecha)', 'tiger side (on your right going out)'], ['出去', 'salir', 'go out']],
-  END: [['心意', 'la intención, el corazón', 'the thought that counts'], ['輕鬆', 'relajado', 'relaxed'], ['下次', 'la próxima vez', 'next time']],
+  GUOLU: [['順時針', 'en sentido horario', 'clockwise'], ['逆時針', 'en sentido antihorario', 'counter-clockwise'], ['繞三圈', 'dar tres vueltas', 'circle three times'], ['香爐', 'incensario', 'incense burner'], ['平安符', 'amuleto de protección', 'protection charm'], ['丟進', 'tirar dentro de', 'throw into']],
+  EXIT: [['龍進虎出', 'entrar por el dragón, salir por el tigre', 'enter by the dragon, exit by the tiger'], ['虎邊', 'lado del tigre (al salir, a la derecha)', 'tiger side (on your right going out)'], ['出去', 'salir', 'go out'], ['龍邊', 'lado del dragón', 'dragon side'], ['記得', 'recordar', 'remember'], ['中間', 'en medio', 'middle']],
+  END: [['心意', 'la intención, el corazón', 'the thought that counts'], ['輕鬆', 'relajado', 'relaxed'], ['下次', 'la próxima vez', 'next time'], ['第一次', 'la primera vez', 'the first time'], ['拜拜', 'ir a rezar (al templo)', 'pray at a temple'], ['感覺', 'sensación, sentir', 'feel'], ['亂', 'desordenado, caótico', 'messy']],
   RESULT: [['分數', 'puntos', 'score'], ['錯誤', 'error', 'mistake'], ['扣分', 'restar puntos', 'lose points']]
 };
 
+/* 過場頁自己的單字（key＝上一關>下一關）；只列這一頁畫面上真的看得到的（見 Game.render） */
+const TRANS_VOCAB = {
+  'FIRE>HEAVEN': [['熄香', 'apagar la llama del incienso', 'put out the incense flame'], ['輕輕', 'suavemente', 'gently'], ['晃動', 'agitar', 'shake'], ['搧', 'abanicar', 'fan'], ['吹', 'soplar', 'blow'], ['冒煙', 'echar humo', 'give off smoke'], ['拿著', 'sosteniendo', 'holding']],
+  'HEAVEN>MAIN': [['天公', 'el Emperador del Cielo', 'the Heavenly Emperor'], ['關聖帝君', 'Guan Shengdijun (Guan Gong)', 'Lord Guan (Guan Gong)'], ['雙手', 'con las dos manos', 'with both hands'], ['天公爐', 'incensario del Cielo', 'Heaven’s incense burner'], ['插', 'clavar, colocar', 'stick in'], ['大殿', 'salón principal', 'main hall']],
+  'MAIN>SIDE': [['問好', 'saludar', 'greet'], ['姓名', 'nombre', 'name'], ['生日', 'cumpleaños', 'birthday'], ['住址', 'dirección', 'address'], ['住在', 'vivir en', 'live at'], ['心願', 'deseo', 'wish'], ['不太順利', 'que no va muy bien', 'not going so well'], ['保佑', 'proteger, bendecir', 'bless, protect'], ['插', 'clavar, colocar', 'stick in'], ['香爐', 'incensario', 'incense burner']],
+  'DRAW>CONFIRM': [['掉出來', 'caerse (hacia fuera)', 'fall out'], ['籤支', 'varilla de la suerte', 'fortune stick'], ['第……籤', 'la suerte n.º …', 'fortune No. …']],
+  'SLIP_NUM>READ': [['細心', 'atento a los detalles', 'attentive'], ['籤詩', 'poema de la suerte', 'fortune poem'], ['號碼', 'número', 'number'], ['籤支', 'varilla de la suerte', 'fortune stick'], ['拿到', 'recibir', 'get'], ['不好意思', 'disculpe', 'excuse me'], ['廟公', 'encargado del templo', 'temple keeper'], ['第……籤', 'la suerte n.º …', 'fortune No. …']],
+  'READ>ASK': [['籤詩', 'poema de la suerte', 'fortune poem'], ['提醒', 'recordatorio, avisar', 'reminder, remind'], ['努力', 'esforzarse', 'make an effort'], ['廟公', 'encargado del templo', 'temple keeper'], ['解籤', 'interpretar la suerte', 'interpret a fortune']],
+  'ASK>MEAN': [['幫忙', 'ayudar', 'help'], ['禮貌', 'buena educación', 'politeness']],
+  'MEAN>FILL': [['聽懂', 'entender (al oír)', 'understand (by ear)'], ['廟公', 'encargado del templo', 'temple keeper'], ['意思', 'significado', 'meaning'], ['光明燈', 'lámpara de luz (bendición)', 'light lamp (blessing)'], ['點', 'encender (una lámpara)', 'light (a lamp)']],
+  'REGISTER>PAY': [['細心', 'atento a los detalles', 'attentive'], ['登記', 'registrar', 'register'], ['內容', 'contenido', 'content'], ['複誦', 'repetir en voz alta', 'read back'], ['登記單', 'formulario de registro', 'registration form'], ['改過來', 'corregir', 'correct'], ['收費', 'cobrar', 'charge a fee']],
+  'PAY>PAY_FIX': [['細心', 'atento a los detalles', 'attentive'], ['付錢', 'pagar', 'pay'], ['價目牌', 'tabla de precios', 'price board']],
+  'PAY>CHANGE': [['付錢', 'pagar', 'pay'], ['價目牌', 'tabla de precios', 'price board']],
+  'PAY_FIX>CHANGE': [['夠', 'alcanzar, ser suficiente', 'be enough'], ['找錢', 'dar el cambio', 'give change']],
+  'CHANGE>GO_AMULET': [['細心', 'atento a los detalles', 'attentive'], ['零錢', 'cambio, monedas', 'small change'], ['馬上', 'enseguida', 'right away'], ['不好意思', 'disculpe', 'excuse me'], ['廟公', 'encargado del templo', 'temple keeper']],
+  'CHANGE>AMULET': [['減掉', 'restar', 'subtract'], ['總價', 'precio total', 'total price'], ['領', 'recoger', 'collect'], ['平安符', 'amuleto de protección', 'protection charm']],
+  'AMULET>CHARM': [['平安符', 'amuleto de protección', 'protection charm'], ['香油錢', 'donación al templo', 'temple donation'], ['隨喜', 'donar lo que uno quiera', 'donate as you wish']],
+  'CHARM>GUOLU': [['清楚', 'claro, saber bien', 'clear, know well'], ['拜拜', 'ir a rezar (al templo)', 'pray at a temple'], ['文化', 'cultura', 'culture'], ['天公爐', 'incensario del Cielo', 'Heaven’s incense burner']],
+  'GUOLU>EXIT': [['過爐', 'pasar sobre el incensario', 'pass over the burner'], ['順時針', 'en sentido horario', 'clockwise'], ['繞三圈', 'dar tres vueltas', 'circle three times'], ['保佑', 'proteger, bendecir', 'bless, protect'], ['順利', 'ir bien', 'go smoothly'], ['平安符', 'amuleto de protección', 'protection charm']],
+  'EXIT>END': [['龍進虎出', 'entrar por el dragón, salir por el tigre', 'enter by the dragon, exit by the tiger'], ['虎邊', 'lado del tigre', 'tiger side'], ['出去', 'salir', 'go out']]
+};
+
 const GOOD_GRADES = ['上上', '上吉', '中吉'];   // 看籤詩：好籤和不好的籤（中平、下下），「躺平」選項不一樣
-const READ_WORDS = VOCAB.READ;   // 看籤詩每局固定的單字；Ami 那句話的單字在 setup() 依籤的等級加上
+const READ_WORDS = VOCAB.READ, FIRE_WORDS = VOCAB.FIRE, END_WORDS = VOCAB.END;   // 完整清單；每局只列看得到的（setup() 和結局裡挑）
 
 /* 關卡名稱（錯誤紀錄用） */
 const STAGE = {
@@ -573,6 +596,14 @@ const PLACES = {
    任務提示：廟裡的告示牌和廟公報的價錢（Ami 全程在旁邊，不列她的話）；不扣分，結果頁顯示看了幾次
 ══════════════════════════════════════ */
 const Hints = makeHints({ render: stdHintsRender });
+const STATE_ORDER = ['START', 'GATE', 'TO_FIRE', 'FIRE', 'HEAVEN', 'MAIN', 'SIDE', 'THROW', 'DRAW', 'CONFIRM', 'SLIP_NUM', 'READ', 'ASK', 'MEAN', 'FILL', 'REGISTER', 'PAY', 'PAY_FIX', 'CHANGE', 'GO_AMULET', 'AMULET', 'CHARM', 'GUOLU', 'EXIT', 'END', 'RESULT'];
+/* 「我的狀況」手上的錢和東西：[從哪一關開始, 中, 西, 英] */
+const HAVE = [
+  ['START', '你身上有：一張一千元的鈔票，還有一點零錢', 'Llevas: un billete de NT$1000 y algo de cambio', 'You have: one 1,000-dollar bill and some small change'],
+  ['CHANGE', '你付了一張一千元的鈔票，身上還有一點零錢', 'Pagaste con un billete de NT$1000; te queda algo de cambio', 'You paid with a 1,000-dollar bill and still have some small change'],
+  ['GO_AMULET', '你身上有：五百元，還有一點零錢', 'Llevas: NT$500 y algo de cambio', 'You have: 500 dollars and some small change'],
+  ['CHARM', '你身上有：五百元、一點零錢和一個平安符', 'Llevas: NT$500, algo de cambio y un amuleto', 'You have: 500 dollars, some small change and a protection charm']
+];
 document.getElementById('hint-tab').onclick = () => Hints.toggle();
 document.getElementById('hint-close').onclick = () => Hints.toggle(false);
 
@@ -624,6 +655,15 @@ const Game = defineGame({
   },
   get feedbackFirst() { return this.state === 'TO_FIRE' && this.feedback.some(f => f.type === 'good'); },
   updateCash() { document.getElementById('cash-badge').textContent = ''; },
+  /* 過場頁的小字典：不沿用上一關的，改用 TRANS_VOCAB，只列這一頁看得到的詞 */
+  render() {
+    GameCore.render.call(this);
+    if (!this._transMode) return;
+    const c = document.getElementById('npc-dialogue').cloneNode(true); c.querySelectorAll('rt,rp').forEach(e => e.remove());
+    const seen = zh => zh === '第……籤' ? /第[一二三四五六七八九十百]+/.test(c.textContent) : c.textContent.includes(Z(zh));
+    this._transList = (TRANS_VOCAB[`${this._trans.from}>${this._trans.to}`] || []).filter(w => seen(w[0]));
+    Vocab.render('_TRANS');
+  },
   /* ── 位置列：PLACES[key] = [圖示, 中文, 西文, 英文, class] ── */
   setPlace(mode) {
     const [icon, who, es, en, cls] = PLACES[mode] || PLACES[Object.keys(PLACES)[0]];
@@ -664,7 +704,12 @@ const Game = defineGame({
     t.numClaim = slip.n === 100 ? 99 : slip.n === 1 ? 2 : slip.n + pick([-1, 1]);   // 廟公拿對時，「抓錯」選項說的錯號碼
     /* 聽懂題：正解＋兩個意思不同的籤 */
     t.mean = [slip, ...otherSlips(slip)].map(x => x.say);
-    VOCAB.READ = [...READ_WORDS, ...GRADES[slip.g].words];
+    VOCAB.FIRE = FIRE_WORDS.filter(w => w[0] !== (t.fire === 'shake' ? '搧' : '晃'));
+    /* 看籤詩：籤的等級只列畫面上看得到的（這一局的籤；「抽到上上籤為止」的選項）；「放棄」只有不好的籤會看到 */
+    const seeGrade = [GRADES[slip.g].zh, '上上籤'], bad = !GOOD_GRADES.includes(slip.g);
+    VOCAB.READ = [...READ_WORDS.filter(w => (!/^.{2}籤$/.test(w[0]) || seeGrade.includes(w[0])) && (w[0] !== '放棄' || bad)), ...GRADES[slip.g].words];
+    if (!VOCAB.READ.some(w => w[0] === GRADES[slip.g].zh)) VOCAB.READ.splice(1, 0, [GRADES[slip.g].zh, GRADES[slip.g].es, GRADES[slip.g].en]);
+    VOCAB.END = END_WORDS;
     const seen = [slip.gloss.zh, ...t.mean].join('');
     VOCAB.MEAN = [['覺得', 'creer, opinar', 'think, feel'], ['廟公', 'encargado del templo', 'temple keeper'], ['意思', 'significado', 'meaning'], ...MEAN_WORDS.filter(w => seen.includes(w[0]))];
     /* 填登記單：名字三選一（自己的暱稱＋兩個別人的名字） */
@@ -752,29 +797,27 @@ const Game = defineGame({
       MAIN: L('告示牌：向神明說話時，先問好，再說自己的姓名、生日和住址，然後再說心願。', 'Letrero: al hablar con la deidad, saluda primero, luego di tu nombre, cumpleaños y dirección, y después tu deseo.', 'Sign: when you speak to the deity, greet first, then say your name, birthday and address, and then your wish.'),
       THROW: L('告示牌：一平一圓是聖筊（同意）；兩個平面是笑筊（還沒決定）；兩個圓面是陰筊（不同意）。抽籤前要一個聖筊；抽籤後要連續三個聖筊，才是那支籤。', 'Letrero: una plana y una redonda = sí; dos planas = sonrisa (aún no decide); dos redondas = no. Antes de sacar la varilla hace falta un «sí»; después, tres «sí» seguidos para confirmarla.', 'Sign: one flat + one round = yes; both flat = smile (undecided); both round = no. One yes before drawing; three yeses in a row afterwards to confirm the stick.'),
       SLIP_NUM: L('告示牌：籤支上的號碼，要和籤詩的號碼一樣。', 'Letrero: el número de la varilla debe ser igual al del papel.', 'Sign: the number on the stick must match the number on the slip.'),
-      FILL: L('告示牌：光明燈，一年五百元。請寫姓名、生日和住址。', 'Letrero: lámpara de luz, un año, NT$500. Escribe tu nombre, cumpleaños y dirección.', 'Sign: light lamp, one year, NT$500. Please write your name, birthday and address.'),
       AMULET: L('告示牌：平安符請自己拿，隨喜投香油錢。', 'Letrero: toma el amuleto tú mismo y deja la donación que quieras.', 'Sign: take a charm yourself and donate as you wish.'),
-      GUOLU: L('告示牌：平安符請在香爐上方，順時針繞三圈。', 'Letrero: pasa el amuleto sobre el incensario, tres vueltas en sentido horario.', 'Sign: pass your charm over the incense burner, three times clockwise.'),
-      EXIT: L('告示牌：龍進虎出。', 'Letrero: entrar por el dragón, salir por el tigre.', 'Sign: enter by the dragon, exit by the tiger.')
+      GUOLU: L('告示牌：平安符請在香爐上方，順時針繞三圈。', 'Letrero: pasa el amuleto sobre el incensario, tres vueltas en sentido horario.', 'Sign: pass your charm over the incense burner, three times clockwise.')
     };
   },
   hintSections() {
-    const ORDER = ['START', 'GATE', 'TO_FIRE', 'FIRE', 'HEAVEN', 'MAIN', 'SIDE', 'THROW', 'DRAW', 'CONFIRM', 'SLIP_NUM', 'READ', 'ASK', 'MEAN', 'FILL', 'REGISTER', 'PAY', 'PAY_FIX', 'CHANGE', 'GO_AMULET', 'AMULET', 'CHARM', 'GUOLU', 'EXIT', 'END', 'RESULT'];
-    const at = s => ORDER.indexOf(this.st0) >= ORDER.indexOf(s);
+    const at = s => STATE_ORDER.indexOf(this.st0) >= STATE_ORDER.indexOf(s);
     const t = this.task, sg = this.signs();
     const out = [];   // Ami 就在旁邊，她的話不放任務提示（今天的事已經在「我的狀況」）
-    const signs = ['GATE', 'FIRE', 'HEAVEN', 'MAIN', 'THROW', 'SLIP_NUM', 'FILL', 'AMULET', 'GUOLU', 'EXIT'].filter(s => at(s)).map(s => sg[s]);
+    const signs = ['GATE', 'FIRE', 'HEAVEN', 'MAIN', 'THROW', 'SLIP_NUM', 'AMULET', 'GUOLU'].filter(s => at(s)).map(s => sg[s]);
     if (signs.length) out.push({ title: '廟裡的告示牌', lines: signs });
-    if (at('PAY_FIX')) out.push({ title: '廟公說的話', lines: [L(`廟公：一共是${zhNum(t.said)}元。`, `Son ${esM(t.said)} en total.`, `${enM(t.said)} in total.`)] });
+    if (at('PAY_FIX')) out.push({ title: '廟公說的話', lines: [L(`廟公：一共是${zhNum(t.total)}元。`, `Son ${esM(t.total)} en total.`, `${enM(t.total)} in total.`)] });   // 一定是正確的價錢（廟公報錯會改口）
     return out;
   },
 
   /* ── 畫面元件 ── */
   listHTML(rowsOnly) {
     const t = this.task, r = s => this.ruby(s), N = this.N;
+    const [, zh, es, en] = HAVE.filter(h => STATE_ORDER.indexOf(this.st0) >= STATE_ORDER.indexOf(h[0])).pop(), have = { zh, es, en };
     const rows = [
       { zh: '最近不太順利，Ami陪你去拜拜，求關聖帝君保佑', es: 'Últimamente no te va muy bien; Ami te acompaña al templo a pedir la protección de Guan Shengdijun', en: "Things haven't gone well lately; Ami goes with you to the temple to ask for Lord Guan's protection" },
-      { zh: '你身上有：一張一千元的鈔票，還有一點零錢', es: 'Llevas: un billete de mil dólares taiwaneses y algo de cambio', en: 'You have: one 1,000-dollar bill and some small change' }
+      have
     ];
     if (rowsOnly) return rows;
     this._spk.push({ text: rows.map(x => x.zh.replace('：', '，')).join('。'), who: '我' });
@@ -1006,7 +1049,7 @@ const Game = defineGame({
         dialogue: () => [
           narr('你和Ami約在關帝廟門口見面。', 'Quedaste con Ami en la entrada del templo de Guan Di.', 'You arranged to meet Ami at the entrance of the Guan Di temple.'),
           ...Game.amiLines(),
-          L('我：好，我們進去吧。', 'Bien, entremos.', "OK, let's go in.")
+          L('我：好，我們進去吧。', 'Yo: Bien, entremos.', "Me: OK, let's go in.")
         ],
         options: ['走進關帝廟'],
         next: () => { Game.startTimer(); Game.state = 'GATE'; }
@@ -1160,7 +1203,7 @@ const Game = defineGame({
         ok: '對，是這張，謝謝。', fix: () => `不好意思，我抽到的是${slipNo(t.numWrong ? S.n : t.numClaim)}。`, rude: '廟公，你的眼睛是不是不太好？',
         wrong: () => t.numWrong,
         whyWrong: slipAgain, whyRight: slipAgain, whyRude: rudeWhy,
-        goodWrong: ['你很細心！籤詩的號碼要和籤支一樣。', '¡Qué atento! El número del papel debe ser igual al de la varilla.', 'Well spotted! The slip number must match the stick.'],
+        goodWrong: ['你很細心！籤詩的號碼要和籤支一樣。', '¡Buen ojo! El número del papel debe ser igual al de la varilla.', 'Well spotted! The slip number must match the stick.'],
         goodOk: ['拿到籤詩以後，先對一下號碼。', 'Al recibir el papel, compara primero el número.', 'When you get the slip, check the number first.'],
         apology: () => [staff(`啊，不好意思！${slipNo(S.n)}，這張才對。`, `¡Ay, disculpe! La ${slipNoEs(S.n)} es esta.`, `Oh, sorry! No. ${S.n} — this is the right one.`)],
         go: () => { Game.state = 'READ'; }
@@ -1239,7 +1282,7 @@ const Game = defineGame({
             t.fillOpen = badName ? 'name' : 'term';   // 打開填錯的那一行
             const parts = [];
             if (badName) parts.push(M('姓名寫錯了喔！', 'El nombre está mal.', 'The name is wrong.'));
-            if (badTerm) parts.push(M('期限選錯了，看一下告示牌！', 'El plazo está mal elegido: ¡mira el letrero!', 'Wrong term: check the sign!'));
+            if (badTerm) parts.push(M('期限選錯了，看一下登記單上面寫的！', 'El plazo está mal elegido: ¡mira lo que pone arriba en el formulario!', 'Wrong term: check what the top of the form says!'));
             Game.addMistake(M(parts.map(x => x.zh).join(''), parts.map(x => x.es).join(' '), parts.map(x => x.en).join(' ')));
             return;
           }
@@ -1273,13 +1316,13 @@ const Game = defineGame({
           rude: '你到底有沒有在看我寫的啊？',
           wrong: () => t.regWrong,
           whyWrong: formAgain, whyRight: formAgain, whyRude: rudeWhy,
-          goodWrong: ['你很細心！登記的內容說錯了，要馬上說。', '¡Qué atento! Si repiten mal el registro, hay que decirlo enseguida.', 'Well spotted! If the registration is repeated wrong, speak up right away.'],
+          goodWrong: ['你很細心！登記的內容說錯了，要馬上說。', '¡Buen ojo! Si repiten mal el registro, hay que decirlo enseguida.', 'Well spotted! If the registration is repeated wrong, speak up right away.'],
           goodOk: ['廟公複誦的時候，要對一下登記單。', 'Cuando el encargado repita los datos, compáralos con el formulario.', 'When the keeper reads it back, compare it with the form.'],
           apology: () => [staff(`啊，不好意思！我改過來。好，「${N}」，${mine.birth}，${mine.addr}，一年。沒問題！這樣要先跟你收費。`,
-            `¡Ay, disculpe! Lo corrijo. Bien: «${N}», ${f.d} de ${MONTH_ES[f.m - 1]}, ${ADDR[f.addr][1]}, un año. ¡Sin problema! Entonces primero tengo que cobrarte.`,
+            `¡Ay, disculpe! Lo corrijo. Bien: «${N}», ${f.d} de ${MONTH_ES[f.m - 1]}, ${ADDR[f.addr][1]}, un año. ¡Sin problema! Entonces primero tengo que cobrarle.`,
             `Oh, sorry! I will fix it. Okay: "${N}", ${MONTH_EN[f.m - 1]} ${f.d}, ${ADDR[f.addr][2]}, one year. No problem! In that case I need to collect the fee first.`)],
           go: wrong => {   // 廟公講錯時，收費那句已經併在道歉的話裡
-            if (!wrong) Game.thought = [staff('沒問題！這樣要先跟你收費。', '¡Sin problema! Entonces primero tengo que cobrarte.', "No problem! In that case I need to collect the fee first.")];
+            if (!wrong) Game.thought = [staff('沒問題！這樣要先跟你收費。', '¡Sin problema! Entonces primero tengo que cobrarle.', "No problem! In that case I need to collect the fee first.")];
             Game.state = 'PAY';
           }
         });
@@ -1293,7 +1336,7 @@ const Game = defineGame({
         whyRude: () => M('點燈的價錢是固定的，不能講價。', 'El precio de las lámparas es fijo: no se regatea.', "The lamp prices are fixed — you don't bargain."),
         wrong: () => t.payWrong,
         whyWrong: priceAgain, whyRight: priceAgain,
-        goodWrong: ['你很細心！付錢以前，要先對一下價目牌。', '¡Qué atento! Antes de pagar, compara con la tabla de precios.', 'Well spotted! Before you pay, check the price board.'],
+        goodWrong: ['你很細心！付錢以前，要先對一下價目牌。', '¡Buen ojo! Antes de pagar, compara con la tabla de precios.', 'Well spotted! Before you pay, check the price board.'],
         goodOk: ['沒錯！付錢以前，要先對一下價目牌。', '¡Exacto! Antes de pagar, compara con la tabla de precios.', 'Right! Before you pay, check the price board.'],
         go: wrong => { if (wrong) { Game.state = 'PAY_FIX'; return; } toChange(); }
       }),
@@ -1305,7 +1348,7 @@ const Game = defineGame({
           if (c !== payOk) {
             Game.addMistake(c === '我下次再付，可以嗎？'
               ? M('不能下次再付。點光明燈要當場付錢。', 'No se puede pagar después: hay que pagar en el momento.', "You can't pay later — you pay on the spot.")
-              : M(`一共是${t.total}元，這樣不夠啦。`, `El total es ${esM(t.total)}: eso no alcanza.`, `The total is ${enM(t.total)} — that isn't enough.`));
+              : M(`一共是${zhNum(t.total)}元，這樣不夠啦。`, `El total es ${esM(t.total)}: eso no alcanza.`, `The total is ${enM(t.total)} — that isn't enough.`));
             return;
           }
           if (Game.att.PAY_FIX === 1) Game.good('沒錯！要給夠錢，他會找錢給你。', '¡Exacto! Das lo suficiente y te dan el cambio.', "Right! Hand over enough and you'll get change.");
@@ -1318,7 +1361,7 @@ const Game = defineGame({
         ok: '好，謝謝。', fix: () => fixChange, rude: '你是不是故意少找我錢啊？',
         wrong: () => t.changeWrong,
         whyWrong: changeAgain, whyRight: changeAgain, whyRude: rudeWhy,
-        goodWrong: ['你很細心！拿到零錢要馬上數。', '¡Qué atento! Cuenta el cambio en el momento.', 'Well spotted! Count your change right away.'],
+        goodWrong: ['你很細心！拿到零錢要馬上數。', '¡Buen ojo! Cuenta el cambio en el momento.', 'Well spotted! Count your change right away.'],
         goodOk: ['找的錢要自己算一下：給的錢減掉總價。', 'Calcula el cambio tú mismo: lo que diste menos el total.', 'Work out the change yourself: what you gave minus the total.'],
         apology: () => [st(`啊，不好意思！找你${zhNum(t.change)}元。`, `¡Ay, disculpe! Le doy ${esM(t.change)} de cambio.`, `Oh, sorry! Here's ${enM(t.change)} change.`)],
         go: wrong => {
@@ -1393,11 +1436,12 @@ const Game = defineGame({
         place: 'phone',
         dialogue: () => {
           Game._endGood = Game.mistakes <= 2;
+          VOCAB.END = END_WORDS.filter(w => (w[0] === '輕鬆') === Game._endGood);   // 單字只列這個結局看得到的
           track('game_complete', { game: 'guandi', score: Game.score, elapsed: Game.elapsedTime });
           return [
             narr('你和Ami一起走出廟門。', 'Sales del templo junto a Ami.', 'You and Ami walk out of the temple together.'),
             Game._endGood
-              ? ami(`拜完以後，心裡有輕鬆一點嗎，${N}？我們去吃點東西吧！`, `¿Te sientes más tranquilo después de rezar, ${N}? ¡Vamos a comer algo!`, `Feeling a bit lighter after praying, ${N}? Let's go get something to eat!`)
+              ? ami(`拜完以後，心裡有輕鬆一點嗎，${N}？我們去吃點東西吧！`, `¿Te sientes mejor después de rezar, ${N}? ¡Vamos a comer algo!`, `Feeling a bit lighter after praying, ${N}? Let's go get something to eat!`)
               : ami(`第一次來拜拜，感覺有點亂，不過心意最重要。下次我再陪你來，${N}。`, `Como es la primera vez que vienes a rezar, todo ha sido un poco caótico, pero lo que cuenta es la intención. La próxima vez vengo contigo otra vez, ${N}.`, `It was your first time praying here, so it felt a bit messy, but the thought is what counts. I'll come with you again next time, ${N}.`)
           ];
         },

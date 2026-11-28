@@ -105,6 +105,7 @@ parent.postMessage({ type: 'scene-complete', scene: '<scene>', score, mistakes }
 - **籤詩**：從「關聖帝君一百籤」上上、上吉、中吉、中平、下下五種等級各取 4 支，共 20 支（第 1、2、3、5、7、10、14、15、23、28、31、35、40、55、60、65、70、75、85、100 籤），原文在 `index.html` 的 `SLIPS`，白話一句是自己寫的。等級標示依「流年知否」網站；**各廟、各網站的等級標示不一定一樣**。
 - **擲筊規則**：一平一圓＝聖筊（同意）；兩個平面＝笑筊（還沒決定／問題不清楚）；兩個圓面＝陰筊（不同意）。連續三個聖筊才求籤。
 - 付錢不用 `billFor`：光明燈固定 500 元、身上只有一張一千元，所以 `PAY`／`PAY_FIX`／`CHANGE` 寫在這個遊戲自己的 `getConfig()` 裡（用 `catchState`），找完錢接到平安符。
+- 單字：每一關在 `VOCAB`，過場頁另外列在 `TRANS_VOCAB`（key＝上一關>下一關），只列畫面上看得到的詞；加台詞或過場時一起改，`tools/guandi_test.py` 會檢查。過場的詞不會進單字小考。
 - 正解在 `tools/oracles/guandi.py`；`tools/smoke.py` 已加入名單。
 - 圖片提示詞在 `docs/image-prompts-guandi.md`，缺圖時自動顯示 emoji。
 - 抽籤圖有四個檔：`draw.jpg`（停住）、`draw_bg.jpg`（背景）、`draw_hands.png`（手和籤筒，720×780 透明底）、`draw_done.jpg`（籤掉在地上）。換 `draw_bg.jpg` 或手的圖時，另外三個要一起重做。
